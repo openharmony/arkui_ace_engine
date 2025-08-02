@@ -2135,7 +2135,7 @@ class OnAreaChangeModifier extends ModifierWithKey {
     }
   }
 }
-OnSizeChangeModifier.identity = Symbol('onAreaChange');
+OnAreaChangeModifier.identity = Symbol('onAreaChange');
 class OnGestureJudgeBeginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3359,9 +3359,10 @@ class KeyBoardShortCutModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().common.resetKeyBoardShortCut(node);
-    }
-    else {
+    } else if (this.value.action === undefined) {
       getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+    } else {
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
     }
   }
   checkObjectDiff() {
@@ -5140,6 +5141,7 @@ class ArkComponent {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
+    keyboardShortCut.action = action;
     modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }
@@ -5370,7 +5372,7 @@ class GestureHandler {
 class TapGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.TAP_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.count = options.count;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5393,7 +5395,7 @@ class TapGestureHandler extends GestureHandler {
 class LongPressGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.LONG_PRESS_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
@@ -5430,7 +5432,7 @@ class LongPressGestureHandler extends GestureHandler {
 class PanGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.PAN_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.distance = options.distance;
@@ -5478,7 +5480,7 @@ class PanGestureHandler extends GestureHandler {
 class SwipeGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.SWIPE_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.speed = options.speed;
@@ -5505,7 +5507,7 @@ class SwipeGestureHandler extends GestureHandler {
 class PinchGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.PINCH_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.distance = options.distance;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5546,7 +5548,7 @@ class PinchGestureHandler extends GestureHandler {
 class RotationGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.ROTATION_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.angle = options.angle;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5587,7 +5589,7 @@ class RotationGestureHandler extends GestureHandler {
 class GestureGroupHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.GESTURE_GROUP);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.mode = options.mode;
       this.gestures = options.gestures;
     }
@@ -30798,7 +30800,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   javaScriptProxy(javaScriptProxy) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebJavaScriptProxyModifier.identity, WebJavaScriptProxyModifier, javaScriptProxy);
+    return this;
   }
   password(password) {
     throw new Error('Method not implemented.');
@@ -32664,6 +32667,21 @@ class WebOnBeforeUnloadModifier extends ModifierWithKey {
   }
 }
 WebOnBeforeUnloadModifier.identity = Symbol('webOnBeforeUnloadModifier');
+
+class WebJavaScriptProxyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetJavaScriptProxy(node);
+    } else {
+      getUINativeModule().web.setJavaScriptProxy(node, this.value.object, this.value.name, this.value.methodList,
+        this.value.controller, this.value?.asyncMethodList, this.value?.permission);
+    }
+  }
+}
+WebJavaScriptProxyModifier.identity = Symbol('webJavaScriptProxyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

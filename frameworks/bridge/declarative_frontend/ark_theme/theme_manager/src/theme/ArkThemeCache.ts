@@ -118,11 +118,11 @@ class ArkThemeCache {
             // return false if one of instances is undefined
             return false;
         }
-        if (theme1.colors === theme2.colors) {
+        if (theme1.colors === theme2.colors && theme1.darkColors === theme2.darkColors) {
             // return true if colors tokens references are the same
             return true;
         }
-        if (!theme1.colors || !theme2.colors) {
+        if (!theme1.colors || !theme2.colors || !theme1.darkColors || !theme2.darkColors) {
             // return false if one of colors instances is undefined
             return false;
         }
@@ -130,8 +130,10 @@ class ArkThemeCache {
         // take array of keys of color tokens used by both custom themes
         let keys1 = Object.keys(theme1.colors);
         let keys2 = Object.keys(theme2.colors);
+        let darkKeys1 = Object.keys(theme1.darkColors);
+        let darkKeys2 = Object.keys(theme2.darkColors);
 
-        if (keys1.length !== keys2.length) {
+        if (keys1.length !== keys2.length || darkKeys1.length !== darkKeys2.length) {
             // return false if the length of the keys arrays are different
             return false;
         }
@@ -146,6 +148,22 @@ class ArkThemeCache {
             // take values of colors tokens by current attribute key
             let value1 = theme1.colors[key];
             let value2 = theme2.colors[key];
+
+            if (value1 !== value2) {
+                // return false if color tokens values are different
+                return false;
+            }
+        }
+        // go by dark color tokens attributes keys one by one
+        for (let key of darkKeys1) {
+            if (!darkKeys2.includes(key)) {
+                // return false if key of first custom theme colors dosn`t used by second custom theme colors
+                return false;
+            }
+
+            // take values of colors tokens by current attribute key
+            let value1 = theme1.darkColors[key];
+            let value2 = theme2.darkColors[key];
 
             if (value1 !== value2) {
                 // return false if color tokens values are different

@@ -1049,4 +1049,74 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteValueSetSymbolSpan001, TestSize.Level1)
     EXPECT_TRUE(result == SYMBOL_SPAN_LENGTH);
 }
 
+/**
+ * @tc.name: DeleteToMaxLength001
+ * @tc.desc: test DeleteToMaxLength001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteToMaxLength001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     */
+    richEditorPattern->DeleteToMaxLength(std::nullopt);
+    ASSERT_EQ(richEditorPattern->previewLongPress_, false);
+}
+
+/**
+ * @tc.name: DeleteToMaxLength002
+ * @tc.desc: test DeleteToMaxLength002
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteToMaxLength002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     */
+    int len = richEditorPattern->GetTextContentLength() - 1;
+    richEditorPattern->DeleteToMaxLength(len);
+    ASSERT_EQ(richEditorPattern->previewLongPress_, false);
+}
+
+/**
+ * @tc.name: DeleteToMaxLength003
+ * @tc.desc: test DeleteToMaxLength003
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteToMaxLength003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t maxLen = 5;
+    // make textLength to 6
+    ClearSpan();
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), static_cast<int32_t>(INIT_VALUE_1.length()));
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->DeleteToMaxLength(maxLen);
+    richEditorPattern->isSpanStringMode_ = false;
+
+    // make textLength to 6
+    ClearSpan();
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), static_cast<int32_t>(INIT_VALUE_1.length()));
+    richEditorPattern->DeleteToMaxLength(maxLen);
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), maxLen);
+}
+
 }

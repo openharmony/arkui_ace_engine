@@ -443,7 +443,7 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeTrackShadow(ArkUIRuntimeCallInfo* ru
         nodeModifiers->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     }
-    ArkUIGaugeShadowOptions shadowOptions = { .isShadowVisible = true, .radius = 0.0, .offsetX = 0.0, .offsetY = 0.0 };
+    ArkUIGaugeShadowOptions shadowOptions = { .radius = 0.0, .offsetX = 0.0, .offsetY = 0.0, .isShadowVisible = true };
     ArkUIShadowOptionsResource shadowOptionsResource;
     RefPtr<ResourceObject> radiusResObj;
     if (!ArkTSUtils::ParseJsDouble(vm, radiusArg, shadowOptions.radius, radiusResObj)) {

@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/image_span_view_static.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1687,6 +1689,17 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic028, TestSize.Level1)
 
     TextFieldModelStatic::SetPasswordRules(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetPasswordRules().has_value());
+
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+
+    NG::OnCreateMenuCallback onCreate = [](const std::vector<NG::MenuItemParam>&) -> std::vector<MenuOptionsParam> {
+        std::vector<NG::MenuOptionsParam> menuParams;
+        return menuParams;
+    };
+    NG::OnMenuItemClickCallback onMenuItemClick = [](const NG::MenuItemParam&) -> bool { return false; };
+    TextFieldModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreate), std::move(onMenuItemClick));
+    EXPECT_NE(textFieldPattern->selectOverlay_->onCreateMenuCallback_, nullptr);
+    EXPECT_NE(textFieldPattern->selectOverlay_->onMenuItemClick_, nullptr);
 }
 
 /**
@@ -1705,6 +1718,11 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic029, TestSize.Level1)
 
     TextFieldModelStatic::SetShowError(frameNode, std::nullopt, false);
     EXPECT_FALSE(layoutProperty->GetShowErrorText().has_value());
+
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldModelStatic::GetController(frameNode, std::make_optional(u"placeholder"), std::make_optional(u"value"));
+    EXPECT_TRUE(layoutProperty->GetPlaceholder().has_value());
+    EXPECT_EQ(pattern->isTextChangedAtCreation_, true);
 }
 
 /**
@@ -1723,6 +1741,11 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic030, TestSize.Level1)
 
     TextFieldModelStatic::SetCounterType(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetSetCounter().has_value());
+
+    TextFieldModelStatic::SetShowCounterBorder(frameNode, std::make_optional(true));
+    EXPECT_EQ(layoutProperty->GetShowHighlightBorder().value(), true);
+    TextFieldModelStatic::SetShowCounterBorder(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetShowHighlightBorder().value(), true);
 }
 
 /**
@@ -1741,6 +1764,11 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic031, TestSize.Level1)
 
     TextFieldModelStatic::SetCancelIconSize(frameNode, std::nullopt);
     EXPECT_TRUE(layoutProperty->GetIconSize().has_value());
+
+    TextFieldModelStatic::SetSelectAllValue(frameNode, std::make_optional(true));
+    EXPECT_EQ(layoutProperty->GetSelectAllValue().value(), true);
+    TextFieldModelStatic::SetSelectAllValue(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetSelectAllValue().value(), false);
 }
 
 /**
@@ -1758,6 +1786,16 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic032, TestSize.Level1)
     std::string moduleName = "entry";
     TextFieldModelStatic::SetCanacelIconSrc(frameNode, "src", bundleName, moduleName);
     EXPECT_EQ(layoutProperty->GetIconSrc().value(), "src");
+
+    TextFieldModelStatic::SetShowUnderline(frameNode, std::make_optional(true));
+    EXPECT_EQ(layoutProperty->GetShowUnderline().value(), true);
+    TextFieldModelStatic::SetShowUnderline(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetShowUnderline().value(), false);
+
+    TextFieldModelStatic::SetShowPasswordIcon(frameNode, std::make_optional(false));
+    EXPECT_EQ(layoutProperty->GetShowPasswordIcon().value(), false);
+    TextFieldModelStatic::SetShowPasswordIcon(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetShowPasswordIcon().value(), true);
 }
 
 /**
@@ -1776,6 +1814,18 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic033, TestSize.Level1)
 
     TextFieldModelStatic::SetCancelIconColor(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetIconColor().has_value());
+
+    std::optional<float> minFontScale = 1.f;
+    TextFieldModelStatic::SetMinFontScale(frameNode, minFontScale);
+    EXPECT_EQ(layoutProperty->GetMinFontScale().value(), minFontScale);
+    TextFieldModelStatic::SetMinFontScale(frameNode, std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetMinFontScale().has_value());
+
+    std::optional<float> maxFontScale = 50.f;
+    TextFieldModelStatic::SetMaxFontScale(frameNode, maxFontScale);
+    EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), maxFontScale);
+    TextFieldModelStatic::SetMaxFontScale(frameNode, std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetMaxFontScale().has_value());
 }
 
 /**
@@ -1794,6 +1844,16 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic034, TestSize.Level1)
 
     TextFieldModelStatic::SetTextDecoration(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetTextDecoration().has_value());
+
+    TextFieldModelStatic::SetEllipsisMode(frameNode, std::make_optional(EllipsisMode::MIDDLE));
+    EXPECT_EQ(layoutProperty->GetEllipsisMode().value(), EllipsisMode::MIDDLE);
+    TextFieldModelStatic::SetEllipsisMode(frameNode, std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetEllipsisMode().has_value());
+
+    TextFieldModelStatic::SetHalfLeading(frameNode, std::make_optional(false));
+    EXPECT_EQ(layoutProperty->GetHalfLeading().value(), false);
+    TextFieldModelStatic::SetHalfLeading(frameNode, std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetHalfLeading().has_value());
 }
 
 /**
@@ -1812,6 +1872,17 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic035, TestSize.Level1)
 
     TextFieldModelStatic::SetTextDecorationColor(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+
+    TextFieldModelStatic::SetEnableHapticFeedback(frameNode, std::make_optional(false));
+    RefPtr<TextFieldPattern> textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(textFieldPattern->GetEnableHapticFeedback(), false);
+    TextFieldModelStatic::SetEnableHapticFeedback(frameNode, std::nullopt);
+    EXPECT_EQ(textFieldPattern->GetEnableHapticFeedback(), true);
+
+    TextFieldModelStatic::SetEnableAutoFill(frameNode, std::make_optional(false));
+    EXPECT_EQ(layoutProperty->GetEnableAutoFill(), false);
+    TextFieldModelStatic::SetEnableAutoFill(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetEnableAutoFill(), true);
 }
 
 /**
@@ -1830,6 +1901,17 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic036, TestSize.Level1)
 
     TextFieldModelStatic::SetTextDecorationStyle(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetTextDecorationStyle().has_value());
+
+    TextFieldModelStatic::SetSelectionMenuHidden(frameNode, std::make_optional(true));
+    EXPECT_EQ(layoutProperty->GetSelectionMenuHidden(), true);
+    TextFieldModelStatic::SetSelectionMenuHidden(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetSelectionMenuHidden(), false);
+
+    TextFieldModelStatic::SetEnablePreviewText(frameNode, std::make_optional(false));
+    RefPtr<TextFieldPattern> textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(textFieldPattern->GetSupportPreviewText(), false);
+    TextFieldModelStatic::SetEnablePreviewText(frameNode, std::nullopt);
+    EXPECT_EQ(textFieldPattern->GetSupportPreviewText(), true);
 }
 
 /**
@@ -1848,6 +1930,24 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic037, TestSize.Level1)
 
     TextFieldModelStatic::SetLineHeight(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetLineHeight().has_value());
+
+    TextFieldModelStatic::SetStopBackPress(frameNode, std::make_optional(false));
+    EXPECT_EQ(layoutProperty->GetStopBackPress().value(), false);
+
+    TextFieldModelStatic::SetStopBackPress(frameNode, std::nullopt);
+    EXPECT_EQ(layoutProperty->GetStopBackPress().value(), true);
+
+    PasswordIcon passwordIcon;
+    TextFieldModelStatic::SetPasswordIcon(frameNode, std::make_optional(passwordIcon));
+    passwordIcon.showResult = HELLO_TEXT;
+    passwordIcon.hideResult = HELLO_TEXT;
+    TextFieldModelStatic::SetPasswordIcon(frameNode, std::make_optional(passwordIcon));
+
+    TextFieldModelStatic::RequestKeyboardOnFocus(frameNode, std::make_optional(false));
+    RefPtr<TextFieldPattern> textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(textFieldPattern->NeedToRequestKeyboardOnFocus(), false);
+    TextFieldModelStatic::RequestKeyboardOnFocus(frameNode, std::nullopt);
+    EXPECT_EQ(textFieldPattern->NeedToRequestKeyboardOnFocus(), true);
 }
 
 /**
@@ -2365,6 +2465,297 @@ HWTEST_F(TextInputAreaTest, TextModelStaticTest025, TestSize.Level0)
     std::optional<Dimension> emptyDimension = std::nullopt;
     TextModelStatic::SetTextIndent(frameNode.GetRawPtr(), emptyDimension);
     EXPECT_FALSE(layoutProperty->GetTextIndent().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest026
+ * @tc.desc: test SetTextColor func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest026, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetTextColor(frameNode.GetRawPtr(), std::make_optional(Color::BLUE));
+    EXPECT_TRUE(layoutProperty->GetTextColor().has_value());
+    TextModelStatic::SetTextColor(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetTextColor().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest027
+ * @tc.desc: test SetTextDecorationColor func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest027, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetTextDecorationColor(frameNode.GetRawPtr(), std::make_optional(Color::BLUE));
+    EXPECT_TRUE(layoutProperty->GetTextDecorationColor().has_value());
+    TextModelStatic::SetTextDecorationColor(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest028
+ * @tc.desc: test SetWordBreak func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest028, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetWordBreak(frameNode.GetRawPtr(), std::make_optional(WordBreak::BREAK_ALL));
+    EXPECT_TRUE(layoutProperty->GetWordBreak().has_value());
+    TextModelStatic::SetWordBreak(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest029
+ * @tc.desc: test SetCaretColor func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest029, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetCaretColor(frameNode.GetRawPtr(), std::make_optional(Color::BLUE));
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+    TextModelStatic::SetCaretColor(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest030
+ * @tc.desc: test BindSelectionMenu func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest030, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    SelectMenuParam menuParam;
+    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    TextModelStatic::BindSelectionMenu(
+        frameNode.GetRawPtr(), textSpanType, textResponseType, nullptr, menuParam);
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest031
+ * @tc.desc: test SetSelectedBackgroundColor func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest031, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetSelectedBackgroundColor(frameNode.GetRawPtr(), std::make_optional(Color::BLUE));
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+    TextModelStatic::SetSelectedBackgroundColor(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest032
+ * @tc.desc: test SetHalfLeading func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest032, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetHalfLeading(frameNode.GetRawPtr(), std::make_optional(true));
+    EXPECT_FALSE(layoutProperty->GetTextDecorationColor().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest033
+ * @tc.desc: test SetEnableHapticFeedback func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest033, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    TextModelStatic::SetEnableHapticFeedback(frameNode.GetRawPtr(), std::make_optional(true));
+    EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest034
+ * @tc.desc: test SetSelectionMenuOptions func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest034, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    TextModelStatic::SetSelectionMenuOptions(frameNode.GetRawPtr(), nullptr, nullptr);
+    EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest035
+ * @tc.desc: test SetLineBreakStrategy func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest035, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    TextModelStatic::SetLineBreakStrategy(frameNode.GetRawPtr(), std::make_optional(LineBreakStrategy::BALANCED));
+    EXPECT_TRUE(layoutProperty->GetLineBreakStrategy().has_value());
+    TextModelStatic::SetLineBreakStrategy(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetLineBreakStrategy().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest036
+ * @tc.desc: test SetTextSelectableMode func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest036, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    TextModelStatic::SetTextSelectableMode(
+        frameNode.GetRawPtr(), std::make_optional(TextSelectableMode::SELECTABLE_FOCUSABLE));
+    EXPECT_FALSE(layoutProperty->GetLineBreakStrategy().has_value());
+}
+
+/**
+ * @tc.name: TextModelStaticTest037
+ * @tc.desc: test SetEllipsisMode func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextModelStaticTest037, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    TextModelStatic::SetEllipsisMode(frameNode.GetRawPtr(), std::make_optional(EllipsisMode::HEAD));
+    EXPECT_TRUE(layoutProperty->GetEllipsisMode().has_value());
+    TextModelStatic::SetEllipsisMode(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetEllipsisMode().has_value());
+}
+
+/**
+ * @tc.name: ImageSpanViewStatic001
+ * @tc.desc: test SetVerticalAlign func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, ImageSpanViewStatic001, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ImageSpanViewStatic::SetVerticalAlign(frameNode.GetRawPtr(), std::make_optional(VerticalAlign::BASELINE));
+    EXPECT_TRUE(layoutProperty->GetVerticalAlign().has_value());
+    ImageSpanViewStatic::SetVerticalAlign(frameNode.GetRawPtr(), std::nullopt);
+    EXPECT_FALSE(layoutProperty->GetVerticalAlign().has_value());
+}
+
+/**
+ * @tc.name: ImageSpanViewStatic002
+ * @tc.desc: test SetObjectFit func
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, ImageSpanViewStatic002, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<ImagePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    ImageSourceInfo imageInfo;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    imageInfo.pixmap_ = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(imageInfo.pixmap_, nullptr);
+    ImageSpanViewStatic::SetImageSpanSrc(frameNode.GetRawPtr(), imageInfo);
+    EXPECT_EQ(pattern->GetSyncLoad(), true);
+}
+
+/**
+ * @tc.name: testFieldModelStatic055
+ * @tc.desc: test testInput ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelStatic038, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    TextFieldModelStatic::SetShowError(frameNode, std::make_optional(u"error"), true);
+    EXPECT_EQ(layoutProperty->GetShowErrorText().value(), true);
+    TextFieldModelStatic::SetShowError(frameNode, std::nullopt, false);
+    EXPECT_FALSE(layoutProperty->GetShowErrorText().has_value());
+}
+
+/**
+ * @tc.name: SetCapitalizationMode001
+ * @tc.desc: test search set CapitalizationMode default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetCapitalizationMode001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    textFieldModelNG.SetCapitalizationMode(AutoCapitalizationMode::NONE);
+    EXPECT_EQ(AutoCapitalizationMode::NONE, pattern->GetAutoCapitalizationMode());
+
+    textFieldModelNG.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::WORDS);
+    EXPECT_EQ(AutoCapitalizationMode::WORDS, pattern->GetAutoCapitalizationMode());
 }
 
 } // namespace OHOS::Ace::NG

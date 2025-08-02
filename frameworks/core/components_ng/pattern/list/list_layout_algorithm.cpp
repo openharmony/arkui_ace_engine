@@ -20,6 +20,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
@@ -185,7 +186,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             posMap_->ClearPosMap();
         }
     }
-
     // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
     prevContentMainSize_ = contentMainSize_;
     
@@ -209,6 +209,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Frame expansion will be determined after Layout.
     size.MinusHeight(expandHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+
+    if (listLayoutProperty->HasCacheRange()) {
+        ScrollableUtils::DisableLazyForEachBuildCache(layoutWrapper->GetHostNode());
+    }
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
@@ -915,7 +919,7 @@ void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& is
 void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup)
 {
     auto it = itemPosition_.rbegin();
-    if (!overScrollFeature_) {
+    if (!overScrollFeature_ && NearEqual(contentMainSize_, prevContentMainSize_)) {
         auto nextIt = it;
         ++nextIt;
         while (nextIt != itemPosition_.rend() &&
@@ -947,6 +951,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     if (!isLayouted_) {
+        noLayoutedItems_ = std::move(itemPosition_);
         itemPosition_ = pattern->GetItemPosition();
     }
     auto prevTotalItemCount = pattern->GetMaxListItemIndex() + 1;
@@ -1098,6 +1103,20 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     }
     RecycleGroupItem(layoutWrapper);
+    UpdateNoLayoutedItems();
+}
+
+void ListLayoutAlgorithm::UpdateNoLayoutedItems()
+{
+    if (isLayouted_) {
+        return;
+    }
+    for (const auto& item : itemPosition_) {
+        noLayoutedItems_.erase(item.first);
+    }
+    for (const auto& item : recycledItemPosition_) {
+        noLayoutedItems_.erase(item.first);
+    }
 }
 
 LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex)
@@ -1269,7 +1288,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
+    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
@@ -1727,7 +1746,7 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
-    bool syncLoad = property->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled());
+    bool syncLoad = property->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled());
     return !(!syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 
@@ -1748,7 +1767,13 @@ void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wr
 
 void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
-    for (auto& pos : recycledItemPosition_) {
+    ResetUnLayoutedItems(layoutWrapper, recycledItemPosition_);
+    ResetUnLayoutedItems(layoutWrapper, noLayoutedItems_);
+}
+
+void ListLayoutAlgorithm::ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap)
+{
+    for (auto& pos : positionMap) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
             ReportGetChildError("ResetLayoutItem", pos.first);
@@ -1853,7 +1878,7 @@ void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(overlayNode);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto listFrameSize = geometryNode->GetFrameSize();
+    auto listFrameSize = geometryNode->GetFrameSize(true);
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
     overlayGeometryNode->SetFrameSize(listFrameSize);
@@ -2254,6 +2279,7 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         wrapper->SetActive(true);
         wrapper->Layout();
         group->SyncItemsToCachedItemPosition();
+        recycledItemPosition_.erase(index);
     }
     bool forward = forwardCache > -1;
     bool backward = backwardCache > -1;
@@ -2279,8 +2305,11 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
 float ListLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, size);
+    }
     return GetCrossAxisSize(size, axis_);
 }
 
@@ -2415,6 +2444,25 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
     return { startIndex, endIndex, cachedForward, cachedBackward };
 }
 
+void CheckMinCacheRange(LayoutWrapper* layoutWrapper, std::list<PredictLayoutItem>& list,
+    int32_t cacheCount, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto prop = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(prop);
+    int32_t minCacheCount = prop->GetMinCacheCount();
+    if (minCacheCount >= cacheCount) {
+        return;
+    }
+    for (auto it = list.begin(); it != list.end();) {
+        if (it->index < start - minCacheCount || it->index > end + minCacheCount) {
+            it = list.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount,
     bool show)
 {
@@ -2429,6 +2477,8 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
         startIndex =
             LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex, predictBuildList, show);
     }
+    CheckMinCacheRange(layoutWrapper, predictBuildList, cacheCount,
+        itemPosition_.begin()->first, itemPosition_.rbegin()->first);
     int32_t cacheStart = itemPosition_.begin()->first - startIndex;
     int32_t cacheEnd = endIndex - itemPosition_.rbegin()->first;
     if (isStackFromEnd_) {

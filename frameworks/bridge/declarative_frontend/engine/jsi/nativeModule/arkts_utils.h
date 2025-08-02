@@ -61,10 +61,9 @@ public:
         RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
         std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        bool fromTheme = false);
-    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo, bool fromTheme = false);
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
@@ -74,10 +73,9 @@ public:
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
+    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-        bool fromTheme = false);
-    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
     static bool ParseColorMetricsToColor(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
@@ -334,6 +332,8 @@ public:
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextMenuId(const EcmaVM* vm, const std::string& id);
+    static void ParseMenuItemsSymbolId(
+        const EcmaVM* vm, const Local<JSValueRef>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam);
     static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
         const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,

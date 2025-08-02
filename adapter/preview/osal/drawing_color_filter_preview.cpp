@@ -20,6 +20,14 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
+
+#if defined(ACE_STATIC)
+RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromAni(void* aniAddr)
+{
+    return nullptr;
+}
+#endif
+
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(void* sptrAddr)
 {
     CHECK_NULL_RETURN(sptrAddr, nullptr);

@@ -19,7 +19,6 @@
 #include "canvas_pattern_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "pixel_map_peer.h"
-#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -109,6 +108,10 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
     instanceId_ = Container::CurrentIdSafely();
     density_ = PipelineBase::GetCurrentDensity();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        paintState_ = PaintState();
+        paintState_.SetTextAlign(TextAlign::START);
+        paintState_.SetOffTextDirection(TextDirection::INHERIT);
+        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         isJudgeSpecialValue_ = true;
@@ -325,8 +328,8 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
         double density = GetDensity();
         auto gradient = std::make_shared<OHOS::Ace::Gradient>();
         gradient->SetType(Ace::GradientType::CONIC);
-        gradient->GetConicGradient().startAngle =
-            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * ACE_PI))));
+        // gradient->GetConicGradient().startAngle =
+        //     Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
         gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
         gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
         return gradient;
@@ -732,7 +735,7 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
 void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetFillColor(Color(colorNum), false);
+    renderingContext2DModel_->SetFillColor(Color(ColorAlphaAdapt(colorNum)), false);
 }
 void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient)
 {
@@ -943,12 +946,37 @@ void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
     paintState_.SetTextBaseline(baseline);
     renderingContext2DModel_->SetTextBaseline(baseline);
 }
+void CanvasRendererPeerImpl::SetLetterSpacing(const std::string& letterSpacingStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!letterSpacingStr.empty() && IsValidLetterSpacing(letterSpacingStr)) {
+        if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
+            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
+            return;
+        }
+        renderingContext2DModel_->SetLetterSpacing(
+            Dimension(StringUtils::StringToDouble(letterSpacingStr) * GetDensity()));
+    }
+}
+void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacing)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto letterSpacingCal = CalcDimension(letterSpacing.Value(), letterSpacing.Unit());
+    if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
+        letterSpacingCal.Reset();
+    }
+    renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+}
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {
+    paintState_ = PaintState();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-    } else {
-        paintState_ = PaintState();
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_.SetTextAlign(TextAlign::START);
+        paintState_.SetOffTextDirection(TextDirection::INHERIT);
+        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
     }
     std::vector<PaintState>().swap(savePaintState_);
     isInitializeShadow_ = false;
@@ -1082,5 +1110,10 @@ void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const Put
     if (params.dirtyHeight) {
         imageData.dirtyHeight = static_cast<int32_t>(GetDimensionValue(*params.dirtyHeight).Value());
     }
+}
+bool CanvasRendererPeerImpl::IsValidLetterSpacing(const std::string& letterSpacing)
+{
+    std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
+    return std::regex_match(letterSpacing, pattern);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

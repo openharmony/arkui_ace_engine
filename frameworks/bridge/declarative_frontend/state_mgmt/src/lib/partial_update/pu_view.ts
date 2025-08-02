@@ -137,10 +137,31 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
   }
 
+  static _findLocalStorage_ViewPU_Interop?: () => any;
+
+  findLocalStorageInterop?: () => any;
+
+  static _resetFindLocalStorage_ViewPU_Interop() {
+    if (typeof ViewPU._findLocalStorage_ViewPU_Interop === 'function') {
+      ViewPU._findLocalStorage_ViewPU_Interop = undefined;
+    }
+  }
+
   public get localStorage_(): LocalStorage {
     if (!this.localStoragebackStore_ && this.getParent()) {
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: get localStorage_ : Using LocalStorage instance of the parent View.`);
       this.localStoragebackStore_ = this.getParent().localStorage_;
+    }
+
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      if (!this.localStoragebackStore_) {
+        if (this.findLocalStorageInterop !== undefined && typeof this.findLocalStorageInterop === 'function') {
+          this.localStoragebackStore_ = this.findLocalStorageInterop();
+        } else if (ViewPU._findLocalStorage_ViewPU_Interop !== undefined && typeof ViewPU._findLocalStorage_ViewPU_Interop === 'function') {
+          this.localStoragebackStore_ = ViewPU._findLocalStorage_ViewPU_Interop();
+        }
+      }
     }
 
     if (!this.localStoragebackStore_) {
@@ -491,7 +512,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   // collect elements need to update synchronously and its owning view
-  public collectElementsNeedToUpdateSynchronously(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
+  public collectElementsNeedToUpdateSynchronously(varName: PropertyInfo, dependentElmtIds: Set<number>, isAllowedWatchCallback: boolean): void {
     stateMgmtConsole.debug(`collectElementsNeedToUpdateSynchronously ${this.debugInfo__()} change ${varName} dependent elements ${dependentElmtIds}`);
     if (dependentElmtIds.size && !this.isFirstRender()) {
       for (const elmtId of dependentElmtIds) {
@@ -502,6 +523,10 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
       SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
+    }
+    if (!isAllowedWatchCallback) {
+      stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} does not call @Watch function`);
+      return;
     }
     const cb = this.watchedProps.get(varName);
     if (cb && typeof cb === 'function') {
@@ -671,14 +696,33 @@ abstract class ViewPU extends PUV2ViewBase
     this.providedVars_.set(providedPropName, store);
   }
 
+  static _findProvide_ViewPU_Interop?: (providedPropName: string) => any;
+
+  findProvideInterop?: (providedPropName: string) => any;
+
   /*
     findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
     if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
   */
   public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      return this.providedVars_.get(providedPropName) ||
+      (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
+      (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName)) ||
+      (this.findProvideInterop !== undefined && typeof this.findProvideInterop === 'function' ? this.findProvideInterop(providedPropName) : undefined) ||
+      (ViewPU._findProvide_ViewPU_Interop !== undefined && typeof ViewPU._findProvide_ViewPU_Interop === 'function' ?
+      ViewPU._findProvide_ViewPU_Interop(providedPropName) : undefined);
+    } 
     return this.providedVars_.get(providedPropName) ||
     (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
     (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
+  }
+
+  static _resetFindProvide_ViewPU_Interop() {
+    if (typeof ViewPU._findProvide_ViewPU_Interop === 'function') {
+      ViewPU._findProvide_ViewPU_Interop = undefined;
+    }
   }
 
   /**

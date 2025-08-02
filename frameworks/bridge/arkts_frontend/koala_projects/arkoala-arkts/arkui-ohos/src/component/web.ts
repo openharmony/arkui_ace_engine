@@ -17,33 +17,27 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { WebviewController, WebviewControllerInternal } from "./../generated/ArkWebviewControllerMaterialized"
-import { Resource } from "global/resource";
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { WebviewController, WebviewControllerInternal } from "./arkui-external"
+import { WebviewController as WebviewControllerAni } from "#external"
+import { Resource } from "global/resource"
 import { Callback_String_Void } from "./gridRow"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, Callback_KeyEvent_Boolean, KeyEvent, NestedScrollOptions, CustomBuilder, TouchEvent, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { CopyOptions, NestedScrollMode } from "./enums"
+import { EditMenuOptions, MenuType } from "./textCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CustomBuilder, TouchEvent, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, NestedScrollOptions } from "./common"
-import { Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { Callback_Void } from "./abilityComponent"
-import { MenuType, EditMenuOptions } from "./textCommon"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, CopyOptions, NestedScrollMode } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { ArkWebComponent } from "./../generated/ArkWeb"
-import { ArkWebPeer } from "./../generated/peers/ArkWebPeer"
+import { Position, ResourceStr } from "./units"
+import { PixelMap } from "./arkui-pixelmap"
+import { PreviewMenuOptions } from "./richEditor"
+import { ArkUIAniModule } from "arkui.ani"
+
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
         const obj : WebKeyboardController = new WebKeyboardController()
@@ -173,17 +167,20 @@ export class FileSelectorParam implements MaterializedBase {
     public isCapture(): boolean {
         return this.isCapture_serialize()
     }
+    public getMimeTypes(): Array<string> {
+        return this.getMimeTypes_serialize()
+    }
     private getTitle_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
         return retval
     }
     private getMode_serialize(): FileSelectorMode {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMode(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.FileSelectorMode_FromNumeric(retval)
     }
     private getAcceptType_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -195,6 +192,17 @@ export class FileSelectorParam implements MaterializedBase {
     private isCapture_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_isCapture(this.peer!.ptr)
         return retval
+    }
+    private getMimeTypes_serialize(): Array<string> {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : Array<string> = buffer
+        return returnResult
     }
 }
 export class JsResultInternal {
@@ -393,18 +401,9 @@ export class ClientAuthenticationHandler implements MaterializedBase {
     public confirm(priKeyFile: string, certChainFile?: string): void {
         const priKeyFile_type = runtimeType(priKeyFile)
         const certChainFile_type = runtimeType(certChainFile)
-        if (RuntimeType.UNDEFINED == certChainFile_type) {
-            const authUri_casted = priKeyFile as (string)
-            this.confirm1_serialize(authUri_casted)
-            return
-        }
-        if (RuntimeType.STRING == certChainFile_type) {
-            const priKeyFile_casted = priKeyFile as (string)
-            const certChainFile_casted = certChainFile as (string)
-            this.confirm0_serialize(priKeyFile_casted, certChainFile_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+        const authUri_casted = priKeyFile as (string)
+        this.confirm1_serialize(authUri_casted)
+        return
     }
     public cancel(): void {
         this.cancel_serialize()
@@ -474,7 +473,7 @@ export class PermissionRequest implements MaterializedBase {
     }
     private getAccessibleResource_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_getAccessibleResource(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -604,9 +603,9 @@ export class ControllerHandler implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ControllerHandler_getFinalizer()
     }
-    public setWebController(controller: WebviewController): void {
-        const controller_casted = controller as (WebviewController)
-        this.setWebController_serialize(controller_casted)
+    public setWebController(controller: WebviewControllerAni): void {
+        const controller_casted = controller as (WebviewControllerAni)
+        ArkUIAniModule._Web_SetWebController_ControllerHandler(this.peer!.ptr, controller_casted);
         return
     }
     private setWebController_serialize(controller: WebviewController): void {
@@ -704,7 +703,7 @@ export class WebContextMenuParam implements MaterializedBase {
     }
     private getMediaType_serialize(): ContextMenuMediaType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getMediaType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.ContextMenuMediaType_FromNumeric(retval)
     }
     private getSelectionText_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSelectionText(this.peer!.ptr)
@@ -712,11 +711,11 @@ export class WebContextMenuParam implements MaterializedBase {
     }
     private getSourceType_serialize(): ContextMenuSourceType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSourceType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.ContextMenuSourceType_FromNumeric(retval)
     }
     private getInputFieldType_serialize(): ContextMenuInputFieldType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getInputFieldType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.ContextMenuInputFieldType_FromNumeric(retval)
     }
     private isEditable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_isEditable(this.peer!.ptr)
@@ -814,7 +813,7 @@ export class ConsoleMessage implements MaterializedBase {
         return this.peer
     }
     static ctor_consolemessage(message: string, sourceId: string, lineNumber: number, messageLevel: MessageLevel): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_ctor(message, sourceId, lineNumber, messageLevel.valueOf())
+        const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_ctor(message, sourceId, lineNumber, TypeChecker.MessageLevel_ToNumeric(messageLevel))
         return retval
     }
     constructor(message?: string, sourceId?: string, lineNumber?: number, messageLevel?: MessageLevel) {
@@ -853,7 +852,7 @@ export class ConsoleMessage implements MaterializedBase {
     }
     private getMessageLevel_serialize(): MessageLevel {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessageLevel(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.MessageLevel_FromNumeric(retval)
     }
 }
 export class WebResourceRequestInternal {
@@ -899,7 +898,7 @@ export class WebResourceRequest implements MaterializedBase {
     }
     private getRequestHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1033,7 +1032,7 @@ export class WebResourceResponse implements MaterializedBase {
     }
     private getResponseHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1236,13 +1235,18 @@ export class EventResult implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._EventResult_getFinalizer()
     }
-    public setGestureEventResult(result: boolean): void {
+    public setGestureEventResult(result: boolean, stopPropagation?: boolean): void {
+        const result_type = runtimeType(result)
+        const stopPropagation_type = runtimeType(stopPropagation)
         const result_casted = result as (boolean)
-        this.setGestureEventResult_serialize(result_casted)
+        this.setGestureEventResult0_serialize(result_casted)
         return
     }
-    private setGestureEventResult_serialize(result: boolean): void {
-        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult(this.peer!.ptr, result ? 1 : 0)
+    private setGestureEventResult0_serialize(result: boolean): void {
+        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult0(this.peer!.ptr, result ? 1 : 0)
+    }
+    private setGestureEventResult1_serialize(result: boolean, stopPropagation: boolean): void {
+        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult1(this.peer!.ptr, result ? 1 : 0, stopPropagation ? 1 : 0)
     }
 }
 export class WebControllerInternal {
@@ -1434,7 +1438,7 @@ export class WebController implements MaterializedBase {
     private registerJavaScriptProxy_serialize(options: Literal_Object_object__String_name_Array_String_methodList): undefined {
         const thisSerializer : Serializer = Serializer.hold()
         const options_object_  = options.object_
-        thisSerializer.writeCustomObject("Object", options_object_)
+        thisSerializer.holdAndWriteObject(options_object_)
         const options_name  = options.name
         thisSerializer.writeString(options_name)
         const options_methodList  = options.methodList
@@ -1453,7 +1457,7 @@ export class WebController implements MaterializedBase {
     }
     private getHitTest_serialize(): HitTestType {
         const retval  = ArkUIGeneratedNativeModule._WebController_getHitTest(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.HitTestType_FromNumeric(retval)
     }
     private requestFocus_serialize(): undefined {
         const retval  = ArkUIGeneratedNativeModule._WebController_requestFocus(this.peer!.ptr)
@@ -1483,6 +1487,1632 @@ export class WebController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebController_getCookieManager(this.peer!.ptr)
         const obj : WebCookie = WebCookieInternal.fromPtr(retval)
         return obj
+    }
+}
+export class ArkWebPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkWebPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Web_construct(peerId, flags)
+        const _peer  = new ArkWebPeer(_peerPtr, peerId, "Web", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setWebOptionsAttribute(value: WebOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        if (TypeChecker.isWebviewControllerAni(value.controller)) {
+            const value_casted = {
+                src: value.src,
+                renderMode: value.renderMode,
+                incognitoMode: value.incognitoMode,
+                sharedRenderProcessToken: value.sharedRenderProcessToken
+            } as (WebOptionsSerializer)
+            thisSerializer.writeWebOptions(value_casted)
+            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, value.controller)
+        }
+        thisSerializer.release()
+    }
+    javaScriptAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_javaScriptAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    fileAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_fileAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onlineImageAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onlineImageAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    domStorageAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_domStorageAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    imageAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_imageAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mixedModeAttribute(value: MixedMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as MixedMode)
+            thisSerializer.writeInt32(TypeChecker.MixedMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_mixedMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    zoomAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_zoomAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    geolocationAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_geolocationAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    javaScriptProxyAttribute(value: JavaScriptProxy | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeJavaScriptProxy(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_javaScriptProxy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    passwordAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_password(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    cacheModeAttribute(value: CacheMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as CacheMode)
+            thisSerializer.writeInt32(TypeChecker.CacheMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_cacheMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    darkModeAttribute(value: WebDarkMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as WebDarkMode)
+            thisSerializer.writeInt32(TypeChecker.WebDarkMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_darkMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    forceDarkAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_forceDarkAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mediaOptionsAttribute(value: WebMediaOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeWebMediaOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_mediaOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    tableDataAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_tableData(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    wideViewModeAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_wideViewModeAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    overviewModeAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_overviewModeAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    overScrollModeAttribute(value: OverScrollMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as OverScrollMode)
+            thisSerializer.writeInt32(TypeChecker.OverScrollMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_overScrollMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    blurOnKeyboardHideModeAttribute(value: BlurOnKeyboardHideMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BlurOnKeyboardHideMode)
+            thisSerializer.writeInt32(TypeChecker.BlurOnKeyboardHideMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_blurOnKeyboardHideMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    textZoomAtioAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_textZoomAtio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    textZoomRatioAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_textZoomRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    databaseAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_databaseAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    initialScaleAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_initialScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    userAgentAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_userAgent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    metaViewportAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_metaViewport(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPageEndAttribute(value: ((parameter: OnPageEndEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onPageEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPageBeginAttribute(value: ((parameter: OnPageBeginEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onPageBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onProgressChangeAttribute(value: ((parameter: OnProgressChangeEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onProgressChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onTitleReceiveAttribute(value: ((parameter: OnTitleReceiveEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onTitleReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onGeolocationHideAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onGeolocationHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onGeolocationShowAttribute(value: ((parameter: OnGeolocationShowEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onGeolocationShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRequestSelectedAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onRequestSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAlertAttribute(value: ((parameter: OnAlertEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onAlert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onBeforeUnloadAttribute(value: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onBeforeUnload(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onConfirmAttribute(value: ((parameter: OnConfirmEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onConfirm(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPromptAttribute(value: ((parameter: OnPromptEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onPrompt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onConsoleAttribute(value: ((parameter: OnConsoleEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onConsole(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onErrorReceiveAttribute(value: ((parameter: OnErrorReceiveEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onHttpErrorReceiveAttribute(value: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onHttpErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDownloadStartAttribute(value: ((parameter: OnDownloadStartEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onDownloadStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRefreshAccessedHistoryAttribute(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onRefreshAccessedHistory(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onUrlLoadInterceptAttribute(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onUrlLoadIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSslErrorReceiveAttribute(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onSslErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRenderExited0Attribute(value: ((parameter: OnRenderExitedEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRenderExited1Attribute(value: ((event?: Literal_Object_detail) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onShowFileSelectorAttribute(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onShowFileSelector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFileSelectorShowAttribute(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onFileSelectorShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onResourceLoadAttribute(value: ((parameter: OnResourceLoadEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onResourceLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFullScreenExitAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onFullScreenExit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFullScreenEnterAttribute(value: OnFullScreenEnterCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onFullScreenEnter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScaleChangeAttribute(value: ((parameter: OnScaleChangeEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onScaleChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onHttpAuthRequestAttribute(value: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onHttpAuthRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onInterceptRequestAttribute(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onInterceptRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPermissionRequestAttribute(value: ((parameter: OnPermissionRequestEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onPermissionRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScreenCaptureRequestAttribute(value: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onScreenCaptureRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onContextMenuShowAttribute(value: ((parameter: OnContextMenuShowEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onContextMenuShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onContextMenuHideAttribute(value: OnContextMenuHideCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onContextMenuHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mediaPlayGestureAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_mediaPlayGestureAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSearchResultReceiveAttribute(value: ((parameter: OnSearchResultReceiveEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onSearchResultReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollAttribute(value: ((parameter: OnScrollEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSslErrorEventReceiveAttribute(value: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onSslErrorEventReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSslErrorEventAttribute(value: OnSslErrorEventCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onSslErrorEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onClientAuthenticationRequestAttribute(value: ((parameter: OnClientAuthenticationEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onClientAuthenticationRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onWindowNewAttribute(value: ((parameter: OnWindowNewEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onWindowNew(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onWindowExitAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onWindowExit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    multiWindowAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_multiWindowAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onInterceptKeyEventAttribute(value: ((parameter: KeyEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onInterceptKeyEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    webStandardFontAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_webStandardFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    webSerifFontAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_webSerifFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    webSansSerifFontAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_webSansSerifFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    webFixedFontAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_webFixedFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    webFantasyFontAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_webFantasyFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    webCursiveFontAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_webCursiveFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    defaultFixedFontSizeAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_defaultFixedFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    defaultFontSizeAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_defaultFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    minFontSizeAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_minFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    minLogicalFontSizeAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_minLogicalFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    defaultTextEncodingFormatAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_defaultTextEncodingFormat(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    forceDisplayScrollBarAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_forceDisplayScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    blockNetworkAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_blockNetwork(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    horizontalScrollBarAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_horizontalScrollBarAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    verticalScrollBarAccessAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_verticalScrollBarAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onTouchIconUrlReceivedAttribute(value: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onTouchIconUrlReceived(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFaviconReceivedAttribute(value: ((parameter: OnFaviconReceivedEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onFaviconReceived(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPageVisibleAttribute(value: ((parameter: OnPageVisibleEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onPageVisible(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDataResubmittedAttribute(value: ((parameter: OnDataResubmittedEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onDataResubmitted(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    pinchSmoothAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_pinchSmooth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    allowWindowOpenMethodAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_allowWindowOpenMethod(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAudioStateChangedAttribute(value: ((parameter: OnAudioStateChangedEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onAudioStateChanged(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFirstContentfulPaintAttribute(value: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onFirstContentfulPaint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFirstMeaningfulPaintAttribute(value: OnFirstMeaningfulPaintCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onFirstMeaningfulPaint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onLargestContentfulPaintAttribute(value: OnLargestContentfulPaintCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onLargestContentfulPaint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onLoadInterceptAttribute(value: ((parameter: OnLoadInterceptEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onLoadIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onControllerAttachedAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onControllerAttached(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onOverScrollAttribute(value: ((parameter: OnOverScrollEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onOverScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSafeBrowsingCheckResultAttribute(value: OnSafeBrowsingCheckResultCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onSafeBrowsingCheckResult(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNavigationEntryCommittedAttribute(value: OnNavigationEntryCommittedCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onNavigationEntryCommitted(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onIntelligentTrackingPreventionResultAttribute(value: OnIntelligentTrackingPreventionCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onIntelligentTrackingPreventionResult(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    javaScriptOnDocumentStartAttribute(value: Array<ScriptItem> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ScriptItem = value_value[i]
+                thisSerializer.writeScriptItem(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_javaScriptOnDocumentStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    javaScriptOnDocumentEndAttribute(value: Array<ScriptItem> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ScriptItem = value_value[i]
+                thisSerializer.writeScriptItem(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_javaScriptOnDocumentEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    layoutModeAttribute(value: WebLayoutMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as WebLayoutMode)
+            thisSerializer.writeInt32(TypeChecker.WebLayoutMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_layoutMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    nestedScrollAttribute(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isNestedScrollOptions(value_value, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as NestedScrollOptions
+                thisSerializer.writeNestedScrollOptions(value_value_0)
+            }
+            else if (TypeChecker.isNestedScrollOptionsExt(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as NestedScrollOptionsExt
+                thisSerializer.writeNestedScrollOptionsExt(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_nestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableNativeEmbedModeAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_enableNativeEmbedMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNativeEmbedLifecycleChangeAttribute(value: ((event: NativeEmbedDataInfo) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onNativeEmbedLifecycleChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNativeEmbedVisibilityChangeAttribute(value: OnNativeEmbedVisibilityChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onNativeEmbedVisibilityChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNativeEmbedGestureEventAttribute(value: ((event: NativeEmbedTouchInfo) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onNativeEmbedGestureEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    copyOptionsAttribute(value: CopyOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as CopyOptions)
+            thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_copyOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onOverrideUrlLoadingAttribute(value: OnOverrideUrlLoadingCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onOverrideUrlLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    textAutosizingAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_textAutosizing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableNativeMediaPlayerAttribute(value: NativeMediaPlayerConfig | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNativeMediaPlayerConfig(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_enableNativeMediaPlayer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRenderProcessNotRespondingAttribute(value: OnRenderProcessNotRespondingCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onRenderProcessNotResponding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRenderProcessRespondingAttribute(value: OnRenderProcessRespondingCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onRenderProcessResponding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectionMenuOptionsAttribute(value: Array<ExpandedMenuItemOptions> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ExpandedMenuItemOptions = value_value[i]
+                thisSerializer.writeExpandedMenuItemOptions(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_selectionMenuOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onViewportFitChangedAttribute(value: OnViewportFitChangedCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onViewportFitChanged(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onInterceptKeyboardAttachAttribute(value: WebKeyboardCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onInterceptKeyboardAttach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAdsBlockedAttribute(value: OnAdsBlockedCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_onAdsBlocked(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    keyboardAvoidModeAttribute(value: WebKeyboardAvoidMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as WebKeyboardAvoidMode)
+            thisSerializer.writeInt32(TypeChecker.WebKeyboardAvoidMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_keyboardAvoidMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    editMenuOptionsAttribute(value: EditMenuOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeEditMenuOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_editMenuOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableHapticFeedbackAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_enableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    optimizeParserBudgetAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_optimizeParserBudget(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableFollowSystemFontWeightAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_enableFollowSystemFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableWebAVSessionAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_enableWebAVSession(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    runJavaScriptOnDocumentStartAttribute(value: Array<ScriptItem> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ScriptItem = value_value[i]
+                thisSerializer.writeScriptItem(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_runJavaScriptOnDocumentStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    runJavaScriptOnDocumentEndAttribute(value: Array<ScriptItem> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ScriptItem = value_value[i]
+                thisSerializer.writeScriptItem(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_runJavaScriptOnDocumentEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    runJavaScriptOnHeadEndAttribute(value: Array<ScriptItem> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ScriptItem = value_value[i]
+                thisSerializer.writeScriptItem(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_runJavaScriptOnHeadEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    nativeEmbedOptionsAttribute(value: EmbedOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeEmbedOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_nativeEmbedOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    registerNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let tag_type : int32 = RuntimeType.UNDEFINED
+        tag_type = runtimeType(tag)
+        thisSerializer.writeInt8(tag_type as int32)
+        if ((RuntimeType.UNDEFINED) != (tag_type)) {
+            const tag_value  = tag!
+            thisSerializer.writeString(tag_value)
+        }
+        let type_type : int32 = RuntimeType.UNDEFINED
+        type_type = runtimeType(type)
+        thisSerializer.writeInt8(type_type as int32)
+        if ((RuntimeType.UNDEFINED) != (type_type)) {
+            const type_value  = type!
+            thisSerializer.writeString(type_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_registerNativeEmbedRule(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindSelectionMenuAttribute(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let elementType_type : int32 = RuntimeType.UNDEFINED
+        elementType_type = runtimeType(elementType)
+        thisSerializer.writeInt8(elementType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (elementType_type)) {
+            const elementType_value  = (elementType as WebElementType)
+            thisSerializer.writeInt32(TypeChecker.WebElementType_ToNumeric(elementType_value))
+        }
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        thisSerializer.writeInt8(content_type as int32)
+        if ((RuntimeType.UNDEFINED) != (content_type)) {
+            const content_value  = content!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
+        }
+        let responseType_type : int32 = RuntimeType.UNDEFINED
+        responseType_type = runtimeType(responseType)
+        thisSerializer.writeInt8(responseType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (responseType_type)) {
+            const responseType_value  = (responseType as WebResponseType)
+            thisSerializer.writeInt32(TypeChecker.WebResponseType_ToNumeric(responseType_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSelectionMenuOptionsExt(options_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_bindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
@@ -1566,6 +3196,10 @@ export enum CacheMode {
 export enum OverScrollMode {
     NEVER = 0,
     ALWAYS = 1
+}
+export enum BlurOnKeyboardHideMode {
+    SILENT = 0,
+    BLUR = 1
 }
 export enum WebDarkMode {
     OFF = 0,
@@ -1729,7 +3363,13 @@ export interface Literal_Object_object__String_name_Array_String_methodList {
 }
 export interface WebOptions {
     src: string | Resource;
-    controller: WebController | WebviewController;
+    controller: WebviewControllerAni;
+    renderMode?: RenderMode;
+    incognitoMode?: boolean;
+    sharedRenderProcessToken?: string;
+}
+export interface WebOptionsSerializer {
+    src: string | Resource;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
@@ -1749,6 +3389,7 @@ export interface IntelligentTrackingPreventionDetails {
     host: string;
     trackerHost: string;
 }
+export type WebInterface = (value: WebOptions) => WebAttribute;
 export interface NativeEmbedInfo {
     id?: string;
     type?: string;
@@ -1961,6 +3602,7 @@ export interface SelectionMenuOptionsExt {
     onDisappear?: (() => void);
     preview?: CustomBuilder;
     menuType?: MenuType;
+    previewMenuOptions?: PreviewMenuOptions;
 }
 export type Callback_OnPageEndEvent_Void = (parameter: OnPageEndEvent) => void;
 export type Callback_OnPageBeginEvent_Void = (parameter: OnPageBeginEvent) => void;
@@ -1981,7 +3623,7 @@ export interface Literal_Union_String_WebResourceRequest_data {
 }
 export type Type_WebAttribute_onUrlLoadIntercept_callback = (event?: Literal_Union_String_WebResourceRequest_data) => boolean;
 export interface Literal_Function_handler_Object_error {
-    handler: Function0<void>;
+    handler: Object;
     error: Object;
 }
 export type Callback_Literal_Function_handler_Object_error_Void = (event?: Literal_Function_handler_Object_error) => void;
@@ -1992,7 +3634,7 @@ export interface Literal_Object_detail {
 }
 export type Callback_Literal_Object_detail_Boolean = (event?: Literal_Object_detail) => boolean;
 export interface Literal_Function_callback__Object_fileSelector {
-    callback_: Function0<void>;
+    callback_: Object;
     fileSelector: Object;
 }
 export type Type_WebAttribute_onFileSelectorShow_callback = (event?: Literal_Function_callback__Object_fileSelector) => void;
@@ -2018,6 +3660,643 @@ export type Callback_OnLoadInterceptEvent_Boolean = (parameter: OnLoadInterceptE
 export type Callback_OnOverScrollEvent_Void = (parameter: OnOverScrollEvent) => void;
 export type Callback_NativeEmbedDataInfo_Void = (event: NativeEmbedDataInfo) => void;
 export type Callback_NativeEmbedTouchInfo_Void = (event: NativeEmbedTouchInfo) => void;
+export interface WebAttribute extends CommonMethod {
+    javaScriptAccess(value: boolean | undefined): this
+    fileAccess(value: boolean | undefined): this
+    onlineImageAccess(value: boolean | undefined): this
+    domStorageAccess(value: boolean | undefined): this
+    imageAccess(value: boolean | undefined): this
+    mixedMode(value: MixedMode | undefined): this
+    zoomAccess(value: boolean | undefined): this
+    geolocationAccess(value: boolean | undefined): this
+    javaScriptProxy(value: JavaScriptProxy | undefined): this
+    password(value: boolean | undefined): this
+    cacheMode(value: CacheMode | undefined): this
+    darkMode(value: WebDarkMode | undefined): this
+    forceDarkAccess(value: boolean | undefined): this
+    mediaOptions(value: WebMediaOptions | undefined): this
+    tableData(value: boolean | undefined): this
+    wideViewModeAccess(value: boolean | undefined): this
+    overviewModeAccess(value: boolean | undefined): this
+    overScrollMode(value: OverScrollMode | undefined): this
+    blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this
+    textZoomAtio(value: number | undefined): this
+    textZoomRatio(value: number | undefined): this
+    databaseAccess(value: boolean | undefined): this
+    initialScale(value: number | undefined): this
+    userAgent(value: string | undefined): this
+    metaViewport(value: boolean | undefined): this
+    onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this
+    onPageBegin(value: ((parameter: OnPageBeginEvent) => void) | undefined): this
+    onProgressChange(value: ((parameter: OnProgressChangeEvent) => void) | undefined): this
+    onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void) | undefined): this
+    onGeolocationHide(value: (() => void) | undefined): this
+    onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void) | undefined): this
+    onRequestSelected(value: (() => void) | undefined): this
+    onAlert(value: ((parameter: OnAlertEvent) => boolean) | undefined): this
+    onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined): this
+    onConfirm(value: ((parameter: OnConfirmEvent) => boolean) | undefined): this
+    onPrompt(value: ((parameter: OnPromptEvent) => boolean) | undefined): this
+    onConsole(value: ((parameter: OnConsoleEvent) => boolean) | undefined): this
+    onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void) | undefined): this
+    onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined): this
+    onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void) | undefined): this
+    onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this
+    onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this
+    onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this
+    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this
+    onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this
+    onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this
+    onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this
+    onFullScreenExit(value: (() => void) | undefined): this
+    onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this
+    onScaleChange(value: ((parameter: OnScaleChangeEvent) => void) | undefined): this
+    onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined): this
+    onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this
+    onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void) | undefined): this
+    onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined): this
+    onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean) | undefined): this
+    onContextMenuHide(value: OnContextMenuHideCallback | undefined): this
+    mediaPlayGestureAccess(value: boolean | undefined): this
+    onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void) | undefined): this
+    onScroll(value: ((parameter: OnScrollEvent) => void) | undefined): this
+    onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined): this
+    onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this
+    onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void) | undefined): this
+    onWindowNew(value: ((parameter: OnWindowNewEvent) => void) | undefined): this
+    onWindowExit(value: (() => void) | undefined): this
+    multiWindowAccess(value: boolean | undefined): this
+    onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this
+    webStandardFont(value: string | undefined): this
+    webSerifFont(value: string | undefined): this
+    webSansSerifFont(value: string | undefined): this
+    webFixedFont(value: string | undefined): this
+    webFantasyFont(value: string | undefined): this
+    webCursiveFont(value: string | undefined): this
+    defaultFixedFontSize(value: number | undefined): this
+    defaultFontSize(value: number | undefined): this
+    minFontSize(value: number | undefined): this
+    minLogicalFontSize(value: number | undefined): this
+    defaultTextEncodingFormat(value: string | undefined): this
+    forceDisplayScrollBar(value: boolean | undefined): this
+    blockNetwork(value: boolean | undefined): this
+    horizontalScrollBarAccess(value: boolean | undefined): this
+    verticalScrollBarAccess(value: boolean | undefined): this
+    onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined): this
+    onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void) | undefined): this
+    onPageVisible(value: ((parameter: OnPageVisibleEvent) => void) | undefined): this
+    onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void) | undefined): this
+    pinchSmooth(value: boolean | undefined): this
+    allowWindowOpenMethod(value: boolean | undefined): this
+    onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void) | undefined): this
+    onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined): this
+    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this
+    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this
+    onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean) | undefined): this
+    onControllerAttached(value: (() => void) | undefined): this
+    onOverScroll(value: ((parameter: OnOverScrollEvent) => void) | undefined): this
+    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this
+    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this
+    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this
+    javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
+    javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
+    layoutMode(value: WebLayoutMode | undefined): this
+    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this
+    enableNativeEmbedMode(value: boolean | undefined): this
+    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this
+    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this
+    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this
+    copyOptions(value: CopyOptions | undefined): this
+    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this
+    textAutosizing(value: boolean | undefined): this
+    enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this
+    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this
+    onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this
+    selectionMenuOptions(value: Array<ExpandedMenuItemOptions> | undefined): this
+    onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this
+    onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this
+    onAdsBlocked(value: OnAdsBlockedCallback | undefined): this
+    keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this
+    editMenuOptions(value: EditMenuOptions | undefined): this
+    enableHapticFeedback(value: boolean | undefined): this
+    optimizeParserBudget(value: boolean | undefined): this
+    enableFollowSystemFontWeight(value: boolean | undefined): this
+    enableWebAVSession(value: boolean | undefined): this
+    runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
+    runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
+    runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this
+    nativeEmbedOptions(value: EmbedOptions | undefined): this
+    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
+    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
+}
+export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
+    javaScriptAccess_value?: boolean | undefined
+    fileAccess_value?: boolean | undefined
+    onlineImageAccess_value?: boolean | undefined
+    domStorageAccess_value?: boolean | undefined
+    imageAccess_value?: boolean | undefined
+    mixedMode_value?: MixedMode | undefined
+    zoomAccess_value?: boolean | undefined
+    geolocationAccess_value?: boolean | undefined
+    javaScriptProxy_value?: JavaScriptProxy | undefined
+    password_value?: boolean | undefined
+    cacheMode_value?: CacheMode | undefined
+    darkMode_value?: WebDarkMode | undefined
+    forceDarkAccess_value?: boolean | undefined
+    mediaOptions_value?: WebMediaOptions | undefined
+    tableData_value?: boolean | undefined
+    wideViewModeAccess_value?: boolean | undefined
+    overviewModeAccess_value?: boolean | undefined
+    overScrollMode_value?: OverScrollMode | undefined
+    blurOnKeyboardHideMode_value?: BlurOnKeyboardHideMode | undefined
+    textZoomAtio_value?: number | undefined
+    textZoomRatio_value?: number | undefined
+    databaseAccess_value?: boolean | undefined
+    initialScale_value?: number | undefined
+    userAgent_value?: string | undefined
+    metaViewport_value?: boolean | undefined
+    onPageEnd_value?: ((parameter: OnPageEndEvent) => void) | undefined
+    onPageBegin_value?: ((parameter: OnPageBeginEvent) => void) | undefined
+    onProgressChange_value?: ((parameter: OnProgressChangeEvent) => void) | undefined
+    onTitleReceive_value?: ((parameter: OnTitleReceiveEvent) => void) | undefined
+    onGeolocationHide_value?: (() => void) | undefined
+    onGeolocationShow_value?: ((parameter: OnGeolocationShowEvent) => void) | undefined
+    onRequestSelected_value?: (() => void) | undefined
+    onAlert_value?: ((parameter: OnAlertEvent) => boolean) | undefined
+    onBeforeUnload_value?: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined
+    onConfirm_value?: ((parameter: OnConfirmEvent) => boolean) | undefined
+    onPrompt_value?: ((parameter: OnPromptEvent) => boolean) | undefined
+    onConsole_value?: ((parameter: OnConsoleEvent) => boolean) | undefined
+    onErrorReceive_value?: ((parameter: OnErrorReceiveEvent) => void) | undefined
+    onHttpErrorReceive_value?: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined
+    onDownloadStart_value?: ((parameter: OnDownloadStartEvent) => void) | undefined
+    onRefreshAccessedHistory_value?: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined
+    onUrlLoadIntercept_value?: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined
+    onSslErrorReceive_value?: ((event?: Literal_Function_handler_Object_error) => void) | undefined
+    onRenderExited_value?: ((parameter: OnRenderExitedEvent) => void) | undefined
+    onShowFileSelector_value?: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined
+    onFileSelectorShow_value?: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined
+    onResourceLoad_value?: ((parameter: OnResourceLoadEvent) => void) | undefined
+    onFullScreenExit_value?: (() => void) | undefined
+    onFullScreenEnter_value?: OnFullScreenEnterCallback | undefined
+    onScaleChange_value?: ((parameter: OnScaleChangeEvent) => void) | undefined
+    onHttpAuthRequest_value?: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined
+    onInterceptRequest_value?: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined
+    onPermissionRequest_value?: ((parameter: OnPermissionRequestEvent) => void) | undefined
+    onScreenCaptureRequest_value?: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined
+    onContextMenuShow_value?: ((parameter: OnContextMenuShowEvent) => boolean) | undefined
+    onContextMenuHide_value?: OnContextMenuHideCallback | undefined
+    mediaPlayGestureAccess_value?: boolean | undefined
+    onSearchResultReceive_value?: ((parameter: OnSearchResultReceiveEvent) => void) | undefined
+    onScroll_value?: ((parameter: OnScrollEvent) => void) | undefined
+    onSslErrorEventReceive_value?: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined
+    onSslErrorEvent_value?: OnSslErrorEventCallback | undefined
+    onClientAuthenticationRequest_value?: ((parameter: OnClientAuthenticationEvent) => void) | undefined
+    onWindowNew_value?: ((parameter: OnWindowNewEvent) => void) | undefined
+    onWindowExit_value?: (() => void) | undefined
+    multiWindowAccess_value?: boolean | undefined
+    onInterceptKeyEvent_value?: ((parameter: KeyEvent) => boolean) | undefined
+    webStandardFont_value?: string | undefined
+    webSerifFont_value?: string | undefined
+    webSansSerifFont_value?: string | undefined
+    webFixedFont_value?: string | undefined
+    webFantasyFont_value?: string | undefined
+    webCursiveFont_value?: string | undefined
+    defaultFixedFontSize_value?: number | undefined
+    defaultFontSize_value?: number | undefined
+    minFontSize_value?: number | undefined
+    minLogicalFontSize_value?: number | undefined
+    defaultTextEncodingFormat_value?: string | undefined
+    forceDisplayScrollBar_value?: boolean | undefined
+    blockNetwork_value?: boolean | undefined
+    horizontalScrollBarAccess_value?: boolean | undefined
+    verticalScrollBarAccess_value?: boolean | undefined
+    onTouchIconUrlReceived_value?: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined
+    onFaviconReceived_value?: ((parameter: OnFaviconReceivedEvent) => void) | undefined
+    onPageVisible_value?: ((parameter: OnPageVisibleEvent) => void) | undefined
+    onDataResubmitted_value?: ((parameter: OnDataResubmittedEvent) => void) | undefined
+    pinchSmooth_value?: boolean | undefined
+    allowWindowOpenMethod_value?: boolean | undefined
+    onAudioStateChanged_value?: ((parameter: OnAudioStateChangedEvent) => void) | undefined
+    onFirstContentfulPaint_value?: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined
+    onFirstMeaningfulPaint_value?: OnFirstMeaningfulPaintCallback | undefined
+    onLargestContentfulPaint_value?: OnLargestContentfulPaintCallback | undefined
+    onLoadIntercept_value?: ((parameter: OnLoadInterceptEvent) => boolean) | undefined
+    onControllerAttached_value?: (() => void) | undefined
+    onOverScroll_value?: ((parameter: OnOverScrollEvent) => void) | undefined
+    onSafeBrowsingCheckResult_value?: OnSafeBrowsingCheckResultCallback | undefined
+    onNavigationEntryCommitted_value?: OnNavigationEntryCommittedCallback | undefined
+    onIntelligentTrackingPreventionResult_value?: OnIntelligentTrackingPreventionCallback | undefined
+    javaScriptOnDocumentStart_value?: Array<ScriptItem> | undefined
+    javaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
+    layoutMode_value?: WebLayoutMode | undefined
+    nestedScroll_value?: NestedScrollOptions | NestedScrollOptionsExt | undefined
+    enableNativeEmbedMode_value?: boolean | undefined
+    onNativeEmbedLifecycleChange_value?: ((event: NativeEmbedDataInfo) => void) | undefined
+    onNativeEmbedVisibilityChange_value?: OnNativeEmbedVisibilityChangeCallback | undefined
+    onNativeEmbedGestureEvent_value?: ((event: NativeEmbedTouchInfo) => void) | undefined
+    copyOptions_value?: CopyOptions | undefined
+    onOverrideUrlLoading_value?: OnOverrideUrlLoadingCallback | undefined
+    textAutosizing_value?: boolean | undefined
+    enableNativeMediaPlayer_value?: NativeMediaPlayerConfig | undefined
+    onRenderProcessNotResponding_value?: OnRenderProcessNotRespondingCallback | undefined
+    onRenderProcessResponding_value?: OnRenderProcessRespondingCallback | undefined
+    selectionMenuOptions_value?: Array<ExpandedMenuItemOptions> | undefined
+    onViewportFitChanged_value?: OnViewportFitChangedCallback | undefined
+    onInterceptKeyboardAttach_value?: WebKeyboardCallback | undefined
+    onAdsBlocked_value?: OnAdsBlockedCallback | undefined
+    keyboardAvoidMode_value?: WebKeyboardAvoidMode | undefined
+    editMenuOptions_value?: EditMenuOptions | undefined
+    enableHapticFeedback_value?: boolean | undefined
+    optimizeParserBudget_value?: boolean | undefined
+    enableFollowSystemFontWeight_value?: boolean | undefined
+    enableWebAVSession_value?: boolean | undefined
+    runJavaScriptOnDocumentStart_value?: Array<ScriptItem> | undefined
+    runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
+    runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
+    nativeEmbedOptions_value?: EmbedOptions
+    public javaScriptAccess(value: boolean | undefined): this {
+        return this
+    }
+    public fileAccess(value: boolean | undefined): this {
+        return this
+    }
+    public onlineImageAccess(value: boolean | undefined): this {
+        return this
+    }
+    public domStorageAccess(value: boolean | undefined): this {
+        return this
+    }
+    public imageAccess(value: boolean | undefined): this {
+        return this
+    }
+    public mixedMode(value: MixedMode | undefined): this {
+        return this
+    }
+    public zoomAccess(value: boolean | undefined): this {
+        return this
+    }
+    public geolocationAccess(value: boolean | undefined): this {
+        return this
+    }
+    public javaScriptProxy(value: JavaScriptProxy | undefined): this {
+        return this
+    }
+    public password(value: boolean | undefined): this {
+        return this
+    }
+    public cacheMode(value: CacheMode | undefined): this {
+        return this
+    }
+    public darkMode(value: WebDarkMode | undefined): this {
+        return this
+    }
+    public forceDarkAccess(value: boolean | undefined): this {
+        return this
+    }
+    public mediaOptions(value: WebMediaOptions | undefined): this {
+        return this
+    }
+    public tableData(value: boolean | undefined): this {
+        return this
+    }
+    public wideViewModeAccess(value: boolean | undefined): this {
+        return this
+    }
+    public overviewModeAccess(value: boolean | undefined): this {
+        return this
+    }
+    public overScrollMode(value: OverScrollMode | undefined): this {
+        return this
+    }
+    public blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
+        return this
+    }
+    public textZoomAtio(value: number | undefined): this {
+        return this
+    }
+    public textZoomRatio(value: number | undefined): this {
+        return this
+    }
+    public databaseAccess(value: boolean | undefined): this {
+        return this
+    }
+    public initialScale(value: number | undefined): this {
+        return this
+    }
+    public userAgent(value: string | undefined): this {
+        return this
+    }
+    public metaViewport(value: boolean | undefined): this {
+        return this
+    }
+    public onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this {
+        return this
+    }
+    public onPageBegin(value: ((parameter: OnPageBeginEvent) => void) | undefined): this {
+        return this
+    }
+    public onProgressChange(value: ((parameter: OnProgressChangeEvent) => void) | undefined): this {
+        return this
+    }
+    public onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void) | undefined): this {
+        return this
+    }
+    public onGeolocationHide(value: (() => void) | undefined): this {
+        return this
+    }
+    public onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void) | undefined): this {
+        return this
+    }
+    public onRequestSelected(value: (() => void) | undefined): this {
+        return this
+    }
+    public onAlert(value: ((parameter: OnAlertEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onConfirm(value: ((parameter: OnConfirmEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onPrompt(value: ((parameter: OnPromptEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onConsole(value: ((parameter: OnConsoleEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void) | undefined): this {
+        return this
+    }
+    public onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined): this {
+        return this
+    }
+    public onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void) | undefined): this {
+        return this
+    }
+    public onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
+        return this
+    }
+    public onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this {
+        return this
+    }
+    public onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this {
+        return this
+    }
+    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
+        return this
+    }
+    public onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this {
+        return this
+    }
+    public onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this {
+        return this
+    }
+    public onFullScreenExit(value: (() => void) | undefined): this {
+        return this
+    }
+    public onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
+        return this
+    }
+    public onScaleChange(value: ((parameter: OnScaleChangeEvent) => void) | undefined): this {
+        return this
+    }
+    public onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+        return this
+    }
+    public onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void) | undefined): this {
+        return this
+    }
+    public onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined): this {
+        return this
+    }
+    public onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
+        return this
+    }
+    public mediaPlayGestureAccess(value: boolean | undefined): this {
+        return this
+    }
+    public onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void) | undefined): this {
+        return this
+    }
+    public onScroll(value: ((parameter: OnScrollEvent) => void) | undefined): this {
+        return this
+    }
+    public onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined): this {
+        return this
+    }
+    public onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
+        return this
+    }
+    public onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void) | undefined): this {
+        return this
+    }
+    public onWindowNew(value: ((parameter: OnWindowNewEvent) => void) | undefined): this {
+        return this
+    }
+    public onWindowExit(value: (() => void) | undefined): this {
+        return this
+    }
+    public multiWindowAccess(value: boolean | undefined): this {
+        return this
+    }
+    public onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
+        return this
+    }
+    public webStandardFont(value: string | undefined): this {
+        return this
+    }
+    public webSerifFont(value: string | undefined): this {
+        return this
+    }
+    public webSansSerifFont(value: string | undefined): this {
+        return this
+    }
+    public webFixedFont(value: string | undefined): this {
+        return this
+    }
+    public webFantasyFont(value: string | undefined): this {
+        return this
+    }
+    public webCursiveFont(value: string | undefined): this {
+        return this
+    }
+    public defaultFixedFontSize(value: number | undefined): this {
+        return this
+    }
+    public defaultFontSize(value: number | undefined): this {
+        return this
+    }
+    public minFontSize(value: number | undefined): this {
+        return this
+    }
+    public minLogicalFontSize(value: number | undefined): this {
+        return this
+    }
+    public defaultTextEncodingFormat(value: string | undefined): this {
+        return this
+    }
+    public forceDisplayScrollBar(value: boolean | undefined): this {
+        return this
+    }
+    public blockNetwork(value: boolean | undefined): this {
+        return this
+    }
+    public horizontalScrollBarAccess(value: boolean | undefined): this {
+        return this
+    }
+    public verticalScrollBarAccess(value: boolean | undefined): this {
+        return this
+    }
+    public onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
+        return this
+    }
+    public onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void) | undefined): this {
+        return this
+    }
+    public onPageVisible(value: ((parameter: OnPageVisibleEvent) => void) | undefined): this {
+        return this
+    }
+    public onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void) | undefined): this {
+        return this
+    }
+    public pinchSmooth(value: boolean | undefined): this {
+        return this
+    }
+    public allowWindowOpenMethod(value: boolean | undefined): this {
+        return this
+    }
+    public onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void) | undefined): this {
+        return this
+    }
+    public onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined): this {
+        return this
+    }
+    public onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
+        return this
+    }
+    public onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
+        return this
+    }
+    public onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onControllerAttached(value: (() => void) | undefined): this {
+        return this
+    }
+    public onOverScroll(value: ((parameter: OnOverScrollEvent) => void) | undefined): this {
+        return this
+    }
+    public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        return this
+    }
+    public onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
+        return this
+    }
+    public onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
+        return this
+    }
+    public javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+        return this
+    }
+    public javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+        return this
+    }
+    public layoutMode(value: WebLayoutMode | undefined): this {
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
+        return this
+    }
+    public enableNativeEmbedMode(value: boolean | undefined): this {
+        return this
+    }
+    public onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
+        return this
+    }
+    public onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
+        return this
+    }
+    public onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
+        return this
+    }
+    public copyOptions(value: CopyOptions | undefined): this {
+        return this
+    }
+    public onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
+        return this
+    }
+    public textAutosizing(value: boolean | undefined): this {
+        return this
+    }
+    public enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
+        return this
+    }
+    public onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
+        return this
+    }
+    public onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
+        return this
+    }
+    public selectionMenuOptions(value: Array<ExpandedMenuItemOptions> | undefined): this {
+        return this
+    }
+    public onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
+        return this
+    }
+    public onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
+        return this
+    }
+    public onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
+        return this
+    }
+    public keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
+        return this
+    }
+    public editMenuOptions(value: EditMenuOptions | undefined): this {
+        return this
+    }
+    public enableHapticFeedback(value: boolean | undefined): this {
+        return this
+    }
+    public optimizeParserBudget(value: boolean | undefined): this {
+        return this
+    }
+    public enableFollowSystemFontWeight(value: boolean | undefined): this {
+        return this
+    }
+    public enableWebAVSession(value: boolean | undefined): this {
+        return this
+    }
+    public runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+        return this
+    }
+    public runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+        return this
+    }
+    public runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
+        return this
+    }
+    public nativeEmbedOptions(value: EmbedOptions | undefined): this {
+        return this
+    }
+    public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
+        return this
+    }
+    public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
+        return this
+        }
+}
 export interface SslErrorEvent {
     handler: SslErrorHandler;
     error: SslError;
@@ -2042,257 +4321,1064 @@ export interface NestedScrollOptionsExt {
     scrollRight?: NestedScrollMode;
     scrollLeft?: NestedScrollMode;
 }
-/** @memo:stable */
-export interface WebAttribute extends CommonMethod {
-    /** @memo */
-    setWebOptions(value: WebOptions): this
-    /** @memo */
-    javaScriptAccess(value: boolean): this
-    /** @memo */
-    fileAccess(value: boolean): this
-    /** @memo */
-    onlineImageAccess(value: boolean): this
-    /** @memo */
-    domStorageAccess(value: boolean): this
-    /** @memo */
-    imageAccess(value: boolean): this
-    /** @memo */
-    mixedMode(value: MixedMode): this
-    /** @memo */
-    zoomAccess(value: boolean): this
-    /** @memo */
-    geolocationAccess(value: boolean): this
-    /** @memo */
-    javaScriptProxy(value: JavaScriptProxy): this
-    /** @memo */
-    password(value: boolean): this
-    /** @memo */
-    cacheMode(value: CacheMode): this
-    /** @memo */
-    darkMode(value: WebDarkMode): this
-    /** @memo */
-    forceDarkAccess(value: boolean): this
-    /** @memo */
-    mediaOptions(value: WebMediaOptions): this
-    /** @memo */
-    tableData(value: boolean): this
-    /** @memo */
-    wideViewModeAccess(value: boolean): this
-    /** @memo */
-    overviewModeAccess(value: boolean): this
-    /** @memo */
-    overScrollMode(value: OverScrollMode): this
-    /** @memo */
-    textZoomAtio(value: number): this
-    /** @memo */
-    textZoomRatio(value: number): this
-    /** @memo */
-    databaseAccess(value: boolean): this
-    /** @memo */
-    initialScale(value: number): this
-    /** @memo */
-    userAgent(value: string): this
-    /** @memo */
-    metaViewport(value: boolean): this
-    /** @memo */
-    onPageEnd(value: ((parameter: OnPageEndEvent) => void)): this
-    /** @memo */
-    onPageBegin(value: ((parameter: OnPageBeginEvent) => void)): this
-    /** @memo */
-    onProgressChange(value: ((parameter: OnProgressChangeEvent) => void)): this
-    /** @memo */
-    onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void)): this
-    /** @memo */
-    onGeolocationHide(value: (() => void)): this
-    /** @memo */
-    onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void)): this
-    /** @memo */
-    onRequestSelected(value: (() => void)): this
-    /** @memo */
-    onAlert(value: ((parameter: OnAlertEvent) => boolean)): this
-    /** @memo */
-    onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean)): this
-    /** @memo */
-    onConfirm(value: ((parameter: OnConfirmEvent) => boolean)): this
-    /** @memo */
-    onPrompt(value: ((parameter: OnPromptEvent) => boolean)): this
-    /** @memo */
-    onConsole(value: ((parameter: OnConsoleEvent) => boolean)): this
-    /** @memo */
-    onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void)): this
-    /** @memo */
-    onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void)): this
-    /** @memo */
-    onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void)): this
-    /** @memo */
-    onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void)): this
-    /** @memo */
-    onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean)): this
-    /** @memo */
-    onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void)): this
-    /** @memo */
-    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | ((event?: Literal_Object_detail) => boolean)): this
-    /** @memo */
-    onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean)): this
-    /** @memo */
-    onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void)): this
-    /** @memo */
-    onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void)): this
-    /** @memo */
-    onFullScreenExit(value: (() => void)): this
-    /** @memo */
-    onFullScreenEnter(value: OnFullScreenEnterCallback): this
-    /** @memo */
-    onScaleChange(value: ((parameter: OnScaleChangeEvent) => void)): this
-    /** @memo */
-    onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean)): this
-    /** @memo */
-    onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse)): this
-    /** @memo */
-    onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void)): this
-    /** @memo */
-    onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void)): this
-    /** @memo */
-    onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean)): this
-    /** @memo */
-    onContextMenuHide(value: OnContextMenuHideCallback): this
-    /** @memo */
-    mediaPlayGestureAccess(value: boolean): this
-    /** @memo */
-    onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void)): this
-    /** @memo */
-    onScroll(value: ((parameter: OnScrollEvent) => void)): this
-    /** @memo */
-    onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void)): this
-    /** @memo */
-    onSslErrorEvent(value: OnSslErrorEventCallback): this
-    /** @memo */
-    onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void)): this
-    /** @memo */
-    onWindowNew(value: ((parameter: OnWindowNewEvent) => void)): this
-    /** @memo */
-    onWindowExit(value: (() => void)): this
-    /** @memo */
-    multiWindowAccess(value: boolean): this
-    /** @memo */
-    onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean)): this
-    /** @memo */
-    webStandardFont(value: string): this
-    /** @memo */
-    webSerifFont(value: string): this
-    /** @memo */
-    webSansSerifFont(value: string): this
-    /** @memo */
-    webFixedFont(value: string): this
-    /** @memo */
-    webFantasyFont(value: string): this
-    /** @memo */
-    webCursiveFont(value: string): this
-    /** @memo */
-    defaultFixedFontSize(value: number): this
-    /** @memo */
-    defaultFontSize(value: number): this
-    /** @memo */
-    minFontSize(value: number): this
-    /** @memo */
-    minLogicalFontSize(value: number): this
-    /** @memo */
-    defaultTextEncodingFormat(value: string): this
-    /** @memo */
-    forceDisplayScrollBar(value: boolean): this
-    /** @memo */
-    blockNetwork(value: boolean): this
-    /** @memo */
-    horizontalScrollBarAccess(value: boolean): this
-    /** @memo */
-    verticalScrollBarAccess(value: boolean): this
-    /** @memo */
-    onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void)): this
-    /** @memo */
-    onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void)): this
-    /** @memo */
-    onPageVisible(value: ((parameter: OnPageVisibleEvent) => void)): this
-    /** @memo */
-    onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void)): this
-    /** @memo */
-    pinchSmooth(value: boolean): this
-    /** @memo */
-    allowWindowOpenMethod(value: boolean): this
-    /** @memo */
-    onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void)): this
-    /** @memo */
-    onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void)): this
-    /** @memo */
-    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback): this
-    /** @memo */
-    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback): this
-    /** @memo */
-    onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean)): this
-    /** @memo */
-    onControllerAttached(value: (() => void)): this
-    /** @memo */
-    onOverScroll(value: ((parameter: OnOverScrollEvent) => void)): this
-    /** @memo */
-    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback): this
-    /** @memo */
-    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback): this
-    /** @memo */
-    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback): this
-    /** @memo */
-    javaScriptOnDocumentStart(value: Array<ScriptItem>): this
-    /** @memo */
-    javaScriptOnDocumentEnd(value: Array<ScriptItem>): this
-    /** @memo */
-    layoutMode(value: WebLayoutMode): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt): this
-    /** @memo */
-    enableNativeEmbedMode(value: boolean): this
-    /** @memo */
-    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void)): this
-    /** @memo */
-    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback): this
-    /** @memo */
-    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void)): this
-    /** @memo */
-    copyOptions(value: CopyOptions): this
-    /** @memo */
-    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback): this
-    /** @memo */
-    textAutosizing(value: boolean): this
-    /** @memo */
-    enableNativeMediaPlayer(value: NativeMediaPlayerConfig): this
-    /** @memo */
-    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback): this
-    /** @memo */
-    onRenderProcessResponding(value: OnRenderProcessRespondingCallback): this
-    /** @memo */
-    selectionMenuOptions(value: Array<ExpandedMenuItemOptions>): this
-    /** @memo */
-    onViewportFitChanged(value: OnViewportFitChangedCallback): this
-    /** @memo */
-    onInterceptKeyboardAttach(value: WebKeyboardCallback): this
-    /** @memo */
-    onAdsBlocked(value: OnAdsBlockedCallback): this
-    /** @memo */
-    keyboardAvoidMode(value: WebKeyboardAvoidMode): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions): this
-    /** @memo */
-    enableHapticFeedback(value: boolean): this
-    /** @memo */
-    registerNativeEmbedRule(tag: string, type: string): this
-    /** @memo */
-    bindSelectionMenu(elementType: WebElementType, content: CustomBuilder, responseType: WebResponseType, options?: SelectionMenuOptionsExt): this
+export interface EmbedOptions {
+    supportDefaultIntrinsicSize?: boolean;
+}
+export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
+    getPeer(): ArkWebPeer {
+        return (this.peer as ArkWebPeer)
+    }
+    public setWebOptions(value: WebOptions): this {
+        if (this.checkPriority("setWebOptions")) {
+            const value_casted = value as (WebOptions)
+            this.getPeer()?.setWebOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public javaScriptAccess(value: boolean | undefined): this {
+        if (this.checkPriority("javaScriptAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.javaScriptAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fileAccess(value: boolean | undefined): this {
+        if (this.checkPriority("fileAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.fileAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onlineImageAccess(value: boolean | undefined): this {
+        if (this.checkPriority("onlineImageAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.onlineImageAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public domStorageAccess(value: boolean | undefined): this {
+        if (this.checkPriority("domStorageAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.domStorageAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public imageAccess(value: boolean | undefined): this {
+        if (this.checkPriority("imageAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.imageAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public mixedMode(value: MixedMode | undefined): this {
+        if (this.checkPriority("mixedMode")) {
+            const value_casted = value as (MixedMode | undefined)
+            this.getPeer()?.mixedModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public zoomAccess(value: boolean | undefined): this {
+        if (this.checkPriority("zoomAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.zoomAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public geolocationAccess(value: boolean | undefined): this {
+        if (this.checkPriority("geolocationAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.geolocationAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public javaScriptProxy(value: JavaScriptProxy | undefined): this {
+        if (this.checkPriority("javaScriptProxy")) {
+            const value_casted = value as (JavaScriptProxy | undefined)
+            this.getPeer()?.javaScriptProxyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public password(value: boolean | undefined): this {
+        if (this.checkPriority("password")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.passwordAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public cacheMode(value: CacheMode | undefined): this {
+        if (this.checkPriority("cacheMode")) {
+            const value_casted = value as (CacheMode | undefined)
+            this.getPeer()?.cacheModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public darkMode(value: WebDarkMode | undefined): this {
+        if (this.checkPriority("darkMode")) {
+            const value_casted = value as (WebDarkMode | undefined)
+            this.getPeer()?.darkModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public forceDarkAccess(value: boolean | undefined): this {
+        if (this.checkPriority("forceDarkAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.forceDarkAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public mediaOptions(value: WebMediaOptions | undefined): this {
+        if (this.checkPriority("mediaOptions")) {
+            const value_casted = value as (WebMediaOptions | undefined)
+            this.getPeer()?.mediaOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public tableData(value: boolean | undefined): this {
+        if (this.checkPriority("tableData")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.tableDataAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public wideViewModeAccess(value: boolean | undefined): this {
+        if (this.checkPriority("wideViewModeAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.wideViewModeAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public overviewModeAccess(value: boolean | undefined): this {
+        if (this.checkPriority("overviewModeAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.overviewModeAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public overScrollMode(value: OverScrollMode | undefined): this {
+        if (this.checkPriority("overScrollMode")) {
+            const value_casted = value as (OverScrollMode | undefined)
+            this.getPeer()?.overScrollModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
+        if (this.checkPriority("blurOnKeyboardHideMode")) {
+            const value_casted = value as (BlurOnKeyboardHideMode | undefined)
+            this.getPeer()?.blurOnKeyboardHideModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textZoomAtio(value: number | undefined): this {
+        if (this.checkPriority("textZoomAtio")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.textZoomAtioAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textZoomRatio(value: number | undefined): this {
+        if (this.checkPriority("textZoomRatio")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.textZoomRatioAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public databaseAccess(value: boolean | undefined): this {
+        if (this.checkPriority("databaseAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.databaseAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public initialScale(value: number | undefined): this {
+        if (this.checkPriority("initialScale")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.initialScaleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public userAgent(value: string | undefined): this {
+        if (this.checkPriority("userAgent")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.userAgentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public metaViewport(value: boolean | undefined): this {
+        if (this.checkPriority("metaViewport")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.metaViewportAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this {
+        if (this.checkPriority("onPageEnd")) {
+            const value_casted = value as (((parameter: OnPageEndEvent) => void) | undefined)
+            this.getPeer()?.onPageEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPageBegin(value: ((parameter: OnPageBeginEvent) => void) | undefined): this {
+        if (this.checkPriority("onPageBegin")) {
+            const value_casted = value as (((parameter: OnPageBeginEvent) => void) | undefined)
+            this.getPeer()?.onPageBeginAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onProgressChange(value: ((parameter: OnProgressChangeEvent) => void) | undefined): this {
+        if (this.checkPriority("onProgressChange")) {
+            const value_casted = value as (((parameter: OnProgressChangeEvent) => void) | undefined)
+            this.getPeer()?.onProgressChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void) | undefined): this {
+        if (this.checkPriority("onTitleReceive")) {
+            const value_casted = value as (((parameter: OnTitleReceiveEvent) => void) | undefined)
+            this.getPeer()?.onTitleReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onGeolocationHide(value: (() => void) | undefined): this {
+        if (this.checkPriority("onGeolocationHide")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onGeolocationHideAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void) | undefined): this {
+        if (this.checkPriority("onGeolocationShow")) {
+            const value_casted = value as (((parameter: OnGeolocationShowEvent) => void) | undefined)
+            this.getPeer()?.onGeolocationShowAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onRequestSelected(value: (() => void) | undefined): this {
+        if (this.checkPriority("onRequestSelected")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onRequestSelectedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAlert(value: ((parameter: OnAlertEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onAlert")) {
+            const value_casted = value as (((parameter: OnAlertEvent) => boolean) | undefined)
+            this.getPeer()?.onAlertAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onBeforeUnload")) {
+            const value_casted = value as (((parameter: OnBeforeUnloadEvent) => boolean) | undefined)
+            this.getPeer()?.onBeforeUnloadAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onConfirm(value: ((parameter: OnConfirmEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onConfirm")) {
+            const value_casted = value as (((parameter: OnConfirmEvent) => boolean) | undefined)
+            this.getPeer()?.onConfirmAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPrompt(value: ((parameter: OnPromptEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onPrompt")) {
+            const value_casted = value as (((parameter: OnPromptEvent) => boolean) | undefined)
+            this.getPeer()?.onPromptAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onConsole(value: ((parameter: OnConsoleEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onConsole")) {
+            const value_casted = value as (((parameter: OnConsoleEvent) => boolean) | undefined)
+            this.getPeer()?.onConsoleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void) | undefined): this {
+        if (this.checkPriority("onErrorReceive")) {
+            const value_casted = value as (((parameter: OnErrorReceiveEvent) => void) | undefined)
+            this.getPeer()?.onErrorReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void) | undefined): this {
+        if (this.checkPriority("onHttpErrorReceive")) {
+            const value_casted = value as (((parameter: OnHttpErrorReceiveEvent) => void) | undefined)
+            this.getPeer()?.onHttpErrorReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void) | undefined): this {
+        if (this.checkPriority("onDownloadStart")) {
+            const value_casted = value as (((parameter: OnDownloadStartEvent) => void) | undefined)
+            this.getPeer()?.onDownloadStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
+        if (this.checkPriority("onRefreshAccessedHistory")) {
+            const value_casted = value as (((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined)
+            this.getPeer()?.onRefreshAccessedHistoryAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this {
+        if (this.checkPriority("onUrlLoadIntercept")) {
+            const value_casted = value as (((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined)
+            this.getPeer()?.onUrlLoadInterceptAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this {
+        if (this.checkPriority("onSslErrorReceive")) {
+            const value_casted = value as (((event?: Literal_Function_handler_Object_error) => void) | undefined)
+            this.getPeer()?.onSslErrorReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
+        if (this.checkPriority("onRenderExited")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (((parameter: OnRenderExitedEvent) => void) | undefined)
+                this.getPeer()?.onRenderExited0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (((event?: Literal_Object_detail) => boolean) | undefined)
+                this.getPeer()?.onRenderExited1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onShowFileSelector")) {
+            const value_casted = value as (((parameter: OnShowFileSelectorEvent) => boolean) | undefined)
+            this.getPeer()?.onShowFileSelectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this {
+        if (this.checkPriority("onFileSelectorShow")) {
+            const value_casted = value as (((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined)
+            this.getPeer()?.onFileSelectorShowAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this {
+        if (this.checkPriority("onResourceLoad")) {
+            const value_casted = value as (((parameter: OnResourceLoadEvent) => void) | undefined)
+            this.getPeer()?.onResourceLoadAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFullScreenExit(value: (() => void) | undefined): this {
+        if (this.checkPriority("onFullScreenExit")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onFullScreenExitAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
+        if (this.checkPriority("onFullScreenEnter")) {
+            const value_casted = value as (OnFullScreenEnterCallback | undefined)
+            this.getPeer()?.onFullScreenEnterAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScaleChange(value: ((parameter: OnScaleChangeEvent) => void) | undefined): this {
+        if (this.checkPriority("onScaleChange")) {
+            const value_casted = value as (((parameter: OnScaleChangeEvent) => void) | undefined)
+            this.getPeer()?.onScaleChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onHttpAuthRequest")) {
+            const value_casted = value as (((parameter: OnHttpAuthRequestEvent) => boolean) | undefined)
+            this.getPeer()?.onHttpAuthRequestAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+        if (this.checkPriority("onInterceptRequest")) {
+            const value_casted = value as (((parameter: OnInterceptRequestEvent) => WebResourceResponse) | undefined)
+            this.getPeer()?.onInterceptRequestAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void) | undefined): this {
+        if (this.checkPriority("onPermissionRequest")) {
+            const value_casted = value as (((parameter: OnPermissionRequestEvent) => void) | undefined)
+            this.getPeer()?.onPermissionRequestAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void) | undefined): this {
+        if (this.checkPriority("onScreenCaptureRequest")) {
+            const value_casted = value as (((parameter: OnScreenCaptureRequestEvent) => void) | undefined)
+            this.getPeer()?.onScreenCaptureRequestAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onContextMenuShow")) {
+            const value_casted = value as (((parameter: OnContextMenuShowEvent) => boolean) | undefined)
+            this.getPeer()?.onContextMenuShowAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
+        if (this.checkPriority("onContextMenuHide")) {
+            const value_casted = value as (OnContextMenuHideCallback | undefined)
+            this.getPeer()?.onContextMenuHideAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public mediaPlayGestureAccess(value: boolean | undefined): this {
+        if (this.checkPriority("mediaPlayGestureAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.mediaPlayGestureAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void) | undefined): this {
+        if (this.checkPriority("onSearchResultReceive")) {
+            const value_casted = value as (((parameter: OnSearchResultReceiveEvent) => void) | undefined)
+            this.getPeer()?.onSearchResultReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScroll(value: ((parameter: OnScrollEvent) => void) | undefined): this {
+        if (this.checkPriority("onScroll")) {
+            const value_casted = value as (((parameter: OnScrollEvent) => void) | undefined)
+            this.getPeer()?.onScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void) | undefined): this {
+        if (this.checkPriority("onSslErrorEventReceive")) {
+            const value_casted = value as (((parameter: OnSslErrorEventReceiveEvent) => void) | undefined)
+            this.getPeer()?.onSslErrorEventReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
+        if (this.checkPriority("onSslErrorEvent")) {
+            const value_casted = value as (OnSslErrorEventCallback | undefined)
+            this.getPeer()?.onSslErrorEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void) | undefined): this {
+        if (this.checkPriority("onClientAuthenticationRequest")) {
+            const value_casted = value as (((parameter: OnClientAuthenticationEvent) => void) | undefined)
+            this.getPeer()?.onClientAuthenticationRequestAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWindowNew(value: ((parameter: OnWindowNewEvent) => void) | undefined): this {
+        if (this.checkPriority("onWindowNew")) {
+            const value_casted = value as (((parameter: OnWindowNewEvent) => void) | undefined)
+            this.getPeer()?.onWindowNewAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWindowExit(value: (() => void) | undefined): this {
+        if (this.checkPriority("onWindowExit")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onWindowExitAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public multiWindowAccess(value: boolean | undefined): this {
+        if (this.checkPriority("multiWindowAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.multiWindowAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onInterceptKeyEvent")) {
+            const value_casted = value as (((parameter: KeyEvent) => boolean) | undefined)
+            this.getPeer()?.onInterceptKeyEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public webStandardFont(value: string | undefined): this {
+        if (this.checkPriority("webStandardFont")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.webStandardFontAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public webSerifFont(value: string | undefined): this {
+        if (this.checkPriority("webSerifFont")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.webSerifFontAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public webSansSerifFont(value: string | undefined): this {
+        if (this.checkPriority("webSansSerifFont")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.webSansSerifFontAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public webFixedFont(value: string | undefined): this {
+        if (this.checkPriority("webFixedFont")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.webFixedFontAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public webFantasyFont(value: string | undefined): this {
+        if (this.checkPriority("webFantasyFont")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.webFantasyFontAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public webCursiveFont(value: string | undefined): this {
+        if (this.checkPriority("webCursiveFont")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.webCursiveFontAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public defaultFixedFontSize(value: number | undefined): this {
+        if (this.checkPriority("defaultFixedFontSize")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.defaultFixedFontSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public defaultFontSize(value: number | undefined): this {
+        if (this.checkPriority("defaultFontSize")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.defaultFontSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minFontSize(value: number | undefined): this {
+        if (this.checkPriority("minFontSize")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.minFontSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minLogicalFontSize(value: number | undefined): this {
+        if (this.checkPriority("minLogicalFontSize")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.minLogicalFontSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public defaultTextEncodingFormat(value: string | undefined): this {
+        if (this.checkPriority("defaultTextEncodingFormat")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.defaultTextEncodingFormatAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public forceDisplayScrollBar(value: boolean | undefined): this {
+        if (this.checkPriority("forceDisplayScrollBar")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.forceDisplayScrollBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public blockNetwork(value: boolean | undefined): this {
+        if (this.checkPriority("blockNetwork")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.blockNetworkAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public horizontalScrollBarAccess(value: boolean | undefined): this {
+        if (this.checkPriority("horizontalScrollBarAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.horizontalScrollBarAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public verticalScrollBarAccess(value: boolean | undefined): this {
+        if (this.checkPriority("verticalScrollBarAccess")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.verticalScrollBarAccessAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
+        if (this.checkPriority("onTouchIconUrlReceived")) {
+            const value_casted = value as (((parameter: OnTouchIconUrlReceivedEvent) => void) | undefined)
+            this.getPeer()?.onTouchIconUrlReceivedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void) | undefined): this {
+        if (this.checkPriority("onFaviconReceived")) {
+            const value_casted = value as (((parameter: OnFaviconReceivedEvent) => void) | undefined)
+            this.getPeer()?.onFaviconReceivedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPageVisible(value: ((parameter: OnPageVisibleEvent) => void) | undefined): this {
+        if (this.checkPriority("onPageVisible")) {
+            const value_casted = value as (((parameter: OnPageVisibleEvent) => void) | undefined)
+            this.getPeer()?.onPageVisibleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void) | undefined): this {
+        if (this.checkPriority("onDataResubmitted")) {
+            const value_casted = value as (((parameter: OnDataResubmittedEvent) => void) | undefined)
+            this.getPeer()?.onDataResubmittedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public pinchSmooth(value: boolean | undefined): this {
+        if (this.checkPriority("pinchSmooth")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.pinchSmoothAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public allowWindowOpenMethod(value: boolean | undefined): this {
+        if (this.checkPriority("allowWindowOpenMethod")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.allowWindowOpenMethodAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void) | undefined): this {
+        if (this.checkPriority("onAudioStateChanged")) {
+            const value_casted = value as (((parameter: OnAudioStateChangedEvent) => void) | undefined)
+            this.getPeer()?.onAudioStateChangedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void) | undefined): this {
+        if (this.checkPriority("onFirstContentfulPaint")) {
+            const value_casted = value as (((parameter: OnFirstContentfulPaintEvent) => void) | undefined)
+            this.getPeer()?.onFirstContentfulPaintAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
+        if (this.checkPriority("onFirstMeaningfulPaint")) {
+            const value_casted = value as (OnFirstMeaningfulPaintCallback | undefined)
+            this.getPeer()?.onFirstMeaningfulPaintAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
+        if (this.checkPriority("onLargestContentfulPaint")) {
+            const value_casted = value as (OnLargestContentfulPaintCallback | undefined)
+            this.getPeer()?.onLargestContentfulPaintAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean) | undefined): this {
+        if (this.checkPriority("onLoadIntercept")) {
+            const value_casted = value as (((parameter: OnLoadInterceptEvent) => boolean) | undefined)
+            this.getPeer()?.onLoadInterceptAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onControllerAttached(value: (() => void) | undefined): this {
+        if (this.checkPriority("onControllerAttached")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onControllerAttachedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onOverScroll(value: ((parameter: OnOverScrollEvent) => void) | undefined): this {
+        if (this.checkPriority("onOverScroll")) {
+            const value_casted = value as (((parameter: OnOverScrollEvent) => void) | undefined)
+            this.getPeer()?.onOverScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        if (this.checkPriority("onSafeBrowsingCheckResult")) {
+            const value_casted = value as (OnSafeBrowsingCheckResultCallback | undefined)
+            this.getPeer()?.onSafeBrowsingCheckResultAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
+        if (this.checkPriority("onNavigationEntryCommitted")) {
+            const value_casted = value as (OnNavigationEntryCommittedCallback | undefined)
+            this.getPeer()?.onNavigationEntryCommittedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
+        if (this.checkPriority("onIntelligentTrackingPreventionResult")) {
+            const value_casted = value as (OnIntelligentTrackingPreventionCallback | undefined)
+            this.getPeer()?.onIntelligentTrackingPreventionResultAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+        if (this.checkPriority("javaScriptOnDocumentStart")) {
+            const value_casted = value as (Array<ScriptItem> | undefined)
+            this.getPeer()?.javaScriptOnDocumentStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+        if (this.checkPriority("javaScriptOnDocumentEnd")) {
+            const value_casted = value as (Array<ScriptItem> | undefined)
+            this.getPeer()?.javaScriptOnDocumentEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public layoutMode(value: WebLayoutMode | undefined): this {
+        if (this.checkPriority("layoutMode")) {
+            const value_casted = value as (WebLayoutMode | undefined)
+            this.getPeer()?.layoutModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
+        if (this.checkPriority("nestedScroll")) {
+            const value_casted = value as (NestedScrollOptions | NestedScrollOptionsExt | undefined)
+            this.getPeer()?.nestedScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableNativeEmbedMode(value: boolean | undefined): this {
+        if (this.checkPriority("enableNativeEmbedMode")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableNativeEmbedModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
+        if (this.checkPriority("onNativeEmbedLifecycleChange")) {
+            const value_casted = value as (((event: NativeEmbedDataInfo) => void) | undefined)
+            this.getPeer()?.onNativeEmbedLifecycleChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
+        if (this.checkPriority("onNativeEmbedVisibilityChange")) {
+            const value_casted = value as (OnNativeEmbedVisibilityChangeCallback | undefined)
+            this.getPeer()?.onNativeEmbedVisibilityChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
+        if (this.checkPriority("onNativeEmbedGestureEvent")) {
+            const value_casted = value as (((event: NativeEmbedTouchInfo) => void) | undefined)
+            this.getPeer()?.onNativeEmbedGestureEventAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public copyOptions(value: CopyOptions | undefined): this {
+        if (this.checkPriority("copyOptions")) {
+            const value_casted = value as (CopyOptions | undefined)
+            this.getPeer()?.copyOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
+        if (this.checkPriority("onOverrideUrlLoading")) {
+            const value_casted = value as (OnOverrideUrlLoadingCallback | undefined)
+            this.getPeer()?.onOverrideUrlLoadingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textAutosizing(value: boolean | undefined): this {
+        if (this.checkPriority("textAutosizing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.textAutosizingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
+        if (this.checkPriority("enableNativeMediaPlayer")) {
+            const value_casted = value as (NativeMediaPlayerConfig | undefined)
+            this.getPeer()?.enableNativeMediaPlayerAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
+        if (this.checkPriority("onRenderProcessNotResponding")) {
+            const value_casted = value as (OnRenderProcessNotRespondingCallback | undefined)
+            this.getPeer()?.onRenderProcessNotRespondingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
+        if (this.checkPriority("onRenderProcessResponding")) {
+            const value_casted = value as (OnRenderProcessRespondingCallback | undefined)
+            this.getPeer()?.onRenderProcessRespondingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectionMenuOptions(value: Array<ExpandedMenuItemOptions> | undefined): this {
+        if (this.checkPriority("selectionMenuOptions")) {
+            const value_casted = value as (Array<ExpandedMenuItemOptions> | undefined)
+            this.getPeer()?.selectionMenuOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
+        if (this.checkPriority("onViewportFitChanged")) {
+            const value_casted = value as (OnViewportFitChangedCallback | undefined)
+            this.getPeer()?.onViewportFitChangedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
+        if (this.checkPriority("onInterceptKeyboardAttach")) {
+            const value_casted = value as (WebKeyboardCallback | undefined)
+            this.getPeer()?.onInterceptKeyboardAttachAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
+        if (this.checkPriority("onAdsBlocked")) {
+            const value_casted = value as (OnAdsBlockedCallback | undefined)
+            this.getPeer()?.onAdsBlockedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
+        if (this.checkPriority("keyboardAvoidMode")) {
+            const value_casted = value as (WebKeyboardAvoidMode | undefined)
+            this.getPeer()?.keyboardAvoidModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public editMenuOptions(value: EditMenuOptions | undefined): this {
+        if (this.checkPriority("editMenuOptions")) {
+            const value_casted = value as (EditMenuOptions | undefined)
+            this.getPeer()?.editMenuOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableHapticFeedback(value: boolean | undefined): this {
+        if (this.checkPriority("enableHapticFeedback")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableHapticFeedbackAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public optimizeParserBudget(value: boolean | undefined): this {
+        if (this.checkPriority("optimizeParserBudget")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.optimizeParserBudgetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableFollowSystemFontWeight(value: boolean | undefined): this {
+        if (this.checkPriority("enableFollowSystemFontWeight")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableFollowSystemFontWeightAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableWebAVSession(value: boolean | undefined): this {
+        if (this.checkPriority("enableWebAVSession")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableWebAVSessionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+        if (this.checkPriority("runJavaScriptOnDocumentStart")) {
+            const value_casted = value as (Array<ScriptItem> | undefined)
+            this.getPeer()?.runJavaScriptOnDocumentStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+        if (this.checkPriority("runJavaScriptOnDocumentEnd")) {
+            const value_casted = value as (Array<ScriptItem> | undefined)
+            this.getPeer()?.runJavaScriptOnDocumentEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
+        if (this.checkPriority("runJavaScriptOnHeadEnd")) {
+            const value_casted = value as (Array<ScriptItem> | undefined)
+            this.getPeer()?.runJavaScriptOnHeadEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public nativeEmbedOptions(value: EmbedOptions | undefined): this {
+        if (this.checkPriority("nativeEmbedOptions")) {
+            const value_casted = value as (EmbedOptions | undefined)
+            this.getPeer()?.nativeEmbedOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
+        if (this.checkPriority("registerNativeEmbedRule")) {
+            const tag_casted = tag as (string | undefined)
+            const type_casted = type as (string | undefined)
+            this.getPeer()?.registerNativeEmbedRuleAttribute(tag_casted, type_casted)
+            return this
+        }
+        return this
+    }
+    public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
+        if (this.checkPriority("bindSelectionMenu")) {
+            const elementType_casted = elementType as (WebElementType | undefined)
+            const content_casted = content as (CustomBuilder | undefined)
+            const responseType_casted = responseType as (WebResponseType | undefined)
+            const options_casted = options as (SelectionMenuOptionsExt)
+            this.getPeer()?.bindSelectionMenuAttribute(elementType_casted, content_casted, responseType_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Web(
-  /** @memo */
-  style: ((attributes: WebAttribute) => void) | undefined,
-  value: WebOptions, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: WebAttribute) => void) | undefined,
+    value: WebOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkWebComponent()
     })

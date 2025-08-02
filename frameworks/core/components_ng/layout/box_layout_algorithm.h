@@ -53,6 +53,8 @@ public:
     
     static Alignment MapLocalizedToAlignment(std::string localizedAlignment);
 
+    static void CalcSingleSideMarginFrame(
+        MarginPropertyF& margin, const OptionalSizeF& singleSideFrame, float& maxWidth, float& maxHeight);
 protected:
     std::list<RefPtr<LayoutWrapper>> layoutPolicyChildren_;
 

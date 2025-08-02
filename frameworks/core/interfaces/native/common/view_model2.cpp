@@ -35,6 +35,20 @@ void* createRowSplitNode(ArkUI_Int32 nodeId)
 
 void* createPanelNode(ArkUI_Int32 nodeId)
 {
+    // auto frameNode = SlidingPanelModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
+}
+
+void* createLazyGridLayoutNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createLazyVGridLayoutNode(ArkUI_Int32 nodeId)
+{
     return nullptr;
 }
 

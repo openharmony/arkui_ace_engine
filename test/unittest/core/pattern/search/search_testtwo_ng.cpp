@@ -17,14 +17,18 @@
 
 #include "gtest/gtest.h"
 #include "search_base.h"
+#include "ui/base/geometry/dimension.h"
+#include "ui/properties/ng/calc_length.h"
 #include "ui/view/frame_node.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -3713,7 +3717,8 @@ HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
 
     /**
-    * @tc.steps: case
+    * @tc.steps: test TextFieldMeasure with different LayoutCalPolicy.
+    * @tc.expected: GetLayoutCalPolicy is right LayoutCalPolicy.
     */
     auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
@@ -3936,8 +3941,6 @@ HWTEST_F(SearchTestTwoNg, GetIMEClientInfo001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize search
      */
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto searchPattern = frameNode->GetPattern<SearchPattern>();
@@ -3953,5 +3956,44 @@ HWTEST_F(SearchTestTwoNg, GetIMEClientInfo001, TestSize.Level1)
 
     IMEClient iMEClientInfo = textFieldPattern->GetIMEClientInfo();
     EXPECT_EQ(iMEClientInfo.nodeId, searchHost->GetId());
+}
+
+/**
+ * @tc.name: GetSearchFixAtIdealMaxWidth
+ * @tc.desc: Test search Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetSearchFixAtIdealMaxWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create search, get frameNode and pattern.
+     */
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    auto searchLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(searchPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(searchLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(searchLayoutAlgorithm));
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(100.0f, 100.0f);
+    layoutConstraint.percentReference = SizeF(100.0f, 100.0f);
+    layoutProperty->layoutConstraint_ = layoutConstraint;
+    auto fixAtIdealMaxWidth = searchLayoutAlgorithm->GetSearchFixAtIdealMaxWidth(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(fixAtIdealMaxWidth.has_value());
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    CalcSize maxCalcSize;
+    maxCalcSize.SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+    layoutProperty->UpdateCalcMaxSize(maxCalcSize);
+    fixAtIdealMaxWidth = searchLayoutAlgorithm->GetSearchFixAtIdealMaxWidth(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(fixAtIdealMaxWidth.has_value());
+    EXPECT_EQ(fixAtIdealMaxWidth.value(), 100.0f);
 }
 } // namespace OHOS::Ace::NG

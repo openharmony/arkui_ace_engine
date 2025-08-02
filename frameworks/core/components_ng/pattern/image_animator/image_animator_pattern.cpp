@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
+#if defined(ACE_STATIC)
+#include "base/utils/multi_thread.h"
+#endif
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/pattern/image_animator/controlled_animator.h"
@@ -277,10 +280,12 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
         case ControlledAnimator::ControlStatus::PAUSED:
             controlledAnimator_->Pause();
             ResetFormAnimationFlag();
+            ShowIndex(index);
             break;
         case ControlledAnimator::ControlStatus::STOPPED:
             controlledAnimator_->Finish();
             ResetFormAnimationFlag();
+            ShowIndex(index);
             break;
         default:
             ResetFormAnimationStartTime();
@@ -289,6 +294,14 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
                 return;
             }
             isReverse_ ? controlledAnimator_->Backward() : controlledAnimator_->Forward();
+    }
+}
+
+void ImageAnimatorPattern::ShowIndex(int32_t index)
+{
+    if (showingIndexByStoppedOrPaused_) {
+        SetShowingIndex(index);
+        showingIndexByStoppedOrPaused_ = false;
     }
 }
 
@@ -320,7 +333,9 @@ void ImageAnimatorPattern::OnModifyDone()
         LOGE("image size is less than 0.");
         return;
     }
-    GenerateCachedImages();
+    if (size > 0) {
+        GenerateCachedImages();
+    }
     auto index = nowImageIndex_;
     if ((status_ == ControlledAnimator::ControlStatus::IDLE || status_ == ControlledAnimator::ControlStatus::STOPPED) &&
         !firstUpdateEvent_) {
@@ -340,6 +355,8 @@ void ImageAnimatorPattern::OnModifyDone()
     if (firstUpdateEvent_) {
         UpdateEventCallback();
         firstUpdateEvent_ = false;
+        showingIndexByStoppedOrPaused_ = status_ == ControlledAnimator::ControlStatus::PAUSED ||
+                                         status_ == ControlledAnimator::ControlStatus::STOPPED;
         auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
         AddImageLoadSuccessEvent(imageFrameNode);
     }
@@ -400,6 +417,9 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+#endif
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
@@ -407,6 +427,15 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
     UpdateBorderRadius();
     RegisterVisibleAreaChange();
 }
+
+#if defined(ACE_STATIC)
+void ImageAnimatorPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+#endif
 
 void ImageAnimatorPattern::UpdateEventCallback()
 {

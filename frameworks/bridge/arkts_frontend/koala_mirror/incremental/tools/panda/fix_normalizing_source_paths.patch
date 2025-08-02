@@ -1,0 +1,25 @@
+diff --git a/ets2panda/util/arktsconfig.cpp b/ets2panda/util/arktsconfig.cpp
+index 2c6f967f0..597a36310 100644
+--- a/ets2panda/util/arktsconfig.cpp
++++ b/ets2panda/util/arktsconfig.cpp
+@@ -462,7 +462,7 @@ static std::vector<fs::path> GetSourceList(const std::shared_ptr<ArkTsConfig> &a
+         }
+         for (const auto &dirEntry : fs::recursive_directory_iterator(traverseRoot)) {
+             if (include.Match(dirEntry.path().string()) && !MatchExcludes(dirEntry, excludes)) {
+-                sourceList.emplace_back(dirEntry);
++                sourceList.emplace_back(fs::canonical(dirEntry));
+             }
+         }
+     }
+diff --git a/ets2panda/varbinder/ETSBinder.cpp b/ets2panda/varbinder/ETSBinder.cpp
+index 988ffb856..bc1ace4d5 100644
+--- a/ets2panda/varbinder/ETSBinder.cpp
++++ b/ets2panda/varbinder/ETSBinder.cpp
+@@ -611,6 +611,7 @@ ir::ETSImportDeclaration *ETSBinder::FindImportDeclInReExports(const ir::ETSImpo
+ {
+     ir::ETSImportDeclaration *implDecl = nullptr;
+     for (auto item : ReExportImports()) {
++        // source.Is(program) - returns false if the path in the program is not normalized
+         if (auto source = import->ResolvedSource()->Str(), program = item->GetProgramPath();
+             !source.Is(program.Mutf8())) {
+             continue;

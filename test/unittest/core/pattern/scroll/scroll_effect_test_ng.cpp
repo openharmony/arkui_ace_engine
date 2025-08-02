@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t RECEDE_TIME = 600;
 namespace {} // namespace
 
 class ScrollEffectTestNg : public ScrollTestNg {
@@ -858,6 +859,32 @@ HWTEST_F(ScrollEffectTestNg, ChangeState_RecedeToIdle, TestSize.Level1)
     controller->ChangeState();
     EXPECT_EQ(controller->state_, OverScrollState::IDLE);
     EXPECT_FLOAT_EQ(controller->pullDistance_, 0.0f);
+}
+
+/**
+ * @tc.name: ChangeState_AbsorbToRecede
+ * @tc.desc: Test ScrollFadeController state change from ABSORB to ProcessRecede
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, ChangeState_AbsorbToRecede, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. reate ScrollFadeController with ABSORB state and mock animator
+     */
+    RefPtr<ScrollFadeController> controller = AceType::MakeRefPtr<ScrollFadeController>();
+    controller->state_ = OverScrollState::ABSORB;
+    auto mockAnimator = AceType::MakeRefPtr<Animator>();
+    controller->controller_ = mockAnimator;
+    
+    /**
+     * @tc.steps: step2. Trigger state change
+     * @tc.expected:
+     * 1. Animation should be played
+     * 2. Duration should be set
+     */
+    controller->ChangeState();
+    EXPECT_TRUE(mockAnimator->IsRunning());
+    EXPECT_EQ(mockAnimator->GetDuration(), RECEDE_TIME);
 }
 
 /**

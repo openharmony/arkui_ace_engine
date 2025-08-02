@@ -440,4 +440,22 @@ void DragDropInitiatingStateBase::OnActionEnd(const GestureEvent& info)
     CHECK_NULL_VOID(machine);
     machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
+
+void DragDropInitiatingStateBase::OnActionCancel(const GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action cancel.");
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropManager->IsAboutToPreview()) {
+        dragDropManager->ResetDragging();
+    }
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragDropManager->SetIsDisableDefaultDropAnimation(true);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+}
 } // namespace OHOS::Ace::NG

@@ -227,4 +227,122 @@ HWTEST_F(TimePickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
     EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
 }
 
+/**
+ * @tc.name: GetAnimationColor001
+ * @tc.desc: Test TimePickerColumnPattern GetAnimationColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerResourceTest, GetAnimationColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create timePicker and initialize related properties.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showCircleDial_ = true;
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+ 
+    /**
+     * @tc.steps: step2. Get timePickerColumn frameNode and pattern, set params.
+     */
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    minuteColumnPattern->isUserSetSelectColor_ = false;
+    minuteColumnPattern->selectedMarkPaint_ = true;
+
+    /**
+     * @tc.steps: step3. GetAnimationColor.
+     * @tc.expected: Color is focusColor.
+     */
+    Color color;
+    minuteColumnPattern->GetAnimationColor(1, 2, color, true);
+    EXPECT_EQ(color, theme->GetOptionStyle(true, true).GetTextColor());
+}
+
+/**
+ * @tc.name: GetAnimationColor002
+ * @tc.desc: Test TimePickerColumnPattern GetAnimationColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerResourceTest, GetAnimationColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create timePicker and initialize related properties.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showCircleDial_ = true;
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+ 
+    /**
+     * @tc.steps: step2. Get timePickerColumn frameNode and pattern, set params.
+     */
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    minuteColumnPattern->isUserSetSelectColor_ = false;
+    minuteColumnPattern->selectedMarkPaint_ = false;
+
+    /**
+     * @tc.steps: step3. GetAnimationColor.
+     * @tc.expected: Color is focusColor.
+     */
+    Color color;
+    minuteColumnPattern->GetAnimationColor(1, 2, color, true);
+    EXPECT_EQ(color, theme->GetOptionStyle(false, false).GetTextColor());
+}
+
+/**
+ * @tc.name: GetAnimationColor003
+ * @tc.desc: Test TimePickerColumnPattern GetAnimationColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerResourceTest, GetAnimationColor003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create timePicker and initialize related properties.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    theme->showCircleDial_ = true;
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+ 
+    /**
+     * @tc.steps: step2. Get timePickerColumn frameNode and pattern, set params.
+     */
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    minuteColumnPattern->isUserSetSelectColor_ = true;
+
+    /**
+     * @tc.steps: step3. GetAnimationColor.
+     * @tc.expected: Color is focusColor.
+     */
+    Color color;
+    minuteColumnPattern->GetAnimationColor(1, 2, color, true);
+    EXPECT_EQ(color, theme->GetOptionStyle(true, false).GetTextColor());
+}
 } // namespace OHOS::Ace::NG

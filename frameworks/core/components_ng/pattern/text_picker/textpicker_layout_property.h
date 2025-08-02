@@ -155,6 +155,10 @@ public:
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
+        disappearTextStyle->Put("minFontSize", GetDisappearMinFontSize().value_or(Dimension()).ToString().c_str());
+        disappearTextStyle->Put("maxFontSize", GetDisappearMaxFontSize().value_or(Dimension()).ToString().c_str());
+        disappearTextStyle->Put("overflow",
+            V2::ConvertWrapTextOverflowToString(GetDisappearTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
         auto normalFont = JsonUtil::Create(true);
@@ -163,6 +167,10 @@ public:
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
+        normalTextStyle->Put("minFontSize", GetMinFontSize().value_or(Dimension()).ToString().c_str());
+        normalTextStyle->Put("maxFontSize", GetMaxFontSize().value_or(Dimension()).ToString().c_str());
+        normalTextStyle->Put("overflow",
+            V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("textStyle", normalTextStyle, filter);
 
         auto selectedFont = JsonUtil::Create(true);
@@ -172,6 +180,10 @@ public:
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
+        selectedTextStyle->Put("minFontSize", GetSelectedMinFontSize().value_or(Dimension()).ToString().c_str());
+        selectedTextStyle->Put("maxFontSize", GetSelectedMaxFontSize().value_or(Dimension()).ToString().c_str());
+        selectedTextStyle->Put("overflow",
+            V2::ConvertWrapTextOverflowToString(GetSelectedTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
         auto canLoop = GetCanLoopValue();
         json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);

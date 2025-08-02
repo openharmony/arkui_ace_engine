@@ -367,6 +367,10 @@ public:
     void ChangeIndex(int32_t index, bool useAnimation);
     void ChangeIndex(int32_t index, SwiperAnimationMode mode);
 
+    void ChangeIndexMultiThread(int32_t index, bool useAnimation);
+    void ChangeIndexMultiThread(int32_t index, SwiperAnimationMode mode);
+    void SetCachedCountMultiThread(int32_t cachedCount);
+
     void OnVisibleChange(bool isVisible) override;
 
     int32_t GetStartIndex() const
@@ -489,13 +493,7 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
-    void SetCachedCount(int32_t cachedCount)
-    {
-        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
-            SetLazyLoadFeature(true);
-        }
-        cachedCount_ = cachedCount;
-    }
+    void SetCachedCount(int32_t cachedCount);
 
     void SetFinishCallbackType(FinishCallbackType finishCallbackType)
     {
@@ -534,7 +532,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void SwipeToWithoutAnimation(int32_t index);
+    void SwipeToWithoutAnimation(int32_t index, bool byUser = false);
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
@@ -950,6 +948,12 @@ private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);
@@ -1321,7 +1325,7 @@ private:
     int32_t GetNodeId() const;
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     void ReportComponentChangeEvent(
-        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0f) const;
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);

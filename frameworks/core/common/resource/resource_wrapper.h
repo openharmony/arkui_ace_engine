@@ -398,6 +398,11 @@ public:
         resourceAdapter_->UpdateColorMode(colorMode);
     }
 
+    const RefPtr<ResourceAdapter>& GetResourceAdapter() const
+    {
+        return resourceAdapter_;
+    }
+
 private:
     RefPtr<ThemeConstants> themeConstants_;
     RefPtr<ResourceAdapter> resourceAdapter_;

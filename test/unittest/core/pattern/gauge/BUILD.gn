@@ -15,11 +15,14 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("gauge_test_ng") {
   type = "new"
+  module_name = "Component-ShowInfo"
+  module_output = ""
   sources = [
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "gauge_builder_test_ng.cpp",
     "gauge_modifier_test_ng.cpp",
     "gauge_pattern_test_ng.cpp",
+    "gauge_pattern_test_two_ng.cpp",
     "gauge_test_ng.cpp",
   ]
 }

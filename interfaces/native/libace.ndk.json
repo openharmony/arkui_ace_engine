@@ -3518,5 +3518,553 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_SetForceDarkConfig"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AddRenderNode"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_RemoveRenderNode"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_Invalidate"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateNode"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeNode"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AddChild"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_InsertChildAfter"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_RemoveChild"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_ClearChildren"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetChild"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetFirstChild"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetNextSibling"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetPreviousSibling"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetChildren"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetChildrenCount"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBackgroundColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetBackgroundColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetClipToFrame"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetClipToFrame"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetClipToBounds"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetClipToBounds"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetOpacity"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetOpacity"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetSize"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetSize"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetPosition"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetPosition"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetPivot"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetPivot"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetScale"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetScale"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetTranslation"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetTranslation"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRotation"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetRotation"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetTransform"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetShadowColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetShadowColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetShadowOffset"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetShadowOffset"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetShadowAlpha"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetShadowAlpha"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetShadowElevation"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetShadowElevation"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetShadowRadius"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetShadowRadius"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBorderStyle"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetBorderStyle"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBorderWidth"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetBorderWidth"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBorderColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetBorderColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBorderRadius"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetBorderRadius"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetMask"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetClip"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetBounds"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetBounds"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetDrawRegion"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachContentModifier"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateContentModifier"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeContentModifier"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachFloatProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachVector2Property"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachColorProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateFloatProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeFloatProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateVector2Property"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeVector2Property"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateColorProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetColorPropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetColorPropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeColorProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRectShapeOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetNodeBorderStyleOptionEdgeStyle"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateNodeBorderWidthOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateNodeBorderColorOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeNodeBorderColorOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetNodeBorderColorOptionEdgeColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterX"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterY"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionRadius"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionCornerXY"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateCommandPathOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetCommandPathOptionCommands"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRectShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRoundRectShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromCircleShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromOvalShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromCommandPath"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionFillColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionStrokeColor"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionStrokeWidth"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromRectShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromRoundRectShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromCircleShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromOvalShape"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromCommandPath"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption"
     }
 ]

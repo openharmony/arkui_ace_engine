@@ -962,6 +962,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetBackButtonIcon002, TestSize.Level1)
     navigationModel.Create();
     navigationModel.SetNavigationStack();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -1304,7 +1305,7 @@ HWTEST_F(NavigationPatternTestSevenNg, ParseTitleHeight001, TestSize.Level1)
     std::string heighValue;
     std::string key = "navigation.title.customtitle";
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
-    navigationModel.ParseTitleHeight(resObj);
+    navigationModel.ParseTitleHeight(titleBarNode, resObj);
     std::string heighString = titleBarPattern->GetResCacheMapByKey(key);
     EXPECT_EQ(heighString, "0.00px");
     ResourceParseUtils::ParseResString(resObj, key);
@@ -1344,7 +1345,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetTitleHeight002, TestSize.Level1)
 
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
     CalcDimension height;
-    auto heightValue = navigationModel.ParseTitleHeight(resObj);
+    auto heightValue = navigationModel.ParseTitleHeight(titleBarNode, resObj);
     EXPECT_EQ(height, heightValue);
     titleBarPattern->OnColorModeChange(1);
 }

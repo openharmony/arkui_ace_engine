@@ -171,6 +171,16 @@ void MockPipelineContext::TearDown()
     predictTasks_.clear();
 }
 
+std::string PipelineContext::GetBundleName()
+{
+    return "";
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    return "";
+}
+
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
@@ -223,6 +233,9 @@ PipelineContext::PipelineContext()
 {
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (forceSplitMgr_) {
+        forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
 }
 
@@ -480,7 +493,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -700,7 +713,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
 {
-    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) 
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks())
     {
         taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
@@ -1046,7 +1059,7 @@ void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
-bool PipelineContext::IsContainerModalVisible()
+bool PipelineContext::IsContainerModalVisible() const
 {
     return false;
 }
@@ -1116,6 +1129,8 @@ void PipelineContext::FlushDirtyPropertyNodes()
 }
 
 void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const {}
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
+    int64_t delayMillis) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1171,7 +1186,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 bool PipelineBase::ReachResponseDeadline() const
 {
@@ -1287,6 +1302,25 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
 void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
 
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    return rootWidth;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    return 0;
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
+}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
@@ -1321,6 +1355,10 @@ void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId ev
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
+{
 }
 
 void PipelineBase::SetFontScale(float fontScale)

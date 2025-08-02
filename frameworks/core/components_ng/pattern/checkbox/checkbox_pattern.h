@@ -155,6 +155,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void StartCustomNodeAnimation(bool select);
     RefPtr<GroupManager> GetGroupManager();
 
@@ -181,7 +182,11 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
@@ -206,6 +211,7 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
+    void UpdateGroupStatus(FrameNode* frameNode);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
@@ -230,6 +236,7 @@ private:
     void SetNeedAnimation(bool needAnimation);
     void InitDefaultMargin();
     void ResetDefaultMargin();
+    void UpdateNavIdAndState(const RefPtr<FrameNode>& host);
 
     CheckboxSettingData checkboxSettingData_;
 

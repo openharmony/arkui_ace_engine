@@ -19,7 +19,9 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/gestures/gesture_info.h"
+#include "gesture_recognizer_peer_impl.h"
 
 #include "arkoala_api_generated.h"
 
@@ -27,23 +29,43 @@ using OHOS::Ace::AceType;
 using OHOS::Ace::PanDirection;
 using OHOS::Ace::PanGestureOption;
 
-struct PanRecognizerPeer {
-    using PanGestureOptionRefPtr = OHOS::Ace::RefPtr<PanGestureOption>;
-
-    void SetOptions(int32_t fingers, double distance, PanDirection direction)
+struct PanRecognizerPeer : public MultiFingerRecognizerPeer {
+    void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::PanRecognizer>& recognizer)
     {
-        options_ = AceType::MakeRefPtr<PanGestureOption>();
-        options_->SetDirection(direction);
-        options_->SetDistance(distance);
-        options_->SetFingers(fingers);
+        MultiFingerRecognizerPeer::Update(recognizer);
+        SetPanGestureOptions(recognizer->GetFingers(), recognizer->GetDistance(), recognizer->GetDirection());
+        direction_ = recognizer->GetDirection();
+        distance = recognizer->GetDistance();
+    }
+    OHOS::Ace::RefPtr<OHOS::Ace::PanGestureOption> GetPanGestureOptions()
+    {
+        return panGestureOption_;
+    }
+    PanDirection GetDirection()
+    {
+        return direction_;
+    }
+    double GetPanDistance()
+    {
+        return distance;
     }
 
-    PanGestureOptionRefPtr GetOptions()
-    {
-        return options_;
-    }
+protected:
+    PanRecognizerPeer() = default;
+    ~PanRecognizerPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 
 private:
-    PanGestureOptionRefPtr options_;
+    void SetPanGestureOptions(int32_t fingers, double distances, PanDirection direction)
+    {
+        panGestureOption_ = OHOS::Ace::AceType::MakeRefPtr<PanGestureOption>();
+        panGestureOption_->SetFingers(fingers);
+        panGestureOption_->SetDistance(distances);
+        panGestureOption_->SetDirection(direction);
+    }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::PanGestureOption> panGestureOption_;
+    PanDirection direction_;
+    double distance;
 };
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PAN_RECOGNIZER_PEER_H

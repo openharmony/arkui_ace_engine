@@ -201,9 +201,11 @@ public:
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
+    void HandleExtDragUpdate();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
+    void HandleExtScroll();
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
     void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
@@ -411,6 +413,10 @@ public:
     {
         overScrollCallback_ = std::move(func);
     }
+    void SetHandleExtScrollCallback(std::function<void(void)>&& func)
+    {
+        handleExtScrollCallback_ = std::move(func);
+    }
     void StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
@@ -591,10 +597,19 @@ public:
         snapDirection_ = SnapDirection::NONE;
     }
 
+    /**
+     * @brief Checks if the scroll event is caused by a mouse wheel.
+     */
+    static inline bool IsMouseWheelScroll(const GestureEvent& info)
+    {
+        return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
     void SetOnActionUpdate();
+    void SetOnActionExtUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
     void SetPanEndCallback();
@@ -625,14 +640,6 @@ private:
     void UpdateCrownVelocity(const TimeStamp& timeStamp, double mainDelta, bool end);
     void StartVibrateFeedback();
 #endif
-
-    /**
-     * @brief Checks if the scroll event is caused by a mouse wheel.
-     *
-     * @param info The GestureEvent containing the scroll event information.
-     * @return true if the scroll event is caused by a mouse wheel, false otherwise.
-     */
-    static inline bool IsMouseWheelScroll(const GestureEvent& info);
 
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEndCallback_;
@@ -695,6 +702,8 @@ private:
     std::function<void(const std::optional<float>&)> onScrollEndRec_;
     // ScrollablePattern::RemainVelocityToChild
     RemainVelocityCallback remainVelocityCallback_;
+    // ScrollablePattern::HandleExtScroll
+    std::function<void(void)> handleExtScrollCallback_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;

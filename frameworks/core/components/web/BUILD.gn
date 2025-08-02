@@ -52,6 +52,7 @@ build_component("web") {
       "opengles:libGLES",
       "webview:libnweb",
       "webview:cj_webview_ffi",
+      "webview:ohos_base_glue_source",
       "window_manager:libwm",
     ]
   }

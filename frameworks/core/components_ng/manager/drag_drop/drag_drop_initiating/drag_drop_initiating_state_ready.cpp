@@ -116,6 +116,11 @@ void DragDropInitiatingStateReady::HandlePanOnActionEnd(const GestureEvent& info
     OnActionEnd(info);
 }
 
+void DragDropInitiatingStateReady::HandlePanOnActionCancel(const GestureEvent& info)
+{
+    OnActionCancel(info);
+}
+
 void DragDropInitiatingStateReady::HandlePanOnReject()
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger pan onReject");

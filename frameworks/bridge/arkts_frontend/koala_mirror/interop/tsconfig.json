@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "lib": ["ESNext", "ESNext.WeakRef"],
+        "moduleResolution": "node",
+        "composite": true,
+        "incremental": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "declaration": true,
+        "noEmitOnError": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "removeComments": false,
+        "outDir": "build/lib",
+        "module": "CommonJS", // TODO maybe migrate to ESM?
+        "rootDirs": ["src"],
+        "baseUrl": ".",
+        "types": ["node"],
+        "paths": {
+            "@koalaui/common": ["../incremental/common/src"],
+            "#common/wrappers/*": ["./src/napi/wrappers/*", "./src/wasm/wrappers/*"]
+        }
+    },
+    "include": ["src/interop/**/*", "src/napi/**/*", "src/wasm/**/*", "src/arkts/ResourceManager.ts"],
+    "references": [
+        { "path": "../incremental/compat" },
+        { "path": "../incremental/common" }
+    ]
+}

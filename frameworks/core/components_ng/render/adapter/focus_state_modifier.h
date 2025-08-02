@@ -15,9 +15,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_STATE_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_FOCUS_STATE_MODIFIER_H
 
-#ifndef MODIFIER_NG
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
-#endif
 #include "render_service_client/core/modifier/rs_property.h"
 #include "render_service_client/core/ui/rs_node.h"
 
@@ -33,13 +30,6 @@ using RSPropertyBase = Rosen::RSPropertyBase;
 class RS_EXPORT FocusStateModifier : public FocusModifier, public RSOverlayStyleModifier {
 public:
     FocusStateModifier() = default;
-
-#ifndef MODIFIER_NG
-    Rosen::RSModifierType GetModifierType() const override
-    {
-        return Rosen::RSModifierType::OVERLAY_STYLE;
-    }
-#endif
 
     void Draw(RSDrawingContext& context) const override
     {

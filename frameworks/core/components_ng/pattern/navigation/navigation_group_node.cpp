@@ -29,8 +29,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
-#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -190,7 +189,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     if (pattern->IsForceSplitSupported(context)) {
         pattern->BackupPrimaryNodes();
         pattern->RecognizeHomePageIfNeeded();
-        pattern->SwapNavDestinationAndPlaceHolder(false);
+        pattern->SwapNavDestinationAndProxyNode(false);
         pattern->SetPrimaryNodesToBeRemoved(std::move(primaryNodesToBeRemoved_));
     }
 }
@@ -219,7 +218,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetCustomNode(uiNode);
         navDestinationPattern->SetIndex(static_cast<int32_t>(i));
-        if (stack) {
+        if (i == navDestinationNodes.size() - 1 && stack) {
             navDestinationPattern->UpdateSerializedParam(stack->GetSerializedParamSafely(static_cast<int32_t>(i)));
         }
         SetBackButtonEvent(navDestination);
@@ -234,13 +233,13 @@ bool NavigationGroupNode::ReorderNavDestination(
             }
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
-        bool needMovePlaceHolder = false;
-        RefPtr<NavDestinationGroupNode> placeHolderNode = nullptr;
+        bool needMoveProxyNode = false;
+        RefPtr<NavDestinationGroupNode> proxyNode = nullptr;
         if (pattern->IsForceSplitSupported(context) && childIndex < 0 &&
-            navDestination->IsShowInPrimaryPartition() && navDestination->GetOrCreatePlaceHolder()) {
-            placeHolderNode = navDestination->GetOrCreatePlaceHolder();
-            childIndex = navigationContentNode->GetChildIndex(placeHolderNode);
-            needMovePlaceHolder = placeHolderNode != nullptr && childIndex >= 0;
+            navDestination->IsShowInPrimaryPartition() && navDestination->GetOrCreateProxyNode()) {
+            proxyNode = navDestination->GetOrCreateProxyNode();
+            childIndex = navigationContentNode->GetChildIndex(proxyNode);
+            needMoveProxyNode = proxyNode != nullptr && childIndex >= 0;
         }
         if (childIndex < 0) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "mountToParent navdestinationId:%{public}d, slot:%{public}d",
@@ -248,8 +247,8 @@ bool NavigationGroupNode::ReorderNavDestination(
             navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
-            if (needMovePlaceHolder) {
-                placeHolderNode->MovePosition(slot);
+            if (needMoveProxyNode) {
+                proxyNode->MovePosition(slot);
             } else {
                 navDestination->MovePosition(slot);
             }
@@ -330,7 +329,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
                 continue;
             }
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
-            if (navDestination->GetNavDestinationType() == NavDestinationType::PLACE_HOLDER) {
+            if (navDestination->GetNavDestinationType() == NavDestinationType::PROXY) {
                 auto primaryNode = navDestination->GetPrimaryNode();
                 if (primaryNode) {
                     primaryNodesToBeRemoved_.push_back(primaryNode);
@@ -378,17 +377,13 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
-        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
-        if (titleBarPattern) {
-            titleBarPattern->GetTitleBarOptions().ToJsonValue(json, filter);
-        }
     }
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarOrHomeDestNode->GetToolBarNode());
-    if (toolBarNode) {
-        auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
-        if (toolBarPattern) {
-            toolBarPattern->GetToolBarOptions().ToJsonValue(json, filter);
-        }
+    auto navBarPattern = navBarOrHomeDestNode->GetPattern<NavDestinationPatternBase>();
+    if (navBarPattern) {
+        auto menuOptionsJson = JsonUtil::Create(true);
+        auto moreButtonOptions = navBarPattern->GetMenuOptions();
+        moreButtonOptions.ToJsonValue(menuOptionsJson, filter);
+        json->PutExtAttr("menuOptions", menuOptionsJson, filter);
     }
     json->PutExtAttr("menus", navBarOrHomeDestNode->GetBarItemsString(true).c_str(), filter);
     json->PutExtAttr("toolBar", navBarOrHomeDestNode->GetBarItemsString(false).c_str(), filter);
@@ -896,6 +891,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
     int32_t preAnimationId)
 {
+    if (!CheckEnableCustomNodeDel()) {
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
@@ -968,7 +967,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
                 CHECK_NULL_VOID(nodeBase);
                 nodeBase->SystemTransitionPushEnd(true);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -1444,6 +1443,11 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
+        // if curNode is visible, need remove in hideNodes_.
+        hideNodes_.erase(
+            std::remove_if(hideNodes_.begin(), hideNodes_.end(),
+                [navDestination](const auto& pair) { return navDestination == pair.first && !pair.second; }),
+            hideNodes_.end());
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         navDestination->SetJSViewActive(true);
     }
@@ -1662,7 +1666,7 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
     // remove content child
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
-    if (navDestination->GetNavDestinationType() == NavDestinationType::PLACE_HOLDER) {
+    if (navDestination->GetNavDestinationType() == NavDestinationType::PROXY) {
         contentNode_->RemoveChild(navDestination, true);
         auto primaryNode = navDestination->GetPrimaryNode();
         CHECK_NULL_VOID(primaryNode);

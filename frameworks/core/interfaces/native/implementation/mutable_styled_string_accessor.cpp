@@ -20,19 +20,6 @@
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<>
-RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
-{
-    return Convert<RefPtr<SpanBase>>(Ark_StyleOptions {
-        .start = ArkValue<Opt_Number>(src.start),
-        .length = ArkValue<Opt_Number>(src.length),
-        .styledKey = src.styledKey,
-        .styledValue = src.styledValue,
-    });
-}
-} // namespace OHOS::Ace::NG::Converter
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MutableStyledStringAccessor {
 void DestroyPeerImpl(Ark_MutableStyledString peer)
@@ -59,7 +46,8 @@ void ReplaceStringImpl(Ark_VMContext vmContext,
     const auto convStart = Converter::Convert<int32_t>(*start);
     const auto convLength = Converter::Convert<int32_t>(*length);
     if (mutableString->CheckRange(convStart, convLength)) {
-        const auto string = Converter::Convert<std::string>(*other);
+        const auto string = Converter::Convert<std::u16string>(*other);
+        mutableString->ReplaceString(convStart, convLength, string);
     } else {
         // throw exception.
         LOGE("MutableStyledStringAccessor::ReplaceStringImpl CheckBoundary failed: start:%d length:%d",
@@ -77,7 +65,8 @@ void InsertStringImpl(Ark_VMContext vmContext,
     auto strLength = mutableString->GetLength();
     const auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart >= 0 && convStart <= strLength) {
-        const auto string = Converter::Convert<std::string>(*other);
+        const auto string = Converter::Convert<std::u16string>(*other);
+        mutableString->InsertString(convStart, string);
     } else {
         // throw exception.
         LOGE("MutableStyledStringAccessor::InsertStringImpl CheckBoundary failed: start:%d length:%d",

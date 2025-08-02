@@ -1499,17 +1499,16 @@ void JSViewPopups::ParseMenuParam(
         JSRef<JSVal> yVal = anchorPositionObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
         CalcDimension dx;
         CalcDimension dy;
-        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
-            menuParam.anchorPosition.SetX(dx.ConvertToPx());
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx) && JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            menuParam.anchorPosition = { dx.ConvertToPx(), dy.ConvertToPx() };
         }
-        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
-            menuParam.anchorPosition.SetY(dy.ConvertToPx());
-        }
-        menuParam.isAnchorPosition = true;
-        if (LessNotEqual(menuParam.anchorPosition.GetX(), 0.0f) &&
-            LessNotEqual(menuParam.anchorPosition.GetY(), 0.0f)) {
-            menuParam.isAnchorPosition = false;
-            menuParam.placement = Placement::BOTTOM_LEFT;
+
+        if (menuParam.anchorPosition.has_value()) {
+            if (LessNotEqual(menuParam.anchorPosition->GetX(), 0.0f) &&
+                LessNotEqual(menuParam.anchorPosition->GetY(), 0.0f)) {
+                menuParam.placement = Placement::BOTTOM_LEFT;
+                menuParam.anchorPosition.reset();
+            }
         }
     }
 }
@@ -2487,7 +2486,7 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
     }
     sheetStyle.detentSelection = sheetStruct;
 }
- 
+
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args,
     std::vector<NG::SheetHeight>& sheetDetents, NG::SheetStyle& sheetStyle)
 {
@@ -3043,6 +3042,9 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
 void JSViewPopups::ParseMenuOutlineWidthObject(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam,
     NG::BorderWidthProperty& outlineWidth)
 {
+    if (!outlineWidthValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineWidthValue);
     CalcDimension left;
     RefPtr<ResourceObject> leftResObj;
@@ -3167,6 +3169,9 @@ void JSViewPopups::ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, 
 void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
     NG::BorderColorProperty& outlineColor)
 {
+    if (!outlineColorValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineColorValue);
     Color left;
     RefPtr<ResourceObject> leftColorResObj;

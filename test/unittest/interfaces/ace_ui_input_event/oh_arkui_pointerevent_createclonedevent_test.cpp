@@ -15,6 +15,7 @@
 
 #include "../ui_input_event_test.h"
 #include "event/ui_input_event_impl.h"
+#include "node/node_model.h"
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -126,6 +127,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent101, TestSize.
  */
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent102, TestSize.Level0)
 {
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     // Test all unsupported event types
     std::vector<std::pair<ArkUI_UIInputEvent_Type, ArkUIEventTypeId>> unsupportedEventTypes = {
         { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID },   // TOUCH_EVENT_ID = 1
@@ -142,5 +144,4 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent102, TestSize.
         OH_ArkUI_PointerEvent_DestroyClonedEvent(clonedEvent);
     }
 }
-
 } // namespace OHOS::Ace

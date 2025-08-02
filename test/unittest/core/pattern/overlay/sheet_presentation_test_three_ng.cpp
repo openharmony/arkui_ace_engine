@@ -681,7 +681,7 @@ HWTEST_F(SheetPresentationTestThreeNg, GetWidthByScreenSizeType005, TestSize.Lev
 
 /**
  * @tc.name: SetCurrentHeight001
- * @tc.desc: Branch: if (height_ != currentHeight).
+ * @tc.desc: Branch: if (height_ != currentHeight || typeChanged_).
  *           Condition: 1.height_ = 500,
  *                      2.currentHeight = 700.
  * @tc.type: FUNC
@@ -749,6 +749,14 @@ HWTEST_F(SheetPresentationTestThreeNg, SetCurrentHeight001, TestSize.Level1)
     sheetPattern->height_ = 500;
     sheetPattern->SetCurrentHeight(700);
     EXPECT_EQ(sheetPattern->height_, 700);
+
+    sheetPattern->typeChanged_ = true;
+    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollProps, nullptr);
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1000)));
+    sheetPattern->SetCurrentHeight(700);
+    EXPECT_EQ(scrollProps->GetCalcLayoutConstraint()->selfIdealSize->Height(),
+        NG::CalcLength(700 - sheetPattern->GetTitleBuilderHeight()));
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -1169,6 +1177,28 @@ HWTEST_F(SheetPresentationTestThreeNg, GetCurrentScrollHeight003, TestSize.Level
     sheetPattern->scrollHeight_ = 100;
     sheetPattern->GetCurrentScrollHeight();
     EXPECT_EQ(sheetPattern->scrollHeight_, -200);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SheetTransitionForOverlay001
+ * @tc.desc: SheetTransitionForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SheetTransitionForOverlay001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+        auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
+    sheetPattern->SheetTransitionForOverlay(true, false);
+    EXPECT_NE(sheetPattern->preType_, SheetType::SHEET_BOTTOM_OFFSET);
+    EXPECT_EQ(sheetPattern->animation_, nullptr);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -1970,6 +2000,50 @@ HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager001, TestSize
     sheetStyle.sheetType = SheetType::SHEET_CENTER;
     sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
     EXPECT_EQ(sheetPattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTypeFromSheetManager003
+ * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
+ *           Condition: sheetStyle.instanceId is 100001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager003, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheeLayoutProperty, nullptr);
+    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
+    /**
+     * @tc.steps: step2. sheetThemeType_ = "auto".
+     */
+    pattern->sheetThemeType_ = "auto";
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1600, 800 });
+    /**
+     * @tc.steps: step2. Set preferType is Bottom.
+     * @tc.expected: the sheetType is Bottom.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    sheetStyle.instanceId = 100001;
+    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
+    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_CENTER);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 

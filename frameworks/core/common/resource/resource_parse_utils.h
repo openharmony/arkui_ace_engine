@@ -50,6 +50,8 @@ public:
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);
     static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result);
+    static bool ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
+        const ColorMode& colorMode);
     static bool ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result);
     static bool ParseResInteger(const RefPtr<ResourceObject>& resObj, int32_t& result);
     static bool ParseResInteger(const RefPtr<ResourceObject>& resObj, uint32_t& result);

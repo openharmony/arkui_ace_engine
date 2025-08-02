@@ -825,9 +825,9 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager016, TestSize.Level1)
     int64_t elementId = 0;
     int64_t rootId = 0;
     EXPECT_FALSE(
-        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, Framework::DumpMode::TREE, rootId));
+        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, DumpMode::TREE, rootId));
     EXPECT_FALSE(
-        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, Framework::DumpMode::NODE, rootId));
+        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, DumpMode::NODE, rootId));
 }
 
 /**
@@ -1548,9 +1548,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager029, TestSize.Level1)
     EXPECT_CALL(*stageManager, IsSplitMode()).Times(2).WillRepeatedly(Return(true));
     EXPECT_CALL(*stageManager, GetTopPagesWithTransition()).Times(2)
         .WillRepeatedly(Return(std::vector<RefPtr<FrameNode>>{}));
-    EXPECT_CALL(*stageManager, GetTopPagePaths()).Times(2)
-        .WillRepeatedly(Return(std::vector<std::string>{"path1", "path2"}));
-    
     jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
     ASSERT_EQ(pageNodes.size(), 0);
     ASSERT_EQ(pagePaths.size(), 0);
@@ -1568,8 +1565,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager029, TestSize.Level1)
      * @tc.steps: step4. test GetCurrentWindowPages with IsSplitMode false
      */
     EXPECT_CALL(*stageManager, IsSplitMode()).WillOnce(Return(false));
-    EXPECT_CALL(*stageManager, GetLastPageWithTransition()).Times(2)
-        .WillRepeatedly(Return(frameNode3));
+    EXPECT_CALL(*stageManager, GetLastPageWithTransition()).WillOnce(Return(frameNode3));
     jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
     ASSERT_EQ(pageNodes.size(), 3);
     context->stageManager_ = stageManagerBackup;
@@ -1675,8 +1671,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
         frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click_DidClick");
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
 
 /**
@@ -1723,8 +1717,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
         frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click");
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
 
 /**
@@ -2628,7 +2620,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager041, TestSize.Level1)
     params = { "-inspector", "-accessibility", "-simplify", "--set-whitelist", "1"};
     auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
     EXPECT_EQ(ret, true);
-    Framework::DumpInfoArgument argument;
+    DumpInfoArgument argument;
     auto isSetList = jsAccessibilityManager->GetDumpInfoArgument(params, argument);
     EXPECT_EQ(isSetList, true);
     jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
@@ -2650,7 +2642,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
     params = { "-inspector", "-accessibility", "-simplify", "--get-whitelist", "1"};
     auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
     EXPECT_EQ(ret, true);
-    Framework::DumpInfoArgument argument;
+    DumpInfoArgument argument;
     auto isGetList = jsAccessibilityManager->GetDumpInfoArgument(params, argument);
     EXPECT_EQ(isGetList, true);
     jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
@@ -3188,6 +3180,7 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId002, TestSize.Level1)
 {
+    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
@@ -3229,7 +3222,7 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateChildrenNodeInCache001, TestSize.Leve
     /**
      * @tc.steps: step1. create PipelineContext
      */
-
+    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
@@ -3289,6 +3282,7 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateChildrenNodeInCache001, TestSize.Leve
  */
 HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoByAccessibilityIdNG001, TestSize.Level1)
 {
+    MockPipelineContext::SetUp();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 

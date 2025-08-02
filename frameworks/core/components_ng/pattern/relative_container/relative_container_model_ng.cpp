@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 
@@ -120,6 +121,23 @@ void RelativeContainerModelNG::ResetResObj(FrameNode* frameNode, const std::stri
     auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
+}
+
+void RelativeContainerModelNG::SetPositionResObj(
+    const RefPtr<ResourceObject>& ResObj, GuidelineInfo& guidelineInfoItem, const std::string key)
+{
+    if (SystemProperties::ConfigChangePerform() && ResObj) {
+        auto&& updateFunc = [key](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            if (key == "relativeContainer.guideLine.position.start") {
+                guidelineInfo.start = result;
+            } else if (key == "relativeContainer.guideLine.position.end") {
+                guidelineInfo.end = result;
+            }
+        };
+        guidelineInfoItem.AddResource(key, ResObj, std::move(updateFunc));
+    }
 }
 
 std::vector<BarrierInfo> RelativeContainerModelNG::GetBarrier(FrameNode* frameNode)

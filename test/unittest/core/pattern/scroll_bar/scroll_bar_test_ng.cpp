@@ -936,7 +936,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll001, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(true);
     scrollBarModel.SetEnableNestedScroll(false);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -968,7 +968,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll002, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(true);
     scrollBarModel.SetEnableNestedScroll(true);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -1000,7 +1000,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll003, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(false);
     scrollBarModel.SetEnableNestedScroll(true);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -1032,7 +1032,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll004, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(false);
     scrollBarModel.SetEnableNestedScroll(false);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -1064,7 +1064,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll005, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(true);
     scrollBarModel.SetEnableNestedScroll(frameNode, false);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -1096,7 +1096,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll006, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(true);
     scrollBarModel.SetEnableNestedScroll(frameNode, true);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -1128,7 +1128,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll007, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(false);
     scrollBarModel.SetEnableNestedScroll(frameNode, true);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -1160,7 +1160,7 @@ HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll008, TestSize.Level1)
     GetScrollBar();
     pattern_->SetEnableNestedSorll(false);
     scrollBarModel.SetEnableNestedScroll(frameNode, false);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**

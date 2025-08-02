@@ -234,7 +234,6 @@ std::vector<TextDecoration> TLVUtil::ReadTextDecorations(std::vector<uint8_t>& b
 {
     std::vector<TextDecoration> textDecorations;
     int32_t size = ReadInt32(buff, cursor);
-    std::cout << "ReadTextDecorations size:" << size << std::endl;
     if (size < 0) {
         return textDecorations;
     }

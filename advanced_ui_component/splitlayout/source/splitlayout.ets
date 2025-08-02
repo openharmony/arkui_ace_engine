@@ -26,11 +26,11 @@ export struct SplitLayout {
   @BuilderParam container: () => void;
   @State sizeValue: string = '';
   @State areaWidth: number = 0;
-  @State imageBackgroundColor: string = "#19000000";
+  @State imageBackgroundColor: string = '#19000000';
   @State mainImage?: Resource = undefined;
-  @Prop primaryText: string = "";
-  secondaryText?: string = "";
-  tertiaryText?: string = "";
+  @Prop primaryText: string = '';
+  secondaryText?: string = '';
+  tertiaryText?: string = '';
 
   build() {
     Column() {

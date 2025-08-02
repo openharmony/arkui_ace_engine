@@ -73,6 +73,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
     }
     delta = -FireOnWillScroll(-delta);
+    delta = -FireObserverOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
@@ -362,7 +363,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     if (layoutInfo_->measureInNextFrame_) {
-        GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, false);
+        context->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
             ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
             auto waterFlow = weak.Upgrade();
             if (waterFlow) {
@@ -902,8 +905,8 @@ void WaterFlowPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
 }
 
 void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -916,7 +919,7 @@ void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 void WaterFlowPattern::DumpInfoAddSections()

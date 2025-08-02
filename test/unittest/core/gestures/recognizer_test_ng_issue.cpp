@@ -341,4 +341,98 @@ HWTEST_F(RecognizerTestNgIssue, TargetDisplayId001, TestSize.Level1)
     longPressRecognizer->OnAccepted();
     EXPECT_EQ(eventInfo.GetTargetDisplayId(), 2);
 }
+
+/**
+ * @tc.name: ClickRecognizerIssue001
+ * @tc.desc: Test ClickRecognizer callback info
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, ClickRecognizerIssue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer and set onAction.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer =
+        AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    GestureEvent eventInfo;
+    auto onActionStart = [&eventInfo](GestureEvent& info) { 
+        eventInfo = info; };
+    clickRecognizer->SetOnAction(onActionStart);
+
+    /**
+     * @tc.steps: step2. DispatchTouchEvent and compare callback info.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent downEvent;
+    downEvent.SetId(0)
+        .SetType(TouchType::DOWN)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetDeviceId(2);
+    clickRecognizer->HandleEvent(downEvent);
+    TouchEvent downFingerOneEvent;
+    downFingerOneEvent.SetId(1)
+        .SetType(TouchType::DOWN)
+        .SetX(120.0f)
+        .SetY(120.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetDeviceId(2);
+    clickRecognizer->touchPoints_[1] = downFingerOneEvent;
+    TouchEvent upEvent;
+    auto upTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(upTime);
+    upEvent.SetId(0)
+        .SetType(TouchType::UP)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetScreenX(200.0f)
+        .SetScreenY(200.0f)
+        .SetGlobalDisplayX(300)
+        .SetGlobalDisplayY(300)
+        .SetSourceType(SourceType::TOUCH)
+        .SetSourceTool(SourceTool::FINGER)
+        .SetTime(TimeStamp(nanoseconds))
+        .SetForce(100.0f)
+        .SetTiltX(10.0f)
+        .SetTiltY(10.0f)
+        .SetTargetDisplayId(2);
+    clickRecognizer->HandleEvent(upEvent);
+    TouchEvent upFingerOneEvent;
+    auto upFingerOneTime = GetSysTimestamp();
+    std::chrono::nanoseconds fingerOneNanoseconds(upFingerOneTime);
+    upFingerOneEvent.SetId(1)
+        .SetType(TouchType::UP)
+        .SetX(120.0f)
+        .SetY(120.0f)
+        .SetScreenX(220.0f)
+        .SetScreenY(220.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetSourceTool(SourceTool::FINGER)
+        .SetTime(TimeStamp(fingerOneNanoseconds))
+        .SetForce(100.0f)
+        .SetTiltX(10.0f)
+        .SetTiltY(10.0f)
+        .SetTargetDisplayId(2);
+    clickRecognizer->touchPoints_[1] = upFingerOneEvent;
+    clickRecognizer->OnAccepted();
+    EXPECT_EQ(eventInfo.GetTimeStamp().time_since_epoch().count(), upTime);
+    EXPECT_EQ(eventInfo.GetFingerList().size(), 2);
+    EXPECT_EQ(eventInfo.GetSourceDevice(), SourceType::TOUCH);
+    EXPECT_EQ(eventInfo.GetDeviceId(), 2);
+    EXPECT_EQ(eventInfo.GetScreenLocation().GetX(), 200.0f);
+    EXPECT_EQ(eventInfo.GetScreenLocation().GetY(), 200.0f);
+    EXPECT_EQ(eventInfo.GetGlobalLocation().GetX(), 100.0f);
+    EXPECT_EQ(eventInfo.GetGlobalLocation().GetY(), 100.0f);
+    EXPECT_EQ(eventInfo.GetLocalLocation().GetX(), 100.0f);
+    EXPECT_EQ(eventInfo.GetLocalLocation().GetY(), 100.0f);
+    EXPECT_EQ(eventInfo.GetGlobalDisplayLocation().GetX(), 300);
+    EXPECT_EQ(eventInfo.GetGlobalDisplayLocation().GetY(), 300);
+    EXPECT_EQ(eventInfo.GetForce(), 100.0f);
+    EXPECT_EQ(eventInfo.GetTiltX(), 10.0f);
+    EXPECT_EQ(eventInfo.GetTiltY(), 10.0f);
+    EXPECT_EQ(eventInfo.GetTargetDisplayId(), 2);
+    EXPECT_EQ(eventInfo.GetSourceTool(), SourceTool::FINGER);
+    EXPECT_EQ(eventInfo.GetInputEventType(), InputEventType::TOUCH_SCREEN);
+}
 } // namespace OHOS::Ace::NG

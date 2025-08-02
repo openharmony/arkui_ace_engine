@@ -318,9 +318,12 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
         auto pipelineContext = node->GetContextRefPtr();
         if (pipelineContext) {
             auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
+            auto globalWindowOffset = pipelineContext->GetGlobalDisplayWindowRect().GetOffset() + centerToWindow;
             info.SetScreenLocation(windowOffset);
+            info.SetGlobalDisplayLocation(globalWindowOffset);
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
+        info.SetPatternName(node->GetTag().c_str());
         auto eventHub = node->GetOrCreateEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();

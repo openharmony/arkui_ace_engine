@@ -85,35 +85,5 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     skMatrix = skMatrix.preRotate(degree, rx, ry);
     ConvertToTransformParam(param, skMatrix);
 }
-
-Matrix4 SetMatrixPolyToPoly(
-    const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint)
-{
-    auto matrix3d = OHOS::Rosen::Drawing::Matrix();
-    /**
-     * When converting from matrix4 to matrix3
-     * [a b c]    [a b 0 c]
-     * [d e f] -> [d e 0 f]
-     * [g h i]    [0 0 1 0]
-     *            [g h 0 i]
-    */
-    matrix3d.SetMatrix(matrix.Get(0, 0), matrix.Get(1, 0), matrix.Get(3, 0), matrix.Get(0, 1), matrix.Get(1, 1),
-        matrix.Get(3, 1), matrix.Get(0, 3), matrix.Get(1, 3), matrix.Get(3, 3));
-    size_t arrayLength = totalPoint.size() / 2;
-    OHOS::Rosen::Drawing::PointF src[arrayLength];
-    OHOS::Rosen::Drawing::PointF dst[arrayLength];
-    for (size_t i = 0; i < arrayLength; i++) {
-        auto point = totalPoint[i];
-        src[i] = OHOS::Rosen::Drawing::Point(point.GetX(), point.GetY());
-    }
-    for (size_t i = 0; i < arrayLength; i++) {
-        auto point = totalPoint[i + arrayLength];
-        dst[i] = OHOS::Rosen::Drawing::Point(point.GetX(), point.GetY());
-    }
-    matrix3d.SetPolyToPoly(src, dst, arrayLength);
-    Matrix4 retMatrix4(matrix3d.Get(0), matrix3d.Get(1), 0, matrix3d.Get(2), matrix3d.Get(3), matrix3d.Get(4), 0,
-        matrix3d.Get(5), 0, 0, 1, 0, matrix3d.Get(6), matrix3d.Get(7), 0, matrix3d.Get(8));
-    return retMatrix4;
-}
 } // namespace OHOS::Ace::NG
 

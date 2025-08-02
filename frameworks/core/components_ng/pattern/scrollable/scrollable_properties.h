@@ -490,6 +490,8 @@ using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
+using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
+    ScrollFrameResult&, ScrollState, ScrollSource)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
@@ -500,6 +502,7 @@ struct ScrollerObserver {
     OnDidScrollEvent onDidScrollEvent;
     OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
     OnWillScrollEventEx onWillScrollEventEx;
+    TwoDimensionOnWillScrollEvent twoDimensionOnWillScrollEvent;
 };
 } // namespace OHOS::Ace
 

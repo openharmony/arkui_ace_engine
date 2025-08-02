@@ -1227,7 +1227,7 @@ void ViewAbstractModelImpl::SetOnDragEnd(OnNewDragFunc&& onDragEnd)
     box->SetOnDragEndId(onDragEnd);
 }
 
-void ViewAbstractModelImpl::SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) {}
+void ViewAbstractModelImpl::SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) {}
 
 void ViewAbstractModelImpl::SetOnDragSpringLoadingConfiguration(
     const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)

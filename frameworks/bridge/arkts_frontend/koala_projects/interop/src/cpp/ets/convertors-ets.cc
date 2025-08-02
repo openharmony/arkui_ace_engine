@@ -34,7 +34,7 @@ static bool registerNatives(ets_env *env, const ets_class clazz, const std::vect
         EtsNativeMethod method;
         method.name = name.c_str();
         method.func = func;
-        method.signature = (static_cast<uint32_t>(flag) & ETS_SLOW_NATIVE_FLAG) == 0 ? FAST_NATIVE_PREFIX : nullptr;
+        method.signature = (flag & ETS_SLOW_NATIVE_FLAG) == 0 ? FAST_NATIVE_PREFIX : nullptr;
         if (registerByOne) {
             result &= env->RegisterNatives(clazz, &method, 1) >= 0;
             if (env->ErrorCheck()) {
@@ -133,9 +133,9 @@ void EtsExports::setClasspath(const char* module, const char *classpath) {
 static std::map<std::string, std::string> g_defaultClasspaths = {
     {"InteropNativeModule", "@koalaui/interop/InteropNativeModule/InteropNativeModule"},
     // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
-    {"TestNativeModule", "arkui/generated/arkts/TestNativeModule/TestNativeModule"},
-    {"ArkUINativeModule", "arkui/generated/arkts/ArkUINativeModule/ArkUINativeModule"},
-    {"ArkUIGeneratedNativeModule", "arkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule"},
+    {"TestNativeModule", "arkui/component/arkts/TestNativeModule/TestNativeModule"},
+    {"ArkUINativeModule", "arkui/component/arkts/ArkUINativeModule/ArkUINativeModule"},
+    {"ArkUIGeneratedNativeModule", "arkui/component/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule"},
 };
 const std::string& EtsExports::getClasspath(const std::string& module) {
     auto it = classpaths.find(module);

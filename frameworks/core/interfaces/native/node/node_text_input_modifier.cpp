@@ -1246,7 +1246,7 @@ void SetTextInputBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint3
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
+        pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
     } else {
         pattern->UnRegisterResource("backgroundColor");
     }
@@ -1860,6 +1860,13 @@ ArkUI_Float32 GetTextInputLineHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
+}
+
+ArkUI_Bool GetTextInputHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Bool>(TextFieldModelNG::GetHalfLeading(frameNode));
 }
 
 ArkUI_Int32 GetTextInputMaxLines(ArkUINodeHandle node)
@@ -2674,6 +2681,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputAdaptMinFontSize = GetTextInputAdaptMinFontSize,
         .getTextInputAdaptMaxFontSize = GetTextInputAdaptMaxFontSize,
         .getTextInputLineHeight = GetTextInputLineHeight,
+        .getTextInputHalfLeading = GetTextInputHalfLeading,
         .getTextInputMaxLines = GetTextInputMaxLines,
         .getTextInputFontFeature = GetTextInputFontFeature,
         .setTextInputCustomKeyboard = SetTextInputCustomKeyboard,

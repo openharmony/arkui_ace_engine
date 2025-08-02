@@ -663,11 +663,11 @@ void JsDragSpringLoadingContext::UpdateConfiguration(const JSCallbackInfo& args)
     int32_t updateNotifyCount = jsObj->GetPropertyValue<int32_t>("updateNotifyCount", NG::DEFAULT_UPDATE_NOTIFY_COUNT);
     int32_t updateToFinishInterval =
         jsObj->GetPropertyValue<int32_t>("updateToFinishInterval", NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL);
-    config->stillTimeLimit = (stillTimeLimit >= 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
-    config->updateInterval = (updateInterval >= 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
-    config->updateNotifyCount = (updateNotifyCount >= 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
+    config->stillTimeLimit = (stillTimeLimit > 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
+    config->updateInterval = (updateInterval > 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
+    config->updateNotifyCount = (updateNotifyCount > 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
     config->updateToFinishInterval =
-        (updateToFinishInterval >= 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
+        (updateToFinishInterval > 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
     context_->SetDragSpringLoadingConfiguration(std::move(config));
 }
 
@@ -807,4 +807,24 @@ JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)
     return itemDragInfoObj;
 }
 
+// use for ArkTs1.2 interop begin
+int64_t JsDragEvent::GetDragEventPointer()
+{
+    CHECK_NULL_RETURN(dragEvent_, 0);
+    return reinterpret_cast<int64_t>(AceType::RawPtr(dragEvent_));
+}
+
+JSRef<JSObject> JsDragEvent::CreateDragEvent(void* dragEventPtr)
+{
+    JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
+    CHECK_NULL_RETURN(dragEventPtr, dragObj);
+    auto dragInfoPtr = reinterpret_cast<DragEvent*>(dragEventPtr);
+    auto dragEvent = AceType::Claim(dragInfoPtr);
+    CHECK_NULL_RETURN(dragEvent, dragObj);
+    auto jsDragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    CHECK_NULL_RETURN(jsDragEvent, dragObj);
+    jsDragEvent->SetDragEvent(dragEvent);
+    return dragObj;
+}
+//use for ArkTs1.2 end
 } // namespace OHOS::Ace::Framework

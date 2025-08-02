@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/text/text_emoji_processor.h"
 #include <cstdint>
 
@@ -290,10 +291,29 @@ float TextBase::GetConstraintMaxLength(
 {
     auto layoutCalPolicy = GetLayoutCalPolicy(layoutWrapper, isHorizontal);
     if (layoutCalPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        return isHorizontal ? constraint.parentIdealSize.Width().value_or(0.0f)
-                            : constraint.parentIdealSize.Height().value_or(0.0f);
+        return isHorizontal ? constraint.parentIdealSize.Width().value_or(constraint.maxSize.Width())
+                            : constraint.parentIdealSize.Height().value_or(constraint.maxSize.Height());
     }
     return isHorizontal ? constraint.maxSize.Width() : constraint.maxSize.Height();
+}
+
+std::optional<float> TextBase::GetCalcLayoutConstraintLength(LayoutWrapper* layoutWrapper, bool isMax, bool isWidth)
+{
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    const auto& layoutCalcConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(layoutCalcConstraint, std::nullopt);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, std::nullopt);
+    auto calcLayoutConstraintMaxMinSize = isMax ? layoutCalcConstraint->maxSize : layoutCalcConstraint->minSize;
+    CHECK_NULL_RETURN(calcLayoutConstraintMaxMinSize, std::nullopt);
+    auto optionalCalcLength =
+        isWidth ? calcLayoutConstraintMaxMinSize->Width() : calcLayoutConstraintMaxMinSize->Height();
+    auto percentLength =
+        isWidth ? layoutConstraint->percentReference.Width() : layoutConstraint->percentReference.Height();
+    CHECK_NULL_RETURN(optionalCalcLength, std::nullopt);
+    return ConvertToPx(optionalCalcLength, ScaleProperty::CreateScaleProperty(), percentLength);
 }
 
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)

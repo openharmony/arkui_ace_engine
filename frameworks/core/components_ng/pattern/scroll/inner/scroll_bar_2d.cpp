@@ -194,14 +194,13 @@ struct LayoutData {
     Axis axis;
     OffsetF offset;
     float contentLength = 0.0f;
-    bool canOverScroll = true;
 };
 void SyncScrollBarLayout(ScrollBar& bar, const LayoutData& data)
 {
     const float scrollableArea = data.contentLength - data.viewSize.MainSize(data.axis);
     bar.SetScrollable(Positive(scrollableArea));
     bar.ScheduleDisappearDelayTask();
-    bar.SetOutBoundary(data.canOverScroll ? GetOverScroll(data.offset.GetMainOffset(data.axis), scrollableArea) : 0.0f);
+    bar.SetOutBoundary(GetOverScroll(data.offset.GetMainOffset(data.axis), scrollableArea));
 
     bar.UpdateScrollBarRegion({}, { data.viewSize.Width(), data.viewSize.Height() },
         { -data.offset.GetX(), -data.offset.GetY() }, data.contentLength, 0);
@@ -212,9 +211,8 @@ void SyncScrollBarLayout(ScrollBar& bar, const LayoutData& data)
 void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
 {
     CHECK_NULL_VOID(vertical_ && horizontal_);
-    const bool canOverScroll = pattern_.GetEdgeEffect() == EdgeEffect::SPRING;
-    SyncScrollBarLayout(*vertical_, { viewSize, Axis::VERTICAL, offset, content.Height(), canOverScroll });
-    SyncScrollBarLayout(*horizontal_, { viewSize, Axis::HORIZONTAL, offset, content.Width(), canOverScroll });
+    SyncScrollBarLayout(*vertical_, { viewSize, Axis::VERTICAL, offset, content.Height() });
+    SyncScrollBarLayout(*horizontal_, { viewSize, Axis::HORIZONTAL, offset, content.Width() });
 }
 
 void ScrollBar2D::ResetAnimationSignals()

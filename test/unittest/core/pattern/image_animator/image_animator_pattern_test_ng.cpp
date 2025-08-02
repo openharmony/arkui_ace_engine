@@ -19,8 +19,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -374,15 +374,11 @@ HWTEST_F(ImageAnimatorPatternTestNg, OnePicFinish001, TestSize.Level1)
     controlledAnimator->AddInterpolator(frames);
     // Add Finish Listener
     int32_t numFlag1 = 0;
-    std::function<void()> func1 = [&numFlag1]() {
-        numFlag1 = 1;
-    };
+    std::function<void()> func1 = [&numFlag1]() { numFlag1 = 1; };
     controlledAnimator->stopEvent_ = func1;
     // Add Running Listener
     int32_t numFlag2 = 0;
-    std::function<void(int32_t)> func2 = [&numFlag2](int32_t num) {
-        numFlag2 = 1;
-    };
+    std::function<void(int32_t)> func2 = [&numFlag2](int32_t num) { numFlag2 = 1; };
     controlledAnimator->AddListener(func2);
 
     controlledAnimator->Finish();
@@ -417,5 +413,87 @@ HWTEST_F(ImageAnimatorPatternTestNg, LayoutPolicyTest001, TestSize.Level1)
     auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_TRUE(imageAnimatorPattern_->IsEnableMatchParent());
     EXPECT_TRUE(imageAnimatorPattern_->IsEnableFix());
+}
+
+/**
+ * @tc.name: RunAnimatorByStatusTest001
+ * @tc.desc: Test RunAnimatorByStatus of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest001, TestSize.Level1)
+{
+    CreateImageAnimator(10);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::RUNNING;
+    pattern_->RunAnimatorByStatus(0);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::IDLE;
+    pattern_->RunAnimatorByStatus(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::PAUSED;
+    pattern_->RunAnimatorByStatus(3);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::STOPPED;
+    pattern_->RunAnimatorByStatus(5);
+    EXPECT_EQ(pattern_->nowImageIndex_, 9);
+}
+
+/**
+ * @tc.name: RunAnimatorByStatusTest002
+ * @tc.desc: Test RunAnimatorByStatus of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest002, TestSize.Level1)
+{
+    CreateImageAnimator(13);
+    EXPECT_FALSE(pattern_->firstUpdateEvent_);
+    pattern_->status_ = ControlledAnimator::ControlStatus::PAUSED;
+    pattern_->RunAnimatorByStatus(3);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+    pattern_->status_ = ControlledAnimator::ControlStatus::RUNNING;
+    pattern_->RunAnimatorByStatus(10);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::IDLE;
+    pattern_->RunAnimatorByStatus(7);
+    EXPECT_EQ(pattern_->nowImageIndex_, 7);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::STOPPED;
+    pattern_->RunAnimatorByStatus(5);
+    EXPECT_EQ(pattern_->nowImageIndex_, 12);
+}
+
+/**
+ * @tc.name: RunAnimatorByStatusTest003
+ * @tc.desc: Test RunAnimatorByStatus of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest003, TestSize.Level1)
+{
+    CreateImageAnimator(13);
+    EXPECT_FALSE(pattern_->firstUpdateEvent_);
+
+    pattern_->showingIndexByStoppedOrPaused_ = true;
+    pattern_->status_ = ControlledAnimator::ControlStatus::RUNNING;
+    pattern_->RunAnimatorByStatus(0);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    pattern_->showingIndexByStoppedOrPaused_ = true;
+    pattern_->status_ = ControlledAnimator::ControlStatus::PAUSED;
+    pattern_->RunAnimatorByStatus(3);
+    EXPECT_EQ(pattern_->nowImageIndex_, 3);
+
+    pattern_->showingIndexByStoppedOrPaused_ = true;
+    pattern_->status_ = ControlledAnimator::ControlStatus::IDLE;
+    pattern_->RunAnimatorByStatus(7);
+    EXPECT_EQ(pattern_->nowImageIndex_, 7);
+
+    pattern_->showingIndexByStoppedOrPaused_ = true;
+    pattern_->status_ = ControlledAnimator::ControlStatus::STOPPED;
+    pattern_->RunAnimatorByStatus(12);
+    EXPECT_EQ(pattern_->nowImageIndex_, 12);
 }
 } // namespace OHOS::Ace::NG

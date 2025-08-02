@@ -41,6 +41,7 @@ export default function Blank4() {
     beforeAll(async (done: Function) => {
       await BlankStart(done)
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0297', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -56,6 +57,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0298', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -69,6 +71,7 @@ export default function Blank4() {
       })
       done();
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0299', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -84,6 +87,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0300', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -99,6 +103,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0301', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -114,6 +119,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0302', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -129,6 +135,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0303', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -144,6 +151,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0304', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -159,6 +167,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0305', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -174,6 +183,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0306', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -189,6 +199,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0307', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -204,6 +215,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0308', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -219,6 +231,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0309', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -234,6 +247,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0310', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -249,6 +263,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0311', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -264,6 +279,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0312', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -279,6 +295,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0313', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -294,6 +311,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.value
     it('ArkUI_Blank_Comp_0314', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
@@ -313,6 +331,7 @@ export default function Blank4() {
 
     })
 
+    // blendMode.type
     it('ArkUI_Blank_Comp_0315', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'blendMode.type', '通用属性2')
@@ -325,6 +344,7 @@ export default function Blank4() {
       done();
 
     })
+    // blendMode.type
     it('ArkUI_Blank_Comp_0316', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'blendMode.type', '通用属性2')
@@ -337,6 +357,7 @@ export default function Blank4() {
       done();
 
     })
+    // useShadowBatching
     it('ArkUI_Blank_Comp_0317', 0, async (done: Function) => {
       await searchParentBlock('useShadowBatching', false, '基础属性', '通用属性2')
       await radioClick({
@@ -354,6 +375,7 @@ export default function Blank4() {
       done();
 
     })
+    // useShadowBatching
     it('ArkUI_Blank_Comp_0318', 0, async (done: Function) => {
       await searchParentBlock('useShadowBatching', true, '基础属性', '通用属性2')
       await radioClick({
@@ -466,6 +488,7 @@ export default function Blank4() {
 
       done();
     })
+    // pixelStretchEffect.options.right
     it('ArkUI_Blank_Comp_0322', 0, async (done: Function) => {
       await searchParentBlock('pixelStretchEffect.options.right', false, '基础属性', '通用属性2')
       await sliderDrag({
@@ -498,6 +521,7 @@ export default function Blank4() {
 
       done();
     })
+    // pixelStretchEffect.options.top
     it('ArkUI_Blank_Comp_0323', 0, async (done: Function) => {
       await searchParentBlock('pixelStretchEffect.options.top', false, '基础属性', '通用属性2')
       await sliderDrag({
@@ -530,6 +554,7 @@ export default function Blank4() {
 
       done();
     })
+    // pixelStretchEffect.options.bottom
     it('ArkUI_Blank_Comp_0324', 0, async (done: Function) => {
       await searchParentBlock('pixelStretchEffect.options.bottom', false, '基础属性', '通用属性2')
       await sliderDrag({
@@ -1151,737 +1176,6 @@ export default function Blank4() {
 
       done();
 
-    })
-
-    // BindPopup
-    // show.button
-    it('ArkUI_Blank_Comp_0353', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'show.button', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done();
-
-    })
-
-    it('ArkUI_Blank_Comp_0354', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'show.button', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done();
-
-    })
-
-    // bindPopup.arrowOffset
-    it('ArkUI_Blank_Comp_0355', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.arrowOffset', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done();
-    })
-
-    // bindPopup.showInSubWindow
-    it('ArkUI_Blank_Comp_0356', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.showInSubWindow', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0357', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.showInSubWindow', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.maskType
-    it('ArkUI_Blank_Comp_0358', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.maskType
-    it('ArkUI_Blank_Comp_0359', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.mask.color
-    it('ArkUI_Blank_Comp_0360', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0361', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0362', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0363', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0364', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0365', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
-
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.mask.boolean
-    it('ArkUI_Blank_Comp_0366', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.mask.boolean', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0367', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.mask.boolean', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.messageOptions.textColor
-    it('ArkUI_Blank_Comp_0368', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0369', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0370', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0371', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0372', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0373', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.messageOptions.font.size
-    it('ArkUI_Blank_Comp_0374', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.size', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.messageOptions.font.weight
-    it('ArkUI_Blank_Comp_0375', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0376', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0377', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0378', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0379', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0380', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.messageOptions.font.style
-    it('ArkUI_Blank_Comp_0381', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.style', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0382', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.style', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.targetSpace
-    it('ArkUI_Blank_Comp_0383', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.targetSpace', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.placement
-    it('ArkUI_Blank_Comp_0384', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0385', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0386', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0387', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0388', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0389', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 5,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0390', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 6,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0391', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 7,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0392', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 8,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Blank_Comp_0393', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 9,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.offsetX
-    it('ArkUI_Blank_Comp_0394', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.offsetX', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.offsetY
-    it('ArkUI_Blank_Comp_0395', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.offsetY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
     })
 
   })

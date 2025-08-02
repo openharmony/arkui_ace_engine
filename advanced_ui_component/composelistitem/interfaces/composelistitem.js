@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -32,121 +32,120 @@ export var IconType;
     IconType[IconType['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
     IconType[IconType['VERTICAL'] = 8] = 'VERTICAL';
 })(IconType || (IconType = {}));
-var FontSizeScaleLevel;
-(function (FontSizeScaleLevel) {
-    FontSizeScaleLevel[FontSizeScaleLevel['LEVEL1'] = 1.75] = 'LEVEL1';
-    FontSizeScaleLevel[FontSizeScaleLevel['LEVEL2'] = 2] = 'LEVEL2';
-    FontSizeScaleLevel[FontSizeScaleLevel['LEVEL3'] = 3.2] = 'LEVEL3';
-})(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
-var ItemHeight;
-(function (ItemHeight) {
-    ItemHeight[ItemHeight['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
-    ItemHeight[ItemHeight['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
-    ItemHeight[ItemHeight['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
-    ItemHeight[ItemHeight['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
-    ItemHeight[ItemHeight['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
-})(ItemHeight || (ItemHeight = {}));
-const TEXT_MAX_LINE = 1;
-const ITEM_BORDER_SHOWN = 2;
-const TEXT_COLUMN_SPACE = 4;
-const TEXT_SAFE_MARGIN = 8;
-const LISTITEM_PADDING = 6;
-const SWITCH_PADDING = 4;
-const STACK_PADDING = 4;
-const BADGE_SIZE = 8;
-const SMALL_ICON_SIZE = 16;
-const SYSTEM_ICON_SIZE = 24;
-const TEXT_ARROW_HEIGHT = 32;
-const SAFE_LIST_PADDING = 32;
-const HEADSCULPTURE_SIZE = 40;
-const BUTTON_SIZE = 28;
-const APP_ICON_SIZE = 64;
-const PREVIEW_SIZE = 96;
-const LONGITUDINAL_SIZE = 96;
-const VERTICAL_SIZE = 96;
-const NORMAL_ITEM_ROW_SPACE = 16;
-const SPECIAL_ITEM_ROW_SPACE = 0;
-const SPECIAL_ICON_SIZE = 0;
-const DEFAULT_ROW_SPACE = 0;
-const SPECICAL_ROW_SPACE = 4;
-const OPERATEITEM_ICONLIKE_SIZE = 24;
-const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
-const OPERATEITEM_ARROW_WIDTH = 12;
-const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
-const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
-const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
-const RIGHT_PART_WIDTH = '34%';
-const RIGHT_ONLY_ARROW_WIDTH = '24vp';
-const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
-const RIGHT_ONLY_ICON_WIDTH = '40vp';
-const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
-const RIGHT_ONLY_RADIO_WIDTH = '30vp';
-const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
-const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
-const ACCESSIBILITY_LEVEL_AUTO = 'auto';
-const ACCESSIBILITY_LEVEL_YES = 'yes';
-const ACCESSIBILITY_LEVEL_NO = 'no';
-const RESOURCE_TYPE_SYMBOL = 40000;
-const ICON_SIZE_MAP = new Map([
-    [IconType.BADGE, BADGE_SIZE],
-    [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
-    [IconType.SYSTEM_ICON, SYSTEM_ICON_SIZE],
-    [IconType.HEAD_SCULPTURE, HEADSCULPTURE_SIZE],
-    [IconType.APP_ICON, APP_ICON_SIZE],
-    [IconType.PREVIEW, PREVIEW_SIZE],
-    [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
-    [IconType.VERTICAL, VERTICAL_SIZE]
+var m;
+(function (j4) {
+    j4[j4['LEVEL1'] = 1.75] = 'LEVEL1';
+    j4[j4['LEVEL2'] = 2] = 'LEVEL2';
+    j4[j4['LEVEL3'] = 3.2] = 'LEVEL3';
+})(m || (m = {}));
+var o;
+(function (i4) {
+    i4[i4['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
+    i4[i4['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
+    i4[i4['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
+    i4[i4['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
+    i4[i4['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
+})(o || (o = {}));
+const t = 1;
+const u = 2;
+const a1 = 4;
+const b1 = 8;
+const c1 = 6;
+const d1 = 4;
+const e1 = 4;
+const f1 = 8;
+const g1 = 16;
+const h1 = 24;
+const i1 = 32;
+const j1 = 32;
+const l1 = 40;
+const m1 = 28;
+const n1 = 64;
+const o1 = 96;
+const q1 = 96;
+const s1 = 96;
+const t1 = 16;
+const u1 = 0;
+const v1 = 0;
+const w1 = 0;
+const z1 = 4;
+const a2 = 24;
+const b2 = 2;
+const c2 = 12;
+const d2 = 40;
+const e2 = 48;
+const f2 = '0vp';
+const g2 = 'calc(66% - 16vp)';
+const h2 = '34%';
+const i2 = '24vp';
+const j2 = '54vp';
+const l2 = '40vp';
+const m2 = '80vp';
+const n2 = '30vp';
+const o2 = '30vp';
+const q2 = '44vp';
+const s2 = 'auto';
+const t2 = 'yes';
+const u2 = 'no';
+const v2 = 40000;
+const w2 = new Map([
+    [IconType.BADGE, f1],
+    [IconType.NORMAL_ICON, g1],
+    [IconType.SYSTEM_ICON, h1],
+    [IconType.HEAD_SCULPTURE, l1],
+    [IconType.APP_ICON, n1],
+    [IconType.PREVIEW, o1],
+    [IconType.LONGITUDINAL, q1],
+    [IconType.VERTICAL, s1]
 ]);
-// Does it support events such as focus, hover, press, etc. for the sub components of list
-const IS_SUPPORT_SUBCOMPONENT_EVENT = LengthMetrics.resource({
+const z2 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_focus_dynamic_effect'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 }).value !== 1;
-const RECOVER_ITEM_SCALE = 1;
-const CLEAR_SHADOW = -1;
-const OPERATE_ITEM_RADIUS = 50;
-const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = {
+const a3 = 1;
+const b3 = -1;
+const c3 = 50;
+const d3 = {
     'id': -1,
     'type': 10001,
     params: ['sys.color.ohos_id_color_switch_outline_off'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 };
-const TEXT_SUPPORT_MARQUEE = 1;
-const IS_MARQUEE_OR_ELLIPSIS = LengthMetrics.resource({
+const e3 = 1;
+const f3 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_right_textOverflow'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 }).value;
-const UNUSUAL = -1;
-const FOCUSED_BG_COLOR = {
+const g3 = -1;
+const h3 = {
     'id': -1,
     'type': 10001,
     params: ['sys.color.composeListItem_container_focus_color'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 };
-const NORMAL_BG_COLOR = {
+const i3 = {
     'id': -1,
     'type': 10001,
     params: ['sys.color.composeListItem_container_normal_color'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 };
-const FOCUSED_ITEM_SCALE = LengthMetrics.resource({
+const j3 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_focus_magnification'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 }).value;
-const FOCUSED_SHADOW = LengthMetrics.resource({
+const l3 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_focus_shadow_attribute'],
@@ -154,7 +153,7 @@ const FOCUSED_SHADOW = LengthMetrics.resource({
     'moduleName': '__harDefaultModuleName__'
 })
     .value;
-const NORMAL_SHADOW = LengthMetrics.resource({
+const m3 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_normal_shadow_attribute'],
@@ -162,21 +161,21 @@ const NORMAL_SHADOW = LengthMetrics.resource({
     'moduleName': '__harDefaultModuleName__'
 })
     .value;
-const ITEM_PADDING = {
+const n3 = {
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_padding'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 };
-const OPERATEITEM_ARROW_MARGIN_WIDTH = LengthMetrics.resource({
+const o3 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_arrow_margin'],
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 }).value;
-const APPICON_ITEMLENGTH = LengthMetrics.resource({
+const q3 = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
     params: ['sys.float.composeListItem_AppIcon_ItemLength'],
@@ -185,15 +184,15 @@ const APPICON_ITEMLENGTH = LengthMetrics.resource({
 }).value;
 
 class Util {
-    static isSymbolResource(resourceStr) {
-        if (!Util.isResourceType(resourceStr)) {
+    static l4(h4) {
+        if (!Util.m4(h4)) {
             return false;
         }
-        let resource = resourceStr;
-        return resource.type === RESOURCE_TYPE_SYMBOL;
+        let resource = h4;
+        return resource.type === v2;
     }
 
-    static isResourceType(resource) {
+    static m4(resource) {
         if (!resource) {
             return false;
         }
@@ -204,7 +203,7 @@ class Util {
     }
 }
 
-class ContentItemStruct extends ViewPU {
+class r3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === 'function') {
@@ -216,7 +215,7 @@ class ContentItemStruct extends ViewPU {
         this.__primaryText = new SynchedPropertyObjectOneWayPU(params.primaryText, this, 'primaryText');
         this.__secondaryText = new SynchedPropertyObjectOneWayPU(params.secondaryText, this, 'secondaryText');
         this.__description = new SynchedPropertyObjectOneWayPU(params.description, this, 'description');
-        this.__itemRowSpace = new ObservedPropertySimplePU(NORMAL_ITEM_ROW_SPACE, this, 'itemRowSpace');
+        this.__itemRowSpace = new ObservedPropertySimplePU(t1, this, 'itemRowSpace');
         this.__leftWidth = new SynchedPropertySimpleOneWayPU(params.leftWidth, this, 'leftWidth');
         this.__primaryTextColor = new ObservedPropertyObjectPU({
             'id': -1,
@@ -324,7 +323,7 @@ class ContentItemStruct extends ViewPU {
             this.itemRowSpace = params.itemRowSpace;
         }
         if (params.leftWidth === undefined) {
-            this.__leftWidth.set(LEFT_PART_WIDTH);
+            this.__leftWidth.set(g2);
         }
         if (params.primaryTextColor !== undefined) {
             this.primaryTextColor = params.primaryTextColor;
@@ -661,11 +660,11 @@ class ContentItemStruct extends ViewPU {
 
     onPropChange() {
         if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
-            this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
+            this.itemRowSpace = u1;
         } else {
-            this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
+            this.itemRowSpace = t1;
         }
-        if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus) {
+        if (!z2 && this.isFocus) {
             this.primaryTextColors = {
                 'id': -1,
                 'type': 10001,
@@ -727,19 +726,19 @@ class ContentItemStruct extends ViewPU {
         }
     }
 
-    judgeIsWrap(text, sizeResource, newHeight) {
-        let singleRowHeight = this.getSingleRowTextHeight(text, sizeResource);
-        return newHeight > singleRowHeight;
+    judgeIsWrap(text, e4, f4) {
+        let g4 = this.getSingleRowTextHeight(text, e4);
+        return f4 > g4;
     }
 
-    getSingleRowTextHeight(text, sizeResource) {
-        if (text && sizeResource) {
-            let singleRowHeight = px2vp(measure.measureTextSize({
+    getSingleRowTextHeight(text, c4) {
+        if (text && c4) {
+            let d4 = px2vp(measure.measureTextSize({
                 textContent: text,
-                fontSize: sizeResource,
-                maxLines: TEXT_MAX_LINE
+                fontSize: c4,
+                maxLines: t
             }).height);
-            return singleRowHeight;
+            return d4;
         }
         return 0;
     }
@@ -751,7 +750,7 @@ class ContentItemStruct extends ViewPU {
     createIcon(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
+            if (this.iconStyle != null && w2.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
@@ -761,7 +760,7 @@ class ContentItemStruct extends ViewPU {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([this.getContentItemIconFillColor()]);
                                     SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
-                                    SymbolGlyph.fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`);
+                                    SymbolGlyph.fontSize(`${w2.get(this.iconStyle)}vp`);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.borderRadius({
@@ -780,11 +779,11 @@ class ContentItemStruct extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
-                                    if (Util.isSymbolResource(ObservedObject.GetRawObject(this.icon))) {
+                                    if (Util.l4(ObservedObject.GetRawObject(this.icon))) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.icon);
-                                                SymbolGlyph.fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`);
+                                                SymbolGlyph.fontSize(`${w2.get(this.iconStyle)}vp`);
                                                 SymbolGlyph.fontColor([this.getContentItemIconFillColor()]);
                                                 SymbolGlyph.borderRadius({
                                                     'id': -1,
@@ -807,8 +806,8 @@ class ContentItemStruct extends ViewPU {
                                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                             Image.create(this.icon);
                                                             Image.objectFit(ImageFit.Contain);
-                                                            Image.width(ICON_SIZE_MAP.get(this.iconStyle));
-                                                            Image.height(ICON_SIZE_MAP.get(this.iconStyle));
+                                                            Image.width(w2.get(this.iconStyle));
+                                                            Image.height(w2.get(this.iconStyle));
                                                             Image.borderRadius({
                                                                 'id': -1,
                                                                 'type': 10002,
@@ -828,10 +827,10 @@ class ContentItemStruct extends ViewPU {
                                                             Image.create(this.icon);
                                                             Image.objectFit(ImageFit.Contain);
                                                             Image.constraintSize({
-                                                                minWidth: SPECIAL_ICON_SIZE,
-                                                                maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
-                                                                minHeight: SPECIAL_ICON_SIZE,
-                                                                maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
+                                                                minWidth: v1,
+                                                                maxWidth: w2.get(this.iconStyle),
+                                                                minHeight: v1,
+                                                                maxHeight: w2.get(this.iconStyle)
                                                             });
                                                             Image.borderRadius({
                                                                 'id': -1,
@@ -871,11 +870,11 @@ class ContentItemStruct extends ViewPU {
 
     createText(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create({ space: TEXT_COLUMN_SPACE });
+            Column.create({ space: a1 });
             Column.flexShrink(1);
-            Column.margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
-                top: TEXT_SAFE_MARGIN,
-                bottom: TEXT_SAFE_MARGIN
+            Column.margin(this.fontSizeScale >= m.LEVEL1 ? undefined : {
+                top: b1,
+                bottom: b1
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
@@ -884,14 +883,14 @@ class ContentItemStruct extends ViewPU {
             Text.fontSize(ObservedObject.GetRawObject(this.primaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColors));
             Text.textOverflow({
-                overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
+                overflow: f3 === e3 ? TextOverflow.None :
                 TextOverflow.Ellipsis
             });
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
             Text.onSizeChange((oldValue, newValue) => {
-                if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (!z2) {
                     this.isWrapFirstText = this.judgeIsWrap(ObservedObject.GetRawObject(this.primaryText),
                         ObservedObject.GetRawObject(this.primaryTextSize), newValue.height);
                 }
@@ -907,12 +906,12 @@ class ContentItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
                         Text.textOverflow({
-                            overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
+                            overflow: f3 === e3 ? TextOverflow.None :
                             TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
                         Text.onSizeChange((oldValue, newValue) => {
-                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                            if (!z2) {
                                 this.isWrapSecondText =
                                     this.judgeIsWrap(ObservedObject.GetRawObject(this.secondaryText),
                                         ObservedObject.GetRawObject(this.secondaryThirdTextSize), newValue.height);
@@ -936,12 +935,12 @@ class ContentItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColors));
                         Text.textOverflow({
-                            overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
+                            overflow: f3 === e3 ? TextOverflow.None :
                             TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
                         Text.onSizeChange((oldValue, newValue) => {
-                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                            if (!z2) {
                                 this.isWrapThirdText = this.judgeIsWrap(ObservedObject.GetRawObject(this.description),
                                     ObservedObject.GetRawObject(this.secondaryThirdTextSize), newValue.height);
                             }
@@ -993,7 +992,7 @@ class ContentItemStruct extends ViewPU {
                 LengthMetrics.vp(0) :
                 LengthMetrics.vp(16)
             });
-            Flex.padding({ start: LengthMetrics.vp(LISTITEM_PADDING) });
+            Flex.padding({ start: LengthMetrics.vp(c1) });
             Flex.flexShrink(this.isParentColumnDirection() ? 0 : 1);
         }, Flex);
         this.createIcon.bind(this)();
@@ -1006,10 +1005,10 @@ class ContentItemStruct extends ViewPU {
     }
 }
 
-class CreateIconParam {
+class s3 {
 }
 
-class OperateItemStructController {
+class t3 {
     constructor() {
         this.changeRadioState = () => {
         };
@@ -1020,7 +1019,7 @@ class OperateItemStructController {
     }
 }
 
-class OperateItemStruct extends ViewPU {
+class u3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === 'function') {
@@ -1056,7 +1055,7 @@ class OperateItemStruct extends ViewPU {
         this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(params.parentIsActive, this, 'parentIsActive');
         this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(params.parentFrontColor, this, 'parentFrontColor');
         this.__parentDirection = new SynchedPropertySimpleTwoWayPU(params.parentDirection, this, 'parentDirection');
-        this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, 'rowSpace');
+        this.__rowSpace = new ObservedPropertySimplePU(w1, this, 'rowSpace');
         this.__isFocus = new SynchedPropertySimpleTwoWayPU(params.isFocus, this, 'isFocus');
         this.__secondaryTextSize = new ObservedPropertyObjectPU({
             'id': -1,
@@ -1079,7 +1078,7 @@ class OperateItemStruct extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'iconColor');
-        this.controller = new OperateItemStructController();
+        this.controller = new t3();
         this.changeRadioState = () => {
             this.radioState = !this.radioState;
         };
@@ -1146,7 +1145,7 @@ class OperateItemStruct extends ViewPU {
             this.checkBoxState = params.checkBoxState;
         }
         if (params.rightWidth === undefined) {
-            this.__rightWidth.set(RIGHT_PART_WIDTH);
+            this.__rightWidth.set(h2);
         }
         if (params.secondaryTextColor !== undefined) {
             this.secondaryTextColor = params.secondaryTextColor;
@@ -1502,7 +1501,7 @@ class OperateItemStruct extends ViewPU {
     }
 
     onFocusChange() {
-        if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus) {
+        if (!z2 && this.isFocus) {
             this.secondaryTextColors = {
                 'id': -1,
                 'type': 10001,
@@ -1540,9 +1539,9 @@ class OperateItemStruct extends ViewPU {
         }
         if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
             ((this.icon != null) || (this.icon == null && this.arrow != null))) {
-            this.rowSpace = SPECICAL_ROW_SPACE;
+            this.rowSpace = z1;
         } else {
-            this.rowSpace = DEFAULT_ROW_SPACE;
+            this.rowSpace = w1;
         }
     }
 
@@ -1560,8 +1559,8 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
             Button.padding({ top: 0, bottom: 0 });
-            Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
+            Button.margin({ end: LengthMetrics.vp(c1) });
+            Button.hitTestBehavior(z2 ? HitTestMode.Block : HitTestMode.None);
             Button.fontSize({
                 'id': -1,
                 'type': 10002,
@@ -1577,7 +1576,7 @@ class OperateItemStruct extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Button.constraintSize({
-                minHeight: BUTTON_SIZE
+                minHeight: m1
             });
             Button.backgroundColor({
                 'id': -1,
@@ -1587,14 +1586,14 @@ class OperateItemStruct extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Button.labelStyle({
-                maxLines: TEXT_MAX_LINE
+                maxLines: t
             });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
             Button.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && z2) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!isHover) {
@@ -1605,15 +1604,15 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
-            Button.accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityLevel(this.button?.accessibilityLevel ?? s2);
             Button.accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''));
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.padding({
-                left: TEXT_SAFE_MARGIN,
-                right: TEXT_SAFE_MARGIN
+                left: b1,
+                right: b1
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1628,11 +1627,11 @@ class OperateItemStruct extends ViewPU {
     createIcon(param, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.shadow(CLEAR_SHADOW);
-            Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
+            Button.shadow(b3);
+            Button.hitTestBehavior(z2 ? HitTestMode.Block : HitTestMode.None);
             Button.backgroundColor(Color.Transparent);
-            Button.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
-            Button.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
+            Button.height(d2);
+            Button.width(d2);
             Button.borderRadius({
                 'id': -1,
                 'type': 10002,
@@ -1645,7 +1644,7 @@ class OperateItemStruct extends ViewPU {
             });
             Button.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && z2) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!isHover) {
@@ -1657,8 +1656,7 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(param.icon?.action);
-            Button.accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel,
-                param.icon?.action));
+            Button.accessibilityLevel(j(param.icon?.accessibilityLevel, param.icon?.action));
             Button.accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''));
             Button.flexShrink(0);
@@ -1671,7 +1669,7 @@ class OperateItemStruct extends ViewPU {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([this.iconColor]);
                         SymbolGlyph.attributeModifier.bind(this)(param.icon?.symbolStyle);
-                        SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
+                        SymbolGlyph.fontSize(`${a2}vp`);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                         SymbolGlyph.focusable(true);
@@ -1682,11 +1680,11 @@ class OperateItemStruct extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (Util.isSymbolResource(param.icon?.value)) {
+                        if (Util.l4(param.icon?.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(param.icon?.value);
-                                    SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
+                                    SymbolGlyph.fontSize(`${a2}vp`);
                                     SymbolGlyph.fontColor([this.iconColor]);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
@@ -1696,8 +1694,8 @@ class OperateItemStruct extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create(param.icon?.value);
-                                    Image.height(OPERATEITEM_ICONLIKE_SIZE);
-                                    Image.width(OPERATEITEM_ICONLIKE_SIZE);
+                                    Image.height(a2);
+                                    Image.width(a2);
                                     Image.focusable(true);
                                     Image.fillColor(ObservedObject.GetRawObject(this.iconColor));
                                     Image.draggable(false);
@@ -1716,23 +1714,23 @@ class OperateItemStruct extends ViewPU {
     createImage(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (Util.isSymbolResource(ObservedObject.GetRawObject(this.image))) {
+            if (Util.l4(ObservedObject.GetRawObject(this.image))) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create(this.image);
-                        SymbolGlyph.fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`);
+                        SymbolGlyph.fontSize(`${e2}vp`);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+                        SymbolGlyph.margin({ end: LengthMetrics.vp(c1) });
                     }, SymbolGlyph);
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create(this.image);
-                        Image.height(OPERATEITEM_IMAGE_SIZE);
-                        Image.width(OPERATEITEM_IMAGE_SIZE);
+                        Image.height(e2);
+                        Image.width(e2);
                         Image.draggable(false);
-                        Image.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+                        Image.margin({ end: LengthMetrics.vp(c1) });
                     }, Image);
                 });
             }
@@ -1744,22 +1742,22 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
             SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
-            SymbolGlyph.fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`);
+            SymbolGlyph.fontSize(`${e2}vp`);
             SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
             SymbolGlyph.symbolEffect(new SymbolEffect(), false);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+            SymbolGlyph.margin({ end: LengthMetrics.vp(c1) });
         }, SymbolGlyph);
     }
 
     createText(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.text);
-            Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+            Text.margin({ end: LengthMetrics.vp(c1) });
             Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
             Text.textOverflow({
-                overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.MARQUEE :
+                overflow: f3 === e3 ? TextOverflow.MARQUEE :
                 TextOverflow.None
             });
             Text.marqueeOptions({
@@ -1783,13 +1781,13 @@ class OperateItemStruct extends ViewPU {
     createArrow(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.shadow(CLEAR_SHADOW);
-            Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
+            Button.shadow(b3);
+            Button.margin({ end: LengthMetrics.vp(c1) });
+            Button.hitTestBehavior(z2 ?
                 (this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent) : HitTestMode.None);
             Button.backgroundColor(Color.Transparent);
-            Button.height(OPERATEITEM_ICONLIKE_SIZE);
-            Button.width(OPERATEITEM_ARROW_WIDTH);
+            Button.height(a2);
+            Button.width(c2);
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
@@ -1799,7 +1797,7 @@ class OperateItemStruct extends ViewPU {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && z2) {
                     this.parentCanHover = false;
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 } else {
@@ -1811,8 +1809,7 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(this.arrow?.action);
-            Button.accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel,
-                this.arrow?.action));
+            Button.accessibilityLevel(j(this.arrow?.accessibilityLevel, this.arrow?.action));
             Button.accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
@@ -1822,7 +1819,7 @@ class OperateItemStruct extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
+                        SymbolGlyph.fontColor([z2 ? {
                             'id': -1,
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_fourth'],
@@ -1830,7 +1827,7 @@ class OperateItemStruct extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         } : this.iconColor]);
                         SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
-                        SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
+                        SymbolGlyph.fontSize(`${a2}vp`);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                         SymbolGlyph.focusable(true);
@@ -1841,12 +1838,12 @@ class OperateItemStruct extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (Util.isSymbolResource(this.arrow?.value)) {
+                        if (Util.l4(this.arrow?.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(this.arrow?.value);
-                                    SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
-                                    SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
+                                    SymbolGlyph.fontSize(`${a2}vp`);
+                                    SymbolGlyph.fontColor([z2 ? {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_fourth'],
@@ -1861,10 +1858,10 @@ class OperateItemStruct extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create(this.arrow?.value);
-                                    Image.height(OPERATEITEM_ICONLIKE_SIZE);
-                                    Image.width(OPERATEITEM_ARROW_WIDTH);
+                                    Image.height(a2);
+                                    Image.width(c2);
                                     Image.focusable(true);
-                                    Image.fillColor(IS_SUPPORT_SUBCOMPONENT_EVENT ? {
+                                    Image.fillColor(z2 ? {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_fourth'],
@@ -1888,32 +1885,32 @@ class OperateItemStruct extends ViewPU {
     createRadio(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Radio.create({ value: '', group: '' });
-            Radio.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+            Radio.margin({ end: LengthMetrics.vp(c1) });
             Radio.checked(this.radioState);
             Radio.radioStyle({
-                uncheckedBorderColor: DEFUALT_RADIO_CHECKBOX_BORDER_COLOR
+                uncheckedBorderColor: d3
             });
             Radio.backgroundColor(Color.Transparent);
-            Radio.borderRadius(OPERATE_ITEM_RADIUS);
+            Radio.borderRadius(c3);
             Radio.onChange((isCheck) => {
-                if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (!z2) {
                     this.radioState = isCheck;
                 }
                 if (this.radio?.onChange) {
                     this.radio?.onChange(isCheck);
                 }
             });
-            Radio.height(OPERATEITEM_ICONLIKE_SIZE);
-            Radio.width(OPERATEITEM_ICONLIKE_SIZE);
-            Radio.padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE);
+            Radio.height(a2);
+            Radio.width(a2);
+            Radio.padding(b2);
             Radio.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Radio.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
+            Radio.hitTestBehavior(z2 ? HitTestMode.Block : HitTestMode.None);
             Radio.flexShrink(0);
             Radio.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && z2) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!isHover) {
@@ -1924,8 +1921,7 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
-            Radio.accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel,
-                this.radio?.onChange));
+            Radio.accessibilityLevel(i(this.radio?.accessibilityLevel, this.radio?.onChange));
             Radio.accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''));
             Radio.accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''));
         }, Radio);
@@ -1934,30 +1930,30 @@ class OperateItemStruct extends ViewPU {
     createCheckBox(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Checkbox.create();
-            Checkbox.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
-            Checkbox.unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR);
+            Checkbox.borderRadius(z2 ? g3 : c3);
+            Checkbox.unselectedColor(d3);
             Checkbox.backgroundColor(Color.Transparent);
-            Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+            Checkbox.margin({ end: LengthMetrics.vp(c1) });
             Checkbox.select(this.checkBoxState);
             Checkbox.onChange((isCheck) => {
-                if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (!z2) {
                     this.checkBoxState = isCheck;
                 }
                 if (this.checkBox?.onChange) {
                     this.checkBox?.onChange(isCheck);
                 }
             });
-            Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
-            Checkbox.width(OPERATEITEM_ICONLIKE_SIZE);
-            Checkbox.padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE);
+            Checkbox.height(a2);
+            Checkbox.width(a2);
+            Checkbox.padding(b2);
             Checkbox.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Checkbox.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
+            Checkbox.hitTestBehavior(z2 ? HitTestMode.Block : HitTestMode.None);
             Checkbox.flexShrink(0);
             Checkbox.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && z2) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!isHover) {
@@ -1968,8 +1964,7 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
-            Checkbox.accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel,
-                this.checkBox?.onChange));
+            Checkbox.accessibilityLevel(i(this.checkBox?.accessibilityLevel, this.checkBox?.onChange));
             Checkbox.accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''));
             Checkbox.accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''));
         }, Checkbox);
@@ -1979,16 +1974,16 @@ class OperateItemStruct extends ViewPU {
     createSwitch(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.margin({ end: LengthMetrics.vp(SWITCH_PADDING) });
-            Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
-            Row.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
+            Row.margin({ end: LengthMetrics.vp(d1) });
+            Row.height(d2);
+            Row.width(d2);
             Row.justifyContent(FlexAlign.Center);
             Row.onFocus(() => {
                 this.parentCanFocus = false;
             });
             Row.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && z2) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!isHover) {
@@ -2002,7 +1997,7 @@ class OperateItemStruct extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
-            Toggle.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
+            Toggle.borderRadius(z2 ? g3 : c3);
             Toggle.backgroundColor(Color.Transparent);
             Toggle.onChange((isCheck) => {
                 this.switchState = isCheck;
@@ -2013,9 +2008,8 @@ class OperateItemStruct extends ViewPU {
             Toggle.onClick(() => {
                 this.switchState = !this.switchState;
             });
-            Toggle.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
-            Toggle.accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel,
-                this.switch?.onChange));
+            Toggle.hitTestBehavior(z2 ? HitTestMode.Block : HitTestMode.None);
+            Toggle.accessibilityLevel(i(this.switch?.accessibilityLevel, this.switch?.onChange));
             Toggle.accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''));
             Toggle.accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''));
         }, Toggle);
@@ -2026,14 +2020,14 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.shadow(CLEAR_SHADOW);
-            Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
+            Button.shadow(b3);
+            Button.hitTestBehavior(z2 ?
                 (this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent) : HitTestMode.None);
             Button.labelStyle({
-                maxLines: TEXT_MAX_LINE
+                maxLines: t
             });
             Button.backgroundColor(Color.Transparent);
-            Button.constraintSize({ minHeight: TEXT_ARROW_HEIGHT });
+            Button.constraintSize({ minHeight: i1 });
             Button.borderRadius({
                 'id': -1,
                 'type': 10002,
@@ -2056,7 +2050,7 @@ class OperateItemStruct extends ViewPU {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && z2) {
                     this.parentCanHover = false;
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 } else {
@@ -2068,8 +2062,7 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(this.arrow?.action);
-            Button.accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel,
-                this.arrow?.action));
+            Button.accessibilityLevel(j(this.arrow?.accessibilityLevel, this.arrow?.action));
             Button.accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`);
             Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
@@ -2080,8 +2073,8 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
                         Flex.padding({
-                            start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
-                            end: LengthMetrics.vp(LISTITEM_PADDING)
+                            start: LengthMetrics.vp(b1),
+                            end: LengthMetrics.vp(c1)
                         });
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2097,7 +2090,7 @@ class OperateItemStruct extends ViewPU {
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
-                            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
+                            maxWidth: `calc(100% - ${c2}vp)`
                         });
                     }, Text);
                     Text.pop();
@@ -2115,7 +2108,7 @@ class OperateItemStruct extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__'
                                     }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
-                                    SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
+                                    SymbolGlyph.fontSize(`${a2}vp`);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.focusable(false);
@@ -2126,11 +2119,11 @@ class OperateItemStruct extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
-                                    if (Util.isSymbolResource(this.arrow?.value)) {
+                                    if (Util.l4(this.arrow?.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.arrow?.value);
-                                                SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
+                                                SymbolGlyph.fontSize(`${a2}vp`);
                                                 SymbolGlyph.fontColor([{
                                                     'id': -1,
                                                     'type': 10001,
@@ -2146,8 +2139,8 @@ class OperateItemStruct extends ViewPU {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 Image.create(this.arrow?.value);
-                                                Image.height(OPERATEITEM_ICONLIKE_SIZE);
-                                                Image.width(OPERATEITEM_ARROW_WIDTH);
+                                                Image.height(a2);
+                                                Image.width(c2);
                                                 Image.fillColor({
                                                     'id': -1,
                                                     'type': 10001,
@@ -2172,10 +2165,10 @@ class OperateItemStruct extends ViewPU {
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Row.create({ space: SPECICAL_ROW_SPACE });
+                        Row.create({ space: z1 });
                         Row.padding({
-                            start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
-                            end: LengthMetrics.vp(LISTITEM_PADDING)
+                            start: LengthMetrics.vp(b1),
+                            end: LengthMetrics.vp(c1)
                         });
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2183,7 +2176,7 @@ class OperateItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
                         Text.textOverflow({
-                            overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.MARQUEE :
+                            overflow: f3 === e3 ? TextOverflow.MARQUEE :
                             TextOverflow.None
                         });
                         Text.marqueeOptions({
@@ -2201,9 +2194,9 @@ class OperateItemStruct extends ViewPU {
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
-                            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH + OPERATEITEM_ARROW_MARGIN_WIDTH}vp)`
+                            maxWidth: `calc(100% - ${c2 + o3}vp)`
                         });
-                        Text.margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH });
+                        Text.margin({ right: o3 });
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2212,7 +2205,7 @@ class OperateItemStruct extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
+                                    SymbolGlyph.fontColor([z2 ? {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.icon_fourth'],
@@ -2220,7 +2213,7 @@ class OperateItemStruct extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__'
                                     } : this.iconColor]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
-                                    SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
+                                    SymbolGlyph.fontSize(`${a2}vp`);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.focusable(false);
@@ -2231,12 +2224,12 @@ class OperateItemStruct extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
-                                    if (Util.isSymbolResource(this.arrow?.value)) {
+                                    if (Util.l4(this.arrow?.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.arrow?.value);
-                                                SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
-                                                SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
+                                                SymbolGlyph.fontSize(`${a2}vp`);
+                                                SymbolGlyph.fontColor([z2 ? {
                                                     'id': -1,
                                                     'type': 10001,
                                                     params: ['sys.color.icon_fourth'],
@@ -2251,9 +2244,9 @@ class OperateItemStruct extends ViewPU {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 Image.create(this.arrow?.value);
-                                                Image.height(OPERATEITEM_ICONLIKE_SIZE);
-                                                Image.width(OPERATEITEM_ARROW_WIDTH);
-                                                Image.fillColor(IS_SUPPORT_SUBCOMPONENT_EVENT ? {
+                                                Image.height(a2);
+                                                Image.width(c2);
+                                                Image.fillColor(z2 ? {
                                                     'id': -1,
                                                     'type': 10001,
                                                     params: ['sys.color.icon_fourth'],
@@ -2281,14 +2274,14 @@ class OperateItemStruct extends ViewPU {
     }
 
     getFlexOptions() {
-        let flexOptions = { alignItems: ItemAlign.Center };
+        let b4 = { alignItems: ItemAlign.Center };
         if (this.parentDirection === FlexDirection.Column) {
-            flexOptions.justifyContent = FlexAlign.SpaceBetween;
+            b4.justifyContent = FlexAlign.SpaceBetween;
         } else {
-            flexOptions.space = { main: LengthMetrics.vp(this.rowSpace) };
-            flexOptions.justifyContent = FlexAlign.End;
+            b4.space = { main: LengthMetrics.vp(this.rowSpace) };
+            b4.justifyContent = FlexAlign.End;
         }
-        return flexOptions;
+        return b4;
     }
 
     initialRender() {
@@ -2316,7 +2309,7 @@ class OperateItemStruct extends ViewPU {
                     this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon',
                         { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
                 });
-            } else if (this.arrow != null && this.text == null) {
+            } else if (this.arrow != null && (this.text == null || this.text == '')) {
                 this.ifElseBranchUpdateFunction(4, () => {
                     this.createArrow.bind(this)();
                 });
@@ -2372,22 +2365,15 @@ class OperateItemStruct extends ViewPU {
     }
 }
 
-/**
- * Obtain accessible text
- *
- * @param resource initial resource
- * @param selected select state
- * @returns string
- */
 function getAccessibilityText(resource) {
     try {
-        let resourceString = '';
+        let a4 = '';
         if (typeof resource === 'string') {
-            resourceString = resource;
+            a4 = resource;
         } else {
-            resourceString = getContext().resourceManager.getStringSync(resource);
+            a4 = getContext().resourceManager.getStringSync(resource);
         }
-        return resourceString;
+        return a4;
     } catch (error) {
         let code = error.code;
         let message = error.message;
@@ -2396,38 +2382,24 @@ function getAccessibilityText(resource) {
     }
 }
 
-/**
- * Obtain accessible level
- *
- * @param resource
- * @param selected select state
- * @returns string
- */
-function getAccessibilityLevelOnChange(accessibilityLevel, onChange) {
+function i(accessibilityLevel, onChange) {
     if (accessibilityLevel) {
         return accessibilityLevel;
     }
     if (onChange) {
-        return ACCESSIBILITY_LEVEL_YES;
+        return t2;
     }
-    return ACCESSIBILITY_LEVEL_NO;
+    return u2;
 }
 
-/**
- * Obtain accessible level
- *
- * @param resource
- * @param selected select state
- * @returns string
- */
-function getAccessibilityLevelOnAction(accessibilityLevel, onAction) {
+function j(accessibilityLevel, onAction) {
     if (accessibilityLevel) {
         return accessibilityLevel;
     }
     if (onAction) {
-        return ACCESSIBILITY_LEVEL_YES;
+        return t2;
     }
-    return ACCESSIBILITY_LEVEL_NO;
+    return u2;
 }
 
 export class ComposeListItem extends ViewPU {
@@ -2438,13 +2410,13 @@ export class ComposeListItem extends ViewPU {
         }
         this.__contentItem = new SynchedPropertyObjectOneWayPU(params.contentItem, this, 'contentItem');
         this.__operateItem = new SynchedPropertyObjectOneWayPU(params.operateItem, this, 'operateItem');
-        this.__frontColor = new ObservedPropertyObjectPU(NORMAL_BG_COLOR, this, 'frontColor');
+        this.__frontColor = new ObservedPropertyObjectPU(i3, this, 'frontColor');
         this.__borderSize = new ObservedPropertySimplePU(0, this, 'borderSize');
         this.__canFocus = new ObservedPropertySimplePU(false, this, 'canFocus');
         this.__canTouch = new ObservedPropertySimplePU(true, this, 'canTouch');
         this.__canHover = new ObservedPropertySimplePU(true, this, 'canHover');
         this.__isHover = new ObservedPropertySimplePU(false, this, 'isHover');
-        this.__itemHeight = new ObservedPropertySimplePU(ItemHeight.FIRST_HEIGHT, this, 'itemHeight');
+        this.__itemHeight = new ObservedPropertySimplePU(o.FIRST_HEIGHT, this, 'itemHeight');
         this.__isActive = new ObservedPropertySimplePU(false, this, 'isActive');
         this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, 'hoveringColor');
         this.__touchDownColor = new ObservedPropertyObjectPU('#1a000000', this, 'touchDownColor');
@@ -2468,7 +2440,7 @@ export class ComposeListItem extends ViewPU {
         this.__isFocus = new ObservedPropertySimplePU(false, this, 'isFocus');
         this.__isWrapText = new ObservedPropertySimplePU(false, this, 'isWrapText');
         this.__listScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'listScale');
-        this.operateItemStructRef = new OperateItemStructController();
+        this.operateItemStructRef = new t3();
         this.envCallback = {
             onConfigurationUpdated: (config) => {
                 if (config === undefined || !this.isFollowingSystemFontScale) {
@@ -2477,9 +2449,9 @@ export class ComposeListItem extends ViewPU {
                 }
                 try {
                     this.fontSizeScale = Math.min(this.maxFontScale, config.fontSizeScale ?? 1);
-                } catch (paramError) {
-                    let code = paramError.code;
-                    let message = paramError.message;
+                } catch (z3) {
+                    let code = z3.code;
+                    let message = z3.message;
                     hilog.error(0x3900, 'Ace', `ComposeListItem environmentCallback error: ${code}, ${message}`);
                 }
             },
@@ -2843,16 +2815,16 @@ export class ComposeListItem extends ViewPU {
                 this.operateItem?.symbolStyle !== undefined ||
                 this.operateItem?.icon !== undefined ||
                 this.operateItem?.subIcon !== undefined) {
-                this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
+                this.itemHeight = e2 + j1;
             }
             return;
         }
         if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
             if (this.contentItem?.icon === undefined) {
-                this.itemHeight = ItemHeight.FIRST_HEIGHT;
+                this.itemHeight = o.FIRST_HEIGHT;
             } else {
                 this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ?
-                ItemHeight.SECOND_HEIGHT :
+                o.SECOND_HEIGHT :
                     (LengthMetrics.resource({
                         'id': -1,
                         'type': 10002,
@@ -2865,15 +2837,15 @@ export class ComposeListItem extends ViewPU {
             let iconStyle = this.contentItem.iconStyle;
             if (this.contentItem.icon === undefined ||
                 (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
-                this.itemHeight = ItemHeight.THIRD_HEIGHT;
+                this.itemHeight = o.THIRD_HEIGHT;
             } else {
-                this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
+                this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? o.FOURTH_HEIGHT : q3;
             }
         } else {
-            this.itemHeight = ItemHeight.FIFTH_HEIGHT;
+            this.itemHeight = o.FIFTH_HEIGHT;
         }
-        if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle) >= this.itemHeight) {
-            this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle) + SAFE_LIST_PADDING;
+        if (w2.get(this.contentItem?.iconStyle) >= this.itemHeight) {
+            this.itemHeight = w2.get(this.contentItem?.iconStyle) + j1;
         }
         if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
             this.accessibilityTextBuilder = `
@@ -2896,12 +2868,12 @@ export class ComposeListItem extends ViewPU {
         this.onPropChange();
         try {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
-        } catch (paramError) {
-            let code = paramError.code;
-            let message = paramError.message;
+        } catch (y3) {
+            let code = y3.code;
+            let message = y3.message;
             hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
         }
-        if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+        if (!z2) {
             this.onFontSizeScaleChange();
         }
     }
@@ -2918,31 +2890,31 @@ export class ComposeListItem extends ViewPU {
 
     calculatedRightWidth() {
         if (this.operateItem?.text || this.operateItem?.button) {
-            return RIGHT_PART_WIDTH;
+            return h2;
         }
         if (this.operateItem?.switch) {
-            return RIGHT_ONLY_SWITCH_WIDTH;
+            return q2;
         } else if (this.operateItem?.checkbox) {
-            return RIGHT_ONLY_CHECKBOX_WIDTH;
+            return o2;
         } else if (this.operateItem?.radio) {
-            return RIGHT_ONLY_RADIO_WIDTH;
+            return n2;
         } else if (this.operateItem?.icon) {
             if (this.operateItem?.subIcon) {
-                return RIGHT_ICON_SUB_ICON_WIDTH;
+                return m2;
             }
-            return RIGHT_ONLY_ICON_WIDTH;
+            return l2;
         } else if (this.operateItem?.symbolStyle) {
-            return RIGHT_ONLY_IMAGE_WIDTH;
+            return j2;
         } else if (this.operateItem?.image) {
-            return RIGHT_ONLY_IMAGE_WIDTH;
+            return j2;
         } else if (this.operateItem?.arrow) {
-            return RIGHT_ONLY_ARROW_WIDTH;
+            return i2;
         }
-        return RIGHT_CONTENT_NULL_RIGHTWIDTH;
+        return f2;
     }
 
     decideContentItemDirection() {
-        if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 &&
+        if (this.fontSizeScale >= m.LEVEL1 &&
             this.contentItem?.iconStyle && this.contentItem?.iconStyle > IconType.HEAD_SCULPTURE) {
             return FlexDirection.Column;
         }
@@ -2950,7 +2922,7 @@ export class ComposeListItem extends ViewPU {
     }
 
     decideContainerDirection() {
-        if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1 || !this.contentItem) {
+        if (this.fontSizeScale < m.LEVEL1 || !this.contentItem) {
             return FlexDirection.Row;
         }
         if (this.operateItem?.button) {
@@ -2965,7 +2937,7 @@ export class ComposeListItem extends ViewPU {
             if (!this.operateItem?.text) {
                 return FlexDirection.Row;
             }
-            this.textArrowLeftSafeOffset = TEXT_SAFE_MARGIN;
+            this.textArrowLeftSafeOffset = b1;
             return FlexDirection.Column;
         } else if (this.operateItem?.text) {
             return FlexDirection.Column;
@@ -2977,7 +2949,7 @@ export class ComposeListItem extends ViewPU {
     onFontSizeScaleChange() {
         this.containerDirection = this.decideContainerDirection();
         this.contentItemDirection = this.decideContentItemDirection();
-        if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
+        if (this.fontSizeScale >= m.LEVEL3) {
             this.containerPadding = {
                 top: {
                     'id': -1,
@@ -2994,7 +2966,7 @@ export class ComposeListItem extends ViewPU {
                     'moduleName': '__harDefaultModuleName__'
                 },
             };
-        } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
+        } else if (this.fontSizeScale >= m.LEVEL2) {
             this.containerPadding = {
                 top: {
                     'id': -1,
@@ -3011,7 +2983,7 @@ export class ComposeListItem extends ViewPU {
                     'moduleName': '__harDefaultModuleName__'
                 },
             };
-        } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
+        } else if (this.fontSizeScale >= m.LEVEL1) {
             this.containerPadding = {
                 top: {
                     'id': -1,
@@ -3041,11 +3013,11 @@ export class ComposeListItem extends ViewPU {
         if (this.containerDirection === FlexDirection.Row) {
             return LengthMetrics.vp(0);
         }
-        let iconSize = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
-        if (this.contentItem?.icon && iconSize && iconSize <= HEADSCULPTURE_SIZE) {
-            return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        let iconSize = w2.get(this.contentItem?.iconStyle);
+        if (this.contentItem?.icon && iconSize && iconSize <= l1) {
+            return LengthMetrics.vp(iconSize + t1 + c1 - this.textArrowLeftSafeOffset);
         }
-        return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        return LengthMetrics.vp(c1 - this.textArrowLeftSafeOffset);
     }
 
     getMainSpace() {
@@ -3091,15 +3063,15 @@ export class ComposeListItem extends ViewPU {
     }
 
     getPadding() {
-        if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-            let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
-            let compareSize = paddingNum > LISTITEM_PADDING;
-            let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
+        if (!z2) {
+            let v3 = LengthMetrics.resource(n3).value;
+            let w3 = v3 > c1;
+            let x3 = w3 ? v3 - c1 : 0;
             return {
-                top: this.isWrapText ? paddingNum : 0,
-                bottom: this.isWrapText ? paddingNum : 0,
-                left: horizontalPadding,
-                right: horizontalPadding
+                top: this.isWrapText ? v3 : 0,
+                bottom: this.isWrapText ? v3 : 0,
+                left: x3,
+                right: x3
             };
         } else {
             return undefined;
@@ -3114,22 +3086,22 @@ export class ComposeListItem extends ViewPU {
             Stack.accessibilityText(this.accessibilityTextBuilder);
             Stack.onFocus(() => {
                 this.isFocus = true;
-                this.frontColor = FOCUSED_BG_COLOR;
+                this.frontColor = h3;
                 this.zoomIn();
             });
             Stack.onBlur(() => {
                 this.isFocus = false;
-                this.frontColor = NORMAL_BG_COLOR;
+                this.frontColor = i3;
                 this.zoomOut();
             });
-            Stack.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : {
+            Stack.borderRadius(z2 ? undefined : {
                 'id': -1,
                 'type': 10002,
                 params: ['sys.float.composeListItem_radius'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             });
-            Stack.onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
+            Stack.onClick(z2 ? undefined : () => {
                 if (this.operateItem?.icon && this.operateItem.icon?.action) {
                     this.operateItem.icon.action();
                 }
@@ -3150,14 +3122,14 @@ export class ComposeListItem extends ViewPU {
                 }
             });
             Stack.scale(ObservedObject.GetRawObject(this.listScale));
-            Stack.shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW));
+            Stack.shadow(z2 ? undefined : (this.isFocus ? l3 : m3));
             Stack.margin({
-                left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
-                right: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined
+                left: !z2 ? e1 : undefined,
+                right: !z2 ? e1 : undefined
             });
             Stack.padding({
-                left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
-                right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
+                left: z2 ? e1 : 0,
+                right: z2 ? e1 : 0
             });
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3166,7 +3138,7 @@ export class ComposeListItem extends ViewPU {
             Flex.constraintSize({
                 minHeight: this.itemHeight
             });
-            Flex.focusable(IS_SUPPORT_SUBCOMPONENT_EVENT);
+            Flex.focusable(z2);
             Flex.borderRadius({
                 'id': -1,
                 'type': 10002,
@@ -3182,7 +3154,7 @@ export class ComposeListItem extends ViewPU {
                 this.canFocus = false;
             });
             Flex.onHover((isHover) => {
-                if (this.isFocus && !IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (this.isFocus && !z2) {
                     this.isHover = false;
                     return;
                 }
@@ -3191,8 +3163,8 @@ export class ComposeListItem extends ViewPU {
                     this.frontColor = isHover ? this.hoveringColor :
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
-                if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+                if (!z2) {
+                    this.frontColor = isHover ? h3 : i3;
                     isHover ? this.zoomIn() : this.zoomOut();
                 }
             });
@@ -3205,7 +3177,7 @@ export class ComposeListItem extends ViewPU {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 },
-                width: ITEM_BORDER_SHOWN,
+                width: u,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
@@ -3245,14 +3217,10 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new ContentItemStruct(this, {
+                                let componentCall = new r3(this, {
                                     isWrapText: this.__isWrapText
                                 }, undefined, elmtId, () => {
-                                }, {
-                                    page: 'library/src/main/ets/components/composelistitem.ets',
-                                    line: 1401,
-                                    col: 11
-                                });
+                                }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1401, n4: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -3279,7 +3247,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new ContentItemStruct(this, {
+                                let componentCall = new r3(this, {
                                     icon: this.contentItem?.icon,
                                     symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
@@ -3293,11 +3261,7 @@ export class ComposeListItem extends ViewPU {
                                     itemHeight: this.itemHeight,
                                     isWrapText: this.__isWrapText
                                 }, undefined, elmtId, () => {
-                                }, {
-                                    page: 'library/src/main/ets/components/composelistitem.ets',
-                                    line: 1406,
-                                    col: 11
-                                });
+                                }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1406, n4: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -3358,7 +3322,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new OperateItemStruct(this, {
+                                let componentCall = new u3(this, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,
@@ -3380,11 +3344,7 @@ export class ComposeListItem extends ViewPU {
                                     isFocus: this.__isFocus,
                                     controller: this.operateItemStructRef
                                 }, undefined, elmtId, () => {
-                                }, {
-                                    page: 'library/src/main/ets/components/composelistitem.ets',
-                                    line: 1422,
-                                    col: 11
-                                });
+                                }, { page: 'library/src/main/ets/components/composelistitem.ets', line: 1422, n4: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -3442,15 +3402,15 @@ export class ComposeListItem extends ViewPU {
 
     zoomIn() {
         this.listScale = {
-            x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE,
-            y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE
+            x: z2 ? undefined : j3,
+            y: z2 ? undefined : j3
         };
     }
 
     zoomOut() {
         this.listScale = {
-            x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE,
-            y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE
+            x: z2 ? undefined : a3,
+            y: z2 ? undefined : a3
         };
     }
 

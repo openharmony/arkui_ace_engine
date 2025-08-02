@@ -86,6 +86,17 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
     ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, heightResObj, false);
+    if (heightValue->IsObject(vm)) {
+        auto obj = heightValue->ToObject(vm);
+        auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+        if (layoutPolicy->IsString(vm)) {
+            auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+            ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    } else {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    }
     if (LessNotEqual(height.Value(), 0.0)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -104,6 +115,7 @@ ArkUINativeModuleValue CounterBridge::ResetCounterHeight(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -119,6 +131,17 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
     CalcDimension width;
     RefPtr<ResourceObject> widthResObj;
     ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, widthResObj, false);
+    if (widthValue->IsObject(vm)) {
+        auto obj = widthValue->ToObject(vm);
+        auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+        if (layoutPolicy->IsString(vm)) {
+            auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+            ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    } else {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    }
     if (LessNotEqual(width.Value(), 0.0)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -137,6 +160,7 @@ ArkUINativeModuleValue CounterBridge::ResetCounterWidth(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     return panda::JSValueRef::Undefined(vm);
 }
 

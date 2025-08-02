@@ -90,6 +90,7 @@ ohos_shared_library("ace_ndk") {
     "node/node_transition_imp.cpp",
     "node/node_utils.cpp",
     "node/progress_option.cpp",
+    "node/render_node.cpp",
     "node/style_modifier.cpp",
     "node/textpicker_option.cpp",
     "node/waterflow_section_option.cpp",

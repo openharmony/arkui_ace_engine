@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/subwindow/subwindow_manager.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
@@ -21,6 +23,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContextMenuAccessor {
 void CloseImpl()
 {
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+    if (Container::IsCurrentUseNewPipeline()) {
+        SubwindowManager::GetInstance()->HideMenuNG();
+    } else {
+        SubwindowManager::GetInstance()->CloseMenu();
+    }
+#endif
 }
 } // ContextMenuAccessor
 const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()

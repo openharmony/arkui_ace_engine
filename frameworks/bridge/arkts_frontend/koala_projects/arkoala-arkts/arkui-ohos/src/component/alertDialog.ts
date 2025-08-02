@@ -18,16 +18,16 @@
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { DialogButtonStyle, WordBreak, BorderStyle } from "./enums"
 import { ResourceStr, ResourceColor, VoidCallback, Offset, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
-import { Rectangle, BlurStyle, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
-import { Callback_DismissDialogAction_Void, DismissDialogAction } from "./actionSheet"
+import { Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
 export class AlertDialog {
     public static show(value: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): undefined {
         const value_casted = value as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
@@ -99,6 +99,9 @@ export interface AlertDialogButtonOptions extends AlertDialogButtonBaseOptions {
 export interface TextStyle_alert_dialog {
     wordBreak?: WordBreak;
 }
+export interface LevelOrder {
+    _LevelOrderStub: string;
+}
 export interface AlertDialogParam {
     title?: ResourceStr;
     subtitle?: ResourceStr;
@@ -113,6 +116,8 @@ export interface AlertDialogParam {
     isModal?: boolean;
     backgroundColor?: ResourceColor;
     backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     onWillDismiss?: ((parameter: DismissDialogAction) => void);
     transition?: TransitionEffect;
     cornerRadius?: Dimension | BorderRadiuses | LocalizedBorderRadiuses;
@@ -125,6 +130,14 @@ export interface AlertDialogParam {
     textStyle?: TextStyle_alert_dialog;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
+    onDidAppear?: (() => void);
+    onDidDisappear?: (() => void);
+    onWillAppear?: (() => void);
+    onWillDisappear?: (() => void);
+    levelMode?: LevelMode;
+    levelUniqueId?: number;
+    immersiveMode?: ImmersiveMode;
+    levelOrder?: LevelOrder;
 }
 export interface AlertDialogParamWithConfirm extends AlertDialogParam {
     confirm?: AlertDialogButtonBaseOptions;

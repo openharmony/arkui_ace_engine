@@ -340,4 +340,14 @@ void TextDragOverlayModifier::SetSelectedBackgroundOpacity(float offset)
 {
     selectedBackgroundOpacity_->Set(offset);
 }
+
+void TextDragOverlayModifier::SetAnimateFlag(bool isAnimate)
+{
+    isAnimating_ = isAnimate;
+    if (!isAnimating_) {
+        auto pattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetAnimatingParagraph();
+    }
+}
 } // namespace OHOS::Ace::NG

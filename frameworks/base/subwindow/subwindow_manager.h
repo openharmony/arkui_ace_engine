@@ -226,6 +226,14 @@ public:
     void RemoveSubwindowByNodeId(const int32_t nodeId);
     void SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
 
+#if defined(ACE_STATIC)
+    ACE_FORCE_EXPORT void ShowDialogStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    ACE_FORCE_EXPORT void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    ACE_FORCE_EXPORT void OpenCustomDialogStatic(DialogProperties &dialogProps,
+        std::function<void(int32_t)> &&callback);
+#endif
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);

@@ -42,6 +42,7 @@ using WindowSetSystemBarEnabledCallback = std::function<bool(SystemBarType, std:
 using GetCurrentViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(void)>;
 using GetTargetViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(std::optional<Orientation>,
     std::optional<bool>, std::optional<bool>, std::optional<bool>)>;
+using IsSetOrientationNeededCallback = std::function<bool(std::optional<Orientation>)>;
 using SetRequestedOrientationCallback = std::function<void(std::optional<Orientation>, bool)>;
 using GetRequestedOrientationCallback = std::function<Orientation(void)>;
 using IsFullScreenWindowCallback = std::function<bool(void)>;
@@ -178,6 +179,11 @@ public:
     void SetGetTargetViewportConfigCallback(GetTargetViewportConfigCallback&& callback)
     {
         getTargetViewportConfigCallback_ = std::move(callback);
+    }
+
+    void SetIsSetOrientationNeededCallback(IsSetOrientationNeededCallback&& callback)
+    {
+        isSetOrientationNeededCallback_ = std::move(callback);
     }
 
     void SetSetRequestedOrientationCallback(SetRequestedOrientationCallback&& callback)
@@ -364,6 +370,14 @@ public:
         std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
         std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator);
 
+    bool IsSetOrientationNeeded(std::optional<Orientation> orientation)
+    {
+        if (isSetOrientationNeededCallback_) {
+            return isSetOrientationNeededCallback_(orientation);
+        }
+        return false;
+    }
+
     void SetRequestedOrientation(std::optional<Orientation> orientation, bool needAnimation = true)
     {
         if (setRequestedOrientationCallback_) {
@@ -465,6 +479,7 @@ private:
     WindowSetSystemBarEnabledCallback windowSetSystemBarEnabledCallback_;
     GetCurrentViewportConfigCallback getCurrentViewportConfigCallback_;
     GetTargetViewportConfigCallback getTargetViewportConfigCallback_;
+    IsSetOrientationNeededCallback isSetOrientationNeededCallback_;
     SetRequestedOrientationCallback setRequestedOrientationCallback_;
     GetRequestedOrientationCallback getRequestedOrientationCallback_;
     IsFullScreenWindowCallback isFullScreenWindowCallback_;

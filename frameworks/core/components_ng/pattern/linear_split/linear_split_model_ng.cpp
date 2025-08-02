@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
 
@@ -94,6 +95,23 @@ void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitTyp
         pattern->AddResObj("columnSplit.divider", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider, frameNode);
+}
+
+void LinearSplitModelNG::RegisterResObj(
+    const RefPtr<ResourceObject>& resObj, NG::ColumnSplitDivider& divider, const std::string key)
+{
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        auto&& updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::ColumnSplitDivider& divider) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            if (key == "columnSplit.divider.startMargin") {
+                divider.startMargin = result;
+            } else if (key == "columnSplit.divider.endMargin") {
+                divider.endMargin = result;
+            }
+        };
+        divider.AddResource(key, resObj, std::move(updateFunc));
+    }
 }
 
 void LinearSplitModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)

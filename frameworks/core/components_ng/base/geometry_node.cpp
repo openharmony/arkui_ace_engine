@@ -328,4 +328,14 @@ void GeometryNode::UpdatePaddingWithBorder(const PaddingPropertyF& padding)
         padding_->bottom = padding.bottom;
     }
 }
+
+OffsetF GeometryNode::GetIgnoreAdjust() const
+{
+    return ignoreAdjust_;
+}
+
+void GeometryNode::SetIgnoreAdjust(const OffsetF& ignoreAdjust)
+{
+    ignoreAdjust_ = ignoreAdjust;
+}
 } // namespace OHOS::Ace::NG

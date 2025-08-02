@@ -276,4 +276,25 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level1)
     g_isConfigChangePerform = false;
     EXPECT_EQ(layoutProperty2->HasGuideline(), true);
 }
+
+/**
+ * @tc.name: SetPositionResObj
+ * @tc.desc: Test SetPositionResObj of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, SetPositionResObj, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    GuidelineInfo guidelineInfo;
+    RelativeContainerModelNG::SetPositionResObj(resObj, guidelineInfo, "relativeContainer.guideLine.position.start");
+    guidelineInfo.ReloadResources();
+    EXPECT_EQ(guidelineInfo.resMap_.size(), 1);
+    RelativeContainerModelNG::SetPositionResObj(resObj, guidelineInfo, "relativeContainer.guideLine.position.end");
+    guidelineInfo.ReloadResources();
+    EXPECT_EQ(guidelineInfo.resMap_.size(), 2);
+}
 } // namespace OHOS::Ace::NG

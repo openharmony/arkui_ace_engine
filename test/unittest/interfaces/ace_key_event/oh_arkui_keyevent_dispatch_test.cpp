@@ -68,4 +68,19 @@ HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_Dispatch002, TestSize.Level0)
     NodeModel::DisposeNode(node);
 }
 
+HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_Dispatch003, TestSize.Level0)
+{
+    ArkUI_UIInputEvent event = {
+        .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
+        .eventTypeId = AXIS_EVENT_ID,
+        .inputEvent = nullptr,
+        .isCloned = false,
+        .apiVersion = 0,
+    };
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    OH_ArkUI_KeyEvent_Dispatch(node, &event);
+    ASSERT_NE(node, nullptr);
+}
 } // namespace OHOS::Ace

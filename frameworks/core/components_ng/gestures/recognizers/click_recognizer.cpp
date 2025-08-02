@@ -564,6 +564,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    info.SetClickPointerEvent(touchPoint.GetTouchEventPointerEvent());
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     info.SetInputEventType(inputEventType_);
     info.CopyConvertInfoFrom(touchPoint.convertInfo);

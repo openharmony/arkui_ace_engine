@@ -41,6 +41,8 @@ function customRefreshingContent(params: Params) {
   // 设置最小高度约束保证自定义组件高度随刷新区域高度变化时自定义组件高度不会低于minHeight
   .constraintSize({ minHeight: 32 })
   .width('100%')
+  // 使自定义节点显示在列表上方
+  .zIndex(1)
 }
 
 @Entry
@@ -49,34 +51,26 @@ struct RefreshSuspensionEffectSample {
   @State isRefreshing: boolean = false;
   @State arr: String[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
   @State refreshStatus: RefreshStatus = RefreshStatus.Inactive;
-  @State customComponentContent: ComponentContent<Object> | undefined = undefined;
+  private refreshTimeOut: number | undefined = undefined;
   private contentNode?: ComponentContent<Object> = undefined;
   private params: Params = new Params(RefreshStatus.Inactive);
 
   aboutToAppear(): void {
-    let uiContext = this.getUIContext()
-    this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshingContent), this.params)
+    let uiContext = this.getUIContext();
+    this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshingContent), this.params);
   }
 
-  @Builder
-  customRefreshBuilder() {
-    Stack() {
-      Row() {
-        LoadingProgress().height(32)
-        Text('Refreshing...').fontSize(16).margin({ left: 20 })
-      }
-      .alignItems(VerticalAlign.Center)
+  // 页面销毁时释放自定义节点，清除定时器
+  aboutToDisappear(): void {
+    this.contentNode = undefined;
+    if (this.refreshTimeOut) {
+      clearTimeout(this.refreshTimeOut);
     }
-    .align(Alignment.Center)
-    .clip(true)
-    // 设置最小高度约束保证自定义组件高度随刷新区域高度变化时自定义组件高度不会低于minHeight
-    .constraintSize({ minHeight: 32 })
-    .width('100%')
   }
 
   build() {
     Column() {
-      Refresh({ refreshing: $$this.isRefreshing, refreshingContent: this.customComponentContent }) {
+      Refresh({ refreshing: $$this.isRefreshing, refreshingContent: this.contentNode }) {
         List() {
           ForEach(this.arr, (item: string) => {
             ListItem() {
@@ -97,7 +91,7 @@ struct RefreshSuspensionEffectSample {
         .width('100%')
         .height('100%')
         // 固定list组件的位置可以实现刷新样式悬浮效果
-        .position({x: 0, y: 0})
+        .position({ x: 0, y: 0 })
         .alignListItem(ListItemAlign.Center)
         .scrollBar(BarState.Off)
       }
@@ -105,17 +99,17 @@ struct RefreshSuspensionEffectSample {
       .pullToRefresh(true)
       .refreshOffset(96)
       .onStateChange((refreshStatus: RefreshStatus) => {
-        this.refreshStatus = refreshStatus
-        this.params.refreshStatus = refreshStatus
+        this.refreshStatus = refreshStatus;
+        this.params.refreshStatus = refreshStatus;
         // 更新自定义组件内容
-        this.contentNode?.update(this.params)
-        console.info('Refresh onStatueChange state is ' + refreshStatus)
+        this.contentNode?.update(this.params);
+        console.info('Refresh onStatueChange state is ' + refreshStatus);
       })
       .onRefreshing(() => {
-        setTimeout(() => {
-          this.isRefreshing = false
-        }, 2000)
-        console.log('onRefreshing test')
+        this.refreshTimeOut = setTimeout(() => {
+          this.isRefreshing = false;
+        }, 2000);
+        console.log('onRefreshing test');
       })
     }
   }

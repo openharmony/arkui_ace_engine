@@ -43,6 +43,11 @@ build_component_ng("web_pattern_ng") {
       "web_pattern.cpp",
       "web_select_overlay.cpp",
     ]
+    sources += [
+      "ani/richtext_model_static.cpp",
+      "ani/web_model_static.cpp",
+      "ani/web_pattern_static.cpp",
+    ]
 
     external_deps = [
       "ability_base:view_data",

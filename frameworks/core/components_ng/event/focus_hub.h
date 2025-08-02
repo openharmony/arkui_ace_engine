@@ -318,7 +318,7 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
+class ACE_FORCE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
     DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState)
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
@@ -883,6 +883,12 @@ public:
     }
 
     RefPtr<FocusHub> GetHeadOrTailChild(bool isHead);
+
+    // multi thread function start
+    void RemoveSelfMultiThread(BlurReason reason);
+    void RemoveSelfExecuteFunction(BlurReason reason);
+    // multi thread function end
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();

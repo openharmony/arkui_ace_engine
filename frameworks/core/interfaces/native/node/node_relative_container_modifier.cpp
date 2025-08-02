@@ -45,22 +45,12 @@ void SetGuideLine(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32
             CalcDimension start(0.0, DimensionUnit::VP);
             info.start = start;
         }
-        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        if (SystemProperties::ConfigChangePerform() && objs[NUM_2 * i]) {
-            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
-                CalcDimension result;
-                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-                guidelineInfo.start = result;
-            };
-            info.AddResource("relativeContainer.guideLine.position.start", objs[NUM_2 * i], std::move(updateFunc));
-        }
-        if (SystemProperties::ConfigChangePerform() && objs[NUM_2 * i + 1]) {
-            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
-                CalcDimension result;
-                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-                guidelineInfo.end = result;
-            };
-            info.AddResource("relativeContainer.guideLine.position.end", objs[NUM_2 * i + 1], std::move(updateFunc));
+        if (rawPtr) {
+            auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
+            RelativeContainerModelNG::SetPositionResObj(
+                objs[NUM_2 * i], info, "relativeContainer.guideLine.position.start");
+            RelativeContainerModelNG::SetPositionResObj(
+                objs[NUM_2 * i + 1], info, "relativeContainer.guideLine.position.end");
         }
         guidelineInfos.push_back(info);
     }

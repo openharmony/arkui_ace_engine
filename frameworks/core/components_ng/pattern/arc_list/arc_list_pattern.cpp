@@ -305,6 +305,9 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
     int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_RETURN(listLayoutProperty, false);
+    if (!listLayoutProperty->GetContentLayoutConstraint().has_value()) {
+        return false;
+    }
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     float stopOnScreen = GetMainAxisSize(contentConstraint.maxSize, Axis::VERTICAL) / FLOAT_TWO;
     float predictStop = stopOnScreen + deltaPos;

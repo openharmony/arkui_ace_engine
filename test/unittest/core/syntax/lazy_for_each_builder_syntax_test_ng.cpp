@@ -2571,7 +2571,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
      * @tc.steps: step3. Invoke the PaintDebugBoundaryTreeAll function.
      * @tc.expected:  Set condition to true.
      */
+    node->shouldRerender_ = false;
     lazyForEachBuilder->NotifyColorModeChange(1, true);
-    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+    EXPECT_TRUE(node->measureAnyWay_);
+    EXPECT_TRUE(node->shouldRerender_);
 }
 } // namespace OHOS::Ace::NG

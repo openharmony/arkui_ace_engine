@@ -33,7 +33,6 @@ public:
 private:
     void CalendarPickerContentMeasure(LayoutWrapper* layoutWrapper);
     void SelfMeasure(LayoutWrapper* layoutWrapper);
-    void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, SizeF& frameSize);
 
     SizeF contentMeasure_;
     SizeF flexMeasure_;

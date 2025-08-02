@@ -86,8 +86,6 @@ private:
     static float GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction);
     static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
         bool& isBlured, double& blurRadius);
-    static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
-        std::string& message);
     static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
         std::string& message);
     static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
@@ -114,8 +112,8 @@ private:
         const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool CheckOverlayText(const RefPtr<FrameNode>& node, std::string& message,
         const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
-    static bool CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message,
-        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static bool CheckRenderEffect(const RefPtr<FrameNode>& secNode, RefPtr<FrameNode>& parentNode,
+        std::string& message, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool CheckOverlayNode(RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
         std::string& message, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,

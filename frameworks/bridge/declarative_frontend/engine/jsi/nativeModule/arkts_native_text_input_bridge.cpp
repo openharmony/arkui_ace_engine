@@ -711,10 +711,19 @@ ArkUINativeModuleValue TextInputBridge::SetTextInputAutoCapitalizationMode(ArkUI
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    if (secondArg->IsNumber()) {
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputAutoCapitalizationMode(nativeNode, value);
     } else {
@@ -739,6 +748,15 @@ ArkUINativeModuleValue TextInputBridge::ResetTextInputAutoCapitalizationMode(Ark
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputAutoCapitalizationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);

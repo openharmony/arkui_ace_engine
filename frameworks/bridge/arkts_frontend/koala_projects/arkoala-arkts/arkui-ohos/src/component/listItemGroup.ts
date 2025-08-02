@@ -17,26 +17,66 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { CustomBuilder, ComponentContent, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, ChildrenMainSize } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ListDividerOptions } from "./list"
-import { ArkListItemGroupComponent } from "./../generated/ArkListItemGroup"
-import { ArkListItemGroupPeer } from "./../generated/peers/ArkListItemGroupPeer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent } from "./arkui-custom"
+
+export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkListItemGroupPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._ListItemGroup_construct(peerId, flags)
+        const _peer  = new ArkListItemGroupPeer(_peerPtr, peerId, "ListItemGroup", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setListItemGroupOptionsAttribute(options?: ListItemGroupOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeListItemGroupOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._ListItemGroupInterface_setListItemGroupOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dividerAttribute(value: ListDividerOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeListDividerOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._ListItemGroupAttribute_divider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    childrenMainSizeAttribute(value: ChildrenMainSize | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeChildrenMainSize(value_value)
+        }
+        ArkUIGeneratedNativeModule._ListItemGroupAttribute_childrenMainSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum ListItemGroupStyle {
     NONE = 0,
     CARD = 1
@@ -49,23 +89,63 @@ export interface ListItemGroupOptions {
     space?: number | string;
     style?: ListItemGroupStyle;
 }
-/** @memo:stable */
+export type ListItemGroupInterface = (options?: ListItemGroupOptions) => ListItemGroupAttribute;
 export interface ListItemGroupAttribute extends CommonMethod {
-    /** @memo */
-    setListItemGroupOptions(options?: ListItemGroupOptions): this
-    /** @memo */
-    divider(value?: ListDividerOptions): this
-    /** @memo */
-    childrenMainSize(value: ChildrenMainSize): this
+    divider(value: ListDividerOptions | undefined): this
+    childrenMainSize(value: ChildrenMainSize | undefined): this
+}
+export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
+    divider_value?: ListDividerOptions | undefined
+    childrenMainSize_value?: ChildrenMainSize | undefined
+    public divider(value: ListDividerOptions | undefined): this {
+        return this
+    }
+    public childrenMainSize(value: ChildrenMainSize | undefined): this {
+        return this
+        }
+}
+export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements ListItemGroupAttribute {
+    getPeer(): ArkListItemGroupPeer {
+        return (this.peer as ArkListItemGroupPeer)
+    }
+    public setListItemGroupOptions(options?: ListItemGroupOptions): this {
+        if (this.checkPriority("setListItemGroupOptions")) {
+            const options_casted = options as (ListItemGroupOptions | undefined)
+            this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public divider(value: ListDividerOptions | undefined): this {
+        if (this.checkPriority("divider")) {
+            const value_casted = value as (ListDividerOptions | undefined)
+            this.getPeer()?.dividerAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public childrenMainSize(value: ChildrenMainSize | undefined): this {
+        if (this.checkPriority("childrenMainSize")) {
+            const value_casted = value as (ChildrenMainSize | undefined)
+            this.getPeer()?.childrenMainSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function ListItemGroup(
-  /** @memo */
-  style: ((attributes: ListItemGroupAttribute) => void) | undefined,
-  options?: ListItemGroupOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: ListItemGroupAttribute) => void) | undefined,
+    options?: ListItemGroupOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkListItemGroupComponent()
     })

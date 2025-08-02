@@ -28,6 +28,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
@@ -281,6 +282,12 @@ public:
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
 
+    void ClearOperationRecords()
+    {
+        operationRecords_.clear();
+        redoOperationRecords_.clear();
+    }
+
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
         keyboardAppearance_ = value;
@@ -331,6 +338,9 @@ public:
     }
 
     void OnModifyDone() override;
+    void OnModifyDoneMultiThread();
+    void OnModifyDoneMultiThreadPart();
+    void OnModifyDoneMultiThreadAddition();
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -372,7 +382,11 @@ public:
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
+    void SetPreviewTextOperationMultiThread(PreviewTextInfo info);
+    void SetPreviewTextOperationMultiThreadPart(PreviewTextInfo info, int32_t start, int32_t end);
     void FinishTextPreviewOperation(bool triggerOnWillChange = true);
+    void FinishTextPreviewOperationMultiThread(bool triggerOnWillChange = true);
+    void FinishTextPreviewOperationMultiThreadPart(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
@@ -427,8 +441,11 @@ public:
         return contentController_->GetTextUtf16Value();
     }
 
-    const RefPtr<AutoFillController>& GetAutoFillController()
+    const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
     {
+        if (!autoFillController_) {
+            autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
+        }
         return autoFillController_;
     }
 
@@ -682,7 +699,9 @@ public:
     bool CursorMoveUpOperation();
     bool CursorMoveDownOperation();
     void SetCaretPosition(int32_t position, bool moveContent = true);
+    void SetCaretPositionMultiThread(int32_t position, bool moveContent = true);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
+    void HandleSetSelectionMultiThread(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
 
@@ -788,7 +807,11 @@ public:
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
     void InitSurfaceChangedCallback();
+    void InitSurfaceChangedCallbackMultiThread();
+    void InitSurfaceChangedCallbackMultiThreadAction();
     void InitSurfacePositionChangedCallback();
+    void InitSurfacePositionChangedCallbackMultiThread();
+    void InitSurfacePositionChangedCallbackMultiThreadAction();
 
     bool HasSurfaceChangedCallback()
     {
@@ -932,14 +955,7 @@ public:
     std::string TextContentTypeToString() const;
     virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
-    inline void InitTheme()
-    {
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        auto context = tmpHost->GetContext();
-        CHECK_NULL_VOID(context);
-        textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
-    }
+    void InitTheme();
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -967,6 +983,8 @@ public:
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
+    void SetSelectionFlagMultiThread(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void SetSelection(int32_t start, int32_t end,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
@@ -1134,6 +1152,8 @@ public:
     }
 
     void StopEditing();
+    void StopEditingMultiThread();
+    void StopEditingMultiThreadAction();
 
     void MarkContentChange()
     {
@@ -1156,6 +1176,7 @@ public:
     std::string GetDisableUnderlineColorStr() const;
     std::string GetErrorUnderlineColorStr() const;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
 
     bool GetTextInputFlag() const
     {
@@ -1209,6 +1230,8 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder);
 
     void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
+    void SetCustomKeyboardWithNodeMultiThread(const RefPtr<UINode>& keyboardBuilder);
+    void SetCustomKeyboardWithNodeMultiThreadAction(const RefPtr<UINode>& keyboardBuilder);
 
     bool HasCustomKeyboard() const
     {
@@ -1353,16 +1376,21 @@ public:
 
     inline void RegisterWindowSizeCallback()
     {
+        auto host = GetHost();
+        // call RegisterWindowSizeCallbackMultiThread() by multi thread
+        FREE_NODE_CHECK(host, RegisterWindowSizeCallback);
         if (isOritationListenerRegisted_) {
             return;
         }
         isOritationListenerRegisted_ = true;
-        auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddWindowSizeChangeCallback(host->GetId());
     }
+
+    void RegisterWindowSizeCallbackMultiThread();
+    void RegisterWindowSizeCallbackMultiThreadAction();
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
@@ -1453,6 +1481,7 @@ public:
     }
 
     void SetShowKeyBoardOnFocus(bool value);
+    void SetShowKeyBoardOnFocusMultiThread(bool value);
     bool GetShowKeyBoardOnFocus()
     {
         return showKeyBoardOnFocus_;
@@ -1687,11 +1716,18 @@ public:
     void SetBackBorderRadius();
     void OnColorModeChange(uint32_t colorMode) override;
 
+    void ProcessDefaultStyleAndBehaviors();
+    void ProcessDefaultStyleAndBehaviorsMultiThread();
+
+    void ProcessResponseArea();
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnAttachToMainTreeMultiThreadAddition();
 
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     
     bool IsReverse() const override
     {
@@ -1729,8 +1765,10 @@ protected:
     bool independentControlKeyboard_ = false;
     RefPtr<AutoFillController> autoFillController_;
     virtual IMEClient GetIMEClientInfo();
+    RefPtr<TextFieldSelectOverlay> selectOverlay_;
 
 private:
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
@@ -1809,6 +1847,7 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachContext(PipelineContext* context) override;
     void OnDetachContext(PipelineContext* context) override;
     void UpdateSelectionByMouseDoubleClick();
@@ -1857,6 +1896,7 @@ private:
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
+    void SetAccessibilityErrorText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
     void SetAccessibilityUnitAction();
@@ -1907,7 +1947,6 @@ private:
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
     void NotifyOnEditChanged(bool isChanged);
-    void ProcessResponseArea();
     void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
@@ -1999,13 +2038,14 @@ private:
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void FireOnWillAttachIME();
     Offset GetCaretClickLocalOffset(const Offset& offset);
+    bool ShouldSkipUpdateParagraph();
+    void UpdateParagraphForDragNode(bool skipUpdate);
 
     RectF frameRect_;
     RectF textRect_;
     float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
-    TextStyle nextLineUtilTextStyle_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -2158,7 +2198,6 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
-    RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
@@ -2186,6 +2225,7 @@ private:
     std::u16string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::u16string lastTextValue_ = u"";
+    float lastCursorLeft_ = 0.0f;
     float lastCursorTop_ = 0.0f;
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
@@ -2217,6 +2257,23 @@ private:
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
+
+    // ----- multi thread state variables -----
+    bool initSurfacePositionChangedCallbackMultiThread_ = false;
+    bool initSurfaceChangedCallbackMultiThread_ = false;
+    bool handleCountStyleMultiThread_ = false;
+    bool startTwinklingMultiThread_ = false;
+    bool registerWindowSizeCallbackMultiThread_ = false;
+    bool processDefaultStyleAndBehaviorsMultiThread_ = false;
+    bool stopEditingMultiThread_ = false;
+    bool triggerAvoidOnCaretChangeMultiThread_ = false;
+    bool updateCaretInfoToControllerMultiThread_ = false;
+    bool setShowKeyBoardOnFocusMultiThread_ = false;
+    bool setShowKeyBoardOnFocusMultiThreadValue_ = false;
+    bool setSelectionFlagMultiThread_ = false;
+    bool setCustomKeyboardWithNodeMultiThread_ = false;
+    RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
+    // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG
 

@@ -28,7 +28,7 @@ template<>
 SnapshotOptions Convert(const Ark_SnapshotOptions& src)
 {
     SnapshotOptions ret;
-    ret.scale = Converter::OptConvert<float>(src.scale).value_or(1.0f);
+    ret.scale = Converter::OptConvert<float>(src.scale).value_or(false);
     ret.waitUntilRenderFinished = Converter::OptConvert<bool>(src.waitUntilRenderFinished).value_or(false);
     return ret;
 }

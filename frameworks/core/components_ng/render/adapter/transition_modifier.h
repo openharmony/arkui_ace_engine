@@ -19,20 +19,14 @@
 #include <functional>
 #include <memory>
 
-#if defined(MODIFIER_NG)
 #include "render_service_client/core/modifier_ng/custom/rs_transition_style_modifier.h"
-#endif
 
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
-#if defined(MODIFIER_NG)
 using RSTransitionStyleModifier = Rosen::ModifierNG::RSTransitionStyleModifier;
-#else
-using RSTransitionStyleModifier = Rosen::RSTransitionModifier;
-#endif
 class TransitionModifier : public RSTransitionStyleModifier {
 public:
     TransitionModifier() = default;
@@ -91,11 +85,6 @@ public:
     {
         initialBackgroundRegion_ = region;
     }
-
-#ifndef MODIFIER_NG
-    void Active() override {};
-    void Identity() override {};
-#endif
 
 private:
     void DrawWithPixelMap(RSDrawingContext& context) const

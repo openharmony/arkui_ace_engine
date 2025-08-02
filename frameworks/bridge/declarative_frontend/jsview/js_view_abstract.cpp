@@ -181,7 +181,8 @@ const char* BOTTOM_RIGHT_PROPERTY = "bottomRight";
 const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
-enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT, AI_WRITER, TRANSLATE, SHARE, SEARCH };
+enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT,
+    AI_WRITER, TRANSLATE, SHARE, SEARCH, ASK_CELIA };
 enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
 const int32_t NUM_0 = 0;
@@ -1825,6 +1826,7 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
         { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
         { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
+        { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
     };
 
     auto item = keyMenuItemMap.find(id);
@@ -1870,9 +1872,12 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
         case MenuItemType::SEARCH:
             menuOptionsParam.symbolId = theme->GetSearchSymbolId();
             break;
+        case MenuItemType::ASK_CELIA:
+            menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
+            break;
         default:
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
-            menuOptionsParam.symbolId = 0;
+            menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
             break;
     }
 }
@@ -7194,23 +7199,21 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
         if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
             return false;
         }
+        RefPtr<ResourceObject> resObj;
+        Color color;
         if (value->IsNumber()) {
-            result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
-            continue;
+            color = Color(ColorAlphaAdapt(value->ToNumber<uint32_t>()));
         } else if (value->IsString()) {
-            Color color;
             Color::ParseColorString(value->ToString(), color);
-            result.emplace_back(color);
-            continue;
         } else {
-            Color color;
-            RefPtr<ResourceObject> resObj;
             ParseJsColorFromResource(value, color, resObj);
-            result.emplace_back(color);
-            if (enableResourceUpdate && resObj) {
-                std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
-                resObjArr.push_back(pair);
-            }
+        }
+
+        result.emplace_back(color);
+        CompleteResourceObjectFromColor(resObj, color, true);
+        if (enableResourceUpdate && resObj) {
+            std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
+            resObjArr.push_back(pair);
         }
     }
     return true;
@@ -8126,7 +8129,7 @@ void JSViewAbstract::JsOnDragSpringLoading(const JSCallbackInfo& info)
         if (!CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
             return;
         }
-        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        NG::OnDragDropSpringLoadingFunc onDragSpringLoading = nullptr;
         WeakPtr<NG::FrameNode> frameNode =
             AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         if (jsVal->IsFunction()) {
@@ -10668,7 +10671,9 @@ void JSViewAbstract::GetJsAngleWithDefault(
 
 inline void JSViewAbstract::CheckAngle(std::optional<float>& angle)
 {
-    angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
+    if (angle.has_value()) {
+        angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
+    }
 }
 
 void JSViewAbstract::GetPerspective(
@@ -10950,6 +10955,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
         auto weak = container->GetCardPipeline(cardId);
         auto cardPipelineContext = weak.Upgrade();
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);
@@ -13001,9 +13007,7 @@ std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSA
         std::string icon;
         ParseJsMedia(jsStartIcon, icon);
         menuOptionsParam.icon = icon;
-        if (!showShortcut) {
-           ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
-        }
+        ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
         menuParams.emplace_back(menuOptionsParam);
     }
     return menuParams;
@@ -13295,10 +13299,13 @@ void JSViewAbstract::ParseDragSpringLoadingConfiguration(
     auto setConfigurationPropertyIfValid =
         [&configuration, &config](const char* propName,
             std::function<void(const RefPtr<NG::DragSpringLoadingConfiguration>&, int32_t)> setter) {
+            CHECK_NULL_VOID(propName);
+            CHECK_NULL_VOID(config);
+            CHECK_NULL_VOID(setter);
             auto propObj = configuration->GetProperty(propName);
             if (propObj->IsNumber()) {
                 auto value = propObj->ToNumber<int32_t>();
-                if (value >= 0) {
+                if (value > 0) {
                     setter(config, value);
                 }
             }

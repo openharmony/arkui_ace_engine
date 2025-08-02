@@ -93,7 +93,7 @@ class ManagerInterface;
 class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
-using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -219,7 +219,7 @@ public:
     virtual bool OnRotationEvent(const RotationEvent& event) const = 0;
 
     // Called by window when received vsync signal.
-    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount);
 
     // Called by viewr
     virtual void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
@@ -867,6 +867,12 @@ public:
         return focusWindowId_.has_value();
     }
 
+    void SetIsArkUIHookEnabled(bool enable)
+    {
+        isArkUIHookEnabled_ = enable;
+    }
+    bool IsArkUIHookEnabled() const;
+
     void SetRealHostWindowId(uint32_t realHostWindowId)
     {
         realHostWindowId_ = realHostWindowId;
@@ -886,6 +892,20 @@ public:
     {
         return viewScale_;
     }
+
+    void SetIsCurrentInForceSplitMode(bool split)
+    {
+        isCurrentInForceSplitMode_ = split;
+    }
+
+    bool IsCurrentInForceSplitMode() const
+    {
+        return isCurrentInForceSplitMode_;
+    }
+
+    double CalcPageWidth(double rootWidth) const;
+
+    double GetPageWidth() const;
 
     double GetRootWidth() const
     {
@@ -1394,7 +1414,7 @@ public:
 
     virtual void ChangeSensitiveNodes(bool flag) {}
 
-    virtual bool IsContainerModalVisible()
+    virtual bool IsContainerModalVisible() const
     {
         return false;
     }
@@ -1597,6 +1617,7 @@ public:
         return configurationChange_;
     }
 
+    void SetUiDVSyncCommandTime(uint64_t vsyncTime);
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1612,7 +1633,7 @@ protected:
     {
         return false;
     }
-    virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
+    virtual void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
@@ -1636,6 +1657,8 @@ protected:
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
 
     bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
+
+    double Vp2PxInner(double vpValue) const;
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1673,10 +1696,12 @@ protected:
     float viewScale_ = 1.0f;
     double density_ = 1.0;
     double dipScale_ = 1.0;
+    bool isCurrentInForceSplitMode_ = false;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
     int32_t width_ = 0;
     int32_t height_ = 0;
+    bool isArkUIHookEnabled_ = false;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
@@ -1752,6 +1777,10 @@ protected:
 
     SerializedGesture serializedGesture_;
     RefPtr<NG::THPExtraManager> thpExtraMgr_;
+    uint64_t DVSyncChangeTime_ = 0;
+    bool commandTimeUpdate_ = false;
+    bool dvsyncTimeUpdate_ = false;
+    int32_t dvsyncTimeUseCount_ = 0;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

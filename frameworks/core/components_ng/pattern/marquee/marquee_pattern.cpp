@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
@@ -33,6 +34,7 @@ void MarqueePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);  // call OnAttachToFrameNodeMultiThread() by multi thread
     host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
     auto pipeline = host->GetContext();
@@ -44,11 +46,30 @@ void MarqueePattern::OnAttachToFrameNode()
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode,
+        frameNode);  // call OnDetachFromFrameNodeMultiThread() by multi thread
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+void MarqueePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void MarqueePattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call OnDetachFromMainTreeMultiThread() by multi thread Pattern::OnDetachFromMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 MarqueePattern::~MarqueePattern()
@@ -109,7 +130,7 @@ void MarqueePattern::OnModifyDone()
     auto gestureHub = textChild->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);

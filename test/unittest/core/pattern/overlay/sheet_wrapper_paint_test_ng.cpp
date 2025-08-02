@@ -218,6 +218,7 @@ HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder004, TestSize.Level1)
     columnNode->AddChild(sheetNode);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     SheetWrapperPaintTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
     auto sheetPaintWrapper = new PaintWrapper(columnNode->GetRenderContext(),
         sheetNode->GetGeometryNode(), sheetNode->GetPaintProperty<PaintProperty>());

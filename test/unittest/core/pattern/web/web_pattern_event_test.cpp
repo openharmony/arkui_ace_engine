@@ -229,4 +229,26 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_005, TestSize.Level1)
     EXPECT_EQ(g_webPattern->delegate_->IsFileSelectorShow(), true);
 #endif
 }
+
+/**
+ * @tc.name: GetPixelMapName_001
+ * @tc.desc: Test GetPixelMapName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, GetPixelMapName_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    EXPECT_EQ(g_webPattern->GetPixelMapName(nullptr, "test"), "undefined_");
+    Media::InitializationOptions opt;
+    opt.size.width = 1;
+    opt.size.height = 1;
+    opt.editable = true;
+    auto pixelMap = Media::PixelMap::Create(opt);
+    std::shared_ptr<Media::PixelMap> testPixelMap(pixelMap.release());
+    auto frameNode = g_webPattern->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(g_webPattern->GetPixelMapName(testPixelMap, "test"),
+        "web-1x1-test-" + std::to_string(frameNode->GetId()));
+#endif
+}
 } // namespace OHOS::Ace::NG

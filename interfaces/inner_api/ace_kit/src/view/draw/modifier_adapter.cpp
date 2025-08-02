@@ -15,9 +15,6 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.h"
 
-#ifndef MODIFIER_NG
-#include "render_service_client/core/modifier/rs_modifier.h"
-#endif
 #include "ui/base/utils/utils.h"
 #include "ui/view/draw/content_modifier.h"
 #include "ui/view/draw/modifier.h"

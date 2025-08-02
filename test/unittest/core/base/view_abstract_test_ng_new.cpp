@@ -679,7 +679,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBackground001, TestSize.Level1)
     ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(node.GetRawPtr(), edge);
     ASSERT_NE(node->GetLayoutProperty(), nullptr);
     EXPECT_EQ(node->GetLayoutProperty()->GetBackgroundIgnoresLayoutSafeAreaEdges(), edge);
-    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdges().value_or(LAYOUT_SAFE_AREA_EDGE_NONE), edge);
 
     ViewAbstract::SetIsTransitionBackground(node.GetRawPtr(), true);
     EXPECT_TRUE(renderContext->GetIsTransitionBackground().value_or(false));

@@ -16,6 +16,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -73,6 +74,29 @@ bool PlatformContainerHandler::GetAccessibilityParentRect(HandlerReply& reply)
     }
 
     return true;
+}
+
+void PlatformContainerHandler::GetHostFocusWindowSceneCloseKeyboard(const std::function<void(bool)>& getKeyCallback)
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetAttachedContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [callback = std::move(getKeyCallback), host, instanceId = host->GetInstanceId()]() {
+            CHECK_NULL_VOID(callback);
+            ContainerScope scope(instanceId);
+            bool isFocusWindowSceneCloseKeyboard = false;
+#if defined(WINDOW_SCENE_SUPPORTED) and !defined(ACE_UNITTEST)
+            isFocusWindowSceneCloseKeyboard = WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(host);
+#endif
+            callback(isFocusWindowSceneCloseKeyboard);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIGetHostFocusWindowSceneCloseKeyboard");
 }
 
 bool PlatformContainerHandler::OnReciveData(const HandlerData& data, HandlerReply& reply)

@@ -49,6 +49,8 @@ public:
 
     ~TextPickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -634,7 +636,9 @@ private:
         const TextStyle& defaultTextStyle,
         std::function<void(const Color&)> updateTextColorFunc,
         std::function<void(const Dimension&)> updateFontSizeFunc,
-        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc,
+        std::function<void(const Dimension&)> updateMinFontSizeFunc,
+        std::function<void(const Dimension&)> updateMaxFontSizeFunc);
 
     void ParseRangeResult(NG::TextCascadePickerOptions& option);
     void GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,

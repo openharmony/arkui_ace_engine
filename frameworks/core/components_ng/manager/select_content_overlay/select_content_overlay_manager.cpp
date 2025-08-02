@@ -858,7 +858,6 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
     parentNode->RemoveChild(overlay);
     parentNode->MarkNeedSyncRenderTree();
     parentNode->RebuildRenderContextTree();
-    overlay->SetInDestroying();
     if (pattern && pattern->GetIsMenuShowInSubWindow()) {
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(pattern->GetContainerId(), overlay->GetId());
         SubwindowManager::GetInstance()->HideSelectOverlay(pattern->GetContainerId());

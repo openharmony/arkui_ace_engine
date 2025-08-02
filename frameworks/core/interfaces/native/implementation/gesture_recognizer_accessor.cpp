@@ -28,13 +28,11 @@ const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccess
 namespace GestureRecognizerAccessor {
 void DestroyPeerImpl(Ark_GestureRecognizer peer)
 {
-    if (peer) {
-        delete peer;
-    }
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_GestureRecognizer CtorImpl()
 {
-    return new GestureRecognizerPeer();
+    return PeerUtils::CreatePeer<GestureRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,43 +40,57 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetTagImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
-    auto resOpt = peer->GetRecognizer()->GetGestureInfo()->GetTag();
+    CHECK_NULL_RETURN(peer, {});
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, {});
+    auto resOpt = recognizer->GetGestureInfo()->GetTag();
     return Converter::ArkValue<Ark_String>(resOpt.value_or(""), Converter::FC);
 }
 Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), static_cast<Ark_GestureControl_GestureType>(-1));
-    auto typeName = peer->GetRecognizer()->GetRecognizerType();
+    CHECK_NULL_RETURN(peer, static_cast<Ark_GestureControl_GestureType>(-1));
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, static_cast<Ark_GestureControl_GestureType>(-1));
+    auto typeName = recognizer->GetRecognizerType();
     return Converter::ArkValue<Ark_GestureControl_GestureType>(typeName);
 }
 Ark_Boolean IsBuiltInImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
-    auto gestureInfo = peer->GetRecognizer()->GetGestureInfo();
+    CHECK_NULL_RETURN(peer, false);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, false);
+    auto gestureInfo = recognizer->GetGestureInfo();
     return Converter::ArkValue<Ark_Boolean>(gestureInfo->IsSystemGesture());
 }
 void SetEnabledImpl(Ark_GestureRecognizer peer,
                     Ark_Boolean isEnabled)
 {
-    CHECK_NULL_VOID(peer && peer->GetRecognizer());
-    peer->GetRecognizer()->SetEnabled(Converter::Convert<bool>(isEnabled));
+    CHECK_NULL_VOID(peer);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_VOID(recognizer);
+    recognizer->SetEnabled(Converter::Convert<bool>(isEnabled));
 }
 Ark_Boolean IsEnabledImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
-    return Converter::ArkValue<Ark_Boolean>(peer->GetRecognizer()->IsEnabled());
+    CHECK_NULL_RETURN(peer, false);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, false);
+    return Converter::ArkValue<Ark_Boolean>(recognizer->IsEnabled());
 }
 Ark_GestureRecognizerState GetStateImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
-    auto state = peer->GetRecognizer()->GetGestureState();
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, {});
+    auto state = recognizer->GetGestureState();
+    return Converter::ArkValue<Ark_GestureRecognizerState>(state);
 }
 Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto attachNode = peer->GetRecognizer() ? peer->GetRecognizer()->GetAttachedNode().Upgrade() : nullptr;
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, nullptr);
+    auto attachNode = recognizer->GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(attachNode, GetEventTargetInfoAccessor()->ctor());
     RefPtr<Pattern> pattern;
     if (auto swiperPattern = attachNode->GetPattern<SwiperPattern>()) {
@@ -101,8 +113,24 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
 }
 Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), false);
-    return Converter::ArkValue<Ark_Boolean>(peer->GetRecognizer()->IsInResponseLinkRecognizers());
+    CHECK_NULL_RETURN(peer, false);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, false);
+    return Converter::ArkValue<Ark_Boolean>(recognizer->IsInResponseLinkRecognizers());
+}
+Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto recognizer = AceType::DynamicCast<NG::MultiFingersRecognizer>(peer->GetRecognizer().Upgrade());
+    CHECK_NULL_RETURN(recognizer, {});
+    return Converter::ArkValue<Ark_Number>(recognizer->GetFingers());
+}
+Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto recognizer = AceType::DynamicCast<NG::MultiFingersRecognizer>(peer->GetRecognizer().Upgrade());
+    CHECK_NULL_RETURN(recognizer, {});
+    return Converter::ArkValue<Ark_Boolean>(recognizer->GetLimitFingerCount());
 }
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
@@ -119,7 +147,10 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
         GestureRecognizerAccessor::GetStateImpl,
         GestureRecognizerAccessor::GetEventTargetInfoImpl,
         GestureRecognizerAccessor::IsValidImpl,
+        GestureRecognizerAccessor::GetFingerCountImpl,
+        GestureRecognizerAccessor::IsFingerCountLimitImpl,
     };
     return &GestureRecognizerAccessorImpl;
 }
+
 }

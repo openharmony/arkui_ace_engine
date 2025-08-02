@@ -19,7 +19,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-    
+namespace {
+constexpr float ZERO_MEASURE_CONTENT_SIZE = 0.0f;
+}
 LoadingProgressLayoutAlgorithm::LoadingProgressLayoutAlgorithm() = default;
 
 std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
@@ -40,8 +42,8 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
-        return std::nullopt;
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        return SizeF(ZERO_MEASURE_CONTENT_SIZE, ZERO_MEASURE_CONTENT_SIZE);
     }
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);

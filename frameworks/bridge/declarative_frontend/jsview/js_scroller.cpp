@@ -156,7 +156,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
             .duration = static_cast<float>(animationValue->IsBoolean() ? DEFAULT_DURATION : duration),
             .curve = curve,
             .smooth = (animationValue->IsBoolean() && smooth) || animationValue->IsObject(),
-            .canOverScroll = canOverScroll })) {
+            .canOverScroll = canStayOverScroll })) {
         return;
     }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
@@ -196,6 +196,13 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
         return;
     }
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
+    if (scrollController->GetScrollDirection() == Axis::FREE) { // allow scrolling to left and right edges
+        if (edge == AlignDeclaration::Edge::START) {
+            edgeType = ScrollEdgeType::SCROLL_LEFT;
+        } else if (edge == AlignDeclaration::Edge::END) {
+            edgeType = ScrollEdgeType::SCROLL_RIGHT;
+        }
+    }
     ContainerScope scope(instanceId_);
 
     if (args.Length() > 1 && args[1]->IsObject()) {

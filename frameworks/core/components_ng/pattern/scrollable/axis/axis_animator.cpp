@@ -73,7 +73,7 @@ void AxisAnimator::CreateAnimator()
             CHECK_NULL_VOID(axisAnimator);
             CHECK_NULL_VOID(axisAnimator->axisAnimationFinishCallback_);
             axisAnimator->axisAnimationFinishCallback_();
-            auto axisScrollMotion = axisAnimator->GeAxisScrollMotion();
+            auto axisScrollMotion = axisAnimator->GetAxisScrollMotion();
             CHECK_NULL_VOID(axisScrollMotion);
             axisScrollMotion->ResetCurrentTime();
         });

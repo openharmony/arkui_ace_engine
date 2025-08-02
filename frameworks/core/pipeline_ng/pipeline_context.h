@@ -40,6 +40,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -953,6 +954,11 @@ public:
         return navigationMgr_;
     }
 
+    const RefPtr<ForceSplitManager>& GetForceSplitManager() const
+    {
+        return forceSplitMgr_;
+    }
+
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
@@ -1045,7 +1051,7 @@ public:
     {
         return isFreezeFlushMessage_;
     }
-    bool IsContainerModalVisible() override;
+    bool IsContainerModalVisible() const override;
     void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
     {
         isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
@@ -1066,11 +1072,11 @@ public:
     void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
         int64_t delayMillis);
 
-    void FlushFrameCallback(uint64_t nanoTimestamp);
+    void FlushFrameCallback(uint64_t nanoTimestamp, uint64_t frameCount);
     void TriggerIdleCallback(int64_t deadline);
 
     void AddCAPIFrameCallback(FrameCallbackFuncFromCAPI&& frameCallbackFuncFromCAPI);
-    void FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint32_t frameCount);
+    void FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint64_t frameCount);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -1249,7 +1255,7 @@ public:
     }
 
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
-    void NotifyDragTouchEvent(const TouchEvent& event);
+    void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
     void NotifyDragOnHide();
 
@@ -1282,7 +1288,7 @@ protected:
     void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
     void FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope);
@@ -1328,6 +1334,10 @@ private:
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
+    void ConsumeTouchEventsInterpolation(
+        const std::unordered_set<int32_t>& ids, const std::map<int32_t, int32_t>& timestampToIds,
+        std::unordered_map<int32_t, TouchEvent>& newIdTouchPoints,
+        const std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void AccelerateConsumeTouchEvents(
         std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void SetTouchAccelarate(bool isEnable) override
@@ -1422,6 +1432,8 @@ private:
 
     void UpdateOcclusionCullingStatus();
 
+    void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
@@ -1508,7 +1520,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
-    bool touchAccelarate_ = true;
+    bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
@@ -1576,6 +1588,7 @@ private:
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<ForceSplitManager> forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
@@ -1613,6 +1626,8 @@ private:
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
     Kit::ArkUIObjectLifecycleCallback objectLifecycleCallback_;
+    bool needUpdateTimeForDVSync_ = false;
+    uint64_t lastVSyncTime_ = 0;
 };
 
 /**

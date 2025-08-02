@@ -26,13 +26,20 @@ namespace OHOS::Ace {
 
 class VelocityTracker final {
 public:
-    VelocityTracker() = default;
+    VelocityTracker()
+    {
+        static int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
+        xAxis_.SetCountNum(pointNum);
+        yAxis_.SetCountNum(pointNum);
+        POINT_NUMBER = pointNum;
+    }
     explicit VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis) {}
     ~VelocityTracker() = default;
 
     static constexpr int32_t LEAST_SQUARE_PARAM_NUM = 3;
-    static constexpr int32_t POINT_NUMBER = 5;
     static constexpr float TOUCH_STILL_THRESHOLD = 0.5;
+    static constexpr float DURATION_LONGEST_THRESHOLD = 0.1;
+    static int32_t POINT_NUMBER;
 
     void Reset()
     {
@@ -42,6 +49,8 @@ public:
         isFirstPoint_ = true;
         xAxis_.Reset();
         yAxis_.Reset();
+        touchEventTime_.clear();
+        mIndex_ = 0;
     }
 
     void UpdateTouchPoint(const TouchEvent& event, bool end = false, float range = TOUCH_STILL_THRESHOLD);
@@ -137,9 +146,11 @@ private:
     bool isFirstPoint_ = true;
     TimeStamp lastTimePoint_;
     TimeStamp firstPointTime_;
-    LeastSquareImpl xAxis_ { LEAST_SQUARE_PARAM_NUM, POINT_NUMBER };
-    LeastSquareImpl yAxis_ { LEAST_SQUARE_PARAM_NUM, POINT_NUMBER };
+    LeastSquareImpl xAxis_ { LEAST_SQUARE_PARAM_NUM };
+    LeastSquareImpl yAxis_ { LEAST_SQUARE_PARAM_NUM };
     bool isVelocityDone_ = false;
+    std::vector<TimeStamp> touchEventTime_;
+    int32_t mIndex_ = 0;
 };
 
 } // namespace OHOS::Ace

@@ -92,7 +92,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         if (sheetType == SheetType::SHEET_SIDE) {
             return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
         }
@@ -304,7 +304,7 @@ public:
 
     void InitialLayoutProps();
     void UpdateDragBarStatus();
-
+    bool IsSingleDetents(const NG::SheetStyle& sheetStyle);
     bool IsScrollable() const;
     void AvoidAiBar();
 
@@ -349,8 +349,6 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
-    void SetSheetAnimationOption(AnimationOption& option) const;
-
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
     void SetCurrentOffset(float currentOffset)
@@ -365,7 +363,7 @@ public:
 
     void SetCurrentHeight(float currentHeight)
     {
-        if (height_ != currentHeight) {
+        if (height_ != currentHeight || typeChanged_) {
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
@@ -930,7 +928,7 @@ public:
     // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
     bool IsSheetBottom() const
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
                  sheetType == SheetType::SHEET_BOTTOM_OFFSET);
     }
@@ -1171,7 +1169,7 @@ private:
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
 
     SheetType GetSheetTypeFromSheetManager() const;
-    
+
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 

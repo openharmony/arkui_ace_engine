@@ -53,6 +53,7 @@ void DragSpringLoadingTestNg::SetUp()
     detector_ = AceType::MakeRefPtr<DragDropSpringLoadingDetector>();
     dragFrameNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(dragFrameNode_, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(FRAME_SIZE);
     dragFrameNode_->SetGeometryNode(geometryNode);

@@ -1,0 +1,46 @@
+{
+  "rootElement": {
+    "nodeId": 1277,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1278,
+        "kind": "SideBarContainer",
+        "children": [
+          {
+            "nodeId": 1279,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "SideBarContainer Test"
+          }
+        ],
+        "setSideBarContainerOptions_type": 2,
+        "showSideBar_value": 1,
+        "showControlButton_value": 0,
+        "sideBarWidth1_value": "123vp",
+        "minSideBarWidth1_value": "111px",
+        "maxSideBarWidth1_value": "222fp",
+        "autoHide_value": 1,
+        "sideBarPosition_value": 1,
+        "minContentWidth_value": "333px",
+        "divider_value": {
+          "strokeWidth": 55,
+          "color": 16711935,
+          "startMargin": "7px",
+          "endMargin": "8vp"
+        },
+        "controlButton_value": {
+          "left": 10,
+          "top": 20,
+          "width": 30,
+          "height": 40,
+          "icons": {
+            "shown": "/shownIcon",
+            "hidden": "/hiddenIcon",
+            "switching": "/switchingIcon"
+          }
+        }
+      }
+    ]
+  }
+}

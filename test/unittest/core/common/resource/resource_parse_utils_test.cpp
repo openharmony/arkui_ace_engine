@@ -1031,4 +1031,38 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest026, TestSize.Level1)
      */
     EXPECT_EQ(originStr2, "Hello_Earth_and_friend");
 }
+
+/**
+ * @tc.name: ResourceParseUtilsTest027
+ * @tc.desc: Test ParseResColorWithColorMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a params with invalid data.
+     * @tc.expect: return false.
+     */
+    RefPtr<ResourceObject> resObj;
+    ColorMode colorMode = ColorMode::LIGHT;
+    Color result;
+    EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+
+    /**
+     * @tc.steps: step2. Create a params with no instanceId.
+     * @tc.expect: return false.
+     */
+    resObj = AceType::MakeRefPtr<ResourceObject>();
+    resObj->SetInstanceId(-1);
+    resObj->SetIsResource(false);
+    resObj->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+
+    /**
+     * @tc.steps: step2. Create a params with instanceId ok.
+     * @tc.expect: return false.
+     */
+    resObj->SetInstanceId(100000);
+    EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
+}
 } // namespace OHOS::Ace

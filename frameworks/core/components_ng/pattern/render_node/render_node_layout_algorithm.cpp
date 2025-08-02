@@ -22,7 +22,7 @@ void RenderNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == "RenderNode" || child->GetHostTag() == V2::CUSTOM_FRAME_NODE_ETS_TAG) {
             child->Measure(std::nullopt);
-        } else if (child->GetLayoutProperty()->GetParentLayoutConstraint().has_value()) {
+        } else if (child->GetLayoutProperty() && child->GetLayoutProperty()->GetParentLayoutConstraint().has_value()) {
             child->Measure(child->GetLayoutProperty()->GetParentLayoutConstraint());
         } else {
             LayoutConstraintF layoutConstraint;
@@ -64,7 +64,7 @@ void RenderNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto align = Alignment::TOP_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+    if (layoutWrapper->GetLayoutProperty() && layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.

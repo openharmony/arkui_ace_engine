@@ -147,8 +147,7 @@ struct MenuParam {
     std::optional<ModalMode> modalMode;
     std::optional<PreviewScaleMode> previewScaleMode;
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
-    OffsetF anchorPosition;
-    bool isAnchorPosition = false;
+    std::optional<OffsetF> anchorPosition;
     bool isDarkMode = false;
     bool isWithTheme = false;
 };

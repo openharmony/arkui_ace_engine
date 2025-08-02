@@ -263,4 +263,50 @@ HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG0
         caseNum++;
     }
 }
+
+/**
+ * @tc.name: DragDropInitiatingStateReadyTestNG003
+ * @tc.desc: Test HandlePanOnActionCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG003, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    pipelineContext->overlayManager_ = overlayManager;
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    GestureEvent info;
+    dragDropManager->ResetDragging(DragDropMgrState::IDLE);
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    machine->HandlePanOnActionCancel(info);
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropMgrState::IDLE));
+    
+    dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    machine->HandlePanOnActionCancel(info);
+    EXPECT_EQ(machine->currentState_, static_cast<int32_t>(DragDropMgrState::IDLE));
+}
 } // namespace OHOS::Ace::NG

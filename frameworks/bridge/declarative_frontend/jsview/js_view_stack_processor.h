@@ -108,6 +108,12 @@ public:
      */
     static void JsSendStateInfo(const std::string& stateInfo);
 
+#ifdef ACE_STATIC
+    static void JsPush(const JSCallbackInfo& info);
+    
+    static void JsPop();
+#endif
+
     static void JsPushPrebuildCompCmd(const JSCallbackInfo& info);
 
     static bool JsCheckIsPrebuildTimeout();

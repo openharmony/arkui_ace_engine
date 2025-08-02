@@ -1109,6 +1109,13 @@ class ObserveV2 {
         // store a reference inside owningObject
         // thereby ComputedV2 will share lifespan as owning @ComponentV2 or @ObservedV2
         // remember: id2cmp only has a WeakRef to ComputedV2 obj
+        const existingComputed = refs[computedPropertyName];
+        if (existingComputed && existingComputed instanceof ComputedV2) {
+          // current computed will be override, and will be GC soon
+          // to avoid the Computed be triggered anymore, invalidate it
+          this.clearBinding(existingComputed.getComputedId());
+          stateMgmtConsole.warn(`Check compatibility, ${owningObjectName} has @Computed ${computedPropertyName} and create ${owningObject?.constructor?.name} instance`);
+        }
         refs[computedPropertyName] = computed;
       });
     }

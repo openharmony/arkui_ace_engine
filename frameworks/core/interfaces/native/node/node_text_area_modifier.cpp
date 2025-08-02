@@ -719,7 +719,7 @@ void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
+        pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
     } else {
         pattern->UnRegisterResource("backgroundColor");
     }
@@ -1247,7 +1247,14 @@ ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
 }
 
-ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
+ArkUI_Bool GetTextAreaHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Bool>(TextFieldModelNG::GetHalfLeading(frameNode));
+}
+
+ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
@@ -2400,7 +2407,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaAdaptMinFontSize = GetTextAreaAdaptMinFontSize,
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
         .getTextAreaLineHeight = GetTextAreaLineHeight,
-        .getTextAreaMaxLines = GetgetTextAreaMaxLines,
+        .getTextAreaHalfLeading = GetTextAreaHalfLeading,
+        .getTextAreaMaxLines = GetTextAreaMaxLines,
         .getTextAreaMinLines = GetTextAreaMinLines,
         .setTextAreaPadding = SetTextAreaPadding,
         .resetTextAreaPadding = ResetTextAreaPadding,
@@ -2464,8 +2472,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaWidth = ResetTextAreaWidth,
         .setTextAreaEnableHapticFeedback = SetTextAreaEnableHapticFeedback,
         .resetTextAreaEnableHapticFeedback = ResetTextAreaEnableHapticFeedback,
-        .setTextAreAutoCapitalizationMode = SetTextAreaAutoCapitalizationMode,
-        .resetTextAreAutoCapitalizationMode = ResetTextAreaAutoCapitalizationMode,
+        .setTextAreaAutoCapitalizationMode = SetTextAreaAutoCapitalizationMode,
+        .resetTextAreaAutoCapitalizationMode = ResetTextAreaAutoCapitalizationMode,
         .getTextAreaLetterSpacing = GetTextAreaLetterSpacing,
         .getTextAreaEnablePreviewText = GetTextAreaEnablePreviewText,
         .setEllipsisMode = SetEllipsisMode,
@@ -2583,7 +2591,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .getTextAreaAdaptMinFontSize = GetTextAreaAdaptMinFontSize,
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
         .getTextAreaLineHeight = GetTextAreaLineHeight,
-        .getTextAreaMaxLines = GetgetTextAreaMaxLines,
+        .getTextAreaMaxLines = GetTextAreaMaxLines,
         .setTextAreaPadding = SetTextAreaPadding,
         .resetTextAreaPadding = ResetTextAreaPadding,
         .getTextAreaFontFeature = GetTextAreaFontFeature,

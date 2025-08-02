@@ -387,7 +387,7 @@ HWTEST_F(DividerTestNg, ResetDividerColorTest01, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<DividerRenderProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    std::optional<Color> colorOpt = Color::RED;
+    Color colorOpt = Color::RED;
     DividerModelNG::SetDividerColor(frameNode.GetRawPtr(), colorOpt, true);
     auto dividerColor = paintProperty->GetDividerColorValue();
     EXPECT_EQ(dividerColor, Color::RED);

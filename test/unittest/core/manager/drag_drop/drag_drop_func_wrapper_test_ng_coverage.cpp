@@ -1420,8 +1420,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(dragEvent, nullptr);
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
+    DragSummaryInfo dragSummaryInfo;
     int32_t ret = -1;
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     ASSERT_NE(mainPipeline, nullptr);
@@ -1431,8 +1430,8 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     EXPECT_EQ(dragEvent->GetData(), nullptr);
     EXPECT_EQ(dragEvent->GetDataLoadParams(), nullptr);
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
-    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _, _)).WillRepeatedly(Return(0));
-    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _)).WillRepeatedly(Return(0));
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     EXPECT_EQ(ret, 0);
 
     auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
@@ -1447,22 +1446,22 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(0));
     dragEvent->SetDataLoadParams(dataLoadParams);
     ASSERT_NE(dragEvent->GetDataLoadParams(), nullptr);
-    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(dragEvent->IsUseDataLoadParams(), true);
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
-    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     EXPECT_EQ(ret, 0);
 
     dragEvent->SetUseDataLoadParams(false);
-    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(dragEvent->IsUseDataLoadParams(), false);
 
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(1));
-    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _, _)).WillRepeatedly(Return(1));
-    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _)).WillRepeatedly(Return(1));
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     EXPECT_EQ(ret, 1);
 }
 
@@ -1477,8 +1476,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
     ASSERT_NE(dragAction, nullptr);
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
+    DragSummaryInfo dragSummaryInfo;
     int32_t dataSize = 1;
 
     RefPtr<MockInteractionInterface> mockInteractionInterface = AceType::MakeRefPtr<MockInteractionInterface>();
@@ -1491,13 +1489,13 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(1));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 1);
 
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(0));
     EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(5));
-    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _, _)).WillRepeatedly(testing::Return(0));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _)).WillRepeatedly(testing::Return(0));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 5);
 
     dragAction->unifiedData = nullptr;
@@ -1505,25 +1503,66 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     ASSERT_NE(mockDataLoadParams, nullptr);
     dragAction->dataLoadParams = mockDataLoadParams;
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 1);
 
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(0));
     EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
-    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _, _)).WillRepeatedly(testing::Return(1));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _)).WillRepeatedly(testing::Return(1));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 10);
 
     EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(-1));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 1);
 
     EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(0));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 1);
 
     EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(INT32_MAX + 1));
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 1);
+}
+
+/**
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage043
+ * @tc.desc: Test FindWindowScene func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage043, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    rootNode->AddChild(frameNode1);
+    ASSERT_NE(frameNode1, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    auto windowScene = DragDropFuncWrapper::FindWindowScene(frameNode1);
+    EXPECT_EQ(windowScene, rootNode);
+
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    frameNode1->AddChild(frameNode2);
+    ASSERT_NE(frameNode2, nullptr);
+    windowScene = DragDropFuncWrapper::FindWindowScene(frameNode2);
+    EXPECT_EQ(windowScene, rootNode);
+
+    auto frameNode3 = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode3, nullptr);
+    windowScene = DragDropFuncWrapper::FindWindowScene(frameNode3);
+    EXPECT_EQ(windowScene, nullptr);
+
+    container->isSceneBoardWindow_ = false;
+    windowScene = DragDropFuncWrapper::FindWindowScene(frameNode3);
+    EXPECT_EQ(windowScene, nullptr);
 }
 } // namespace OHOS::Ace::NG

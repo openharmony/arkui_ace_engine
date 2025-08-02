@@ -86,52 +86,58 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     property->UpdateHasCustomPermissionForSecComp(hasCustomPermission);
 }
 
+void SecurityComponentModelNG::InitChildNode(FrameNode* frameNode, const SecurityComponentElementStyle& style,
+    GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource)
+{
+    bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->SetInternal();
+
+    if (isButtonVisible) {
+        SetDefaultBackgroundButton(buttonNode, style.backgroundType);
+    } else {
+        SetInvisibleBackgroundButton(buttonNode);
+    }
+    frameNode->AddChild(buttonNode);
+
+    if (style.symbolIcon && style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+        auto symbolIcon = FrameNode::CreateFrameNode(
+            V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
+        frameNode->AddChild(symbolIcon);
+    } else if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+        auto imageIcon = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        imageIcon->SetInternal();
+        InternalResource::ResourceId iconId;
+        if (getIconResource(style.icon, iconId)) {
+            SetDefaultIconStyle(imageIcon, iconId, isButtonVisible);
+        }
+        frameNode->AddChild(imageIcon);
+    }
+
+    if (style.text != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        textNode->SetInternal();
+        std::string textStr = "";
+        getTextResource(style.text, textStr);
+        SetDefaultTextStyle(textNode, textStr, isButtonVisible);
+        frameNode->AddChild(textNode);
+    }
+    auto refPtr = AceType::Claim(frameNode);
+    InitLayoutProperty(refPtr, style.text, style.icon, style.symbolIcon, style.backgroundType);
+}
+
 bool SecurityComponentModelNG::InitSecurityComponent(FrameNode* frameNode,
     const SecurityComponentElementStyle& style, bool isArkuiComponent,
     GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource)
 {
     CHECK_NULL_RETURN(frameNode, false);
     if (frameNode->GetChildren().empty()) {
-        bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
-        auto buttonNode = FrameNode::CreateFrameNode(
-            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<ButtonPattern>());
-        buttonNode->SetInternal();
-
-        if (isButtonVisible) {
-            SetDefaultBackgroundButton(buttonNode, style.backgroundType);
-        } else {
-            SetInvisibleBackgroundButton(buttonNode);
-        }
-        frameNode->AddChild(buttonNode);
-
-        if (style.symbolIcon && style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
-            auto symbolIcon = FrameNode::CreateFrameNode(
-                V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
-            frameNode->AddChild(symbolIcon);
-        } else if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
-            auto imageIcon = FrameNode::CreateFrameNode(
-                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-            imageIcon->SetInternal();
-            InternalResource::ResourceId iconId;
-            if (getIconResource(style.icon, iconId)) {
-                SetDefaultIconStyle(imageIcon, iconId, isButtonVisible);
-            }
-            frameNode->AddChild(imageIcon);
-        }
-
-        if (style.text != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
-            auto textNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            textNode->SetInternal();
-            std::string textStr = "";
-            getTextResource(style.text, textStr);
-            SetDefaultTextStyle(textNode, textStr, isButtonVisible);
-            frameNode->AddChild(textNode);
-        }
-        auto refPtr = AceType::Claim(frameNode);
-        InitLayoutProperty(refPtr, style.text, style.icon, style.symbolIcon, style.backgroundType);
+        InitChildNode(frameNode, style, getIconResource, getTextResource);
     }
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_RETURN(property, false);

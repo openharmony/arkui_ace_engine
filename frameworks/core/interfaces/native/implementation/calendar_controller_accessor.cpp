@@ -65,7 +65,4 @@ const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
     return &CalendarControllerAccessorImpl;
 }
 
-struct CalendarControllerPeer {
-    virtual ~CalendarControllerPeer() = default;
-};
 }

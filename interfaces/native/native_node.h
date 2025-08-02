@@ -8294,7 +8294,6 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
  * @return 错误码。
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
  *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中参数长度超限。
- *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
 int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
@@ -8322,7 +8321,6 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index,
     * @param size 数组长度。
     * @return 错误码。
     *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
-    *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
     * @since 12
     */
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);

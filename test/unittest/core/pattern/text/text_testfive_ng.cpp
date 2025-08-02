@@ -1567,6 +1567,9 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
     frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     textSelectOverlay->OnAncestorNodeChanged(frameNodeChangeInfoFlag);
     EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+    auto viewPort = textSelectOverlay->GetAncestorNodeViewPort();
+    ASSERT_TRUE(viewPort.has_value());
+    EXPECT_EQ(viewPort.value(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -3322,7 +3325,7 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
 
 /**
  * @tc.name: TxtParagraphUpdateColor001
- * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
@@ -3342,7 +3345,7 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
 
 /**
  * @tc.name: UnRegisterAfterLayoutCallback001
- * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
@@ -3409,11 +3412,11 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), true);
     /**
-     * @tc.expected: Set EnableAutoSpacing False
+     * @tc.expected: Set EnableAutoSpacing False.
      */
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
     /**
-     * @tc.expected: Get EnableAutoSpacing Value
+     * @tc.expected: Get EnableAutoSpacing Value.
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);

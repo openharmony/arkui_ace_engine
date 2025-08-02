@@ -93,8 +93,8 @@ private:
     void DumpInjectingInfo(int32_t round, std::vector<InjectingInfo>& activedInjectingInfos,
         std::vector<InjectingInfo>& otherInjectingInfos) const;
     int32_t EstimateActiveFinger(const std::vector<ConsumeActionInfo>& actionList, int32_t lastActivedFinger) const;
-    void UpdateGlobalStatus(
-        const std::vector<ConsumeActionInfo>& actionList, const std::vector<InjectingInfo>& activedInjectingInfos);
+    void UpdateGlobalStatus(const std::vector<ConsumeActionInfo>& actionList,
+        const std::vector<InjectingInfo>& activedInjectingInfos, const std::vector<InjectingInfo>& otherInjectingInfos);
     bool IsAllConsumed() const;
     int32_t GetOptFromCurrentPosAndMoveOn(int32_t argc, char* argv[]);
     std::string GetParamFromCurrentPosAndMoveOn(int32_t argc, char* argv[]);

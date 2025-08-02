@@ -59,6 +59,9 @@ void ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(bool autoMonitorInvisible
 
 void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 {
+    if (images.empty()) {
+        return;
+    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     InitImageNodeInImageAnimator(frameNode);
     std::vector<ImageProperties> imageList = images;
@@ -180,6 +183,9 @@ RefPtr<FrameNode> ImageAnimatorModelNG::CreateFrameNode(int32_t nodeId)
 
 void ImageAnimatorModelNG::SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images)
 {
+    if (images.empty()) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
     InitImageNodeInImageAnimator(frameNode);
     std::vector<ImageProperties> imageList = images;

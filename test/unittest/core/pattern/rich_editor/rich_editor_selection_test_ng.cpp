@@ -847,6 +847,77 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSelection019
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, SetSelection019, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    ASSERT_EQ(richEditorPattern->contentMod_, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
+    richEditorPattern->previewTextRecord_.startOffset = 1;
+    richEditorPattern->previewTextRecord_.endOffset = 10;
+
+    int32_t start = -1;
+    int32_t end = 1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: SetSelection020
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, SetSelection020, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    ASSERT_EQ(richEditorPattern->contentMod_, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    std::u16string content = u"TEST123";
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
+    richEditorPattern->previewTextRecord_.startOffset = -1;
+    richEditorPattern->previewTextRecord_.endOffset = 10;
+
+    int32_t start = -1;
+    int32_t end = -1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+}
+
+
+/**
  * @tc.name: InitSelection001
  * @tc.desc: test InitSelection
  * @tc.type: FUNC
@@ -1858,6 +1929,223 @@ HWTEST_F(RichEditorSelectionTestNg, GetRectsForRange001, TestSize.Level1)
     end = 0;
     result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
     EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection001
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+    richEditorPattern->caretPosition_ = 0;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection002
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection003
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextSpanOptions options;
+    options.value = TEST_INSERT_VALUE;
+    richEditorPattern->AddTextSpan(options);
+
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 0;
+
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 1);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection004
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretPosition_ = 0;
+
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection005
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 1;
+
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
+}
+
+/**
+ * @tc.name: CalculateTruncationLength001
+ * @tc.desc: test CalculateTruncationLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, CalculateTruncationLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    std::string insertValue = "hello";
+    int32_t start = 2;
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 4;
+    int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
+    EXPECT_EQ(length, 4);
+}
+
+/**
+ * @tc.name: CalculateTruncationLength002
+ * @tc.desc: test CalculateTruncationLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, CalculateTruncationLength002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    std::string insertValue = "hello";
+    int32_t start = 2;
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
+    EXPECT_EQ(length, 2);
+}
+
+/**
+ * @tc.name: GetSpanRangeByResultObject001
+ * @tc.desc: test GetSpanRangeByResultObject function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, GetSpanRangeByResultObject001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto rangeStart = 1;
+    SpanPosition spanPosition;
+    spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = rangeStart;
+    ResultObject result;
+    result.spanPosition = spanPosition;
+    result.offsetInSpan[0] = 1;
+    result.offsetInSpan[1] = 2;
+    auto [selectStartResult, selectEndResult] = richEditorPattern->GetSpanRangeByResultObject(result);
+    auto selectStart = 2;
+    auto selectEnd = 3;
+    EXPECT_EQ(selectStart, selectStartResult);
+    EXPECT_EQ(selectEnd, selectEndResult);
+}
+
+/**
+ * @tc.name: GetSpanRangeByResultObject002
+ * @tc.desc: test GetSpanRangeByResultObject function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, GetSpanRangeByResultObject002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    SpanPosition spanPosition;
+    ResultObject result;
+    result.spanPosition = spanPosition;
+    result.offsetInSpan[0] = 1;
+    result.offsetInSpan[1] = 2;
+    auto [selectStartResult, selectEndResult] = richEditorPattern->GetSpanRangeByResultObject(result);
+    auto selectStart = 1;
+    auto selectEnd = 2;
+    EXPECT_EQ(selectStart, selectStartResult);
+    EXPECT_EQ(selectEnd, selectEndResult);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility001
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, UpdateSelectionAndHandleVisibility001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::MOUSE;
+    richEditorPattern->releaseInDrop_ = true;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->caretPosition_ = 5;
+    richEditorPattern->insertValueLength_ = 5;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 5);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility002
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, UpdateSelectionAndHandleVisibility002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::MOUSE;
+    richEditorPattern->releaseInDrop_ = true;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->lastCaretPosition_ = 5;
+    richEditorPattern->insertValueLength_ = 5;
+    richEditorPattern->isSpanStringMode_ = false;
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 5);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 10);
 }
 
 } // namespace OHOS::Ace::NG

@@ -1314,7 +1314,7 @@ HWTEST_F(TextFieldTenPatternNg, GetSubComponentInfos001, TestSize.Level1)
     pattern->spans_.push_back(spanItem1);
     pattern->spans_.push_back(spanItem2);
     pattern->spans_.push_back(nullptr);
-
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     std::vector<SubComponentInfo> subComponentInfos;
     size_t result = pattern->GetSubComponentInfos(subComponentInfos);
     EXPECT_EQ(result, 0);

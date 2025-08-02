@@ -52,6 +52,7 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
+#include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "securec.h"
 
@@ -955,9 +956,9 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
 }
 
 LayoutSafeAreaEdge ParseIgnoresLayoutSafeAreaEdges(
-    const ArkUI_Int32* ignoreEdges, ArkUI_Int32 size, LayoutSafeAreaEdge defaultVal)
+    const ArkUI_Int32* ignoreEdges, ArkUI_Uint32 size, LayoutSafeAreaEdge defaultVal)
 {
-    if (ignoreEdges == nullptr || size <= 0) {
+    if (ignoreEdges == nullptr || size == 0) {
         return NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     }
     static std::vector<uint32_t> layoutEdgeEnum {
@@ -970,7 +971,7 @@ LayoutSafeAreaEdge ParseIgnoresLayoutSafeAreaEdges(
         NG::LAYOUT_SAFE_AREA_EDGE_ALL
     };
     NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
-    for (int32_t i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         if (ignoreEdges[i] < 0 || ignoreEdges[i] > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
             return defaultVal;
         }
@@ -1598,7 +1599,7 @@ void SetPositionEdges(ArkUINodeHandle node, const int32_t useEdges, const ArkUIS
         if (vaild) {
             if (SystemProperties::ConfigChangePerform() && rawPtr) {
                 auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-                ViewAbstract::SetPosition(frameNode, x.value(), y.value(), objs[0], objs[1]);
+                ViewAbstract::SetPosition(frameNode, offset, objs[0], objs[1]);
             } else {
                 ViewAbstract::SetPosition(frameNode, offset);
             }
@@ -3376,6 +3377,7 @@ void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGe
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetGeometryTransition, node, id, options);
     std::string idStr(id);
     ViewAbstract::SetGeometryTransition(frameNode, idStr,
         static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
@@ -3397,6 +3399,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, ResetGeometryTransition, node);
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 

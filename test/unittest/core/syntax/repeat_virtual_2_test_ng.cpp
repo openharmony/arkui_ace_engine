@@ -751,6 +751,6 @@ HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange001, TestSize.Level1)
         { 1, cacheItem }, { 2, cacheItem }, { 3, cacheItem }, { 4, cacheItem }
     };
     repeatNode->NotifyColorModeChange(1);
-    EXPECT_EQ(repeatNode->GetChildren().size(), 4);
+    EXPECT_TRUE(cacheItem->node_->measureAnyWay_);
 }
 } // namespace OHOS::Ace::NG

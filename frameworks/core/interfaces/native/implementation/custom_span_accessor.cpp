@@ -17,8 +17,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct CustomSpanPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomSpanAccessor {
 void DestroyPeerImpl(Ark_CustomSpan peer)
@@ -59,7 +57,4 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
     return &CustomSpanAccessorImpl;
 }
 
-struct CustomSpanPeer {
-    virtual ~CustomSpanPeer() = default;
-};
 }

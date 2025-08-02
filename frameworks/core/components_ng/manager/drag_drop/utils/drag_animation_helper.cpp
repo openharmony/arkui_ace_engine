@@ -118,6 +118,8 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<FrameNod
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
     CalcResult calcResult = { 0.0f, -1.0f, -1.0f };
     CalcDistanceBeforeLifting(isGrid, calcResult, gatherNodeCenter, gatherNodeChildrenInfo);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     AnimationUtils::Animate(
         option,
         [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
@@ -128,7 +130,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<FrameNod
                 offset += child.offset;
                 DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, offset);
             }
-        });
+        }, nullptr, nullptr, pipeline);
 }
 
 void DragAnimationHelper::PlayGatherNodeOpacityAnimation(const RefPtr<OverlayManager>& overlayManager)
@@ -229,6 +231,13 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
         option.GetOnFinishEvent());
 }
 
+float DragAnimationHelper::GetLiftingNodeScale(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_RETURN(renderContext, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    VectorF defaultScale = VectorF(PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    return renderContext->GetTransformScaleValue(defaultScale).x;
+}
+
 void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode,
     const RefPtr<OverlayManager>& overlayManager)
 {
@@ -258,8 +267,11 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     auto frameNodeSize = geometryNode->GetFrameSize();
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    GatherAnimationInfo gatherAnimationInfo = { PIXELMAP_DRAG_SCALE_MULTIPLE, frameNodeSize.Width(),
+    auto scale = GetLiftingNodeScale(renderContext);
+    GatherAnimationInfo gatherAnimationInfo = { scale, frameNodeSize.Width(),
         frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     AnimationUtils::Animate(
         option,
         [weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), gatherAnimationInfo,
@@ -269,7 +281,7 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
             DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
             DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, pipeline);
 }
 
 void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
@@ -851,26 +863,6 @@ RefPtr<FrameNode> DragAnimationHelper::CreateBadgeTextNode(int32_t childSize)
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_RETURN(textNode, nullptr);
-
-    auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-
-    auto textRowProperty = textRow->GetLayoutProperty();
-    CHECK_NULL_RETURN(textRowProperty, nullptr);
-    auto textNodeProperty = textNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(textNodeProperty, nullptr);
-    auto textRowRenderContext = textRow->GetRenderContext();
-    CHECK_NULL_RETURN(textRowRenderContext, nullptr);
-    textNodeProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
-    textNodeProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    textRowRenderContext->UpdateOffset(OffsetT<Dimension>(
-        Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx()), Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx())));
-    textRowProperty->UpdateAlignRules(
-        { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
-            { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });
-    textNode->MountToParent(textRow);
-
     auto badgeLength = std::to_string(childSize).size();
     DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
 
@@ -878,7 +870,7 @@ RefPtr<FrameNode> DragAnimationHelper::CreateBadgeTextNode(int32_t childSize)
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    return textRow;
+    return textNode;
 }
 
 void DragAnimationHelper::ShowPreviewBadgeAnimation(
@@ -1268,13 +1260,45 @@ void DragAnimationHelper::UpdateStartTransitionOptionAnimation(const DragDropMan
 
 void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
 {
-    auto textRowNode = DragAnimationHelper::CreateBadgeTextNode(data.badgeNumber);
-    data.textRowNode = textRowNode;
-    RefPtr<OHOS::Ace::NG::FrameNode> textNode = nullptr;
-    if (textRowNode) {
-        textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetChildAtIndex(0));
-        data.textNode = textNode;
+    if (data.badgeNumber <= 1) {
+        return;
     }
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    auto textRowProperty = textRow->GetLayoutProperty();
+    CHECK_NULL_VOID(textRowProperty);
+    auto textNodeProperty = textNode->GetLayoutProperty();
+    CHECK_NULL_VOID(textNodeProperty);
+    auto textRowRenderContext = textRow->GetRenderContext();
+    CHECK_NULL_VOID(textRowRenderContext);
+    textNodeProperty->UpdateUserDefinedIdealSize(
+        { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+    textNodeProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto windowScale = dragDropManager->GetWindowScale();
+    textRowRenderContext->UpdateOffset(OffsetT<Dimension>(Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
+        Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    textRowProperty->UpdateAlignRules(
+        { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
+            { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });
+    textNode->MountToParent(textRow);
+
+    auto badgeLength = std::to_string(data.badgeNumber).size();
+    DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, data.badgeNumber);
+
+    textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    textNode->MarkModifyDone();
+    textNode->SetLayoutDirtyMarked(true);
+    textNode->SetActive(true);
+    data.textRowNode = textRow;
+    data.textNode = textNode;
     if (!data.gatherNode || data.deviceType == SourceType::MOUSE) {
         DragAnimationHelper::SetNodeVisible(data.textNode, false);
     }

@@ -16,33 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Edge, Axis, Curve, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, ScrollSource } from "./enums"
-import { Length, Dimension, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback } from "./units"
-import { RectResult, ICurve, ScrollableCommonMethod, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions } from "./common"
-import { Resource } from "global/resource";
+import { Edge, Axis, ScrollSource, BarState, Color, EdgeEffect, Curve } from "./enums"
+import { Length, VoidCallback, Dimension } from "./units"
+import { RectResult, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { Callback_Number_Number_Void } from "./grid"
+import { ScrollState, ScrollSnapAlign } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { ScrollSnapAlign, ScrollState } from "./list"
-import { ResizableOptions } from "./image"
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { Callback_Number_Number_Void } from "./grid"
-import { ArkScrollComponent } from "./../generated/ArkScroll"
-import { ArkScrollPeer } from "./../generated/peers/ArkScrollPeer"
+
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
         const obj : Scroller = new Scroller()
@@ -66,46 +57,47 @@ export class Scroller implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._Scroller_getFinalizer()
     }
-    public scrollTo(options: ScrollOptions): undefined {
+    public scrollTo(options: ScrollOptions): void {
         const options_casted = options as (ScrollOptions)
-        return this.scrollTo_serialize(options_casted)
+        this.scrollTo_serialize(options_casted)
+        return
     }
-    public scrollEdge(value: Edge, options?: ScrollEdgeOptions): undefined {
+    public scrollEdge(value: Edge, options?: ScrollEdgeOptions): void {
         const value_casted = value as (Edge)
         const options_casted = options as (ScrollEdgeOptions | undefined)
-        return this.scrollEdge_serialize(value_casted, options_casted)
+        this.scrollEdge_serialize(value_casted, options_casted)
+        return
     }
     public fling(velocity: number): void {
         const velocity_casted = velocity as (number)
         this.fling_serialize(velocity_casted)
         return
     }
-    public scrollPage(value: ScrollPageOptions | Literal_Boolean_next_Axis_direction): undefined {
+    public scrollPage(value: ScrollPageOptions): void {
         const value_type = runtimeType(value)
         if (TypeChecker.isScrollPageOptions(value, true, false)) {
             const value_casted = value as (ScrollPageOptions)
-            return this.scrollPage0_serialize(value_casted)
-        }
-        if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isLiteral_Boolean_next_Axis_direction(value, true, false))) {
-            const value_casted = value as (Literal_Boolean_next_Axis_direction)
-            return this.scrollPage1_serialize(value_casted)
+            this.scrollPage0_serialize(value_casted)
+            return
         }
         throw new Error("Can not select appropriate overload")
     }
     public currentOffset(): OffsetResult {
         return this.currentOffset_serialize()
     }
-    public scrollToIndex(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): undefined {
+    public scrollToIndex(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
         const value_casted = value as (number)
         const smooth_casted = smooth as (boolean | undefined)
         const align_casted = align as (ScrollAlign | undefined)
         const options_casted = options as (ScrollToIndexOptions | undefined)
-        return this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
+        this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
+        return
     }
-    public scrollBy(dx: Length, dy: Length): undefined {
-        const dx_casted = dx as (Length)
-        const dy_casted = dy as (Length)
-        return this.scrollBy_serialize(dx_casted, dy_casted)
+    public scrollBy(dx: Length | undefined, dy: Length | undefined): void {
+        const dx_casted = dx as (Length | undefined)
+        const dy_casted = dy as (Length | undefined)
+        this.scrollBy_serialize(dx_casted, dy_casted)
+        return
     }
     public isAtEnd(): boolean {
         return this.isAtEnd_serialize()
@@ -135,7 +127,7 @@ export class Scroller implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeScrollEdgeOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, TypeChecker.Edge_ToNumeric(value), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -159,15 +151,22 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as Axis)
-            thisSerializer.writeInt32(value_direction_value.valueOf())
+            thisSerializer.writeInt32(TypeChecker.Axis_ToNumeric(value_direction_value))
         }
         const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     private currentOffset_serialize(): OffsetResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : OffsetResult = retvalDeserializer.readOffsetResult()
         return returnResult
     }
@@ -185,7 +184,7 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(align_type as int32)
         if ((RuntimeType.UNDEFINED) != (align_type)) {
             const align_value  = (align as ScrollAlign)
-            thisSerializer.writeInt32(align_value.valueOf())
+            thisSerializer.writeInt32(TypeChecker.ScrollAlign_ToNumeric(align_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
@@ -198,8 +197,25 @@ export class Scroller implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    private scrollBy_serialize(dx: Length, dy: Length): undefined {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, dx, dy)
+    private scrollBy_serialize(dx: Length | undefined, dy: Length | undefined): undefined {
+        const thisSerializer : Serializer = Serializer.hold()
+        let dx_type : int32 = RuntimeType.UNDEFINED
+        dx_type = runtimeType(dx)
+        thisSerializer.writeInt8(dx_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dx_type)) {
+            const dx_value  = dx!
+            thisSerializer.writeLength(dx_value)
+        }
+
+        let dy_type : int32 = RuntimeType.UNDEFINED
+        dy_type = runtimeType(dy)
+        thisSerializer.writeInt8(dy_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dy_type)) {
+            const dy_value  = dy!
+            thisSerializer.writeLength(dy_value)
+        }
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     private isAtEnd_serialize(): boolean {
@@ -207,14 +223,318 @@ export class Scroller implements MaterializedBase {
         return retval
     }
     private getItemRect_serialize(index: number): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }
     private getItemIndex_serialize(x: number, y: number): number {
         const retval  = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)
         return retval
+    }
+}
+export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkScrollPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Scroll_construct(peerId, flags)
+        const _peer  = new ArkScrollPeer(_peerPtr, peerId, "Scroll", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setScrollOptionsAttribute(scroller?: Scroller): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let scroller_type : int32 = RuntimeType.UNDEFINED
+        scroller_type = runtimeType(scroller)
+        thisSerializer.writeInt8(scroller_type as int32)
+        if ((RuntimeType.UNDEFINED) != (scroller_type)) {
+            const scroller_value  = scroller!
+            thisSerializer.writeScroller(scroller_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollInterface_setScrollOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollableAttribute(value: ScrollDirection | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as ScrollDirection)
+            thisSerializer.writeInt32(TypeChecker.ScrollDirection_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_scrollable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollAttribute(value: ((first: number,last: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onWillScrollAttribute(value: ScrollOnWillScrollCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDidScrollAttribute(value: ScrollOnScrollCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollEdgeAttribute(value: OnScrollEdgeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onScrollEdge(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollStartAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onScrollStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollEndAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onScrollEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollStopAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollBarAttribute(value: BarState | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BarState)
+            thisSerializer.writeInt32(TypeChecker.BarState_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_scrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollBarColorAttribute(value: Color | number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_scrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollBarWidthAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_scrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_onScrollFrameBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    nestedScrollAttribute(value: NestedScrollOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNestedScrollOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_nestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableScrollInteractionAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_enableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    frictionAttribute(value: number | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_friction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollSnapAttribute(value: ScrollSnapOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeScrollSnapOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_scrollSnap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enablePagingAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_enablePaging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    initialOffsetAttribute(value: OffsetOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeOffsetOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_initialOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let edgeEffect_type : int32 = RuntimeType.UNDEFINED
+        edgeEffect_type = runtimeType(edgeEffect)
+        thisSerializer.writeInt8(edgeEffect_type as int32)
+        if ((RuntimeType.UNDEFINED) != (edgeEffect_type)) {
+            const edgeEffect_value  = (edgeEffect as EdgeEffect)
+            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(edgeEffect_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeEdgeEffectOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_edgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export enum ScrollDirection {
@@ -271,64 +591,291 @@ export interface ScrollSnapOptions {
     enableSnapToStart?: boolean;
     enableSnapToEnd?: boolean;
 }
+export type ScrollInterface = (scroller?: Scroller) => ScrollAttribute;
 export type OnScrollEdgeCallback = (side: Edge) => void;
 export interface OnScrollFrameBeginHandlerResult {
     offsetRemain: number;
 }
 export type OnScrollFrameBeginCallback = (offset: number, state: ScrollState) => OnScrollFrameBeginHandlerResult;
+export interface ScrollAttribute extends ScrollableCommonMethod {
+    scrollable(value: ScrollDirection | undefined): this
+    onScroll(value: ((first: number,last: number) => void) | undefined): this
+    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this
+    onDidScroll(value: ScrollOnScrollCallback | undefined): this
+    onScrollEdge(value: OnScrollEdgeCallback | undefined): this
+    onScrollStart(value: VoidCallback | undefined): this
+    onScrollEnd(value: (() => void) | undefined): this
+    onScrollStop(value: VoidCallback | undefined): this
+    scrollBar(value: BarState | undefined): this
+    scrollBarColor(value: Color | number | string | undefined): this
+    scrollBarWidth(value: number | string | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
+    nestedScroll(value: NestedScrollOptions | undefined): this
+    enableScrollInteraction(value: boolean | undefined): this
+    friction(value: number | Resource | undefined): this
+    scrollSnap(value: ScrollSnapOptions | undefined): this
+    enablePaging(value: boolean | undefined): this
+    initialOffset(value: OffsetOptions | undefined): this
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+}
+export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
+    scrollable_value?: ScrollDirection | undefined
+    onScroll_value?: ((first: number,last: number) => void) | undefined
+    onWillScroll_value?: ScrollOnWillScrollCallback | undefined
+    onDidScroll_value?: ScrollOnScrollCallback | undefined
+    onScrollEdge_value?: OnScrollEdgeCallback | undefined
+    onScrollStart_value?: VoidCallback | undefined
+    onScrollEnd_value?: (() => void) | undefined
+    onScrollStop_value?: VoidCallback | undefined
+    scrollBar_value?: BarState | undefined
+    scrollBarColor_value?: Color | number | string | undefined
+    scrollBarWidth_value?: number | string | undefined
+    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
+    nestedScroll_value?: NestedScrollOptions | undefined
+    enableScrollInteraction_value?: boolean | undefined
+    friction_value?: number | Resource | undefined
+    scrollSnap_value?: ScrollSnapOptions | undefined
+    enablePaging_value?: boolean | undefined
+    initialOffset_value?: OffsetOptions | undefined
+    public scrollable(value: ScrollDirection | undefined): this {
+        return this
+    }
+    public onScroll(value: ((first: number,last: number) => void) | undefined): this {
+        return this
+    }
+    public onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
+        return this
+    }
+    public onDidScroll(value: ScrollOnScrollCallback | undefined): this {
+        return this
+    }
+    public onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
+        return this
+    }
+    public onScrollStart(value: VoidCallback | undefined): this {
+        return this
+    }
+    public onScrollEnd(value: (() => void) | undefined): this {
+        return this
+    }
+    public onScrollStop(value: VoidCallback | undefined): this {
+        return this
+    }
+    public scrollBar(value: BarState | undefined): this {
+        return this
+    }
+    public scrollBarColor(value: Color | number | string | undefined): this {
+        return this
+    }
+    public scrollBarWidth(value: number | string | undefined): this {
+        return this
+    }
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | undefined): this {
+        return this
+    }
+    public enableScrollInteraction(value: boolean | undefined): this {
+        return this
+    }
+    public friction(value: number | Resource | undefined): this {
+        return this
+    }
+    public scrollSnap(value: ScrollSnapOptions | undefined): this {
+        return this
+    }
+    public enablePaging(value: boolean | undefined): this {
+        return this
+    }
+    public initialOffset(value: OffsetOptions | undefined): this {
+        return this
+    }
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        return this
+        }
+}
 export type ScrollOnScrollCallback = (xOffset: number, yOffset: number, scrollState: ScrollState) => void;
 export type ScrollOnWillScrollCallback = (xOffset: number, yOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => OffsetResult;
-/** @memo:stable */
-export interface ScrollAttribute extends ScrollableCommonMethod {
-    /** @memo */
-    setScrollOptions(scroller?: Scroller): this
-    /** @memo */
-    scrollable(value: ScrollDirection): this
-    /** @memo */
-    onScroll(value: ((first: number,last: number) => void)): this
-    /** @memo */
-    onWillScroll(value?: ScrollOnWillScrollCallback): this
-    /** @memo */
-    onDidScroll(value: ScrollOnScrollCallback): this
-    /** @memo */
-    onScrollEdge(value: OnScrollEdgeCallback): this
-    /** @memo */
-    onScrollStart(value: VoidCallback): this
-    /** @memo */
-    onScrollEnd(value: (() => void)): this
-    /** @memo */
-    onScrollStop(value: VoidCallback): this
-    /** @memo */
-    scrollBar(value: BarState): this
-    /** @memo */
-    scrollBarColor(value: Color | number | string): this
-    /** @memo */
-    scrollBarWidth(value: number | string): this
-    /** @memo */
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions): this
-    /** @memo */
-    enableScrollInteraction(value: boolean): this
-    /** @memo */
-    friction(value: number | Resource): this
-    /** @memo */
-    scrollSnap(value: ScrollSnapOptions): this
-    /** @memo */
-    enablePaging(value: boolean): this
-    /** @memo */
-    initialOffset(value: OffsetOptions): this
-    /** @memo */
-    edgeEffect(edgeEffect: EdgeEffect, options?: EdgeEffectOptions): this
+export class ArkScrollComponent extends ArkScrollableCommonMethodComponent implements ScrollAttribute {
+    getPeer(): ArkScrollPeer {
+        return (this.peer as ArkScrollPeer)
+    }
+    public setScrollOptions(scroller?: Scroller): this {
+        if (this.checkPriority("setScrollOptions")) {
+            const scroller_casted = scroller as (Scroller | undefined)
+            this.getPeer()?.setScrollOptionsAttribute(scroller_casted)
+            return this
+        }
+        return this
+    }
+    public scrollable(value: ScrollDirection | undefined): this {
+        if (this.checkPriority("scrollable")) {
+            const value_casted = value as (ScrollDirection | undefined)
+            this.getPeer()?.scrollableAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScroll(value: ((first: number,last: number) => void) | undefined): this {
+        if (this.checkPriority("onScroll")) {
+            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            this.getPeer()?.onScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
+        if (this.checkPriority("onWillScroll")) {
+            const value_casted = value as (ScrollOnWillScrollCallback | undefined)
+            this.getPeer()?.onWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidScroll(value: ScrollOnScrollCallback | undefined): this {
+        if (this.checkPriority("onDidScroll")) {
+            const value_casted = value as (ScrollOnScrollCallback | undefined)
+            this.getPeer()?.onDidScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
+        if (this.checkPriority("onScrollEdge")) {
+            const value_casted = value as (OnScrollEdgeCallback | undefined)
+            this.getPeer()?.onScrollEdgeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollStart(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onScrollStart")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.onScrollStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollEnd(value: (() => void) | undefined): this {
+        if (this.checkPriority("onScrollEnd")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onScrollEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollStop(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onScrollStop")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.onScrollStopAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBar(value: BarState | undefined): this {
+        if (this.checkPriority("scrollBar")) {
+            const value_casted = value as (BarState | undefined)
+            this.getPeer()?.scrollBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarColor(value: Color | number | string | undefined): this {
+        if (this.checkPriority("scrollBarColor")) {
+            const value_casted = value as (Color | number | string | undefined)
+            this.getPeer()?.scrollBarColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarWidth(value: number | string | undefined): this {
+        if (this.checkPriority("scrollBarWidth")) {
+            const value_casted = value as (number | string | undefined)
+            this.getPeer()?.scrollBarWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        if (this.checkPriority("onScrollFrameBegin")) {
+            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
+            this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | undefined): this {
+        if (this.checkPriority("nestedScroll")) {
+            const value_casted = value as (NestedScrollOptions | undefined)
+            this.getPeer()?.nestedScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableScrollInteraction(value: boolean | undefined): this {
+        if (this.checkPriority("enableScrollInteraction")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableScrollInteractionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public friction(value: number | Resource | undefined): this {
+        if (this.checkPriority("friction")) {
+            const value_casted = value as (number | Resource | undefined)
+            this.getPeer()?.frictionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollSnap(value: ScrollSnapOptions | undefined): this {
+        if (this.checkPriority("scrollSnap")) {
+            const value_casted = value as (ScrollSnapOptions | undefined)
+            this.getPeer()?.scrollSnapAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enablePaging(value: boolean | undefined): this {
+        if (this.checkPriority("enablePaging")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enablePagingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public initialOffset(value: OffsetOptions | undefined): this {
+        if (this.checkPriority("initialOffset")) {
+            const value_casted = value as (OffsetOptions | undefined)
+            this.getPeer()?.initialOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        if (this.checkPriority("edgeEffect")) {
+            const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
+            const options_casted = options as (EdgeEffectOptions)
+            this.getPeer()?.edgeEffectAttribute(edgeEffect_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Scroll(
-  /** @memo */
-  style: ((attributes: ScrollAttribute) => void) | undefined,
-  scroller?: Scroller | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: ScrollAttribute) => void) | undefined,
+    scroller?: Scroller,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkScrollComponent()
     })

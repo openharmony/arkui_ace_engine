@@ -75,8 +75,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
         if (!resObjArr.empty()) {
-            SymbolModel::GetInstance()->RegisterSymbolFontColorResource("symbolColor",
-                colorArr, resObjArr);
+            SymbolModelNG::RegisterSymbolFontColorResource(frameNode, "symbolColor", colorArr, resObjArr);
         } else {
             pattern->UnRegisterResource("symbolColor");
         }

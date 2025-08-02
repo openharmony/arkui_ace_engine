@@ -79,7 +79,4 @@ const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAcce
     return &PatternLockControllerAccessorImpl;
 }
 
-struct PatternLockControllerPeer {
-    virtual ~PatternLockControllerPeer() = default;
-};
 }

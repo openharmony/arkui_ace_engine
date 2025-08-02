@@ -185,6 +185,7 @@ adapter/ohos/osal/stylus_detector_callback.cpp @huawei_g_five
 adapter/ohos/osal/system_bar_style_ohos.cpp @arkuievent
 adapter/ohos/osal/system_bar_style_ohos.h @arkuievent
 adapter/ohos/osal/system_properties.cpp @arkuiframework
+adapter/ohos/osal/system_properties_multi_thread.cpp @arkuiframework
 adapter/ohos/osal/text_share_adapter.cpp @huawei_g_five
 adapter/ohos/osal/text_share_loader.cpp @huawei_g_five
 adapter/ohos/osal/text_share_mgr.cpp @huawei_g_five
@@ -256,6 +257,7 @@ examples/ImageAnimator/ @arkui_image
 examples/Picker/ @arkui_image
 examples/PickDialog/ @arkui_image
 examples/ScrollableComponentTest/ @arkuiscroll
+examples/UIExtension @arkuiabilitygroup
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkuiframework
@@ -2368,6 +2370,7 @@ frameworks/core/components_ng/base/distributed_ui.h @arkuiframework
 frameworks/core/components_ng/base/extension_handler.cpp @arkuiframework
 frameworks/core/components_ng/base/extension_handler.h @arkuiframework
 frameworks/core/components_ng/base/frame_node.cpp @arkui_architecture
+frameworks/core/components_ng/base/frame_node_multi_thread.cpp @arkuiframework
 frameworks/core/components_ng/base/frame_node.h @arkui_architecture
 frameworks/core/components_ng/base/frame_scene_status.h @arkuiframework
 frameworks/core/components_ng/base/geometry_node.cpp @arkuiframework
@@ -2414,11 +2417,13 @@ frameworks/core/components_ng/export_texture_info/export_texture_info.h @arkuila
 frameworks/core/components_ng/gestures/ @arkuievent
 frameworks/core/components_ng/image_provider/ @arkui_image
 frameworks/core/components_ng/layout/ @arkuilayout
+frameworks/core/components_ng/layout/section/ @arkuiscroll
 frameworks/core/components_ng/manager/avoid_info/ @arkui_superman
 frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
 frameworks/core/components_ng/manager/display_sync/ @arkuiframework
 frameworks/core/components_ng/manager/drag_drop/ @arkuievent
 frameworks/core/components_ng/manager/focus/ @arkuievent
+frameworks/core/components_ng/manager/force_split/ @arkui_superman
 frameworks/core/components_ng/manager/frame_rate/ @arkuiframework
 frameworks/core/components_ng/manager/full_screen/ @arkuilayout
 frameworks/core/components_ng/manager/memory/ @arkui_image
@@ -2750,6 +2755,7 @@ frameworks/core/components_ng/render/polygon_painter.h @arkuilayout
 frameworks/core/components_ng/render/rect_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/rect_painter.h @arkuilayout
 frameworks/core/components_ng/render/render_context.cpp @arkuiframework
+frameworks/core/components_ng/render/render_context_multi_thread.cpp @arkuiframework
 frameworks/core/components_ng/render/render_context_creator.cpp @arkuiframework
 frameworks/core/components_ng/render/render_context.h @arkuiframework
 frameworks/core/components_ng/render/render_property.cpp @arkuiframework
@@ -2760,6 +2766,7 @@ frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout
 frameworks/core/components_ng/render/snapshot_param.h @arkuievent
 frameworks/core/components_ng/token_theme/ @arkuiframework
+frameworks/core/drawable/ @arkui_image
 frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
@@ -2805,6 +2812,8 @@ frameworks/core/interfaces/native/node/form_component_modifier.cpp @form_framewo
 frameworks/core/interfaces/native/node/form_component_modifier.h @form_framework
 frameworks/core/interfaces/native/node/frame_node_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/frame_node_modifier.h @arkuiframework
+frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.cpp @arkuiframework
+frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.h @arkuiframework
 frameworks/core/interfaces/native/node/gauge_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/gauge_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/grid_col_modifier.cpp @arkuilayout
@@ -2845,6 +2854,8 @@ frameworks/core/interfaces/native/node/node_animate.cpp @arkuiframework
 frameworks/core/interfaces/native/node/node_animate.h @arkuiframework
 frameworks/core/interfaces/native/node/node_api.cpp @arkui_architecture
 frameworks/core/interfaces/native/node/node_api.h @arkui_architecture
+frameworks/core/interfaces/native/node/node_api_multi_thread.cpp @arkuiframework
+frameworks/core/interfaces/native/node/node_api_multi_thread.h @arkuiframework
 frameworks/core/interfaces/native/node/node_canvas_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_canvas_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp @arkuipopupwindow
@@ -2886,6 +2897,8 @@ frameworks/core/interfaces/native/node/node_refresh_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/node_refresh_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/node_relative_container_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_relative_container_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/node_render_node_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/node/node_render_node_modifier.h @arkuiframework
 frameworks/core/interfaces/native/node/node_scroll_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/node_scroll_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/node_slider_modifier.cpp @arkuipopupwindow
@@ -2980,6 +2993,7 @@ frameworks/core/interfaces/native/node/video_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/video_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/view_model.cpp @arkuiframework
 frameworks/core/interfaces/native/node/view_model.h @arkuiframework
+frameworks/core/interfaces/native/node/view_model_multi_thread.cpp @arkuiframework
 frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
@@ -3001,6 +3015,7 @@ interfaces/native/native_interface_xcomponent.cpp @arkuilayout
 interfaces/native/native_interface_xcomponent.h @arkuilayout
 interfaces/native/native_node.h @arkui_architecture
 interfaces/native/native_node_napi.h @arkuiframework
+interfaces/native/native_render.h @arkuiframework
 interfaces/native/native_styled_string.h @huawei_g_five
 interfaces/native/native_type.h @arkui_architecture
 interfaces/native/native_xcomponent_key_event.h @arkuilayout
@@ -3038,6 +3053,8 @@ interfaces/native/node/node_transition_imp.cpp @arkui_superman
 interfaces/native/node/node_utils.cpp @arkuiframework
 interfaces/native/node/progress_option.cpp @arkui_image
 interfaces/native/node/progress_option.h @arkui_image
+interfaces/native/node/render_node.cpp @arkuiframework
+interfaces/native/node/render_node.h @arkuiframework
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkuiframework
@@ -3121,6 +3138,58 @@ interfaces/napi/kits/router/ @arkui_superman
 interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkuiframework
 
+[Web ArkTS1.2]
+frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/client_authentication_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/client_authentication_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/console_message_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/console_message_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/controller_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/controller_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/data_resubmission_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/data_resubmission_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/event_result_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/event_result_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/file_selector_param_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/file_selector_param_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/file_selector_result_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/file_selector_result_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/full_screen_exit_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/http_auth_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/http_auth_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/js_geolocation_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/js_geolocation_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/js_result_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/js_result_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/permission_request_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/permission_request_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/rich_text_modifier.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/screen_capture_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/screen_capture_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/ssl_error_handler_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/ssl_error_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_context_menu_param_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_context_menu_param_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_context_menu_result_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_context_menu_result_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_controller_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_controller_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_cookie_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_cookie_peer.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_keyboard_controller_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_modifier.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_modifier_callbacks.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_modifier_callbacks.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_resource_error_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_resource_error_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_resource_request_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_resource_request_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_resource_response_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web_resource_response_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/webview_controller_accessor.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/web/webview_controller_peer_impl.h @arkwebinarkuireview
 
 [Test source]
 test/mock/core/event/ @arkuievent
@@ -3162,6 +3231,7 @@ test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
 test/unittest/core/manager/avoid_info_manager_test_ng.cpp  @arkui_superman
+test/unittest/core/manager/force_split_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/pattern/animator/ @arkui_superman
@@ -3258,6 +3328,7 @@ test/unittest/core/pattern/video/ @arkuilayout
 test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
+test/unittest/core/pattern/withtheme/ @arkuiframework
 test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
@@ -3266,8 +3337,13 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
+test/unittest/core/base/frame_node_test_ng_coverage.cpp @arkui_architecture
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
 test/unittest/interfaces/ace_gesture/ @arkuievent
 test/unittest/interfaces/form_render/ @form_framework
+
+[Generated source]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
+frameworks/core/interfaces/native/generated/ @arkui-idlize

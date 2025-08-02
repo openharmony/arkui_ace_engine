@@ -14,6 +14,9 @@
  */
 
 #include "base/log/dump_log.h"
+#if defined(ACE_STATIC)
+#include "base/utils/multi_thread.h"
+#endif
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
@@ -38,6 +41,9 @@ void LoadingProgressPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+#endif
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
     RegisterVisibleAreaChange();
@@ -45,12 +51,31 @@ void LoadingProgressPattern::OnAttachToFrameNode()
 
 void LoadingProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
+#endif
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     hasVisibleChangeRegistered_ = false;
 }
+
+#if defined(ACE_STATIC)
+void LoadingProgressPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void LoadingProgressPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+}
+#endif
 
 void LoadingProgressPattern::OnModifyDone()
 {

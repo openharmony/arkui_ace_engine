@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -694,7 +695,7 @@ HWTEST_F(TextTestNg, TryLinkJump001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. update spanNode content and call TryLinkJump funciton.
-     * jump link: "www.baidu.com"
+     * jump link: "www.baidu.com".
      */
     spanNode->UpdateContent(NORMAL_URL);
     EXPECT_FALSE(textPattern->TryLinkJump(spanItem));
@@ -1403,6 +1404,7 @@ HWTEST_F(TextTestNg, BuildTextRaceParagraph001, TestSize.Level1)
     rowLayoutAlgorithm->BuildTextRaceParagraph(
         textStyle1, textLayoutProperty, contentConstraint1, AceType::RawPtr(frameNode));
     EXPECT_EQ(rowLayoutAlgorithm->textStyle_, textStyle1);
+    EXPECT_TRUE(textLayoutProperty->GetNeedReCreateParagraphValue(false));
 }
 
 /**

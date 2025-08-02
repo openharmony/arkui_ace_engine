@@ -147,7 +147,21 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
 
 void ListItemPattern::OnRecycle()
 {
-    ResetSwipeStatus(false);
+    if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD) {
+        return;
+    }
+    FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+    if (springController_ && !springController_->IsStopped()) {
+        // clear stop listener before stop
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
+    startNodeSize_ = 0.0f;
+    endNodeSize_ = 0.0f;
+    float oldOffset = curOffset_;
+    curOffset_ = 0.0f;
+    FireSwipeActionOffsetChange(oldOffset, curOffset_);
+    MarkDirtyNode();
 }
 
 void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)

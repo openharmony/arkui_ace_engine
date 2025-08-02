@@ -172,6 +172,14 @@ RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
 }
 
+#if defined(ACE_STATIC)
+// only for 1.2
+RefPtr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixmap)
+{
+    return AceType::MakeRefPtr<PixelMapOhos>(pixmap);
+}
+#endif
+
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     auto* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);

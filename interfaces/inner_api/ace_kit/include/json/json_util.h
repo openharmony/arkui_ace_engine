@@ -125,6 +125,15 @@ public:
     JsonUtil() = delete;
     ~JsonUtil() = delete;
     static std::unique_ptr<JsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);
+#if defined(ACE_STATIC)
+    /**
+     * @description: only for 1.2
+     * @param data string
+     * @param size string length
+     * @return JsonValue
+     */
+    static std::unique_ptr<JsonValue> ParseJsonDataWithLength(const char* data, size_t len);
+#endif
     static std::unique_ptr<JsonValue> ParseJsonString(const std::string& content, const char** parseEnd = nullptr);
     static std::unique_ptr<JsonValue> Create(bool isRoot = true);
     static std::shared_ptr<JsonValue> CreateSharedPtrJson(bool isRoot = true);

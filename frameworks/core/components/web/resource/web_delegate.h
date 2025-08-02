@@ -982,6 +982,7 @@ public:
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -1195,6 +1196,10 @@ public:
     void OnOnlineRenderToForeground();
     void NotifyForNextTouchEvent();
 
+    std::string GetAllTextInfo() const;
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
+
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
@@ -1227,6 +1232,8 @@ public:
     void SetSurfaceId(const std::string& surfaceId);
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+
+    void OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
 
     void OnCursorUpdate(double x, double y, double width, double height);
 
@@ -1558,7 +1565,7 @@ private:
     // data detector js state
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
-
+    double density_ = 0.0;
 #endif
 };
 

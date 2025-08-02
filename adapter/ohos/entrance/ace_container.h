@@ -921,6 +921,35 @@ public:
     UIContentErrorCode RunIntentPage();
     void SetIsFormRender(bool isFormRender) override;
 
+    RefPtr<Frontend> GetSubFrontend() const override
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, nullptr);
+        std::lock_guard<std::mutex> lock(subFrontendMutex_);
+        return subFrontend_;
+    }
+
+    FrontendType GetFrontendType() const override
+    {
+        return type_;
+    }
+
+    bool IsArkTsFrontEnd() const override
+    {
+        return type_ == FrontendType::ARK_TS;
+    }
+
+    FrontendType GetSubFrontendType() const
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, type_);
+        if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+            return FrontendType::DECLARATIVE_JS;
+        } else {
+            return FrontendType::ARK_TS;
+        }
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -965,6 +994,9 @@ private:
     void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
 
     void UpdateSubContainerDensity(ResourceConfiguration& resConfig);
+
+    void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
+    void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -1054,6 +1086,10 @@ private:
     void SubscribeHighContrastChange();
     void UnsubscribeHighContrastChange();
     std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
+    // for multiple frontEnd
+    // valid only when type_ is STATIC_HYBRID_DYNAMIC or DYNAMIC_HYBRID_STATIC
+    RefPtr<Frontend> subFrontend_ = nullptr;
+    mutable std::mutex subFrontendMutex_;
 };
 
 } // namespace OHOS::Ace::Platform

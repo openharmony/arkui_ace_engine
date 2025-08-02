@@ -1113,6 +1113,41 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BackToTopNestedScrollTest005
+ * @tc.desc: Test the change in the number of listeners after setting backToTop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG listModel;
+    listModel.Create();
+    listModel.SetEdgeEffect(EdgeEffect::NONE, false);
+    ViewAbstract::SetWidth(CalcLength(SCROLLABLE_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLLABLE_HEIGHT));
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(450));
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto listNode = AceType::DynamicCast<FrameNode>(element);
+    FlushUITasks(listNode);
+    auto* proxy = StatusBarEventProxy::GetInstance();
+    ASSERT_NE(proxy, nullptr);
+    EXPECT_EQ(proxy->GetStatusBarClickListener().size(), 0);
+
+    /**
+     * @tc.steps: step2. Set listPattern backToTop to true.
+     */
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    listPattern->SetBackToTop(true);
+    FlushUITasks(listNode);
+    EXPECT_EQ(proxy->GetStatusBarClickListener().size(), 1);
+}
+
+/**
  * @tc.name: NestedScrollFromAxis001
  * @tc.desc: nested scroll from Axis
  * @tc.type: FUNC

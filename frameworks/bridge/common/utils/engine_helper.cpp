@@ -86,7 +86,7 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
 ScopedDelegate EngineHelper::GetCurrentDelegateSafely()
 {
     auto engine = GetCurrentEngineSafely();
-    if (engine) {
+    if (engine) { // AddEngine will be called in AceContainer::InitializeFrontend
         return { engine->GetFrontend(), Container::CurrentIdSafely() };
     }
     auto container = Container::CurrentSafely();

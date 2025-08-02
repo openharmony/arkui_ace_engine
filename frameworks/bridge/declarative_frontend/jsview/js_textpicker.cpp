@@ -1125,16 +1125,19 @@ void JSTextPickerParser::ParsePickerBackgroundStyle(const JSRef<JSObject>& param
     auto borderRadius = paramObj->GetProperty("borderRadius");
     if (!color->IsUndefined() && !color->IsNull()) {
         Color buttonBgColor;
-        if (ParseJsColor(color, buttonBgColor)) {
+        if (ParseJsColor(color, buttonBgColor, bgStyle.colorResObj)) {
             bgStyle.color = buttonBgColor;
+            bgStyle.textColorSetByUser = true;
         }
     }
     if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
         CalcDimension calcDimension;
         NG::BorderRadiusProperty borderRadiusProperty;
-        if (ParseLengthMetricsToDimension(borderRadius, calcDimension)) {
+        if (ParseLengthMetricsToDimension(borderRadius, calcDimension, bgStyle.borderRadiusResObj)) {
             if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
                 bgStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
+            } else {
+                bgStyle.borderRadiusResObj = nullptr;
             }
         } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
             SetBorderRadiusWithCheck(bgStyle.borderRadius, borderRadiusProperty);

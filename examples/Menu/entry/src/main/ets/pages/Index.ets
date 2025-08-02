@@ -10,10 +10,12 @@ interface ListCategories {
 struct RotationIndex {
 
   private items : ListCategories[] = [
-    {title: "Menu示例代码",utl: "pages/Examples/Index" },
-    {title: "Menu生命周期",utl:"pages/LifeCycle/Index"},
-    {title: "Menu拖拽相关测试",utl:"pages/Drag/Index"},
-    {title: "bindContextMenu菜单UX规格",utl:"pages/BindContextMenu/Index"},
+    {title: 'Menu示例代码',utl: 'pages/Examples/Index' },
+    {title: 'Menu生命周期',utl:'pages/LifeCycle/Index'},
+    {title: 'Menu拖拽相关测试',utl:'pages/Drag/Index'},
+    {title: 'bindContextMenu菜单UX规格',utl:'pages/BindContextMenu/Index'},
+    {title: 'PreviewAnimation',utl:'pages/PreviewAnimation/Index'},
+    {title: 'Dock',utl:'pages/Dock/Index'},
   ]
 
   build() {

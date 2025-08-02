@@ -105,7 +105,7 @@ public:
         return currentOffset_;
     }
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return -currentOffset_;
     }
@@ -415,6 +415,8 @@ private:
     float ValidateOffset(int32_t source, float willScrollOffset);
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
+    TwoDimensionScrollResult FireObserverTwoDimensionOnWillScroll(Dimension xOffset, Dimension yOffset,
+        ScrollState state, ScrollSource source);
     void FireOnDidScroll(float scroll);
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -477,7 +479,7 @@ public:
     Offset GetFreeScrollOffset() const final;
     bool FreeScrollBy(const OffsetF& delta) final;
     bool FreeScrollPage(bool reverse, bool smooth) final;
-    bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity) final;
+    bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity) final;
     void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
 
 private:

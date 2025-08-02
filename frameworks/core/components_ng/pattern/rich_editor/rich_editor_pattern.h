@@ -659,6 +659,7 @@ public:
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
     RefPtr<FrameNode> CreateAIEntityMenu() override;
+    std::function<void(const RectF& firstHandle, const RectF& secondHandle)> GetAISelectTextFunc();
     void AdjustAIEntityRect(RectF& aiRect) override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
@@ -670,6 +671,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
+        lastCaretPos_.reset();
         CHECK_NULL_VOID(HasFocus());
         CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
 
@@ -809,12 +811,13 @@ public:
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
-    bool IsShowHandle();
+    bool IsShowHandle() override;
     void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
+    void ProcessOverlay(const OverlayRequest& request = OverlayRequest()) override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
     void CheckEditorTypeChange();
@@ -902,14 +905,13 @@ public:
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
-    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false) override;
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
-    bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -1535,6 +1537,7 @@ private:
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
+    std::pair<int32_t, int32_t> CalcSpansRange(const std::vector<RefPtr<SpanNode>>& spanNodes) const;
     void OnHover(bool isHover, HoverInfo& hoverInfo);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
@@ -1749,7 +1752,7 @@ private:
     bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
-    std::list<RefPtr<SpanItem>> CopySpansForClipboard();
+    std::list<RefPtr<SpanItem>> CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans);
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif
@@ -1906,6 +1909,7 @@ private:
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
     std::optional<float> lastCaretPos_ = std::nullopt;
+    int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
     bool unmarkText_;

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
+#include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -104,6 +105,19 @@ void RecycleItemsByIndex(
     }
 }
 } // namespace
+
+void ScrollableUtils::DisableLazyForEachBuildCache(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    for (const auto& child : node->GetChildren()) {
+        auto lazyNode = AceType::DynamicCast<LazyForEachNode>(child);
+        if (lazyNode) {
+            lazyNode->EnablePreBuild(false);
+        } else if (AceType::InstanceOf<IfElseNode>(child)) {
+            DisableLazyForEachBuildCache(child);
+        }
+    }
+}
 
 float ScrollableUtils::CheckHeightExpansion(const RefPtr<LayoutProperty>& layoutProps, Axis axis)
 {

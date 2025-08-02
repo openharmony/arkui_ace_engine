@@ -3290,4 +3290,140 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsJsCustomPropertyUpdated001, TestSize.Level1
     result = frameNode->IsJsCustomPropertyUpdated();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: FrameNodeUpdateBackground001
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+    std::function<RefPtr<UINode>()> func = []() -> RefPtr<UINode> {
+        return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    };
+    frameNode->builderFunc_ = func;
+
+    /**
+     * @tc.steps: step2. do not set the BuilderBackgroundFlag.
+     * @tc.expected: do nothing.
+     */
+    EXPECT_CALL(*mockRenderContext, UpdateCustomBackground()).Times(0);
+    frameNode->UpdateBackground();
+    EXPECT_NE(frameNode->builderFunc_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground002
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+    std::function<RefPtr<UINode>()> func = []() -> RefPtr<UINode> {
+        return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    };
+    frameNode->builderFunc_ = func;
+
+    /**
+     * @tc.steps: step2. set the BuilderBackgroundFlag to false.
+     * @tc.expected: UpdateCustomBackground function is called.
+     */
+    EXPECT_CALL(*mockRenderContext, UpdateCustomBackground()).Times(1);
+    mockRenderContext->UpdateBuilderBackgroundFlag(false);
+    frameNode->UpdateBackground();
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground003
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+    std::function<RefPtr<UINode>()> func = []() -> RefPtr<UINode> {
+        return FrameNode::CreateFrameNode("backgroundNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    };
+    frameNode->builderFunc_ = func;
+
+    /**
+     * @tc.steps: step2. set the BuilderBackgroundFlag to true.
+     * @tc.expected: frameNode->builderFunc_ is nullptr.
+     */
+    mockRenderContext->UpdateBuilderBackgroundFlag(true);
+    frameNode->UpdateBackground();
+    EXPECT_EQ(frameNode->builderFunc_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground004
+ * @tc.desc: Test UpdateBackground.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step4. set the BuilderBackgroundFlag to true while frameNode->builderFunc_ is nullptr.
+     * @tc.expected: do nothing.
+     */
+    EXPECT_CALL(*mockRenderContext, UpdateCustomBackground()).Times(0);
+    mockRenderContext->UpdateBuilderBackgroundFlag(true);
+    frameNode->builderFunc_ = nullptr;
+    frameNode->backgroundNode_ = nullptr;
+    frameNode->UpdateBackground();
+    EXPECT_EQ(frameNode->backgroundNode_, nullptr);
+}
+
+/**
+ * @tc.name: AttachContext010
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, AttachContext010, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->GetOrCreateGestureEventHub();
+    SystemProperties::multiInstanceEnabled_ = true;
+    node->isDeleteRsNode_ = false;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    node->AttachContext(AceType::RawPtr(context));
+    SystemProperties::multiInstanceEnabled_ = false;
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
+}
 } // namespace OHOS::Ace::NG

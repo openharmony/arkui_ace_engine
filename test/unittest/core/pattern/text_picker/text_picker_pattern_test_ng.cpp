@@ -2276,4 +2276,28 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest020, TestSize.Level1)
     columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
     EXPECT_FLOAT_EQ(columnSize, 0.0f);
 }
+
+/**
+ * @tc.name: TextPickerPatternTest021
+ * @tc.desc: Test GetColumnWidthsStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest021, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+    auto columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
+    EXPECT_STREQ(columnWidthsStr.c_str(), "0.00px,0.00px");
+
+    auto host = textPickerPattern_->GetHost();
+    auto children = host->GetChildren();
+    for (auto iter = children.begin(); iter != children.end(); iter++) {
+        ASSERT_NE(*iter, nullptr);
+        auto stackNode = AceType::DynamicCast<FrameNode>(*iter);
+        host->RemoveChildAndReturnIndex(stackNode);
+    }
+    columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
+    EXPECT_STREQ(columnWidthsStr.c_str(), "");
+}
 } // namespace OHOS::Ace::NG

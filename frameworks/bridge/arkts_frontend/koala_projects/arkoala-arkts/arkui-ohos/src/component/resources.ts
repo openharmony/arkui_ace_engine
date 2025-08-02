@@ -1,9 +1,23 @@
 import { Resource } from "global/resource";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
-import { Serializer } from "../generated/peers/Serializer";
+import { Serializer } from "./peers/Serializer";
 import { asArray } from "@koalaui/common";
 import { RuntimeType, runtimeType } from "@koalaui/interop";
+
+enum ResourceType {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+}
 
 class ArkResource implements Resource {
     bundleName: string = "";
@@ -21,22 +35,7 @@ class ArkResource implements Resource {
         }
         this.params = param1;
         this._id = -1;
-        const param: string = resourceName.split(".")[1];
-        this.type = 20000;
-        switch (param) {
-            case 'media':
-                this.type = 20000;
-                break;
-            case 'color':
-                this.type = 10001;
-                break;
-            case 'string':
-                this.type = 10003;
-                break;
-            case 'float':
-                this.type = 10002;
-                break;
-        }
+        this.type = this.parseResourceType(resourceName);
     }
     set id(value: number) {
         this._id = value;
@@ -56,16 +55,7 @@ class ArkResource implements Resource {
             }
             thisSerializer.writeInt32(param.length as int32);
             for (let i = 0; i < param.length; i++) {
-                const params_type = runtimeType(param[i]);
-                if (params_type == RuntimeType.STRING) {
-                    const params_element: string = param[i] as string;
-                    thisSerializer.writeString(params_element);
-                } else if (params_type == RuntimeType.NUMBER) {
-                    const params_element: number = param[i] as number;
-                    thisSerializer.writeString(String(params_element));
-                } else {
-                    throw new Error("Unsupported params type, expect string or number.")
-                }
+                thisSerializer.writeString(String(param[i]));
             }
             const retval = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleNamea, moduleNamea, thisSerializer.asBuffer(), thisSerializer.length());
             thisSerializer.release();
@@ -75,6 +65,34 @@ class ArkResource implements Resource {
             }
         }
         return this._id;
+    }
+    parseResourceType(resourceName: string): ResourceType {
+        const typeName: string = resourceName.split(".")[1];
+        switch (typeName) {
+            case 'color':
+                return ResourceType.COLOR;
+            case 'float':
+                return ResourceType.FLOAT;
+            case 'string':
+                return ResourceType.STRING;
+            case 'plural':
+                return ResourceType.PLURAL;
+            case 'boolean':
+                return ResourceType.BOOLEAN;
+            case 'intarray':
+                return ResourceType.INTARRAY
+            case 'integer':
+                return ResourceType.INTEGER;
+            case 'pattern':
+                return ResourceType.PATTERN;
+            case 'strarray':
+                return ResourceType.STRARRAY
+            case 'media':
+                return ResourceType.MEDIA;
+            case 'RAWFILE':
+                return ResourceType.RAWFILE;
+        }
+        return ResourceType.STRING;
     }
 }
 export function _r(bundleName: string, moduleName: string, name: string, ...params: Object[]): Resource {

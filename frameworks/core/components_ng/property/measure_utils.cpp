@@ -150,6 +150,51 @@ PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const
     return PaddingPropertyF { left, right, top, bottom };
 }
 
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference, bool nonNegative)
+{
+    if (!padding) {
+        return {};
+    }
+    return ConvertWithResidueToPaddingPropertyF(*padding, scaleProperty, fract, percentReference, nonNegative);
+}
+
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const PaddingProperty& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference, bool nonNegative)
+{
+    auto left = ConvertToPx(padding.left, scaleProperty, percentReference);
+    auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
+    auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
+    auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = floor(left.value() + fract.left.value_or(0.0f));
+    }
+    if (right.has_value()) {
+        right = floor(right.value() + fract.right.value_or(0.0f));
+    }
+    if (top.has_value()) {
+        top = floor(top.value() + fract.top.value_or(0.0f));
+    }
+    if (bottom.has_value()) {
+        bottom = floor(bottom.value() + fract.bottom.value_or(0.0f));
+    }
+    if (nonNegative) {
+        if (left.has_value()) {
+            left = std::max(left.value(), 0.0f);
+        }
+        if (right.has_value()) {
+            right = std::max(right.value(), 0.0f);
+        }
+        if (top.has_value()) {
+            top = std::max(top.value(), 0.0f);
+        }
+        if (bottom.has_value()) {
+            bottom = std::max(bottom.value(), 0.0f);
+        }
+    }
+    return PaddingPropertyF { left, right, top, bottom };
+}
+
 MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
     const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
@@ -531,7 +576,7 @@ OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutCo
 
 OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyProperty>& childLayoutPolicy,
     const std::unique_ptr<MeasureProperty>& childCalcLayoutConstraint,
-    const std::optional<LayoutConstraintF>& parentConstraint)
+    const std::optional<LayoutConstraintF>& parentConstraint, const MagicItemProperty& magicItemProperty)
 {
     OptionalSizeF result;
     if (!parentConstraint.has_value()) {
@@ -540,7 +585,8 @@ OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyPro
     if (!childLayoutPolicy.has_value() || !childLayoutPolicy->IsMatch()) {
         return result;
     }
-    if (!childCalcLayoutConstraint || !childCalcLayoutConstraint->selfIdealSize.has_value()) {
+    if (!childCalcLayoutConstraint ||
+        (!childCalcLayoutConstraint->selfIdealSize.has_value() && !childCalcLayoutConstraint->minSize.has_value())) {
         return result;
     }
     auto isWidthPolicy = childLayoutPolicy->IsWidthMatch();
@@ -549,19 +595,32 @@ OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyPro
     if (childCalcLayoutConstraint->selfIdealSize.has_value()) {
         auto selfSize = ConvertToOptionalSize(childCalcLayoutConstraint->selfIdealSize.value(),
             parentConstraint->scaleProperty, parentConstraint->percentReference);
-        if (isHeightPolicy) {
-            if (selfSize.Width().has_value()) {
-                result.SetWidth(selfSize.Width().value());
+        if (isHeightPolicy && selfSize.Width().has_value()) {
+            result.SetWidth(selfSize.Width().value());
+        }
+        if (isWidthPolicy && selfSize.Height().has_value()) {
+            result.SetHeight(selfSize.Height().value());
+        }
+        if (magicItemProperty.HasAspectRatio()) {
+            auto aspectRatio = magicItemProperty.GetAspectRatioValue();
+            if (result.Width().has_value() && GreatNotEqual(aspectRatio, 0.0f)) {
+                result.SetHeight(result.Width().value() / aspectRatio);
             }
         }
-        if (isWidthPolicy) {
-            if (selfSize.Height().has_value()) {
-                result.SetHeight(selfSize.Height().value());
-            }
+        UpdateSingleSideByMaxOrMinCalcLayoutConstraint(
+            result, childCalcLayoutConstraint->maxSize, parentConstraint, true);
+        UpdateSingleSideByMaxOrMinCalcLayoutConstraint(
+            result, childCalcLayoutConstraint->minSize, parentConstraint, false);
+    } else if (childCalcLayoutConstraint->minSize.has_value()) {
+        auto minsize = ConvertToOptionalSize(childCalcLayoutConstraint->minSize.value(),
+            parentConstraint->scaleProperty, parentConstraint->percentReference);
+        if (isHeightPolicy && minsize.Width().has_value()) {
+            result.SetWidth(minsize.Width().value());
+        }
+        if (isWidthPolicy && minsize.Height().has_value()) {
+            result.SetHeight(minsize.Height().value());
         }
     }
-    UpdateSingleSideByMaxOrMinCalcLayoutConstraint(result, childCalcLayoutConstraint->maxSize, parentConstraint, true);
-    UpdateSingleSideByMaxOrMinCalcLayoutConstraint(result, childCalcLayoutConstraint->minSize, parentConstraint, false);
     return result;
 }
 

@@ -85,7 +85,6 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }

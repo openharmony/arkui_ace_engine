@@ -256,6 +256,15 @@ public:
         return pointerEvent_;
     }
 
+    void SetClickPointerEvent(const std::shared_ptr<MMI::PointerEvent>& clickPointerEvent)
+    {
+        clickPointerEvent_ = clickPointerEvent;
+    }
+    const std::shared_ptr<MMI::PointerEvent>& GetClickPointerEvent() const
+    {
+        return clickPointerEvent_;
+    }
+
     void SetRawGlobalLocation(const Offset& rawGlobalLocation)
     {
         rawGlobalLocation_ = rawGlobalLocation;
@@ -377,6 +386,7 @@ private:
     std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
+    std::shared_ptr<MMI::PointerEvent> clickPointerEvent_;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;

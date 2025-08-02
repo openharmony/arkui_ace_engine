@@ -1994,4 +1994,34 @@ HWTEST_F(GaugePatternTestNg, GaugeTestSetUseSpecialDefaultIndicator001, TestSize
     ASSERT_NE(gaugePaintProperty->GetUseSpecialDefaultIndicator().has_value(), false);
     EXPECT_TRUE(gaugePaintProperty->GetUseSpecialDefaultIndicatorValue());
 }
+
+/**
+ * @tc.name: GaugeIsMatchParentTest001
+ * @tc.desc: Test Gauge LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugeIsMatchParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = -0.1f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(ENABLED_TRUE);
+    gaugePaintProperty->UpdateValue(g_testValue);
+
+    /**
+     * @tc.steps: step2. get pattern and test IsEnableMatchParent
+     */
+    EXPECT_TRUE(gaugePattern->IsEnableMatchParent());
+    EXPECT_TRUE(gaugePattern->IsEnableFix());
+}
 } // namespace OHOS::Ace::NG

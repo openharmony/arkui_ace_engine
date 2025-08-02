@@ -32,6 +32,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "bridge/js_frontend/engine/common/js_engine.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
 #endif
@@ -480,6 +481,7 @@ std::shared_mutex JsiDeclarativeEngineInstance::globalRuntimeMutex_;
 // for async task callback executed after this instance has been destroyed.
 thread_local void* cardRuntime_;
 thread_local shared_ptr<JsRuntime> localRuntime_;
+thread_local void* g_declarativeRuntime = nullptr;
 
 // ArkTsCard start
 thread_local bool isUnique_ = false;
@@ -693,6 +695,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
+    LOGI("preload js enums in PreloadAceModuleWorker");
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
@@ -807,6 +810,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
+    g_declarativeRuntime = runtime;
 }
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
@@ -871,6 +875,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
+
+    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
@@ -1450,6 +1456,12 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_DCHECK(delegate);
     NG::UIContextHelper::RegisterRemoveUIContextFunc();
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
+    if (hybridType == JsEngineHybridType::DYNAMIC_HYBRID_STATIC) {
+        runtime_ = g_declarativeRuntime;
+    }
+    if (!g_declarativeRuntime && hybridType == JsEngineHybridType::DYNAMIC_HYBRID_STATIC) {
+        LOGE("JsiDeclarativeEngine::Initialize, g_declarativeRuntime is null");
+    }
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;
@@ -1705,6 +1717,11 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 #else
         abcPath = moduleName.append("/").append(fileName);
 #endif
+        {
+            if (arkRuntime->IsStaticOrInvalidFile(content.data(), content.size())) {
+                return false;
+            }
+        }
         {
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
                 return false;

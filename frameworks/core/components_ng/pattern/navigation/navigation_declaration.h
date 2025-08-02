@@ -290,7 +290,7 @@ enum class NavigationSystemTransitionType {
 enum class NavDestinationType {
     DETAIL = 0,
     HOME = 1,
-    PLACE_HOLDER = 2,
+    PROXY = 2
 };
 
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
@@ -308,6 +308,18 @@ struct NavDestinationTransition {
     RefPtr<Curve> curve;
     std::function<void()> event;
     std::function<void()> onTransitionEnd;
+};
+
+enum class LaunchMode {
+    STANDARD = 0,
+    MOVE_TO_TOP_SINGLETON,
+    POP_TO_TOP_SINGLETON,
+    NEW_INSTANCE,
+};
+
+struct NavigationOptions {
+    LaunchMode launchMode = LaunchMode::STANDARD;
+    bool animated = true;
 };
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(

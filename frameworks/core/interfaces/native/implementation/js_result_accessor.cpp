@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsResultAccessor {
 void DestroyPeerImpl(Ark_JsResult peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->result = nullptr;
     delete peer;
 }
 Ark_JsResult CtorImpl()
@@ -67,7 +65,4 @@ const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
     return &JsResultAccessorImpl;
 }
 
-struct JsResultPeer {
-    virtual ~JsResultPeer() = default;
-};
 }

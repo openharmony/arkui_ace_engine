@@ -69,7 +69,7 @@ void SearchModelStatic::SetTextIndent(FrameNode* frameNode, const std::optional<
 }
 
 void SearchModelStatic::SetCustomKeyboard(FrameNode* frameNode,
-    const std::function<void()>&& buildFunc, bool supportAvoidance)
+                                      const std::function<void()>&& buildFunc, bool supportAvoidance)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -143,6 +143,9 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
         if (!iconOptions.value().GetSize().has_value()) {
             iconOptions.value().UpdateSize(theme->GetIconHeight());
         }
+        if (!iconOptions.value().GetSrc().has_value()) {
+            iconOptions.value().UpdateSrc("", "", "");
+        }
     } else {
         iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
     }
@@ -151,11 +154,19 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
 
 void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value.has_value()) {
         SearchModelNG::SetSearchButtonFontSize(frameNode, value.value());
+        auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->ResetAdaptMinFontSize();
+        textLayoutProperty->ResetAdaptMaxFontSize();
         return;
     }
-    CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonFrameNode);
@@ -258,7 +269,7 @@ void SearchModelStatic::SetPlaceholderColor(FrameNode* frameNode, const std::opt
         SearchModelNG::SetPlaceholderColor(frameNode, optColor.value());
         return;
     }
-    SearchModelNG::ResetPlaceholderColor(frameNode);
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -565,8 +576,8 @@ void SearchModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
-        nullptr);
+    // textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+    //     nullptr);
 }
 
 void SearchModelStatic::RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest)

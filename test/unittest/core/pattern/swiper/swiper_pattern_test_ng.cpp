@@ -1725,6 +1725,46 @@ HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwipeToWithoutAnimation001
+ * @tc.desc: Test SwipeToWithoutAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper, jumpIndexByUser_ is nullopt.
+     * @tc.expected: jumpIndexByUser_ is nullopt.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+
+    /**
+     * @tc.steps: step2. The call to the SwipeToWithoutAnimation interface is triggered but not
+                  by the user using the changindex interface.
+     * @tc.expected: jumpIndexByUser_ is not changed.
+     */
+    pattern_->SwipeToWithoutAnimation(1, false);
+    EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+
+    /**
+     * @tc.steps: step3. The call to the SwipeToWithoutAnimation interface is triggered
+                  by the user using the changindex interface.
+     * @tc.expected: jumpIndexByUser_ is changed.
+     */
+    pattern_->SwipeToWithoutAnimation(1, true);
+    EXPECT_EQ(pattern_->jumpIndexByUser_, 1);
+
+    /**
+     * @tc.steps: step4. After executing the BeforeCreateLayoutWrapper interface, the jumpindex will be reset.
+     * @tc.expected: jumpIndexByUser_ is nullopt.
+     */
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+}
+
+/**
  * @tc.name: OnFontScaleConfigurationUpdate001
  * @tc.desc: Test SwiperPattern OnFontScaleConfigurationUpdate
  * @tc.type: FUNC
@@ -1747,5 +1787,37 @@ HWTEST_F(SwiperPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->OnFlushReloadFinish();
     EXPECT_EQ(pattern_->mainSizeIsMeasured_, false);
+}
+
+/**
+ * @tc.name: UpdateDefaultColor001
+ * @tc.desc: Text UpdateDefaultColor
+ */
+HWTEST_F(SwiperPatternTestNg, UpdateDefaultColor001, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    model.SetIndicatorType(AceType::RawPtr(frameNode_), SwiperIndicatorType::DOT);
+
+    pattern_->swiperParameters_ = nullptr;
+    pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+
+    swiperParameters.colorVal = Color::RED;
+    swiperParameters.selectedColorVal = Color::RED;
+    pattern_->SetSwiperParameters(swiperParameters);
+    pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+    EXPECT_NE(pattern_->swiperParameters_->colorVal, Color::RED);
+    EXPECT_NE(pattern_->swiperParameters_->selectedColorVal, Color::RED);
+
+    swiperParameters.parametersByUser.insert("colorVal");
+    swiperParameters.parametersByUser.insert("selectedColorVal");
+    swiperParameters.colorVal = Color::RED;
+    swiperParameters.selectedColorVal = Color::RED;
+    pattern_->SetSwiperParameters(swiperParameters);
+    pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+    EXPECT_EQ(pattern_->swiperParameters_->colorVal.value(), Color::RED);
+    EXPECT_EQ(pattern_->swiperParameters_->selectedColorVal.value(), Color::RED);
 }
 } // namespace OHOS::Ace::NG

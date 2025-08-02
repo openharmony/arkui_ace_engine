@@ -263,6 +263,7 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
         pageJson->Put("functionName", record.second.c_str());
         pageJson->Put("costTime", record.first);
         ruleJson->Put(pageJson);
+        LOGI("pageJson 9902: %{public}s", pageJson->ToString().c_str());
     }
     records_.clear();
 }

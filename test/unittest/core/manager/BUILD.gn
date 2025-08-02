@@ -123,6 +123,12 @@ ace_unittest("display_sync_manager_test_ng") {
   sources = [ "display_sync_manager_test.cpp" ]
 }
 
+ace_unittest("force_split_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "force_split_manager_test_ng.cpp" ]
+}
+
 ace_unittest("frame_rate_manager_test_ng") {
   type = "new"
   module_output = "manager"
@@ -203,6 +209,7 @@ group("core_manager_unittest") {
     ":drag_drop_spring_loading_test_ng",
     ":focus_manager_test_ng",
     ":focus_view_test_ng",
+    ":force_split_manager_test_ng",
     ":frame_rate_manager_test_ng",
     ":full_screen_manager_test_ng",
     ":json_report_test_ng",

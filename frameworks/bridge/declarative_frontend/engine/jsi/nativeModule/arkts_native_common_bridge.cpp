@@ -7274,14 +7274,33 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
     if (arrLength > NUM_10) {
         arrLength = NUM_10;
     }
-    int32_t* keysIntArray = new int32_t[arrLength];
-    for (size_t i = 0; i < arrLength; i++) {
+    std::vector<OHOS::Ace::ModifierKey> keysVector(arrLength);
+    for (uint32_t i = 0; i < arrLength; i++) {
         Local<JSValueRef> objValue = keysArray->GetValueAt(vm, keysArg, i);
-        keysIntArray[i] = objValue->Int32Value(vm);
+        keysVector.emplace_back(static_cast<OHOS::Ace::ModifierKey>(objValue->Int32Value(vm)));
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setKeyBoardShortCut(
-        nativeNode, stringValue.c_str(), keysIntArray, arrLength);
-    delete[] keysIntArray;
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (runtimeCallInfo->GetArgsNumber() == NUM_4) {
+        Local<JSValueRef> actionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+        auto obj = actionArg->ToObject(vm);
+        auto containerId = Container::CurrentId();
+        panda::Local<panda::FunctionRef> func = obj;
+        auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+        auto onActionFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                node = AceType::WeakClaim(frameNode), containerId]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+            function->Call(vm, function.ToLocal(), nullptr, 0);
+        };
+        ViewAbstractModelNG::SetKeyboardShortcut(frameNode, stringValue, keysVector, std::move(onActionFunc));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, stringValue, keysVector, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -7606,6 +7625,9 @@ void CommonBridge::SetCommonAttributes(
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, info->GetVerticalAxis()));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, info->GetHorizontalAxis()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
 }
@@ -8540,7 +8562,7 @@ ArkUINativeModuleValue CommonBridge::SetOnDragSpringLoading(ArkUIRuntimeCallInfo
         if (!JSViewAbstract::CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
             return panda::JSValueRef::Undefined(vm);
         }
-        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        NG::OnDragDropSpringLoadingFunc onDragSpringLoading = nullptr;
         if (jsVal->IsFunction()) {
             RefPtr<JsDragFunction> jsOnDragSpringLoadingFunc =
                 AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
@@ -9198,7 +9220,8 @@ ArkUINativeModuleValue CommonBridge::ResetOnBlur(ArkUIRuntimeCallInfo* runtimeCa
 Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInfo& hoverInfo)
 {
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
-        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY" };
+        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY",
+        "sourceTool" };
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = hoverInfo.GetGlobalLocation();
     const Offset& localOffset = hoverInfo.GetLocalLocation();
@@ -9217,7 +9240,8 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInf
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetX() / density : 0),
-        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceTool())) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
@@ -10884,25 +10908,23 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    JsiRef<JsiValue> secondeArg =
+        JsiRef<JsiValue>::FastMake(runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(NUM_1));
+
+    auto ratioArray = JSRef<JSArray>::Cast(secondeArg);
+    size_t size = ratioArray->Length();
     std::vector<double> ratioList;
-    if (secondeArg->IsArray(vm)) {
-        auto arrayObj = secondeArg->ToObject(vm);
-        uint32_t length = 0;
-        bool isArrayOrSharedArray = false;
-        bool isPendingException = false;
-        arrayObj->TryGetArrayLength(vm, &isPendingException, &isArrayOrSharedArray, &length);
-        for (uint32_t i = 0; i < length; ++i) {
-            auto element = arrayObj->Get(vm, i);
-            double ratio = 0.0;
-            bool isNumber = true;
-            element->GetValueDouble(isNumber);
-            if (isNumber) {
-                ratio = element->ToNumber(vm)->Value();
-                ratio = std::max(std::min(ratio, VISIBLE_RATIO_MAX), VISIBLE_RATIO_MIN);
-                ratioList.push_back(ratio);
-            }
+    for (size_t i = 0; i < size; i++) {
+        double ratio = 0.0;
+        JSViewAbstract::ParseJsDouble(ratioArray->GetValueAt(i), ratio);
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
         }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioList.push_back(ratio);
     }
     CHECK_NULL_RETURN(thirdArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto event = thirdArg->ToObject(vm);

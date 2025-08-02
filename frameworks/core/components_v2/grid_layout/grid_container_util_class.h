@@ -198,9 +198,10 @@ class BreakPoints : public AceType {
 public:
     BreakPoints() = default;
     DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
-        BreakPoints, (reference)(breakpoints))
+        BreakPoints, (reference)(breakpoints)(userDefine))
     BreakPointsReference reference = BreakPointsReference::WindowSize;
     std::vector<std::string> breakpoints { "320vp", "600vp", "840vp" };
+    bool userDefine = false;
 
     std::string ToString()
     {

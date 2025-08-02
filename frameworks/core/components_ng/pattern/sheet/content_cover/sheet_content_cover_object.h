@@ -36,6 +36,11 @@ public:
     void InitAnimationForOverlay(bool isTransitionIn, bool isFirstTransition) override;
     std::function<void()> GetAnimationPropertyCallForOverlay(bool isTransitionIn) override;
 
+    void SetSheetAnimationOption(AnimationOption& option) const override;
+    RefPtr<InterpolatingSpring> GetSheetTransitionCurve(float dragVelocity) const override;
+    std::function<void()> GetSheetTransitionFinishEvent(bool isTransitionIn) override;
+    std::function<void()> GetSheetAnimationEvent(bool isTransitionIn, float offset) override;
+
     ScrollResult HandleScroll(float scrollOffset, int32_t source, NestedState state, float velocity = 0.f) override
     {
         return { 0.0f, true };
@@ -51,7 +56,7 @@ public:
     void HandleDragUpdate(const GestureEvent& info) override {};
     void HandleDragEnd(float dragVelocity) override {};
 
-    void BeforeCreateLayoutWrapper() override {};
+    void BeforeCreateLayoutWrapper() override;
     SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const override
     {
         return SheetKeyboardAvoidMode::NONE;

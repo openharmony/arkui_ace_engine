@@ -36,19 +36,22 @@ public:
     void RecordPropChange(const WeakPtr<AnimatableProperty<T>>& ptr, T targetValue)
     {
         auto& impl = props_[ptr];
-        if (!MockAnimationManager::GetInstance().IsAnimationOpen()) {
+        using Manager = MockAnimationManager;
+        if (!Manager::GetInstance().IsAnimationOpen()) {
             impl = { targetValue, targetValue };
 
-            const auto prop = ptr.Upgrade();
-            CHECK_NULL_VOID(prop);
-            if (auto cb = prop->GetUpdateCallback()) {
-                cb(targetValue); // call update callback immediately if not within animation scope
+            if (Manager::Version() > Manager::Version::V0) {
+                const auto prop = ptr.Upgrade();
+                CHECK_NULL_VOID(prop);
+                if (auto cb = prop->GetUpdateCallback()) {
+                    cb(targetValue); // call update callback immediately if not within animation scope
+                }
             }
             return;
         }
 
         impl.endValue_ = targetValue;
-        MockAnimationManager::GetInstance().AddActiveProp(ptr);
+        Manager::GetInstance().AddActiveProp(ptr);
     }
 
     T GetEndValue(const WeakPtr<AnimatableProperty<T>>& ptr)

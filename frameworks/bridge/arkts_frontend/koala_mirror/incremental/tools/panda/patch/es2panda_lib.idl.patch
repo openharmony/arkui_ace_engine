@@ -1,0 +1,27 @@
+--- ./node_modules/@panda/sdk/ohos_arm64/include/tools/es2panda/generated/es2panda_lib/es2panda_lib.idl	2025-04-28 17:25:03.787222095 +0300
++++ ./node_modules/@panda/sdk/ohos_arm64/include/tools/es2panda/generated/es2panda_lib/es2panda_lib.idl	2025-04-28 17:28:54.616765363 +0300
+@@ -1779,7 +1779,10 @@
+ 
+ namespace ir {
+ 
+-[Entity=Class, c_type=es2panda_AstNode] interface NumberLiteral: Literal {
++[Entity=Class, Es2pandaAstNodeType=52, c_type=es2panda_AstNode] interface NumberLiteral: Literal {
++
++    /* [[nodiscard]] const util::StringView &Str() const noexcept */
++    [get] String StrConst(es2panda_Context context);
+     ir.AstNode Create(es2panda_Context ctx, i32 value);
+     ir.AstNode Create1(es2panda_Context ctx, i64 value);
+     ir.AstNode Create2(es2panda_Context ctx, f64 value);
+@@ -2487,12 +2490,6 @@
+     void SetTypeParams(es2panda_Context context, ir.TSTypeParameterInstantiation typeParams);
+ };
+ 
+-[Entity=Class, Es2pandaAstNodeType=52, c_type=es2panda_AstNode] interface NumberLiteral: Literal {
+-
+-    /* [[nodiscard]] const util::StringView &Str() const noexcept */
+-    [get] String StrConst(es2panda_Context context);
+-};
+-
+ [Entity=Class, Es2pandaAstNodeType=124, c_type=es2panda_AstNode] interface TSFunctionType: TypeNode {
+ 
+     /* explicit TSFunctionType(FunctionSignature &&signature, ArenaAllocator *const allocator) */

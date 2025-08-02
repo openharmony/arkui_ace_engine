@@ -2919,4 +2919,33 @@ HWTEST_F(OverlayTestNg, OverlayManagerContetx001, TestSize.Level1)
     context = overlayManager->GetPipelineContext();
     ASSERT_NE(context, nullptr);
 }
+
+/**
+ * @tc.name: DialogTransitionTest006
+ * @tc.desc: Test OverlayManager::ShowDialog->Set no transition effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTransitionTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    ASSERT_NE(dialog, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. get transitionEffect from dialog.
+     * @tc.expected: transitionEffect is nullptr.
+     */
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    EXPECT_EQ(transitionEffect, nullptr);
+}
 } // namespace OHOS::Ace::NG

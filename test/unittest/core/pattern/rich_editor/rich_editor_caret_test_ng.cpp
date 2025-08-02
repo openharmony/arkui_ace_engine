@@ -740,6 +740,24 @@ HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartFloatingCaretLand
+ * @tc.desc: test rich_editor_pattern.cpp StartFloatingCaretLand function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, StartFloatingCaretLand001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->floatingCaretState_.isFloatingCaretVisible = true;
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    ASSERT_NE(richEditorOverlay, nullptr);
+    richEditorOverlay->caretLanding_ = true;
+    richEditorPattern->StartFloatingCaretLand();
+    EXPECT_FALSE(richEditorOverlay->caretLanding_);
+}
+
+/**
  * @tc.name: CalcMoveDownPos001
  * @tc.desc: test CalcMoveDownPos
  * @tc.type: FUNC
@@ -848,6 +866,29 @@ HWTEST_F(RichEditorCaretTestNg, CalcMoveUpPos001, TestSize.Level0)
     Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
     auto caretPosition = richEditorPattern->CalcMoveUpPos(leadingMarginOffset);
     EXPECT_EQ(caretPosition, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
+/**
+ * @tc.name: TriggerAvoidOnCaretChange
+ * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    auto focusHub = pattern_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->currentFocus_ = true;
+    pattern_->HandleFocusEvent();
+    auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    pattern_->TriggerAvoidOnCaretChange();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), std::nullopt);
 }
 
 }

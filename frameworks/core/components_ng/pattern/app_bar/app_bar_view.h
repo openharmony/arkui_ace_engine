@@ -73,6 +73,7 @@ private:
     void CreateServicePanel(bool firstTry);
     void DestroyServicePanel();
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
+    static void InitAccessibility(RefPtr<UINode> uiNode);
     int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;

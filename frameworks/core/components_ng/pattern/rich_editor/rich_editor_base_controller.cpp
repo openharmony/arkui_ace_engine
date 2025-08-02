@@ -98,6 +98,7 @@ void RichEditorBaseController::StopEditing()
     richEditorPattern->StopEditing();
 }
 
+#if defined(ACE_STATIC)
 void RichEditorBaseController::SetSelection(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
@@ -106,6 +107,16 @@ void RichEditorBaseController::SetSelection(
     richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
     richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
+#else
+void RichEditorBaseController::SetSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetSelection(selectionStart, selectionEnd, options);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
+}
+#endif
 
 const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
 {

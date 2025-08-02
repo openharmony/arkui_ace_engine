@@ -114,6 +114,12 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
+
     void AddHeader(const RefPtr<NG::UINode>& header)
     {
         auto host = GetHost();
@@ -380,15 +386,10 @@ public:
         return true;
     }
 
-    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
-
     bool ChildTentativelyLayouted() override
     {
         return true;
     }
-
-    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
-        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

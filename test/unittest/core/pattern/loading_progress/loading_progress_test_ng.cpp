@@ -75,7 +75,7 @@ RefPtr<FrameNode> LoadingProgressTestNg::CreateLoadingProgressNode(const Color& 
  * @tc.desc: Test all the property of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameNodeCreator001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
     ASSERT_NE(frameNode, nullptr);
@@ -89,7 +89,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameNodeCreator001, TestSize.Lev
  * @tc.desc: Test the Reset function of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModel001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModel001, TestSize.Level0)
 {
     LoadingProgressModelNG modelNg;
     modelNg.Create();
@@ -108,7 +108,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModel001, TestSize.Level1)
  * @tc.desc: Test the Reset function of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModel002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModel002, TestSize.Level0)
 {
     LoadingProgressModelNG modelNg;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -127,7 +127,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModel002, TestSize.Level1)
  * @tc.desc: Test MeasureContent function of loadingProgressNode.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
     ASSERT_NE(frameNode, nullptr);
@@ -168,7 +168,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Leve
  * @tc.desc: Test Pattern OnDirtyLayoutWrapperSwap function of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
     ASSERT_NE(frameNode, nullptr);
@@ -190,7 +190,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest001, TestSize.Level1)
  * @tc.desc: Test LoadingProgress in visible scene.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
     ASSERT_NE(frameNode, nullptr);
@@ -301,7 +301,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
  * @tc.desc: Test LoadingProgress StartAnimation will fail in some scene.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest004, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
     ASSERT_NE(frameNode, nullptr);
@@ -342,7 +342,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest004, TestSize.Level1)
  * @tc.desc: SetChangeValue and get value.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get frameNode.
@@ -377,7 +377,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level1)
  * @tc.desc: Test Pattern OnThemeScopeUpdate function of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level0)
 {
     LoadingProgressModelNG modelNg;
     modelNg.Create();
@@ -470,7 +470,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
  * @tc.desc: Test LoadingProgressModifier DrawRing function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level0)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -508,7 +508,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier DrawOrbit function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest002, TestSize.Level0)
 {
     LoadingProgressModifier loadingProgressModifier;
     Testing::MockCanvas rsCanvas;
@@ -548,7 +548,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest002, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier onDraw function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest003, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest003, TestSize.Level0)
 {
     LoadingProgressModifier loadingProgressModifier;
     LinearColor color;
@@ -605,7 +605,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest003, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier onDraw function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest004, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest004, TestSize.Level0)
 {
     LoadingProgressModifier loadingProgressModifier;
     LinearColor color;
@@ -633,7 +633,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest004, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier StartTransToRecycleAnimation function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest005, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest005, TestSize.Level0)
 {
     LoadingProgressModifier loadingProgressModifier;
     LinearColor color;
@@ -665,7 +665,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest005, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier DrawOrbit function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest006, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest006, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create LoadingProgressModifier instance.
@@ -697,7 +697,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest006, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier DrawOrbit function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest007, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest007, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create LoadingProgressModifier instance.
@@ -728,7 +728,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest007, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier StartTransToRecycleAnimation function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest008, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest008, TestSize.Level0)
 {
     /**
      * @tc.step: step1. set isFormRender_ is true.
@@ -767,7 +767,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest008, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier StartRecycleCometAnimation function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create LoadingProgressModifier pointer.
@@ -787,7 +787,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier DrawRing function. ColorMode = DARK
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level0)
 {
     MockContainer::SetMockColorMode(ColorMode::DARK);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -827,7 +827,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier DrawOrbit function.ColorMode = DARK
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level0)
 {
     MockContainer::SetMockColorMode(ColorMode::DARK);
     LoadingProgressModifier loadingProgressModifier;
@@ -869,7 +869,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
  * @tc.desc: Test LoadingProgressModifier CorrectNormalize function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest012, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest012, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create LoadingProgressModifier pointer.
@@ -889,7 +889,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest012, TestSize.Level1)
  * @tc.desc: Test LoadingProgress StartAnimation will fail in some scene.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressRegisterVisibleAreaChangeTest004, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressRegisterVisibleAreaChangeTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
     ASSERT_NE(frameNode, nullptr);
@@ -923,7 +923,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressRegisterVisibleAreaChangeTest004,
  * @tc.desc: Test LoadingProgress enableLoading property.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set enableLoading property true.
@@ -965,7 +965,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest001, TestSize.L
  * @tc.desc: Test LoadingProgress enableLoading property.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set enableLoading property false.
@@ -1007,7 +1007,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest002, TestSize.L
  * @tc.desc: Test LoadingProgress focus event.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest001, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create LoadingProgress.
@@ -1044,7 +1044,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest001, TestSize
 * @tc.desc: Test LoadingProgress focus event.
 * @tc.type: FUNC
 */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest002, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create LoadingProgress.
@@ -1086,7 +1086,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest002, TestSize
 * @tc.desc: Test LoadingProgress focus event.
 * @tc.type: FUNC
 */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest001, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create LoadingProgress.
@@ -1123,7 +1123,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest001, TestSize.
 * @tc.desc: Test LoadingProgress focus event.
 * @tc.type: FUNC
 */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest002, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create LoadingProgress.
@@ -1161,7 +1161,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest002, TestSize.
  * @tc.desc: Test LoadingProgress color update property.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create loading progress and get pattern
@@ -1219,7 +1219,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest001, TestSize.Leve
  * @tc.desc: Test LoadingProgress color update property.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameRateRangeTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameRateRangeTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create loading progress and get pattern
@@ -1248,7 +1248,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameRateRangeTest001, TestSize.L
  * @tc.desc: Test LoadingProgress color update property.
  * @tc.type: FUNCC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create loading progress and get pattern
@@ -1282,7 +1282,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest002, TestSize.Leve
  * @tc.desc: Test OnColorConfigurationUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressOnColorConfigurationUpdateTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressOnColorConfigurationUpdateTest001, TestSize.Level0)
 {
     LoadingProgressModelNG modelNg;
     modelNg.Create();
@@ -1332,7 +1332,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressOnColorConfigurationUpdateTest001
  * @tc.desc: Test CreateWithResourceObj
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressTestNg, LoadingProgressCreateWithResourceObjTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressCreateWithResourceObjTest001, TestSize.Level0)
 {
     LoadingProgressModelNG modelNg;
     modelNg.Create();

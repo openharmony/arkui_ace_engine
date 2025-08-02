@@ -178,6 +178,12 @@ public:
 
     // router operation
     void Push(const RouterPageInfo& target);
+
+    // For ArkTS1.2
+    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target);
+    RefPtr<FrameNode> ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& enterFinishCallback);
+    RefPtr<FrameNode> RunPageExtender(const RouterPageInfo& target);
+
     void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();
     void Replace(const RouterPageInfo& target);
@@ -316,6 +322,11 @@ protected:
     bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
+
+    // For ArkTS1.2
+    virtual bool LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
+        bool needHideLast = true, bool needTransition = true, bool isPush = false);
+    RefPtr<FrameNode> CreatePageExtender(int32_t pageId, const RouterPageInfo& target);
 
     UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");

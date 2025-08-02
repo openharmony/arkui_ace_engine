@@ -216,6 +216,16 @@ struct BarrierInfo {
                 (this->referencedId == right.referencedId));
     }
 };
+
+#ifdef ACE_STATIC
+struct LocalizedBarrierInfo : public BarrierInfo {
+    LocalizedBarrierInfo()
+    {
+        direction = BarrierDirection::START;
+    }
+};
+#endif
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H

@@ -34,6 +34,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/base/mock_drag_window.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
+    "$ace_root/test/mock/base/mock_feature_param.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",

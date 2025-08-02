@@ -23,7 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
-// #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -48,6 +48,7 @@ void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPt
     }
     CHECK_NULL_VOID(unitNode);
     pattern->SetUnitNode(unitNode);
+    pattern->ProcessResponseArea();
 }
 
 void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& optValue)
@@ -55,15 +56,15 @@ void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std:
     TextFieldModelNG::SetShowCounterBorder(frameNode, optValue.value_or(true));
 }
 
-// void TextFieldModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
-// {
-//     NG::ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
-//     if (color) {
-//         TextFieldModelNG::SetBackgroundColor(frameNode, *color);
-//     } else {
-//         ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, frameNode);
-//     }
-// }
+void TextFieldModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    NG::ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
+    if (color) {
+        TextFieldModelNG::SetBackgroundColor(frameNode, *color);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, frameNode);
+    }
+}
 
 void TextFieldModelStatic::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
@@ -179,6 +180,10 @@ void TextFieldModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, cons
 
 void TextFieldModelStatic::SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
 {
+    if (valueOpt.has_value() && valueOpt.value() <= 0) {
+        TextFieldModelNG::SetMaxViewLines(frameNode, MAX_LINES);
+        return;
+    }
     TextFieldModelNG::SetMaxViewLines(frameNode, valueOpt.value_or(MAX_LINES));
 }
 
@@ -709,5 +714,113 @@ void TextFieldModelStatic::SetShowUnderline(FrameNode* frameNode, const std::opt
 void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue)
 {
     TextFieldModelNG::SetSelectAllValue(frameNode, isSelectAllValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+
+    CalcDimension iconSize = theme->GetCancelIconSize();
+    Color color = theme->GetCancelButtonIconColor();
+    std::string srcStr = "";
+
+    TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
+    TextFieldModelNG::SetCancelIconColor(frameNode, color);
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, srcStr);
+}
+
+void TextFieldModelStatic::SetWidthAuto(FrameNode* frameNode, bool val)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateWidthAuto(val);
+}
+
+void TextFieldModelStatic::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newPadding,
+    bool tmp)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (tmp) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto theme = pattern->GetTheme();
+        CHECK_NULL_VOID(theme);
+        auto themePadding = theme->GetPadding();
+        PaddingProperty paddings;
+        paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+        paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+        paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+        paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+        ViewAbstract::SetPadding(paddings);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings, frameNode);
+        return;
+    }
+    NG::ViewAbstract::SetPadding(frameNode, newPadding);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+}
+
+void TextFieldModelStatic::SetMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& margin = layoutProperty->GetMarginProperty();
+    CHECK_NULL_VOID(margin);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
+    MarginProperty userMargin;
+    userMargin.top = margin->top;
+    userMargin.bottom = margin->bottom;
+    userMargin.left = margin->left.has_value() ? margin->left :
+        (isRTL ? margin->end : margin->start);
+    userMargin.right = margin->right.has_value() ? margin->right :
+        (isRTL ? margin->start : margin->end);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
+}
+
+void TextFieldModelStatic::SetBackBorder(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+
+        bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        auto radius = renderContext->GetBorderRadius().value();
+
+        radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+            (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+        radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+            (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+        radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+            (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+        radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+            (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius, frameNode);
+    }
+    if (renderContext->HasBorderColor()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value(), frameNode);
+    }
+    if (renderContext->HasBorderWidth()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value(), frameNode);
+    }
+    if (renderContext->HasBorderStyle()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value(), frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

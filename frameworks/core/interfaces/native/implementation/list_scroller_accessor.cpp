@@ -143,7 +143,4 @@ const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()
     return &ListScrollerAccessorImpl;
 }
 
-struct ListScrollerPeer {
-    virtual ~ListScrollerPeer() = default;
-};
 }

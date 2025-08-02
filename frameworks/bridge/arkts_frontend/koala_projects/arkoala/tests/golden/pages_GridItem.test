@@ -1,0 +1,90 @@
+{
+  "rootElement": {
+    "nodeId": 1150,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1151,
+        "kind": "Grid",
+        "children": [
+          {
+            "nodeId": 1152,
+            "kind": "GridItem",
+            "children": [
+              {
+                "nodeId": 1153,
+                "kind": "Text",
+                "children": [],
+                "setTextOptions_content": "Grid item: 00"
+              }
+            ],
+            "rowStart_value": 5,
+            "rowEnd_value": 9,
+            "columnStart_value": 2,
+            "columnEnd_value": 7,
+            "selectable_value": 1,
+            "selected_value": 0,
+            "forceRebuild_value": 1
+          },
+          {
+            "nodeId": 1154,
+            "kind": "GridItem",
+            "children": [
+              {
+                "nodeId": 1155,
+                "kind": "Text",
+                "children": [],
+                "setTextOptions_content": "Grid item: 01"
+              }
+            ],
+            "rowStart_value": 5,
+            "rowEnd_value": 9,
+            "columnStart_value": 2,
+            "columnEnd_value": 7,
+            "selectable_value": 1,
+            "selected_value": 0,
+            "forceRebuild_value": 1
+          },
+          {
+            "nodeId": 1156,
+            "kind": "GridItem",
+            "children": [
+              {
+                "nodeId": 1157,
+                "kind": "Text",
+                "children": [],
+                "setTextOptions_content": "Grid item: 10"
+              }
+            ],
+            "rowStart_value": 5,
+            "rowEnd_value": 9,
+            "columnStart_value": 2,
+            "columnEnd_value": 7,
+            "selectable_value": 1,
+            "selected_value": 0,
+            "forceRebuild_value": 1
+          },
+          {
+            "nodeId": 1158,
+            "kind": "GridItem",
+            "children": [
+              {
+                "nodeId": 1159,
+                "kind": "Text",
+                "children": [],
+                "setTextOptions_content": "Grid item: 11"
+              }
+            ],
+            "rowStart_value": 5,
+            "rowEnd_value": 9,
+            "columnStart_value": 2,
+            "columnEnd_value": 7,
+            "selectable_value": 1,
+            "selected_value": 0,
+            "forceRebuild_value": 1
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -69,6 +69,8 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
+bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
+std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::gridIrregularLayoutEnable_ = true;
@@ -85,6 +87,9 @@ bool SystemProperties::imageFrameworkEnable_ = true;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+int32_t SystemProperties::velocityTrackerPointNumber_ = 20;
+bool SystemProperties::isVelocityWithinTimeWindow_ = true;
+bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
@@ -96,6 +101,7 @@ bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
@@ -193,6 +199,16 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
+bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
+{
+    return forceSplitIgnoreOrientationEnabled_;
+}
+
+std::optional<bool> SystemProperties::GetArkUIHookEnabled()
+{
+    return arkUIHookEnabled_;
+}
+
 bool SystemProperties::GetCacheNavigationNodeEnable()
 {
     return cacheNavigationNodeEnable_;
@@ -236,6 +252,21 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+int32_t SystemProperties::GetVelocityTrackerPointNumber()
+{
+    return velocityTrackerPointNumber_;
+}
+
+bool SystemProperties::IsVelocityWithinTimeWindow()
+{
+    return isVelocityWithinTimeWindow_;
+}
+
+bool SystemProperties::IsVelocityWithoutUpPoint()
+{
+    return isVelocityWithoutUpPoint_;
 }
 
 bool SystemProperties::GetAllowWindowOpenMethodEnabled()

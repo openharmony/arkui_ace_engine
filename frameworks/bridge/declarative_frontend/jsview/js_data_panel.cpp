@@ -388,10 +388,10 @@ void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
     }
 }
 
-void JSDataPanel::ParseShadowColors(const JSRef<JSVal>& colors, std::vector<OHOS::Ace::NG::Gradient>& shadowColors)
+void JSDataPanel::ParseShadowColors(
+    const JSRef<JSArray>& colorsArray, std::vector<OHOS::Ace::NG::Gradient>& shadowColors)
 {
     shadowColors.clear();
-    auto colorsArray = JSRef<JSArray>::Cast(colors);
     for (size_t i = 0; i < colorsArray->Length(); ++i) {
         auto item = colorsArray->GetValueAt(i);
         OHOS::Ace::NG::Gradient gradient;

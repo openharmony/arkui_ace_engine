@@ -15,7 +15,6 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 /// <reference path="./disposable.ts" />
-
 class BuilderNode extends Disposable {
   private _JSBuilderNode: JSBuilderNode;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.

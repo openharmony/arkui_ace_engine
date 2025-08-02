@@ -194,4 +194,18 @@ RefPtr<UINode> NavBarNode::GetNavigationNode()
 {
     return GetParentFrameNode();
 }
+
+std::string NavBarNode::ToDumpString()
+{
+    std::string dumpString;
+    dumpString.append("| [/]{ NavBar ");
+    dumpString.append("Visible? \"");
+    dumpString.append(IsVisible() ? "Yes" : "No");
+    int32_t count = 0;
+    int32_t depth = 0;
+    GetPageNodeCountAndDepth(&count, &depth);
+    dumpString.append("\", Count: " + std::to_string(count));
+    dumpString.append(", Depth: " + std::to_string(depth) + " }");
+    return dumpString;
+}
 } // namespace OHOS::Ace::NG

@@ -21,7 +21,7 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace::NG {
-const std::string DEFAULT_THEME_TAG = "ThemeTag";
+constexpr char DEFAULT_THEME_TAG[] = "ThemeTag";
 
 ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -43,14 +43,14 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     ArkUI_Int32 themeId = static_cast<ArkUI_Int32>(themeIdArg->Int32Value(vm));
     std::vector<ArkUI_Uint32> lightColors;
     std::vector<RefPtr<ResourceObject>> lightResObjs;
-    if (!HandleThemeColorsArg(vm, colorsArg, lightColors, lightResObjs)) {
+    if (!HandleThemeColorsArg(vm, colorsArg, lightColors, lightResObjs, themeId, false)) {
         TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme Colors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }
 
     std::vector<ArkUI_Uint32> darkColors;
     std::vector<RefPtr<ResourceObject>> darkResObjs;
-    if (!HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs)) {
+    if (!HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs, themeId, true)) {
         TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme darkColors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -82,7 +82,8 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
 }
 
 bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
-    std::vector<ArkUI_Uint32>& colors, std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<ArkUI_Uint32>& colors, std::vector<RefPtr<ResourceObject>>& resObjs,
+    ArkUI_Int32 themeId, bool isDark)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
     if (!basisTheme) {
@@ -91,17 +92,23 @@ bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>
     if (!basisTheme) {
         return false;
     }
+    auto basisObjs = basisTheme->GetResObjs();
+    bool basisObjsAvaliable = basisObjs.size() == TokenColors::TOTAL_NUMBER;
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
         RefPtr<ResourceObject> resObj;
+        bool isColorSetByUser = true;
         NodeInfo nodeInfo = { DEFAULT_THEME_TAG, ColorMode::COLOR_MODE_UNDEFINED };
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
             TAG_LOGD(AceLogTag::ACE_THEME, "Parse JS Color Alpha failed");
             color = basisTheme->Colors()->GetByIndex(i);
+            isColorSetByUser = false;
+            resObj = basisObjsAvaliable ? basisObjs[i] : nullptr;
         }
         resObjs.push_back(resObj);
         colors.push_back(static_cast<ArkUI_Uint32>(color.GetValue()));
+        TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(themeId, isDark, i, isColorSetByUser);
     }
     return true;
 }
@@ -142,12 +149,15 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     std::vector<ArkUI_Uint32> colors;
+    std::vector<RefPtr<ResourceObject>> resObjs;
     auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
         bool isColorAvailable = false;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, true)) {
+        RefPtr<ResourceObject> resObj;
+        NodeInfo nodeInfo = { DEFAULT_THEME_TAG, ColorMode::COLOR_MODE_UNDEFINED };
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
             TAG_LOGD(AceLogTag::ACE_THEME, "Parse JS Color Alpha failed");
             if (basisTheme) {
                 color = basisTheme->Colors()->GetByIndex(i);
@@ -157,12 +167,12 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
             isColorAvailable = true;
         }
         TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(isDark, i, isColorAvailable);
-        
+        resObjs.emplace_back(resObj);
         colors.push_back(static_cast<ArkUI_Uint32>(color.GetValue()));
     }
 
     // execute C-API
-    GetArkUINodeModifiers()->getThemeModifier()->setDefaultTheme(colors.data(), isDark);
+    GetArkUINodeModifiers()->getThemeModifier()->setDefaultTheme(colors.data(), isDark, static_cast<void*>(&resObjs));
     return panda::JSValueRef::Undefined(vm);
 }
 

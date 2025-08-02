@@ -180,7 +180,7 @@ public:
         return itemPosition_;
     }
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return currentOffset_;
     }
@@ -542,6 +542,8 @@ private:
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
+    bool JudgeCanOverScrollStart();
+    bool JudgeCanOverScrollEnd();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -628,12 +630,13 @@ private:
     void ProcessFocusEvent(bool indexChanged);
     void RequestFocusForItem(int32_t index, int32_t indexInGroup);
     RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
+    void ResetForExtScroll() override;
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
     float prevEndOffset_ = 0.f;
-    float currentOffset_ = 0.0f;
+    double currentOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
     std::optional<int32_t> lastSnapTargetIndex_;
 

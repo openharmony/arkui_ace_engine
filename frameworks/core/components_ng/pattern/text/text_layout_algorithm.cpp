@@ -891,6 +891,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
             return std::nullopt;
         }
     }
+    layoutProperty->OnPropertyChangeMeasure();
 
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
@@ -984,12 +985,14 @@ bool TextLayoutAlgorithm::IsParentSizeNearZero(const LayoutConstraintF& contentC
 {
     auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
     if (widthPolicy == LayoutCalPolicy::MATCH_PARENT &&
-        (!contentConstraint.parentIdealSize.Width() || NearZero(contentConstraint.parentIdealSize.Width().value()))) {
+        (contentConstraint.parentIdealSize.Width().has_value() &&
+            NearZero(contentConstraint.parentIdealSize.Width().value()))) {
         return true;
     }
     auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     if (heightPolicy == LayoutCalPolicy::MATCH_PARENT &&
-        (!contentConstraint.parentIdealSize.Height() || NearZero(contentConstraint.parentIdealSize.Height().value()))) {
+        (contentConstraint.parentIdealSize.Height().has_value() &&
+            NearZero(contentConstraint.parentIdealSize.Height().value()))) {
         return true;
     }
     return false;
@@ -1024,10 +1027,8 @@ LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
         } else {
             contentConstraint.maxSize.SetWidth(std::numeric_limits<double>::infinity());
         }
-    } else if (widthPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        auto idealSize = constraint.parentIdealSize;
-        idealSize.Constrain(constraint.minSize, constraint.maxSize, true);
-        contentConstraint.selfIdealSize.SetWidth(idealSize.Width().value_or(0.0f));
+    } else if (widthPolicy == LayoutCalPolicy::MATCH_PARENT && constraint.parentIdealSize.Width().has_value()) {
+        contentConstraint.selfIdealSize.SetWidth(constraint.parentIdealSize.Width().value());
     }
     auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
@@ -1037,10 +1038,8 @@ LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
         } else {
             contentConstraint.maxSize.SetHeight(std::numeric_limits<double>::infinity());
         }
-    } else if (heightPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        auto idealSize = constraint.parentIdealSize;
-        idealSize.Constrain(constraint.minSize, constraint.maxSize, true);
-        contentConstraint.selfIdealSize.SetHeight(idealSize.Height().value_or(0.0f));
+    } else if (heightPolicy == LayoutCalPolicy::MATCH_PARENT && constraint.parentIdealSize.Height().has_value()) {
+        contentConstraint.selfIdealSize.SetHeight(constraint.parentIdealSize.Height().value());
     }
     cachedCalcContentConstraint_ = contentConstraint;
     return contentConstraint;
@@ -1076,5 +1075,42 @@ std::optional<float> TextLayoutAlgorithm::GetCalcLayoutConstraintLength(
         isWidth ? layoutConstraint->percentReference.Width() : layoutConstraint->percentReference.Height();
     CHECK_NULL_RETURN(optionalCalcLength, std::nullopt);
     return ConvertToPx(optionalCalcLength, ScaleProperty::CreateScaleProperty(), percentLength);
+}
+
+void TextLayoutAlgorithm::MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (widthPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE && heightPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto& content = geometryNode->GetContent();
+    CHECK_NULL_VOID(content);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto contentSize = content->GetRect().GetSize();
+    AddPaddingToSize(padding, contentSize);
+    OptionalSizeF frameSize;
+    frameSize.UpdateIllegalSizeWithCheck(contentSize);
+    frameSize = UpdateOptionSizeByCalcLayoutConstraint(
+        frameSize, layoutProperty->GetCalcLayoutConstraint(), layoutProperty->GetLayoutConstraint()->percentReference);
+    auto fixSize = frameSize.ConvertToSizeT();
+    auto measureSize = geometryNode->GetFrameSize();
+    if (widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        measureSize.SetWidth(fixSize.Width());
+    }
+    if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        measureSize.SetHeight(fixSize.Height());
+    }
+    geometryNode->SetFrameSize(measureSize);
+}
+
+void TextLayoutAlgorithm::MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper)
+{
+    MeasureWithFixAtIdealSize(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

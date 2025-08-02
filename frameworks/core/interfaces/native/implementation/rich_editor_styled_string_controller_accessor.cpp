@@ -63,8 +63,8 @@ Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController
 Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
-    return {};
+    SelectionRangeInfo selection = peer->GetSelection();
+    return Converter::ArkValue<Ark_RichEditorRange>(selection);
 }
 void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)
@@ -73,7 +73,8 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
     CHECK_NULL_VOID(listener);
 
     auto onWillChangeArk = Converter::OptConvert<Callback_StyledStringChangeValue_Boolean>(listener->onWillChange);
-    auto onWillChange = [onWillChangeArk, arkCallback = CallbackHelper(*onWillChangeArk)](
+    auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
+    auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
         const StyledStringChangeValue& value) {
         auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         Callback_Boolean_Void continuation;
@@ -83,10 +84,12 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
     peer->SetOnWillChange(std::move(onWillChange));
 
     auto onDidChangeArk = Converter::OptConvert<OnDidChangeCallback>(listener->onDidChange);
-    auto onDidChange = [onDidChangeArk, arkCallback = CallbackHelper(*onDidChangeArk)](
+    auto onDidChangeCapture = std::make_shared<OnDidChangeCallback>(*onDidChangeArk);
+    auto onDidChange = [onDidChangeCapture, arkCallback = CallbackHelper(*onDidChangeCapture)](
         const StyledStringChangeValue& value) {
         auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         arkCallback.Invoke(changeValue.range, changeValue.range);
+        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
     };
     peer->SetOnDidChange(std::move(onDidChange));
 }

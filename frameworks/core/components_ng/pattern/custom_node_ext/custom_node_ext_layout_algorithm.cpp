@@ -22,8 +22,11 @@ namespace OHOS::Ace::NG {
 void CustomNodeExtLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     if (measureCallback_) {
-        auto constraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
-        measureCallback_(constraint);
+        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetLayoutConstraint().has_value()) {
+            measureCallback_(layoutProperty->GetLayoutConstraint().value());
+        }
     } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);
     }

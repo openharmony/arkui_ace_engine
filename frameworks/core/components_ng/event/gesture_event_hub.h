@@ -135,7 +135,7 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-using OnDrapDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
+using OnDragDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
@@ -369,8 +369,8 @@ public:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
         DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
     void HideMenu();
-    GestureEvent GetGestureEventInfo();
-    ClickInfo GetClickInfo();
+    const GestureEvent GetGestureEventInfo();
+    const ClickInfo GetClickInfo();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(

@@ -17,23 +17,31 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { Finalizable, runtimeType, RuntimeType, InteropNativeModule, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32, int8 } from "@koalaui/common"
+import { GlobalStateManager, StateContext, __context } from '@koalaui/runtime'
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
+import { Length, Dimension, ResourceStr, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
+import { PixelMap } from "./arkui-pixelmap"
+import { Resource } from "global/resource"
+import { SymbolGlyphModifier, TextModifier } from "./arkui-external"
+import { SystemBarStyle } from "./arkui-custom"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource";
-import { CustomBuilder, SymbolGlyphModifier, BlurStyle } from "./common"
 import { TitleHeight } from "./enums"
-import { Length, ResourceStr, ResourceColor, Dimension } from "./units"
-import { Callback_Void } from "./abilityComponent"
 import { NavDestinationContext, NavDestinationMode } from "./navDestination"
-import { NavigationAttribute } from "./../handwritten"
 import { LengthMetrics } from "../Graphics"
-import { TextModifier } from "./../generated/ArkArkuiExternalInterfaces"
-import { Callback_Boolean_Void } from "./checkbox"
+import { NavExtender } from "./navigationExtender"
+import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
+import { PathStackUtils } from "../handwritten/ArkNavPathStack"
+import { setNeedCreate } from "../ArkComponentRoot"
+import { ArkStackComponent, ArkStackPeer } from "./stack"
+
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
         const obj : NavPathInfo = new NavPathInfo(undefined, undefined, undefined, undefined)
@@ -42,64 +50,42 @@ export class NavPathInfoInternal {
     }
 }
 export class NavPathInfo implements MaterializedBase {
+    name: string = ""
     peer?: Finalizable | undefined = undefined
+    param: object | null | undefined = undefined
+    onPop: ((parameter: PopInfo)=> void) | undefined = undefined
+    isEntry: boolean | undefined = false;
+    navDestinationId: string | undefined = ""
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get name(): string {
-        return this.getName()
-    }
-    set name(name: string) {
-        this.setName(name)
-    }
-    get param(): object | undefined {
-        throw new Error("Not implemented")
-    }
-    set param(param: object | undefined) {
-        const param_NonNull  = (param as object)
-        this.setParam(param_NonNull)
-    }
-    get onPop(): ((parameter: PopInfo) => void) | undefined {
-        throw new Error("Not implemented")
-    }
-    set onPop(onPop: ((parameter: PopInfo) => void) | undefined) {
-        const onPop_NonNull  = (onPop as ((parameter: PopInfo) => void))
-        this.setOnPop(onPop_NonNull)
-    }
-    get isEntry(): boolean | undefined {
-        return this.getIsEntry()
-    }
-    set isEntry(isEntry: boolean | undefined) {
-        const isEntry_NonNull  = (isEntry as boolean)
-        this.setIsEntry(isEntry_NonNull)
-    }
-    static ctor_navpathinfo(name: string, param: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Any", param)
-        let onPop_type : int32 = RuntimeType.UNDEFINED
-        onPop_type = runtimeType(onPop)
-        thisSerializer.writeInt8(onPop_type as int32)
-        if ((RuntimeType.UNDEFINED) != (onPop_type)) {
-            const onPop_value  = onPop!
-            thisSerializer.holdAndWriteCallback(onPop_value)
+    static ctor_navpathinfo(name: string, isEntry?: boolean): KPointer {
+        let isEntry_casted: boolean = false
+        if (runtimeType(isEntry) === RuntimeType.BOOLEAN) {
+            isEntry_casted = isEntry!
         }
-        let isEntry_type : int32 = RuntimeType.UNDEFINED
-        isEntry_type = runtimeType(isEntry)
-        thisSerializer.writeInt8(isEntry_type as int32)
-        if ((RuntimeType.UNDEFINED) != (isEntry_type)) {
-            const isEntry_value  = isEntry!
-            thisSerializer.writeBoolean(isEntry_value)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_ctor(name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_ctor(name, isEntry_casted ? 1 : 0)
         return retval
     }
-    constructor(name?: string, param?: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
-        if (((name) !== (undefined)) || ((param) !== (undefined)) || ((onPop) !== (undefined)) || ((isEntry) !== (undefined)))
-        {
-            const ctorPtr : KPointer = NavPathInfo.ctor_navpathinfo((name)!, (param)!, (onPop)!, (isEntry)!)
-            this.peer = new Finalizable(ctorPtr, NavPathInfo.getFinalizer())
+    constructor(name?: string, param?: object | null | undefined, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
+        let name_casted: string = ""
+        if (runtimeType(name) === RuntimeType.STRING) {
+            name_casted = name!
+            this.name = name!
         }
+        if (runtimeType(param) === RuntimeType.OBJECT) {
+            this.param = param
+        }
+        if (runtimeType(onPop) !== RuntimeType.UNDEFINED) {
+            this.onPop = onPop
+        }
+        let isEntry_casted: boolean = false
+        if (runtimeType(isEntry) === RuntimeType.BOOLEAN) {
+            isEntry_casted = isEntry!
+            this.isEntry = isEntry!
+        }
+        const ctorPtr: KPointer = NavPathInfo.ctor_navpathinfo(name_casted, isEntry_casted)
+        this.peer = new Finalizable(ctorPtr, NavPathInfo.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._NavPathInfo_getFinalizer()
@@ -112,29 +98,26 @@ export class NavPathInfo implements MaterializedBase {
         this.setName_serialize(name_casted)
         return
     }
-    private getParam(): object {
-        return this.getParam_serialize()
-    }
-    private setParam(param: object): void {
-        const param_casted = param as (object)
-        this.setParam_serialize(param_casted)
-        return
-    }
-    private getOnPop(): ((parameter: PopInfo) => void) {
-        return this.getOnPop_serialize()
-    }
-    private setOnPop(onPop: ((parameter: PopInfo) => void)): void {
-        const onPop_casted = onPop as (((parameter: PopInfo) => void))
-        this.setOnPop_serialize(onPop_casted)
-        return
-    }
-    private getIsEntry(): boolean {
+    private getIsEntry(): boolean | undefined {
         return this.getIsEntry_serialize()
     }
     private setIsEntry(isEntry: boolean): void {
         const isEntry_casted = isEntry as (boolean)
         this.setIsEntry_serialize(isEntry_casted)
         return
+    }
+    private getNavDestinationId(): string | undefined {
+        return this.getNavDestinationId_serialize()
+    }
+    private setNavDestinationId(navDestinationId: string): void {
+        const navDestinationId_casted = navDestinationId as (string)
+        this.setNavDestinationId_serialize(navDestinationId_casted)
+        return
+    }
+    updateNavPathInfo(): void {
+        this.setName_serialize(this.name)
+        this.setIsEntry_serialize(this.isEntry!)
+        this.setNavDestinationId_serialize(this.navDestinationId!)
     }
     private getName_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getName(this.peer!.ptr)
@@ -143,32 +126,18 @@ export class NavPathInfo implements MaterializedBase {
     private setName_serialize(name: string): void {
         ArkUIGeneratedNativeModule._NavPathInfo_setName(this.peer!.ptr, name)
     }
-    private getParam_serialize(): object {
-        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getParam(this.peer!.ptr)
-        return retval
-    }
-    private setParam_serialize(param: object): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Any", param)
-        ArkUIGeneratedNativeModule._NavPathInfo_setParam(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getOnPop_serialize(): ((parameter: PopInfo) => void) {
-        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getOnPop(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setOnPop_serialize(onPop: ((parameter: PopInfo) => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(onPop)
-        ArkUIGeneratedNativeModule._NavPathInfo_setOnPop(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getIsEntry_serialize(): boolean {
+    private getIsEntry_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getIsEntry(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setIsEntry_serialize(isEntry: boolean): void {
         ArkUIGeneratedNativeModule._NavPathInfo_setIsEntry(this.peer!.ptr, isEntry ? 1 : 0)
+    }
+    private getNavDestinationId_serialize(): string | undefined {
+        return ArkUIGeneratedNativeModule._NavPathInfo_getNavDestinationId(this.peer!.ptr)
+    }
+    private setNavDestinationId_serialize(navDestinationId: string): void {
+        ArkUIGeneratedNativeModule._NavPathInfo_setNavDestinationId(this.peer!.ptr, navDestinationId)
     }
 }
 export class NavPathStackInternal {
@@ -194,24 +163,10 @@ export class NavPathStack implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
     }
-    public pushPath(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
-        const info_type = runtimeType(info)
-        const animated_type = runtimeType(animated)
-        if ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type)) {
-            const info_casted = info as (NavPathInfo)
-            const animated_casted = animated as (boolean | undefined)
-            this.pushPath0_serialize(info_casted, animated_casted)
-            return
-        }
-        if ((RuntimeType.OBJECT == animated_type) || (RuntimeType.UNDEFINED == animated_type)) {
-            const info_casted = info as (NavPathInfo)
-            const options_casted = animated as (NavigationOptions | undefined)
-            this.pushPath1_serialize(info_casted, options_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+    public pushPath(info: NavPathInfo, animated?: boolean | undefined): void {
+        PathStackUtils.pushPath(this, info, animated)
     }
-    public pushDestination(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): Promise<void> {
+    public pushDestination(info: NavPathInfo, animated?: boolean | undefined): Promise<void> {
         const info_type = runtimeType(info)
         const animated_type = runtimeType(animated)
         if ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type)) {
@@ -226,39 +181,14 @@ export class NavPathStack implements MaterializedBase {
         }
         throw new Error("Can not select appropriate overload")
     }
-    public pushPathByName(name: string, param: object | Object, onPop?: boolean | undefined | ((parameter: PopInfo) => void), animated?: boolean): void {
-        const name_type = runtimeType(name)
-        const param_type = runtimeType(param)
-        const onPop_type = runtimeType(onPop)
-        const animated_type = runtimeType(animated)
-        if ((RuntimeType.OBJECT == param_type) && ((RuntimeType.BOOLEAN == onPop_type) || (RuntimeType.UNDEFINED == onPop_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-            const name_casted = name as (string)
-            const param_casted = param as (object)
-            const animated_casted = onPop as (boolean | undefined)
-            this.pushPathByName0_serialize(name_casted, param_casted, animated_casted)
-            return
-        }
-        if ((RuntimeType.OBJECT == param_type) && (RuntimeType.FUNCTION == onPop_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
-            const name_casted = name as (string)
-            const param_casted = param as (Object)
-            const onPop_casted = onPop as (((parameter: PopInfo) => void))
-            const animated_casted = animated as (boolean | undefined)
-            this.pushPathByName1_serialize(name_casted, param_casted, onPop_casted, animated_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+    public pushPathByName(name: string, param: Object, onPop: Callback<PopInfo>, animated?: boolean | undefined): void {
+        PathStackUtils.pushPathByName(this, name, param, onPop, animated)
     }
-    public pushDestinationByName(name: string, param: Object, onPop?: boolean | undefined | ((parameter: PopInfo) => void), animated?: boolean): Promise<void> {
+    public pushDestinationByName(name: string, param: Object, onPop: ((parameter: PopInfo) => void), animated?: boolean): Promise<void> {
         const name_type = runtimeType(name)
         const param_type = runtimeType(param)
         const onPop_type = runtimeType(onPop)
         const animated_type = runtimeType(animated)
-        if (((RuntimeType.BOOLEAN == onPop_type) || (RuntimeType.UNDEFINED == onPop_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-            const name_casted = name as (string)
-            const param_casted = param as (Object)
-            const animated_casted = onPop as (boolean | undefined)
-            return this.pushDestinationByName0_serialize(name_casted, param_casted, animated_casted)
-        }
         if ((RuntimeType.FUNCTION == onPop_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
             const name_casted = name as (string)
             const param_casted = param as (Object)
@@ -268,22 +198,8 @@ export class NavPathStack implements MaterializedBase {
         }
         throw new Error("Can not select appropriate overload")
     }
-    public replacePath(info: NavPathInfo, animated?: boolean | undefined | NavigationOptions | undefined): void {
-        const info_type = runtimeType(info)
-        const animated_type = runtimeType(animated)
-        if ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type)) {
-            const info_casted = info as (NavPathInfo)
-            const animated_casted = animated as (boolean | undefined)
-            this.replacePath0_serialize(info_casted, animated_casted)
-            return
-        }
-        if ((RuntimeType.OBJECT == animated_type) || (RuntimeType.UNDEFINED == animated_type)) {
-            const info_casted = info as (NavPathInfo)
-            const options_casted = animated as (NavigationOptions | undefined)
-            this.replacePath1_serialize(info_casted, options_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+    public replacePath(info: NavPathInfo, animated?: NavigationOptions | undefined): void {
+        PathStackUtils.replacePath(this, info, animated)
     }
     public replaceDestination(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const info_casted = info as (NavPathInfo)
@@ -291,11 +207,7 @@ export class NavPathStack implements MaterializedBase {
         return this.replaceDestination_serialize(info_casted, options_casted)
     }
     public replacePathByName(name: string, param: Object, animated?: boolean): void {
-        const name_casted = name as (string)
-        const param_casted = param as (Object)
-        const animated_casted = animated as (boolean | undefined)
-        this.replacePathByName_serialize(name_casted, param_casted, animated_casted)
-        return
+        PathStackUtils.replacePathByName(this, name, param, animated)
     }
     public removeByIndexes(indexes: Array<number>): number {
         const indexes_casted = indexes as (Array<number>)
@@ -309,55 +221,14 @@ export class NavPathStack implements MaterializedBase {
         const navDestinationId_casted = navDestinationId as (string)
         return this.removeByNavDestinationId_serialize(navDestinationId_casted)
     }
-    public pop(result?: boolean | undefined | Object, animated?: boolean): NavPathInfo | undefined {
-        const result_type = runtimeType(result)
-        const animated_type = runtimeType(animated)
-        if (((RuntimeType.BOOLEAN == result_type) || (RuntimeType.UNDEFINED == result_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-            const animated_casted = result as (boolean | undefined)
-            return this.pop0_serialize(animated_casted)
-        }
-        if ((RuntimeType.OBJECT == result_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
-            const result_casted = result as (Object)
-            const animated_casted = animated as (boolean | undefined)
-            return this.pop1_serialize(result_casted, animated_casted)
-        }
-        throw new Error("Can not select appropriate overload")
+    public pop(result: Object, animated?: boolean): NavPathInfo | undefined {
+        return PathStackUtils.pop(this, result, animated)
     }
-    public popToName(name: string, result?: boolean | undefined | Object, animated?: boolean): number {
-        const name_type = runtimeType(name)
-        const result_type = runtimeType(result)
-        const animated_type = runtimeType(animated)
-        if (((RuntimeType.BOOLEAN == result_type) || (RuntimeType.UNDEFINED == result_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-            const name_casted = name as (string)
-            const animated_casted = result as (boolean | undefined)
-            return this.popToName0_serialize(name_casted, animated_casted)
-        }
-        if ((RuntimeType.OBJECT == result_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
-            const name_casted = name as (string)
-            const result_casted = result as (Object)
-            const animated_casted = animated as (boolean | undefined)
-            return this.popToName1_serialize(name_casted, result_casted, animated_casted)
-        }
-        throw new Error("Can not select appropriate overload")
+    public popToName(name: string, result: Object, animated?: boolean): number {
+        return PathStackUtils.popToName(this, name, result, animated)
     }
-    public popToIndex(index: number, result?: boolean | undefined | Object, animated?: boolean): void {
-        const index_type = runtimeType(index)
-        const result_type = runtimeType(result)
-        const animated_type = runtimeType(animated)
-        if (((RuntimeType.BOOLEAN == result_type) || (RuntimeType.UNDEFINED == result_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-            const index_casted = index as (number)
-            const animated_casted = result as (boolean | undefined)
-            this.popToIndex0_serialize(index_casted, animated_casted)
-            return
-        }
-        if ((RuntimeType.OBJECT == result_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
-            const index_casted = index as (number)
-            const result_casted = result as (Object)
-            const animated_casted = animated as (boolean | undefined)
-            this.popToIndex1_serialize(index_casted, result_casted, animated_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+    public popToIndex(index: number, result: Object, animated?: boolean): void {
+        PathStackUtils.popToIndex(this, index, result, animated)
     }
     public moveToTop(name: string, animated?: boolean): number {
         const name_casted = name as (string)
@@ -378,13 +249,11 @@ export class NavPathStack implements MaterializedBase {
     public getAllPathName(): Array<string> {
         return this.getAllPathName_serialize()
     }
-    public getParamByIndex(index: number): object | undefined {
-        const index_casted = index as (number)
-        return this.getParamByIndex_serialize(index_casted)
+    public getParamByIndex(index: number): Object | undefined {
+        return PathStackUtils.getParamByIndex(this, index)
     }
-    public getParamByName(name: string): Array<object> {
-        const name_casted = name as (string)
-        return this.getParamByName_serialize(name_casted)
+    public getParamByName(name: string): Array<Object | undefined> {
+        return PathStackUtils.getParamByName(this, name)
     }
     public getIndexByName(name: string): Array<number> {
         const name_casted = name as (string)
@@ -406,29 +275,14 @@ export class NavPathStack implements MaterializedBase {
         this.setInterception_serialize(interception_casted)
         return
     }
-    private pushPath0_serialize(info: NavPathInfo, animated?: boolean): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    public getPathStack(): Array<NavPathInfo> {
+        return this.getPathStack_serialize()
     }
-    private pushPath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeNavigationOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    public setPathStack(pathStack: Array<NavPathInfo>, animated?: boolean): void {
+        const pathStack_casted = pathStack as (Array<NavPathInfo>)
+        const animated_casted = animated as (boolean | undefined)
+        this.setPathStack_serialize(pathStack_casted, animated_casted)
+        return
     }
     private pushDestination0_serialize(info: NavPathInfo, animated?: boolean): Promise<void> {
         const thisSerializer : Serializer = Serializer.hold()
@@ -458,36 +312,9 @@ export class NavPathStack implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    private pushPathByName0_serialize(name: string, param: object, animated?: boolean): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Any", param)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPathByName0(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private pushPathByName1_serialize(name: string, param: Object, onPop: ((parameter: PopInfo) => void), animated?: boolean): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", param)
-        thisSerializer.holdAndWriteCallback(onPop)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPathByName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     private pushDestinationByName0_serialize(name: string, param: Object, animated?: boolean): Promise<void> {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", param)
+        thisSerializer.holdAndWriteObject(param)
         let animated_type : int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
         thisSerializer.writeInt8(animated_type as int32)
@@ -502,7 +329,7 @@ export class NavPathStack implements MaterializedBase {
     }
     private pushDestinationByName1_serialize(name: string, param: Object, onPop: ((parameter: PopInfo) => void), animated?: boolean): Promise<void> {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", param)
+        thisSerializer.holdAndWriteObject(param)
         thisSerializer.holdAndWriteCallback(onPop)
         let animated_type : int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
@@ -515,30 +342,6 @@ export class NavPathStack implements MaterializedBase {
         ArkUIGeneratedNativeModule._NavPathStack_pushDestinationByName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
-    }
-    private replacePath0_serialize(info: NavPathInfo, animated?: boolean): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private replacePath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeNavigationOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private replaceDestination_serialize(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const thisSerializer : Serializer = Serializer.hold()
@@ -553,19 +356,6 @@ export class NavPathStack implements MaterializedBase {
         ArkUIGeneratedNativeModule._NavPathStack_replaceDestination(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
-    }
-    private replacePathByName_serialize(name: string, param: Object, animated?: boolean): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", param)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePathByName(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private removeByIndexes_serialize(indexes: Array<number>): number {
         const thisSerializer : Serializer = Serializer.hold()
@@ -586,33 +376,6 @@ export class NavPathStack implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_removeByNavDestinationId(this.peer!.ptr, navDestinationId)
         return retval
     }
-    private pop0_serialize(animated?: boolean): NavPathInfo | undefined {
-        const thisSerializer : Serializer = Serializer.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_pop0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private pop1_serialize(result: Object, animated?: boolean): NavPathInfo | undefined {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", result)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8(animated_type as int32)
-        if ((RuntimeType.UNDEFINED) != (animated_type)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_pop1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
-    }
     private popToName0_serialize(name: string, animated?: boolean): number {
         const thisSerializer : Serializer = Serializer.hold()
         let animated_type : int32 = RuntimeType.UNDEFINED
@@ -628,7 +391,7 @@ export class NavPathStack implements MaterializedBase {
     }
     private popToName1_serialize(name: string, result: Object, animated?: boolean): number {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", result)
+        thisSerializer.holdAndWriteObject(result)
         let animated_type : int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
         thisSerializer.writeInt8(animated_type as int32)
@@ -654,7 +417,7 @@ export class NavPathStack implements MaterializedBase {
     }
     private popToIndex1_serialize(index: number, result: Object, animated?: boolean): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Object", result)
+        thisSerializer.holdAndWriteObject(result)
         let animated_type : int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
         thisSerializer.writeInt8(animated_type as int32)
@@ -703,8 +466,15 @@ export class NavPathStack implements MaterializedBase {
         thisSerializer.release()
     }
     private getAllPathName_serialize(): Array<string> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -713,24 +483,16 @@ export class NavPathStack implements MaterializedBase {
         const returnResult : Array<string> = buffer
         return returnResult
     }
-    private getParamByIndex_serialize(index: number): object | undefined {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByIndex(this.peer!.ptr, index)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private getParamByName_serialize(name: string): Array<object> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<object> = new Array<object>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readCustomObject("Any") as Object)
-        }
-        const returnResult : Array<object> = buffer
-        return returnResult
-    }
     private getIndexByName_serialize(name: string): Array<number> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<number> = new Array<number>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -756,11 +518,46 @@ export class NavPathStack implements MaterializedBase {
         ArkUIGeneratedNativeModule._NavPathStack_setInterception(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private getPathStack_serialize(): Array<NavPathInfo> {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getPathStack(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<NavPathInfo> = new Array<NavPathInfo>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readNavPathInfo() as NavPathInfo)
+        }
+        const returnResult : Array<NavPathInfo> = buffer
+        return returnResult
+    }
+    private setPathStack_serialize(pathStack: Array<NavPathInfo>, animated?: boolean): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeInt32(pathStack.length as int32)
+        for (let i = 0; i < pathStack.length; i++) {
+            const pathStack_element : NavPathInfo = pathStack[i]
+            thisSerializer.writeNavPathInfo(pathStack_element)
+        }
+        let animated_type : int32 = RuntimeType.UNDEFINED
+        animated_type = runtimeType(animated)
+        thisSerializer.writeInt8(animated_type as int32)
+        if ((RuntimeType.UNDEFINED) != (animated_type)) {
+            const animated_value  = animated!
+            thisSerializer.writeBoolean(animated_value)
+        }
+        ArkUIGeneratedNativeModule._NavPathStack_setPathStack(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface NavigationTransitionProxy {
     from: NavContentInfo
     to: NavContentInfo
-    isInteractive?: boolean
+    isInteractive?: boolean | undefined
     finishTransition(): void
     cancelTransition(): void
     updateTransition(progress: number): void
@@ -829,7 +626,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         this.setTo_serialize(to_casted)
         return
     }
-    private getIsInteractive(): boolean {
+    private getIsInteractive(): boolean | undefined {
         return this.getIsInteractive_serialize()
     }
     private setIsInteractive(isInteractive: boolean): void {
@@ -848,7 +645,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private getFrom_serialize(): NavContentInfo {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getFrom(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
         return returnResult
     }
@@ -860,7 +657,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private getTo_serialize(): NavContentInfo {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getTo(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
         return returnResult
     }
@@ -870,9 +667,9 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         ArkUIGeneratedNativeModule._NavigationTransitionProxy_setTo(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getIsInteractive_serialize(): boolean {
+    private getIsInteractive_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getIsInteractive(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setIsInteractive_serialize(isInteractive: boolean): void {
         ArkUIGeneratedNativeModule._NavigationTransitionProxy_setIsInteractive(this.peer!.ptr, isInteractive ? 1 : 0)
@@ -883,9 +680,587 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         return obj
     }
 }
-export interface SystemBarStyle {
-    _SystemBarStyleStub: string;
+export class ArkNavigationPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkNavigationPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Navigation_construct(peerId, flags)
+        const _peer  = new ArkNavigationPeer(_peerPtr, peerId, "Navigation", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setNavigationOptions0Attribute(): void {
+        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions0(this.peer.ptr)
+    }
+    setNavigationOptions1Attribute(pathInfos: NavPathStack): void {
+        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions1(this.peer.ptr, toPeerPtr(pathInfos))
+    }
+    navBarWidthAttribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_navBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    navBarPositionAttribute(value: NavBarPosition | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as NavBarPosition)
+            thisSerializer.writeInt32(TypeChecker.NavBarPosition_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_navBarPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    navBarWidthRangeAttribute(value: [ Dimension, Dimension ] | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            const value_value_0  = value_value[0]
+            thisSerializer.writeLength(value_value_0)
+            const value_value_1  = value_value[1]
+            thisSerializer.writeLength(value_value_1)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_navBarWidthRange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    minContentWidthAttribute(value: Dimension | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_minContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    modeAttribute(value: NavigationMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as NavigationMode)
+            thisSerializer.writeInt32(TypeChecker.NavigationMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_mode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backButtonIcon0Attribute(value: string | PixelMap | Resource | SymbolGlyphModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (TypeChecker.isPixelMap(value_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as PixelMap
+                thisSerializer.writePixelMap(value_value_1)
+            }
+            else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Resource
+                thisSerializer.writeResource(value_value_2)
+            }
+            else if (TypeChecker.isSymbolGlyphModifier(value_value)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as SymbolGlyphModifier
+                thisSerializer.writeSymbolGlyphModifier(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_backButtonIcon0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backButtonIcon1Attribute(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let icon_type : int32 = RuntimeType.UNDEFINED
+        icon_type = runtimeType(icon)
+        thisSerializer.writeInt8(icon_type as int32)
+        if ((RuntimeType.UNDEFINED) != (icon_type)) {
+            const icon_value  = icon!
+            let icon_value_type : int32 = RuntimeType.UNDEFINED
+            icon_value_type = runtimeType(icon_value)
+            if (RuntimeType.STRING == icon_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const icon_value_0  = icon_value as string
+                thisSerializer.writeString(icon_value_0)
+            }
+            else if (TypeChecker.isPixelMap(icon_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const icon_value_1  = icon_value as PixelMap
+                thisSerializer.writePixelMap(icon_value_1)
+            }
+            else if (TypeChecker.isResource(icon_value, false, false, false, false, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const icon_value_2  = icon_value as Resource
+                thisSerializer.writeResource(icon_value_2)
+            }
+            else if (TypeChecker.isSymbolGlyphModifier(icon_value)) {
+                thisSerializer.writeInt8(3 as int32)
+                const icon_value_3  = icon_value as SymbolGlyphModifier
+                thisSerializer.writeSymbolGlyphModifier(icon_value_3)
+            }
+        }
+        let accessibilityText_type : int32 = RuntimeType.UNDEFINED
+        accessibilityText_type = runtimeType(accessibilityText)
+        thisSerializer.writeInt8(accessibilityText_type as int32)
+        if ((RuntimeType.UNDEFINED) != (accessibilityText_type)) {
+            const accessibilityText_value  = accessibilityText!
+            let accessibilityText_value_type : int32 = RuntimeType.UNDEFINED
+            accessibilityText_value_type = runtimeType(accessibilityText_value)
+            if (RuntimeType.STRING == accessibilityText_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const accessibilityText_value_0  = accessibilityText_value as string
+                thisSerializer.writeString(accessibilityText_value_0)
+            }
+            else if (TypeChecker.isResource(accessibilityText_value, false, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const accessibilityText_value_1  = accessibilityText_value as Resource
+                thisSerializer.writeResource(accessibilityText_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_backButtonIcon1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hideNavBarAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_hideNavBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    subTitleAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_subTitle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hideTitleBar0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_hideTitleBar0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hideTitleBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let hide_type : int32 = RuntimeType.UNDEFINED
+        hide_type = runtimeType(hide)
+        thisSerializer.writeInt8(hide_type as int32)
+        if ((RuntimeType.UNDEFINED) != (hide_type)) {
+            const hide_value  = hide!
+            thisSerializer.writeBoolean(hide_value)
+        }
+        let animated_type : int32 = RuntimeType.UNDEFINED
+        animated_type = runtimeType(animated)
+        thisSerializer.writeInt8(animated_type as int32)
+        if ((RuntimeType.UNDEFINED) != (animated_type)) {
+            const animated_value  = animated!
+            thisSerializer.writeBoolean(animated_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_hideTitleBar1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hideBackButtonAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_hideBackButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    titleModeAttribute(value: NavigationTitleMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as NavigationTitleMode)
+            thisSerializer.writeInt32(TypeChecker.NavigationTitleMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_titleMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    menus0Attribute(value: Array<NavigationMenuItem> | CustomBuilder | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Array<NavigationMenuItem>
+                thisSerializer.writeInt32(value_value_0.length as int32)
+                for (let i = 0; i < value_value_0.length; i++) {
+                    const value_value_0_element : NavigationMenuItem = value_value_0[i]
+                    thisSerializer.writeNavigationMenuItem(value_value_0_element)
+                }
+            }
+            else if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_menus0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    menus1Attribute(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let items_type : int32 = RuntimeType.UNDEFINED
+        items_type = runtimeType(items)
+        thisSerializer.writeInt8(items_type as int32)
+        if ((RuntimeType.UNDEFINED) != (items_type)) {
+            const items_value  = items!
+            let items_value_type : int32 = RuntimeType.UNDEFINED
+            items_value_type = runtimeType(items_value)
+            if (RuntimeType.OBJECT == items_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const items_value_0  = items_value as Array<NavigationMenuItem>
+                thisSerializer.writeInt32(items_value_0.length as int32)
+                for (let i = 0; i < items_value_0.length; i++) {
+                    const items_value_0_element : NavigationMenuItem = items_value_0[i]
+                    thisSerializer.writeNavigationMenuItem(items_value_0_element)
+                }
+            }
+            else if (RuntimeType.FUNCTION == items_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const items_value_1  = items_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(items_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeNavigationMenuOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_menus1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    toolBarAttribute(value: CustomBuilder | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value))
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_toolBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hideToolBar0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_hideToolBar0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hideToolBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let hide_type : int32 = RuntimeType.UNDEFINED
+        hide_type = runtimeType(hide)
+        thisSerializer.writeInt8(hide_type as int32)
+        if ((RuntimeType.UNDEFINED) != (hide_type)) {
+            const hide_value  = hide!
+            thisSerializer.writeBoolean(hide_value)
+        }
+        let animated_type : int32 = RuntimeType.UNDEFINED
+        animated_type = runtimeType(animated)
+        thisSerializer.writeInt8(animated_type as int32)
+        if ((RuntimeType.UNDEFINED) != (animated_type)) {
+            const animated_value  = animated!
+            thisSerializer.writeBoolean(animated_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_hideToolBar1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableToolBarAdaptationAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_enableToolBarAdaptation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onTitleModeChangeAttribute(value: ((titleMode: NavigationTitleMode) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_onTitleModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNavBarStateChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_onNavBarStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNavigationModeChangeAttribute(value: ((mode: NavigationMode) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_onNavigationModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    navDestinationAttribute(value: ((name: string,param: Object | null | undefined) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_navDestination(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    customNavContentTransitionAttribute(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_customNavContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    systemBarStyleAttribute(value: SystemBarStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeSystemBarStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_systemBarStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    recoverableAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_recoverable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableDragBarAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_enableDragBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableModeChangeAnimationAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_enableModeChangeAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    titleAttribute(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (value_value_type == RuntimeType.STRING || TypeChecker.isResource(value, false, false, false, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ResourceStr
+                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_type = runtimeType(value_value_0)
+                if (RuntimeType.STRING == value_value_0_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0_0  = value_value_0 as string
+                    thisSerializer.writeString(value_value_0_0)
+                }
+                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_0_1  = value_value_0 as Resource
+                    thisSerializer.writeResource(value_value_0_1)
+                }
+            }
+            else if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+            }
+            else if (TypeChecker.isNavigationCommonTitle(value_value, false, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as NavigationCommonTitle
+                thisSerializer.writeNavigationCommonTitle(value_value_2)
+            }
+            else if (TypeChecker.isNavigationCustomTitle(value_value, false, false)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as NavigationCustomTitle
+                thisSerializer.writeNavigationCustomTitle(value_value_3)
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeNavigationTitleOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_title(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    toolbarConfigurationAttribute(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Array<ToolbarItem>
+                thisSerializer.writeInt32(value_value_0.length as int32)
+                for (let i = 0; i < value_value_0.length; i++) {
+                    const value_value_0_element : ToolbarItem = value_value_0[i]
+                    thisSerializer.writeToolbarItem(value_value_0_element)
+                }
+            }
+            else if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeNavigationToolbarOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_toolbarConfiguration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    ignoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let types_type : int32 = RuntimeType.UNDEFINED
+        types_type = runtimeType(types)
+        thisSerializer.writeInt8(types_type as int32)
+        if ((RuntimeType.UNDEFINED) != (types_type)) {
+            const types_value  = types!
+            thisSerializer.writeInt32(types_value.length as int32)
+            for (let i = 0; i < types_value.length; i++) {
+                const types_value_element : LayoutSafeAreaType = types_value[i]
+                thisSerializer.writeInt32(TypeChecker.LayoutSafeAreaType_ToNumeric(types_value_element))
+            }
+        }
+        let edges_type : int32 = RuntimeType.UNDEFINED
+        edges_type = runtimeType(edges)
+        thisSerializer.writeInt8(edges_type as int32)
+        if ((RuntimeType.UNDEFINED) != (edges_type)) {
+            const edges_value  = edges!
+            thisSerializer.writeInt32(edges_value.length as int32)
+            for (let i = 0; i < edges_value.length; i++) {
+                const edges_value_element : LayoutSafeAreaEdge = edges_value[i]
+                thisSerializer.writeInt32(TypeChecker.LayoutSafeAreaEdge_ToNumeric(edges_value_element))
+            }
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_ignoreLayoutSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
+export type Callback_Boolean_Void = (isVisible: boolean) => void;
 export interface NavigationCommonTitle {
     main: string | Resource;
     sub: string | Resource;
@@ -927,7 +1302,6 @@ export interface PopInfo {
     info: NavPathInfo;
     result: Object;
 }
-export type Callback_PopInfo_Void = (parameter: PopInfo) => void;
 export enum LaunchMode {
     STANDARD = 0,
     MOVE_TO_TOP_SINGLETON = 1,
@@ -945,10 +1319,6 @@ export interface NavigationInterception {
     willShow?: InterceptionShowCallback;
     didShow?: InterceptionShowCallback;
     modeChange?: InterceptionModeCallback;
-}
-export interface NavigationInterface {
-    invoke(): NavigationAttribute;
-
 }
 export enum ToolbarItemStatus {
     NORMAL = 0,
@@ -972,6 +1342,8 @@ export interface ToolbarItem {
 export interface NavigationTitleOptions {
     backgroundColor?: ResourceColor;
     backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     barStyle?: BarStyle;
     paddingStart?: LengthMetrics;
     paddingEnd?: LengthMetrics;
@@ -987,7 +1359,19 @@ export enum BarStyle {
 export interface NavigationToolbarOptions {
     backgroundColor?: ResourceColor;
     backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
+    moreButtonOptions?: MoreButtonOptions;
     barStyle?: BarStyle;
+    hideItemValue?: boolean;
+}
+export interface NavigationMenuOptions {
+    moreButtonOptions?: MoreButtonOptions;
+}
+export interface MoreButtonOptions {
+    backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
 }
 export type Tuple_Dimension_Dimension = [
     Dimension,
@@ -995,11 +1379,152 @@ export type Tuple_Dimension_Dimension = [
 ]
 export type Callback_NavigationTitleMode_Void = (titleMode: NavigationTitleMode) => void;
 export type Callback_NavigationMode_Void = (mode: NavigationMode) => void;
-export type Callback_String_Unknown_Void = (name: string, param: object) => void;
+export type Callback_String_Opt_Object_Void = (name: string, param: Object | undefined) => void;
 export type Type_NavigationAttribute_customNavContentTransition_delegate = (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation) => NavigationAnimatedTransition | undefined;
+export interface NavigationAttribute extends CommonMethod {
+    navBarWidth(value: Length | undefined): this
+    navBarPosition(value: NavBarPosition | undefined): this
+    navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this
+    minContentWidth(value: Dimension | undefined): this
+    mode(value: NavigationMode | undefined): this
+    backButtonIcon(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
+    hideNavBar(value: boolean | undefined): this
+    subTitle(value: string | undefined): this
+    hideTitleBar(hide: boolean | undefined, animated?: boolean): this
+    hideBackButton(value: boolean | undefined): this
+    titleMode(value: NavigationTitleMode | undefined): this
+    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
+    toolBar(value: CustomBuilder | undefined): this
+    hideToolBar(hide: boolean | undefined, animated?: boolean): this
+    enableToolBarAdaptation(value: boolean | undefined): this
+    onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this
+    onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this
+    onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this
+    navDestination(
+        /** @memo */
+        value: ((name: string,param: Object | null | undefined) => void) | undefined): this
+    customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this
+    systemBarStyle(value: SystemBarStyle | undefined): this
+    recoverable(value: boolean | undefined): this
+    enableDragBar(value: boolean | undefined): this
+    enableModeChangeAnimation(value: boolean | undefined): this
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this
+    toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
+}
+export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
+    navBarWidth_value?: Length | undefined
+    navBarPosition_value?: NavBarPosition | undefined
+    navBarWidthRange_value?: [ Dimension, Dimension ] | undefined
+    minContentWidth_value?: Dimension | undefined
+    mode_value?: NavigationMode | undefined
+    backButtonIcon_value?: string | PixelMap | Resource | SymbolGlyphModifier | undefined
+    hideNavBar_value?: boolean | undefined
+    subTitle_value?: string | undefined
+    hideTitleBar_value?: boolean | undefined
+    hideBackButton_value?: boolean | undefined
+    titleMode_value?: NavigationTitleMode | undefined
+    menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
+    toolBar_value?: CustomBuilder | undefined
+    toolbarConfiguration_value?: Array<ToolbarItem> | CustomBuilder | undefined
+    hideToolBar_value?: boolean | undefined
+    enableToolBarAdaptation_value?: boolean | undefined
+    onTitleModeChange_value?: ((titleMode: NavigationTitleMode) => void) | undefined
+    onNavBarStateChange_value?: ((isVisible: boolean) => void) | undefined
+    onNavigationModeChange_value?: ((mode: NavigationMode) => void) | undefined
+    navDestination_value?: ((name: string,param: Object | undefined) => void) | undefined
+    customNavContentTransition_value?: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined
+    systemBarStyle_value?: SystemBarStyle | undefined
+    recoverable_value?: boolean | undefined
+    enableDragBar_value?: boolean | undefined
+    enableModeChangeAnimation_value?: boolean | undefined
+    public navBarWidth(value: Length | undefined): this {
+        return this
+    }
+    public navBarPosition(value: NavBarPosition | undefined): this {
+        return this
+    }
+    public navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
+        return this
+    }
+    public minContentWidth(value: Dimension | undefined): this {
+        return this
+    }
+    public mode(value: NavigationMode | undefined): this {
+        return this
+    }
+    public backButtonIcon(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+        return this
+    }
+    public hideNavBar(value: boolean | undefined): this {
+        return this
+    }
+    public subTitle(value: string | undefined): this {
+        return this
+    }
+    public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
+        return this
+    }
+    public hideBackButton(value: boolean | undefined): this {
+        return this
+    }
+    public titleMode(value: NavigationTitleMode | undefined): this {
+        return this
+    }
+    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+        return this
+    }
+    public toolBar(value: CustomBuilder | undefined): this {
+        return this
+    }
+    public hideToolBar(hide: boolean | undefined, animated?: boolean): this {
+        return this
+    }
+    public enableToolBarAdaptation(value: boolean | undefined): this {
+        return this
+    }
+    public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
+        return this
+    }
+    public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
+        return this
+    }
+    public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
+        return this
+    }
+    navDestination(
+        /** @memo */
+        value: ((name: string,param: Object | null | undefined) => void) | undefined): this {
+            return this
+    }
+    public customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
+        return this
+    }
+    public systemBarStyle(value: SystemBarStyle | undefined): this {
+        return this
+    }
+    public recoverable(value: boolean | undefined): this {
+        return this
+    }
+    public enableDragBar(value: boolean | undefined): this {
+        return this
+    }
+    public enableModeChangeAnimation(value: boolean | undefined): this {
+        return this
+    }
+    public title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
+        return this
+    }
+    public toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+        return this
+    }
+    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        return this
+    }
+}
 export type Callback_NavigationTransitionProxy_Void = (transitionProxy: NavigationTransitionProxy) => void;
 export interface NavigationAnimatedTransition {
-    onTransitionEnd?: ((parameter: boolean) => void);
+    onTransitionEnd?: ((isVisible: boolean) => void);
     timeout?: number;
     isInteractive?: boolean;
     transition: ((transitionProxy: NavigationTransitionProxy) => void);
@@ -1010,4 +1535,362 @@ export interface NavContentInfo {
     mode?: NavDestinationMode;
     param?: Object;
     navDestinationId?: string;
+}
+export type Callback_PopInfo_Void = (parameter: PopInfo) => void;
+export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
+    /** @memo */
+    _navDestination: (name: string, param: Object | null | undefined) => void =
+        /** @memo */
+        (name: string, param: object | null | undefined) => {
+            InteropNativeModule._NativeLog("_navDestination attribute is undefined")
+        }
+    _needSync: boolean = false
+    getPeer(): ArkNavigationPeer {
+        return (this.peer as ArkNavigationPeer)
+    }
+    public setNavigationOptions(pathInfos?: NavPathStack): this {
+        if (this.checkPriority("setNavigationOptions")) {
+            let info: NavPathStack = new NavPathStack();
+            const pathInfos_type = runtimeType(pathInfos)
+            if (pathInfos_type != RuntimeType.UNDEFINED) {
+                info = pathInfos!
+            }
+            this.getPeer()?.setNavigationOptions1Attribute(info)
+            return this
+        }
+        return this
+    }
+    public navBarWidth(value: Length | undefined): this {
+        if (this.checkPriority("navBarWidth")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.navBarWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public navBarPosition(value: NavBarPosition | undefined): this {
+        if (this.checkPriority("navBarPosition")) {
+            const value_casted = value as (NavBarPosition | undefined)
+            this.getPeer()?.navBarPositionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
+        if (this.checkPriority("navBarWidthRange")) {
+            const value_casted = value as ([ Dimension, Dimension ] | undefined)
+            this.getPeer()?.navBarWidthRangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minContentWidth(value: Dimension | undefined): this {
+        if (this.checkPriority("minContentWidth")) {
+            const value_casted = value as (Dimension | undefined)
+            this.getPeer()?.minContentWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public mode(value: NavigationMode | undefined): this {
+        if (this.checkPriority("mode")) {
+            const value_casted = value as (NavigationMode | undefined)
+            this.getPeer()?.modeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public backButtonIcon(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+        if (this.checkPriority("backButtonIcon")) {
+            const icon_type = runtimeType(icon)
+            const accessibilityText_type = runtimeType(accessibilityText)
+            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
+                (RuntimeType.UNDEFINED == icon_type)) && (RuntimeType.UNDEFINED == accessibilityText_type)) {
+                const value_casted = icon as (string | PixelMap | Resource | SymbolGlyphModifier | undefined)
+                this.getPeer()?.backButtonIcon0Attribute(value_casted)
+                return this
+            }
+            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
+                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.STRING == accessibilityText_type) ||
+                (RuntimeType.OBJECT == accessibilityText_type))) {
+                const icon_casted = icon as (string | PixelMap | Resource | SymbolGlyphModifier | undefined)
+                const accessibilityText_casted = accessibilityText as (ResourceStr)
+                this.getPeer()?.backButtonIcon1Attribute(icon_casted, accessibilityText_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public hideNavBar(value: boolean | undefined): this {
+        if (this.checkPriority("hideNavBar")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.hideNavBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public subTitle(value: string | undefined): this {
+        if (this.checkPriority("subTitle")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.subTitleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
+        if (this.checkPriority("hideTitleBar")) {
+            const hide_type = runtimeType(hide)
+            const animated_type = runtimeType(animated)
+            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && (RuntimeType.UNDEFINED == animated_type)) {
+                const value_casted = hide as (boolean | undefined)
+                this.getPeer()?.hideTitleBar0Attribute(value_casted)
+                return this
+            }
+            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
+                const hide_casted = hide as (boolean | undefined)
+                const animated_casted = animated as (boolean | undefined)
+                this.getPeer()?.hideTitleBar1Attribute(hide_casted, animated_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public hideBackButton(value: boolean | undefined): this {
+        if (this.checkPriority("hideBackButton")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.hideBackButtonAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public titleMode(value: NavigationTitleMode | undefined): this {
+        if (this.checkPriority("titleMode")) {
+            const value_casted = value as (NavigationTitleMode | undefined)
+            this.getPeer()?.titleModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+        if (this.checkPriority("menus")) {
+            const items_type = runtimeType(items)
+            const options_type = runtimeType(options)
+            if (((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type)) && (RuntimeType.UNDEFINED == options_type)) {
+                const value_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
+                this.getPeer()?.menus0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type) && (RuntimeType.UNDEFINED != options_type)) {
+                const items_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
+                const options_casted = options as (NavigationMenuOptions)
+                this.getPeer()?.menus1Attribute(items_casted, options_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public toolBar(value: CustomBuilder | undefined): this {
+        if (this.checkPriority("toolBar")) {
+            const value_casted = value as (CustomBuilder | undefined)
+            this.getPeer()?.toolBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public hideToolBar(hide: boolean | undefined, animated?: boolean): this {
+        if (this.checkPriority("hideToolBar")) {
+            const hide_type = runtimeType(hide)
+            const animated_type = runtimeType(animated)
+            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && (RuntimeType.UNDEFINED == animated_type)) {
+                const value_casted = hide as (boolean | undefined)
+                this.getPeer()?.hideToolBar0Attribute(value_casted)
+                return this
+            }
+            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
+                const hide_casted = hide as (boolean | undefined)
+                const animated_casted = animated as (boolean | undefined)
+                this.getPeer()?.hideToolBar1Attribute(hide_casted, animated_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public enableToolBarAdaptation(value: boolean | undefined): this {
+        if (this.checkPriority("enableToolBarAdaptation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableToolBarAdaptationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
+        if (this.checkPriority("onTitleModeChange")) {
+            const value_casted = value as (((titleMode: NavigationTitleMode) => void) | undefined)
+            this.getPeer()?.onTitleModeChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (this.checkPriority("onNavBarStateChange")) {
+            const value_casted = value as (((isVisible: boolean) => void) | undefined)
+            this.getPeer()?.onNavBarStateChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
+        if (this.checkPriority("onNavigationModeChange")) {
+            const value_casted = value as (((mode: NavigationMode) => void) | undefined)
+            this.getPeer()?.onNavigationModeChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public navDestination(
+        /** @memo */
+        value: ((name: string,param: Object | null | undefined) => void) | undefined): this {
+        if (runtimeType(value) !== RuntimeType.UNDEFINED) {
+            this._navDestination = value!
+        }
+        return this
+    }
+    public customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
+        if (this.checkPriority("customNavContentTransition")) {
+            const value_casted = value as (((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined)
+            this.getPeer()?.customNavContentTransitionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public systemBarStyle(value: SystemBarStyle | undefined): this {
+        if (this.checkPriority("systemBarStyle")) {
+            const value_casted = value as (SystemBarStyle | undefined)
+            this.getPeer()?.systemBarStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public recoverable(value: boolean | undefined): this {
+        if (this.checkPriority("recoverable")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.recoverableAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableDragBar(value: boolean | undefined): this {
+        if (this.checkPriority("enableDragBar")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableDragBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableModeChangeAnimation(value: boolean | undefined): this {
+        if (this.checkPriority("enableModeChangeAnimation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableModeChangeAnimationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
+        if (this.checkPriority("title")) {
+            const value_casted = value as (ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined)
+            const options_casted = options as (NavigationTitleOptions | undefined)
+            this.getPeer()?.titleAttribute(value_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+        if (this.checkPriority("toolbarConfiguration")) {
+            const value_casted = value as (Array<ToolbarItem> | CustomBuilder | undefined)
+            const options_casted = options as (NavigationToolbarOptions | undefined)
+            this.getPeer()?.toolbarConfigurationAttribute(value_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        if (this.checkPriority("ignoreLayoutSafeArea")) {
+            const types_casted = types as (Array<LayoutSafeAreaType>)
+            const edges_casted = edges as (Array<LayoutSafeAreaEdge>)
+            this.getPeer()?.ignoreLayoutSafeAreaAttribute(types_casted, edges_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+
+    public updateNeedSync(needSync: boolean): void {
+        this._needSync = needSync
+    }
+
+    public isNeedSync(): boolean {
+        return this._needSync
+    }
+}
+/** @memo */
+export function Navigation(
+    /** @memo */
+    style: ((attributes: NavigationAttribute) => void) | undefined,
+    pathInfos?: NavPathStack,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
+    const receiver = remember(() => {
+        return new ArkNavigationComponent()
+    })
+    NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer) => {
+        receiver.setNavigationOptions(pathInfos)
+        style?.(receiver)
+        content_?.()
+        if (pathInfos != undefined) {
+            remember(() => {
+                const updater: (name: string, param: object|undefined)=>PeerNode =
+                (name: string, param: object|undefined) => {
+                    let node = ArkStackPeer.create(new ArkStackComponent())
+                    return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
+                        setNeedCreate(true)
+                        receiver._navDestination(name, param);
+                        setNeedCreate(false)
+                    })
+                }
+                const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
+                NavExtender.setUpdateStackCallback(pathInfos!, () => {
+                    addPartialUpdate(() => {
+                        if (!receiver.isNeedSync()) {
+                            return
+                        }
+                        InteropNativeModule._NativeLog("AceNavigation: sync navigation stack")
+                        receiver.updateNeedSync(false)
+                        let size: int32 = pathInfos!.size() as int32
+                        InteropNativeModule._NativeLog("AceNavigation: path stack size: " + size)
+                        let names: Array<string> = pathInfos!.getAllPathName()
+                        for (let index: int32 = 0; index < size; index++) {
+                            if (NavExtender.checkNeedCreate(receiver.getPeer().peer.ptr, index)) {
+                                InteropNativeModule._NativeLog("AceNavigation: create new node: " + index + ", name: " + names[index])
+                                let param = pathInfos!.getParamByIndex(index)
+                                let node = value_casted(names[index], param)
+                                NavExtender.setNavDestinationNode(pathInfos!, index, node.peer.ptr)
+                            }
+                        }
+                        NavExtender.syncStack(pathInfos!)
+                    }, __context, (isBefore: boolean) => {})
+                    receiver.updateNeedSync(true)
+                })
+            })
+        }
+        receiver.applyAttributesFinish()
+    })
 }

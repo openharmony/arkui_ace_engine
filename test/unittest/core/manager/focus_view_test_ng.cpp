@@ -251,7 +251,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest002, TestSize.Level1)
     PipelineContext::GetCurrentContext()->FlushFocusView();
     EXPECT_TRUE(pagePattern->isViewHasFocused_);
     EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern->neverShown_);
+    EXPECT_FALSE(pagePattern->neverShown_);
     EXPECT_TRUE(pageFocusHub->IsCurrentFocus());
     EXPECT_TRUE(pagePattern->IsRootScopeCurrentFocus());
     EXPECT_TRUE(columnFocusHub->IsCurrentFocus());
@@ -387,7 +387,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest004, TestSize.Level1)
     PipelineContext::GetCurrentContext()->FlushFocusView();
     EXPECT_TRUE(pagePattern->isViewHasFocused_);
     EXPECT_FALSE(pagePattern->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern->neverShown_);
+    EXPECT_FALSE(pagePattern->neverShown_);
     EXPECT_TRUE(pageFocusHub->IsCurrentFocus());
     EXPECT_TRUE(pagePattern->IsRootScopeCurrentFocus());
     EXPECT_TRUE(columnFocusHub->IsCurrentFocus());
@@ -488,7 +488,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest005, TestSize.Level1)
     PipelineContext::GetCurrentContext()->FlushFocusView();
     EXPECT_TRUE(pagePattern1->isViewHasFocused_);
     EXPECT_TRUE(pagePattern1->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern1->neverShown_);
+    EXPECT_FALSE(pagePattern1->neverShown_);
     EXPECT_TRUE(pageFocusHub1->IsCurrentFocus());
     EXPECT_TRUE(pagePattern1->IsRootScopeCurrentFocus());
     EXPECT_TRUE(columnFocusHub1->IsCurrentFocus());
@@ -526,7 +526,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest005, TestSize.Level1)
     PipelineContext::GetCurrentContext()->FlushFocusView();
     EXPECT_TRUE(pagePattern1->isViewHasFocused_);
     EXPECT_TRUE(pagePattern1->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern1->neverShown_);
+    EXPECT_FALSE(pagePattern1->neverShown_);
     EXPECT_FALSE(pageFocusHub1->IsCurrentFocus());
     EXPECT_FALSE(pagePattern1->IsRootScopeCurrentFocus());
     EXPECT_FALSE(columnFocusHub1->IsCurrentFocus());
@@ -535,7 +535,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest005, TestSize.Level1)
 
     EXPECT_TRUE(pagePattern2->isViewHasFocused_);
     EXPECT_TRUE(pagePattern2->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern2->neverShown_);
+    EXPECT_FALSE(pagePattern2->neverShown_);
     EXPECT_TRUE(pageFocusHub2->IsCurrentFocus());
     EXPECT_TRUE(pagePattern2->IsRootScopeCurrentFocus());
     EXPECT_TRUE(columnFocusHub2->IsCurrentFocus());
@@ -572,7 +572,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest005, TestSize.Level1)
 
     EXPECT_TRUE(pagePattern2->isViewHasFocused_);
     EXPECT_TRUE(pagePattern2->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern2->neverShown_);
+    EXPECT_FALSE(pagePattern2->neverShown_);
     EXPECT_FALSE(pageFocusHub2->IsCurrentFocus());
     EXPECT_FALSE(pagePattern2->IsRootScopeCurrentFocus());
     EXPECT_FALSE(columnFocusHub2->IsCurrentFocus());
@@ -639,7 +639,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest006, TestSize.Level1)
     PipelineContext::GetCurrentContext()->FlushFocusView();
     EXPECT_TRUE(pagePattern->isViewHasFocused_);
     EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern->neverShown_);
+    EXPECT_FALSE(pagePattern->neverShown_);
     EXPECT_TRUE(pageFocusHub->IsCurrentFocus());
     EXPECT_TRUE(pagePattern->IsRootScopeCurrentFocus());
     EXPECT_TRUE(columnFocusHub->IsCurrentFocus());
@@ -718,7 +718,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest007, TestSize.Level1)
     PipelineContext::GetCurrentContext()->FlushFocusView();
     EXPECT_TRUE(pagePattern->isViewHasFocused_);
     EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
-    EXPECT_TRUE(pagePattern->neverShown_);
+    EXPECT_FALSE(pagePattern->neverShown_);
     EXPECT_TRUE(pageFocusHub->IsCurrentFocus());
     EXPECT_TRUE(pagePattern->IsRootScopeCurrentFocus());
     EXPECT_TRUE(columnFocusHub->IsCurrentFocus());

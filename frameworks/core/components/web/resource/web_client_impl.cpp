@@ -1303,6 +1303,15 @@ void WebClientImpl::KeyboardReDispatch(
     delegate->KeyboardReDispatch(event, isUsed);
 }
 
+void WebClientImpl::OnTakeFocus(
+    std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnTakeFocus(event);
+}
+
 void WebClientImpl::OnCursorUpdate(double x, double y, double width, double height)
 {
     auto delegate = webDelegate_.Upgrade();

@@ -3599,8 +3599,10 @@ class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else {
+    } else if (this.value.action === undefined) {
       getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+    } else {
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
     }
   }
   checkObjectDiff(): boolean {
@@ -5592,6 +5594,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
+    keyboardShortCut.action = action;
     modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }

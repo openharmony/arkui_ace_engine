@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/gesture_info.h"
 
@@ -132,9 +133,10 @@ public:
         const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
     static float GetPixelMapScale(const RefPtr<FrameNode>& frameNode);
     static void ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, std::string& udKey,
-        std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary, int32_t& ret);
+        DragSummaryInfo& dragSummaryInfo, int32_t& ret);
     static void EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey,
-        std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary, int32_t& dataSize);
+        DragSummaryInfo& dragSummaryInfo, int32_t& dataSize);
+    static RefPtr<UINode> FindWindowScene(RefPtr<FrameNode>& targetNode);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

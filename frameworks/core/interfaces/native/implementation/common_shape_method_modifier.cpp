@@ -21,12 +21,12 @@
 
 namespace {
     static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
-    void validateStrokeMiterLimit(std::optional<float>& limit)
-    {
-        if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
-            limit = 1.0;
-        }
-    }
+    // void validateStrokeMiterLimit(std::optional<float>& limit)
+    // {
+    //     if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
+    //         limit = 1.0;
+    //     }
+    // }
 } // namespace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -37,122 +37,114 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     return {};
 }
 void StrokeImpl(Ark_NativePointer node,
-                const Ark_ResourceColor* value)
+                const Opt_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
     // ShapeModelNG::SetStroke(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FillImpl(Ark_NativePointer node,
-              const Ark_ResourceColor* value)
+              const Opt_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
     // ShapeModelNG::SetFill(frameNode, Converter::OptConvert<Color>(*value));
 }
 void StrokeDashOffsetImpl(Ark_NativePointer node,
-                          const Ark_Union_Number_String* value)
+                          const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto strokeDashOffset = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidatePositive(strokeDashOffset);
-    Validator::ValidateNonPercent(strokeDashOffset);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto strokeDashOffset = Converter::OptConvert<Dimension>(*value);
+    // Validator::ValidatePositive(strokeDashOffset);
+    // Validator::ValidateNonPercent(strokeDashOffset);
     // ShapeModelNG::SetStrokeDashOffset(frameNode, strokeDashOffset);
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
-                       Ark_LineCapStyle value)
+                       const Opt_LineCapStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumLineCapStyle = Converter::OptConvert<LineCapStyle>(value);
+    auto enumLineCapStyle = Converter::OptConvert<LineCapStyle>(*value);
     auto intLineCapStyle = EnumToInt(enumLineCapStyle);
     // ShapeModelNG::SetStrokeLineCap(frameNode, intLineCapStyle);
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
-                        Ark_LineJoinStyle value)
+                        const Opt_LineJoinStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto enumLineJoinStyle = Converter::OptConvert<LineJoinStyle>(value);
-    auto intLineJoinStyle = EnumToInt(enumLineJoinStyle);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto enumLineJoinStyle = Converter::OptConvert<LineJoinStyle>(*value);
+    // auto intLineJoinStyle = EnumToInt(enumLineJoinStyle);
     // ShapeModelNG::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
-                          const Ark_Union_Number_String* value)
+                          const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto strokeMiterLimit = Converter::OptConvert<float>(*value);
-    validateStrokeMiterLimit(strokeMiterLimit);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto strokeMiterLimit = Converter::OptConvert<float>(*value);
+    // validateStrokeMiterLimit(strokeMiterLimit);
     // ShapeModelNG::SetStrokeMiterLimit(frameNode, strokeMiterLimit);
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
-                       const Ark_Union_Number_String_Resource* value)
+                       const Opt_Union_Number_String_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto strokeOpacity = Converter::OptConvert<float>(*value);
-    Validator::ValidateOpacity(strokeOpacity);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto strokeOpacity = Converter::OptConvert<float>(*value);
+    // Validator::ValidateOpacity(strokeOpacity);
     // ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
 }
 void FillOpacityImpl(Ark_NativePointer node,
-                     const Ark_Union_Number_String_Resource* value)
+                     const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto strokeOpacity = Converter::OptConvert<float>(*value);
     Validator::ValidateOpacity(strokeOpacity);
     // ShapeModelNG::SetFillOpacity(frameNode, strokeOpacity);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Ark_Length* value)
+                     const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto strokeWidth = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     // ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth);
 }
 void AntiAliasImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+                   const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetAntiAlias(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    // ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Array_Length* value)
+                         const Opt_Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    int32_t length = value->length;
-    std::vector<Dimension> strokeDashArray;
-    for (int32_t i = 0; i < length; ++i) {
-        Ark_Length arkStrokeDash = value->array[i];
-        auto optStrokeDash = Converter::OptConvert<Dimension>(arkStrokeDash);
-        Validator::ValidatePositive(optStrokeDash);
-        Validator::ValidateNonPercent(optStrokeDash);
-        if (optStrokeDash.has_value()) {
-            strokeDashArray.emplace_back(optStrokeDash.value());
+    auto dashArray = Converter::OptConvert<std::vector<Dimension>>(*value);
+    if (!dashArray) {
+        // TODO: Reset value
+        return;
+    }
+    // if odd,add twice
+    auto length = dashArray->size();
+    if (length & 1) {
+        for (int32_t i = 0; i < static_cast<int32_t>(length); i++) {
+            dashArray->emplace_back((*dashArray)[i]);
         }
     }
-    if (length == static_cast<int32_t>(strokeDashArray.size()) && (static_cast<uint32_t>(length) & 1)) {
-        for (int32_t i = 0; i < length; ++i) {
-            strokeDashArray.emplace_back(strokeDashArray[i]);
-        }
-    }
-    ShapeModelNG::SetStrokeDashArray(frameNode, strokeDashArray);
-    LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not fully implemented.");
+    // ShapeModelNG::SetStrokeDashArray(frameNode, std::move(*dashArray));
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

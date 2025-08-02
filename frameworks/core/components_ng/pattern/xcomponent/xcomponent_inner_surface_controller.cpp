@@ -92,6 +92,23 @@ int32_t XComponentInnerSurfaceController::GetRenderFitBySurfaceId(
     return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 
+int32_t XComponentInnerSurfaceController::GetSurfaceRotationBySurfaceId(
+    const std::string& surfaceId, bool& isSurfaceLock)
+{
+    std::lock_guard<std::mutex> lock(mutex);
+    auto it = nodeMap.find(surfaceId);
+    if (it == nodeMap.end()) {
+        return XCOMPONENT_CONTROLLER_INVALID_PARAMETER;
+    }
+    auto weakNode = it->second;
+    auto node = weakNode.Upgrade();
+    CHECK_NULL_RETURN(node, XCOMPONENT_CONTROLLER_INVALID_PARAMETER);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(node->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, XCOMPONENT_CONTROLLER_INVALID_PARAMETER);
+    isSurfaceLock = xcPattern->GetSurfaceRotation();
+    return XCOMPONENT_CONTROLLER_NO_ERROR;
+}
+
 void XComponentInnerSurfaceController::RegisterNode(
     const std::string& surfaceId, const WeakPtr<FrameNode>& node)
 {

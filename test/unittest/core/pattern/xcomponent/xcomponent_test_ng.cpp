@@ -1473,4 +1473,25 @@ HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
     code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, RenderFit::CENTER, true);
     EXPECT_EQ(code, 1);
 }
+
+/**
+ * @tc.name: DumpAdvanceInfo
+ * @tc.desc: Test Enable Image Analyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, DumpAdvanceInfo, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->DumpAdvanceInfo();
+    EXPECT_NE(pattern->renderSurface_, nullptr);
+
+    pattern->renderSurface_ = nullptr;
+    pattern->DumpAdvanceInfo();
+    EXPECT_EQ(pattern->renderSurface_, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -833,6 +833,59 @@ HWTEST_F(WebDataDetectorAdapterTest, UrlDecode_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ExtraParamsTest_001
+ * @tc.desc: Test extra params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, ExtraParamsTest_001, TestSize.Level0)
+{
+    auto adapter = AceType::MakeRefPtr<WebDataDetectorAdapter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)), 0);
+    std::map<std::string, std::string> res;
+    res = adapter->AttrsToParams(nullptr);
+    EXPECT_TRUE(res.empty());
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString("test"));
+    EXPECT_TRUE(res.empty());
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString("{}"));
+    EXPECT_TRUE(res.empty());
+
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString(R"({"test": "test"})"));
+    EXPECT_TRUE(res.empty());
+
+    adapter->extraParamKeys_ = {"test"};
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString(R"({"example": "test"})"));
+    EXPECT_TRUE(res.empty());
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString(R"({"test": "test"})"));
+    EXPECT_FALSE(res.empty());
+}
+
+/**
+ * @tc.name: ExtraParamsTest_002
+ * @tc.desc: Test extra params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, ExtraParamsTest_002, TestSize.Level0)
+{
+    std::map<std::string, std::string> res;
+    res = WebDataDetectorAdapter::ParseExtraParams("datetime", nullptr);
+    EXPECT_TRUE(res.empty());
+    res = WebDataDetectorAdapter::ParseExtraParams("datetime", JsonUtil::ParseJsonString(R"([])"));
+    EXPECT_TRUE(res.empty());
+    res = WebDataDetectorAdapter::ParseExtraParams("invalid", JsonUtil::ParseJsonString(R"({})"));
+    EXPECT_TRUE(res.empty());
+
+    // for others
+    res = WebDataDetectorAdapter::ParseExtraParams("phoneNum", JsonUtil::ParseJsonString(R"({})"));
+    EXPECT_TRUE(res.empty());
+
+    // for datetime
+    res = WebDataDetectorAdapter::ParseExtraParams("datetime", JsonUtil::ParseJsonString(R"({})"));
+    EXPECT_TRUE(res.empty());
+    res = WebDataDetectorAdapter::ParseExtraParams(
+        "datetime", JsonUtil::ParseJsonString(R"({"startTimestamp": 123456})"));
+    EXPECT_FALSE(res.empty());
+}
+
+/**
  * @tc.name: WebDataDetectorCacheTest001
  * @tc.desc: Test WebDataDetectorCache with different scenarios.
  * @tc.type: FUNC

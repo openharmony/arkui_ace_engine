@@ -828,6 +828,8 @@ typedef enum {
     ARKUI_BORDER_STYLE_DASHED,
     /** Dotted border. */
     ARKUI_BORDER_STYLE_DOTTED,
+    /** default border. */
+    ARKUI_BORDER_STYLE_NONE,
 } ArkUI_BorderStyle;
 
 /**
@@ -2307,6 +2309,31 @@ typedef enum {
      */
     ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID = 106205,
     /**
+     * @error The node type is not custom node.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_NOT_CUSTOM_NODE = 106401,
+    /**
+     * @error Node already has children.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_CHILD_EXISTED = 106402,
+    /**
+     * @error RenderNode parent is existed.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_RENDER_PARENT_EXISTED = 106403,
+    /**
+     * @error RenderNode child is not exist.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_RENDER_CHILD_NOT_EXIST = 106404,
+    /**
+     * @error Param is out of range.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE = 106405,
+    /**
      * @error The node requesting focus is not focusable.
      * @since 15
      */
@@ -2495,6 +2522,42 @@ typedef enum {
     /** Move focus right. */
     ARKUI_FOCUS_MOVE_RIGHT,
 } ArkUI_FocusMove;
+
+/**
+ * @brief Enumerates the edge derection.
+ *
+ * @since 20
+ */
+typedef enum {
+    /** Set all edge derection. */
+    ARKUI_EDGE_DIRECTION_ALL = 0,
+    /** Set left edge derection. */
+    ARKUI_EDGE_DIRECTION_LEFT,
+    /** Set right edge derection. */
+    ARKUI_EDGE_DIRECTION_RIGHT,
+    /** Set top edge derection. */
+    ARKUI_EDGE_DIRECTION_TOP,
+    /** Set bottom edge derection. */
+    ARKUI_EDGE_DIRECTION_BOTTOM,
+} ArkUI_EdgeDirection;
+ 
+/**
+ * @brief Enumerates the corner derection.
+ *
+ * @since 20
+ */
+typedef enum {
+    /** Set all corner derection. */
+    ARKUI_CORNER_DIRECTION_ALL = 0,
+    /** Set top left corner derection. */
+    ARKUI_CORNER_DIRECTION_TOP_LEFT,
+    /** Set top right corner derection. */
+    ARKUI_CORNER_DIRECTION_TOP_RIGHT,
+    /** Set bottom left corner derection. */
+    ARKUI_CORNER_DIRECTION_BOTTOM_LEFT,
+    /** Set bottom right corner derection. */
+    ARKUI_CORNER_DIRECTION_BOTTOM_RIGHT,
+} ArkUI_CornerDirection;
 
 /**
  * @brief Defines parameter used by the system font style callback event.

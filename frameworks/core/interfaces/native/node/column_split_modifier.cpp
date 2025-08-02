@@ -47,22 +47,12 @@ void SetColumnSplitDivider(ArkUINodeHandle node, ArkUI_Float32 stVal, int32_t st
     if (SystemProperties::ConfigChangePerform() && startMarginRawPtr) {
         auto* start = reinterpret_cast<ResourceObject*>(startMarginRawPtr);
         auto startResObj = AceType::Claim(start);
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::ColumnSplitDivider& divider) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            divider.startMargin = result;
-        };
-        divider.AddResource("columnSplit.divider.startMargin", startResObj, std::move(updateFunc));
+        LinearSplitModelNG::RegisterResObj(startResObj, divider, "columnSplit.divider.startMargin");
     }
     if (SystemProperties::ConfigChangePerform() && endMarginRawPtr) {
         auto* end = reinterpret_cast<ResourceObject*>(endMarginRawPtr);
         auto endResObj = AceType::Claim(end);
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::ColumnSplitDivider& divider) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            divider.endMargin = result;
-        };
-        divider.AddResource("columnSplit.divider.endMargin", endResObj, std::move(updateFunc));
+        LinearSplitModelNG::RegisterResObj(endResObj, divider, "columnSplit.divider.endMargin");
     }
     LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, divider);
 }

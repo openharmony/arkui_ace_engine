@@ -55,10 +55,9 @@ void BeginImpl(const Ark_String* scene,
                const Opt_String* note)
 {
     CHECK_NULL_VOID(scene);
-    CHECK_NULL_VOID(note);
     auto sceneId = Converter::Convert<std::string>(*scene);
     auto action = Converter::OptConvert<PerfActionType>(startInputType).value_or(PerfActionType::UNKNOWN_ACTION);
-    auto notes = Converter::OptConvert<std::string>(*note).value_or(EMPTY_STRING);
+    auto notes = (note ? Converter::OptConvert<std::string>(*note) : std::nullopt).value_or(EMPTY_STRING);
     auto pMonitor = PerfMonitor::GetPerfMonitor();
     CHECK_NULL_VOID(pMonitor);
     pMonitor->Start(sceneId, action, notes);
@@ -73,14 +72,11 @@ void EndImpl(const Ark_String* scene)
 }
 void RecordInputEventTimeImpl(Ark_PerfMonitorActionType actionType,
                               Ark_PerfMonitorSourceType sourceType,
-                              const Ark_Number* time)
+                              Ark_Int64 time)
 {
-    CHECK_NULL_VOID(time);
     auto action = Converter::OptConvert<PerfActionType>(actionType).value_or(PerfActionType::UNKNOWN_ACTION);
     auto source = Converter::OptConvert<PerfSourceType>(sourceType).value_or(PerfSourceType::UNKNOWN_SOURCE);
-    auto timestamp = Converter::Convert<int32_t>(*time);
-    LOGE("ARKOALA GlobalScope_ohos_arkui_performanceMonitorAccessor::RecordInputEventTimeImpl - "
-        "Ark_Number width of int32_t is not enough for implementation of int64_t functionality.");
+    auto timestamp = Converter::Convert<int64_t>(time);
     auto pMonitor = PerfMonitor::GetPerfMonitor();
     CHECK_NULL_VOID(pMonitor);
     pMonitor->RecordInputEvent(action, source, timestamp);

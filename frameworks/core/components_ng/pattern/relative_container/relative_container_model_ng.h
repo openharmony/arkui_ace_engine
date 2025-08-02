@@ -36,7 +36,8 @@ public:
     static void ResetBarrier(FrameNode* frameNode);
     static void ResetGuideline(FrameNode* frameNode);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);
-
+    static void SetPositionResObj(
+        const RefPtr<ResourceObject>& startResObj, GuidelineInfo& guidelineInfoItem, const std::string key);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_MODEL_NG_H

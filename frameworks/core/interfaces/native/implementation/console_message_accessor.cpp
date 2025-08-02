@@ -92,7 +92,4 @@ const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
     return &ConsoleMessageAccessorImpl;
 }
 
-struct ConsoleMessagePeer {
-    virtual ~ConsoleMessagePeer() = default;
-};
 }

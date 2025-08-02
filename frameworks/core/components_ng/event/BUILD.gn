@@ -23,6 +23,7 @@ build_component_ng("event_ng") {
     "focus_box.cpp",
     "focus_event_handler.cpp",
     "focus_hub.cpp",
+    "focus_hub_multithread.cpp",
     "gesture_event_hub.cpp",
     "gesture_event_hub_drag.cpp",
     "input_event.cpp",

@@ -1462,6 +1462,63 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMenuNode003
+ * @tc.desc: Test UpdateMenuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateMenuNode003, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    targetNode->MountToParent(rootNode);
+    textNode->MountToParent(targetNode);
+    MenuParam menuParam;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    PreparedInfoForDrag data;
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    frameNode->SetDragPreviewOptions(previewOption);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+    menuWrapperPattern->SetHasTransitionEffect(true);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
+    menuWrapperPattern->SetHasTransitionEffect(false);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
+    menuWrapperPattern->SetHasTransitionEffect(false);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    auto menuNode = menuWrapperPattern->GetMenu();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsShowHoverImage(true);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
+}
+
+/**
  * @tc.name: MinRecognizerGroupLoopSizeTest001
  * @tc.desc: Test ProcessTouchTestHit
  * @tc.type: FUNC
@@ -1559,5 +1616,52 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubProcessTouchHitTest001, TestSize.
         ASSERT_NE(panRecognizer, nullptr);
         EXPECT_EQ(panRecognizer->GetDistance(), testCase.expectDistance.ConvertToPx());
     }
+}
+
+/**
+ * @tc.name: ProcessTouchTestHitSequence001
+ * @tc.desc: Test ProcessTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ProcessTouchTestHitSequence001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create recognizer and add to innerTargets.
+     */
+    OffsetF coordinateOffset;
+    TouchRestrict touchRestrict;
+    TouchTestResult innerTargets;
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    PointF localPoint;
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0.0);
+    panRecognizer->SetPriority(GesturePriority::Low);
+    innerTargets.emplace_back(panRecognizer);
+
+    auto otherFrameNode = FrameNode::CreateFrameNode(
+        "scroll", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto scrollGestureEventHub = otherFrameNode->GetOrCreateGestureEventHub();
+    auto scrollableActuator =
+        AceType::MakeRefPtr<ScrollableActuator>(AceType::WeakClaim(AceType::RawPtr(scrollGestureEventHub)));
+
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto panRecognizerNG = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0.0);
+    scrollable->panRecognizerNG_ = panRecognizerNG;
+    scrollableEvent->SetScrollable(scrollable);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
+    EXPECT_EQ(scrollableActuator->scrollableEvents_.size(), 1);
+    scrollGestureEventHub->scrollableActuator_ = scrollableActuator;
+
+    /**
+     * @tc.steps: step2. call ProcessTouchTestHit , recognizer is not instance of recognizer group
+     * @tc.expected: result is false
+     */
+    auto result = scrollGestureEventHub->ProcessTouchTestHit(
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(panRecognizer->IsSystemGesture());
 }
 } // namespace OHOS::Ace::NG

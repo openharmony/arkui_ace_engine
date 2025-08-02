@@ -1,0 +1,58 @@
+{
+  "rootElement": {
+    "nodeId": 1091,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1092,
+        "kind": "Column",
+        "children": [
+          {
+            "nodeId": 1093,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "ListItemTest"
+          },
+          {
+            "nodeId": 1094,
+            "kind": "List",
+            "children": [
+              {
+                "nodeId": 1095,
+                "kind": "ListItem",
+                "children": [
+                  {
+                    "nodeId": 1096,
+                    "kind": "Text",
+                    "children": [],
+                    "setTextOptions_content": "Item-0"
+                  }
+                ],
+                "selectable_value": 1,
+                "selected_value": 0
+              },
+              {
+                "nodeId": 1097,
+                "kind": "ListItem",
+                "children": [
+                  {
+                    "nodeId": 1098,
+                    "kind": "Text",
+                    "children": [],
+                    "setTextOptions_content": "Item-1"
+                  }
+                ],
+                "selectable_value": 1,
+                "selected_value": 0
+              }
+            ],
+            "setListOptions_options": {
+              "initialIndex": 0,
+              "space": 20
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

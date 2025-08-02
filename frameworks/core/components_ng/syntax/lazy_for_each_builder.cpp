@@ -996,7 +996,7 @@ namespace OHOS::Ace::NG {
         std::unordered_map<std::string, LazyForEachCacheChild>& cache, int64_t deadline,
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
-        if (GetSysTimestamp() > deadline) {
+        if (!enablePreBuild_ || GetSysTimestamp() > deadline) {
             if (DeleteExpiringItemImmediately()) {
                 return false;
             }

@@ -248,6 +248,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern007, TestSize.Level1)
      * @tc.steps: step1. Set AutoPlay to true and call HandleDragEnd
      * @tc.expected: HandleDragEnd correctly handles AutoPlay case
      */
+    indicatorPattern->isPressed_ = true;
     swiperPaintProperty->UpdateAutoPlay(true);
     indicatorPattern->HandleDragEnd(0.0);
     EXPECT_EQ(pattern_->isIndicatorLongPress_, false);

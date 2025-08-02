@@ -16,6 +16,7 @@
 #include "core/interfaces/native/node/view_model.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -621,6 +622,14 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return AceType::RawPtr(frameNode);
 }
 
+void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
+{
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag), nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -782,6 +791,8 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(parent, RemoveChild, parentNode, childNode);
     child->MarkRemoving();
     parent->RemoveChild(AceType::Claim(child), true);
 }

@@ -3082,7 +3082,17 @@ class NavPathStack {
       return '';
     }
     try {
-      return JSON.stringify(this.pathArray[index].param);
+      let serializeCount = 0;
+      const MAX_COUNT = 1000;
+      const serializeFilter = (key, value) => {
+        serializeCount++;
+        if (serializeCount > MAX_COUNT) {
+          console.warn('AceNavigation', 'too many iterations during serialize navigation param!');
+          throw new Error('too many iterations');
+        }
+        return value;
+      }
+      return JSON.stringify(this.pathArray[index].param, serializeFilter);
     } catch (error) {
       return '';
     }

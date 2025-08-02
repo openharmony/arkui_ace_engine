@@ -89,12 +89,11 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::u16str
     auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
     auto isFirstBuild = frameNode->IsFirstBuilding();
     if (layout) {
-        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][isFirstBuild:%d]", V2::TEXT_ETS_TAG, nodeId, isFirstBuild);
         layout->UpdateContent(content);
     }
     // set draggable for framenode
     if (isFirstBuild) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);

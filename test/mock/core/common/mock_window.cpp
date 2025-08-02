@@ -18,7 +18,7 @@
 namespace OHOS::Ace {
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow)) {}
 
-void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void Window::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 void Window::RequestFrame() {}
 

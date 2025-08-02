@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
+#include "base/utils/feature_param.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -118,8 +119,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
-    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
-                layoutInfo_->targetIndex_.has_value();
+    const float prevOffset = pattern->GetPrevOffset();
+    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+                layoutInfo_->targetIndex_.has_value() || !NearEqual(layoutInfo_->currentOffset_, prevOffset);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     GetExpandArea(layoutProperty, layoutInfo_);
@@ -372,8 +374,6 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     auto currentIndex = layoutInfo_->startIndex_;
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
-    const float prevOffset = layoutWrapper->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
-    auto notScrolling = NearEqual(layoutInfo_->currentOffset_, prevOffset);
     while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
            layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
@@ -432,7 +432,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         }
         position = GetItemPosition(++currentIndex);
         fill = true;
-        if (!syncLoad_ && notScrolling && layoutWrapper->ReachResponseDeadline()) {
+        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             layoutInfo_->measureInNextFrame_ = true;
             break;
         }

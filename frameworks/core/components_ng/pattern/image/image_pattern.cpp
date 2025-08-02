@@ -17,6 +17,9 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+#if defined(ACE_STATIC)
+#include "base/utils/multi_thread.h"
+#endif
 #include "base/image/image_perf.h"
 #include "base/log/dump_log.h"
 #include "base/network/download_manager.h"
@@ -1445,6 +1448,9 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+#endif
     auto renderCtx = host->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     auto pipeline = host->GetContext();
@@ -1472,6 +1478,9 @@ void ImagePattern::OnAttachToFrameNode()
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
+#endif
     CloseSelectOverlay();
 
     auto id = frameNode->GetId();
@@ -1481,8 +1490,22 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
+#if defined(ACE_STATIC)
+void ImagePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+#endif
+
 void ImagePattern::OnDetachFromMainTree()
 {
+#if defined(ACE_STATIC)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+#endif
     if (isNeedReset_) {
         ResetImageAndAlt();
         isNeedReset_ = false;

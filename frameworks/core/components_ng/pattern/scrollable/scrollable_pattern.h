@@ -390,7 +390,7 @@ public:
     void PlaySpringAnimation(
         float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
-    virtual float GetTotalOffset() const
+    virtual double GetTotalOffset() const
     {
         return 0.0f;
     }
@@ -408,7 +408,7 @@ public:
     {
         return false;
     }
-    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity)
     {
         return false;
     }
@@ -1067,6 +1067,7 @@ private:
     /******************************************************************************
      * NestableScrollContainer implementations
      */
+    void HandleExtScroll(float velocity = 0.f);
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
@@ -1106,6 +1107,7 @@ private:
     void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
     void SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable);
+    void SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetOverScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetIsReverseCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable);
@@ -1140,10 +1142,12 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
+    void SetUiDVSyncCommandTime(uint64_t time);
     void SetNestedScrolling(bool nestedScrolling);
     void InitRatio();
     void SetOnHiddenChangeForParent();
     void ReportOnItemStopEvent();
+    virtual void ResetForExtScroll() {};
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -1230,6 +1234,7 @@ private:
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
+    float GetDVSyncOffset();
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
@@ -1237,7 +1242,7 @@ private:
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
-    bool prevHasFadingEdge_ = false;
+    bool preHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
 
     bool isRoundScroll_ = false;
@@ -1249,6 +1254,9 @@ private:
     bool backToTop_ = false;
     bool useDefaultBackToTop_ = true;
     bool isHitTestBlock_ = false;
+    std::queue<std::pair<uint64_t, float>> offsets_;
+    bool isExtScroll_ = false;
+    bool isNeedCollectOffset_ = false;
 };
 } // namespace OHOS::Ace::NG
 

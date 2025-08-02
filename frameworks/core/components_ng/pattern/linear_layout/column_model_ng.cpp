@@ -79,10 +79,11 @@ void ColumnModelNG::Create(const RefPtr<ResourceObject>& spaceResObj, AlignDecla
 
 void ColumnModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
-    if (space && GreatOrEqual(space->Value(), 0.0)) {
+    CHECK_NULL_VOID(space);
+    if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, frameNode);
+        LOGE("Column: the space value is illegal due to space is less than zero");
     }
 }
 
@@ -161,22 +162,14 @@ void ColumnModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse, frameNode);
 }
 
-void ColumnModelNG::SetJustifyContent(FrameNode* frameNode, const std::optional<FlexAlign>& valueOpt)
+void ColumnModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
 {
-    if (valueOpt) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, valueOpt.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign, frameNode);
 }
 
-void ColumnModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& valueOpt)
+void ColumnModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign)
 {
-    if (valueOpt) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, valueOpt.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign, frameNode);
 }
 
 FlexAlign ColumnModelNG::GetJustifyContent(FrameNode* frameNode)

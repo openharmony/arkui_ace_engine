@@ -150,12 +150,11 @@ bool SetOhosPath(const std::string& uri, std::string& ohosPath)
     return false;
 }
 void EnvironmentImpl(Ark_NativePointer node,
-                     const Ark_ResourceStr* value)
+                     const Opt_ResourceStr* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto srcPath = Converter::OptConvert<std::string>(*value);
     if (srcPath) {
         std::string ohosPath("");
@@ -165,12 +164,11 @@ void EnvironmentImpl(Ark_NativePointer node,
     #endif
 }
 void ShaderImpl(Ark_NativePointer node,
-                const Ark_ResourceStr* value)
+                const Opt_ResourceStr* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto srcPath = Converter::OptConvert<std::string>(*value);
     if (srcPath) {
         std::string ohosPath("");
@@ -180,12 +178,11 @@ void ShaderImpl(Ark_NativePointer node,
     #endif
 }
 void ShaderImageTextureImpl(Ark_NativePointer node,
-                            const Ark_ResourceStr* value)
+                            const Opt_ResourceStr* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto srcPath = Converter::OptConvert<std::string>(*value);
     if (srcPath) {
         std::string ohosPath("");
@@ -195,63 +192,67 @@ void ShaderImageTextureImpl(Ark_NativePointer node,
     #endif
 }
 void ShaderInputBufferImpl(Ark_NativePointer node,
-                           const Array_Number* value)
+                           const Opt_Array_Number* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::vector<float> shaderInputVec = Converter::Convert<std::vector<float>>(*value);
-    size_t length = shaderInputVec.size();
-    if (length == 0) {
+    auto shaderInputVec = Converter::OptConvert<std::vector<float>>(*value);
+    if (!shaderInputVec) {
+        // TODO: Reset value
         return;
     }
-    std::shared_ptr<OHOS::Render3D::ShaderInputBuffer> buffer = nullptr;
-    buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
+    int32_t length = shaderInputVec->size();
+    if (length <= 0) {
+        return;
+    }
+    auto buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
     if (!buffer->Alloc(length)) {
         return;
     }
-    for (size_t i = 0; i < length; i++) {
-        buffer->Update(shaderInputVec.at(i), i);
+    for (int32_t i = 0; i < length; i++) {
+        buffer->Update(shaderInputVec->at(i), i);
     }
     ModelViewNG::AddShaderInputBuffer(frameNode, buffer);
     #endif
 }
 void RenderWidthImpl(Ark_NativePointer node,
-                     const Ark_Length* value)
+                     const Opt_Length* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(convValue);
     // ModelViewNG::SetRenderWidth(frameNode, convValue);
     #endif
 }
 void RenderHeightImpl(Ark_NativePointer node,
-                      const Ark_Length* value)
+                      const Opt_Length* value)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(convValue);
     // ModelViewNG::SetRenderHeight(frameNode, convValue);
     #endif
 }
 void CustomRenderImpl(Ark_NativePointer node,
-                      const Ark_ResourceStr* uri,
-                      Ark_Boolean selfRenderUpdate)
+                      const Opt_ResourceStr* uri,
+                      const Opt_Boolean* selfRenderUpdate)
 {
     #if defined(MODEL_COMPONENT_SUPPORTED)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(uri);
-    bool update = Converter::Convert<bool>(selfRenderUpdate);
+    auto update = Converter::OptConvert<bool>(*selfRenderUpdate);
+    if (!update) {
+        // TODO: Reset value
+        return;
+    }
     auto uriString = Converter::OptConvert<std::string>(*uri); //uriString.value_or("")
-    auto customRender = std::make_shared<OHOS::Render3D::CustomRenderDescriptor>(uriString.value_or(""), update);
+    auto customRender = std::make_shared<OHOS::Render3D::CustomRenderDescriptor>(uriString.value_or(""), *update);
     // ModelViewNG::AddCustomRender(frameNode, customRender);
     #endif
 }

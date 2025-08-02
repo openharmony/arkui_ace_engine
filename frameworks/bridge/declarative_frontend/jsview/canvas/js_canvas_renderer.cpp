@@ -1236,6 +1236,7 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
         info.GetDoubleArg(2, param.radius, isJudgeSpecialValue_) && // Index2: the 3rd arg.
         info.GetDoubleArg(3, param.startAngle, isJudgeSpecialValue_) && // Index3: the 4th arg.
         info.GetDoubleArg(4, param.endAngle, isJudgeSpecialValue_)) { // Index4: the 5th arg.
+
         info.GetBooleanArg(5, param.anticlockwise); // Non mandatory parameter with default value 'false'
         double density = GetDensity();
         param.x *= density;
@@ -1257,6 +1258,7 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
         info.GetDoubleArg(4, param.rotation, isJudgeSpecialValue_) && // Index4: the 5th arg.
         info.GetDoubleArg(5, param.startAngle, isJudgeSpecialValue_) && // Index5: the 6th arg.
         info.GetDoubleArg(6, param.endAngle, isJudgeSpecialValue_)) { // Index6: the 7th arg.
+
         info.GetBooleanArg(7, param.anticlockwise); // Non mandatory parameter with default value 'false'
         double density = GetDensity();
         param.x *= density;

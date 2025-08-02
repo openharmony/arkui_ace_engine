@@ -898,6 +898,8 @@ void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
     auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(popupPaintProp);
     popupPaintProp->UpdateBackgroundColor(value);
+    CHECK_NULL_VOID(popupParam_);
+    UpdateStyleOption(popupParam_->GetBlurStyle(), false);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

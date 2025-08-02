@@ -33,6 +33,14 @@ void ImageBitmapPeer::SetOptions(
     ContainerScope scope(Container::CurrentIdSafely());
     SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (!textString.empty()) {
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        if (context->IsFormRender() && NotFormSupport(textString)) {
+            LOGE("ARKOALA ImageBitmapPeer::Constructor Not supported src : %{public}s when form render",
+                textString.c_str());
+            return;
+        }
+        LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
         CHECK_NULL_VOID(pixelMap);
@@ -122,25 +130,24 @@ void ImageBitmapPeer::LoadImage(const RefPtr<PixelMap>& pixmap)
 }
 void ImageBitmapPeer::LoadImage(const OHOS::Ace::ImageSourceInfo& sourceInfo)
 {
-    auto dataReadyCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto jsRenderImage = weak.Upgrade();
-        CHECK_NULL_VOID(jsRenderImage);
-        jsRenderImage->OnImageDataReady();
-    };
-    auto loadSuccessCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto jsRenderImage = weak.Upgrade();
-        CHECK_NULL_VOID(jsRenderImage);
-        jsRenderImage->OnImageLoadSuccess();
-    };
-    auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo,
-        const std::string& errorMsg, ImageErrorInfo /* errorInfo */) {
-        auto jsRenderImage = weak.Upgrade();
-        CHECK_NULL_VOID(jsRenderImage);
-        jsRenderImage->OnImageLoadFail(errorMsg);
-    };
-    NG::LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
-    loadingCtx_ = AceType::MakeRefPtr<NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
-    loadingCtx_->LoadImageData();
+    // auto dataReadyCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    //     auto jsRenderImage = weak.Upgrade();
+    //     CHECK_NULL_VOID(jsRenderImage);
+    //     jsRenderImage->OnImageDataReady();
+    // };
+    // auto loadSuccessCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    //     auto jsRenderImage = weak.Upgrade();
+    //     CHECK_NULL_VOID(jsRenderImage);
+    //     jsRenderImage->OnImageLoadSuccess();
+    // };
+    // auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+    //     auto jsRenderImage = weak.Upgrade();
+    //     CHECK_NULL_VOID(jsRenderImage);
+    //     jsRenderImage->OnImageLoadFail(errorMsg);
+    // };
+    // NG::LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
+    // loadingCtx_ = AceType::MakeRefPtr<NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
+    // loadingCtx_->LoadImageData();
 }
 void ImageBitmapPeer::OnImageDataReady()
 {

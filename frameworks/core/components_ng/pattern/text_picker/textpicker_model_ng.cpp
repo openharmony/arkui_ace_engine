@@ -1061,19 +1061,19 @@ void TextPickerModelNG::SetNormalTextStyle(
         TextPickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()), frameNode);
 
     if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize,
-            ConvertFontScaleValue(value.minFontSize.value()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize, Dimension());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize, Dimension(), frameNode);
     }
     if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize,
-            ConvertFontScaleValue(value.maxFontSize.value()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize, Dimension());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize, Dimension(), frameNode);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, TextOverflow,
-        value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, TextOverflow,
+        value.textOverflow.value_or(TextOverflow::CLIP), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
@@ -1111,19 +1111,19 @@ void TextPickerModelNG::SetSelectedTextStyle(
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()), frameNode);
 
     if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize,
-            ConvertFontScaleValue(value.minFontSize.value()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize, Dimension());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize, Dimension(), frameNode);
     }
     if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize,
-            ConvertFontScaleValue(value.maxFontSize.value()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize, Dimension());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize, Dimension(), frameNode);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedTextOverflow,
-        value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedTextOverflow,
+        value.textOverflow.value_or(TextOverflow::CLIP), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
@@ -1159,19 +1159,19 @@ void TextPickerModelNG::SetDisappearTextStyle(
         value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
 
     if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize,
-            ConvertFontScaleValue(value.minFontSize.value()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize, Dimension());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize, Dimension(), frameNode);
     }
     if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize,
-            ConvertFontScaleValue(value.maxFontSize.value()));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize, Dimension());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize, Dimension(), frameNode);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearTextOverflow,
-        value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearTextOverflow,
+        value.textOverflow.value_or(TextOverflow::CLIP), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
@@ -1616,6 +1616,10 @@ bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
 
 void TextPickerModelNG::SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseBackgroundStyleColorResObj(frameNode, value);
+    ParseBackgroundStyleRadiusResObj(frameNode, value);
     if (value.color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
             value.color.value());
@@ -1629,6 +1633,8 @@ void TextPickerModelNG::SetSelectedBackgroundStyle(const NG::PickerBackgroundSty
 void TextPickerModelNG::SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ParseBackgroundStyleColorResObj(frameNode, value);
+    ParseBackgroundStyleRadiusResObj(frameNode, value);
     if (value.color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
             value.color.value(), frameNode);
@@ -1784,7 +1790,8 @@ void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj) {
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj &&
+        !textStyleOpt.minFontSizeResObj && !textStyleOpt.maxFontSizeResObj) {
         pickerPattern->RemoveResObj(textStyleType);
         return;
     }
@@ -1808,6 +1815,18 @@ void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
         if (textStyleOpt.fontFamilyResObj &&
             ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
             textStyle.fontFamily = families;
+        }
+
+        CalcDimension minFontSize;
+        if (textStyleOpt.minFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.minFontSizeResObj, minFontSize)) {
+            textStyle.minFontSize = minFontSize;
+        }
+
+        CalcDimension maxFontSize;
+        if (textStyleOpt.maxFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.maxFontSizeResObj, maxFontSize)) {
+            textStyle.maxFontSize = maxFontSize;
         }
 
         updateTextStyleFunc(textStyle);
@@ -1873,49 +1892,11 @@ void TextPickerModelNG::ParseDefaultTextStyleResObj(const PickerTextStyle& textS
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj &&
-        !textStyleOpt.minFontSizeResObj && !textStyleOpt.maxFontSizeResObj) {
-        pickerPattern->RemoveResObj("TextPickerDefaultTextStyle");
-        return;
-    }
-
-    auto&& updateFunc = [textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
-        PickerTextStyle textStyle;
-        auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        CHECK_NULL_VOID(pickerPattern);
-        Color color;
-        if (textStyleOpt.textColorResObj &&
-            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
-            textStyle.textColor = color;
-        }
-
-        CalcDimension fontSize;
-        if (textStyleOpt.fontSizeResObj &&
-            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
-            textStyle.fontSize = fontSize;
-        }
-
-        std::vector<std::string> families;
-        if (textStyleOpt.fontFamilyResObj &&
-            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
-            textStyle.fontFamily = families;
-        }
-
-        CalcDimension minFontSize;
-        if (textStyleOpt.minFontSizeResObj &&
-            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.minFontSizeResObj, minFontSize)) {
-            textStyle.minFontSize = minFontSize;
-        }
-
-        CalcDimension maxFontSize;
-        if (textStyleOpt.maxFontSizeResObj &&
-            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.maxFontSizeResObj, maxFontSize)) {
-            textStyle.maxFontSize = maxFontSize;
-        }
-        pickerPattern->UpdateDefaultTextStyle(textStyle);
-    };
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
-    pickerPattern->AddResObj("TextPickerDefaultTextStyle", resObj, std::move(updateFunc));
+    ParseResTextStyle(
+        textStyleOpt,
+        "TextPickerDefaultTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDefaultTextStyle(textStyle); }
+    );
 }
 
 void TextPickerModelNG::ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
@@ -2099,6 +2080,75 @@ void TextPickerModelNG::TextPickerRemoveResObj(FrameNode* frameNode, const std::
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->RemoveResObj(key);
+}
+
+void TextPickerModelNG::ParseBackgroundStyleColorResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
+{
+    if (!SystemProperties::ConfigChangePerform() || !frameNode) {
+        return;
+    }
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->RemoveResObj("TextPicker.BackgroundStyle.color");
+
+    auto&& updateColorFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+
+        NG::PickerBackgroundStyle& backgroundValue = const_cast<NG::PickerBackgroundStyle&>(value);
+        Color color = backgroundValue.color.value();
+        if (value.colorResObj && ResourceParseUtils::ParseResColor(backgroundValue.colorResObj, color)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor, color, node);
+        } else if (!value.textColorSetByUser) {
+            auto context = node->GetContext();
+            CHECK_NULL_VOID(context);
+            auto theme = context->GetTheme<PickerTheme>();
+            if (theme) {
+                color = theme->GetSelectedBackgroundColor();
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor, color, node);
+            }
+        }
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->AddResObj("TextPicker.BackgroundStyle.color", resObj, std::move(updateColorFunc));
+}
+
+void TextPickerModelNG::ParseBackgroundStyleRadiusResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
+{
+    if (!SystemProperties::ConfigChangePerform() || !frameNode) {
+        return;
+    }
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->RemoveResObj("TextPicker.BackgroundStyle.borderRadius");
+
+    if (!value.borderRadiusResObj && !value.borderRadius->HasResources()) {
+        return;
+    }
+
+    auto&& updateRadiusFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+
+        NG::PickerBackgroundStyle& backgroundValue = const_cast<NG::PickerBackgroundStyle&>(value);
+        if (backgroundValue.borderRadius->HasResources()) {
+            backgroundValue.borderRadius->ReloadResources();
+            NG::BorderRadiusProperty& borderRadiusValue = backgroundValue.borderRadius.value();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius, borderRadiusValue, node);
+        } else if (backgroundValue.borderRadiusResObj) {
+            CalcDimension calcDimension;
+            ResourceParseUtils::ParseResDimensionVpNG(backgroundValue.borderRadiusResObj, calcDimension);
+            if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
+                NG::BorderRadiusProperty borderRadiusValue = NG::BorderRadiusProperty(calcDimension);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    TextPickerLayoutProperty, SelectedBorderRadius, borderRadiusValue, node);
+            }
+        }
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->AddResObj("TextPicker.BackgroundStyle.borderRadius", resObj, std::move(updateRadiusFunc));
 }
 
 } // namespace OHOS::Ace::NG

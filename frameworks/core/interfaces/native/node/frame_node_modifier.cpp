@@ -20,11 +20,13 @@
 #include "base/error/error_code.h"
 #include "core/common/builder_util.h"
 #include "core/common/color_inverter.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/frame_node_modifier_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
 
@@ -167,6 +169,8 @@ void ClearBuilderNodeInFrameNode(ArkUINodeHandle node)
 void ClearChildrenInFrameNode(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(currentNode, ClearChildrenInFrameNode, node);
     CHECK_NULL_VOID(currentNode);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);

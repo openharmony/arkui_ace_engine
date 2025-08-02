@@ -154,6 +154,10 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    /* only for 1.2 begin */
+    bool GetIsTransferringCaller();
+    void SetIsTransferringCaller(bool isTransferringCaller);
+    /* only for 1.2 end */
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
     bool IsCompatibleOldVersion();
@@ -270,6 +274,10 @@ public:
     void SetModalRequestFocus(bool requestFocus)
     {
         isModalRequestFocus_ = requestFocus;
+    }
+    bool IsWindowSceneVisible() const
+    {
+        return windowSceneVisible_;
     }
 
 protected:
@@ -439,6 +447,7 @@ private:
     bool needReNotifyForeground_ = false;
     bool needReDispatchDisplayArea_ = false;
     bool curVisible_ = false;
+    bool windowSceneVisible_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
@@ -453,6 +462,9 @@ private:
 
     bool isWindowModeFollowHost_ = false;
     bool isModalRequestFocus_ = true;
+    /* only for 1.2 begin */
+    bool hasAttachContext_ = false;
+    /* only for 1.2 end */
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;

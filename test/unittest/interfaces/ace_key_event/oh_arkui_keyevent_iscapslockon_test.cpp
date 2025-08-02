@@ -57,4 +57,16 @@ HWTEST_F(KeyEventTest, KeyEvent_IsCapsLockOn003, TestSize.Level0)
     }
 }
 
+HWTEST_F(KeyEventTest, KeyEvent_IsCapsLockOn004, TestSize.Level0)
+{
+    ArkUI_UIInputEvent event = {
+        .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
+        .eventTypeId = AXIS_EVENT_ID,
+        .inputEvent = nullptr,
+        .isCloned = false,
+        .apiVersion = 0,
+    };
+    bool state = false;
+    EXPECT_EQ(OH_ArkUI_KeyEvent_IsCapsLockOn(&event, &state), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace

@@ -1311,7 +1311,7 @@ public:
         ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
     }
 
-    void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) override
+    void SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) override
     {
         ViewAbstract::SetOnDragSpringLoading(std::move(onDragSpringLoading));
     }

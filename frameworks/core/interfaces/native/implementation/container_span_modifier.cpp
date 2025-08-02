@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
@@ -24,7 +25,10 @@ namespace ContainerSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto spanNode = SpanModelStatic::CreateContainerSpanNode(id);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
 }
 } // ContainerSpanModifier
 namespace ContainerSpanInterfaceModifier {
@@ -35,13 +39,16 @@ void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
 void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Ark_TextBackgroundStyle* value)
+                             const Opt_TextBackgroundStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<TextBackgroundStyle>(*value);
-    SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextBackgroundStyle>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);
 }
 } // ContainerSpanAttributeModifier
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()

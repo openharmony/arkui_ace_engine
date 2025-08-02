@@ -21,6 +21,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -32,7 +33,7 @@ constexpr uint32_t ASYNC_UITASK_QOS = 5;
 std::unique_ptr<ffrt::queue> asyncUITaskQueue = nullptr;
 #endif
 }
-thread_local bool MultiThreadBuildManager::isFreeNodeScope_ = false;
+thread_local bool MultiThreadBuildManager::isThreadSafeNodeScope_ = false;
 thread_local bool MultiThreadBuildManager::isUIThread_ = false;
 
 MultiThreadBuildManager& MultiThreadBuildManager::GetInstance()
@@ -79,39 +80,21 @@ bool MultiThreadBuildManager::CheckNodeOnValidThread(NG::UINode* node)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. node is nullptr");
         return false;
     }
-    if (!node->IsFreeState() && !MultiThreadBuildManager::IsOnUIThread()) {
+    if (!node->IsFree() && !MultiThreadBuildManager::IsOnUIThread()) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. unfree node not run on main thread");
         return false;
     }
     return true;
 }
 
-void MultiThreadBuildManager::SetIsFreeNodeScope(bool isFreeNodeScope)
+void MultiThreadBuildManager::SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope)
 {
-    isFreeNodeScope_ = isFreeNodeScope;
+    isThreadSafeNodeScope_ = isThreadSafeNodeScope;
 }
 
-bool MultiThreadBuildManager::IsFreeNodeScope()
+bool MultiThreadBuildManager::IsThreadSafeNodeScope()
 {
-    return isFreeNodeScope_;
-}
-
-void MultiThreadBuildManager::TryExecuteUnSafeTask(NG::UINode* node, std::function<void()>&& task)
-{
-    if (node->IsFreeState()) {
-        node->PostAfterAttachMainTreeTask(std::move(task));
-    } else if (task) {
-        task();
-    }
-}
-
-bool MultiThreadBuildManager::TryPostUnSafeTask(NG::UINode* node, std::function<void()>&& task)
-{
-    if (node->IsFreeState()) {
-        node->PostAfterAttachMainTreeTask(std::move(task));
-        return true;
-    }
-    return false;
+    return isThreadSafeNodeScope_ || SystemProperties::GetDebugThreadSafeNodeEnabled();
 }
 
 bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,

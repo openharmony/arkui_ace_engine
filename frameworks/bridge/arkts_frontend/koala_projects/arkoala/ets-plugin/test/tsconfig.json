@@ -1,0 +1,18 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "../build/test",
+        "module": "CommonJS",
+        "noEmit": true,
+        "removeComments": false
+    },
+    "include": ["../test/**/*"],
+    "exclude": [
+        "../build",
+        "../test/generated",
+        "../test/ets",
+        "../test/golden",
+        "../test/specification/developtools_ace_ets2bundle"
+    ]
+}

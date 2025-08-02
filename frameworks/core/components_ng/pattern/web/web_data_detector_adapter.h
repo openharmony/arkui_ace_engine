@@ -38,6 +38,7 @@ struct EntityMatch {
     size_t end; // u16
     std::string entityType;
     std::string clean;
+    std::map<std::string, std::string> params;
 };
 
 struct WebDataDetectorConfig {
@@ -164,6 +165,10 @@ public:
     std::string GetResultJsonString(const std::string& requestId);
     void SendResultToJS(const std::string& resultStr);
 
+    std::map<std::string, std::string> AttrsToParams(const std::unique_ptr<JsonValue>& jsonValue);
+    
+    static std::map<std::string, std::string> ParseExtraParams(
+        const std::string& detectType, const std::unique_ptr<JsonValue>& item);
     static int32_t MatchInOffsets(EntityMatch& match, const std::vector<std::pair<size_t, size_t> >& detectOffsets);
 
     void ProcessClick(const std::string& jsonStr);
@@ -191,7 +196,8 @@ public:
     std::function<void()> GetPreviewMenuOptionCallback(TextDataDetectType type, const std::string& content);
     RefPtr<FrameNode> GetPreviewMenuNode(const AIMenuInfo& info);
 
-    void SetPreviewMenuAttr(TextDataDetectType type = TextDataDetectType::INVALID, const std::string& content = "");
+    void SetPreviewMenuAttr(TextDataDetectType type = TextDataDetectType::INVALID, const std::string& content = "",
+        const std::map<std::string, std::string>& params = {});
 
     static TextDataDetectType ConvertTypeFromString(const std::string& type);
 
@@ -219,6 +225,8 @@ private:
     // preview menu
     TextDataDetectType previewMenuType_ = TextDataDetectType::INVALID;
     std::string previewMenuContent_ = "";
+    std::map<std::string, std::string> previewMenuExtraParams_;
+    std::unordered_set<std::string> extraParamKeys_;
 
     // cache
     RefPtr<WebDataDetectorCache<std::string, DataDetectorResult>> resultCache_ = nullptr;

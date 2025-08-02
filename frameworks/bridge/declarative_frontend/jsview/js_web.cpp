@@ -28,6 +28,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
 #endif
@@ -48,6 +49,18 @@
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
+
+#include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/components/web/web_transfer_api.h"
+
+#define ARKWEB_CREATE_JS_OBJECT(nativeClass, jsClass, funName, eventValue)                                     \
+    napi_value Create##jsClass##Object(napi_env env, const RefPtr<nativeClass>& value)                         \
+    {                                                                                                          \
+        JSRef<JSObject> jsObject = JSClass<jsClass>::NewInstance();                                            \
+        auto nativeObject = Referenced::Claim(jsObject->Unwrap<jsClass>());                                    \
+        nativeObject->funName(eventValue);                                                                     \
+        return WrapNapiValue(env, JSRef<JSVal>::Cast(jsObject), static_cast<void*>(nativeObject.GetRawPtr())); \
+    }
 
 namespace OHOS::Ace {
 namespace {
@@ -104,11 +117,11 @@ namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
-class JSWebDialog : public Referenced {
+class JSWebDialog : public WebTransferBase<RefPtr<Result>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
-        JSClass<JSWebDialog>::Declare("WebDialog");
+        JSClass<JSWebDialog>::Declare("JsResult");
         JSClass<JSWebDialog>::CustomMethod("handleConfirm", &JSWebDialog::Confirm);
         JSClass<JSWebDialog>::CustomMethod("handleCancel", &JSWebDialog::Cancel);
         JSClass<JSWebDialog>::CustomMethod("handlePromptConfirm", &JSWebDialog::PromptConfirm);
@@ -118,6 +131,7 @@ public:
     void SetResult(const RefPtr<Result>& result)
     {
         result_ = result;
+        transferValues_ = std::make_tuple(result_);
     }
 
     void Confirm(const JSCallbackInfo& args)
@@ -203,7 +217,7 @@ private:
     RefPtr<FullScreenExitHandler> fullScreenExitHandler_;
 };
 
-class JSWebKeyboardController : public Referenced {
+class JSWebKeyboardController : public WebTransferBase<RefPtr<WebCustomKeyboardHandler>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -220,6 +234,7 @@ public:
     void SeWebKeyboardController(const RefPtr<WebCustomKeyboardHandler>& controller)
     {
         webKeyboardController_ = controller;
+        transferValues_ = std::make_tuple(webKeyboardController_);
     }
 
     void InsertText(const JSCallbackInfo& args)
@@ -296,11 +311,11 @@ private:
     RefPtr<WebCustomKeyboardHandler> webKeyboardController_;
 };
 
-class JSWebHttpAuth : public Referenced {
+class JSWebHttpAuth : public WebTransferBase<RefPtr<AuthResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
-        JSClass<JSWebHttpAuth>::Declare("WebHttpAuthResult");
+        JSClass<JSWebHttpAuth>::Declare("HttpAuthHandler");
         JSClass<JSWebHttpAuth>::CustomMethod("confirm", &JSWebHttpAuth::Confirm);
         JSClass<JSWebHttpAuth>::CustomMethod("cancel", &JSWebHttpAuth::Cancel);
         JSClass<JSWebHttpAuth>::CustomMethod("isHttpAuthInfoSaved", &JSWebHttpAuth::IsHttpAuthInfoSaved);
@@ -310,6 +325,7 @@ public:
     void SetResult(const RefPtr<AuthResult>& result)
     {
         result_ = result;
+        transferValues_ = std::make_tuple(result_);
     }
 
     void Confirm(const JSCallbackInfo& args)
@@ -368,11 +384,11 @@ private:
     RefPtr<AuthResult> result_;
 };
 
-class JSWebSslError : public Referenced {
+class JSWebSslError : public WebTransferBase<RefPtr<SslErrorResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
-        JSClass<JSWebSslError>::Declare("WebSslErrorResult");
+        JSClass<JSWebSslError>::Declare("SslErrorHandler");
         JSClass<JSWebSslError>::CustomMethod("handleConfirm", &JSWebSslError::HandleConfirm);
         JSClass<JSWebSslError>::CustomMethod("handleCancel", &JSWebSslError::HandleCancel);
         JSClass<JSWebSslError>::Bind(globalObj, &JSWebSslError::Constructor, &JSWebSslError::Destructor);
@@ -381,6 +397,7 @@ public:
     void SetResult(const RefPtr<SslErrorResult>& result)
     {
         result_ = result;
+        transferValues_ = std::make_tuple(result_);
     }
 
     void HandleConfirm(const JSCallbackInfo& args)
@@ -466,11 +483,11 @@ private:
     RefPtr<AllSslErrorResult> result_;
 };
 
-class JSWebSslSelectCert : public Referenced {
+class JSWebSslSelectCert : public WebTransferBase<RefPtr<SslSelectCertResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
-        JSClass<JSWebSslSelectCert>::Declare("WebSslSelectCertResult");
+        JSClass<JSWebSslSelectCert>::Declare("ClientAuthenticationHandler");
         JSClass<JSWebSslSelectCert>::CustomMethod("confirm", &JSWebSslSelectCert::HandleConfirm);
         JSClass<JSWebSslSelectCert>::CustomMethod("cancel", &JSWebSslSelectCert::HandleCancel);
         JSClass<JSWebSslSelectCert>::CustomMethod("ignore", &JSWebSslSelectCert::HandleIgnore);
@@ -480,6 +497,7 @@ public:
     void SetResult(const RefPtr<SslSelectCertResult>& result)
     {
         result_ = result;
+        transferValues_ = std::make_tuple(result_);
     }
 
     void HandleConfirm(const JSCallbackInfo& args)
@@ -532,7 +550,7 @@ private:
     RefPtr<SslSelectCertResult> result_;
 };
 
-class JSWebConsoleLog : public Referenced {
+class JSWebConsoleLog : public WebTransferBase<RefPtr<WebConsoleLog>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -547,6 +565,7 @@ public:
     void SetMessage(const RefPtr<WebConsoleLog>& message)
     {
         message_ = message;
+        transferValues_ = std::make_tuple(message_);
     }
 
     void GetLineNumber(const JSCallbackInfo& args)
@@ -595,7 +614,7 @@ private:
     RefPtr<WebConsoleLog> message_;
 };
 
-class JSWebGeolocation : public Referenced {
+class JSWebGeolocation : public WebTransferBase<RefPtr<WebGeolocation>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -607,6 +626,7 @@ public:
     void SetEvent(const LoadWebGeolocationShowEvent& eventInfo)
     {
         webGeolocation_ = eventInfo.GetWebGeolocation();
+        transferValues_ = std::make_tuple(webGeolocation_);
     }
 
     void Invoke(const JSCallbackInfo& args)
@@ -646,7 +666,7 @@ private:
     RefPtr<WebGeolocation> webGeolocation_;
 };
 
-class JSWebPermissionRequest : public Referenced {
+class JSWebPermissionRequest : public WebTransferBase<RefPtr<WebPermissionRequest>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -662,6 +682,7 @@ public:
     void SetEvent(const WebPermissionRequestEvent& eventInfo)
     {
         webPermissionRequest_ = eventInfo.GetWebPermissionRequest();
+        transferValues_ = std::make_tuple(webPermissionRequest_);
     }
 
     void Deny(const JSCallbackInfo& args)
@@ -743,7 +764,7 @@ private:
     RefPtr<WebPermissionRequest> webPermissionRequest_;
 };
 
-class JSScreenCaptureRequest : public Referenced {
+class JSScreenCaptureRequest : public WebTransferBase<RefPtr<WebScreenCaptureRequest>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -758,6 +779,7 @@ public:
     void SetEvent(const WebScreenCaptureRequestEvent& eventInfo)
     {
         request_ = eventInfo.GetWebScreenCaptureRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void Deny(const JSCallbackInfo& args)
@@ -817,7 +839,7 @@ private:
     RefPtr<WebScreenCaptureRequest> request_;
 };
 
-class JSNativeEmbedGestureRequest : public Referenced {
+class JSNativeEmbedGestureRequest : public WebTransferBase<RefPtr<GestureEventResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -831,6 +853,7 @@ public:
     void SetResult(const RefPtr<GestureEventResult>& result)
     {
         eventResult_ = result;
+        transferValues_ = std::make_tuple(eventResult_);
     }
 
     void SetGestureEventResult(const JSCallbackInfo& args)
@@ -885,6 +908,7 @@ public:
     
     void SetMouseEventResult(const JSCallbackInfo& args)
     {
+        RETURN_IF_CALLING_FROM_M114();
         if (eventResult_) {
             bool result = true;
             bool stopPropagation = true;
@@ -916,7 +940,7 @@ private:
     RefPtr<MouseEventResult> eventResult_;
 };
 
-class JSWebWindowNewHandler : public Referenced {
+class JSWebWindowNewHandler : public WebTransferBase<RefPtr<WebWindowNewHandler>> {
 public:
     struct ChildWindowInfo {
         int32_t parentWebId_ = -1;
@@ -934,6 +958,7 @@ public:
     void SetEvent(const WebWindowNewEvent& eventInfo)
     {
         handler_ = eventInfo.GetWebWindowNewHandler();
+        transferValues_ = std::make_tuple(handler_);
     }
 
     static JSRef<JSObject> PopController(int32_t id, int32_t* parentId = nullptr)
@@ -1031,7 +1056,7 @@ private:
 };
 std::unordered_map<int32_t, JSWebWindowNewHandler::ChildWindowInfo> JSWebWindowNewHandler::controller_map_;
 
-class JSDataResubmitted : public Referenced {
+class JSDataResubmitted : public WebTransferBase<RefPtr<DataResubmitted>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1044,6 +1069,7 @@ public:
     void SetHandler(const RefPtr<DataResubmitted>& handler)
     {
         dataResubmitted_ = handler;
+        transferValues_ = std::make_tuple(dataResubmitted_);
     }
 
     void Resend(const JSCallbackInfo& args)
@@ -1129,7 +1155,7 @@ private:
     RefPtr<WebError> error_;
 };
 
-class JSWebResourceResponse : public Referenced {
+class JSWebResourceResponse : public WebTransferBase<RefPtr<WebResponse>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1162,6 +1188,7 @@ public:
     void SetEvent(const ReceivedHttpErrorEvent& eventInfo)
     {
         response_ = eventInfo.GetResponse();
+        transferValues_ = std::make_tuple(response_);
     }
 
     void GetResponseData(const JSCallbackInfo& args)
@@ -1364,7 +1391,7 @@ private:
     JSRef<JSVal> responseData_;
 };
 
-class JSWebResourceRequest : public Referenced {
+class JSWebResourceRequest : public WebTransferBase<RefPtr<WebRequest>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1382,26 +1409,31 @@ public:
     void SetErrorEvent(const ReceivedErrorEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetHttpErrorEvent(const ReceivedHttpErrorEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetOnInterceptRequestEvent(const OnInterceptRequestEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetOnOverrideErrorPageEvent(const OnOverrideErrorPageEvent& eventInfo)
     {
         request_ = eventInfo.GetWebResourceRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetLoadInterceptEvent(const LoadInterceptEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void IsRedirect(const JSCallbackInfo& args)
@@ -1457,6 +1489,7 @@ public:
     void SetLoadOverrideEvent(const LoadOverrideEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
 private:
@@ -1477,7 +1510,7 @@ private:
     RefPtr<WebRequest> request_;
 };
 
-class JSFileSelectorParam : public Referenced {
+class JSFileSelectorParam : public WebTransferBase<RefPtr<WebFileSelectorParam>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1494,6 +1527,7 @@ public:
     void SetParam(const FileSelectorEvent& eventInfo)
     {
         param_ = eventInfo.GetParam();
+        transferValues_ = std::make_tuple(param_);
     }
 
     void GetTitle(const JSCallbackInfo& args)
@@ -1563,7 +1597,7 @@ private:
     RefPtr<WebFileSelectorParam> param_;
 };
 
-class JSFileSelectorResult : public Referenced {
+class JSFileSelectorResult : public WebTransferBase<RefPtr<FileSelectorResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1576,6 +1610,7 @@ public:
     void SetResult(const FileSelectorEvent& eventInfo)
     {
         result_ = eventInfo.GetFileSelectorResult();
+        transferValues_ = std::make_tuple(result_);
     }
 
     void HandleFileList(const JSCallbackInfo& args)
@@ -1619,7 +1654,7 @@ private:
     RefPtr<FileSelectorResult> result_;
 };
 
-class JSContextMenuParam : public Referenced {
+class JSContextMenuParam : public WebTransferBase<RefPtr<WebContextMenuParam>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1671,6 +1706,7 @@ public:
     {
         param_ = eventInfo.GetParam();
         UpdatePreviewSize();
+        transferValues_ = std::make_tuple(param_);
     }
 
     void GetXCoord(const JSCallbackInfo& args)
@@ -1800,6 +1836,9 @@ public:
         if (param_) {
             type = param_->GetMediaType();
         }
+        if (type > 1) {
+            RETURN_IF_CALLING_FROM_M114();
+        }
         auto jsType = JSVal(ToJSValue(type));
         auto descriptionRef = JSRef<JSVal>::Make(jsType);
         args.SetReturnValue(descriptionRef);
@@ -1827,7 +1866,7 @@ private:
     int32_t previewHeight_ = -1;
 };
 
-class JSContextMenuResult : public Referenced {
+class JSContextMenuResult : public WebTransferBase<RefPtr<ContextMenuResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1848,6 +1887,7 @@ public:
     void SetResult(const ContextMenuEvent& eventInfo)
     {
         result_ = eventInfo.GetContextMenuResult();
+        transferValues_ = std::make_tuple(result_);
     }
 
     void Cancel(const JSCallbackInfo& args)
@@ -1894,6 +1934,7 @@ public:
 
     void Undo(const JSCallbackInfo& args)
     {
+        RETURN_IF_CALLING_FROM_M114();
         if (result_) {
             result_->Undo();
         }
@@ -1901,6 +1942,7 @@ public:
 
     void Redo(const JSCallbackInfo& args)
     {
+        RETURN_IF_CALLING_FROM_M114();
         if (result_) {
             result_->Redo();
         }
@@ -1908,6 +1950,7 @@ public:
 
     void PasteAndMatchStyle(const JSCallbackInfo& args)
     {
+        RETURN_IF_CALLING_FROM_M114();
         if (result_) {
             result_->PasteAndMatchStyle();
         }
@@ -2163,6 +2206,36 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebKeyboardController::JSBind(globalObj);
 }
 
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
+
+napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
+{
+    napi_value undefined;
+    napi_get_undefined(env, &undefined);
+    CHECK_NULL_RETURN(obj->IsObject(), undefined);
+    ArkNativeEngine* nativeEngine = reinterpret_cast<ArkNativeEngine*>(env);
+    CHECK_NULL_RETURN(nativeEngine, undefined);
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(env);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        return undefined;
+    }
+    napi_wrap(env, napiValue, nativeValue,
+        [](napi_env env, void *data, void *hint) {}, nullptr, nullptr);
+    return napiValue;
+}
+
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2170,6 +2243,7 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
     JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
     auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
     jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(messageObj), static_cast<void *>(jsWebConsoleLog.GetRawPtr()));
 
     obj->SetPropertyObject("message", messageObj);
 
@@ -2194,7 +2268,7 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
     auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
     jsWebDialog->SetResult(eventInfo.GetResult());
-
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebDialog.GetRawPtr()));
     obj->SetProperty("url", eventInfo.GetUrl());
     obj->SetProperty("message", eventInfo.GetMessage());
     if (eventInfo.GetType() == DialogEventType::DIALOG_EVENT_PROMPT) {
@@ -2308,6 +2382,7 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadInterceptEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("data", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -2335,6 +2410,7 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
     auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
     geolocationEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(geolocationObj), static_cast<void *>(geolocationEvent.GetRawPtr()));
     obj->SetPropertyObject("geolocation", geolocationObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -2372,6 +2448,7 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebHttpAuth->SetResult(eventInfo.GetResult());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebHttpAuth.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
@@ -2398,6 +2475,7 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebSslError->SetResult(eventInfo.GetResult());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebSslError.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
 
@@ -2525,6 +2603,7 @@ JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventIn
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebSslSelectCert->SetResult(eventInfo.GetResult());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebSslSelectCert.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("port", eventInfo.GetPort());
@@ -2574,6 +2653,7 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadOverrideEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     return JSRef<JSVal>::Cast(requestObj);
 }
 
@@ -2686,9 +2766,22 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             if (!param) {
                 return;
             }
+
+            napi_env env = GetNapiEnv();
+            if (!env) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            auto napi_status = napi_open_handle_scope(env, &scope);
+            if (napi_status != napi_ok) {
+                return;
+            }
+
             JSRef<JSVal> argv[] = {
                 FaviconReceivedEventToJSValue(static_cast<const FaviconReceivedEvent&>(*param)) };
             func->Call(webviewController, 1, argv);
+
+            napi_close_handle_scope(env, scope);
         };
     }
 
@@ -2879,6 +2972,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 ->Call(controller, 0, {})
                 ->ToNumber<int32_t>();
         }
+
+        // Don't compare JSWeb::webDebuggingAccess_ and webDebuggingAccess, call SetWebDebuggingAccess directly.
+        // To ensure JSWeb::webDebuggingAccess_ always equals to WebPattern's class member.
         if (webDebuggingPort > 0) {
             WebModel::GetInstance()->SetWebDebuggingAccessEnabledAndPort(
                 webDebuggingAccess, webDebuggingPort);
@@ -3373,6 +3469,7 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetErrorEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
 
     JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
@@ -3413,10 +3510,12 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetHttpErrorEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
 
     JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
     auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
     responseEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(responseObj), static_cast<void *>(responseEvent.GetRawPtr()));
 
     obj->SetPropertyObject("request", requestObj);
     obj->SetPropertyObject("response", responseObj);
@@ -3500,6 +3599,7 @@ JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eve
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetOnInterceptRequestEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("request", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -3566,6 +3666,7 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
 
 void JSWeb::OnOverrideErrorPage(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
@@ -3659,10 +3760,12 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
     auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
     fileSelectorParam->SetParam(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(fileSelectorParam.GetRawPtr()));
 
     JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
     auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
     fileSelectorResult->SetResult(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(fileSelectorResult.GetRawPtr()));
 
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("fileSelector", paramObj);
@@ -3721,10 +3824,12 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
     auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
     contextMenuParam->SetParam(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(contextMenuParam.GetRawPtr()));
 
     JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
     auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
     contextMenuResult->SetResult(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(contextMenuResult.GetRawPtr()));
 
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("param", paramObj);
@@ -3896,6 +4001,9 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         return;
     }
     WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
+    if (elementType == WebElementType::LINK) {
+        RETURN_IF_CALLING_FROM_M114();
+    }
     ResponseType responseType =
         static_cast<ResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>());
 
@@ -4029,6 +4137,7 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
     }
 
+    RETURN_IF_CALLING_FROM_M114();
     auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
     if (cssDisplayChangeObj->IsBoolean()) {
         bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
@@ -4355,6 +4464,7 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
     auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
     permissionEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(permissionObj), static_cast<void*>(permissionEvent.GetRawPtr()));
     obj->SetPropertyObject("request", permissionObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -4397,6 +4507,7 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
     JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
     requestEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("handler", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -4648,6 +4759,7 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
     handler->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void *>(handler.GetRawPtr()));
     obj->SetPropertyObject("handler", handlerObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -4932,6 +5044,7 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
         return JSRef<JSVal>::Cast(obj);
     }
     jsDataResubmitted->SetHandler(eventInfo.GetHandler());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsDataResubmitted.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -5167,6 +5280,8 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+
+    RETURN_IF_CALLING_FROM_M114();
     auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
     auto audioSessionType = WebAudioSessionType::AUTO;
     if (audioSessionTypeObj->IsNumber()) {
@@ -5593,6 +5708,7 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
     requestEvent->SetResult(eventInfo.GetResult());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -5665,6 +5781,7 @@ void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
 
 void JSWeb::OnNativeEmbedMouseEvent(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
@@ -6115,6 +6232,8 @@ JSRef<JSVal> InterceptKeyboardEventToJSValue(const InterceptKeyboardEvent& event
     JSRef<JSObject> webKeyboardControllerObj = JSClass<JSWebKeyboardController>::NewInstance();
     auto webKeyboardController = Referenced::Claim(webKeyboardControllerObj->Unwrap<JSWebKeyboardController>());
     webKeyboardController->SeWebKeyboardController(eventInfo.GetCustomKeyboardHandler());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(webKeyboardControllerObj),
+        static_cast<void*>(webKeyboardController.GetRawPtr()));
     obj->SetPropertyObject("controller", webKeyboardControllerObj);
 
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
@@ -6293,6 +6412,7 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
 
 void JSWeb::EnableDataDetector(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (args.Length() < 1 || !args[0]->IsBoolean()) {
         return;
     }
@@ -6302,6 +6422,7 @@ void JSWeb::EnableDataDetector(const JSCallbackInfo& args)
 
 void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (args.Length() < 1) {
         return;
     }
@@ -6319,6 +6440,7 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
 
 void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 {
+    RETURN_IF_CALLING_FROM_M114();
     auto condition = WebBypassVsyncCondition::NONE;
     switch (webBypassVsyncCondition) {
         case 0:
@@ -6341,6 +6463,7 @@ void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 
 void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
         gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
@@ -6352,6 +6475,7 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfScrollAtBottom, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
@@ -6380,6 +6504,7 @@ void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 
 void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfLoadEvent, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
@@ -6405,4 +6530,24 @@ void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
     };
     WebModel::GetInstance()->SetOnPdfLoadEvent(jsCallback);
 }
+
+ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)
+ARKWEB_CREATE_JS_OBJECT(WebGeolocation, JSWebGeolocation, SetEvent, LoadWebGeolocationShowEvent("", value))
+ARKWEB_CREATE_JS_OBJECT(Result, JSWebDialog, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(GestureEventResult, JSNativeEmbedGestureRequest, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(FileSelectorResult, JSFileSelectorResult, SetResult, FileSelectorEvent(nullptr, value))
+ARKWEB_CREATE_JS_OBJECT(WebFileSelectorParam, JSFileSelectorParam, SetParam, FileSelectorEvent(value, nullptr))
+ARKWEB_CREATE_JS_OBJECT(ContextMenuResult, JSContextMenuResult, SetResult, ContextMenuEvent(nullptr, value))
+ARKWEB_CREATE_JS_OBJECT(WebContextMenuParam, JSContextMenuParam, SetParam, ContextMenuEvent(value, nullptr))
+ARKWEB_CREATE_JS_OBJECT(WebConsoleLog, JSWebConsoleLog, SetMessage, value)
+ARKWEB_CREATE_JS_OBJECT(AuthResult, JSWebHttpAuth, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(SslErrorResult, JSWebSslError, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(SslSelectCertResult, JSWebSslSelectCert, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(WebResponse, JSWebResourceResponse, SetEvent, ReceivedHttpErrorEvent(nullptr, value))
+ARKWEB_CREATE_JS_OBJECT(WebRequest, JSWebResourceRequest, SetHttpErrorEvent, ReceivedHttpErrorEvent(value, nullptr))
+ARKWEB_CREATE_JS_OBJECT(DataResubmitted, JSDataResubmitted, SetHandler, value)
+ARKWEB_CREATE_JS_OBJECT(WebPermissionRequest, JSWebPermissionRequest, SetEvent, WebPermissionRequestEvent(value))
+ARKWEB_CREATE_JS_OBJECT(WebCustomKeyboardHandler, JSWebKeyboardController, SeWebKeyboardController, value)
+ARKWEB_CREATE_JS_OBJECT(
+    WebWindowNewHandler, JSWebWindowNewHandler, SetEvent, WebWindowNewEvent(std::string(), false, false, value))
 } // namespace OHOS::Ace::Framework

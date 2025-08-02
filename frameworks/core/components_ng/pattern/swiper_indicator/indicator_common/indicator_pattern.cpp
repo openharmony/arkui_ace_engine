@@ -666,8 +666,6 @@ void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
 {
     UpdateDefaultColor();
     Pattern::OnColorModeChange(colorMode);
-    auto indicatorNode = GetHost();
-    CHECK_NULL_VOID(indicatorNode);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
         SaveDotIndicatorProperty();
     } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {

@@ -16,7 +16,6 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
 #include "core/common/ace_engine.h"
-#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -154,10 +153,9 @@ void EnvelopedDragData(
     }
     auto pointerId = dragAction->dragPointerEvent.pointerId;
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
+    DragSummaryInfo dragSummaryInfo;
     int32_t dataSize = 1;
-    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     if (dragAction->previewOption.isNumber) {
         recordSize = dragAction->previewOption.badgeNumber > 1 ? dragAction->previewOption.badgeNumber : 1;
@@ -175,12 +173,12 @@ void EnvelopedDragData(
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
-        summary, false, detailedSummary };
+        dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
+        dragSummaryInfo.version, dragSummaryInfo.totalSize };
 }
 
 void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
-    std::string& udKey, std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary,
-    int32_t& dataSize)
+    std::string& udKey, DragSummaryInfo& dragSummaryInfo, int32_t& dataSize)
 {
     CHECK_NULL_VOID(dragAction);
     int32_t ret = 1;
@@ -200,7 +198,7 @@ void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInte
         dataSize = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
     }
     if (ret == 0) {
-        ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
         }
@@ -1529,7 +1527,7 @@ void DragDropFuncWrapper::HandleBackPressHideMenu()
 }
 
 void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, std::string& udKey,
-    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary, int32_t& ret)
+    DragSummaryInfo& dragSummaryInfo, int32_t& ret)
 {
     CHECK_NULL_VOID(dragEvent);
     auto unifiedData = dragEvent->GetData();
@@ -1552,7 +1550,7 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
         }
     }
-    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+    ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
     }
@@ -1560,6 +1558,23 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetSummaryMap(summary);
+    dragDropManager->SetSummaryMap(dragSummaryInfo.summary);
+}
+
+RefPtr<UINode> DragDropFuncWrapper::FindWindowScene(RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto pipeline = targetNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, nullptr);
+    if (!container->IsSceneBoardWindow()) {
+        return nullptr;
+    }
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    return parent;
 }
 } // namespace OHOS::Ace::NG

@@ -196,6 +196,20 @@ ArkUI_Int32 GetCachedIsShown(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ListModelNG::GetShowCached(frameNode));
 }
 
+void SetCacheRange(ArkUINodeHandle node, ArkUI_Int32 min, ArkUI_Int32 max)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetCacheRange(frameNode, min, max);
+}
+
+void ResetCacheRange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::ResetCacheRange(frameNode);
+}
+
 ArkUI_Bool GetEnableScrollInteraction(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -892,6 +906,8 @@ const ArkUIListModifier* GetListModifier()
         .resetCachedCount = ResetCachedCount,
         .setCachedIsShown = SetCachedIsShown,
         .resetCachedIsShown = ResetCachedIsShown,
+        .setCacheRange = SetCacheRange,
+        .resetCacheRange = ResetCacheRange,
         .getListFocusWrapMode = GetListFocusWrapMode,
         .setListFocusWrapMode = SetListFocusWrapMode,
         .resetListFocusWrapMode = ResetListFocusWrapMode,

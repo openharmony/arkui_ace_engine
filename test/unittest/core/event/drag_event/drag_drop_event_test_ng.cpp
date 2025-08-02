@@ -654,9 +654,8 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropProxyTest001, TestSize.Level1)
      * @tc.steps: step2. call onDragEnd
      * @tc.expected: step2. drag extraInfo equals.
      */
-    MockContainer::SetUp();
     auto pipeline = MockPipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
+    ASSERT_NE(pipeline, nullptr);
     auto manager = pipeline->GetDragDropManager();
     manager->dragDropState_ = DragDropMgrState::DRAGGING;
     auto dragDropProxy = dragDropManager->CreateFrameworkDragDropProxy();
@@ -685,9 +684,8 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropProxyTest002, TestSize.Level1)
      * @tc.expected: step2. drag extraInfo equals.
      */
     GestureEvent gestureEvent;
-    MockContainer::SetUp();
     auto pipeline = MockPipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
+    ASSERT_NE(pipeline, nullptr);
     auto manager = pipeline->GetDragDropManager();
     auto dragDropProxy = dragDropManager->CreateFrameworkDragDropProxy();
     dragDropProxy->id_ = manager->currentId_;

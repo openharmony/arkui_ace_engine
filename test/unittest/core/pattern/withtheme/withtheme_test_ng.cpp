@@ -18,6 +18,8 @@
 #define private public
 #define protected public
 
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/with_theme_node.h"
@@ -416,5 +418,150 @@ HWTEST_F(WithThemeTestNg, WithThemeTest011, TestSize.Level1)
      * @tc.steps4: The function is called and the value of defaultDarkTheme_ is not nullptr.
      */
     EXPECT_EQ(TokenThemeStorage::GetInstance()->defaultDarkTheme_, nullptr);
+}
+
+/**
+ * @tc.name: WithThemeTestNg012
+ * @tc.desc: test SetIsThemeColorSetByUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: set invalid index.
+     * @tc.expected: themeColorSetByUser_ size is 0.
+     */
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeColorSetByUser_[1].size(), 0);
+    TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(1, 0, -1, true);
+    TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(1, 0, 100, true);
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeColorSetByUser_[1].size(), 0);
+
+    /**
+     * @tc.steps2: SetIsThemeColorSetByUser with legal args.
+     * @tc.expected: themeColorSetByUser_ can record correct data.
+     */
+    TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(1, 0, 0, true);
+    TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(1, 0, 1, true);
+    EXPECT_TRUE(TokenThemeStorage::GetInstance()->themeColorSetByUser_[1][0][0]);
+}
+
+/**
+ * @tc.name: WithThemeTestNg013
+ * @tc.desc: reset cache color test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: reset cached theme with defaultLightTheme_ null.
+     */
+    TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(0, 0, true);
+    TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(1, 0, true);
+    TokenThemeStorage::GetInstance()->defaultLightTheme_ = nullptr;
+    ResourceParseUtils::SetIsReloading(true);
+    TokenThemeStorage::GetInstance()->CacheResetColor();
+
+    /**
+     * @tc.steps2: reset cached theme with resObj error.
+     * @tc.expected: cached color is equal Color::BLACK.
+     */
+    TokenThemeStorage::GetInstance()->CacheClear();
+    std::vector<Color> colors;
+    std::vector<RefPtr<ResourceObject>> resObjs =
+        std::vector<RefPtr<ResourceObject>> (TokenColors::TOTAL_NUMBER, nullptr);
+    colors.reserve(TokenColors::TOTAL_NUMBER);
+    for (int i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        colors.push_back(Color(g_testProperty.colors_[i]));
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    resObj->SetColor(Color::BLACK);
+    resObj->SetIsResource(false);
+    resObj->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    resObjs[0] = resObj;
+    auto themeColors = AceType::MakeRefPtr<TokenColors>();
+    themeColors->SetColors(std::move(colors));
+    themeColors->SetResObjs(std::move(resObjs));
+    auto theme = AceType::MakeRefPtr<TokenTheme>(1);
+    theme->SetColors(themeColors);
+    theme->SetDarkColors(themeColors);
+    theme->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->CacheResetColor();
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->CacheGet(1)->Colors()->Brand(), Color::BLACK);
+
+    /**
+     * @tc.steps3: reset cached theme with resObj ok.
+     * @tc.expected: cached color is equal Color::BLACK.
+     */
+    auto colorMode = ColorMode::LIGHT;
+    std::vector<RefPtr<ResourceObject>> resObjsWithLight =
+        std::vector<RefPtr<ResourceObject>> (TokenColors::TOTAL_NUMBER, nullptr);
+    resObj->SetColorMode(ColorMode::LIGHT);
+    resObjsWithLight[0] = resObj;
+    themeColors->SetResObjs(std::move(resObjsWithLight));
+    theme->SetColors(themeColors);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->ResetThemeColor(1, theme, theme, colorMode);
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->CacheGet(1)->Colors()->Brand(), Color::BLACK);
+    colorMode = ColorMode::DARK;
+    TokenThemeStorage::GetInstance()->ResetThemeColor(1, theme, theme, colorMode);
+
+    /**
+     * @tc.steps4: reset cached theme with resObjs size error.
+     * @tc.expected: cached color is equal Color::BLACK.
+     */
+    std::vector<RefPtr<ResourceObject>> resObjsSizeErr =
+        std::vector<RefPtr<ResourceObject>> (TokenColors::TOTAL_NUMBER - 1, nullptr);
+    themeColors->SetResObjs(std::move(resObjsSizeErr));
+    theme->SetColors(themeColors);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->ResetThemeColor(1, theme, theme, colorMode);
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->CacheGet(1)->Colors()->Brand(), Color::BLACK);
+
+    ResourceParseUtils::SetIsReloading(false);
+}
+
+/**
+ * @tc.name: WithThemeTestNg014
+ * @tc.desc: test GetColorWithResourceObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: GetColorWithResourceObject with invalid index.
+     * @tc.expected: return Color().
+     */
+    auto theme = TokenThemeStorage::GetInstance()->CacheGet(1);
+    EXPECT_TRUE(theme);
+    auto colors = theme->Colors();
+    EXPECT_EQ(colors->GetColorWithResourceObject(-1), Color());
+    EXPECT_EQ(colors->GetColorWithResourceObject(100), Color());
+}
+
+/**
+ * @tc.name: WithThemeTestNg015
+ * @tc.desc: reset cache color test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: reset cahced theme with no cache.
+     * @tc.expected: do not CreateSystemTokenTheme.
+     */
+    TokenThemeStorage::GetInstance()->CacheClear();
+    TokenThemeStorage::GetInstance()->CacheResetColor();
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 0);
+
+    /**
+     * @tc.steps2: add theme cache.
+     */
+    auto theme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
+    theme->SetColors(g_testProperty.tokenColors_);
+    theme->SetDarkColors(g_testProperty.tokenColors_);
+    theme->SetColorMode(THEME_COLOR_MODE);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 1);
 }
 } //namespace OHOS::Ace::NG

@@ -24,6 +24,7 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -488,8 +489,7 @@ void ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t layout
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void ViewAbstract::SetIsTransitionBackground(bool val)
@@ -552,8 +552,7 @@ void ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(FrameNode* frameNode,
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges, frameNode);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void ViewAbstract::SetIsTransitionBackground(FrameNode* frameNode, bool val)
@@ -4264,11 +4263,11 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
     menuWrapperPattern->SetIsOpenMenu(true);
     NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
-    if (menuParam.isAnchorPosition) {
+    if (menuParam.anchorPosition.has_value()) {
         NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
-        menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
+        menuPosition = { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
                         targetNodePosition.GetX(),
-                        menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
+                        menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                         targetNodePosition.GetY() };
     }
     if (menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
@@ -4300,20 +4299,17 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     wrapperPattern->SetMenuParam(menuParam);
     MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
     MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
-    if (menuParam.isAnchorPosition) {
+    if (menuParam.anchorPosition.has_value()) {
         auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
         if (menuProperty) {
             auto target = ElementRegister::GetInstance()->
                 GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
             CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
             NG::OffsetF targetNodePosition = target->GetPositionToWindowWithTransform();
-            auto pipelineContext = target->GetContext();
-            CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
-            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-            NG::OffsetF menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
-                                         targetNodePosition.GetX() + windowRect.Left(),
-                                         menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
-                                         targetNodePosition.GetY() + windowRect.Top() };
+            NG::OffsetF menuPosition = { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
+                                         targetNodePosition.GetX(),
+                                         menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
+                                         targetNodePosition.GetY() };
             menuProperty->UpdateMenuOffset(menuPosition);
             menuProperty->ResetMenuPlacement();
         }
@@ -5475,6 +5471,47 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     }
 }
 
+#if defined(ACE_STATIC)
+void ViewAbstract::SetOverlayBuilder(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess() || !frameNode || !customNode) {
+        return;
+    }
+    auto overlayNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (!overlayNode && customNode) {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+        if (stackNode) {
+            stackNode->AddChild(customNode);
+        }
+        overlayNode = stackNode;
+    }
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+    layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+}
+#endif
+
 void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
     const std::optional<Dimension>& offsetY)
@@ -6123,11 +6160,10 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& v
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
-void ViewAbstract::SetPosition(FrameNode* frameNode, const Dimension& x, const Dimension& y,
-    const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
+void ViewAbstract::SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj,
+    const RefPtr<ResourceObject>& yresObj)
 {
     CHECK_NULL_VOID(frameNode);
-    OffsetT<Dimension> value = { x, y };
     SetPositionX(frameNode, value, xresObj);
     SetPositionY(frameNode, value, yresObj);
     CheckIfParentNeedMarkDirty(frameNode);
@@ -6424,6 +6460,7 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 void ViewAbstract::UpdateBackgroundBlurStyle(
     FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
+    FREE_NODE_CHECK(frameNode, UpdateBackgroundBlurStyle, frameNode, bgBlurStyle, sysOptions);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -7489,6 +7526,7 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
+    FREE_NODE_CHECK(frameNode, SetInspectorId, frameNode, inspectorId);
     if (frameNode) {
         if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
             ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
@@ -7794,6 +7832,7 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onD
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
+    FREE_NODE_CHECK(frameNode, SetOnAreaChanged, frameNode, std::move(onAreaChanged));
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -7962,6 +8001,7 @@ NG::OverlayOptions ViewAbstract::GetOverlay(FrameNode* frameNode)
 void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetNeedFocus, frameNode, value);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (value) {
@@ -9134,6 +9174,7 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
     const std::vector<double> &ratioList)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleChange, frameNode, std::move(onVisibleChange), ratioList);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9145,6 +9186,8 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
     int32_t expectedUpdateInterval)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleAreaApproximateChange, frameNode, std::move(onVisibleChange),
+        ratioList, expectedUpdateInterval);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9194,6 +9237,7 @@ Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 
 void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetAreaChanged, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9203,6 +9247,7 @@ void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 
 void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetVisibleChange, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9718,6 +9763,10 @@ bool ViewAbstract::CreatePropertyAnimation(FrameNode* frameNode, AnimationProper
         TAG_LOGI(AceLogTag::ACE_ANIMATION,
             "no animation generated because the value is same or first set, property:%{public}d",
             static_cast<int32_t>(property));
+    }
+    auto pipeline = frameNode->GetContextWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
     }
     return result;
 }

@@ -276,12 +276,12 @@ void SetTextForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t c
     CHECK_NULL_VOID(frameNode);
     if (isColor) {
         TextModelNG::SetTextColor(frameNode, Color(color));
+        NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), colorRawPtr);
     } else {
         TextModelNG::SetTextColor(frameNode, Color::FOREGROUND);
         auto strategy = static_cast<ForegroundColorStrategy>(color);
         ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
     }
-    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), colorRawPtr);
 }
 
 void ResetTextForegroundColor(ArkUINodeHandle node)
@@ -515,7 +515,7 @@ void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
     NodeModifier::ProcessResourceObj<CalcDimension>(
-        frameNode, "AdapttMaxFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), maxFontSizeRawPtr);
+        frameNode, "AdaptMaxFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), maxFontSizeRawPtr);
 }
 
 void ResetTextMaxFontSize(ArkUINodeHandle node)
@@ -526,7 +526,7 @@ void ResetTextMaxFontSize(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("AdapttMaxFontSize");
+        pattern->UnRegisterResource("AdaptMaxFontSize");
     }
 }
 
@@ -1267,7 +1267,6 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
     textDetectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
-    TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
     if (SystemProperties::ConfigChangePerform()) {
         if (entityColorRawPtr) {
             auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(entityColorRawPtr));
@@ -1278,6 +1277,7 @@ void SetTextDataDetectorConfigWithEvent(
             TextDetectConfig::RegisterDecoColorResource(textDetectConfig, resObj);
         }
     }
+    TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
 void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)

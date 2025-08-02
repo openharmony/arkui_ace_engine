@@ -14,6 +14,7 @@
  */
 
 #include "base/utils/utils.h"
+#include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
@@ -31,32 +32,8 @@ std::optional<SizeF> XComponentLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.IsValid()) {
         layoutSize = contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-    MeasureLayoutPolicySize(contentConstraint, layoutProperty, layoutSize);
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
     return layoutSize;
-}
-
-void XComponentLayoutAlgorithm::MeasureLayoutPolicySize(
-    const LayoutConstraintF& contentConstraint, RefPtr<XComponentLayoutProperty> layoutProperty, SizeF& size)
-{
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    CHECK_NULL_VOID(layoutPolicy.has_value());
-
-    if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
-        // if width is matchParent
-        size.SetWidth(contentConstraint.parentIdealSize.Width().value());
-    } else if (layoutPolicy->IsWidthAdaptive()) {
-        // if width is wrapContent or fixAtIdealSize set width 0.0
-        size.SetWidth(0.0);
-    }
-
-    if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
-        // if height is matchParent
-        size.SetHeight(contentConstraint.parentIdealSize.Height().value());
-    } else if (layoutPolicy->IsHeightAdaptive()) {
-        // if height is wrapContent or fixAtIdealSize set height 0.0
-        size.SetHeight(0.0);
-    }
 }
 
 void XComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

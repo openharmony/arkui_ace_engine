@@ -64,6 +64,7 @@ void ScrollPattern::OnModifyDone()
         // need to init after scrollableEvent
         if (axis == Axis::FREE) {
             freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
+            SetScrollEnabled(true); // always enable scrollEvent
             scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
             SetScrollBar(DisplayMode::OFF); // turn off single-axis scrollBar
             auto* ctx = GetRenderContext();
@@ -181,8 +182,10 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
-    if (freeScroll_) {
+    if (freeScroll_ && scrollBar2d_) {
         freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetScrollableArea());
+        scrollBar2d_->SyncLayout(
+            layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -441,7 +444,8 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     CHECK_NULL_RETURN(eventHub, scroll);
     auto onScroll = eventHub->GetOnWillScrollEvent();
     auto onJsFrameNodeScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
-    CHECK_NULL_RETURN(onScroll || onJsFrameNodeScroll, scroll);
+    auto observer = positionController_ ? positionController_->GetObserverManager() : nullptr;
+    CHECK_NULL_RETURN(onScroll || onJsFrameNodeScroll || observer, scroll);
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
     Dimension scrollPx(scroll, DimensionUnit::PX);
@@ -458,6 +462,10 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
     if (onJsFrameNodeScroll) {
         scrollRes = onJsFrameNodeScroll(scrollRes.xOffset, scrollRes.yOffset, GetScrollState(),
+            ScrollablePattern::ConvertScrollSource(GetScrollSource()));
+    }
+    if (observer) {
+        scrollRes = FireObserverTwoDimensionOnWillScroll(scrollRes.xOffset, scrollRes.yOffset, GetScrollState(),
             ScrollablePattern::ConvertScrollSource(GetScrollSource()));
     }
     auto context = GetContext();
@@ -818,9 +826,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
-    if (scrollBar2d_ && freeScroll_) {
-        // update 2d scroll bar
-        scrollBar2d_->SyncLayout(freeScroll_->GetOffset(), GetViewSize(), GetViewPortExtent());
+    if (freeScroll_) {
         return;
     }
     CheckScrollBarOff();
@@ -1731,7 +1737,7 @@ void ScrollPattern::TriggerScrollBarDisplay()
 Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
-        auto res = freeScroll_->GetOffset();
+        auto&& res = freeScroll_->GetLayoutOffset();
         return { Dimension(-res.GetX()).ConvertToVp(), Dimension(-res.GetY()).ConvertToVp() };
     }
     return {};
@@ -1774,7 +1780,7 @@ bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
     }
     return true;
 }
-bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
     auto pos = freeScroll_->GetOffset();
@@ -1795,6 +1801,10 @@ bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std
             break;
     }
     if (smooth) {
+        if (velocity) {
+            constexpr float VELOCITY_TO_SPRING_RATIO = 100.0f;
+            *velocity /= VELOCITY_TO_SPRING_RATIO; // Adjust velocity for smooth scrolling
+        }
         freeScroll_->ScrollTo(pos, velocity);
     } else {
         freeScroll_->SetOffset(pos);
@@ -1814,5 +1824,20 @@ void ScrollPattern::FreeScrollTo(const ScrollControllerBase::ScrollToParam& para
     } else {
         freeScroll_->SetOffset(pos, param.canOverScroll);
     }
+}
+
+TwoDimensionScrollResult ScrollPattern::FireObserverTwoDimensionOnWillScroll(Dimension xOffset, Dimension yOffset,
+    ScrollState state, ScrollSource source)
+{
+    TwoDimensionScrollResult result = { .xOffset = xOffset, .yOffset = yOffset };
+    CHECK_NULL_RETURN(positionController_, result);
+    auto obsMgr = positionController_->GetObserverManager();
+    CHECK_NULL_RETURN(obsMgr, result);
+    ScrollFrameResult xResult = { .offset = xOffset };
+    ScrollFrameResult yResult = { .offset = yOffset };
+    obsMgr->HandleTwoDimensionOnWillScrollEvent(xResult, yResult, state, source);
+    result.xOffset = xResult.offset;
+    result.yOffset = yResult.offset;
+    return result;
 }
 } // namespace OHOS::Ace::NG

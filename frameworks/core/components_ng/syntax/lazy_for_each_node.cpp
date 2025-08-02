@@ -672,4 +672,11 @@ void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperat
         }
     }
 }
+
+void LazyForEachNode::EnablePreBuild(bool enable)
+{
+    if (builder_) {
+        builder_->EnablePreBuild(enable);
+    }
+}
 } // namespace OHOS::Ace::NG

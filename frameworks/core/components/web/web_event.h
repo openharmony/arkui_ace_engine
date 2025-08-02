@@ -649,9 +649,9 @@ public:
 private:
     RefPtr<AllSslErrorResult> result_;
     int32_t error_;
-    const std::string& url_;
-    const std::string& originalUrl_;
-    const std::string& referrer_;
+    const std::string url_;
+    const std::string originalUrl_;
+    const std::string referrer_;
     bool isFatalError_;
     bool isMainFrame_;
     std::vector<std::string> certChainData_;

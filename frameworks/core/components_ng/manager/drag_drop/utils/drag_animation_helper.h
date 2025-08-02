@@ -102,6 +102,7 @@ public:
         const DragDropManager::DragPreviewInfo& info, const Offset& newOffset);
     static void UpdateStartTransitionOptionAnimation(const DragDropManager::DragPreviewInfo& info);
     static void CreateTextNode(PreparedInfoForDrag& data);
+    static float GetLiftingNodeScale(const RefPtr<RenderContext>& renderContext);
 
 private:
     static void CreateAndMountMenuPreviewNode(PreparedInfoForDrag& data, const RefPtr<FrameNode>& stackFrameNode);

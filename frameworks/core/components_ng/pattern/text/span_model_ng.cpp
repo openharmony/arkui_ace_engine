@@ -535,7 +535,6 @@ void SpanModelNG::ResetFont(UINode *uiNode)
 void SpanModelNG::CreateContainSpan()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = ContainerSpanNode::GetOrCreateSpanNode(nodeId);
     stack->Push(spanNode);

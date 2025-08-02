@@ -17,29 +17,150 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { Length } from "./units"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CommonShapeMethod, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkRectComponent } from "./../generated/ArkRect"
-import { ArkRectPeer } from "./../generated/peers/ArkRectPeer"
+
+export type RadiusItem = [
+    Length,
+    Length
+]
+
+export class ArkRectPeer extends ArkCommonShapeMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkRectPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Rect_construct(peerId, flags)
+        const _peer  = new ArkRectPeer(_peerPtr, peerId, "Rect", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setRectOptionsAttribute(options?: RectOptions | RoundedRectOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            let options_value_type : int32 = RuntimeType.UNDEFINED
+            options_value_type = runtimeType(options_value)
+            if (TypeChecker.isRectOptions(options_value, true, true, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const options_value_0  = options_value as RectOptions
+                thisSerializer.writeRectOptions(options_value_0)
+            }
+            else if (TypeChecker.isRoundedRectOptions(options_value, true, true, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const options_value_1  = options_value as RoundedRectOptions
+                thisSerializer.writeRoundedRectOptions(options_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._RectInterface_setRectOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    radiusWidthAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._RectAttribute_radiusWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    radiusHeightAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._RectAttribute_radiusHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    radiusAttribute(value: number | string | Array<number | string> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Array<number | string>
+                thisSerializer.writeInt32(value_value_2.length as int32)
+                for (let i = 0; i < value_value_2.length; i++) {
+                    const value_value_2_element : number | string = value_value_2[i]
+                    let value_value_2_element_type : int32 = RuntimeType.UNDEFINED
+                    value_value_2_element_type = runtimeType(value_value_2_element)
+                    if (RuntimeType.NUMBER == value_value_2_element_type) {
+                        thisSerializer.writeInt8(0 as int32)
+                        const value_value_2_element_0  = value_value_2_element as number
+                        thisSerializer.writeNumber(value_value_2_element_0)
+                    }
+                    else if (RuntimeType.STRING == value_value_2_element_type) {
+                        thisSerializer.writeInt8(1 as int32)
+                        const value_value_2_element_1  = value_value_2_element as string
+                        thisSerializer.writeString(value_value_2_element_1)
+                    }
+                }
+            }
+        }
+        ArkUIGeneratedNativeModule._RectAttribute_radius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface RectOptions {
     width?: number | string;
     height?: number | string;
-    radius?: number | string | Array<number | string>;
+    radius?: Length | Array<RadiusItem>;
 }
 export interface RoundedRectOptions {
     width?: number | string;
@@ -47,25 +168,76 @@ export interface RoundedRectOptions {
     radiusWidth?: number | string;
     radiusHeight?: number | string;
 }
-/** @memo:stable */
+export type RectInterface = (options?: RectOptions | RoundedRectOptions) => RectAttribute;
 export interface RectAttribute extends CommonShapeMethod {
-    /** @memo */
-    setRectOptions(options?: RectOptions | RoundedRectOptions): this
-    /** @memo */
-    radiusWidth(value: number | string): this
-    /** @memo */
-    radiusHeight(value: number | string): this
-    /** @memo */
-    radius(value: number | string | Array<number | string>): this
+    radiusWidth(value: number | string | undefined): this
+    radiusHeight(value: number | string | undefined): this
+    radius(value: number | string | Array<number | string> | undefined): this
+}
+export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
+    radiusWidth_value?: number | string | undefined
+    radiusHeight_value?: number | string | undefined
+    radius_value?: number | string | Array<number | string> | undefined
+    public radiusWidth(value: number | string | undefined): this {
+        return this
+    }
+    public radiusHeight(value: number | string | undefined): this {
+        return this
+    }
+    public radius(value: number | string | Array<number | string> | undefined): this {
+        return this
+        }
+}
+export class ArkRectComponent extends ArkCommonShapeMethodComponent implements RectAttribute {
+    getPeer(): ArkRectPeer {
+        return (this.peer as ArkRectPeer)
+    }
+    public setRectOptions(options?: RectOptions | RoundedRectOptions): this {
+        if (this.checkPriority("setRectOptions")) {
+            const options_casted = options as (RectOptions | RoundedRectOptions | undefined)
+            this.getPeer()?.setRectOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public radiusWidth(value: number | string | undefined): this {
+        if (this.checkPriority("radiusWidth")) {
+            const value_casted = value as (number | string | undefined)
+            this.getPeer()?.radiusWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public radiusHeight(value: number | string | undefined): this {
+        if (this.checkPriority("radiusHeight")) {
+            const value_casted = value as (number | string | undefined)
+            this.getPeer()?.radiusHeightAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public radius(value: number | string | Array<number | string> | undefined): this {
+        if (this.checkPriority("radius")) {
+            const value_casted = value as (number | string | Array<number | string> | undefined)
+            this.getPeer()?.radiusAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Rect(
-  /** @memo */
-  style: ((attributes: RectAttribute) => void) | undefined,
-  options?: RectOptions | RoundedRectOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: RectAttribute) => void) | undefined,
+    options?: RectOptions | RoundedRectOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkRectComponent()
     })

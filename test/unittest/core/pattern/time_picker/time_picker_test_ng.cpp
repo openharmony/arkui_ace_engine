@@ -2939,7 +2939,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level1)
     ASSERT_NE(hourColumn, nullptr);
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(hourColumnPattern, nullptr);
-    EXPECT_EQ(hourColumnPattern->GetWheelModeEnabled(), false);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), false);
 }
 
 /**
@@ -2963,7 +2963,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level1)
     ASSERT_NE(hourColumn, nullptr);
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(hourColumnPattern, nullptr);
-    EXPECT_EQ(hourColumnPattern->GetWheelModeEnabled(), true);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), true);
 }
 
 /**
@@ -3016,6 +3016,35 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode004, TestSize.Level1)
     minuteColumnPattern->SetCurrentIndex(0);
     minuteColumnPattern->UpdateColumnChildPosition(TOSS_DELTA);
     EXPECT_EQ(minuteColumnPattern->GetCurrentIndex(), MINUTE_59);
+}
+
+/**
+ * @tc.name: TimePickerWheelMode005
+ * @tc.desc: Test TimePickerRowPattern wheelmode is false when start end is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(hourColumnPattern, nullptr);
+
+    PickerTime startTime = PickerTime(0, 1, 1);
+    PickerTime endTime = PickerTime(22, 58, 58);
+    timePickerRowPattern->SetStartTime(startTime);
+    timePickerRowPattern->SetEndTime(endTime);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), false);
 }
 
 /**

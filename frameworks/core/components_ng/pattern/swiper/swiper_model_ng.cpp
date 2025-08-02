@@ -1292,6 +1292,7 @@ void SwiperModelNG::ProcessDotPositionWithResourceObj(FrameNode* frameNode, cons
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
             result = parseOk && result.ConvertToPx() >= 0.0f ? result : 0.0_vp;
             auto params = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(params);
             if (name == "dimLeft") {
                 params->dimLeft = result;
             } else if (name == "dimTop") {
@@ -1323,13 +1324,14 @@ void SwiperModelNG::ProcessDotSizeWithResourceObj(FrameNode* frameNode, const st
             CalcDimension result;
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
             if (!(parseOk && result > 0.0_vp)) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
                 result = theme->GetSize();
             }
             auto param = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(param);
             if (name == "itemWidth") {
                 param->itemWidth = result;
             } else if (name == "itemHeight") {
@@ -1361,9 +1363,10 @@ void SwiperModelNG::ProcessDotColorWithResourceObj(FrameNode* frameNode, const s
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             auto param = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(param);
             if (!parseOk) {
                 param->parametersByUser.erase(name);
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
@@ -1395,6 +1398,7 @@ void SwiperModelNG::ProcessDigitalPositionWithResourceObj(FrameNode* frameNode, 
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
             result = parseOk && result.ConvertToPx() >= 0.0f ? result : 0.0_vp;
             auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
             if (name == "dimLeft") {
                 params->dimLeft = result;
             } else if (name == "dimTop") {
@@ -1426,13 +1430,14 @@ void SwiperModelNG::ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNode, 
             CalcDimension result;
             bool parseOk = ResourceParseUtils::ParseResDimensionFpNG(theObj, result);
             if (!parseOk || LessOrEqual(result.Value(), 0.0) || result.Unit() == DimensionUnit::PERCENT) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
                 result = theme->GetDigitalIndicatorTextStyle().GetFontSize();
             }
             auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
             if (name == "fontSize") {
                 params->fontSize = result;
             } else if (name == "selectedFontSize") {
@@ -1460,9 +1465,10 @@ void SwiperModelNG::ProcessDigitalColorWithResourceObj(FrameNode* frameNode, con
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
             if (!parseOk) {
                 params->parametersByUser.erase(name);
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
@@ -1496,11 +1502,13 @@ void SwiperModelNG::ProcessArrowColorWithResourceObj(FrameNode* frameNode, const
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             auto param = pattern->GetSwiperArrowParameters();
+            CHECK_NULL_VOID(param);
             if (!parseOk) {
                 param->parametersByUser.erase("arrowColor");
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
                 result = param->isSidebarMiddle.value() ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
             } else {
                 param->parametersByUser.insert("arrowColor");
@@ -1528,11 +1536,13 @@ void SwiperModelNG::ProcessArrowBackgroundColorWithResourceObj(FrameNode* frameN
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             auto param = pattern->GetSwiperArrowParameters();
+            CHECK_NULL_VOID(param);
             if (!parseOk) {
                 param->parametersByUser.erase("backgroundColor");
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
                 result = param->isSidebarMiddle.value() ? theme->GetBigArrowBackgroundColor()
                     : theme->GetSmallArrowBackgroundColor();
             } else {
@@ -1563,7 +1573,7 @@ void SwiperModelNG::ProcessArrowSizeWithResourceObj(FrameNode* frameNode, const 
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
             if (!parseOk || LessOrEqual(result.ConvertToVp(), 0.0) ||
                 (result.Unit() == DimensionUnit::PERCENT)) {
-                    auto pipelineContext = PipelineBase::GetCurrentContext();
+                    auto pipelineContext = node->GetContext();
                     CHECK_NULL_VOID(pipelineContext);
                     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -1606,7 +1616,7 @@ void SwiperModelNG::ProcessBackgroundSizeWithResourceObj(FrameNode* frameNode, c
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
             if (!parseOk || LessOrEqual(result.ConvertToVp(), 0.0) ||
                 (result.Unit() == DimensionUnit::PERCENT)) {
-                    auto pipelineContext = PipelineBase::GetCurrentContext();
+                    auto pipelineContext = node->GetContext();
                     CHECK_NULL_VOID(pipelineContext);
                     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -1693,13 +1703,14 @@ void SwiperModelNG::ProcessDotStyleSizeWithResourceObj(FrameNode* frameNode, con
             CalcDimension result;
             if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) ||
                 result.Unit() == DimensionUnit::PERCENT || LessNotEqual(result.Value(), 0.0)) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(swiperIndicatorTheme);
                 result = swiperIndicatorTheme->GetSize();
             }
             auto params = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(params);
             params->itemWidth = result;
             params->itemHeight = result;
             params->selectedItemWidth = result;

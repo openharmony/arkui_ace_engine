@@ -20,9 +20,10 @@
 #include <string>
 
 #include "base/memory/referenced.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
 namespace OHOS::Rosen {
-class RSUIDirector;
+class RSUIContext;
 class RSNode;
 }
 
@@ -33,8 +34,10 @@ public:
     ~RsNodeAdapter() = default;
     static std::shared_ptr<Rosen::RSNode> CreateRootNode();
     static std::shared_ptr<Rosen::RSNode> CreateCanvasNode();
+    static std::shared_ptr<Rosen::RSNode> CreateSurfaceNode(
+        const Rosen::RSSurfaceNodeConfig& surfaceNodeConfig);
 private:
-    static std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
+    static std::shared_ptr<Rosen::RSUIContext> GetRSUIContext();
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RS_NODE_ADAPTER_H

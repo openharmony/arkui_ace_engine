@@ -55,7 +55,7 @@ public:
 
     bool IsRunning();
 
-    RefPtr<AxisScrollMotion> GeAxisScrollMotion() const
+    RefPtr<AxisScrollMotion> GetAxisScrollMotion() const
     {
         return axisScrollMotion_;
     }

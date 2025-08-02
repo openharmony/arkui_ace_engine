@@ -29,6 +29,9 @@
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
+#ifdef ACE_STATIC
+#include "base/utils/multi_thread.h"
+#endif
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
@@ -159,6 +162,9 @@ void XComponentPattern::InitXComponent()
 void XComponentPattern::InitSurface()
 {
     auto host = GetHost();
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(host, InitSurface, host);
+#endif
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -176,7 +182,8 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -272,13 +279,16 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
+    auto host = GetHost();
+#ifdef ACE_STATIC
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+#endif
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
@@ -292,13 +302,16 @@ void XComponentPattern::OnAttachToMainTree()
 
 void XComponentPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+#ifdef ACE_STATIC
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
+#endif
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     isOnTree_ = false;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (displaySync_ && displaySync_->IsOnPipeline()) {
@@ -383,6 +396,9 @@ void XComponentPattern::OnAttachToFrameNode()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    nodeId_ = std::to_string(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -464,6 +480,8 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     SetSurfaceNodeToGraphic();
 }
 
@@ -471,6 +489,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
+#ifdef ACE_STATIC
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
+#endif
     UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -487,11 +508,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
             OnSurfaceDestroyed();
             auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
-            eventHub->FireDestroyEvent(GetId(frameNode));
+            eventHub->FireDestroyEvent(GetId());
             if (id_.has_value()) {
                 eventHub->FireDetachEvent(id_.value());
             }
-            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId(frameNode));
+            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
 #ifdef RENDER_EXTRACT_SUPPORTED
             if (renderContextForSurface_) {
                 renderContextForSurface_->RemoveSurfaceChangedCallBack();
@@ -517,6 +538,9 @@ void XComponentPattern::InitController()
     CHECK_NULL_VOID(xcomponentController_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(host, InitController);
+#endif
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -1509,6 +1533,8 @@ bool XComponentPattern::StopTextureExport()
     CHECK_NULL_RETURN(renderContext, false);
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     renderContext->SetIsNeedRebuildRSTree(true);
     return true;
 }

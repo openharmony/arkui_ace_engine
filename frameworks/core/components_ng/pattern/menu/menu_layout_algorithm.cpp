@@ -554,6 +554,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         dumpInfo_.wrapperRect = wrapperRect_;
         width_ = wrapperRect_.Width();
         height_ = wrapperRect_.Height();
+        TAG_LOGI(
+            AceLogTag::ACE_MENU, "InitWrapperRect with menuWindowRect : %{public}s", wrapperRect_.ToString().c_str());
         return;
     }
     wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
@@ -576,6 +578,9 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     dumpInfo_.bottom = bottom_;
     dumpInfo_.left = left_;
     dumpInfo_.right = right_;
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "safeAreaInsets: (top: %{public}f, bottom: %{public}f, left: %{public}f, right: %{public}f)", top_, bottom_,
+        left_, right_);
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
@@ -588,6 +593,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
+    TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s", wrapperRect_.ToString().c_str());
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
@@ -623,6 +629,8 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     } else {
         wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, height_ - top_ - bottom_);
     }
+    dumpInfo_.wrapperRect = wrapperRect_;
+    TAG_LOGI(AceLogTag::ACE_MENU, "Update wrapperRect for hoverMode : %{public}s", wrapperRect_.ToString().c_str());
 }
 
 uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
@@ -632,9 +640,7 @@ uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaMa
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     auto bottom = safeAreaInsets.bottom_.Length();
     CHECK_NULL_RETURN(safeAreaManager, 0);
-    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
-    auto keyboardHeight = keyboardInsert.Length();
+    auto keyboardHeight = safeAreaManager->GetKeyboardInsetImpl().Length();
     if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) &&
         GreatNotEqual(keyboardHeight, 0)) {
         bottom = keyboardHeight;
@@ -798,7 +804,9 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isContextMenu = menuPattern->IsContextMenu();
-    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
+    auto containerId = Container::CurrentId();
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu
+        || (containerId >= MIN_SUBCONTAINER_ID);
     InitCanExpandCurrentWindow(isShowInSubWindow, layoutWrapper);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
@@ -2748,32 +2756,41 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, boo
         }
         // can't fit in screen, line up with top of the screen
         return wrapperRect_.Top() + paddingTop_;
-    } else {
-        float wrapperHeight = wrapperSize_.Height();
+    } else if (anchorPosition_.has_value()) {
         // When the component height is less than the bottom margin and the menu height can be lowered,
         // or when the anchor point y coordinate is at the bottom of the screen and
         // the anchorPosition_ has a set value, the menu should be placed at the bottom of the screen.
-        if (anchorPosition_.has_value()) {
+        bool isOutBottom = GreatOrEqual(position + anchorPosition_->GetY() + size.Height(), wrapperRect_.Bottom());
+        if (isOutBottom) {
             if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
                 LessNotEqual(size.Height(), wrapperRect_.Height()))) {
                 return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
             }
             // can't fit in screen, line up with top of the screen
             return wrapperRect_.Top() + paddingTop_;
+        } else {
+            return CalcVerticalPosition(size);
         }
-        // put menu above click point
-        if (GreatOrEqual(topSpace_, size.Height())) {
-            // menu show on top
-            placement_ = Placement::TOP;
-            return topSpace_ - size.Height() + margin_;
-        }
-        // line up bottom of menu with bottom of the screen
-        if (LessNotEqual(size.Height(), wrapperHeight)) {
-            return wrapperHeight - size.Height();
-        }
-        // can't fit in screen, line up with top of the screen
-        return 0.0f;
+    } else {
+        return CalcVerticalPosition(size);
     }
+}
+
+float MenuLayoutAlgorithm::CalcVerticalPosition(const SizeF& size)
+{
+    float wrapperHeight = wrapperSize_.Height();
+    // put menu above click point
+    if (GreatOrEqual(topSpace_, size.Height())) {
+        // menu show on top
+        placement_ = Placement::TOP;
+        return topSpace_ - size.Height() + margin_;
+    }
+    // line up bottom of menu with bottom of the screen
+    if (LessNotEqual(size.Height(), wrapperHeight)) {
+        return wrapperHeight - size.Height();
+    }
+    // can't fit in screen, line up with top of the screen
+    return 0.0f;
 }
 
 // returns horizontal offset
@@ -3525,7 +3542,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_RETURN(menuPattern, menuWindowRect);
     auto host = menuPattern->GetHost();
     CHECK_NULL_RETURN(host, menuWindowRect);
-    auto pipelineContext = DialogManager::GetMainPipelineContext(host);
+    auto pipelineContext = DialogManager::GetMainPipelineContext(host, isTargetNodeInSubwindow_);
     CHECK_NULL_RETURN(pipelineContext, menuWindowRect);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());

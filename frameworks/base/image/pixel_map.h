@@ -208,6 +208,14 @@ class ACE_FORCE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:
+#if defined(ACE_STATIC)
+    /**
+     * @description: only for 1.2
+     * @param opts initialize options
+     * @return refptr pixelmap
+     */
+    static RefPtr<PixelMap> Create(const std::shared_ptr<Media::PixelMap>& pixmap);
+#endif
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> Create(const InitializationOptions& opts);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);

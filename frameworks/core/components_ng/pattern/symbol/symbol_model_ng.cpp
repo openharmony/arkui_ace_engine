@@ -110,10 +110,16 @@ void SymbolModelNG::SetMaxFontScale(const float value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
 }
 
-void SymbolModelNG::RegisterSymbolFontColorResource(const std::string& key,
-    std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+void SymbolModelNG::RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+    const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    RegisterSymbolFontColorResource(frameNode, key, symbolColor, resObjArr);
+}
+
+void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const std::string& key,
+    std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
@@ -140,7 +146,7 @@ void SymbolModelNG::RegisterSymbolFontColorResource(const std::string& key,
 
         pattern->AddResObj(storeKey, resObj, std::move(updateFunc));
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
 }
 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)

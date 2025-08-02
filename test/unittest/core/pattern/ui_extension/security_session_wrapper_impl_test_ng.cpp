@@ -663,4 +663,155 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg012, 
     sessionWrapper->OnConnect();
 #endif
 }
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg013
+ * @tc.desc: Test the method ReDispatchWantParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg013, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_NE(sessionWrapper->session_->GetExtensionDataHandler(), nullptr);
+    auto container = Platform::AceContainer::GetContainer(sessionWrapper->instanceId_);
+    EXPECT_NE(container, nullptr);
+
+    /**
+     * @tc.steps: step2. test ReDispatchWantParams
+     */
+    RefPtr<WantWrap> wantWrap = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    auto want = wantWrapOhos->GetWant();
+    want.SetParam("type", std::string("test type"));
+    sessionWrapper->customWant_ = std::make_shared<AAFwk::Want>(want);
+    sessionWrapper->ReDispatchWantParams();
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg014
+ * @tc.desc: Test the method GetWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg014, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetWant
+     */
+    EXPECT_EQ(sessionWrapper->GetWant(), nullptr);
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_EQ(sessionWrapper->GetWant(), sessionWrapper->customWant_);
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg015
+ * @tc.desc: Test the method NotifyBackPressedSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg015, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test NotifyBackPressedSync
+     */
+    EXPECT_FALSE(sessionWrapper->NotifyBackPressedSync());
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_FALSE(sessionWrapper->NotifyBackPressedSync());
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg016
+ * @tc.desc: Test the method NotifyKeyEventAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg016, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test NotifyKeyEventAsync
+     */
+    std::shared_ptr<OHOS::MMI::KeyEvent> keyEvent;
+    EXPECT_FALSE(sessionWrapper->NotifyKeyEventAsync(keyEvent, false));
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_TRUE(sessionWrapper->NotifyKeyEventAsync(keyEvent, false));
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg017
+ * @tc.desc: Test the method NotifyFocusEventAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg017, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test NotifyFocusEventAsync
+     */
+    EXPECT_FALSE(sessionWrapper->NotifyFocusEventAsync(false));
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_TRUE(sessionWrapper->NotifyFocusEventAsync(false));
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg018
+ * @tc.desc: Test the method NotifyFocusStateAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg018, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test NotifyFocusStateAsync
+     */
+    EXPECT_FALSE(sessionWrapper->NotifyFocusStateAsync(false));
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_TRUE(sessionWrapper->NotifyFocusStateAsync(false));
+#endif
+}
 } // namespace OHOS::Ace::NG

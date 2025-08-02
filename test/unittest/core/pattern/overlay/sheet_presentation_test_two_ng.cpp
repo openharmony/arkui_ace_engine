@@ -2326,7 +2326,7 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
      * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 1000 and frameSize height is 500.
      */
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetPattern->pageHeight_ = 1000.0f;
     auto sheetSize = SizeF({ 500, 500 });
     sheetNode->GetGeometryNode()->SetFrameSize(sheetSize);
@@ -2343,9 +2343,8 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
      * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE.
      */
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     sheetPattern->pageHeight_ = 1200.0f;
-
     /**
      * @tc.steps: step11. excute ComputeSheetOffset function.
      * @tc.expected: sheetHeight_ is pageHeight_.
@@ -2691,8 +2690,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
     Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetTheme->sheetType_ = "popup";
-
     /**
      * @tc.steps: step3. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
@@ -2766,7 +2765,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
     sheetTheme->sheetType_ = "popup";
-
     /**
      * @tc.steps: step4. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
@@ -2776,6 +2774,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
     EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
 

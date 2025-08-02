@@ -194,6 +194,8 @@ public:
      * @param dataOperations bulk change operations.
      */
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
+
+    void EnablePreBuild(bool enable);
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:

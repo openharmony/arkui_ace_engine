@@ -557,6 +557,7 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
+    // checkScreen takes effect only when checkBoundary is false.
     OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
@@ -603,13 +604,13 @@ public:
         AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
+        AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
+        AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -856,6 +857,8 @@ public:
 
     // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+
+    bool EnsureDelayedMeasureBeingOnlyOnce();
 
     bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
 
@@ -1574,7 +1577,8 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
+    void AddFrameNodeSnapshot(
+        bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
@@ -1628,6 +1632,12 @@ private:
     const char* GetPaintPropertyTypeName() const;
     void AddNodeToRegisterTouchTest();
     void CleanupPipelineResources();
+
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
+    void UpdateBackground();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

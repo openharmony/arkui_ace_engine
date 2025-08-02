@@ -17,7 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
+#include "core/components_ng/pattern/plugin/plugin_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #endif
 #include "arkoala_api_generated.h"
@@ -36,14 +36,14 @@ namespace Converter {
     {
         PluginComponentOptions opt;
         opt.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
-        LOGE("PluginComponentModifier::Convert cannot convert data. data is Ark_CustomObject!");
+        opt.data = Convert<std::string>(options.data);
         return opt;
     }
     template<>
     RequestPluginInfo Convert(const Ark_PluginComponentTemplate& temp)
     {
         RequestPluginInfo info;
-        info.source = Convert<std::string>(temp.source);
+        info.pluginName = Convert<std::string>(temp.source); // for historical reasons, source is pluginName
         info.bundleName = Convert<std::string>(temp.bundleName);
         return info;
     }
@@ -56,7 +56,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    return {};
+    auto frameNode = PluginModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 #else
     return {};
 #endif
@@ -72,31 +75,41 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
-    LOGE("PluginComponentModifier::SetPluginComponentOptionsImpl setData into model isn't supported");
+    PluginModelStatic::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
+    PluginModelStatic::SetData(frameNode, optInfoData ? std::make_optional(optInfoData->data) : std::nullopt);
 #endif
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
-                    const VoidCallback* value)
+                    const Opt_VoidCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onComplete = [arkCallback = CallbackHelper(*value)](const std::string& param) -> void {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onComplete = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         arkCallback.Invoke();
     };
+    PluginModelStatic::SetOnComplete(frameNode, std::move(onComplete));
 #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const PluginErrorCallback* value)
+                 const Opt_PluginErrorCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) -> void {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         auto json = JsonUtil::ParseJsonString(param);
         Ark_PluginErrorData errorData;
         errorData.errcode = Converter::ArkValue<Ark_Number>(StringUtils::StringToInt(json->GetString("errcode")));
@@ -104,6 +117,7 @@ void OnErrorImpl(Ark_NativePointer node,
         errorData.msg = Converter::ArkValue<Ark_String>(msg);
         arkCallback.Invoke(errorData);
     };
+    PluginModelStatic::SetOnError(frameNode, std::move(onError));
 #endif
 }
 } // PluginComponentAttributeModifier

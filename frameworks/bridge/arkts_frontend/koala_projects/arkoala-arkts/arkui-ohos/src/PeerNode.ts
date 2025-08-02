@@ -17,17 +17,18 @@ import { int32, KoalaCallsiteKey } from "@koalaui/common"
 import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
-import { ArkRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
+import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
-const INITIAL_ID = 1000
+export const RepeatType = 19
+const INITIAL_ID = 10000000
 
 export class PeerNode extends IncrementalNode {
     static generateRootPeer() {
-        return ArkRootPeer.create()
+        return ArkRootPeer.create(undefined)
     }
     peer: NativePeerNode
     protected static currentId: int32 = INITIAL_ID
@@ -96,10 +97,17 @@ export class PeerNode extends IncrementalNode {
     }
 
     setReusePoolSize(size: number, reuseKey: string): void {
+        if (size < 0) return
         if (!this.isKind(RootPeerType)) {
             if (this.parent?.isKind(PeerNodeType))
                 (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
             return
+        }
+        if (!this._reusePool) {
+            this._reusePool = new Map<string, ReusablePool>()
+        }
+        if (!this._reusePool?.has(reuseKey)) {
+            this._reusePool?.set(reuseKey, new ReusablePool())
         }
         this._reusePool?.get(reuseKey)?.setMaxSize(size)
     }
@@ -145,15 +153,15 @@ export class PeerNode extends IncrementalNode {
                     this.insertMark = peerPtr
                     return
                 }
-                // Find the closest peer node backward.
-                let sibling: PeerNode | undefined = undefined
-                for (let node = child.previousSibling; node; node = node!.previousSibling) {
-                    if (node!.isKind(PeerNodeType)) {
-                        sibling = node as PeerNode
-                        break
-                    }
+                // Find the closest peer node forward.
+                let sibling: PeerNode | undefined = findSiblingPeerNode(child, true)
+                if (sibling === undefined) {
+                    // Add to the end (common case!).
+                    this.peer.addChild(peerPtr)
+                } else {
+                    // Insert child in the middle.
+                    this.peer.insertChildBefore(peerPtr, sibling?.peer?.ptr ?? nullptr)
                 }
-                this.peer.insertChildAfter(peerPtr, sibling?.peer?.ptr ?? nullptr)
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
@@ -189,6 +197,23 @@ function findPeerNode(node: IncrementalNode): PeerNode | undefined {
     for (let child = node.firstChild; child; child = child!.nextSibling) {
         let peer = findPeerNode(child!)
         if (peer) return peer
+    }
+    return undefined
+}
+
+function findSiblingPeerNode(node: IncrementalNode, forward: boolean): PeerNode | undefined {
+    if (forward) {
+        for (let sibling = node.nextSibling; sibling; sibling = sibling!.nextSibling) {
+            if (sibling!.isKind(PeerNodeType)) {
+                return sibling as PeerNode
+            }
+        }
+    } else {
+        for (let sibling = node.previousSibling; sibling; sibling = sibling!.previousSibling) {
+            if (sibling!.isKind(PeerNodeType)) {
+                return sibling as PeerNode
+            }
+        }
     }
     return undefined
 }

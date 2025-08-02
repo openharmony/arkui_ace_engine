@@ -51,6 +51,8 @@ public:
 
     ~DatePickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     void OnColorModeChange(uint32_t colorMode) override
     {
         LinearLayoutPattern::OnColorModeChange(colorMode);
