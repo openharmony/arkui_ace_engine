@@ -104,9 +104,20 @@ void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double
     v = GetLinearSlope(axis);
     CheckExtremePoint(axis, extremX, valSize);
 }
+} // namespace
 
-double UpdateAxisVelocity(LeastSquareImpl& axis)
-{
+double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
+{ 
+    LeastSquareImpl axis = axisRaw;
+    if (SystemProperties::IsVelocityWithinTimeWindow()) {
+        auto xTimes = axis.GetXVals();
+        auto timeThreshold = xTimes.back() - VelocityTracker::DURATION_LONGEST_THRESHOLD;
+        int32_t cnt = (std::lower_bound(xTimes.begin(), xTimes.end(), timeThreshold) - xTimes.begin());
+        while (cnt) {
+            axis.PopFrontPoint();
+            --cnt;
+        }
+    }
     std::vector<double> param(VelocityTracker::LEAST_SQUARE_PARAM_NUM, 0);
     auto x = axis.GetXVals().back();
     // curve is param[0] * x^2 + param[1] * x + param[2]
@@ -121,7 +132,6 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
     }
     return velocity;
 }
-} // namespace
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
@@ -155,15 +165,8 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
         }
     }
     // nanoseconds duration to seconds.
-    touchEventTime_.push_back(event.time);
-    std::chrono::duration<double> duration = event.time - touchEventTime_[mIndex_];
+    std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;
     auto seconds = duration.count();
-    auto timeWindowEnabled = SystemProperties::IsVelocityWithinTimeWindow();
-    if (timeWindowEnabled && seconds > DURATION_LONGEST_THRESHOLD) {
-        xAxis_.PopFrontPoint();
-        yAxis_.PopFrontPoint();
-        mIndex_++;
-    }
     xAxis_.UpdatePoint(seconds, event.x);
     yAxis_.UpdatePoint(seconds, event.y);
 }

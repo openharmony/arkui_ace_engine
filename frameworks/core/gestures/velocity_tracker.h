@@ -49,8 +49,6 @@ public:
         isFirstPoint_ = true;
         xAxis_.Reset();
         yAxis_.Reset();
-        touchEventTime_.clear();
-        mIndex_ = 0;
     }
 
     void UpdateTouchPoint(const TouchEvent& event, bool end = false, float range = TOUCH_STILL_THRESHOLD);
@@ -133,6 +131,8 @@ public:
 
     void DumpVelocityPoints() const;
 
+    double UpdateAxisVelocity(LeastSquareImpl& axis);
+
 private:
     void UpdateVelocity();
 
@@ -149,8 +149,6 @@ private:
     LeastSquareImpl xAxis_ { LEAST_SQUARE_PARAM_NUM };
     LeastSquareImpl yAxis_ { LEAST_SQUARE_PARAM_NUM };
     bool isVelocityDone_ = false;
-    std::vector<TimeStamp> touchEventTime_;
-    int32_t mIndex_ = 0;
 };
 
 } // namespace OHOS::Ace
