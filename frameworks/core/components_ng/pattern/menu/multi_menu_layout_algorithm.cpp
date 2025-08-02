@@ -168,7 +168,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!pattern->IsEmbedded()) {
         MinusPaddingToSize(padding, childConstraint.maxSize);
     } else {
-        PaddingPropertyF safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+        const auto& safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
         MinusPaddingToSize(safeAreaPadding, childConstraint.maxSize);
         UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
     }
