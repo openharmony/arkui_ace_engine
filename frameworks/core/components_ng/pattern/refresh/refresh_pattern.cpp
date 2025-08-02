@@ -146,6 +146,7 @@ RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
             refreshLayoutAlgorithm->SetScrollOffset(scrollOffset_);
         }
     }
+    refreshLayoutAlgorithm->SetIsHighVersion(isHigherVersion_);
     return refreshLayoutAlgorithm;
 }
 
