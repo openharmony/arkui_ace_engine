@@ -181,6 +181,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+        pinchCenter_ = ComputePinchCenter();
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
@@ -260,6 +261,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
+        pinchCenter_ = ComputePinchCenter();
         if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
             return;
         }
