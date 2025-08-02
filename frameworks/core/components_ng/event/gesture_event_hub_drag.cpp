@@ -280,7 +280,8 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
     }
 
     // use menuPreview's size and offset for drag framework.
-    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
+        GreatNotEqual(DragAnimationHelper::GetPreviewMenuAnimationRate(), 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
@@ -795,15 +796,25 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     data.originPreviewRect = DragDropFuncWrapper::GetPaintRectToScreen(menuPreview);
     CHECK_EQUAL_VOID(isShowHoverImage, false);
     auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
-    auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
-    CHECK_NULL_VOID(previewNode);
-    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    auto previewPattern = menuPreview->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
     auto rate = animationInfo.clipRate;
-    auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth();
-    auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight();
-    auto clipEndWidth = previewPattern->GetStackAfterScaleActualWidth();
-    auto clipEndHeight = previewPattern->GetStackAfterScaleActualHeight();
+    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
+    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    auto previewBeforeAnimationScale =
+        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto previewAfterAnimationScale =
+        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+    auto previewScale = rate * (previewAfterAnimationScale - previewBeforeAnimationScale) + previewBeforeAnimationScale;
+    if (!GreatNotEqual(rate, 0.0f)) {
+        data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+        data.dragPreviewRect = data.originPreviewRect;
+        return;
+    }
+    auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth() * previewScale;
+    auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight() * previewScale;
+    auto clipEndWidth = previewPattern->GetStackAfterScaleActualWidth() * previewScale;
+    auto clipEndHeight = previewPattern->GetStackAfterScaleActualHeight() * previewScale;
     auto curentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
     auto curentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
     auto centerX = data.originPreviewRect.GetX() + data.originPreviewRect.Width() / 2;
