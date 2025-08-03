@@ -107,7 +107,7 @@ void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double
 } // namespace
 
 double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
-{ 
+{
     LeastSquareImpl axis = axisRaw;
     if (SystemProperties::IsVelocityWithinTimeWindow()) {
         auto xTimes = axis.GetXVals();
