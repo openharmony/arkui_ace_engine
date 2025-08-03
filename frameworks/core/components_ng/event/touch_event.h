@@ -158,7 +158,7 @@ public:
         isNeedPropagation_ = isNeedPropagation;
     }
 
-    const bool IsNeedPropagation() {
+    bool IsNeedPropagation() {
         return isNeedPropagation_;
     }
 
