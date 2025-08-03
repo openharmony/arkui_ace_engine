@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -43,6 +44,7 @@ public:
     static std::string ParseArgs(const std::string& args);
     static float GetMainGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis);
     static float GetCrossGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis);
+    static bool CheckNeedCacheLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
 };
 
 } // namespace OHOS::Ace::NG
