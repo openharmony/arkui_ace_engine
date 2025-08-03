@@ -30,6 +30,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
+import { uiUtils } from '../base/uiUtilsImpl';
 
 export class StoragePropRefDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
@@ -81,7 +82,7 @@ export class StoragePropRefDecoratedVariable<T>
         if (oldValue === newValue) {
             return;
         }
-        const value = UIUtils.makeObserved(newValue);
+        const value = uiUtils.makeObserved(newValue);
         if (this.backing_.set(value)) {
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(value);

@@ -19,6 +19,7 @@ import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
 import { ObserveWrappedBase } from './observeWrappedBase';
 import { UIUtils } from '../utils';
+import { uiUtils } from './uiUtilsImpl';
 final class CONSTANT {
     public static readonly OB_MAP_ANY_PROPERTY = '__OB_SET_ANY_PROPERTY';
     public static readonly OB_LENGTH = '__OB_LENGTH';
@@ -32,16 +33,16 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     private ____V1RenderId: RenderIdType = 0;
-
+    private allowDeep_: boolean;
     /**
      * Constructs a Map from another Map
      * @param map another map
      */
-    constructor(map: Map<K, V>) {
+    constructor(map: Map<K, V>, allowDeep: boolean) {
         // Create without parameters to avoid call back to WrappedMap before "this" is fully constructed!
         super();
-
         this.store_ = map;
+        this.allowDeep_ = allowDeep;
         this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedMap');
     }
 
@@ -66,7 +67,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
 
     // helper
     public shouldAddRef(): boolean {
-        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     public override toString(): String {
@@ -171,7 +172,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
                 this.meta_.addRef(CONSTANT.OB_LENGTH);
             }
         }
-        return UIUtils.makeObserved(this.store_.get(key));
+        return uiUtils.makeObserved(this.store_.get(key), this.allowDeep_);
     }
 
     /**

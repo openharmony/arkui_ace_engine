@@ -18,6 +18,7 @@ import { FactoryInternal } from '../base/iFactoryInternal';
 import { IConsumerDecoratedVariable, IProviderDecoratedVariable } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
+import { uiUtils } from '../base/uiUtilsImpl';
 export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implements IConsumerDecoratedVariable<T> {
     provideAlias_: string;
     sourceProvider_: IProviderDecoratedVariable<T> | null;
@@ -52,7 +53,7 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
         if (value === newValue) {
             return;
         }
-        if (this.backing_!.set(UIUtils.makeObserved(newValue) as T)) {
+        if (this.backing_!.set(uiUtils.makeObserved(newValue, true) as T)) {
         }
     }
 }

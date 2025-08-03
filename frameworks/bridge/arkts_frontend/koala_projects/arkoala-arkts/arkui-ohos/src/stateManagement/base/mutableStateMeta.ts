@@ -51,12 +51,13 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     // meta MutableState to record dependencies in addRef
     // and mutate in fireChange
     protected __metaDependency: MutableState<int32>;
-    private bindingRefs_: Set<WeakRef<ITrackedDecoratorRef>> = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private bindingRefs_: Set<WeakRef<ITrackedDecoratorRef>>;
     weakThis: WeakRef<IBindingSource>;
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
         this.__metaDependency = metaDependency ?? StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        this.bindingRefs_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         this.weakThis = new WeakRef<IBindingSource>(this);
     }
 
