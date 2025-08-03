@@ -308,14 +308,14 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_antiAlias(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    meshAttribute(value: Array<number>, column: number, row: number): void {
+    meshAttribute(value: Array<number>, column: int32, row: int32): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeInt32(value.length as int32)
         for (let i = 0; i < value.length; i++) {
             const value_element : number = value[i]
             thisSerializer.writeNumber(value_element)
         }
-        ArkUIGeneratedNativeModule._ShapeAttribute_mesh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), column, row)
+        ArkUIGeneratedNativeModule._ShapeAttribute_mesh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), column as number, row as number)
         thisSerializer.release()
     }
 }
@@ -338,7 +338,7 @@ export interface ShapeAttribute extends CommonMethod {
     fillOpacity(value: number | string | Resource | undefined): this
     strokeWidth(value: number | string | undefined): this
     antiAlias(value: boolean | undefined): this
-    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
+    mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this
     attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
@@ -390,7 +390,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     public antiAlias(value: boolean | undefined): this {
         return this
     }
-    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+    public mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this {
         return this
         }
 }
@@ -500,14 +500,14 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         }
         return this
     }
-    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+    public mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this {
         if (value == undefined || column == undefined || row == undefined) {
             return this;
         }
         if (this.checkPriority("mesh")) {
             const value_casted = value as (Array<number>)
-            const column_casted = column as (number)
-            const row_casted = row as (number)
+            const column_casted = column as (int32)
+            const row_casted = row as (int32)
             this.getPeer()?.meshAttribute(value_casted, column_casted, row_casted)
             return this
         }

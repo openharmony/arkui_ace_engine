@@ -38,7 +38,7 @@ public:
     void InitParams();
     bool IsBindNative() override;
     void MarkBindNative();
-    bool BindXComponentController(const std::shared_ptr<InnerXComponentController>& controlller);
+    bool BindXComponentController(const std::shared_ptr<InnerXComponentController>& controller);
     void SetNativeHandler(const std::function<void(void*)>& handler);
     void UpdateId(const std::string &id);
     bool UpdateType(XComponentType type);
@@ -174,12 +174,12 @@ void XComponentStaticPattern::MarkBindNative()
     isBindNative_ = true;
 }
 
-bool XComponentStaticPattern::BindXComponentController(const std::shared_ptr<InnerXComponentController>& controlller)
+bool XComponentStaticPattern::BindXComponentController(const std::shared_ptr<InnerXComponentController>& controller)
 {
-    CHECK_NULL_RETURN(controlller, false);
+    CHECK_NULL_RETURN(controller, false);
     CHECK_EQUAL_RETURN(isBindNative_, true, false);
     CHECK_EQUAL_RETURN((xcomponentController_ != nullptr), true, false);
-    xcomponentController_ = controlller;
+    xcomponentController_ = controller;
     return true;
 }
 
