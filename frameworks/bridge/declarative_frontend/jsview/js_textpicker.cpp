@@ -1912,6 +1912,8 @@ bool JSTextPickerDialog::ParseShowDataOptions(
             JSRef<JSArray> getRange = paramObject->GetProperty("range");
             JSTextPickerParser::GenerateCascadeOptions(getRange, param.options);
             attr.isCascade = true;
+
+            JSTextPickerParser::ParseColumnWidths(paramObject, param);
         }
     }
     if (optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
@@ -2033,6 +2035,10 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
     }
     settingData.isEnableHapticFeedback = isEnableHapticFeedback;
+
+    for (auto& item : param.columnWidths) {
+        settingData.columnWidths.emplace_back(item);
+    }
     return true;
 }
 
