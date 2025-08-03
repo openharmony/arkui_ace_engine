@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
+
 namespace OHOS::Ace::NG {
 void ArkoalaLazyNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
@@ -62,6 +63,9 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!item && !needBuild) {
         return nullptr;
     }
+    if (createItem_) {
+        item = createItem_(indexCasted);
+    }
     CHECK_NULL_RETURN(item, nullptr);
     items_.Put(indexCasted, item);
     AddChild(item);
@@ -78,9 +82,6 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
 {
     auto item = items_.Get(index);
-    if (!item && createItem_) {
-        item = createItem_(index);
-    }
     return item ? item->Upgrade() : nullptr;
 }
 
