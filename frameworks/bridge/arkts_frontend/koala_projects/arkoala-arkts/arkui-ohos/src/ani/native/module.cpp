@@ -562,6 +562,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragPreviewAnimate)
         },
         ani_native_function {
+            "_DragController_cleanDragAction",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANICleanDragAction)
+        },
+        ani_native_function {
+            "_DragController_cleanDragPreview",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANICleanDragPreview)
+        },
+        ani_native_function {
             "_DragController_setDragEventStrictReportingEnabled",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionSetDragEventStrictReportingEnabled)

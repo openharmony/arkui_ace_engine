@@ -1035,4 +1035,21 @@ void ANIDragActionNotifyDragStartReques(
     }
     modifier->getDragControllerAniModifier()->aniDragActionNotifyDragStartReques(env, aniClass, requestStatus);
 }
+
+void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr)
+{
+    DragAction* ptr = reinterpret_cast<DragAction *>(dragActionPtr);
+    delete ptr;
+    ptr = nullptr;
+    dragActionPtr = 0;
+}
+
+void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return;
+    }
+    modifier->getDragControllerAniModifier()->aniCleanDragPreview(env, aniClass, dragPreviewPtr);
+}
 } // namespace OHOS::Ace::Ani
