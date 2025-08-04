@@ -57,10 +57,10 @@ namespace OHOS::Ace::NG::Converter {
 
     void AssignArkValue(Ark_Rectangle& dst, const Rect& src)
     {
-        dst.x = ArkValue<Opt_Length>(src.Left());
-        dst.y = ArkValue<Opt_Length>(src.Top());
-        dst.width = ArkValue<Opt_Length>(src.Width());
-        dst.height = ArkValue<Opt_Length>(src.Height());
+        dst.x = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Left()));
+        dst.y = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Top()));
+        dst.width = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Width()));
+        dst.height = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Height()));
     }
 } // namespace Converter
 
