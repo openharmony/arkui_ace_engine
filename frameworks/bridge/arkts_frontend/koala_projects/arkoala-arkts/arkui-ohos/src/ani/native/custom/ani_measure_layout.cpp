@@ -68,7 +68,7 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
-        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:",&ctor)) {
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:", &ctor)) {
         return nullptr;
     }
     ani_object minWidth_;
