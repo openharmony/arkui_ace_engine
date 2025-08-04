@@ -10454,7 +10454,7 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     event.hoverEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
     // tiltX tiltY
     event.hoverEvent.tiltX = info.GetTiltX().value_or(0.0f);
-    event.hoverEvent.tiltY = info.GetTiltX().value_or(0.0f);
+    event.hoverEvent.tiltY = info.GetTiltY().value_or(0.0f);
     // rollAngle
     event.hoverEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     // stoppropagation
