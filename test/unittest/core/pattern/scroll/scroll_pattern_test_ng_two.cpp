@@ -976,8 +976,9 @@ HWTEST_F(ScrollPatternTwoTestNg, FireTwoDimensionOnWillScroll003, TestSize.Level
     auto controller = AceType::MakeRefPtr<ScrollableController>();
     ScrollerObserver observer;
     bool isCallback = true;
-    observer.onWillScrollEventEx = [&isCallback](ScrollFrameResult& result, ScrollState state, ScrollSource source) {
-        result.offset = Dimension(2.0f, DimensionUnit::VP);
+    observer.twoDimensionOnWillScrollEvent = [&isCallback](ScrollFrameResult& xResult, ScrollFrameResult& yResult,
+        ScrollState state, ScrollSource source) {
+        yResult.offset = Dimension(2.0f, DimensionUnit::VP);
         isCallback = false;
     };
     auto observerMgr = AceType::MakeRefPtr<ScrollerObserverManager>();
