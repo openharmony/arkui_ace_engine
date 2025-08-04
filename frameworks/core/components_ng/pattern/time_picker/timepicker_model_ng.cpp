@@ -888,7 +888,7 @@ int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
     return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsUseMilitaryTimeValue(false);
 }
 
-int32_t TimePickerModelNG::getTimepickerEnableCascade(FrameNode* frameNode)
+int32_t TimePickerModelNG::GetTimepickerEnableCascade(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsEnableCascadeValue(false);

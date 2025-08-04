@@ -494,7 +494,7 @@ ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
+    return TimePickerModelNG::GetTimepickerEnableCascade(frameNode);
 }
 
 void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
