@@ -435,4 +435,59 @@ HWTEST_F(RecognizerTestNgIssue, ClickRecognizerIssue001, TestSize.Level1)
     EXPECT_EQ(eventInfo.GetSourceTool(), SourceTool::FINGER);
     EXPECT_EQ(eventInfo.GetInputEventType(), InputEventType::TOUCH_SCREEN);
 }
+
+/**
+ * @tc.name: PinchRecognizerIssue002
+ * @tc.desc: Test PinchRecognizer's pinchCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, PinchRecognizerIssue002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer and set onAction.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(COUNT, PAN_DISTANCE, false);
+
+    /**
+     * @tc.steps: step2. DispatchTouchEvent and compare pinchCenter.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent downEvent;
+    downEvent.SetId(0)
+        .SetType(TouchType::DOWN)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetSourceType(SourceType::TOUCH);
+    pinchRecognizer->HandleEvent(downEvent);
+    TouchEvent downFingerOneEvent;
+    downFingerOneEvent.SetId(1)
+        .SetType(TouchType::DOWN)
+        .SetX(300.0f)
+        .SetY(300.0f)
+        .SetSourceType(SourceType::TOUCH);
+    pinchRecognizer->HandleEvent(downFingerOneEvent);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_.GetX(), 200.0);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_.GetY(), 200.0);
+    pinchRecognizer->OnAccepted();
+    TouchEvent moveEvent;
+    moveEvent.SetId(0)
+        .SetType(TouchType::MOVE)
+        .SetX(200.0f)
+        .SetY(200.0f)
+        .SetSourceType(SourceType::TOUCH);
+    pinchRecognizer->HandleEvent(moveEvent);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_.GetX(), 250.0);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_.GetY(), 250.0);
+
+    TouchEvent upEvent;
+    upEvent.SetId(0)
+        .SetType(TouchType::UP)
+        .SetX(300.0f)
+        .SetY(300.0f)
+        .SetSourceType(SourceType::TOUCH);
+    pinchRecognizer->HandleEvent(upEvent);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_.GetX(), 300.0);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_.GetY(), 300.0);
+}
 } // namespace OHOS::Ace::NG
