@@ -59,7 +59,14 @@ void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& s
 {
     dst.itemsCount = Converter::ArkValue<Ark_Number>(src.itemsCount);
     dst.crossCount = Converter::ArkValue<Opt_Number>(src.crossCount);
-    LOGE("CallbackKeeper does not support callback with parameters, dst.onGetItemMainSizeByIndex isn't converted");
+    auto cb = [src](const Ark_Number index, const Callback_Number_Void continuation) {
+        auto result = src.onGetItemMainSizeByIndex(Converter::Convert<int32_t>(index));
+        auto helper = CallbackHelper(continuation);
+        helper.Invoke(Converter::ArkValue<Ark_Number>(result));
+    };
+    auto rc = CallbackKeeper::RegisterReverseCallback<::GetItemMainSizeByIndex,
+                                                   std::function<void(Ark_Number, Callback_Number_Void)>>(cb);
+    dst.onGetItemMainSizeByIndex = Converter::ArkValue<Opt_GetItemMainSizeByIndex>(rc);
     dst.columnsGap = Converter::ArkValue<Opt_Length>(src.columnsGap);
     dst.rowsGap = Converter::ArkValue<Opt_Length>(src.rowsGap);
     dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin);
@@ -128,7 +135,6 @@ Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->GetController(), {});
     auto info = peer->GetController()->GetSectionInfo();
-    LOGE("WaterFlowSectionAccessor.ValuesImpl -> converter is not fully implemented");
     auto options = Converter::ArkValue<Array_SectionOptions>(info, Converter::FC);
     return options;
 }
