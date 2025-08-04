@@ -109,26 +109,26 @@ void ScrollablePattern::SetFrictionMultiThread(double friction)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->PostAfterAttachMainTreeTask([&friction, weak = WeakClaim(this)]() {
+    host->PostAfterAttachMainTreeTask([friction, weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-
         CHECK_NULL_VOID(pattern);
-        if (LessOrEqual(friction, 0.0)) {
-            friction =
+        auto innerFriction = friction;
+        if (LessOrEqual(innerFriction, 0.0)) {
+            innerFriction =
                 Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-            friction =
-                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction;
+            innerFriction = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION
+                                                                                                     : innerFriction;
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
                 auto context = pattern->GetContext();
                 CHECK_NULL_VOID(context);
                 auto scrollableTheme = context->GetTheme<ScrollableTheme>();
-                friction = scrollableTheme->GetFriction();
+                innerFriction = scrollableTheme->GetFriction();
             }
         }
-        pattern->friction_ = friction;
+        pattern->friction_ = innerFriction;
         CHECK_NULL_VOID(pattern->scrollableEvent_);
         auto scrollable = pattern->scrollableEvent_->GetScrollable();
-        scrollable->SetUnstaticFriction(friction);
+        scrollable->SetUnstaticFriction(innerFriction);
     });
 }
 } // namespace OHOS::Ace::NG
