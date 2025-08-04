@@ -1127,6 +1127,10 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
         textPattern->SetExternalParagraph(nullptr);
         textPattern->SetExternalSpanItem(spanItems);
         textPattern->SetExternalParagraphStyle(std::nullopt);
+        auto pManager = textPattern->GetParagraphManager();
+        if (pManager) {
+            pManager->Reset();
+        }
     } else {
         textPattern->SetExternalParagraph(value->paragraph);
     }
