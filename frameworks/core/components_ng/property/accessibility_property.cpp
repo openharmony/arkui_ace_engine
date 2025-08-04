@@ -310,6 +310,9 @@ bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibil
     }
     auto& rect = responseRegionList.back();
     if (rect == origRect) {
+        if (focusDrawLevel_ == FocusDrawLevel::TOP) {
+            return false;
+        }
         return true;
     }
     if (!IsAccessibilityCompInResponseRegion(rect, origRect)) {
