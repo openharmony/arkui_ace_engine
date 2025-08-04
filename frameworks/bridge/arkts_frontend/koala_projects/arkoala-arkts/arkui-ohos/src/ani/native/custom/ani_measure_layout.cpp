@@ -61,13 +61,14 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
 {
     ani_object constraint_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ConstraintSizeOptionsInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.ConstraintSizeOptionsInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.Double}C{std.core.Double}C{std.core.Double}C{std.core.Double}:C{arkui.ani.arkts.ArkUIAniCustomNodeModule.ConstraintSizeOptionsInner}", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:",&ctor)) {
         return nullptr;
     }
     ani_object minWidth_;
