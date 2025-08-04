@@ -277,9 +277,11 @@ std::function<void()> GetTextAnimationFinishCallback(
         pattern->ShowAIEntityMenuForCancel();
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->RemovePixelMap();
+        if (!pattern->IsPreviewMenuShow()) {
+            auto manager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(manager);
+            manager->RemovePixelMap();
+        }
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);

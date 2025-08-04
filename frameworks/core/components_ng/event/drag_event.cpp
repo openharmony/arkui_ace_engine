@@ -1584,9 +1584,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         pattern->ShowAIEntityMenuForCancel();
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->RemovePixelMap();
+        if (!pattern->IsPreviewMenuShow()) {
+            auto manager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(manager);
+            manager->RemovePixelMap();
+        }
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -1633,6 +1635,15 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         },
         option.GetOnFinishEvent());
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set hide text animation success.");
+}
+
+void DragEventActuator::RemovePixelMap()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePixelMap();
 }
 
 bool DragEventActuator::GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator)

@@ -69,6 +69,7 @@ constexpr Dimension CLICK_THRESHOLD = 5.0_vp;
 const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr int MAX_SELECTED_AI_ENTITY = 1;
 constexpr int32_t PREVIEW_MENU_DELAY = 600;
+constexpr int32_t DRAG_NODE_HIDE = 300;
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -353,6 +354,21 @@ bool TextPattern::IsAiSelected()
     return textSelector_.aiStart && textSelector_.aiEnd;
 }
 
+bool TextPattern::IsPreviewMenuShow()
+{
+    CHECK_NULL_RETURN(previewController_, false);
+    return previewController_->IsPreviewMenuShow();
+}
+
+void TextPattern::DragNodeDetachFromParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->DragNodeDetachFromParent();
+}
+
 void TextPattern::ShowAIEntityMenuForCancel()
 {
     auto host = GetHost();
@@ -606,6 +622,7 @@ void TextPattern::ShowAIEntityPreviewMenuTimer()
         CHECK_NULL_VOID(dragNode);
         auto parent = dragNode->GetParent();
         CHECK_NULL_VOID(parent);
+        pattern->PreviewDragNodeHideAnimation();
         previewController->BindContextMenu(dragNode);
     };
     auto context = host->GetContext();
@@ -614,6 +631,22 @@ void TextPattern::ShowAIEntityPreviewMenuTimer()
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
         task, TaskExecutor::TaskType::UI, PREVIEW_MENU_DELAY, "ArkShowAIEntityPreviewMenuTimer");
+}
+
+void TextPattern::PreviewDragNodeHideAnimation()
+{
+    CHECK_NULL_VOID(dragNode_);
+    auto renderContext = dragNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(1.0f);
+    AnimationOption option;
+    option.SetDuration(DRAG_NODE_HIDE);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(
+        option, [renderContext, mainId = Container::CurrentIdSafelyWithCheck()]() {
+            ContainerScope scope(mainId);
+            renderContext->UpdateOpacity(0.0);
+        });
 }
 
 RefPtr<FrameNode> TextPattern::CreateAIEntityMenu()
@@ -6719,5 +6752,4 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
-
 } // namespace OHOS::Ace::NG

@@ -1938,6 +1938,13 @@ void GestureEventHub::SetThumbnailCallback(std::function<void(Offset)>&& callbac
     }
 }
 
+void GestureEventHub::DragNodeDetachFromParent()
+{
+    if (dragEventActuator_) {
+        dragEventActuator_->RemovePixelMap();
+    }
+}
+
 bool GestureEventHub::GetTextDraggable() const
 {
     return textDraggable_;

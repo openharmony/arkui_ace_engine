@@ -205,6 +205,7 @@ void TextModelNG::ResetTextColor(FrameNode* frameNode)
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
@@ -460,6 +461,7 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [textDetectConfig, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
@@ -611,6 +613,7 @@ void TextModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
 void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto index = 0;
@@ -1243,7 +1246,7 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
-
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto key = "textDetectorConfig";
     auto&& updateFunc = [textDetectConfig, weak = AceType::WeakClaim(frameNode)]
