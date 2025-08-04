@@ -1181,7 +1181,11 @@ export class DetachedRootEntryManager {
 
     public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
          return this.detachedRoots_;
-     }
+    }
+
+    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>) {
+        this.detachedRoots_.set(nativeNode, new DetachedRootEntryImpl<IncrementalNode>(rootNode));
+    }
 
     public createUiDetachedRoot(
         peerFactory: () => PeerNode,

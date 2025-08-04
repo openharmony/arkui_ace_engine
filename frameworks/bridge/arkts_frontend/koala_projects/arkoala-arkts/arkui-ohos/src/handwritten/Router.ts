@@ -235,6 +235,8 @@ class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
                 if (index !== -1) {
@@ -282,6 +284,8 @@ class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
                 if (index !== -1) {
@@ -426,6 +430,8 @@ class RouterImpl implements Router {
         const jsViewNodePtr = peerNode!.peer.ptr
         this.rootState.push(stateNode);
         this.peerNodeList.push(jsViewNodePtr);
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
         let pagePushTransitionCallback = (jsNode: KPointer) => {
             let index = this.peerNodeList.indexOf(jsNode);
             if (index !== -1) {
