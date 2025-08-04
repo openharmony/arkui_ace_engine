@@ -58,6 +58,7 @@ template("ace_capability_ohos_source_set") {
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {
       external_deps += [ "pasteboard:pasteboard_client" ]
+      external_deps += [ "pasteboard:pasteboard_data" ]
       defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
     }
 
