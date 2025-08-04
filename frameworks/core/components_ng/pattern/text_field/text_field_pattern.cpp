@@ -773,6 +773,7 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
         CHECK_NULL_VOID(pattern);
         pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
         if (pattern->SelectOverlayIsOn()) {
+            pattern->selectOverlay_->UpdateIsSingleHandle(!pattern->IsSelected());
             if (pattern->IsSelected()) {
                 pattern->selectOverlay_->UpdateAllHandlesOffset();
             } else {
