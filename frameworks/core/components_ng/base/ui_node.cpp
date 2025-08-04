@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-thread_local int64_t currentAccessibilityId_ = 0;
+std::atomic<int64_t> currentAccessibilityId_ = 0;
 const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
