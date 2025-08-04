@@ -91,6 +91,30 @@ DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options
 PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions options)
 {
     PickerDialogInfo dialogInfo;
+
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, dialogInfo);
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto parseStartTime = pickerTheme->GetDefaultStartTime();
+    auto parseEndTime = pickerTheme->GetDefaultEndTime();
+    // start & end time
+    auto start =  Converter::OptConvert<PickerTime>(options.start);
+    if (start) {
+        parseStartTime = start.value();
+    }
+    auto end =  Converter::OptConvert<PickerTime>(options.end);
+    if (end) {
+        parseEndTime = end.value();
+    }
+    dialogInfo.parseStartTime = parseStartTime;
+    dialogInfo.parseEndTime = parseEndTime;
+    // select time
+    auto selectedTime = Converter::OptConvert<PickerTime>(options.selected);
+    if (selectedTime) {
+        dialogInfo.isSelectedTime = true;
+        dialogInfo.pickerTime = selectedTime.value();
+    }
     auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
     if (alignment) {
         dialogInfo.alignment = alignment.value();
@@ -145,6 +169,12 @@ TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions o
     auto selectedTextStyle = Converter::OptConvert<PickerTextStyle>(options.selectedTextStyle);
     if (selectedTextStyle) {
         settingData.properties.selectedTextStyle_ = selectedTextStyle.value();
+    }
+    auto dateTimeOptions = Converter::OptConvert<DateTimeType>(options.dateTimeOptions);
+    if (dateTimeOptions) {
+        settingData.dateTimeOptions.hourType = dateTimeOptions->hourType;
+        settingData.dateTimeOptions.minuteType = dateTimeOptions->minuteType;
+        settingData.dateTimeOptions.secondType = dateTimeOptions->secondType;
     }
     return settingData;
 }
@@ -204,7 +234,6 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TimePickerDialogOptions arkOptions = arkOptionsOpt.value();
-    // PickerDialogInfo & TimePickerSettingData
     PickerDialogInfo dialogInfo = BuildTimePickerDialogInfo(arkOptions);
     TimePickerSettingData settingData = BuildPickerSettingData(arkOptions);
     dialogInfo.isUseMilitaryTime = settingData.isUseMilitaryTime;
