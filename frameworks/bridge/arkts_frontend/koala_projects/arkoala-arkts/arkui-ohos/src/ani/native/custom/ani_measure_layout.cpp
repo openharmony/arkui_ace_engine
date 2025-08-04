@@ -61,13 +61,17 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
 {
     ani_object constraint_obj;
     ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ConstraintSizeOptionsInner;";
+    static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.ConstraintSizeOptionsInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:", &ctor)) {
         return nullptr;
     }
     ani_object minWidth_;
@@ -79,18 +83,6 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
     maxWidth_ = AniUtils::CreateDouble(env, maxWidth);
     maxHeight_ =AniUtils::CreateDouble(env, maxHeight);
     if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth_, minHeight_, maxWidth_, maxHeight_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight_)) {
         return nullptr;
     }
     return constraint_obj;
