@@ -15,6 +15,8 @@
 
 #include "scroll_test_ng.h"
 
+#include "core/common/multi_thread_build_manager.h"
+
 namespace OHOS::Ace::NG {
 class ScrollLayoutTestNg : public ScrollTestNg {
 public:
@@ -48,6 +50,36 @@ HWTEST_F(ScrollLayoutTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     model.SetFriction(friction);
     CreateScrollDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), friction);
+}
+
+/**
+ * @tc.name: ScrollSetFrictionTest002
+ * @tc.desc: Test thread safe node SetFriction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollSetFrictionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create thread safe frameNode
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    auto frameNode =
+        ScrollModelNG::CreateFrameNode(1);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    /**
+     * @tc.steps: step2. thread safe SetFriction
+     * @tc.expected: SetFriction success
+     */
+    int32_t taskSize = frameNode->afterAttachMainTreeTasks_.size();
+    pattern->SetFriction(10);
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), taskSize + 1);
+
+    auto& lastTask = frameNode->afterAttachMainTreeTasks_.back();
+    lastTask();
+
+    EXPECT_DOUBLE_EQ(pattern->GetFriction(), 10);
 }
 
 /**
