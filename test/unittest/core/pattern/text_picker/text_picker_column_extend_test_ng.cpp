@@ -1340,6 +1340,9 @@ HWTEST_F(TextPickerColumnExtendTestNg, OnDetachFromMainTreeMultiThread001, TestS
     auto pipeline = columnNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
 
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+
     auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
     columnPattern->OnDetachFromMainTreeMultiThread();
     EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);

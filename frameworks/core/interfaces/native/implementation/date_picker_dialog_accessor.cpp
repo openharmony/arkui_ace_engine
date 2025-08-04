@@ -72,8 +72,8 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    // dialogProps.enableHoverMode =
-    //     Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode);
+    dialogProps.enableHoverMode =
+        Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode.value_or(false));
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
@@ -177,6 +177,7 @@ std::map<std::string, DialogEvent> CreateDialogEvent(const Ark_DatePickerDialogO
 }
 void ShowImpl(const Opt_DatePickerDialogOptions* options)
 {
+#ifndef ARKUI_WEARABLE
     CHECK_NULL_VOID(options);
     auto arkOptionsOpt = Converter::OptConvert<Ark_DatePickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
@@ -195,6 +196,7 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
         dialogCancelEvent["cancelId"] = onCancelFunc;
     }
     DatePickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+#endif
 }
 } // DatePickerDialogAccessor
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
