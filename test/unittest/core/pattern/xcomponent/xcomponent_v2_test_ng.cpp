@@ -862,4 +862,37 @@ HWTEST_F(XComponentV2TestNg, FlushImplicitTransaction002, TestSize.Level1)
     xcomponentPattern->FlushImplicitTransaction(hostNode);
     EXPECT_EQ(frameNode->GetId(), nodeId);
 }
+
+/**
+ * @tc.name: GetSurfaceHolderTest
+ * @tc.desc: Test GetSurfaceHolder Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetSurfaceHolderTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call GetSurfaceHolder when surfaceHolder_ is nullptr
+     * @tc.expected: GetSurfaceHolder return nullptr
+     */
+    pattern->SetSurfaceHolder(nullptr);
+    ASSERT_FALSE(pattern->GetSurfaceHolder());
+
+    /**
+     * @tc.steps: step3. call GetSurfaceHolder when surfaceHolder_ is not null
+     * @tc.expected: GetSurfaceHolder return not null
+     */
+    OH_ArkUI_SurfaceHolder* surfaceHolder = new OH_ArkUI_SurfaceHolder();
+    pattern->SetSurfaceHolder(surfaceHolder);
+    ASSERT_TRUE(pattern->GetSurfaceHolder());
+}
 } // namespace OHOS::Ace::NG

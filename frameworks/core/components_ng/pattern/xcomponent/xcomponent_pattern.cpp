@@ -639,9 +639,13 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     globalPosition_ = geometryNode->GetFrameOffset();
     localPosition_ = geometryNode->GetContentOffset();
 
-    if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(geometryNode);
-    }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this), geometryNode]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateAnalyzerUIConfig(geometryNode);
+    });
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = paintRect_.GetSize();
