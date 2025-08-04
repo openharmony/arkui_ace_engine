@@ -33,16 +33,15 @@ void DestroyPeerImpl(Ark_LongPressGestureInterface peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LongPressGestureInterface CtorImpl(const Opt_Literal_Number_duration_fingers_Boolean_repeat* value)
+Ark_LongPressGestureInterface ConstructImpl(const Ark_LongPressGestureInterface_Invoke_Literal* value)
 {
     auto peer = PeerUtils::CreatePeer<LongPressGestureInterfacePeer>();
     int32_t fingers = DEFAULT_FINGERS;
     int32_t duration = DEFAULT_DURATION;
     bool repeat = DEFAULT_REPEAT;
     bool isLimitFingerCount = DEFAULT_IS_LIMIT_FINGER_COUNT;
-    std::optional<Ark_Literal_Number_duration_fingers_Boolean_repeat> params =
-        value ? Converter::GetOpt(*value) : std::nullopt;
-    if (params.has_value()) {
+    auto params = value;
+    if (params) {
         fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_FINGERS);
         duration = Converter::OptConvert<int32_t>(params->duration).value_or(DEFAULT_DURATION);
         repeat = Converter::OptConvert<bool>(params->repeat).value_or(DEFAULT_REPEAT);
@@ -105,7 +104,7 @@ const GENERATED_ArkUILongPressGestureInterfaceAccessor* GetLongPressGestureInter
 {
     static const GENERATED_ArkUILongPressGestureInterfaceAccessor LongPressGestureInterfaceAccessorImpl {
         LongPressGestureInterfaceAccessor::DestroyPeerImpl,
-        LongPressGestureInterfaceAccessor::CtorImpl,
+        LongPressGestureInterfaceAccessor::ConstructImpl,
         LongPressGestureInterfaceAccessor::GetFinalizerImpl,
         LongPressGestureInterfaceAccessor::OnActionImpl,
         LongPressGestureInterfaceAccessor::OnActionEndImpl,

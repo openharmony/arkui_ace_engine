@@ -18,6 +18,407 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
+ * @tc.name: setLineHeightTestLineHeightInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues, TestSize.Level1)
+{
+    Opt_Union_Number_String_Resource initValueLineHeight;
+
+    // Initial setup
+    initValueLineHeight = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueLineHeight](
+                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueLineHeight = initValueLineHeight;
+
+        modifier_->setLineHeight(node_, &inputValueLineHeight);
+        inputValueLineHeight = value;
+        modifier_->setLineHeight(node_, &inputValueLineHeight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_HEIGHT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
+}
+
+/*
+ * @tc.name: setPasswordRulesTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PASSWORD_RULES_DEFAULT_VALUE) << "Default value for attribute 'passwordRules'";
+}
+
+/*
+ * @tc.name: setPasswordRulesTestPasswordRulesValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesValidValues, TestSize.Level1)
+{
+    Opt_String initValuePasswordRules;
+
+    // Initial setup
+    initValuePasswordRules = ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+
+    auto checkValue = [this, &initValuePasswordRules](
+                          const std::string& input, const std::string& expectedStr, const Opt_String& value) {
+        Opt_String inputValuePasswordRules = initValuePasswordRules;
+
+        inputValuePasswordRules = value;
+        modifier_->setPasswordRules(node_, &inputValuePasswordRules);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPasswordRules, attribute: passwordRules";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, ArkValue<Opt_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setPasswordRulesTestPasswordRulesInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesInvalidValues, TestSize.Level1)
+{
+    Opt_String initValuePasswordRules;
+
+    // Initial setup
+    initValuePasswordRules = ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+
+    auto checkValue = [this, &initValuePasswordRules](const std::string& input, const Opt_String& value) {
+        Opt_String inputValuePasswordRules = initValuePasswordRules;
+
+        modifier_->setPasswordRules(node_, &inputValuePasswordRules);
+        inputValuePasswordRules = value;
+        modifier_->setPasswordRules(node_, &inputValuePasswordRules);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_PASSWORD_RULES_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setPasswordRules, attribute: passwordRules";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_String>());
+}
+
+/*
+ * @tc.name: setFontFeatureTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setFontFeatureTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) << "Default value for attribute 'fontFeature'";
+}
+
+/*
+ * @tc.name: setFontFeatureTestFontFeatureValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
+{
+    Opt_String initValueFontFeature;
+
+    // Initial setup
+    initValueFontFeature = ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureFontFeatureStrValidValues[0]));
+
+    auto checkValue = [this, &initValueFontFeature](
+                          const std::string& input, const std::string& expectedStr, const Opt_String& value) {
+        Opt_String inputValueFontFeature = initValueFontFeature;
+
+        inputValueFontFeature = value;
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontFeatureStrValidValues) {
+        checkValue(input, expected, ArkValue<Opt_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setFontFeatureTestFontFeatureInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestFontFeatureInvalidValues, TestSize.Level1)
+{
+    Opt_String initValueFontFeature;
+
+    // Initial setup
+    initValueFontFeature = ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureFontFeatureStrValidValues[0]));
+
+    auto checkValue = [this, &initValueFontFeature](const std::string& input, const Opt_String& value) {
+        Opt_String inputValueFontFeature = initValueFontFeature;
+
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        inputValueFontFeature = value;
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureFontFeatureStrInvalidValues) {
+        checkValue(input, ArkValue<Opt_String>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_String>());
+}
+
+/*
+ * @tc.name: setShowPasswordTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowPasswordTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_PASSWORD_DEFAULT_VALUE) << "Default value for attribute 'showPassword'";
+}
+
+/*
+ * @tc.name: setShowPasswordTestShowPasswordValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowPasswordTestShowPasswordValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueShowPassword;
+
+    // Initial setup
+    initValueShowPassword = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueShowPassword](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueShowPassword = initValueShowPassword;
+
+        inputValueShowPassword = value;
+        modifier_->setShowPassword(node_, &inputValueShowPassword);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowPassword, attribute: showPassword";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setShowPasswordTestShowPasswordInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowPasswordTestShowPasswordInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueShowPassword;
+
+    // Initial setup
+    initValueShowPassword = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueShowPassword](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueShowPassword = initValueShowPassword;
+
+        modifier_->setShowPassword(node_, &inputValueShowPassword);
+        inputValueShowPassword = value;
+        modifier_->setShowPassword(node_, &inputValueShowPassword);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_PASSWORD_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setShowPassword, attribute: showPassword";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setEnablePreviewTextTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE) <<
+        "Default value for attribute 'enablePreviewText'";
+}
+
+/*
+ * @tc.name: setEnablePreviewTextTestEnablePreviewTextValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestEnablePreviewTextValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnablePreviewText;
+
+    // Initial setup
+    initValueEnablePreviewText = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnablePreviewText](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnablePreviewText = initValueEnablePreviewText;
+
+        inputValueEnablePreviewText = value;
+        modifier_->setEnablePreviewText(node_, &inputValueEnablePreviewText);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnablePreviewText, attribute: enablePreviewText";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setEnablePreviewTextTestEnablePreviewTextInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestEnablePreviewTextInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnablePreviewText;
+
+    // Initial setup
+    initValueEnablePreviewText = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnablePreviewText](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnablePreviewText = initValueEnablePreviewText;
+
+        modifier_->setEnablePreviewText(node_, &inputValueEnablePreviewText);
+        inputValueEnablePreviewText = value;
+        modifier_->setEnablePreviewText(node_, &inputValueEnablePreviewText);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEnablePreviewText, attribute: enablePreviewText";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableHapticFeedback'";
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnableHapticFeedback;
+
+    // Initial setup
+    initValueEnableHapticFeedback = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableHapticFeedback](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
+
+        inputValueEnableHapticFeedback = value;
+        modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnableHapticFeedback;
+
+    // Initial setup
+    initValueEnableHapticFeedback = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableHapticFeedback](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
+
+        modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
+        inputValueEnableHapticFeedback = value;
+        modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
  * @tc.name: setAutoCapitalizationModeTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -40,17 +441,18 @@ HWTEST_F(TextInputModifierTest, DISABLED_setAutoCapitalizationModeTestDefaultVal
 HWTEST_F(
     TextInputModifierTest, DISABLED_setAutoCapitalizationModeTestAutoCapitalizationModeValidValues, TestSize.Level1)
 {
-    Ark_AutoCapitalizationMode initValueAutoCapitalizationMode;
+    Opt_AutoCapitalizationMode initValueAutoCapitalizationMode;
 
     // Initial setup
-    initValueAutoCapitalizationMode = std::get<1>(Fixtures::testFixtureEnumAutoCapitalizationModeValidValues[0]);
+    initValueAutoCapitalizationMode = ArkValue<Opt_AutoCapitalizationMode>(
+        std::get<1>(Fixtures::testFixtureEnumAutoCapitalizationModeValidValues[0]));
 
     auto checkValue = [this, &initValueAutoCapitalizationMode](const std::string& input, const std::string& expectedStr,
-                          const Ark_AutoCapitalizationMode& value) {
-        Ark_AutoCapitalizationMode inputValueAutoCapitalizationMode = initValueAutoCapitalizationMode;
+                          const Opt_AutoCapitalizationMode& value) {
+        Opt_AutoCapitalizationMode inputValueAutoCapitalizationMode = initValueAutoCapitalizationMode;
 
         inputValueAutoCapitalizationMode = value;
-        modifier_->setAutoCapitalizationMode(node_, inputValueAutoCapitalizationMode);
+        modifier_->setAutoCapitalizationMode(node_, &inputValueAutoCapitalizationMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -58,7 +460,7 @@ HWTEST_F(
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumAutoCapitalizationModeValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_AutoCapitalizationMode>(value));
     }
 }
 
@@ -70,18 +472,19 @@ HWTEST_F(
 HWTEST_F(
     TextInputModifierTest, DISABLED_setAutoCapitalizationModeTestAutoCapitalizationModeInvalidValues, TestSize.Level1)
 {
-    Ark_AutoCapitalizationMode initValueAutoCapitalizationMode;
+    Opt_AutoCapitalizationMode initValueAutoCapitalizationMode;
 
     // Initial setup
-    initValueAutoCapitalizationMode = std::get<1>(Fixtures::testFixtureEnumAutoCapitalizationModeValidValues[0]);
+    initValueAutoCapitalizationMode = ArkValue<Opt_AutoCapitalizationMode>(
+        std::get<1>(Fixtures::testFixtureEnumAutoCapitalizationModeValidValues[0]));
 
     auto checkValue = [this, &initValueAutoCapitalizationMode](
-                          const std::string& input, const Ark_AutoCapitalizationMode& value) {
-        Ark_AutoCapitalizationMode inputValueAutoCapitalizationMode = initValueAutoCapitalizationMode;
+                          const std::string& input, const Opt_AutoCapitalizationMode& value) {
+        Opt_AutoCapitalizationMode inputValueAutoCapitalizationMode = initValueAutoCapitalizationMode;
 
-        modifier_->setAutoCapitalizationMode(node_, inputValueAutoCapitalizationMode);
+        modifier_->setAutoCapitalizationMode(node_, &inputValueAutoCapitalizationMode);
         inputValueAutoCapitalizationMode = value;
-        modifier_->setAutoCapitalizationMode(node_, inputValueAutoCapitalizationMode);
+        modifier_->setAutoCapitalizationMode(node_, &inputValueAutoCapitalizationMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_DEFAULT_VALUE) <<
@@ -89,7 +492,7 @@ HWTEST_F(
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumAutoCapitalizationModeInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_AutoCapitalizationMode>(value));
     }
 }
 
@@ -419,23 +822,23 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterValueValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueValue;
+    Opt_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
 
     // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueValue = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueOptions).thresholdPercentage =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueOptions](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueValue = initValueValue;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueValue = initValueValue;
         Opt_InputCounterOptions inputValueOptions = initValueOptions;
 
         inputValueValue = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_VALUE_NAME);
@@ -444,8 +847,43 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterValueValidValues, T
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setShowCounterTestShowCounterValueInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, DISABLED_setShowCounterTestShowCounterValueInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueValue;
+    Opt_InputCounterOptions initValueOptions;
+
+    // Initial setup
+    initValueValue = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueOptions).thresholdPercentage =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
+    WriteTo(initValueOptions).highlightBorder =
+        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueValue, &initValueOptions](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueValue = initValueValue;
+        Opt_InputCounterOptions inputValueOptions = initValueOptions;
+
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
+        inputValueValue = value;
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_VALUE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_VALUE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setShowCounter, attribute: showCounter.value";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -455,11 +893,11 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterValueValidValues, T
  */
 HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPercentageValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueValue;
+    Opt_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
 
     // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueValue = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueOptions).thresholdPercentage =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
@@ -467,11 +905,11 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPer
 
     auto checkValue = [this, &initValueValue, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
-        Ark_Boolean inputValueValue = initValueValue;
+        Opt_Boolean inputValueValue = initValueValue;
         Opt_InputCounterOptions inputValueOptions = initValueOptions;
 
         WriteTo(inputValueOptions).thresholdPercentage = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultOptions =
@@ -495,23 +933,23 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPer
  */
 HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueValue;
+    Opt_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
 
     // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueValue = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueOptions).thresholdPercentage =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueOptions](const std::string& input, const Opt_Number& value) {
-        Ark_Boolean inputValueValue = initValueValue;
+        Opt_Boolean inputValueValue = initValueValue;
         Opt_InputCounterOptions inputValueOptions = initValueOptions;
 
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         WriteTo(inputValueOptions).thresholdPercentage = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultOptions =
@@ -537,11 +975,11 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPer
  */
 HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsHighlightBorderValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueValue;
+    Opt_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
 
     // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueValue = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueOptions).thresholdPercentage =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
@@ -549,11 +987,11 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsHighlightBor
 
     auto checkValue = [this, &initValueValue, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
-        Ark_Boolean inputValueValue = initValueValue;
+        Opt_Boolean inputValueValue = initValueValue;
         Opt_InputCounterOptions inputValueOptions = initValueOptions;
 
         WriteTo(inputValueOptions).highlightBorder = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultOptions =
@@ -576,23 +1014,23 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsHighlightBor
  */
 HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueValue;
+    Opt_Boolean initValueValue;
     Opt_InputCounterOptions initValueOptions;
 
     // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueValue = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteTo(initValueOptions).thresholdPercentage =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
     WriteTo(initValueOptions).highlightBorder =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueOptions](const std::string& input, const Opt_Boolean& value) {
-        Ark_Boolean inputValueValue = initValueValue;
+        Opt_Boolean inputValueValue = initValueValue;
         Opt_InputCounterOptions inputValueOptions = initValueOptions;
 
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         WriteTo(inputValueOptions).highlightBorder = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
+        modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultOptions =

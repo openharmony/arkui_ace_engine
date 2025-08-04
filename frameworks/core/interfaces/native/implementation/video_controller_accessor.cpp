@@ -47,7 +47,7 @@ void DestroyPeerImpl(Ark_VideoController peer)
         }
     }
 }
-Ark_VideoController CtorImpl()
+Ark_VideoController ConstructImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<VideoControllerPeerImpl>();
     peerImpl->IncRefCount();
@@ -85,16 +85,6 @@ void SetCurrentTime0Impl(Ark_VideoController peer,
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value));
 }
-void SetCurrentTime1Impl(Ark_VideoController peer,
-                         const Ark_Number* value,
-                         Ark_SeekMode seekMode)
-{
-    CHECK_NULL_VOID(value);
-    auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto seekModeValue = Converter::OptConvert<SeekMode>(seekMode).value_or(SeekMode::SEEK_PREVIOUS_SYNC);
-    peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value), seekModeValue);
-}
 void RequestFullscreenImpl(Ark_VideoController peer,
                            Ark_Boolean value)
 {
@@ -108,6 +98,11 @@ void ExitFullscreenImpl(Ark_VideoController peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerExitFullscreen();
 }
+void SetCurrentTime1Impl(Ark_VideoController peer,
+                         const Ark_Number* value,
+                         Ark_SeekMode seekMode)
+{
+}
 void ResetImpl(Ark_VideoController peer)
 {
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
@@ -119,15 +114,15 @@ const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
 {
     static const GENERATED_ArkUIVideoControllerAccessor VideoControllerAccessorImpl {
         VideoControllerAccessor::DestroyPeerImpl,
-        VideoControllerAccessor::CtorImpl,
+        VideoControllerAccessor::ConstructImpl,
         VideoControllerAccessor::GetFinalizerImpl,
         VideoControllerAccessor::StartImpl,
         VideoControllerAccessor::PauseImpl,
         VideoControllerAccessor::StopImpl,
         VideoControllerAccessor::SetCurrentTime0Impl,
-        VideoControllerAccessor::SetCurrentTime1Impl,
         VideoControllerAccessor::RequestFullscreenImpl,
         VideoControllerAccessor::ExitFullscreenImpl,
+        VideoControllerAccessor::SetCurrentTime1Impl,
         VideoControllerAccessor::ResetImpl,
     };
     return &VideoControllerAccessorImpl;

@@ -66,7 +66,7 @@ namespace Converter {
         return "";
     }
     template<>
-    void AssignArkValue(Ark_Literal_Alignment_align& dst, const Ark_Alignment& src, ConvContext *ctx)
+    void AssignArkValue(Ark_BackgroundOptions& dst, const Ark_Alignment& src, ConvContext *ctx)
     {
         dst.align = Converter::ArkValue<Opt_Alignment>(src);
     }
@@ -148,17 +148,17 @@ HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundTestValidValues, Test
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper(this, frameNode);
     const auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
 
-    using OneTestStep = std::tuple<Opt_Literal_Alignment_align, std::string>;
+    using OneTestStep = std::tuple<Opt_BackgroundOptions, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_TOP_START), "TOP_LEFT"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_TOP), "TOP_CENTER"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_TOP_END), "TOP_RIGHT"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_START), "CENTER_LEFT"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_CENTER), "CENTER"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_END), "CENTER_RIGHT"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_BOTTOM_START), "BOTTOM_LEFT"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_BOTTOM), "BOTTOM_CENTER"},
-        {Converter::ArkValue<Opt_Literal_Alignment_align>(ARK_ALIGNMENT_BOTTOM_END), "BOTTOM_RIGHT"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_TOP_START), "TOP_LEFT"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_TOP), "TOP_CENTER"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_TOP_END), "TOP_RIGHT"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_START), "CENTER_LEFT"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_CENTER), "CENTER"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_END), "CENTER_RIGHT"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_BOTTOM_START), "BOTTOM_LEFT"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_BOTTOM), "BOTTOM_CENTER"},
+        {Converter::ArkValue<Opt_BackgroundOptions>(ARK_ALIGNMENT_BOTTOM_END), "BOTTOM_RIGHT"},
     };
     std::string resultValue = "";
     const auto& renderContext = frameNode->GetRenderContext();

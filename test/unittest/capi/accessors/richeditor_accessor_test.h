@@ -31,7 +31,9 @@ void AssignArkValue(Ark_RichEditorBuilderSpanOptions& dst, const OHOS::Ace::Span
 void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpanOptionsForUpdate& src,
     ConvContext *ctx);
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style, ConvContext *ctx);
-void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst, const TextSpanOptionsForUpdate& src,
+void AssignArkValue(
+    Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions& dst,
+    const TextSpanOptionsForUpdate& src,
     ConvContext *ctx);
 void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src);
 void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);

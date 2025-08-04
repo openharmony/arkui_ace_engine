@@ -98,7 +98,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(want);
     bool isTransferringCaller = false;
     bool densityDpi = false;
-    auto extensionOptionOpt = Converter::OptConvert<Ark_UIExtensionOptions>(*options);
+    auto extensionOptionOpt = Converter::OptConvertPtr<Ark_UIExtensionOptions>(options);
     if (extensionOptionOpt) {
         auto extensionOption = extensionOptionOpt.value();
         LOGE("UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl - "
@@ -122,22 +122,22 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 }
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
-void OnRemoteReadyImpl(Ark_NativePointer node,
-                       const Opt_Callback_UIExtensionProxy_Void* value)
+void SetOnRemoteReadyImpl(Ark_NativePointer node,
+                          const Opt_Callback_UIExtensionProxy_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onRemoteReady =
         [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
             auto accessor = GetUIExtensionProxyAccessor();
             CHECK_NULL_VOID(accessor);
-            auto peer = accessor->ctor();
+            auto peer = accessor->construct();
             CHECK_NULL_VOID(peer);
             auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
             uiExtensionProxyPeerPtr->SetProxy(proxy);
@@ -146,88 +146,22 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnReceiveImpl(Ark_NativePointer node,
-                   const Opt_Callback_Map_String_Object_Void* value)
+void SetOnReceiveImpl(Ark_NativePointer node,
+                      const Opt_Callback_Map_String_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
-void OnResultImpl(Ark_NativePointer node,
-                  const Opt_Callback_Literal_Number_code__want_Void* value)
+void SetOnErrorImpl(Ark_NativePointer node,
+                    const Opt_ErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onResult =
-        [arkCallback = CallbackHelper(*optValue)](int32_t code, const AAFwk::Want& want) {
-#ifdef WRONG_GEN
-            Ark_Want arkWant;
-            auto bundleName = want.GetBundle();
-            arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
-            auto abilityName = want.GetElement().GetAbilityName();
-            arkWant.abilityName = Converter::ArkValue<Opt_String>(abilityName);
-            auto deviceId = want.GetDeviceId();
-            arkWant.deviceId = Converter::ArkValue<Opt_String>(deviceId);
-            auto uri = want.GetUriString();
-            arkWant.uri = Converter::ArkValue<Opt_String>(uri);
-            auto type = want.GetType();
-            arkWant.type = Converter::ArkValue<Opt_String>(type);
-            auto flags = static_cast<int32_t>(want.GetFlags());
-            arkWant.flags = Converter::ArkValue<Opt_Number>(flags);
-            auto action = want.GetAction();
-            arkWant.action = Converter::ArkValue<Opt_String>(action);
-            LOGE("UIExtensionComponentInterfaceModifier::OnResultImpl - "
-                "Ark_Want::parameters is not supported");
-            auto entities = want.GetEntities();
-            Converter::ArkArrayHolder<Array_String> stringHolder(entities);
-            Array_String stringArrayValues = stringHolder.ArkValue();
-            arkWant.entities = Converter::ArkValue<Opt_Array_String>(stringArrayValues);
-            auto moduleName = want.GetModuleName();
-            arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
-
-            Ark_Literal_Number_code__want parameter;
-            parameter.code = Converter::ArkValue<Ark_Number>(code);
-            parameter.want = Converter::ArkValue<Opt_Want>(arkWant);
-            arkCallback.Invoke(parameter);
-#endif
-        };
-    UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
-#endif //WINDOW_SCENE_SUPPORTED
-}
-void OnReleaseImpl(Ark_NativePointer node,
-                   const Opt_Callback_Number_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onRelease =
-        [arkCallback = CallbackHelper(*optValue)](int32_t index) {
-            Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
-            arkCallback.Invoke(arkIndex);
-        };
-    UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
-#endif //WINDOW_SCENE_SUPPORTED
-}
-void OnErrorImpl(Ark_NativePointer node,
-                 const Opt_ErrorCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto instanceId = ContainerScope::CurrentId();
@@ -246,15 +180,15 @@ void OnErrorImpl(Ark_NativePointer node,
     UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnTerminatedImpl(Ark_NativePointer node,
-                      const Opt_Callback_TerminationInfo_Void* value)
+void SetOnTerminatedImpl(Ark_NativePointer node,
+                         const Opt_Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onTerminated =
@@ -294,13 +228,11 @@ void OnTerminatedImpl(Ark_NativePointer node,
     UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnDrawReadyImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+void SetOnDrawReadyImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //UIExtensionComponentModelNG::SetOnDrawReady(frameNode, convValue);
 }
 } // UIExtensionComponentAttributeModifier
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()
@@ -308,13 +240,11 @@ const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifi
     static const GENERATED_ArkUIUIExtensionComponentModifier ArkUIUIExtensionComponentModifierImpl {
         UIExtensionComponentModifier::ConstructImpl,
         UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl,
-        UIExtensionComponentAttributeModifier::OnRemoteReadyImpl,
-        UIExtensionComponentAttributeModifier::OnReceiveImpl,
-        UIExtensionComponentAttributeModifier::OnResultImpl,
-        UIExtensionComponentAttributeModifier::OnReleaseImpl,
-        UIExtensionComponentAttributeModifier::OnErrorImpl,
-        UIExtensionComponentAttributeModifier::OnTerminatedImpl,
-        UIExtensionComponentAttributeModifier::OnDrawReadyImpl,
+        UIExtensionComponentAttributeModifier::SetOnRemoteReadyImpl,
+        UIExtensionComponentAttributeModifier::SetOnReceiveImpl,
+        UIExtensionComponentAttributeModifier::SetOnErrorImpl,
+        UIExtensionComponentAttributeModifier::SetOnTerminatedImpl,
+        UIExtensionComponentAttributeModifier::SetOnDrawReadyImpl,
     };
     return &ArkUIUIExtensionComponentModifierImpl;
 }

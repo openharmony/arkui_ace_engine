@@ -1,0 +1,169 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.Graphics;
+
+import ohos.graphics.drawing.default as drawing;
+import ohos.graphics.common2D.default as common2D;
+import global.resource.Resource as Resource;
+import arkui.component.enums.BorderStyle as BorderStyle;
+import arkui.component.units.ResourceColor as ResourceColor;
+import arkui.component.units.Edges as Edges;
+import arkui.component.units.BorderRadiuses as BorderRadiuses;
+
+interface Size {
+    attribute number width;
+    attribute number height;
+};
+[Entity=Class]
+interface DrawContext {
+    constructor();
+    Size size();
+    Size sizeInPixel();
+    drawing.Canvas canvas();
+};
+interface Vector2 {
+    attribute number x;
+    attribute number y;
+};
+[TypeParameters="T = void"]
+interface Vector2T {
+    attribute number x;
+    attribute number y;
+};
+interface Vector3 {
+    attribute number x;
+    attribute number y;
+    attribute number z;
+};
+[Synthetic, Entity=Tuple]
+interface Matrix4 {
+    attribute number value0;
+    attribute number value1;
+    attribute number value2;
+    attribute number value3;
+    attribute number value4;
+    attribute number value5;
+    attribute number value6;
+    attribute number value7;
+    attribute number value8;
+    attribute number value9;
+    attribute number value10;
+    attribute number value11;
+    attribute number value12;
+    attribute number value13;
+    attribute number value14;
+    attribute number value15;
+};
+typedef Vector2 Offset;
+typedef Vector2 Position;
+[TypeParameters="T = void"]
+typedef [TypeArguments="T"] Vector2T PositionT;
+typedef Vector2 Pivot;
+typedef Vector2 Scale;
+typedef Vector2 Translation;
+typedef Vector3 Rotation;
+interface Frame {
+    attribute number x;
+    attribute number y;
+    attribute number width;
+    attribute number height;
+};
+dictionary LengthUnit {
+    number PX = 0;
+    number VP = 1;
+    number FP = 2;
+    number PERCENT = 3;
+    number LPX = 4;
+};
+[TypeParameters="T = void"]
+interface SizeT {
+    attribute number width;
+    attribute number height;
+};
+dictionary LengthMetricsUnit {
+    number DEFAULT = 0;
+    number PX = 1;
+};
+[Entity=Class]
+interface LengthMetrics {
+    constructor(number value, LengthUnit unit);
+    attribute LengthUnit unit;
+    attribute number value;
+    static LengthMetrics px(number value);
+    static LengthMetrics vp(number value);
+    static LengthMetrics fp(number value);
+    static LengthMetrics percent(number value);
+    static LengthMetrics lpx(number value);
+    static LengthMetrics resource(Resource value);
+};
+[Entity=Class]
+interface ColorMetrics {
+    constructor();
+    static ColorMetrics numeric(number value);
+    static ColorMetrics rgba(number red, number green, number blue, number alpha);
+    static ColorMetrics resourceColor(ResourceColor color);
+    ColorMetrics blendColor(ColorMetrics overlayColor);
+    String color();
+    number red();
+    number green();
+    number blue();
+    number alpha();
+};
+interface Corners {
+    attribute number topLeft;
+    attribute number topRight;
+    attribute number bottomLeft;
+    attribute number bottomRight;
+};
+typedef common2D.Rect Rect;
+// fixme
+interface CornerRadius {};
+interface RoundRect {
+    attribute common2D.Rect rect;
+    attribute CornerRadius corners;
+};
+interface Circle {
+    attribute number centerX;
+    attribute number centerY;
+    attribute number radius;
+};
+interface CommandPath {
+    attribute String commands;
+};
+[Entity=Class]
+interface ShapeMask {
+    constructor();
+    attribute number fillColor;
+    attribute number strokeColor;
+    attribute number strokeWidth;
+    void setRectShape(common2D.Rect rect);
+    void setRoundRectShape(RoundRect roundRect);
+    void setCircleShape(Circle circle);
+    void setOvalShape(common2D.Rect oval);
+    void setCommandPath(CommandPath path);
+};
+[Entity=Class]
+interface ShapeClip {
+    constructor();
+    void setRectShape(common2D.Rect rect);
+    void setRoundRectShape(RoundRect roundRect);
+    void setCircleShape(Circle circle);
+    void setOvalShape(common2D.Rect oval);
+    void setCommandPath(CommandPath path);
+};
+Edges edgeColors(number all);
+Edges edgeWidths(number all);
+Edges borderStyles(BorderStyle all);
+BorderRadiuses borderRadiuses(number all);

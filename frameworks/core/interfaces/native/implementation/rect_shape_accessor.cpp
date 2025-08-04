@@ -107,7 +107,7 @@ void DestroyPeerImpl(Ark_RectShape peer)
 {
     delete peer;
 }
-Ark_RectShape CtorImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options)
+Ark_RectShape ConstructImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options)
 {
     Ark_RectShape peer = new RectShapePeer();
     RefPtr<ShapeRect> shape = Referenced::MakeRefPtr<ShapeRect>();
@@ -229,7 +229,7 @@ const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor()
 {
     static const GENERATED_ArkUIRectShapeAccessor RectShapeAccessorImpl {
         RectShapeAccessor::DestroyPeerImpl,
-        RectShapeAccessor::CtorImpl,
+        RectShapeAccessor::ConstructImpl,
         RectShapeAccessor::GetFinalizerImpl,
         RectShapeAccessor::OffsetImpl,
         RectShapeAccessor::FillImpl,

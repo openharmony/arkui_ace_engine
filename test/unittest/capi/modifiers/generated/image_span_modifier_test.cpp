@@ -156,17 +156,18 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignValidValues, TestSize.Level1)
 {
-    Ark_ImageSpanAlignment initValueVerticalAlign;
+    Opt_ImageSpanAlignment initValueVerticalAlign;
 
     // Initial setup
-    initValueVerticalAlign = std::get<1>(Fixtures::testFixtureImageSpanVerticalAlignValidValues[0]);
+    initValueVerticalAlign =
+        ArkValue<Opt_ImageSpanAlignment>(std::get<1>(Fixtures::testFixtureImageSpanVerticalAlignValidValues[0]));
 
     auto checkValue = [this, &initValueVerticalAlign](const std::string& input, const std::string& expectedStr,
-                          const Ark_ImageSpanAlignment& value) {
-        Ark_ImageSpanAlignment inputValueVerticalAlign = initValueVerticalAlign;
+                          const Opt_ImageSpanAlignment& value) {
+        Opt_ImageSpanAlignment inputValueVerticalAlign = initValueVerticalAlign;
 
         inputValueVerticalAlign = value;
-        modifier_->setVerticalAlign(node_, inputValueVerticalAlign);
+        modifier_->setVerticalAlign(node_, &inputValueVerticalAlign);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -174,7 +175,7 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignValidValues, Te
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureImageSpanVerticalAlignValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_ImageSpanAlignment>(value));
     }
 }
 
@@ -185,17 +186,18 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignValidValues, Te
  */
 HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignInvalidValues, TestSize.Level1)
 {
-    Ark_ImageSpanAlignment initValueVerticalAlign;
+    Opt_ImageSpanAlignment initValueVerticalAlign;
 
     // Initial setup
-    initValueVerticalAlign = std::get<1>(Fixtures::testFixtureImageSpanVerticalAlignValidValues[0]);
+    initValueVerticalAlign =
+        ArkValue<Opt_ImageSpanAlignment>(std::get<1>(Fixtures::testFixtureImageSpanVerticalAlignValidValues[0]));
 
-    auto checkValue = [this, &initValueVerticalAlign](const std::string& input, const Ark_ImageSpanAlignment& value) {
-        Ark_ImageSpanAlignment inputValueVerticalAlign = initValueVerticalAlign;
+    auto checkValue = [this, &initValueVerticalAlign](const std::string& input, const Opt_ImageSpanAlignment& value) {
+        Opt_ImageSpanAlignment inputValueVerticalAlign = initValueVerticalAlign;
 
-        modifier_->setVerticalAlign(node_, inputValueVerticalAlign);
+        modifier_->setVerticalAlign(node_, &inputValueVerticalAlign);
         inputValueVerticalAlign = value;
-        modifier_->setVerticalAlign(node_, inputValueVerticalAlign);
+        modifier_->setVerticalAlign(node_, &inputValueVerticalAlign);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE) <<
@@ -203,8 +205,10 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignInvalidValues, 
     };
 
     for (auto& [input, value] : Fixtures::testFixtureImageSpanVerticalAlignInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ImageSpanAlignment>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ImageSpanAlignment>());
 }
 
 /*
@@ -228,17 +232,17 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize.Level1)
 {
-    Ark_ImageFit initValueObjectFit;
+    Opt_ImageFit initValueObjectFit;
 
     // Initial setup
-    initValueObjectFit = std::get<1>(Fixtures::testFixtureEnumImageFitValidValues[0]);
+    initValueObjectFit = ArkValue<Opt_ImageFit>(std::get<1>(Fixtures::testFixtureEnumImageFitValidValues[0]));
 
-    auto checkValue = [this, &initValueObjectFit](const std::string& input, const Ark_ImageFit& value) {
-        Ark_ImageFit inputValueObjectFit = initValueObjectFit;
+    auto checkValue = [this, &initValueObjectFit](const std::string& input, const Opt_ImageFit& value) {
+        Opt_ImageFit inputValueObjectFit = initValueObjectFit;
 
-        modifier_->setObjectFit(node_, inputValueObjectFit);
+        modifier_->setObjectFit(node_, &inputValueObjectFit);
         inputValueObjectFit = value;
-        modifier_->setObjectFit(node_, inputValueObjectFit);
+        modifier_->setObjectFit(node_, &inputValueObjectFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE) <<
@@ -246,7 +250,7 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumImageFitInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ImageFit>(value));
     }
 }
 } // namespace OHOS::Ace::NG

@@ -35,7 +35,7 @@ public:
     {
         SetShowNextImpl(std::bind(&StubSwiperController::ShowNext, this));
         SetShowPrevImpl(std::bind(&StubSwiperController::ShowPrevious, this));
-        SetChangeIndexImpl(
+        SetChangeIndexWithModeImpl(
             std::bind(&StubSwiperController::ChangeIndex, this, std::placeholders::_1, std::placeholders::_2)
         );
         SetFinishImpl([&]() {
@@ -50,7 +50,7 @@ public:
     ~StubSwiperController() override = default;
     virtual void ShowNext() {}
     virtual void ShowPrevious() {}
-    virtual void ChangeIndex(int, bool) {}
+    virtual void ChangeIndex(int32_t index, SwiperAnimationMode animationMode) {}
     virtual void PreloadItems(std::set<int32_t>) {}
 };
 
@@ -60,7 +60,7 @@ public:
     ~MockSwiperController() override = default;
     MOCK_METHOD(void, ShowNext, ());
     MOCK_METHOD(void, ShowPrevious, ());
-    MOCK_METHOD(void, ChangeIndex, (int, bool));
+    MOCK_METHOD(void, ChangeIndex, (int, SwiperAnimationMode));
     MOCK_METHOD(void, PreloadItems, (std::set<int32_t>));
 };
 } // namespace
@@ -125,28 +125,28 @@ HWTEST_F(SwiperControllerAccessorTest, showPreviousTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperControllerAccessor.ChangeIndex
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerAccessorTest, changeIndex0Test, TestSize.Level1)
+HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
 {
     constexpr int indexValidValue = 10;
 
-    ASSERT_NE(accessor_->changeIndex0, nullptr);
+    ASSERT_NE(accessor_->changeIndex, nullptr);
 
     auto arkNumValid = ArkValue<Ark_Number>(indexValidValue);
     auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
-    auto optBoolTrue = ArkValue<Opt_Boolean>(true);
-    auto optBoolFalse = ArkValue<Opt_Boolean>(false);
-    auto optBoolUndef = ArkValue<Opt_Boolean>();
+    auto optBoolTrue = ArkUnion<Opt_Union_SwiperAnimationMode_Boolean, Ark_Boolean>(true);
+    auto optBoolFalse = ArkUnion<Opt_Union_SwiperAnimationMode_Boolean, Ark_Boolean>(false);
+    auto optBoolUndef = ArkValue<Opt_Union_SwiperAnimationMode_Boolean>();
 
-    EXPECT_CALL(*mockSwiperController_, ChangeIndex(indexValidValue, true)).Times(1);
-    accessor_->changeIndex0(peer_, &arkNumValid, &optBoolTrue);
+    EXPECT_CALL(*mockSwiperController_, ChangeIndex(indexValidValue, SwiperAnimationMode::DEFAULT_ANIMATION)).Times(1);
+    accessor_->changeIndex(peer_, &arkNumValid, &optBoolTrue);
 
-    EXPECT_CALL(*mockSwiperController_, ChangeIndex(indexValidValue, false)).Times(3);
-    accessor_->changeIndex0(peer_, &arkNumValid, &optBoolFalse);
-    accessor_->changeIndex0(peer_, &arkNumValid, &optBoolUndef);
-    accessor_->changeIndex0(peer_, &arkNumValid, nullptr);
+    EXPECT_CALL(*mockSwiperController_, ChangeIndex(indexValidValue, SwiperAnimationMode::NO_ANIMATION)).Times(3);
+    accessor_->changeIndex(peer_, &arkNumValid, &optBoolFalse);
+    accessor_->changeIndex(peer_, &arkNumValid, &optBoolUndef);
+    accessor_->changeIndex(peer_, &arkNumValid, nullptr);
 
-    EXPECT_CALL(*mockSwiperController_, ChangeIndex(0, false)).Times(1);
-    accessor_->changeIndex0(peer_, &arkNumInvalid, nullptr);
+    EXPECT_CALL(*mockSwiperController_, ChangeIndex(0, SwiperAnimationMode::NO_ANIMATION)).Times(1);
+    accessor_->changeIndex(peer_, &arkNumInvalid, nullptr);
 }
 
 /**

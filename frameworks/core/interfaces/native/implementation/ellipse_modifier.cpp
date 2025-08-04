@@ -30,8 +30,10 @@ template<>
 inline EllipseOptions Convert(const Ark_EllipseOptions& src)
 {
     EllipseOptions ellipseOptions;
+#ifdef WRONG_GEN
     ellipseOptions.width = Converter::OptConvert<Dimension>(src.width);
     ellipseOptions.height = Converter::OptConvert<Dimension>(src.height);
+#endif
     return ellipseOptions;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -53,7 +55,7 @@ void SetEllipseOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = options ? Converter::OptConvert<Converter::EllipseOptions>(*options) : std::nullopt;
+    auto opt = Converter::OptConvertPtr<Converter::EllipseOptions>(options);
 
     if (opt && opt->width) {
         ShapeAbstractModelNG::SetWidth(frameNode, *opt->width);

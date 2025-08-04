@@ -40,6 +40,7 @@ public:
     static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
     static void SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& onActive);
     static void SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& onInactive);
+    static void SetCustomTransition(FrameNode* frameNode, NG::NavDestinationTransitionDelegate transitionDelegate);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
@@ -64,6 +65,7 @@ public:
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid = true);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetEnableStatusBar(FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar);
+    static void SetEnableNavigationIndicator(FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
 };
 } // namespace OHOS::Ace::NG
 

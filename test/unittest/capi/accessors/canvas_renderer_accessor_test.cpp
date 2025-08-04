@@ -326,7 +326,7 @@ public:
         pipelineContext->SetDensity(density);
         // Re-create peer for density to have effect
         finalyzer_(peer_);
-        peer_ = accessor_->ctor();
+        peer_ = accessor_->construct();
         reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer_)->SetRenderingContext2DModel(
             renderingModel_);
     }
@@ -349,17 +349,18 @@ HWTEST_F(CanvasRendererAccessorTest, beginPathTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: stroke0Test
+ * @tc.name: strokeTestEmpty
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, stroke0Test, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, strokeTestEmpty, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->stroke0, nullptr);
+    ASSERT_NE(accessor_->stroke, nullptr);
     EXPECT_CALL(*renderingModel_, SetStrokeRuleForPath(CanvasFillRule::NONZERO)).Times(EXPECTED_NUMBER_OF_CALLS);
-    accessor_->stroke0(peer_);
-    accessor_->stroke0(peer_);
-    accessor_->stroke0(peer_);
+    auto path = Converter::ArkValue<Opt_Path2D>();
+    accessor_->stroke(peer_, &path);
+    accessor_->stroke(peer_, &path);
+    accessor_->stroke(peer_, &path);
 }
 
 /**
@@ -977,18 +978,19 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: stroke1Test
+ * @tc.name: strokeTestWithPath
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, stroke1Test, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, strokeTestWithPath, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->stroke1, nullptr);
-    Ark_Path2D arkPath = new Path2DPeer();
+    ASSERT_NE(accessor_->stroke, nullptr);
+    Ark_Path2D arkPath = PeerUtils::CreatePeer<Path2DPeer>();
     auto path = AceType::MakeRefPtr<CanvasPath2D>();
     arkPath->SetCanvasPath2d(path);
     EXPECT_CALL(*renderingModel_, SetStrokeRuleForPath2D(CanvasFillRule::NONZERO, path)).Times(1);
-    accessor_->stroke1(peer_, arkPath);
+    auto optPath = Converter::ArkValue<Opt_Path2D>(arkPath);
+    accessor_->stroke(peer_, &optPath);
 }
 
 /**

@@ -52,7 +52,7 @@ ani_object CanvasModule::GetPixelMap(ani_env* env, [[maybe_unused]] ani_object a
     CHECK_NULL_RETURN(modifier, nullptr);
     auto* canvasModifier = modifier->getCanvasAniModifier();
     CHECK_NULL_RETURN(canvasModifier, nullptr);
-    auto* pixelMapPeer = reinterpret_cast<PixelMapPeer*>(canvasModifier->getPixelMap(peer, sx, sy, sw, sh));
+    auto* pixelMapPeer = reinterpret_cast<image_PixelMapPeer*>(canvasModifier->getPixelMap(peer, sx, sy, sw, sh));
     CHECK_NULL_RETURN(pixelMapPeer, nullptr);
     auto pixelMap = pixelMapPeer->pixelMap;
     CHECK_NULL_RETURN(pixelMap, nullptr);

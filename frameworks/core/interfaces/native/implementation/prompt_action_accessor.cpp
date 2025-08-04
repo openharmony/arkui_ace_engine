@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/prompt_action_accessor_peer.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "frameworks/base/utils/utils.h"
@@ -32,6 +32,7 @@
 #include "core/interfaces/native/utility/promise_helper.h"
 
 using namespace OHOS::Ace::NG::Converter;
+
 namespace OHOS::Ace::NG {
 constexpr int32_t INVALID_ID = -1;
 std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
@@ -156,6 +157,7 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
         menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
         menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
     }
+    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
     menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode);
     menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
     auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
@@ -166,13 +168,9 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.hasTransitionEffect = transitionOpt.has_value();
     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
-    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
     // if enableArrow is true and placement not set, set placement default value to top.
     if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
         menuParam.placement = Placement::TOP;
-    }
-    if (!menuParam.placement.has_value()) {
-        menuParam.placement = Placement::BOTTOM_LEFT;
     }
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
@@ -362,11 +360,9 @@ void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam
     updatePopupCommonParamPart1(src, popupParam);
     updatePopupCommonParamPart2(src, popupParam);
 }
-
-} // OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
-
 template<>
 RefPtr<PopupParam> Convert(const Ark_PopupCommonOptions& src)
 {
@@ -386,14 +382,27 @@ MenuParam Convert(const Ark_MenuOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PromptActionAccessor {
-void OpenPopupImpl(Ark_VMContext vmContext,
-    Ark_AsyncWorkerPtr asyncWorker,
-    Ark_PromptAction peer,
-    Ark_NativePointer content,
-    const Ark_TargetInfo* targetInfo,
-    const Opt_PopupCommonOptions* options,
-    const Callback_Opt_Array_String_Void* promiseValue)
+void DestroyPeerImpl(Ark_PromptAction peer)
 {
+    PeerUtils::DestroyPeer(peer);
+}
+Ark_PromptAction ConstructImpl()
+{
+    return PeerUtils::CreatePeer<PromptActionPeer>();
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+void OpenPopupImpl(Ark_VMContext vmContext,
+                   Ark_AsyncWorkerPtr asyncWorker,
+                   Ark_PromptAction peer,
+                   Ark_ComponentContent content,
+                   const Ark_TargetInfo* target,
+                   const Opt_PopupCommonOptions* options,
+                   const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+    auto promiseValue = outputArgumentForReturningPromise;
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
@@ -406,7 +415,7 @@ void OpenPopupImpl(Ark_VMContext vmContext,
     popupParam->SetIsShow(true);
     popupParam->SetUseCustomComponent(true);
     int targetId = INVALID_ID;
-    auto result = ParseTargetInfo(targetInfo, targetId);
+    auto result = ParseTargetInfo(target, targetId);
     if (result == ERROR_CODE_NO_ERROR) {
         popupParam->SetTargetId(std::to_string(targetId));
     } else {
@@ -420,13 +429,14 @@ void OpenPopupImpl(Ark_VMContext vmContext,
     ReturnPromise(promiseValue, result);
 }
 void UpdatePopupImpl(Ark_VMContext vmContext,
-    Ark_AsyncWorkerPtr asyncWorker,
-    Ark_PromptAction peer,
-    Ark_NativePointer content,
-    const Ark_PopupCommonOptions* options,
-    const Opt_Boolean* partialUpdate,
-    const Callback_Opt_Array_String_Void* promiseValue)
+                     Ark_AsyncWorkerPtr asyncWorker,
+                     Ark_PromptAction peer,
+                     Ark_ComponentContent content,
+                     const Ark_PopupCommonOptions* options,
+                     const Opt_Boolean* partialUpdate,
+                     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto promiseValue = outputArgumentForReturningPromise;
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
@@ -463,11 +473,12 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
     ReturnPromise(promiseValue, result);
 }
 void ClosePopupImpl(Ark_VMContext vmContext,
-    Ark_AsyncWorkerPtr asyncWorker,
-    Ark_PromptAction peer,
-    Ark_NativePointer content,
-    const Callback_Opt_Array_String_Void* promiseValue)
+                    Ark_AsyncWorkerPtr asyncWorker,
+                    Ark_PromptAction peer,
+                    Ark_ComponentContent content,
+                    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto promiseValue = outputArgumentForReturningPromise;
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     if (!frameNode) {
@@ -481,13 +492,14 @@ void ClosePopupImpl(Ark_VMContext vmContext,
     ReturnPromise(promiseValue, result);
 }
 void OpenMenuImpl(Ark_VMContext vmContext,
-    Ark_AsyncWorkerPtr asyncWorker,
-    Ark_PromptAction peer,
-    Ark_NativePointer content,
-    const Ark_TargetInfo* targetInfo,
-    const Opt_MenuOptions* options,
-    const Callback_Opt_Array_String_Void* promiseValue)
+                  Ark_AsyncWorkerPtr asyncWorker,
+                  Ark_PromptAction peer,
+                  Ark_ComponentContent content,
+                  const Ark_TargetInfo* target,
+                  const Opt_MenuOptions* options,
+                  const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto promiseValue = outputArgumentForReturningPromise;
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
@@ -500,19 +512,20 @@ void OpenMenuImpl(Ark_VMContext vmContext,
     menuParam.isShowInSubWindow =
         Converter::OptConvert<bool>(options->value.showInSubWindow).value_or(theme->GetExpandDisplay());
     int targetId = INVALID_ID;
-    auto result = ParseTargetInfo(targetInfo, targetId);
+    auto result = ParseTargetInfo(target, targetId);
     if (result == ERROR_CODE_NO_ERROR) {
         result = ViewAbstractModelStatic::OpenMenu(menuParam, frameNode, targetId);
     }
 }
 void UpdateMenuImpl(Ark_VMContext vmContext,
-    Ark_AsyncWorkerPtr asyncWorker,
-    Ark_PromptAction peer,
-    Ark_NativePointer content,
-    const Ark_MenuOptions* options,
-    const Opt_Boolean* partialUpdate,
-    const Callback_Opt_Array_String_Void* promiseValue)
+                    Ark_AsyncWorkerPtr asyncWorker,
+                    Ark_PromptAction peer,
+                    Ark_ComponentContent content,
+                    const Ark_MenuOptions* options,
+                    const Opt_Boolean* partialUpdate,
+                    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto promiseValue = outputArgumentForReturningPromise;
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
@@ -528,10 +541,10 @@ void UpdateMenuImpl(Ark_VMContext vmContext,
     ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
 }
 void CloseMenuImpl(Ark_VMContext vmContext,
-    Ark_AsyncWorkerPtr asyncWorker,
-    Ark_PromptAction peer,
-    Ark_NativePointer content,
-    const Callback_Opt_Array_String_Void* promiseValue)
+                   Ark_AsyncWorkerPtr asyncWorker,
+                   Ark_PromptAction peer,
+                   Ark_ComponentContent content,
+                   const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
@@ -539,10 +552,12 @@ void CloseMenuImpl(Ark_VMContext vmContext,
     auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
 }
 } // PromptActionAccessor
-
 const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
 {
     static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
+        PromptActionAccessor::DestroyPeerImpl,
+        PromptActionAccessor::ConstructImpl,
+        PromptActionAccessor::GetFinalizerImpl,
         PromptActionAccessor::OpenPopupImpl,
         PromptActionAccessor::UpdatePopupImpl,
         PromptActionAccessor::ClosePopupImpl,

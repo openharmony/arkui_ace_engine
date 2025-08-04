@@ -33,7 +33,7 @@ class RenderingContextSettingsAccessorTest
 public:
     RenderingContextSettingsPeer* CreatePeerInstanceT(const Opt_Boolean* value)
     {
-        return accessor_->ctor(value);
+        return accessor_->construct(value);
     }
     void* CreatePeerInstance() override
     {
@@ -98,7 +98,8 @@ HWTEST_F(RenderingContextSettingsAccessorTest, setAntialiasTest, TestSize.Level1
 {
     ASSERT_NE(accessor_->setAntialias, nullptr);
     for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
-        accessor_->setAntialias(peer_, value);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
+        accessor_->setAntialias(peer_, &inputValue);
         auto result = peer_->antialias;
         ASSERT_NE(result, std::nullopt);
         EXPECT_EQ(result.value(), expected) <<

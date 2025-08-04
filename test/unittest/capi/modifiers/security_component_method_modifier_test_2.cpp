@@ -21,24 +21,44 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 using namespace TestConst::SecurityComponentMethod;
 
-typedef std::pair<Ark_Length, std::string> MarginPaddingOneTestStep;
-static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
-    { Converter::ArkValue<Ark_Length>(-2.45f), "-2.45vp" },
-    { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
-    { Converter::ArkValue<Ark_Length>(-5.0_px), "-5.00px" },
-    { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
-    { Converter::ArkValue<Ark_Length>(-22.35_px), "-22.35px" },
-    { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
-    { Converter::ArkValue<Ark_Length>(-7.0_vp), "-7.00vp" },
-    { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
-    { Converter::ArkValue<Ark_Length>(-1.65_vp), "-1.65vp" },
-    { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
-    { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
-    { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-    { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
-    { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
-    { Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID), "70.50px" },
+ConvContext ctx;
+
+static const std::vector<std::pair<Ark_Dimension, std::string>> DIMENSION_TEST_PLAN = {
+    { Converter::ArkUnion<Ark_Dimension, Ark_Number>(2.45f, &ctx), "2.45vp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_Number>(-2.45f, &ctx), "-2.45vp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("5.0px", &ctx), "5.00px" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("-5.0px", &ctx), "-5.00px" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("22.35px", &ctx), "22.35px" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("-22.35px", &ctx), "-22.35px" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("7.0vp", &ctx), "7.00vp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("-7.0vp", &ctx), "-7.00vp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("1.65vp", &ctx), "1.65vp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("-1.65vp", &ctx), "-1.65vp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("65.0fp", &ctx), "65.00fp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("-65.0fp", &ctx), "-65.00fp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("4.3fp", &ctx), "4.30fp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("-4.3fp", &ctx), "-4.30fp" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_String>("12.00%", &ctx), "12.00%" },
+    { Converter::ArkUnion<Ark_Dimension, Ark_Resource>(FLOAT_RES_0, &ctx), "70.50px" },
+};
+
+static const std::vector<std::pair<Ark_Length, std::string>> LENGTH_TEST_PLAN = {
+    { Converter::ArkUnion<Ark_Length, Ark_Number>(2.45f, &ctx), "2.45vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_Number>(-2.45f, &ctx), "-2.45vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("5.0px", &ctx), "5.00px" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("-5.0px", &ctx), "-5.00px" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("22.35px", &ctx), "22.35px" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("-22.35px", &ctx), "-22.35px" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("7.0vp", &ctx), "7.00vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("-7.0vp", &ctx), "-7.00vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("1.65vp", &ctx), "1.65vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("-1.65vp", &ctx), "-1.65vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("65.0fp", &ctx), "65.00fp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("-65.0fp", &ctx), "-65.00fp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("4.3fp", &ctx), "4.30fp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("-4.3fp", &ctx), "-4.30fp" },
+    { Converter::ArkUnion<Ark_Length, Ark_String>("12.00%", &ctx), "12.00%" },
+    { Converter::ArkUnion<Ark_Length, Ark_Resource>(FLOAT_RES_0, &ctx), "70.50px" },
 };
 
 using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
@@ -48,6 +68,39 @@ static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = 
     { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, 2.45f), "2.45vp" },
     { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_VP, -7.f), "-7.00vp" },
     { Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_FP, -65.5f), "-65.50fp" },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureMaxFontScaleFloat64ValidValues = {
+    { "1", Converter::ArkValue<Ark_Float64>(1), "1.000000" },
+    { "2.5", Converter::ArkValue<Ark_Float64>(2.5), "2.500000" },
+    { "100", Converter::ArkValue<Ark_Float64>(100), "100.000000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureMinFontScaleFloat64ValidValues = {
+    { "0.1", Converter::ArkValue<Ark_Float64>(0.1), "0.100000" },
+    { "0.89", Converter::ArkValue<Ark_Float64>(0.89), "0.890000" },
+    { "1", Converter::ArkValue<Ark_Float64>(1), "1.000000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureMaxLinesValidValues = {
+    { "100", Converter::ArkValue<Ark_Int32>(100), "100" },
+    { "0", Converter::ArkValue<Ark_Int32>(0), "0" },
+    { "1", Converter::ArkValue<Ark_Int32>(1), "1" },
+};
+
+std::vector<std::tuple<std::string, Ark_Int32>> testFixtureMaxLinesInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Int32>(-1) },
+    { "-100", Converter::ArkValue<Ark_Int32>(-100) },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureFloat64NonNegValidValues = {
+    { "123", Converter::ArkValue<Ark_Float64>(123), "123.00vp" },
+    { "0", Converter::ArkValue<Ark_Float64>(0), "0.00vp" },
+    { "1.23", Converter::ArkValue<Ark_Float64>(1.23), "1.23vp" },
+};
+
+std::vector<std::tuple<std::string, Ark_Float64>> testFixtureFloat64NonNegInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Float64>(-1) },
 };
 
 /*
@@ -70,14 +123,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidPositionXValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionXValues, TestSize.Level1)
 {
     Ark_Position position;
     std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        position.x = Converter::ArkValue<Opt_Length>(arkLength);
-        position.y = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
+        position.x = Converter::ArkValue<Opt_Length>(arkLength, &ctx);
+        position.y = Converter::ArkUnion<Opt_Length, Ark_Empty>(nullptr);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position, &ctx);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
@@ -92,14 +145,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidPositio
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidPositionYValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionYValues, TestSize.Level1)
 {
     Ark_Position position;
     std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        position.x = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        position.y = Converter::ArkValue<Opt_Length>(arkLength);
-        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
+        position.x = Converter::ArkUnion<Opt_Length, Ark_Empty>(nullptr);
+        position.y = Converter::ArkValue<Opt_Length>(arkLength, &ctx);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position, &ctx);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
@@ -114,17 +167,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidPositio
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesLeftValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesLeftValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     Ark_Edges edges;
     std::string strResult;
-    for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        edges.left = Converter::ArkValue<Opt_Length>(arkLength);
-        edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
+    for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
+        edges.left = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
+        edges.top = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.right = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.bottom = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -136,7 +188,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesLe
         auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
         EXPECT_EQ(bottomResult, "");
     }
-#endif
 }
 
 /*
@@ -144,17 +195,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesLe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesTopValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesTopValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     Ark_Edges edges;
     std::string strResult;
-    for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        edges.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.top = Converter::ArkValue<Opt_Length>(arkLength);
-        edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
+    for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
+        edges.left = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.top = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
+        edges.right = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.bottom = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -166,7 +216,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesTo
         auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
         EXPECT_EQ(bottomResult, "");
     }
-#endif
 }
 
 /*
@@ -174,17 +223,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesTo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesRightValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesRightValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     Ark_Edges edges;
     std::string strResult;
-    for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        edges.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.right = Converter::ArkValue<Opt_Length>(arkLength);
-        edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
+    for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
+        edges.left = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.top = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.right = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
+        edges.bottom = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -196,7 +244,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesRi
         auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
         EXPECT_EQ(bottomResult, "");
     }
-#endif
 }
 
 /*
@@ -204,17 +251,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesRi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesBottomValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesBottomValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     Ark_Edges edges;
     std::string strResult;
-    for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        edges.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.bottom = Converter::ArkValue<Opt_Length>(arkLength);
-        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
+    for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
+        edges.left = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.top = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.right = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
+        edges.bottom = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
+        auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -226,7 +272,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesBo
         auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
         EXPECT_EQ(bottomResult, expected);
     }
-#endif
 }
 
 /*
@@ -403,18 +448,18 @@ HWTEST_F(SecurityComponentMethodModifierTest, alignTestInvalidValues, TestSize.L
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_Resource initValueMaxFontScale;
+    Ark_Union_F64_Resource initValueMaxFontScale;
 
     // Initial setup
-    initValueMaxFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureMaxFontScaleNumValidValues[0]));
+    initValueMaxFontScale = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureMaxFontScaleFloat64ValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_Resource& value) {
-        Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+                          const Ark_Union_F64_Resource& value) {
+        Ark_Union_F64_Resource inputValueMaxFontScale = initValueMaxFontScale;
 
         inputValueMaxFontScale = value;
-        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMaxFontScale);
+        auto convValue = ArkValue<Opt_Union_F64_Resource>(inputValueMaxFontScale);
         modifier_->setMaxFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -427,11 +472,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestValidValues, Te
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureMaxFontScaleNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    for (auto& [input, value, expected] : testFixtureMaxFontScaleFloat64ValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureMaxFontScaleResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
     }
 }
 
@@ -442,18 +487,18 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestValidValues, Te
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_Resource initValueMaxFontScale;
+    Ark_Union_F64_Resource initValueMaxFontScale;
 
     // Initial setup
-    initValueMaxFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureMaxFontScaleNumValidValues[0]));
+    initValueMaxFontScale = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureMaxFontScaleFloat64ValidValues[0]));
 
-    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
-        Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
-        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMaxFontScale);
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Ark_Union_F64_Resource& value) {
+        Ark_Union_F64_Resource inputValueMaxFontScale = initValueMaxFontScale;
+        auto convValue = ArkValue<Opt_Union_F64_Resource>(inputValueMaxFontScale);
         modifier_->setMaxFontScale(node_, &convValue);
         inputValueMaxFontScale = value;
-        convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMaxFontScale);
+        convValue = ArkValue<Opt_Union_F64_Resource>(inputValueMaxFontScale);
         modifier_->setMaxFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -464,7 +509,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestInvalidValues, 
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_F64_Resource, Ark_Empty>(nullptr));
 }
 
 /*
@@ -474,18 +519,18 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontScaleTestInvalidValues, 
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_Resource initValueMinFontScale;
+    Ark_Union_F64_Resource initValueMinFontScale;
 
     // Initial setup
-    initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureMinFontScaleNumValidValues[0]));
+    initValueMinFontScale = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureMinFontScaleFloat64ValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_Resource& value) {
-        Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+                          const Ark_Union_F64_Resource& value) {
+        Ark_Union_F64_Resource inputValueMinFontScale = initValueMinFontScale;
 
         inputValueMinFontScale = value;
-        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMinFontScale);
+        auto convValue = ArkValue<Opt_Union_F64_Resource>(inputValueMinFontScale);
         modifier_->setMinFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -498,11 +543,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestValidValues, Te
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureMinFontScaleNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    for (auto& [input, value, expected] : testFixtureMinFontScaleFloat64ValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureMinFontScaleResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
     }
 }
 
@@ -513,18 +558,18 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestValidValues, Te
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_Resource initValueMinFontScale;
+    Ark_Union_F64_Resource initValueMinFontScale;
 
     // Initial setup
-    initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureMinFontScaleNumValidValues[0]));
+    initValueMinFontScale = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+        std::get<1>(testFixtureMinFontScaleFloat64ValidValues[0]));
 
-    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
-        Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
-        auto convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMinFontScale);
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Ark_Union_F64_Resource& value) {
+        Ark_Union_F64_Resource inputValueMinFontScale = initValueMinFontScale;
+        auto convValue = ArkValue<Opt_Union_F64_Resource>(inputValueMinFontScale);
         modifier_->setMinFontScale(node_, &convValue);
         inputValueMinFontScale = value;
-        convValue = ArkValue<Opt_Union_Number_Resource>(inputValueMinFontScale);
+        convValue = ArkValue<Opt_Union_F64_Resource>(inputValueMinFontScale);
         modifier_->setMinFontScale(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -535,7 +580,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestInvalidValues, 
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_F64_Resource, Ark_Empty>(nullptr));
 }
 
 /*
@@ -545,17 +590,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontScaleTestInvalidValues, 
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestValidValues, TestSize.Level1)
 {
-    Ark_Number initValueMaxLines;
+    Ark_Int32 initValueMaxLines;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
+    initValueMaxLines = std::get<1>(testFixtureMaxLinesValidValues[0]);
 
     auto checkValue = [this, &initValueMaxLines](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Number inputValueMaxLines = initValueMaxLines;
+                          const std::string& input, const std::string& expectedStr, const Ark_Int32& value) {
+        Ark_Int32 inputValueMaxLines = initValueMaxLines;
 
         inputValueMaxLines = value;
-        auto convValue = ArkValue<Opt_Number>(inputValueMaxLines);
+        auto convValue = ArkValue<Opt_Int32>(inputValueMaxLines);
         modifier_->setMaxLines(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -568,7 +613,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestValidValues, TestSi
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
+    for (auto& [input, value, expected] : testFixtureMaxLinesValidValues) {
         checkValue(input, expected, value);
     }
 }
@@ -580,17 +625,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestValidValues, TestSi
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
 {
-    Ark_Number initValueMaxLines;
+    Ark_Int32 initValueMaxLines;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
+    initValueMaxLines = std::get<1>(testFixtureMaxLinesValidValues[0]);
 
-    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Number& value) {
-        Ark_Number inputValueMaxLines = initValueMaxLines;
-        auto convValue = ArkValue<Opt_Number>(inputValueMaxLines);
+    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Int32& value) {
+        Ark_Int32 inputValueMaxLines = initValueMaxLines;
+        auto convValue = ArkValue<Opt_Int32>(inputValueMaxLines);
         modifier_->setMaxLines(node_, &convValue);
         inputValueMaxLines = value;
-        convValue = ArkValue<Opt_Number>(inputValueMaxLines);
+        convValue = ArkValue<Opt_Int32>(inputValueMaxLines);
         modifier_->setMaxLines(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -600,7 +645,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestInvalidValues, Test
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntFloorInvalidValues) {
+    for (auto& [input, value] : testFixtureMaxLinesInvalidValues) {
         checkValue(input, value);
     }
 }
@@ -612,18 +657,18 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxLinesTestInvalidValues, Test
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMinFontSize;
+    Ark_Union_F64_String_Resource initValueMinFontSize;
 
     // Initial setup
-    initValueMinFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    initValueMinFontSize = ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(
+        std::get<1>(testFixtureFloat64NonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontSize](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
+                          const Ark_Union_F64_String_Resource& value) {
+        Ark_Union_F64_String_Resource inputValueMinFontSize = initValueMinFontSize;
 
         inputValueMinFontSize = value;
-        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMinFontSize);
+        auto convValue = ArkValue<Opt_Union_F64_String_Resource>(inputValueMinFontSize);
         modifier_->setMinFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -636,14 +681,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestValidValues, Tes
             "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    for (auto& [input, value, expected] : testFixtureFloat64NonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(value));
     }
 }
 
@@ -654,19 +699,19 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestValidValues, Tes
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMinFontSize;
+    Ark_Union_F64_String_Resource initValueMinFontSize;
 
     // Initial setup
-    initValueMinFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    initValueMinFontSize = ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(
+        std::get<1>(testFixtureFloat64NonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontSize](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
-        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMinFontSize);
+                          const std::string& input, const Ark_Union_F64_String_Resource& value) {
+        Ark_Union_F64_String_Resource inputValueMinFontSize = initValueMinFontSize;
+        auto convValue = ArkValue<Opt_Union_F64_String_Resource>(inputValueMinFontSize);
         modifier_->setMinFontSize(node_, &convValue);
         inputValueMinFontSize = value;
-        convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMinFontSize);
+        convValue = ArkValue<Opt_Union_F64_String_Resource>(inputValueMinFontSize);
         modifier_->setMinFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -676,17 +721,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestInvalidValues, T
             "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    for (auto& [input, value] : testFixtureFloat64NonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Ark_Union_F64_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_F64_String_Resource, Ark_Empty>(nullptr));
 }
 
 /*
@@ -696,18 +741,18 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMinFontSizeTestInvalidValues, T
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMaxFontSize;
+    Ark_Union_F64_String_Resource initValueMaxFontSize;
 
     // Initial setup
-    initValueMaxFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    initValueMaxFontSize = ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(
+        std::get<1>(testFixtureFloat64NonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontSize](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
+                          const Ark_Union_F64_String_Resource& value) {
+        Ark_Union_F64_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
 
         inputValueMaxFontSize = value;
-        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMaxFontSize);
+        auto convValue = ArkValue<Opt_Union_F64_String_Resource>(inputValueMaxFontSize);
         modifier_->setMaxFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -720,14 +765,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestValidValues, Tes
             "Input value is: " << input << ", method: setMaxFontSize, attribute: maxFontSize";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    for (auto& [input, value, expected] : testFixtureFloat64NonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(value));
     }
 }
 
@@ -738,19 +783,19 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestValidValues, Tes
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMaxFontSize;
+    Ark_Union_F64_String_Resource initValueMaxFontSize;
 
     // Initial setup
-    initValueMaxFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    initValueMaxFontSize = ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(
+        std::get<1>(testFixtureFloat64NonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontSize](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
-        auto convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMaxFontSize);
+                          const std::string& input, const Ark_Union_F64_String_Resource& value) {
+        Ark_Union_F64_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
+        auto convValue = ArkValue<Opt_Union_F64_String_Resource>(inputValueMaxFontSize);
         modifier_->setMaxFontSize(node_, &convValue);
         inputValueMaxFontSize = value;
-        convValue = ArkValue<Opt_Union_Number_String_Resource>(inputValueMaxFontSize);
+        convValue = ArkValue<Opt_Union_F64_String_Resource>(inputValueMaxFontSize);
         modifier_->setMaxFontSize(node_, &convValue);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
@@ -760,17 +805,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMaxFontSizeTestInvalidValues, T
             "Input value is: " << input << ", method: setMaxFontSize, attribute: maxFontSize";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    for (auto& [input, value] : testFixtureFloat64NonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Ark_Union_F64_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_F64_String_Resource, Ark_Empty>(nullptr));
 }
 
 /*
@@ -990,32 +1035,32 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadBothValues, Te
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftValidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesTopLeftValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftValidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesTopLeftValidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topLeft = value;
-        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1025,41 +1070,41 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius->radiusTopLeft) << "Passed value is: " << input;
         EXPECT_EQ(borderRadius->radiusTopLeft->ToString(), expectedStr) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.topLeft";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.topLeft";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftInvalidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesTopLeftInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftInvalidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesTopLeftInvalidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
         auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        modifier_->setBorderRadius(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topLeft = value;
-        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1068,43 +1113,43 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius) << "Passed value is: " << input;
         ASSERT_FALSE(borderRadius->radiusTopLeft) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.topLeft";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.topLeft";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Length>());
+    checkValue("undefined", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesTopRightValidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesTopRightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesTopRightValidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesTopRightValidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topRight = value;
-        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1114,41 +1159,41 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius->radiusTopRight) << "Passed value is: " << input;
         EXPECT_EQ(borderRadius->radiusTopRight->ToString(), expectedStr) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.topRight";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.topRight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesTopRightInvalidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesTopRightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesTopRightInvalidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesTopRightInvalidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
         auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        modifier_->setBorderRadius(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).topRight = value;
-        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1157,43 +1202,43 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius) << "Passed value is: " << input;
         ASSERT_FALSE(borderRadius->radiusTopRight) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.topRight";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.topRight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Length>());
+    checkValue("undefined", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftValidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesBottomLeftValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftValidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesBottomLeftValidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomLeft = value;
-        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1203,41 +1248,41 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius->radiusBottomLeft) << "Passed value is: " << input;
         EXPECT_EQ(borderRadius->radiusBottomLeft->ToString(), expectedStr) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.bottomLeft";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.bottomLeft";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftInvalidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesBottomLeftInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftInvalidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesBottomLeftInvalidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
-        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomLeft = value;
         radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1246,43 +1291,43 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius) << "Passed value is: " << input;
         ASSERT_FALSE(borderRadius->radiusBottomLeft) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.bottomLeft";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.bottomLeft";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Length>());
+    checkValue("undefined", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightValidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesBottomRightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightValidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesBottomRightValidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
 
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomRight = value;
-        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1292,41 +1337,41 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius->radiusBottomRight);
         EXPECT_EQ(borderRadius->radiusBottomRight->ToString(), expectedStr) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.bottomRight";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.bottomRight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
 }
 
 /*
- * @tc.name: setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightInvalidValues
+ * @tc.name: setBorderRadiusTestBorderRadiusBorderRadiusesBottomRightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightInvalidValues,
+HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestBorderRadiusBorderRadiusesBottomRightInvalidValues,
     TestSize.Level1)
 {
     Ark_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
     WriteToUnion<Ark_BorderRadiuses>(initValueBorderRadius).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]), &ctx);
 
     auto checkValue = [this, &initValueBorderRadius](const std::string& input, const Opt_Length& value) {
         Ark_Union_Dimension_BorderRadiuses inputValueBorderRadius = initValueBorderRadius;
-        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        auto radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius, &ctx);
+        modifier_->setBorderRadius(node_, &radius);
         WriteToUnion<Ark_BorderRadiuses>(inputValueBorderRadius).bottomRight = value;
         radius = ArkValue<Opt_Union_Dimension_BorderRadiuses>(inputValueBorderRadius);
-        modifier_->setBorderRadius1(node_, &radius);
+        modifier_->setBorderRadius(node_, &radius);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
         auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
@@ -1335,13 +1380,13 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadius1TestBorderRadiusBo
         ASSERT_TRUE(borderRadius) << "Passed value is: " << input;
         ASSERT_FALSE(borderRadius->radiusBottomRight) <<
             "Input value is: " << input
-            << ", method: setBorderRadius1, attribute: borderRadius.BorderRadiuses.bottomRight";
+            << ", method: setBorderRadius, attribute: borderRadius.BorderRadiuses.bottomRight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value, &ctx));
     }
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Length>());
+    checkValue("undefined", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG

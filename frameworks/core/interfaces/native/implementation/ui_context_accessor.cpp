@@ -14,28 +14,32 @@
  */
 
 #include "core/common/container.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/interfaces/native/implementation/ui_context_accessor_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/pipeline/pipeline_base.h"
+#include "global_scope_animation_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextAccessor {
 void DestroyPeerImpl(Ark_UIContext peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
-Ark_UIContext CtorImpl()
+Ark_UIContext ConstructImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<UIContextPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Font GetFontImpl(Ark_UIContext peer)
+Ark_drawing_Font GetFontImpl(Ark_UIContext peer)
 {
     return {};
 }
@@ -57,6 +61,7 @@ void AnimateToImpl(Ark_UIContext peer,
                    const Ark_AnimateParam* value,
                    const Callback_Void* event)
 {
+    AnimateToInner(value, event, false);
 }
 void ShowTextPickerDialogImpl(Ark_UIContext peer,
                               const Ark_TextPickerDialogOptions* options)
@@ -70,53 +75,149 @@ void AnimateToImmediatelyImpl(Ark_UIContext peer,
                               const Ark_AnimateParam* param,
                               const Callback_Void* event)
 {
+    AnimateToInner(param, event, true);
 }
-Ark_Union_FrameNode_Undefined GetFrameNodeByIdImpl(Ark_UIContext peer,
-                                                   const Ark_String* id)
+Opt_FrameNode GetFrameNodeByIdImpl(Ark_UIContext peer,
+                                   const Ark_String* id)
 {
     return {};
 }
-Ark_Union_FrameNode_Undefined GetAttachedFrameNodeByIdImpl(Ark_UIContext peer,
-                                                           const Ark_String* id)
+Opt_FrameNode GetAttachedFrameNodeByIdImpl(Ark_UIContext peer,
+                                           const Ark_String* id)
 {
     return {};
 }
-Ark_Union_FrameNode_Undefined GetFrameNodeByUniqueIdImpl(Ark_UIContext peer,
-                                                         const Ark_Number* id)
+Opt_FrameNode GetFrameNodeByUniqueIdImpl(Ark_UIContext peer,
+                                         const Ark_Number* id)
 {
     return {};
 }
 Ark_Number Vp2pxImpl(Ark_UIContext peer,
                      const Ark_Number* value)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    double vpValue = Converter::Convert<double>(*value);
+    double density = PipelineBase::GetCurrentDensity();
+    double pxValue = vpValue * density;
+    return Converter::ArkValue<Ark_Number>(pxValue);
 }
 Ark_Number Px2vpImpl(Ark_UIContext peer,
                      const Ark_Number* value)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    double pxValue = Converter::Convert<double>(*value);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density) || density == 0) {
+        return Converter::ArkValue<Ark_Number>(0);
+    }
+    double vpValue = pxValue / density;
+    return Converter::ArkValue<Ark_Number>(vpValue);
 }
 Ark_Number Fp2pxImpl(Ark_UIContext peer,
                      const Ark_Number* value)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    double density = PipelineBase::GetCurrentDensity();
+    double fpValue = Converter::Convert<double>(*value);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, invalid);
+    auto pipelineContext = container->GetPipelineContext();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
+    double pxValue = fpValue * density * fontScale;
+    return Converter::ArkValue<Ark_Number>(pxValue);
 }
 Ark_Number Px2fpImpl(Ark_UIContext peer,
                      const Ark_Number* value)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        return Converter::ArkValue<Ark_Number>(0);
+    }
+    double pxValue = Converter::Convert<double>(*value);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, invalid);
+    auto pipelineContext = container->GetPipelineContext();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
+    double ratio = density * fontScale;
+    double fpValue = pxValue / ratio;
+    return Converter::ArkValue<Ark_Number>(fpValue);
 }
 Ark_Number Lpx2pxImpl(Ark_UIContext peer,
                       const Ark_Number* value)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, invalid);
+
+    auto pipelineContext = container->GetPipelineContext();
+#ifdef ARKUI_CAPI_UNITTEST
+    CHECK_NULL_RETURN(pipelineContext, invalid);
+    auto width = pipelineContext->GetCurrentWindowRect().Width();
+    static WindowConfig windowConfig;
+#else
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, invalid);
+    auto width = window->GetCurrentWindowRect().Width();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, invalid);
+    auto windowConfig = frontend->GetWindowConfig();
+#endif // ARKUI_CAPI_UNITTEST
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        int32_t multiplier = 2;
+        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
+    double lpxValue = Converter::Convert<double>(*value);
+    double pxValue = lpxValue * windowConfig.designWidthScale;
+    return Converter::ArkValue<Ark_Number>(pxValue);
 }
 Ark_Number Px2lpxImpl(Ark_UIContext peer,
                       const Ark_Number* value)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(value, invalid);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, invalid);
+
+    auto pipelineContext = container->GetPipelineContext();
+#ifdef ARKUI_CAPI_UNITTEST
+    CHECK_NULL_RETURN(pipelineContext, invalid);
+    auto width = pipelineContext->GetCurrentWindowRect().Width();
+    static WindowConfig windowConfig;
+#else
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, invalid);
+    auto width = window->GetCurrentWindowRect().Width();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, invalid);
+    auto windowConfig = frontend->GetWindowConfig();
+#endif // ARKUI_CAPI_UNITTEST
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        int32_t multiplier = 2;
+        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
+    double pxValue = Converter::Convert<double>(*value);
+    double lpxValue = pxValue / windowConfig.designWidthScale;
+    return Converter::ArkValue<Ark_Number>(lpxValue);
 }
-Ark_Union_Context_Undefined GetHostContextImpl(Ark_UIContext peer)
+Opt_common_Context GetHostContextImpl(Ark_UIContext peer)
 {
     return {};
 }
@@ -125,23 +226,63 @@ void SetDynamicDimmingImpl(Ark_UIContext peer,
                            const Ark_Number* value)
 {
 }
+Opt_String GetWindowNameImpl(Ark_UIContext peer)
+{
+#ifdef WRONG_CODE
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, {});
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, {});
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    std::string windowName = window->GetWindowName();
+    return Converter::ArkValue<Ark_String>(windowName, Converter::FC);
+#else
+    return {};
+#endif
+}
+Ark_WidthBreakpoint GetWindowWidthBreakpointImpl(Ark_UIContext peer)
+{
+#ifdef WRONG_CODE
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    int32_t windowWidthBreakpoint = ViewAbstractModelStatic::GetWindowWidthBreakpoint();
+    return Converter::ArkValue<Ark_Number>(windowWidthBreakpoint);
+#else
+    return {};
+#endif
+}
+Ark_HeightBreakpoint GetWindowHeightBreakpointImpl(Ark_UIContext peer)
+{
+#ifdef WRONG_CODE
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    int32_t windowHeightBreakpoint = ViewAbstractModelStatic::GetWindowHeightBreakpoint();
+    return Converter::ArkValue<Ark_Number>(windowHeightBreakpoint);
+#else
+    return {};
+#endif
+}
 void OpenBindSheetImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
                        Ark_UIContext peer,
                        Ark_ComponentContent bindSheetContent,
                        const Opt_SheetOptions* sheetOptions,
-                       const Opt_Number* targetId)
+                       const Opt_Number* targetId,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void UpdateBindSheetImpl(Ark_VMContext vmContext,
+                         Ark_AsyncWorkerPtr asyncWorker,
                          Ark_UIContext peer,
                          Ark_ComponentContent bindSheetContent,
                          const Ark_SheetOptions* sheetOptions,
-                         const Opt_Boolean* partialUpdate)
+                         const Opt_Boolean* partialUpdate,
+                         const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void CloseBindSheetImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
                         Ark_UIContext peer,
-                        Ark_ComponentContent bindSheetContent)
+                        Ark_ComponentContent bindSheetContent,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void ClearResourceCacheImpl(Ark_VMContext vmContext,
@@ -156,34 +297,12 @@ Ark_Number GetMaxFontScaleImpl(Ark_UIContext peer)
 {
     return {};
 }
-Ark_String GetWindowNameImpl(const Ark_Number* instanceId)
-{
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, {});
-    auto window = context->GetWindow();
-    CHECK_NULL_RETURN(window, {});
-    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
-    std::string windowName = window->GetWindowName();
-    return Converter::ArkValue<Ark_String>(windowName, Converter::FC);
-}
-Ark_Number GetWindowWidthBreakpoint(const Ark_Number* instanceId)
-{
-    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
-    int32_t windowWidthBreakpoint = ViewAbstractModelStatic::GetWindowWidthBreakpoint();
-    return Converter::ArkValue<Ark_Number>(windowWidthBreakpoint);
-}
-Ark_Number GetWindowHeightBreakpoint(const Ark_Number* instanceId)
-{
-    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
-    int32_t windowHeightBreakpoint = ViewAbstractModelStatic::GetWindowHeightBreakpoint();
-    return Converter::ArkValue<Ark_Number>(windowHeightBreakpoint);
-}
 } // UIContextAccessor
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
 {
     static const GENERATED_ArkUIUIContextAccessor UIContextAccessorImpl {
         UIContextAccessor::DestroyPeerImpl,
-        UIContextAccessor::CtorImpl,
+        UIContextAccessor::ConstructImpl,
         UIContextAccessor::GetFinalizerImpl,
         UIContextAccessor::GetFontImpl,
         UIContextAccessor::GetFilteredInspectorTreeImpl,
@@ -203,15 +322,9 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
         UIContextAccessor::Px2lpxImpl,
         UIContextAccessor::GetHostContextImpl,
         UIContextAccessor::SetDynamicDimmingImpl,
-        UIContextAccessor::OpenBindSheetImpl,
-        UIContextAccessor::UpdateBindSheetImpl,
-        UIContextAccessor::CloseBindSheetImpl,
-        UIContextAccessor::ClearResourceCacheImpl,
-        UIContextAccessor::IsFollowingSystemFontScaleImpl,
-        UIContextAccessor::GetMaxFontScaleImpl,
         UIContextAccessor::GetWindowNameImpl,
-        UIContextAccessor::GetWindowWidthBreakpoint,
-        UIContextAccessor::GetWindowHeightBreakpoint,
+        UIContextAccessor::GetWindowWidthBreakpointImpl,
+        UIContextAccessor::GetWindowHeightBreakpointImpl,
     };
     return &UIContextAccessorImpl;
 }

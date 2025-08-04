@@ -41,7 +41,7 @@ void DestroyPeerImpl(Ark_AxisEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_AxisEvent CtorImpl()
+Ark_AxisEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<AxisEventPeer>();
 }
@@ -242,7 +242,7 @@ Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
     return Converter::ArkValue<Opt_Number>(info->GetScrollStep());
 }
 void SetScrollStepImpl(Ark_AxisEvent peer,
-                       const Ark_Number* scrollStep)
+                       const Opt_Number* scrollStep)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(scrollStep);
@@ -273,7 +273,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
 {
     static const GENERATED_ArkUIAxisEventAccessor AxisEventAccessorImpl {
         AxisEventAccessor::DestroyPeerImpl,
-        AxisEventAccessor::CtorImpl,
+        AxisEventAccessor::ConstructImpl,
         AxisEventAccessor::GetFinalizerImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,

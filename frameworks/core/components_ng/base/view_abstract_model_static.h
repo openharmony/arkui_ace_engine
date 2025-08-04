@@ -25,7 +25,6 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
@@ -93,7 +92,7 @@ public:
     {
         return ViewAbstract::GetWindowHeightBreakpoint();
     }
-    
+
     static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
     {
         ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));
@@ -272,7 +271,7 @@ public:
     static void SetAlignRules(FrameNode* frameNode,
         const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
-    static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+    static void SetBias(FrameNode* frameNode, const std::optional<float>& horizontal,
         const std::optional<float>& vertical);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
@@ -298,8 +297,8 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
-    static void SetFocusScopePriority(
-        FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
+        const std::optional<uint32_t>& focusPriority);
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);

@@ -1,0 +1,495 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.graphics.drawing;
+import ohos.multimedia.image.default as image;
+import ohos.graphics.common2D.default as common2D;
+[DefaultExport]
+namespace drawing {
+    dictionary BlendMode {
+        number CLEAR = 0;
+        number SRC = 1;
+        number DST = 2;
+        number SRC_OVER = 3;
+        number DST_OVER = 4;
+        number SRC_IN = 5;
+        number DST_IN = 6;
+        number SRC_OUT = 7;
+        number DST_OUT = 8;
+        number SRC_ATOP = 9;
+        number DST_ATOP = 10;
+        number XOR = 11;
+        number PLUS = 12;
+        number MODULATE = 13;
+        number SCREEN = 14;
+        number OVERLAY = 15;
+        number DARKEN = 16;
+        number LIGHTEN = 17;
+        number COLOR_DODGE = 18;
+        number COLOR_BURN = 19;
+        number HARD_LIGHT = 20;
+        number SOFT_LIGHT = 21;
+        number DIFFERENCE = 22;
+        number EXCLUSION = 23;
+        number MULTIPLY = 24;
+        number HUE = 25;
+        number SATURATION = 26;
+        number COLOR = 27;
+        number LUMINOSITY = 28;
+    };
+    dictionary PathDirection {
+        number CLOCKWISE = 0;
+        number COUNTER_CLOCKWISE = 1;
+    };
+    dictionary PathFillType {
+        number WINDING = 0;
+        number EVEN_ODD = 1;
+        number INVERSE_WINDING = 2;
+        number INVERSE_EVEN_ODD = 3;
+    };
+    dictionary PathMeasureMatrixFlags {
+        number GET_POSITION_MATRIX = 0;
+        number GET_TANGENT_MATRIX = 1;
+        number GET_POSITION_AND_TANGENT_MATRIX = 2;
+    };
+    [Entity=Class]
+    interface RoundRect {
+        constructor(common2D.Rect rect, number xRadii, number yRadii);
+        void setCorner(CornerPos pos, number x, number y);
+        common2D.Point getCorner(CornerPos pos);
+        void offset(number dx, number dy);
+    };
+    dictionary PathOp {
+        number DIFFERENCE = 0;
+        number INTERSECT = 1;
+        number UNION = 2;
+        number XOR = 3;
+        number REVERSE_DIFFERENCE = 4;
+    };
+    [Entity=Class]
+    interface Path {
+        constructor();
+        constructor(Path path);
+        void moveTo(number x, number y);
+        void lineTo(number x, number y);
+        void arcTo(number x1, number y1, number x2, number y2, number startDeg, number sweepDeg);
+        void quadTo(number ctrlX, number ctrlY, number endX, number endY);
+        void conicTo(number ctrlX, number ctrlY, number endX, number endY, number weight);
+        void cubicTo(number ctrlX1, number ctrlY1, number ctrlX2, number ctrlY2, number endX, number endY);
+        void rMoveTo(number dx, number dy);
+        void rLineTo(number dx, number dy);
+        void rQuadTo(number dx1, number dy1, number dx2, number dy2);
+        void rConicTo(number ctrlX, number ctrlY, number endX, number endY, number weight);
+        void rCubicTo(number ctrlX1, number ctrlY1, number ctrlX2, number ctrlY2, number endX, number endY);
+        void addPolygon(sequence<common2D.Point> points, boolean close);
+        boolean op(Path path, PathOp pathOp);
+        void addArc(common2D.Rect rect, number startAngle, number sweepAngle);
+        void addCircle(number x, number y, number radius, PathDirection pathDirection);
+        void addOval(common2D.Rect rect, number start, PathDirection pathDirection);
+        void addRect(common2D.Rect rect, PathDirection pathDirection);
+        void addRoundRect(RoundRect roundRect, PathDirection pathDirection);
+        void addPath(Path path, (Matrix or undefined) matrix);
+        void transform(Matrix matrix);
+        boolean contains(number x, number y);
+        void setFillType(PathFillType pathFillType);
+        common2D.Rect getBounds();
+        void close();
+        Path offset(number dx, number dy);
+        void reset();
+        number getLength(boolean forceClosed);
+        boolean getPositionAndTangent(boolean forceClosed, number distance, common2D.Point position, common2D.Point tangent);
+        boolean isClosed();
+        boolean getMatrix(boolean forceClosed, number distance, Matrix matrix, PathMeasureMatrixFlags flags);
+        boolean buildFromSvgString(String str);
+    };
+    dictionary PointMode {
+        number POINTS = 0;
+        number LINES = 1;
+        number POLYGON = 2;
+    };
+    dictionary FilterMode {
+        number FILTER_MODE_NEAREST = 0;
+        number FILTER_MODE_LINEAR = 1;
+    };
+    dictionary ShadowFlag {
+        number NONE = 0;
+        number TRANSPARENT_OCCLUDER = 1;
+        number GEOMETRIC_ONLY = 2;
+        number ALL = 3;
+    };
+    [Entity=Class]
+    interface SamplingOptions {
+        constructor();
+        constructor(FilterMode filterMode);
+    };
+    [Entity=Class]
+    interface Canvas {
+        constructor(image.PixelMap pixelmap);
+        void drawRect(common2D.Rect rect);
+        void drawRect(number left, number top, number right, number bottom);
+        void drawRoundRect(RoundRect roundRect);
+        void drawNestedRoundRect(RoundRect outer, RoundRect inner);
+        void drawBackground(Brush brush);
+        void drawShadow(Path path, common2D.Point3d planeParams, common2D.Point3d devLightPos, number lightRadius, common2D.Color ambientColor, common2D.Color spotColor, ShadowFlag flag);
+        void drawShadow(Path path, common2D.Point3d planeParams, common2D.Point3d devLightPos, number lightRadius, number ambientColor, number spotColor, ShadowFlag flag);
+        void drawCircle(number x, number y, number radius);
+        void drawImage(image.PixelMap pixelmap, number left, number top, SamplingOptions samplingOptions);
+        void drawImageRect(image.PixelMap pixelmap, common2D.Rect dstRect, SamplingOptions samplingOptions);
+        void drawImageRectWithSrc(image.PixelMap pixelmap, common2D.Rect srcRect, common2D.Rect dstRect, SamplingOptions samplingOptions, SrcRectConstraint constraint);
+        void drawColor(common2D.Color color, BlendMode blendMode);
+        void drawColor(number color, BlendMode blendMode);
+        void drawColor(number alpha, number red, number green, number blue, BlendMode blendMode);
+        void drawOval(common2D.Rect oval);
+        void drawArc(common2D.Rect arc, number startAngle, number sweepAngle);
+        void drawPoint(number x, number y);
+        void drawPoints(sequence<common2D.Point> points, PointMode mode);
+        void drawPath(Path path);
+        void drawLine(number x0, number y0, number x1, number y1);
+        void drawSingleCharacter(String text, Font font, number x, number y);
+        void drawTextBlob(TextBlob blob, number x, number y);
+        void drawPixelMapMesh(image.PixelMap pixelmap, number meshWidth, number meshHeight, sequence<number> vertices, number vertOffset, sequence<number> colors, number colorOffset);
+        void drawRegion(Region region);
+        void attachPen(Pen pen);
+        void attachBrush(Brush brush);
+        void detachPen();
+        void detachBrush();
+        number save();
+        number saveLayer((common2D.Rect or undefined) rect, (Brush or undefined) brush);
+        void clear(common2D.Color color);
+        void clear(number color);
+        void restore();
+        void restoreToCount(number count);
+        number getSaveCount();
+        number getWidth();
+        number getHeight();
+        common2D.Rect getLocalClipBounds();
+        Matrix getTotalMatrix();
+        void scale(number sx, number sy);
+        void skew(number sx, number sy);
+        void rotate(number degrees, number sx, number sy);
+        void translate(number dx, number dy);
+        void clipPath(Path path, ClipOp clipOp, boolean doAntiAlias);
+        void clipRect(common2D.Rect rect, ClipOp clipOp, boolean doAntiAlias);
+        void concatMatrix(Matrix matrix);
+        void clipRegion(Region region, ClipOp clipOp);
+        void clipRoundRect(RoundRect roundRect, ClipOp clipOp, boolean doAntiAlias);
+        boolean isClipEmpty();
+        void setMatrix(Matrix matrix);
+        void resetMatrix();
+    };
+    dictionary ClipOp {
+        number DIFFERENCE = 0;
+        number INTERSECT = 1;
+    };
+    interface TextBlobRunBuffer {
+        attribute number glyph;
+        attribute number positionX;
+        attribute number positionY;
+    };
+    dictionary TextEncoding {
+        number TEXT_ENCODING_UTF8 = 0;
+        number TEXT_ENCODING_UTF16 = 1;
+        number TEXT_ENCODING_UTF32 = 2;
+        number TEXT_ENCODING_GLYPH_ID = 3;
+    };
+    [Entity=Class]
+    interface TextBlob {
+        constructor();
+        static TextBlob makeFromString(String text, Font font, TextEncoding encoding);
+        static TextBlob makeFromPosText(String text, number len, sequence<common2D.Point> points, Font font);
+        static TextBlob makeFromRunBuffer(sequence<TextBlobRunBuffer> pos, Font font, common2D.Rect bounds);
+        common2D.Rect bounds();
+        number uniqueID();
+    };
+    [Entity=Class]
+    interface Typeface {
+        constructor();
+        String getFamilyName();
+        static Typeface makeFromFile(String filePath);
+    };
+    dictionary FontEdging {
+        number ALIAS = 0;
+        number ANTI_ALIAS = 1;
+        number SUBPIXEL_ANTI_ALIAS = 2;
+    };
+    dictionary FontHinting {
+        number NONE = 0;
+        number SLIGHT = 1;
+        number NORMAL = 2;
+        number FULL = 3;
+    };
+    [Entity=Class]
+    interface Font {
+        constructor();
+        void enableSubpixel(boolean isSubpixel);
+        void enableEmbolden(boolean isEmbolden);
+        void enableLinearMetrics(boolean isLinearMetrics);
+        void setSize(number textSize);
+        number getSize();
+        void setTypeface(Typeface typeface);
+        Typeface getTypeface();
+        FontMetrics getMetrics();
+        number measureSingleCharacter(String text);
+        number measureText(String text, TextEncoding encoding);
+        void setScaleX(number scaleX);
+        void setSkewX(number skewX);
+        void setEdging(FontEdging edging);
+        void setHinting(FontHinting hinting);
+        number countText(String text);
+        void setBaselineSnap(boolean isBaselineSnap);
+        boolean isBaselineSnap();
+        void setEmbeddedBitmaps(boolean isEmbeddedBitmaps);
+        boolean isEmbeddedBitmaps();
+        void setForceAutoHinting(boolean isForceAutoHinting);
+        boolean isForceAutoHinting();
+        sequence<number> getWidths(sequence<number> glyphs);
+        sequence<number> textToGlyphs(String text, number glyphCount);
+        boolean isSubpixel();
+        boolean isLinearMetrics();
+        number getSkewX();
+        boolean isEmbolden();
+        number getScaleX();
+        FontHinting getHinting();
+        FontEdging getEdging();
+        Path createPathForGlyph(number index);
+        sequence<common2D.Rect> getBounds(sequence<number> glyphs);
+        Path getTextPath(String text, number byteLength, number x, number y);
+    };
+    dictionary FontMetricsFlags {
+        number UNDERLINE_THICKNESS_VALID;
+        number UNDERLINE_POSITION_VALID;
+        number STRIKETHROUGH_THICKNESS_VALID;
+        number STRIKETHROUGH_POSITION_VALID;
+        number BOUNDS_INVALID;
+    };
+    interface FontMetrics {
+        [Optional]
+        attribute FontMetricsFlags flags;
+        attribute number top;
+        attribute number ascent;
+        attribute number descent;
+        attribute number bottom;
+        attribute number leading;
+        [Optional]
+        attribute number avgCharWidth;
+        [Optional]
+        attribute number maxCharWidth;
+        [Optional]
+        attribute number xMin;
+        [Optional]
+        attribute number xMax;
+        [Optional]
+        attribute number xHeight;
+        [Optional]
+        attribute number capHeight;
+        [Optional]
+        attribute number underlineThickness;
+        [Optional]
+        attribute number underlinePosition;
+        [Optional]
+        attribute number strikethroughThickness;
+        [Optional]
+        attribute number strikethroughPosition;
+    };
+    [Entity=Class]
+    interface Lattice {
+        constructor();
+        [TypeParameters="T"]
+        static Lattice createImageLattice(sequence<number> xDivs, sequence<number> yDivs, number fXCount, number fYCount, (common2D.Rect or undefined) fBounds, (sequence<RectType> or undefined) fRectTypes, (sequence<T> or undefined) fColors);
+    };
+    dictionary RectType {
+        number DEFAULT = 0;
+        number TRANSPARENT = 1;
+        number FIXEDCOLOR = 2;
+    };
+    [Entity=Class]
+    interface MaskFilter {
+        constructor();
+        static MaskFilter createBlurMaskFilter(BlurType blurType, number sigma);
+    };
+    [Entity=Class]
+    interface PathEffect {
+        constructor();
+        static PathEffect createDashPathEffect(sequence<number> intervals, number phase);
+        static PathEffect createCornerPathEffect(number radius);
+    };
+    [Entity=Class]
+    interface ShaderEffect {
+        constructor();
+        static ShaderEffect createColorShader(number color);
+        static ShaderEffect createLinearGradient(common2D.Point startPt, common2D.Point endPt, sequence<number> colors, TileMode mode, (sequence<number> or undefined) pos, (Matrix or undefined) matrix);
+        static ShaderEffect createRadialGradient(common2D.Point centerPt, number radius, sequence<number> colors, TileMode mode, (sequence<number> or undefined) pos, (Matrix or undefined) matrix);
+        static ShaderEffect createSweepGradient(common2D.Point centerPt, sequence<number> colors, TileMode mode, number startAngle, number endAngle, (sequence<number> or undefined) pos, (Matrix or undefined) matrix);
+        static ShaderEffect createConicalGradient(common2D.Point startPt, number startRadius, common2D.Point endPt, number endRadius, sequence<number> colors, TileMode mode, (sequence<number> or undefined) pos, (Matrix or undefined) matrix);
+    };
+    dictionary TileMode {
+        number CLAMP = 0;
+        number REPEAT = 1;
+        number MIRROR = 2;
+        number DECAL = 3;
+    };
+    [Entity=Class]
+    interface ShadowLayer {
+        constructor();
+        static ShadowLayer create(number blurRadius, number x, number y, common2D.Color color);
+        static ShadowLayer create(number blurRadius, number x, number y, number color);
+    };
+    [Entity=Class]
+    interface ColorFilter {
+        constructor();
+        static ColorFilter createBlendModeColorFilter(common2D.Color color, BlendMode mode);
+        static ColorFilter createBlendModeColorFilter(number color, BlendMode mode);
+        static ColorFilter createComposeColorFilter(ColorFilter outer, ColorFilter inner);
+        static ColorFilter createLinearToSRGBGamma();
+        static ColorFilter createSRGBGammaToLinear();
+        static ColorFilter createLumaColorFilter();
+        static ColorFilter createMatrixColorFilter(sequence<number> matrix);
+    };
+    [Entity=Class]
+    interface ImageFilter {
+        constructor();
+        static ImageFilter createBlurImageFilter(number sigmaX, number sigmaY, TileMode tileMode, (ImageFilter or undefined) imageFilter);
+        static ImageFilter createFromColorFilter(ColorFilter colorFilter, (ImageFilter or undefined) imageFilter);
+    };
+    dictionary JoinStyle {
+        number MITER_JOIN = 0;
+        number ROUND_JOIN = 1;
+        number BEVEL_JOIN = 2;
+    };
+    dictionary CapStyle {
+        number FLAT_CAP = 0;
+        number SQUARE_CAP = 1;
+        number ROUND_CAP = 2;
+    };
+    dictionary BlurType {
+        number NORMAL = 0;
+        number SOLID = 1;
+        number OUTER = 2;
+        number INNER = 3;
+    };
+    [Entity=Class]
+    interface Pen {
+        constructor();
+        constructor(Pen pen);
+        void setMiterLimit(number miter);
+        number getMiterLimit();
+        void setShaderEffect(ShaderEffect shaderEffect);
+        void setColor(common2D.Color color);
+        void setColor(number color);
+        void setColor(number alpha, number red, number green, number blue);
+        common2D.Color getColor();
+        number getHexColor();
+        void setStrokeWidth(number width);
+        number getWidth();
+        void setAntiAlias(boolean aa);
+        boolean isAntiAlias();
+        void setAlpha(number alpha);
+        number getAlpha();
+        void setColorFilter(ColorFilter filter);
+        ColorFilter getColorFilter();
+        void setImageFilter((ImageFilter or undefined) filter);
+        void setMaskFilter(MaskFilter filter);
+        void setPathEffect(PathEffect effect);
+        void setShadowLayer(ShadowLayer shadowLayer);
+        void setBlendMode(BlendMode mode);
+        void setDither(boolean dither);
+        void setJoinStyle(JoinStyle style);
+        JoinStyle getJoinStyle();
+        void setCapStyle(CapStyle style);
+        CapStyle getCapStyle();
+        void reset();
+        boolean getFillPath(Path src, Path dst);
+    };
+    [Entity=Class]
+    interface Brush {
+        constructor();
+        constructor(Brush brush);
+        void setColor(common2D.Color color);
+        void setColor(number color);
+        void setColor(number alpha, number red, number green, number blue);
+        common2D.Color getColor();
+        number getHexColor();
+        void setAntiAlias(boolean aa);
+        boolean isAntiAlias();
+        void setAlpha(number alpha);
+        number getAlpha();
+        void setColorFilter(ColorFilter filter);
+        ColorFilter getColorFilter();
+        void setImageFilter((ImageFilter or undefined) filter);
+        void setMaskFilter(MaskFilter filter);
+        void setShadowLayer(ShadowLayer shadowLayer);
+        void setShaderEffect(ShaderEffect shaderEffect);
+        void setBlendMode(BlendMode mode);
+        void reset();
+    };
+    [Entity=Class]
+    interface Matrix {
+        constructor();
+        void setRotation(number degree, number px, number py);
+        void setScale(number sx, number sy, number px, number py);
+        void setTranslation(number dx, number dy);
+        void setMatrix(sequence<number> values);
+        void preConcat(Matrix matrix);
+        boolean isEqual(Matrix matrix);
+        boolean invert(Matrix matrix);
+        boolean isIdentity();
+        number getValue(number index);
+        void postRotate(number degree, number px, number py);
+        void postScale(number sx, number sy, number px, number py);
+        void postTranslate(number dx, number dy);
+        void preRotate(number degree, number px, number py);
+        void preScale(number sx, number sy, number px, number py);
+        void preTranslate(number dx, number dy);
+        void reset();
+        sequence<common2D.Point> mapPoints(sequence<common2D.Point> src);
+        sequence<number> getAll();
+        boolean mapRect(common2D.Rect dst, common2D.Rect src);
+        boolean setRectToRect(common2D.Rect src, common2D.Rect dst, ScaleToFit scaleToFit);
+        boolean setPolyToPoly(sequence<common2D.Point> src, sequence<common2D.Point> dst, number count);
+    };
+    dictionary ScaleToFit {
+        number FILL_SCALE_TO_FIT = 0;
+        number START_SCALE_TO_FIT = 1;
+        number CENTER_SCALE_TO_FIT = 2;
+        number END_SCALE_TO_FIT = 3;
+    };
+    [Entity=Class]
+    interface Region {
+        constructor();
+        boolean isPointContained(number x, number y);
+        boolean isRegionContained(Region other);
+        boolean op(Region region, RegionOp regionOp);
+        boolean quickReject(number left, number top, number right, number bottom);
+        boolean setPath(Path path, Region clip);
+        boolean setRect(number left, number top, number right, number bottom);
+    };
+    dictionary RegionOp {
+        number DIFFERENCE = 0;
+        number INTERSECT = 1;
+        number UNION = 2;
+        number XOR = 3;
+        number REVERSE_DIFFERENCE = 4;
+        number REPLACE = 5;
+    };
+    dictionary CornerPos {
+        number TOP_LEFT_POS = 0;
+        number TOP_RIGHT_POS = 1;
+        number BOTTOM_RIGHT_POS = 2;
+        number BOTTOM_LEFT_POS = 3;
+    };
+    dictionary SrcRectConstraint {
+        number STRICT = 0;
+        number FAST = 1;
+    };
+};

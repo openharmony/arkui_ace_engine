@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
     delete peer;
 }
-Ark_TextContentControllerBase CtorImpl()
+Ark_TextContentControllerBase ConstructImpl()
 {
     return new TextContentControllerBasePeer();
 }
@@ -63,8 +63,7 @@ Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer && peer->controller_ && text, errValue);
     auto textConv = Converter::Convert<std::u16string>(*text);
-    auto optionsConv =
-        textOperationOptions ? Converter::OptConvert<int32_t>(*textOperationOptions) : std::nullopt;
+    auto optionsConv = Converter::OptConvertPtr<int32_t>(textOperationOptions);
     const auto defaultOffset = -1;
     auto retValue = peer->controller_->AddText(textConv, optionsConv.value_or(defaultOffset));
     return Converter::ArkValue<Ark_Number>(retValue);
@@ -73,7 +72,7 @@ void DeleteTextImpl(Ark_TextContentControllerBase peer,
                     const Opt_TextRange* range)
 {
     CHECK_NULL_VOID(peer && peer->controller_);
-    auto rangeConv = range ? Converter::OptConvert<TextRange>(*range) : std::nullopt;
+    auto rangeConv = Converter::OptConvertPtr<TextRange>(range);
     if (rangeConv.has_value()) {
         peer->controller_->DeleteText(rangeConv.value().start, rangeConv.value().end);
     }
@@ -95,7 +94,7 @@ Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
 {
     std::u16string result = u"";
     CHECK_NULL_RETURN(peer && peer->controller_ && range, Converter::ArkValue<Ark_String>(result));
-    auto rangeConv = range ? Converter::OptConvert<TextRange>(*range) : std::nullopt;
+    auto rangeConv = Converter::OptConvertPtr<TextRange>(range);
     std::u16string content = peer->controller_->GetText();
     int32_t startIndex = 0;
     int32_t endIndex = content.length();
@@ -118,7 +117,7 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
 {
     static const GENERATED_ArkUITextContentControllerBaseAccessor TextContentControllerBaseAccessorImpl {
         TextContentControllerBaseAccessor::DestroyPeerImpl,
-        TextContentControllerBaseAccessor::CtorImpl,
+        TextContentControllerBaseAccessor::ConstructImpl,
         TextContentControllerBaseAccessor::GetFinalizerImpl,
         TextContentControllerBaseAccessor::GetCaretOffsetImpl,
         TextContentControllerBaseAccessor::GetTextContentRectImpl,

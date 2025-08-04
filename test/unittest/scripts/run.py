@@ -196,7 +196,7 @@ def get_tests_out_path(debug):
         code_path = os.path.join(code_path, "exe.unstripped/clang_x64")
         os.environ["ASAN_SYMBOLIZER_PATH"] = os.path.join(base_path,
             "prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-symbolizer")
-    code_path = os.path.join(code_path, "tests/unittest/ace_engine")
+    code_path = os.path.join(code_path, "tests/unittest/ace_engine/ace_engine")
     return code_path
 
 

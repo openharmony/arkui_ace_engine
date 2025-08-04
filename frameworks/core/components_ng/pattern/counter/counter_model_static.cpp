@@ -50,6 +50,7 @@ RefPtr<FrameNode> CounterModelStatic::CreateFrameNode(int32_t nodeId)
     auto addId = counterPattern->GetAddId();
     if (!hasSubNode) {
         auto subNode = CreateButtonChild(subId, SUB, counterTheme);
+        CHECK_NULL_RETURN(subNode, nullptr);
         subNode->MountToParent(counterNode);
     }
     if (!hasContentNode) {
@@ -157,7 +158,10 @@ RefPtr<FrameNode> CounterModelStatic::CreateButtonChild(
 {
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    CHECK_NULL_RETURN(buttonNode, nullptr);
+    auto eventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    eventHub->SetStateEffect(true);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateCreateWithLabel(false);
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(

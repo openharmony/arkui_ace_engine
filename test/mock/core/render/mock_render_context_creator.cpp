@@ -18,6 +18,6 @@
 namespace OHOS::Ace::NG {
 RefPtr<RenderContext> RenderContext::Create()
 {
-    return MakeRefPtr<MockRenderContext>();
+    return MakeRefPtr<::testing::NiceMock<MockRenderContext>>();
 }
 } // namespace OHOS::Ace::NG

@@ -33,13 +33,13 @@ void DestroyPeerImpl(Ark_PinchGestureInterface peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PinchGestureInterface CtorImpl(const Opt_Literal_Number_distance_fingers* value)
+Ark_PinchGestureInterface ConstructImpl(const Ark_PinchGestureInterface_Invoke_Literal* value)
 {
     auto peer = PeerUtils::CreatePeer<PinchGestureInterfacePeer>();
     auto fingers = DEFAULT_PINCH_FINGER;
     auto distance = DEFAULT_PINCH_DISTANCE;
-    std::optional<Ark_Literal_Number_distance_fingers> params = value ? Converter::GetOpt(*value) : std::nullopt;
-    if (params.has_value()) {
+    auto params = value;
+    if (params) {
         fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_PINCH_FINGER);
         fingers = fingers <= DEFAULT_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingers;
         fingers = fingers > DEFAULT_MAX_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingers;
@@ -115,7 +115,7 @@ const GENERATED_ArkUIPinchGestureInterfaceAccessor* GetPinchGestureInterfaceAcce
 {
     static const GENERATED_ArkUIPinchGestureInterfaceAccessor PinchGestureInterfaceAccessorImpl {
         PinchGestureInterfaceAccessor::DestroyPeerImpl,
-        PinchGestureInterfaceAccessor::CtorImpl,
+        PinchGestureInterfaceAccessor::ConstructImpl,
         PinchGestureInterfaceAccessor::GetFinalizerImpl,
         PinchGestureInterfaceAccessor::OnActionStartImpl,
         PinchGestureInterfaceAccessor::OnActionUpdateImpl,

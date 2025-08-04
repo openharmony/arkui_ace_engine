@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.RenderNode;
+
+import arkui.Graphics.DrawContext as DrawContext;
+import arkui.Graphics.Size as Size;
+import arkui.Graphics.Offset as Offset;
+import arkui.Graphics.Position as Position;
+import arkui.Graphics.Pivot as Pivot;
+import arkui.Graphics.Scale as Scale;
+import arkui.Graphics.Translation as Translation;
+import arkui.Graphics.Matrix4 as Matrix4;
+import arkui.Graphics.Rotation as Rotation;
+import arkui.Graphics.Frame as Frame;
+import arkui.Graphics.BorderRadiuses as BorderRadiuses;
+import arkui.Graphics.ShapeMask as ShapeMask;
+import arkui.Graphics.ShapeClip as ShapeClip;
+import arkui.Graphics.Edges as Edges;
+import arkui.Graphics.LengthMetricsUnit as LengthMetricsUnit;
+
+import arkui.component.units.EdgeStyles as EdgeStyles;
+
+typedef Vector2 Offset_graphics;  // TODO must be removed when names collision problem is resolved
+
+[Entity=Interface]
+interface BorderRadiuses_graphics { // TODO must be removed when names collision problem is resolved
+    attribute number topLeft;
+    attribute number topRight;
+    attribute number bottomLeft;
+    attribute number bottomRight;
+};
+
+[Entity=Interface]
+interface RenderNode {
+    constructor();
+    attribute number backgroundColor;
+    attribute boolean clipToFrame;
+    attribute number opacity;
+    attribute Size size;
+    attribute Position position;
+    attribute Frame frame;
+    attribute Pivot pivot;
+    attribute Scale scale;
+    attribute Translation translation;
+    attribute Rotation rotation;
+    attribute Matrix4 transform;
+    attribute number shadowColor;
+    attribute Offset_graphics shadowOffset;
+    attribute String label;
+    attribute number shadowAlpha;
+    attribute number shadowElevation;
+    attribute number shadowRadius;
+    attribute EdgeStyles borderStyle;
+    attribute Edges borderWidth;
+    attribute Edges borderColor;
+    attribute BorderRadiuses_graphics borderRadius;
+    attribute ShapeMask shapeMask;
+    attribute ShapeClip shapeClip;
+    attribute boolean markNodeGroup;
+    attribute LengthMetricsUnit lengthMetricsUnit;
+    void appendChild(RenderNode node);
+    void insertChildAfter(RenderNode child, (RenderNode or undefined) sibling);
+    void removeChild(RenderNode node);
+    void clearChildren();
+    (RenderNode or undefined) getChild(number index);
+    (RenderNode or undefined) getFirstChild();
+    (RenderNode or undefined) getNextSibling();
+    (RenderNode or undefined) getPreviousSibling();
+    void draw(DrawContext context);
+    void invalidate();
+    void dispose();
+};

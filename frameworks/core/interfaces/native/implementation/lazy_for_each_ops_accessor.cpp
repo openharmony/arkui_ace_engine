@@ -27,13 +27,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
-Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer mark, Ark_Int32 direction)
-{
-    return nullptr;
-}
-void OnRangeUpdateImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_RangeUpdate* updater) {}
-void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index) {}
-void PrepareImpl(Ark_NativePointer node, Ark_Int32 totalCount, Ark_Int32 offset) {}
 void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -42,9 +35,10 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
     CHECK_NULL_VOID(lazyNode);
     lazyNode->OnDataChange(startIdx, changeCnt, UINode::NotificationType::START_CHANGE_POSITION);
 }
-
-void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_CreateItem* creator,
-    const Callback_RangeUpdate* updater)
+void SyncImpl(Ark_NativePointer node,
+              Ark_Int32 totalCount,
+              const Callback_CreateItem* creator,
+              const Callback_RangeUpdate* updater)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode && creator && updater);
@@ -57,18 +51,13 @@ void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_Creat
             int32_t index) { return AceType::DynamicCast<UINode>(callback.BuildSync(index)); },
         [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); });
 }
-} // namespace LazyForEachOpsAccessor
+} // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-        LazyForEachOpsAccessor::NeedMoreElementsImpl,
-        LazyForEachOpsAccessor::OnRangeUpdateImpl,
-        LazyForEachOpsAccessor::SetCurrentIndexImpl,
-        LazyForEachOpsAccessor::PrepareImpl,
-        LazyForEachOpsAccessor::NotifyChangeImpl,
         LazyForEachOpsAccessor::SyncImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

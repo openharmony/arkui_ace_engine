@@ -202,7 +202,7 @@ void ShaderInputBufferImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto shaderInputVec = Converter::OptConvert<std::vector<float>>(*value);
     if (!shaderInputVec) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     int32_t length = shaderInputVec->size();
@@ -251,7 +251,7 @@ void CustomRenderImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(uri);
     auto update = Converter::OptConvert<bool>(*selfRenderUpdate);
     if (!update) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto uriString = Converter::OptConvert<std::string>(*uri); //uriString.value_or("")

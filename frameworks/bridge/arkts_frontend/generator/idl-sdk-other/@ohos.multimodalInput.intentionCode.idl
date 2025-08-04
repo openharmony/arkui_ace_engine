@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.multimodalInput.intentionCode;
+dictionary IntentionCode {
+    number INTENTION_UNKNOWN = -1;
+    number INTENTION_UP = 1;
+    number INTENTION_DOWN = 2;
+    number INTENTION_LEFT = 3;
+    number INTENTION_RIGHT = 4;
+    number INTENTION_SELECT = 5;
+    number INTENTION_ESCAPE = 6;
+    number INTENTION_BACK = 7;
+    number INTENTION_FORWARD = 8;
+    number INTENTION_MENU = 9;
+    number INTENTION_PAGE_UP = 11;
+    number INTENTION_PAGE_DOWN = 12;
+    number INTENTION_ZOOM_OUT = 13;
+    number INTENTION_ZOOM_IN = 14;
+};

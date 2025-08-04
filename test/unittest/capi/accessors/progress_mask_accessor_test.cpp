@@ -33,7 +33,7 @@ public:
         const auto value = Converter::ArkValue<Ark_Number>(-1);
         const auto valueMax = Converter::ArkValue<Ark_Number>(-1);
         const auto color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("");
-        return accessor_->ctor(&value, &valueMax, &color);
+        return accessor_->construct(&value, &valueMax, &color);
     }
 
     ProgressMaskPeer* CreatePeerInstanceT()
@@ -120,7 +120,7 @@ HWTEST_F(ProgressMaskAccessorTest, ctorValidTest, TestSize.Level1)
         },
     };
     for (const auto& [inValue, outValue, inMax, outMax, inColor, outColor] : validValues) {
-        auto peer = static_cast<ProgressMaskPeer*>(accessor_->ctor(&inValue, &inMax, &inColor));
+        auto peer = static_cast<ProgressMaskPeer*>(accessor_->construct(&inValue, &inMax, &inColor));
         const auto property = peer->GetProperty();
         ASSERT_NE(property, nullptr);
         EXPECT_EQ(property->GetValue(), outValue);
@@ -161,7 +161,7 @@ HWTEST_F(ProgressMaskAccessorTest, ctorInvalidTest, TestSize.Level1)
         },
     };
     for (const auto& [inValue, outValue, inMax, outMax, inColor, outColor] : validValues) {
-        auto peer = static_cast<ProgressMaskPeer*>(accessor_->ctor(&inValue, &inMax, &inColor));
+        auto peer = static_cast<ProgressMaskPeer*>(accessor_->construct(&inValue, &inMax, &inColor));
         const auto property = peer->GetProperty();
         ASSERT_NE(property, nullptr);
         EXPECT_EQ(property->GetValue(), outValue);

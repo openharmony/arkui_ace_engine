@@ -20,20 +20,20 @@
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ICurveAccessor {
-void DestroyPeerImpl(Ark_ICurve peer)
+namespace curves_ICurveAccessor {
+void DestroyPeerImpl(Ark_curves_ICurve peer)
 {
     delete peer;
 }
-Ark_ICurve CtorImpl()
+Ark_curves_ICurve ConstructImpl()
 {
-    return new ICurvePeer();
+    return new curves_ICurvePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number InterpolateImpl(Ark_ICurve peer,
+Ark_Number InterpolateImpl(Ark_curves_ICurve peer,
                            const Ark_Number* fraction)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
@@ -48,16 +48,16 @@ Ark_Number InterpolateImpl(Ark_ICurve peer,
     }
     return Converter::ArkValue<Ark_Number>(peer->handler->Move(time));
 }
-} // ICurveAccessor
-const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
+} // curves_ICurveAccessor
+const GENERATED_ArkUICurves_ICurveAccessor* GetCurves_ICurveAccessor()
 {
-    static const GENERATED_ArkUIICurveAccessor ICurveAccessorImpl {
-        ICurveAccessor::DestroyPeerImpl,
-        ICurveAccessor::CtorImpl,
-        ICurveAccessor::GetFinalizerImpl,
-        ICurveAccessor::InterpolateImpl,
+    static const GENERATED_ArkUICurves_ICurveAccessor Curves_ICurveAccessorImpl {
+        curves_ICurveAccessor::DestroyPeerImpl,
+        curves_ICurveAccessor::ConstructImpl,
+        curves_ICurveAccessor::GetFinalizerImpl,
+        curves_ICurveAccessor::InterpolateImpl,
     };
-    return &ICurveAccessorImpl;
+    return &Curves_ICurveAccessorImpl;
 }
 
 }

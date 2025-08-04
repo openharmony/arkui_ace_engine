@@ -49,8 +49,8 @@ public:
     }
 };
 class DrawingCanvasAccessorTest
-    : public AccessorTestMyBase<GENERATED_ArkUIDrawingCanvasAccessor,
-    &GENERATED_ArkUIAccessors::getDrawingCanvasAccessor, DrawingCanvasPeerImpl> {
+    : public AccessorTestMyBase<GENERATED_ArkUIDrawing_CanvasAccessor,
+    &GENERATED_ArkUIAccessors::getDrawing_CanvasAccessor, DrawingCanvasPeerImpl> {
 public:
     void SetUp() override
     {
@@ -59,11 +59,11 @@ public:
         auto colors = new uint32_t[width * height];
         auto pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(colors));
 
-        PixelMapPeer pixelMapPeer;
+        image_PixelMapPeer pixelMapPeer;
         pixelMapPeer.pixelMap = pixelMap;
-        Ark_PixelMap arkPixelmap = &pixelMapPeer;
+        Ark_image_PixelMap arkPixelmap = &pixelMapPeer;
 
-        peer_ = static_cast<DrawingCanvasPeerImpl *>(accessor_->ctor(arkPixelmap));
+        peer_ = static_cast<DrawingCanvasPeerImpl *>(accessor_->construct(arkPixelmap));
         ASSERT_NE(peer_, nullptr);
         pattern_ = new MockPattern();
         auto pattern = AceType::Claim(pattern_);
@@ -80,9 +80,9 @@ public:
  * @tc.desc: Testing function of drawRect
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingCanvasAccessorTest, drawRectTest, TestSize.Level1)
+HWTEST_F(DrawingCanvasAccessorTest, drawRect1Test, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->drawRect, nullptr);
+    ASSERT_NE(accessor_->drawRect1, nullptr);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(pattern_, nullptr);
 
@@ -93,8 +93,8 @@ HWTEST_F(DrawingCanvasAccessorTest, drawRectTest, TestSize.Level1)
     auto y = Converter::ArkValue<Ark_Number>(START);
     auto w = Converter::ArkValue<Ark_Number>(END);
     auto h = Converter::ArkValue<Ark_Number>(END);
-    auto peer = reinterpret_cast<DrawingCanvasPeer *>(peer_);
-    accessor_->drawRect(peer, &x, &y, &w, &h);
+    auto peer = reinterpret_cast<drawing_CanvasPeer *>(peer_);
+    accessor_->drawRect1(peer, &x, &y, &w, &h);
 }
 
 } // namespace OHOS::Ace::NG

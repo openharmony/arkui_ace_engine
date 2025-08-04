@@ -21,9 +21,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -72,6 +71,7 @@ public:
         accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
 
+        g_isResourceDecoupling = false;
         themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         ASSERT_TRUE(MockPipelineContext::GetCurrent());
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
@@ -132,7 +132,7 @@ public:
         MockThemeStyle::GetInstance()->SetAttr(key, { .type = type, .value = value });
     }
 
-    static void AddResource(uint32_t key, const ResRawValue& value)
+    static void AddResource(int64_t key, const ResRawValue& value)
     {
         AddResource(std::to_string(key), value);
     }
@@ -179,8 +179,20 @@ class AccessorTestBase : public AccessorTestBaseParent<AccessorType, GetAccessor
 public:
     virtual void SetUp(void)
     {
-        ASSERT_NE(this->accessor_->ctor, nullptr);
-        this->peer_ = static_cast<PeerType *>(this->accessor_->ctor());
+        ASSERT_NE(this->accessor_->construct, nullptr);
+        this->peer_ = static_cast<PeerType *>(this->accessor_->construct());
+        ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
+    }
+};
+
+template<typename AccessorType, auto GetAccessorFunc, typename PeerType>
+class AccessorTestBase0 : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType> {
+public:
+    virtual void SetUp(void)
+    {
+        ASSERT_NE(this->accessor_->construct0, nullptr);
+        this->peer_ = static_cast<PeerType *>(this->accessor_->construct0());
         ASSERT_NE(this->peer_, nullptr);
         AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }

@@ -26,6 +26,56 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+std::optional<Converter::PickerValueType> ProcessBindableValue(
+    const Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable& value)
+{
+    std::optional<Converter::PickerValueType> result;
+    Converter::VisitUnion(value,
+        [&result](const Ark_ResourceStr& src) {
+            result = Converter::OptConvert<Converter::PickerValueType>(src);
+        },
+        [&result](const Array_ResourceStr& src) {
+            result = Converter::OptConvert<Converter::PickerValueType>(src);
+        },
+        [&result](const Ark_Bindable_Arkui_Component_Units_ResourceStr& src) {
+            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+            // Implement callback functionality
+        },
+        [&result](const Ark_Bindable_Array_Arkui_Component_Units_ResourceStr& src) {
+            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+            // Implement callback functionality
+        },
+        []{});
+    return result;
+}
+
+std::optional<Converter::PickerSelectedType> ProcessBindableSelected(
+    const Opt_Union_Number_Array_Number_Bindable_Bindable& value)
+{
+    std::optional<Converter::PickerSelectedType> result;
+    Converter::VisitUnion(value,
+        [&result](const Ark_Number& src) {
+            result = Converter::OptConvert<Converter::PickerSelectedType>(src);
+        },
+        [&result](const Array_Number& src) {
+            result = Converter::OptConvert<Converter::PickerSelectedType>(src);
+        },
+        [&result](const Ark_Bindable_Number& src) {
+            result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
+            // Implement callback functionality
+        },
+        [&result](const Ark_Bindable_Array_Number& src) {
+            result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
+            // Implement callback functionality
+        },
+        []{});
+    return result;
+}
+} // namespace
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
 void BuildDialogPropertiesCallbacks(const Ark_TextPickerDialogOptions options, DialogProperties& dialogProps)
@@ -59,7 +109,6 @@ void BuildDialogPropertiesCallbacks(const Ark_TextPickerDialogOptions options, D
         dialogProps.onWillDisappear = onWillDisappear;
     }
 }
-
 DialogProperties BuildDialogProperties(const Ark_TextPickerDialogOptions options)
 {
     DialogProperties dialogProps;
@@ -87,7 +136,6 @@ DialogProperties BuildDialogProperties(const Ark_TextPickerDialogOptions options
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
 }
-
 void BuildCascadeSelection(std::vector<NG::TextCascadePickerOptions>& opts,
     TextPickerSettingData& settingData, std::vector<uint32_t> selectedIndexes,
     std::vector<std::string> selectedValues)
@@ -129,11 +177,10 @@ void BuildCascadeSelection(std::vector<NG::TextCascadePickerOptions>& opts,
         }
     }
 }
-
 void CreateRangeWithSelection(const Ark_TextPickerDialogOptions options, TextPickerSettingData& settingData)
 {
     std::vector<uint32_t> selectedIndexes;
-    auto pickerSelectedOpt = Converter::OptConvert<Converter::PickerSelectedType>(options.selected);
+    auto pickerSelectedOpt = ProcessBindableSelected(options.selected);
     if (pickerSelectedOpt) {
         auto selectedValue = pickerSelectedOpt.value();
         if (auto selected = std::get_if<uint32_t>(&selectedValue); selected) {
@@ -143,7 +190,7 @@ void CreateRangeWithSelection(const Ark_TextPickerDialogOptions options, TextPic
         }
     }
     std::vector<std::string> selectedValues;
-    auto pickerValueOpt = Converter::OptConvert<Converter::PickerValueType>(options.value);
+    auto pickerValueOpt = ProcessBindableValue(options.value);
     if (pickerValueOpt) {
         auto pickerValue = pickerValueOpt.value();
         if (auto value = std::get_if<std::string>(&pickerValue); value) {
@@ -176,7 +223,6 @@ void CreateRangeWithSelection(const Ark_TextPickerDialogOptions options, TextPic
         }
     }
 }
-
 TextPickerSettingData BuildTextPickerSettingData(const Ark_TextPickerDialogOptions options)
 {
     TextPickerSettingData settingData;
@@ -209,7 +255,7 @@ TextPickerSettingData BuildTextPickerSettingData(const Ark_TextPickerDialogOptio
     }
     return settingData;
 }
-
+#ifdef WRONG_GEN
 DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 {
     return [arkCallback = CallbackHelper(callback)](const std::string& info) -> void {
@@ -368,11 +414,9 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions optio
     }
     return buttonInfos;
 }
-
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
-    CHECK_NULL_VOID(options);
-    auto arkOptionsOpt = Converter::OptConvert<Ark_TextPickerDialogOptions>(*options);
+    auto arkOptionsOpt = Converter::OptConvertPtr<Ark_TextPickerDialogOptions>(options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();
@@ -382,7 +426,7 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     auto textPickerDialog = BuildTextPickerDialog(arkOptions);
     auto dialogEvents = BuildTextPickerDialogEvents(arkOptions);
     std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(arkOptions);
-    // WARING: don't use, only adapter backend function interface.
+    // WARNING: don't use, only adapter backend function interface.
     RefPtr<AceType> pickerText = nullptr;
 #ifndef ARKUI_CAPI_UNITTEST
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
@@ -393,13 +437,27 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     MockTextPickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 #endif
 }
+#endif
+void DestroyPeerImpl(Ark_TextPickerDialog peer)
+{
+}
+Ark_TextPickerDialog ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 } // TextPickerDialogAccessor
-
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
-        TextPickerDialogAccessor::ShowImpl,
+        TextPickerDialogAccessor::DestroyPeerImpl,
+        TextPickerDialogAccessor::ConstructImpl,
+        TextPickerDialogAccessor::GetFinalizerImpl,
     };
     return &TextPickerDialogAccessorImpl;
 }
+
 }

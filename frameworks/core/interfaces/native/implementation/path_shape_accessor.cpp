@@ -24,12 +24,11 @@ void DestroyPeerImpl(Ark_PathShape peer)
 {
     delete peer;
 }
-Ark_PathShape CtorImpl(const Opt_PathShapeOptions* options)
+Ark_PathShape ConstructImpl(const Opt_PathShapeOptions* options)
 {
     auto peer = new PathShapePeer();
     peer->shape = OHOS::Ace::AceType::MakeRefPtr<Path>();
-    CHECK_NULL_RETURN(options, peer);
-    auto optOptions = Converter::OptConvert<PathShapeOptions>(*options);
+    auto optOptions = Converter::OptConvertPtr<PathShapeOptions>(options);
     CHECK_EQUAL_RETURN(optOptions.has_value(), false, peer);
     CHECK_EQUAL_RETURN(optOptions.value().commands.has_value(), false, peer);
     peer->shape->SetValue(optOptions.value().commands.value());
@@ -84,7 +83,7 @@ const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor()
 {
     static const GENERATED_ArkUIPathShapeAccessor PathShapeAccessorImpl {
         PathShapeAccessor::DestroyPeerImpl,
-        PathShapeAccessor::CtorImpl,
+        PathShapeAccessor::ConstructImpl,
         PathShapeAccessor::GetFinalizerImpl,
         PathShapeAccessor::OffsetImpl,
         PathShapeAccessor::FillImpl,

@@ -22,15 +22,15 @@ namespace DrawableDescriptorAccessor {
 void DestroyPeerImpl(Ark_DrawableDescriptor peer)
 {
 }
-Ark_DrawableDescriptor CtorImpl()
+Ark_DrawableDescriptor ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
+Ark_image_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
 {
     return {};
 }
@@ -39,7 +39,7 @@ const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()
 {
     static const GENERATED_ArkUIDrawableDescriptorAccessor DrawableDescriptorAccessorImpl {
         DrawableDescriptorAccessor::DestroyPeerImpl,
-        DrawableDescriptorAccessor::CtorImpl,
+        DrawableDescriptorAccessor::ConstructImpl,
         DrawableDescriptorAccessor::GetFinalizerImpl,
         DrawableDescriptorAccessor::GetPixelMapImpl,
     };

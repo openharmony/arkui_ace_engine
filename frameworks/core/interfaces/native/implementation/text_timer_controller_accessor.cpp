@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_TextTimerController peer)
         delete peer;
     }
 }
-Ark_TextTimerController CtorImpl()
+Ark_TextTimerController ConstructImpl()
 {
     return new TextTimerControllerPeer();
 }
@@ -57,7 +57,7 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
 {
     static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
         TextTimerControllerAccessor::DestroyPeerImpl,
-        TextTimerControllerAccessor::CtorImpl,
+        TextTimerControllerAccessor::ConstructImpl,
         TextTimerControllerAccessor::GetFinalizerImpl,
         TextTimerControllerAccessor::StartImpl,
         TextTimerControllerAccessor::PauseImpl,

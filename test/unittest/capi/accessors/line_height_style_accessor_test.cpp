@@ -37,7 +37,7 @@ public:
     {
         Ark_LengthMetrics metrics = new LengthMetricsPeer();
         metrics->value = Dimension(TEST_HEIGHT);
-        return accessor_->ctor(metrics);
+        return accessor_->construct(metrics);
     }
 };
 

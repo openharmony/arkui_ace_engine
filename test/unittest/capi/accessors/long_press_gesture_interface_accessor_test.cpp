@@ -75,8 +75,8 @@ class LongPressGestureIntrfaceAccessorTest
 public:
     void *CreatePeerInstance() override
     {
-        auto value = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>();
-        return accessor_->ctor(&value);
+        Ark_LongPressGestureInterface_Invoke_Literal value{};
+        return accessor_->construct(&value);
     }
     void SetUp(void) override
     {
@@ -104,12 +104,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
     int32_t someDuration = 100;
 
     for (auto& value : TEST_PLAN) {
-        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        Ark_LongPressGestureInterface_Invoke_Literal params;
         params.fingers = Converter::ArkValue<Opt_Number>(value.first);
         params.repeat = Converter::ArkValue<Opt_Boolean>(someRepeat);
         params.duration = Converter::ArkValue<Opt_Number>(someDuration);
-        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -124,12 +123,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
     }
 
     for (auto& value : TEST_PLAN) {
-        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        Ark_LongPressGestureInterface_Invoke_Literal params;
         params.fingers = Converter::ArkValue<Opt_Number>(value.first);
         params.repeat = Converter::ArkValue<Opt_Boolean>();
         params.duration = Converter::ArkValue<Opt_Number>();
-        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -159,12 +157,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestRepeat, TestSize.Level1)
     int32_t someDuration = 100;
 
     for (auto& value : TEST_PLAN) {
-        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        Ark_LongPressGestureInterface_Invoke_Literal params;
         params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
         params.repeat = Converter::ArkValue<Opt_Boolean>(value.first);
         params.duration = Converter::ArkValue<Opt_Number>(someDuration);
-        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -179,12 +176,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestRepeat, TestSize.Level1)
     }
 
     for (auto& value : TEST_PLAN) {
-        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        Ark_LongPressGestureInterface_Invoke_Literal params;
         params.fingers = Converter::ArkValue<Opt_Number>();
         params.repeat = Converter::ArkValue<Opt_Boolean>(value.first);
         params.duration = Converter::ArkValue<Opt_Number>();
-        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -216,12 +212,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestDuration, TestSize.Level1
     int32_t someFingers= 5;
 
     for (auto& value : TEST_PLAN) {
-        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        Ark_LongPressGestureInterface_Invoke_Literal params;
         params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
         params.repeat = Converter::ArkValue<Opt_Boolean>(someRepeat);
         params.duration = Converter::ArkValue<Opt_Number>(value.first);
-        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -236,12 +231,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestDuration, TestSize.Level1
     }
 
     for (auto& value : TEST_PLAN) {
-        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        Ark_LongPressGestureInterface_Invoke_Literal params;
         params.fingers = Converter::ArkValue<Opt_Number>();
         params.repeat = Converter::ArkValue<Opt_Boolean>();
         params.duration = Converter::ArkValue<Opt_Number>(value.first);
-        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -263,7 +257,7 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestDuration, TestSize.Level1
  */
 HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 {
-    auto peer = accessor_->ctor(nullptr);
+    auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->gesture, nullptr);
     auto fingers = peer->gesture->GetFingers();

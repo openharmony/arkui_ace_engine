@@ -1,0 +1,422 @@
+{
+    "$schema": "./schema.json",
+    "TypePrefix": "Ark_",
+    "LibraryPrefix": "",
+    "OptionalPrefix": "Opt_",
+    "GenerateUnused": false,
+    "ApiKind": 10,
+    "ApiVersion": 9999,
+    "dumpSerialized": false,
+    "ignoreMaterialized": [
+        "AnimatableArithmetic",
+        "CustomLayoutRoot",
+        "DynamicNode",
+        "GestureHandler",
+        "LongPressGestureHandler",
+        "PanGestureHandler",
+        "PinchGestureHandler",
+        "RotationGestureHandler",
+        "SwipeGestureHandler",
+        "TapGestureHandler",
+        "UIGestureEvent",
+        "MenuItemConfiguration",
+        "WrappedBuilder",
+        "TouchTestInfo",
+        "TouchResult",
+        "SectionOptions"
+    ],
+    "forceMaterialized": [
+        "TapGestureInterface",
+        "LongPressGestureInterface",
+        "PanGestureInterface",
+        "SwipeGestureInterface",
+        "PinchGestureInterface",
+        "RotationGestureInterface",
+        "GestureGroupInterface",
+        "BaseContext",
+        "ClickEvent",
+        "AccessibilityHoverEvent",
+        "BaseEvent",
+        "BaseGestureEvent",
+        "FocusAxisEvent",
+        "GestureEvent",
+        "HoverEvent",
+        "KeyEvent",
+        "LongPressGestureEvent",
+        "MouseEvent",
+        "PanGestureEvent",
+        "PinchGestureEvent",
+        "RotationGestureEvent",
+        "SwipeGestureEvent",
+        "TapGestureEvent"
+    ],
+    "forceCallback": {
+        "EditMenuOptions": [],
+        "XComponentController": [
+            "onSurfaceCreated",
+            "onSurfaceChanged",
+            "onSurfaceDestroyed"
+        ],
+        "DrawModifier": [
+            "drawBehind",
+            "drawContent",
+            "drawFront"
+        ],
+        "CustomSpan": [
+            "onMeasure",
+            "onDraw"
+        ]
+    },
+    "forceResource": [
+	    "ContentModifier"
+    ],
+    "boundProperties": {
+        "Checkbox": [
+            "select"
+        ],
+        "CheckboxGroup": [
+            "selectAll"
+        ],
+        "DatePicker": [
+            "selected"
+        ],
+        "TimePicker": [
+            "selected"
+        ],
+        "MenuItem": [
+            "selected"
+        ],
+        "Panel": [
+            "mode"
+        ],
+        "Radio": [
+            "checked"
+        ],
+        "Rating": [
+            "rating"
+        ],
+        "Search": [
+            "value"
+        ],
+        "SideBarContainer": [
+            "showSideBar"
+        ],
+        "Slider": [
+            "value"
+        ],
+        "Stepper": [
+            "index"
+        ],
+        "Swiper": [
+            "index"
+        ],
+        "Tabs": [
+            "index"
+        ],
+        "TextArea": [
+            "text"
+        ],
+        "TextInput": [
+            "text"
+        ],
+        "TextPicker": [
+            "selected",
+            "value"
+        ],
+        "Toggle": [
+            "isOn"
+        ],
+        "AlphabetIndexer": [
+            "selected"
+        ],
+        "Select": [
+            "selected",
+            "value"
+        ],
+        "BindSheet": [
+            "isShow"
+        ],
+        "BindContentCover": [
+            "isShow"
+        ],
+        "Refresh": [
+            "refreshing"
+        ],
+        "GridItem": [
+            "selected"
+        ],
+        "ListItem": [
+            "selected"
+        ]
+    },
+    "rootComponents": [
+        "Root",
+        "ComponentRoot",
+        "CommonMethod",
+        "SecurityComponentMethod",
+        "CommonTransition",
+        "CalendarAttribute",
+        "ContainerSpanAttribute",
+        "CustomLayoutRoot"
+    ],
+    "standaloneComponents": [
+        "TextPickerDialog",
+        "TimePickerDialog",
+        "AlertDialog",
+        "CanvasPattern"
+    ],
+    "parameterized": [
+        "Indicator",
+        "AttributeModifier",
+        "AnimationRange",
+        "SizeT",
+        "PositionT",
+        "Record"
+    ],
+    "builderClasses": [
+        "Indicator",
+        "SubTabBarStyle",
+        "BottomTabBarStyle",
+        "DotIndicator",
+        "DigitIndicator"
+    ],
+    "components": {
+        "custom": [
+            "BaseCustomComponent",
+            "CustomComponent",
+            "CustomComponentV2"
+        ],
+        "customNodeTypes": [
+            "CustomNode"
+        ],
+        "handWritten": [
+            "LocalStorage",
+            "SyncedPropertyOneWay",
+            "SubscribedAbstractProperty",
+            "SyncedPropertyTwoWay",
+            "AttributeModifier",
+            "AttributeUpdater",
+            "AbstractProperty",
+            "SubscribaleAbstract",
+            "IPropertySubscriber",
+            "ISinglePropertyChangeSubscriber",
+            "ISinglePropertyChangeSubscriber",
+            "PageTransitionEnterInterface",
+            "PageTransitionExitInterface",
+            "CommonTransition",
+            "wrapBuilder",
+            "ContentModifier"
+        ],
+        "ignoreEntry": [
+            "Optional",
+            "AppStorage",
+            "DataChangeListener",
+            "DisturbanceFieldOptions",
+            "EntryOptions",
+            "Environment",
+            "GestureGroupHandler",
+            "IDataSource",
+            "LazyForEachInterface",
+            "LocalStorage",
+            "PersistentStorage",
+            "PositionT",
+            "SizeT",
+            "Storage",
+            "SubscribedAbstractProperty",
+            "SyncedPropertyOneWay",
+            "SyncedPropertyTwoWay",
+            "IMonitorValue"
+        ],
+        "ignoreEntryJava": [
+            "AnimationRange",
+            "EventTargetInfo",
+            "GestureRecognizer",
+            "GestureRecognizerJudgeBeginCallback",
+            "Matrix2D",
+            "ScrollAnimationOptions",
+            "SheetDismiss",
+            "SubTabBarStyle",
+            "TextPickerDialog",
+            "Dimension",
+            "ScaleSymbolEffect",
+            "ReplaceSymbolEffect",
+            "BaseShape",
+            "RectShape",
+            "EllipseShape",
+            "CircleShape",
+            "BusinessError",
+            "Error",
+            "ErrorCallback",
+            "getRectangleById",
+            "edgeColors",
+            "edgeWidths",
+            "borderRadiuses"
+        ],
+        "ignoreComponents": [
+            "Particle",
+            "ForEach",
+            "LazyForEach",
+            "ContentSlot"
+        ],
+        "ignorePeerMethod": [
+            "attributeModifier"
+        ],
+        "ignoreMethodArkts": [
+            "testTupleNumberStringEnum",
+            "testTupleOptional",
+            "testTupleUnion"
+        ],
+        "invalidAttributes": [
+            "ScrollableCommonMethod"
+        ],
+        "replaceThrowErrorReturn": [
+            "NavPathStack"
+        ]
+    },
+    "hooks": {
+        "Button": {
+            "contentModifier": {
+                "hookName": "hookButtonContentModifier"
+            }
+        },
+        "Checkbox": {
+            "contentModifier": {
+                "hookName": "hookCheckBoxContentModifier"
+            }
+        },
+        "DataPanel": {
+            "contentModifier": {
+                "hookName": "hookDataPanelContentModifier"
+            }
+        },
+        "Gauge": {
+            "contentModifier": {
+                "hookName": "hookGaugeContentModifier"
+            }
+        },
+        "LoadingProgress": {
+            "contentModifier": {
+                "hookName": "hookLoadingProgressContentModifier"
+            }
+        },
+        "Progress": {
+            "contentModifier": {
+                "hookName": "hookProgressContentModifier"
+            }
+        },
+        "Radio": {
+            "contentModifier": {
+                "hookName": "hookRadioContentModifier"
+            }
+        },
+        "Rating": {
+            "contentModifier": {
+                "hookName": "hookRatingContentModifier"
+            }
+        },
+        "Select": {
+            "menuItemContentModifier": {
+                "hookName": "hookSelectContentModifier"
+            }
+        },
+        "Slider": {
+            "contentModifier": {
+                "hookName": "hookSliderContentModifier"
+            }
+        },
+        "TextClock": {
+            "contentModifier": {
+                "hookName": "hookTextClockContentModifier"
+            }
+        },
+        "TextTimer": {
+            "contentModifier": {
+                "hookName": "hookTextTimerContentModifier"
+            }
+        },
+        "Toggle": {
+            "contentModifier": {
+                "hookName": "hookToggleContentModifier"
+            }
+        },
+        "waterFlow": {
+            "setWaterFlowOptionsAttribute": {
+                "hookName": "hookWaterFlowOptionsImpl"
+            }
+        }
+    },
+    "externalTypes": {},
+    "externalPackages": [],
+    "materialized": {
+        "ignoreReturnTypes": [
+            "Promise"
+        ]
+    },
+    "cppPrefix": "GENERATED_",
+    "serializer": {
+        "ignore": [
+            "Array",
+            "Callback",
+            "AttributeModifier",
+            "Number",
+            "String",
+            "Function",
+            "Optional",
+            "RelativeIndexable"
+        ]
+    },
+    "dummy": {
+        "ignoreMethods": {
+            "CommonMethod": [
+                "onClick",
+                "onClick0",
+                "onClick1",
+                "drawModifier"
+            ],
+            "EventEmulator": [
+                "emitClickEvent"
+            ],
+            "RenderServiceNode": [
+                "getNodeId"
+            ],
+            "DrawModifier": [
+                "invalidate",
+                "setDrawBehind_callback",
+                "setDrawContent_callback",
+                "setDrawFront_callback"
+            ]
+        }
+    },
+    "patchMaterialized": {},
+    "forceContext": [
+        "LoadUserView",
+        "MeasureLayoutAndDraw",
+        "MeasureNode",
+        "DrawNode",
+        "TestCallIntNoArgs",
+        "TestCallIntIntArraySum",
+        "TestCallVoidIntArrayPrefixSum",
+        "TestCallIntRecursiveCallback",
+        "TestCallIntMemory"
+    ],
+    "moduleName": "arkui",
+    "modules": {
+        "arkui": {
+            "name": "arkui",
+            "packages": [""]
+        }
+    },
+    "currentModulePackagesPaths": {
+        "arkui.component": "./component"
+    },
+    "currentModuleExportedPackages": [
+        "arkui.component",
+        "internal.component.ets",
+        "arkui.idlize"
+    ],
+    "globalPackages": [
+        "idlize.stdlib",
+        "org.openharmony.idlize.predefined",
+        "org.openharmony.arkui"
+    ]
+}

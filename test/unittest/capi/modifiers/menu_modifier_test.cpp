@@ -39,9 +39,9 @@ using namespace testing::ext;
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const auto COLOR_COLOR_RES = CreateResource("color_name", Converter::ResourceType::COLOR);
-const auto COLOR_ID_RES = CreateResource(1234, Converter::ResourceType::COLOR);
-const auto COLOR_STRING_RES = CreateResource("color_name", Converter::ResourceType::STRING);
+const auto COLOR_COLOR_RES = CreateResource("color_name", ResourceType::COLOR);
+const auto COLOR_ID_RES = CreateResource(1234, ResourceType::COLOR);
+const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING);
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
@@ -67,7 +67,7 @@ const Ark_Float32 AFLT32_NEG(-5.6789f);
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
 const auto FAMILY_RES_ID = 555;
-const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, Converter::ResourceType::STRARRAY);
+const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, ResourceType::STRARRAY);
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
     Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(FAMILY_NAME_RES);
 
@@ -203,27 +203,6 @@ public:
 };
 
 /**
- * @tc.name: setFontSizeTest
- * @tc.desc: Check the functionality of MenuModifier.setFontSize
- * @tc.type: FUNC
- */
-HWTEST_F(MenuModifierTest, setFontSizeTest, TestSize.Level1)
-{
-    auto checkVal = GetAttrValue<std::string>(node_, "fontSize");
-    EXPECT_EQ(checkVal, "0.00px");
-
-    auto optSize = Converter::ArkValue<Opt_Length>(123._px);
-    modifier_->setFontSize(node_, &optSize);
-    checkVal = GetStringAttribute(node_, "fontSize");
-    EXPECT_EQ(checkVal, "123.00px");
-
-    optSize = Converter::ArkValue<Opt_Length>(-123._px);
-    modifier_->setFontSize(node_, &optSize);
-    checkVal = GetAttrValue<std::string>(node_, "fontSize");
-    EXPECT_EQ(checkVal, "0.00px");
-}
-
-/**
  * @tc.name: setSubMenuExpandingModeTest
  * @tc.desc: Check the functionality of MenuModifier.setSubMenuExpandingMode
  * @tc.type: FUNC
@@ -305,7 +284,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusTest, TestSize.Level1)
     auto bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
     EXPECT_EQ(bottomRight, "0.00vp");
 
-    auto optRadius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(5._px);
+    auto optRadius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>("5px");
     modifier_->setRadius(node_, &optRadius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -318,7 +297,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusTest, TestSize.Level1)
     bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
     EXPECT_EQ(bottomRight, "5.00px");
 
-    optRadius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(-5._px);
+    optRadius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>("-5px");
     modifier_->setRadius(node_, &optRadius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -351,8 +330,8 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesValidTest, TestSize.Level1)
     EXPECT_EQ(bottomRight, "0.00vp");
 
     Ark_BorderRadiuses radiuses = {
-        .topLeft = Converter::ArkValue<Opt_Length>(5._px), .topRight = Converter::ArkValue<Opt_Length>(7._px),
-        .bottomLeft = Converter::ArkValue<Opt_Length>(8._px), .bottomRight = Converter::ArkValue<Opt_Length>(0._px)
+        .topLeft = Converter::ArkValue<Opt_Length>("5px"), .topRight = Converter::ArkValue<Opt_Length>("7px"),
+        .bottomLeft = Converter::ArkValue<Opt_Length>("8px"), .bottomRight = Converter::ArkValue<Opt_Length>("0px")
     };
     auto optRadius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &optRadius);
@@ -387,8 +366,8 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesNegativeOrEmptyTest, TestSi
     EXPECT_EQ(bottomRight, "0.00vp");
 
     Ark_BorderRadiuses radiuses = {
-        .topLeft = Converter::ArkValue<Opt_Length>(5._px), .topRight = Converter::ArkValue<Opt_Length>(7._px),
-        .bottomLeft = Converter::ArkValue<Opt_Length>(-8._px), .bottomRight = Converter::ArkValue<Opt_Length>(-9._px)
+        .topLeft = Converter::ArkValue<Opt_Length>("5px"), .topRight = Converter::ArkValue<Opt_Length>("7px"),
+        .bottomLeft = Converter::ArkValue<Opt_Length>("-8px"), .bottomRight = Converter::ArkValue<Opt_Length>("-9px")
     };
     auto optRadius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &optRadius);
@@ -404,7 +383,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesNegativeOrEmptyTest, TestSi
     EXPECT_EQ(bottomRight, "0.00vp");
 
     radiuses = {
-        .topLeft = Converter::ArkValue<Opt_Length>(5._px), .topRight = Converter::ArkValue<Opt_Length>(7._px),
+        .topLeft = Converter::ArkValue<Opt_Length>("5px"), .topRight = Converter::ArkValue<Opt_Length>("7px"),
         .bottomLeft = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .bottomRight = Converter::ArkValue<Opt_Length>(Ark_Empty())
     };

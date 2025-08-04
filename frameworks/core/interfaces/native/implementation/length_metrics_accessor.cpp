@@ -37,7 +37,8 @@ void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
     LengthMetricsPeer::Destroy(peer);
 }
-Ark_LengthMetrics CtorImpl()
+Ark_LengthMetrics ConstructImpl(const Ark_Number* value,
+                                Ark_LengthUnit unit)
 {
     return LengthMetricsPeer::Create({});
 }
@@ -67,7 +68,7 @@ Ark_LengthMetrics LpxImpl(const Ark_Number* value)
 }
 Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
-    std::optional<Dimension> convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     return LengthMetricsPeer::Create(convValue.value_or(Dimension()));
 }
 Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)
@@ -102,7 +103,7 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
 {
     static const GENERATED_ArkUILengthMetricsAccessor LengthMetricsAccessorImpl {
         LengthMetricsAccessor::DestroyPeerImpl,
-        LengthMetricsAccessor::CtorImpl,
+        LengthMetricsAccessor::ConstructImpl,
         LengthMetricsAccessor::GetFinalizerImpl,
         LengthMetricsAccessor::PxImpl,
         LengthMetricsAccessor::VpImpl,

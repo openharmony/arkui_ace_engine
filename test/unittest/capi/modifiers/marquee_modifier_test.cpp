@@ -243,20 +243,19 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestValidValues, TestSize.Leve
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    typedef std::pair<Ark_Number, std::string> OneTestStep;
+    typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testFontSizeValid = {
-        { Converter::ArkValue<Ark_Number>(1.0f),  "1.00vp" },
-        { Converter::ArkValue<Ark_Number>(2.45f), "2.45vp" },
-        { Converter::ArkValue<Ark_Number>(5.0_px), "5.00px" },
-        { Converter::ArkValue<Ark_Number>(22.35_px), "22.35px" },
-        { Converter::ArkValue<Ark_Number>(7.0_vp), "7.00vp" },
-        { Converter::ArkValue<Ark_Number>(1.65_vp), "1.65vp" },
-        { Converter::ArkValue<Ark_Number>(65.0_fp), "65.00fp" },
-        { Converter::ArkValue<Ark_Number>(4.3_fp), "4.30fp" },
+        { Converter::ArkValue<Opt_Length>(1.0f),  "1.00vp" },
+        { Converter::ArkValue<Opt_Length>(2.45f), "2.45vp" },
+        { Converter::ArkValue<Opt_Length>("5.0px"), "5.00px" },
+        { Converter::ArkValue<Opt_Length>("22.35px"), "22.35px" },
+        { Converter::ArkValue<Opt_Length>("7.0vp"), "7.00vp" },
+        { Converter::ArkValue<Opt_Length>("1.65vp"), "1.65vp" },
+        { Converter::ArkValue<Opt_Length>("65.0fp"), "65.00fp" },
+        { Converter::ArkValue<Opt_Length>("4.3fp"), "4.30fp" },
     };
     for (const auto &[value, expectValue]: testFontSizeValid) {
-        auto optValue = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value);
-        modifier_->setFontSize(node_, &optValue);
+        modifier_->setFontSize(node_, &value);
         jsonValue = GetJsonValue(node_);
         auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
         EXPECT_EQ(size, expectValue);
@@ -272,14 +271,13 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeInvalidValues, TestSize.Level1
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    typedef std::pair<Ark_Number, std::string> OneTestStep;
+    typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testFontSizeInvalid = {
-        { Converter::ArkValue<Ark_Number>(-0.1f), "10.00p"},
-        { Converter::ArkValue<Ark_Number>(-5.0_px), "10.00vp" },
+        { Converter::ArkValue<Opt_Length>(-0.1f), "10.00p"},
+        { Converter::ArkValue<Opt_Length>("-5.0px"), "10.00vp" },
     };
     for (const auto &[value, expectValue]: testFontSizeInvalid) {
-        auto optValue = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value);
-        modifier_->setFontSize(node_, &optValue);
+        modifier_->setFontSize(node_, &value);
         jsonValue = GetJsonValue(node_);
         auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
         EXPECT_EQ(size, expectValue);

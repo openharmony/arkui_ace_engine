@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 #include "ani/ani_parser.h"
- 
+
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "interfaces/inner_api/ace_kit/src/view/scroller_impl.h"
- 
+
 namespace OHOS::Ace::Kit {
- 
+
 class ScrollerDataAni : public ScrollerImpl::ScrollerData {
     DECLARE_ACE_TYPE(ScrollerDataAni, ScrollerImpl::ScrollerData);
 public:
@@ -35,20 +35,24 @@ public:
     }
     void AddObserver(const ScrollerObserver& observer, int32_t id) override
     {
+#ifdef WRONG_GEN
         scrollerPeer_->AddObserver(observer, id);
+#endif
     }
     void RemoveObserver(int32_t id) override
     {
+#ifdef WRONG_GEN
         scrollerPeer_->RemoveObserver(id);
+#endif
     }
 private:
     RefPtr<ScrollerPeer> scrollerPeer_;
 };
- 
+
 RefPtr<Scroller> ACE_FORCE_EXPORT ParseScroller(ani_long value)
 {
     ScrollerPeer* scroller = reinterpret_cast<ScrollerPeer*>(value);
     return AceType::MakeRefPtr<ScrollerImpl>(AceType::MakeRefPtr<ScrollerDataAni>(AceType::Claim(scroller)));
 }
- 
+
 } // namespace OHOS::Ace::Kit

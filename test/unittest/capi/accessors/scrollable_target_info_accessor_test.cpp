@@ -69,9 +69,9 @@ class ScrollableTargetInfoAccessorTest : public AccessorTestBase<GENERATED_ArkUI
  */
 HWTEST_F(ScrollableTargetInfoAccessorTest, ctorTest, TestSize.Level1)
 {
-    auto peer1 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->ctor());
-    auto peer2 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->ctor());
-    auto peer3 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->ctor());
+    auto peer1 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->construct());
+    auto peer2 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->construct());
+    auto peer3 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->construct());
     ASSERT_NE(peer1, nullptr);
     ASSERT_NE(peer2, nullptr);
     ASSERT_NE(peer3, nullptr);

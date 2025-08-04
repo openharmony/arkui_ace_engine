@@ -46,7 +46,7 @@ void DestroyPeerImpl(Ark_TouchEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_TouchEvent CtorImpl()
+Ark_TouchEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<TouchEventPeer>();
 }
@@ -166,7 +166,7 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
 {
     static const GENERATED_ArkUITouchEventAccessor TouchEventAccessorImpl {
         TouchEventAccessor::DestroyPeerImpl,
-        TouchEventAccessor::CtorImpl,
+        TouchEventAccessor::ConstructImpl,
         TouchEventAccessor::GetFinalizerImpl,
         TouchEventAccessor::GetHistoricalPointsImpl,
         TouchEventAccessor::GetTypeImpl,

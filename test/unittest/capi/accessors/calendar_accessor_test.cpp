@@ -81,7 +81,7 @@ HWTEST_F(CalendarControllerAccessorTest, goToTest, TestSize.Level1)
     };
     for (auto [year, month, day] : testData) {
         EXPECT_CALL(*mockController_, GoTo(year, month, day)).Times(1);
-        const Ark_Literal_Number_day_month_year value {
+        const Ark_CalendarSelectedDate value {
             .year = Converter::ArkValue<Ark_Number>(year),
             .month = Converter::ArkValue<Ark_Number>(month),
             .day = Converter::ArkValue<Ark_Number>(day),

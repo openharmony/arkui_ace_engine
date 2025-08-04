@@ -22,9 +22,9 @@ namespace GestureModifierAccessor {
 void DestroyPeerImpl(Ark_GestureModifier peer)
 {
 }
-Ark_GestureModifier CtorImpl()
+Ark_GestureModifier ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,7 +39,7 @@ const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
 {
     static const GENERATED_ArkUIGestureModifierAccessor GestureModifierAccessorImpl {
         GestureModifierAccessor::DestroyPeerImpl,
-        GestureModifierAccessor::CtorImpl,
+        GestureModifierAccessor::ConstructImpl,
         GestureModifierAccessor::GetFinalizerImpl,
         GestureModifierAccessor::ApplyGestureImpl,
     };

@@ -36,7 +36,9 @@ namespace Converter {
     {
         PluginComponentOptions opt;
         opt.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
+#ifdef WRONG_SDK
         opt.data = Convert<std::string>(options.data);
+#endif
         return opt;
     }
     template<>
@@ -81,15 +83,15 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
-void OnCompleteImpl(Ark_NativePointer node,
-                    const Opt_VoidCallback* value)
+void SetOnCompleteImpl(Ark_NativePointer node,
+                       const Opt_VoidCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onComplete = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
@@ -98,15 +100,15 @@ void OnCompleteImpl(Ark_NativePointer node,
     PluginModelStatic::SetOnComplete(frameNode, std::move(onComplete));
 #endif
 }
-void OnErrorImpl(Ark_NativePointer node,
-                 const Opt_PluginErrorCallback* value)
+void SetOnErrorImpl(Ark_NativePointer node,
+                    const Opt_PluginErrorCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
@@ -126,8 +128,8 @@ const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
     static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
         PluginComponentModifier::ConstructImpl,
         PluginComponentInterfaceModifier::SetPluginComponentOptionsImpl,
-        PluginComponentAttributeModifier::OnCompleteImpl,
-        PluginComponentAttributeModifier::OnErrorImpl,
+        PluginComponentAttributeModifier::SetOnCompleteImpl,
+        PluginComponentAttributeModifier::SetOnErrorImpl,
     };
     return &ArkUIPluginComponentModifierImpl;
 }

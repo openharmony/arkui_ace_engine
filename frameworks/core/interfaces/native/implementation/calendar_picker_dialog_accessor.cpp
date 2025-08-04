@@ -62,10 +62,7 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.customStyle = false;
-    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
-    if (enableHoverMode.has_value()) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
-    }
+    dialogProps.enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
@@ -93,10 +90,20 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
     }
     return buttonInfos;
 }
+void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
+{
+}
+Ark_CalendarPickerDialog ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
-    CHECK_NULL_VOID(options);
-    auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
+    auto arkOptionsOpt = Converter::OptConvertPtr<Ark_CalendarDialogOptions>(options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_CalendarDialogOptions arkOptions = *arkOptionsOpt;
@@ -145,6 +152,9 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
 {
     static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {
+        CalendarPickerDialogAccessor::DestroyPeerImpl,
+        CalendarPickerDialogAccessor::ConstructImpl,
+        CalendarPickerDialogAccessor::GetFinalizerImpl,
         CalendarPickerDialogAccessor::ShowImpl,
     };
     return &CalendarPickerDialogAccessorImpl;

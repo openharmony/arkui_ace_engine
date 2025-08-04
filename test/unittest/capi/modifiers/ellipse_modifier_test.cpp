@@ -45,14 +45,14 @@ namespace  {
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("4.3fp"), "4.30fp" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("11lpx"), "11.00lpx" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("0.5lpx"), "0.50lpx" },
-        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("3"), "3.00fp" },
-        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("10.65"), "10.65fp" },
+        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("3"), "3.00vp" },
+        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("10.65"), "10.65vp" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("23%"), "23.00%" },
     };
     static const std::vector<DimensionTestStep> INVALID_VALUE_TEST_PLAN = {
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_Number>(-1), "0.00vp" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_Number>(-3.56f), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("invalid value"), "0.00fp" },
+        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("invalid value"), "0.00vp" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-8px"), "0.00px" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-15.6px"), "0.00px" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-21vp"), "0.00vp" },
@@ -61,8 +61,8 @@ namespace  {
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-9.99fp"), "0.00fp" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-22lpx"), "0.00lpx" },
         { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-1.23lpx"), "0.00lpx" },
-        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-6"), "0.00fp" },
-        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-16.2"), "0.00fp" },
+        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-6"), "0.00vp" },
+        { Converter::ArkUnion<Opt_Union_String_Number, Ark_String>("-16.2"), "0.00vp" },
     };
 } // namespace
 

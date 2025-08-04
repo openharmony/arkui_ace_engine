@@ -183,6 +183,17 @@ void RichEditorModelStatic::BindSelectionMenu(FrameNode* frameNode, TextSpanType
         pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam);
     }
 }
+
+void RichEditorModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
+    const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        nullptr);
+}
+
 void RichEditorModelStatic::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
 {
     CHECK_NULL_VOID(frameNode);

@@ -1,0 +1,214 @@
+{
+    "DeletedPackages": [
+    ],
+    "DeletedDeclarations": [
+        "Callback",
+        "double",
+        "int",
+        "WrappedBuilder",
+        "wrapBuilder",
+        "AnimatableArithmetic",
+        "IMonitorValue",
+        "IMonitor",
+        "MethodDecorator",
+        "ParticleInterface",
+        "ParticleAttribute",
+        "ParticleModifier",
+        "ParticleTuple",
+        "Particle",
+        "ParticleAttribute",
+        "Particles",
+        "ParticleColorPropertyOptions",
+        "ParticlePropertyOptions",
+        "IsolatedComponentInterface",
+        "IsolatedComponentAttribute",
+        "AccelerationOptions",
+        "ParticleOptions",
+        "EmitterOptions",
+        "ForEachInterface",
+        "ForEachAttribute",
+        "LazyForEachAttribute",
+        "LazyForEachInterface",
+        "IDataSource",
+        "DisturbanceFieldOptions",
+        "RepeatItem",
+        "RepeatItemBuilder",
+        "RepeatAttribute",
+        "RepeatInterface",
+        "TemplateTypedFunc",
+        "EntryOptions",
+        "UIBaseSpan",
+        "UICommonMethod",
+        "UICommonShapeMethod",
+        "UIScrollableCommonMethod",
+        "UIIsolatedComponentAttribute",
+        "UILazyForEachAttribute",
+        "UIParticleAttribute",
+        "UIRepeatAttribute",
+        "UIPluginComponentAttribute",
+        "UISecurityComponentMethod",
+        "UIRichEditorAttribute",
+        "$$",
+        "CommonTransition",
+        "PageTransitionEnter",
+        "PageTransitionExit",
+        "UICommonTransition",
+        "UIPageTransitionEnter",
+        "UIPageTransitionExit",
+        "ForEach",
+        "GestureGroup",
+        "LongPressGesture",
+        "PanGesture",
+        "PinchGesture",
+        "TapGesture",
+        "_r",
+        "_rawfile",
+        "LazyGridLayoutAttribute",
+        "LazyVGridLayoutAttribute"
+    ],
+    "DeletedMembers": {
+        "CommonMethod": [
+            "attributeModifier"
+        ],
+        "ScrollableCommonMethod": [
+            "onWillScroll",
+            "onDidScroll"
+        ],
+        "WrappedBuilder": [
+            "constructor"
+        ],
+        "SliderBlockStyle": [
+            "shape"
+        ]
+    },
+    "StubbedDeclarations": [
+        "OnWillScrollCallback",
+        "LayoutChild",
+        "EmitterProperty",
+        "GestureGroupGestureHandlerOptions",
+        "ColumnOptionsV2",
+        "RowOptionsV2",
+        "AlignRuleOption"
+    ],
+    "Components": [
+        "BaseSpan",
+        "CommonMethod",
+        "CommonShapeMethod",
+        "ScrollableCommonMethod"
+    ],
+    "Throws": [
+        "CanvasRenderingContext2D.onOnAttach",
+        "CanvasRenderingContext2D.offOnAttach"
+    ],
+    "ForceCallback": {
+        "EditMenuOptions.onCreateMenu": "",
+        "EditMenuOptions.onMenuItemClick": "",
+        "XComponentController.onSurfaceCreated": "",
+        "XComponentController.onSurfaceChanged": "",
+        "XComponentController.onSurfaceDestroyed": "",
+        "DrawModifier.drawBehind": "ExtraMethod",
+        "DrawModifier.drawContent": "ExtraMethod",
+        "DrawModifier.drawFront": "ExtraMethod",
+        "CustomSpan.onMeasure": "",
+        "CustomSpan.onDraw": ""
+    },
+    "BoundProperties": {
+        "Checkbox": [
+            "select"
+        ],
+        "CheckboxGroup": [
+            "selectAll"
+        ],
+        "DatePicker": [
+            "selected"
+        ],
+        "TimePicker": [
+            "selected"
+        ],
+        "MenuItem": [
+            "selected"
+        ],
+        "Panel": [
+            "mode"
+        ],
+        "Radio": [
+            "checked"
+        ],
+        "Rating": [
+            "rating"
+        ],
+        "Search": [
+            "value"
+        ],
+        "SideBarContainer": [
+            "showSideBar"
+        ],
+        "Slider": [
+            "value"
+        ],
+        "Stepper": [
+            "index"
+        ],
+        "Swiper": [
+            "index"
+        ],
+        "Tabs": [
+            "index"
+        ],
+        "TextArea": [
+            "text"
+        ],
+        "TextInput": [
+            "text"
+        ],
+        "TextPicker": [
+            "selected",
+            "value"
+        ],
+        "Toggle": [
+            "isOn"
+        ],
+        "AlphabetIndexer": [
+            "selected"
+        ],
+        "Select": [
+            "selected",
+            "value"
+        ],
+        "BindSheet": [
+            "isShow"
+        ],
+        "BindContentCover": [
+            "isShow"
+        ],
+        "Refresh": [
+            "refreshing"
+        ],
+        "GridItem": [
+            "selected"
+        ],
+        "ListItem": [
+            "selected"
+        ]
+    },
+    "NameReplacements": {
+        "common.d.ts": [
+            [
+                "LinearGradient",
+                "LinearGradient_common"
+            ]
+        ],
+        "alert_dialog.d.ts": [
+            [
+                "TextStyle",
+                "TextStyle_alert_dialog"
+            ]
+        ],
+        "styled_string.d.ts": [
+            [
+                "TextStyle",
+                "TextStyle_styled_string"
+            ]
+        ]
+    }
+}

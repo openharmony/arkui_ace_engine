@@ -20,7 +20,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "arkoala_api_generated.h"
@@ -42,11 +41,12 @@ constexpr auto ATTRIBUTE_ENABLE_NESTED_SCROLL_DEFAULT_VALUE = "false";
 struct ScrollBarOptions {
     Ark_ScrollBarOptions value;
 
-    explicit ScrollBarOptions(const RefPtr<ScrollProxy>& proxy,
+    explicit ScrollBarOptions(const GENERATED_ArkUIFullNodeAPI *api,
+        const RefPtr<ScrollProxy>& proxy,
         const std::optional<Ark_ScrollBarDirection>& direction = std::nullopt,
-        const std::optional<Ark_BarState>& state = std::nullopt)
+        const std::optional<Ark_BarState>& state = std::nullopt) : fullAPI_(api)
     {
-        auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+        auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->construct();
         auto scrollerPeer = static_cast<ScrollerPeer *>(peer);
         scrollerPeer->SetScrollBarProxy(proxy);
         value = {
@@ -63,11 +63,12 @@ struct ScrollBarOptions {
     ~ScrollBarOptions()
     {
         auto destroy = reinterpret_cast<void (*)(Ark_NativePointer)>(
-            GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer()
+            fullAPI_->getAccessors()->getScrollerAccessor()->getFinalizer()
         );
         destroy(value.scroller);
     }
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOptions);
+    const GENERATED_ArkUIFullNodeAPI *fullAPI_;
 };
 
 template<class T> using TestCases = std::vector<std::tuple<std::string, T, std::string>>;
@@ -104,7 +105,7 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestDefaultValues, TestSize.L
 HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, TestSize.Level1)
 {
     const auto proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
-    ScrollBarOptions options(proxy);
+    ScrollBarOptions options(fullAPI_, proxy);
 
     modifier_->setScrollBarOptions(node_, &options.value);
 
@@ -126,8 +127,10 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, Test
  */
 HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestValidValues, TestSize.Level1)
 {
-    ScrollBarOptions optionsVertical(AceType::MakeRefPtr<NG::ScrollBarProxy>(), ARK_SCROLL_BAR_DIRECTION_VERTICAL);
-    ScrollBarOptions optionsHorizontal(AceType::MakeRefPtr<NG::ScrollBarProxy>(), ARK_SCROLL_BAR_DIRECTION_HORIZONTAL);
+    ScrollBarOptions optionsVertical(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
+        ARK_SCROLL_BAR_DIRECTION_VERTICAL);
+    ScrollBarOptions optionsHorizontal(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
+        ARK_SCROLL_BAR_DIRECTION_HORIZONTAL);
     const TestCases<ScrollBarOptions&> optionsList {
         {"ARK_SCROLL_BAR_DIRECTION_VERTICAL", optionsVertical, "ScrollBarDirection.Vertical"},
         {"ARK_SCROLL_BAR_DIRECTION_HORIZONTAL", optionsHorizontal, "ScrollBarDirection.Horizontal"},
@@ -148,10 +151,11 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestValidValues, Tes
  */
 HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestInvalidValues, TestSize.Level1)
 {
-    ScrollBarOptions optionsValid(AceType::MakeRefPtr<NG::ScrollBarProxy>(), ARK_SCROLL_BAR_DIRECTION_VERTICAL);
+    ScrollBarOptions optionsValid(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
+        ARK_SCROLL_BAR_DIRECTION_VERTICAL);
     const auto optionsValidStr = "ScrollBarDirection.Vertical";
 
-    ScrollBarOptions optionsUndefined(AceType::MakeRefPtr<NG::ScrollBarProxy>());
+    ScrollBarOptions optionsUndefined(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>());
     const TestCases<ScrollBarOptions&> optionsList {
         {"undefined", optionsUndefined, ATTRIBUTE_DIRECTION_DEFAULT_VALUE},
     };
@@ -176,9 +180,10 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestInvalidValues, T
  */
 HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestValidValues, TestSize.Level1)
 {
-    ScrollBarOptions optionsOff(AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_OFF);
-    ScrollBarOptions optionsAuto(AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_AUTO);
-    ScrollBarOptions optionsOn(AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_ON);
+    ScrollBarOptions optionsOff(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_OFF);
+    ScrollBarOptions optionsAuto(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt,
+        ARK_BAR_STATE_AUTO);
+    ScrollBarOptions optionsOn(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_ON);
     const TestCases<ScrollBarOptions&> optionsList {
         {"ARK_BAR_STATE_OFF", optionsOff, "BarState.Off"},
         {"ARK_BAR_STATE_AUTO", optionsAuto, "BarState.Auto"},
@@ -204,10 +209,10 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestValidValues, TestSiz
  */
 HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestInvalidValues, TestSize.Level1)
 {
-    ScrollBarOptions optionsValid(AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_ON);
+    ScrollBarOptions optionsValid(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_ON);
     const auto optionsValidStr = "BarState.On";
 
-    ScrollBarOptions optionsUndefined(AceType::MakeRefPtr<NG::ScrollBarProxy>());
+    ScrollBarOptions optionsUndefined(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>());
     const TestCases<ScrollBarOptions&> optionsList {
         {"undefined", optionsUndefined, ATTRIBUTE_STATE_DEFAULT_VALUE},
     };
@@ -236,7 +241,7 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestInvalidValues, TestS
  */
 HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestDefaultValues, TestSize.Level1)
 {
-    ScrollBarOptions options(AceType::MakeRefPtr<NG::ScrollBarProxy>());
+    ScrollBarOptions options(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>());
     modifier_->setScrollBarOptions(node_, &options.value);
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME);
@@ -251,7 +256,7 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestDefaultValues, TestSize
  */
 HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestValidValues, TestSize.Level1)
 {
-    ScrollBarOptions options(AceType::MakeRefPtr<NG::ScrollBarProxy>());
+    ScrollBarOptions options(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>());
     const TestCases<Opt_Boolean> valueList {
         {
             "true",
@@ -286,7 +291,7 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestInvalidValues, TestSize
     const auto validValue = Converter::ArkValue<Opt_Boolean>(true);
     const auto validStr = "true";
 
-    ScrollBarOptions options(AceType::MakeRefPtr<NG::ScrollBarProxy>());
+    ScrollBarOptions options(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>());
     const TestCases<Opt_Boolean> valueList {
         {
             "undefined",

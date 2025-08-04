@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.multimodalInput.pointer;
+
+[DefaultExport]
+namespace pointer {
+    dictionary PointerStyle {
+        number DEFAULT = 0;
+        number EAST = 1;
+        number WEST = 2;
+        number SOUTH = 3;
+        number NORTH = 4;
+        number WEST_EAST = 5;
+        number NORTH_SOUTH = 6;
+        number NORTH_EAST = 7;
+        number NORTH_WEST = 8;
+        number SOUTH_EAST = 9;
+        number SOUTH_WEST = 10;
+        number NORTH_EAST_SOUTH_WEST = 11;
+        number NORTH_WEST_SOUTH_EAST = 12;
+        number CROSS = 13;
+        number CURSOR_COPY = 14;
+        number CURSOR_FORBID = 15;
+        number COLOR_SUCKER = 16;
+        number HAND_GRABBING = 17;
+        number HAND_OPEN = 18;
+        number HAND_POINTING = 19;
+        number HELP = 20;
+        number MOVE = 21;
+        number RESIZE_LEFT_RIGHT = 22;
+        number RESIZE_UP_DOWN = 23;
+        number SCREENSHOT_CHOOSE = 24;
+        number SCREENSHOT_CURSOR = 25;
+        number TEXT_CURSOR = 26;
+        number ZOOM_IN = 27;
+        number ZOOM_OUT = 28;
+        number MIDDLE_BTN_EAST = 29;
+        number MIDDLE_BTN_WEST = 30;
+        number MIDDLE_BTN_SOUTH = 31;
+        number MIDDLE_BTN_NORTH = 32;
+        number MIDDLE_BTN_NORTH_SOUTH = 33;
+        number MIDDLE_BTN_NORTH_EAST = 34;
+        number MIDDLE_BTN_NORTH_WEST = 35;
+        number MIDDLE_BTN_SOUTH_EAST = 36;
+        number MIDDLE_BTN_SOUTH_WEST = 37;
+        number MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38;
+        number HORIZONTAL_TEXT_CURSOR = 39;
+        number CURSOR_CROSS = 40;
+        number CURSOR_CIRCLE = 41;
+        number LOADING = 42;
+        number RUNNING = 43;
+    };
+};

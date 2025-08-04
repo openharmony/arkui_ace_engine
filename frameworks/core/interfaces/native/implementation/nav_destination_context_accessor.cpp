@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_NavDestinationContext peer)
 {
     delete peer;
 }
-Ark_NavDestinationContext CtorImpl()
+Ark_NavDestinationContext ConstructImpl()
 {
     return new NavDestinationContextPeer();
 }
@@ -84,15 +84,15 @@ void SetPathStackImpl(Ark_NavDestinationContext peer,
 {
     LOGE("NavDestinationContext doesn't support set nav path stack");
 }
-Ark_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
+Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
-    auto invalidVal = Converter::ArkValue<Ark_String>("", Converter::FC);
+    auto invalidVal = Converter::ArkValue<Opt_String>("", Converter::FC);
     CHECK_NULL_RETURN(peer && peer->handler, invalidVal);
     auto id = std::to_string(peer->handler->GetNavDestinationId());
-    return Converter::ArkValue<Ark_String>(id, Converter::FC);
+    return Converter::ArkValue<Opt_String>(id, Converter::FC);
 }
 void SetNavDestinationIdImpl(Ark_NavDestinationContext peer,
-                             const Ark_String* navDestinationId)
+                             const Opt_String* navDestinationId)
 {
     LOGE("NavDestinationContext doesn't support set nav destination id");
 }
@@ -101,7 +101,7 @@ const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAcce
 {
     static const GENERATED_ArkUINavDestinationContextAccessor NavDestinationContextAccessorImpl {
         NavDestinationContextAccessor::DestroyPeerImpl,
-        NavDestinationContextAccessor::CtorImpl,
+        NavDestinationContextAccessor::ConstructImpl,
         NavDestinationContextAccessor::GetFinalizerImpl,
         NavDestinationContextAccessor::GetConfigInRouteMapImpl,
         NavDestinationContextAccessor::GetPathInfoImpl,

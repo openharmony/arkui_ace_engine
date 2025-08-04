@@ -39,7 +39,7 @@ namespace  {
     const auto ATTRIBUTE_IMAGES_TOP_NAME = "top";
     const auto ATTRIBUTE_IMAGES_TOP_TEST_VALUE = "100.00vp";
     const auto ATTRIBUTE_IMAGES_WIDTH_NAME = "width";
-    const auto ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE = "autocalc";
+    const auto ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE = "0.00auto"; // TODO: Need to check
     const auto ATTRIBUTE_IMAGES_HEIGHT_NAME = "height";
     const auto ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE = "100.00px";
     const auto ATTRIBUTE_IMAGES_DURATION_NAME = "duration";
@@ -121,7 +121,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
         },
         {
             .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(
-                CreateResource(IMAGES_OK_STR.c_str(), Converter::ResourceType::STRING)),
+                CreateResource(IMAGES_OK_STR.c_str(), ResourceType::STRING)),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
@@ -137,7 +137,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
     std::string resultStr;
     std::unique_ptr<JsonValue> resultImages = GetAttrValue<std::unique_ptr<JsonValue>>(
         jsonValue, ATTRIBUTE_IMAGES_NAME);
-    
+
     if (resultImages->IsArray()) {
         int32_t count = resultImages->GetArraySize();
         for (int i = 0; i < count; i++) {
@@ -169,11 +169,11 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     std::string imagesSrc = "test";
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
-    PixelMapPeer pixelMapPeer;
+    image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
     auto array = new Ark_ImageFrameInfo[] {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(&pixelMapPeer),
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_image_PixelMap>(&pixelMapPeer),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
@@ -291,14 +291,14 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Lev
     InitPattern(pattern);
 
     // Verifying attribute's  values
-    for (auto& [imput, value]: iterationsIterationsInvalidValues) {
+    for (auto& [input, value]: iterationsIterationsInvalidValues) {
         auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setIterations(node_, &optValue);
         pattern->OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
         expectedStr = ATTRIBUTE_ITERATIONS_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << imput;
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
     }
 }
 

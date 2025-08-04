@@ -35,7 +35,7 @@ void DestroyPeerImpl(Ark_ColorMetrics peer)
 {
     delete peer;
 }
-Ark_ColorMetrics CtorImpl()
+Ark_ColorMetrics ConstructImpl()
 {
     return new ColorMetricsPeer();
 }
@@ -47,7 +47,7 @@ uint32_t ClampUint32(uint32_t value)
 {
     return std::min(std::max(value, MIN_VALUE_U), MAX_CHANNEL_VALUE_U);
 }
-uint32_t ClampInt32(int32_t value)
+int8_t ClampInt32(int32_t value)
 {
     return std::min(std::max(value, MIN_VALUE), MAX_CHANNEL_VALUE);
 }
@@ -74,19 +74,15 @@ Ark_ColorMetrics NumericImpl(const Ark_Number* value)
 Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
                           const Ark_Number* green,
                           const Ark_Number* blue,
-                          const Opt_Number* alpha)
+                          const Ark_Number* alpha)
 {
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
     peer->colorValue.argb.red = red ? ClampInt32(Converter::Convert<int32_t>(*red)) : 0x00;
     peer->colorValue.argb.green = green ? ClampInt32(Converter::Convert<int32_t>(*green)) : 0x00;
     peer->colorValue.argb.blue = blue ? ClampInt32(Converter::Convert<int32_t>(*blue)) : 0x00;
-    auto optAlpha = alpha ? Converter::OptConvert<float>(*alpha) : std::nullopt;
-    if (optAlpha.has_value()) {
-        peer->colorValue.argb.alpha = ClampInt32(optAlpha.value());
-    } else {
-        peer->colorValue.argb.alpha = 0xff;
-    }
+    auto optAlpha = Converter::OptConvertPtr<float>(alpha);
+    peer->colorValue.argb.alpha = ClampInt32(optAlpha.value_or(1.0f) * MAX_CHANNEL_VALUE);
     return peer;
 }
 Ark_ColorMetrics ResourceColorImpl(const Ark_ResourceColor* color)
@@ -110,27 +106,27 @@ Ark_ColorMetrics BlendColorImpl(Ark_ColorMetrics peer,
     peer->colorValue.value = aceColor.BlendColor(aceOverlayColor).GetValue();
     return peer;
 }
-Ark_String GetColorImpl(Ark_ColorMetrics peer)
+Ark_String ColorImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, {});
     return Converter::ArkValue<Ark_String>(Ace::Color(peer->colorValue.value).ToString(), Converter::FC);
 }
-Ark_Number GetRedImpl(Ark_ColorMetrics peer)
+Ark_Number RedImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.red);
 }
-Ark_Number GetGreenImpl(Ark_ColorMetrics peer)
+Ark_Number GreenImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.green);
 }
-Ark_Number GetBlueImpl(Ark_ColorMetrics peer)
+Ark_Number BlueImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.blue);
 }
-Ark_Number GetAlphaImpl(Ark_ColorMetrics peer)
+Ark_Number AlphaImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0xff));
     return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.alpha);
@@ -140,17 +136,17 @@ const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor()
 {
     static const GENERATED_ArkUIColorMetricsAccessor ColorMetricsAccessorImpl {
         ColorMetricsAccessor::DestroyPeerImpl,
-        ColorMetricsAccessor::CtorImpl,
+        ColorMetricsAccessor::ConstructImpl,
         ColorMetricsAccessor::GetFinalizerImpl,
         ColorMetricsAccessor::NumericImpl,
         ColorMetricsAccessor::RgbaImpl,
         ColorMetricsAccessor::ResourceColorImpl,
         ColorMetricsAccessor::BlendColorImpl,
-        ColorMetricsAccessor::GetColorImpl,
-        ColorMetricsAccessor::GetRedImpl,
-        ColorMetricsAccessor::GetGreenImpl,
-        ColorMetricsAccessor::GetBlueImpl,
-        ColorMetricsAccessor::GetAlphaImpl,
+        ColorMetricsAccessor::ColorImpl,
+        ColorMetricsAccessor::RedImpl,
+        ColorMetricsAccessor::GreenImpl,
+        ColorMetricsAccessor::BlueImpl,
+        ColorMetricsAccessor::AlphaImpl,
     };
     return &ColorMetricsAccessorImpl;
 }

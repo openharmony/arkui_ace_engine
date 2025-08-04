@@ -22,9 +22,9 @@ namespace ComponentContentAccessor {
 void DestroyPeerImpl(Ark_ComponentContent peer)
 {
 }
-Ark_ComponentContent CtorImpl()
+Ark_ComponentContent ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -52,7 +52,7 @@ const GENERATED_ArkUIComponentContentAccessor* GetComponentContentAccessor()
 {
     static const GENERATED_ArkUIComponentContentAccessor ComponentContentAccessorImpl {
         ComponentContentAccessor::DestroyPeerImpl,
-        ComponentContentAccessor::CtorImpl,
+        ComponentContentAccessor::ConstructImpl,
         ComponentContentAccessor::GetFinalizerImpl,
         ComponentContentAccessor::UpdateImpl,
         ComponentContentAccessor::ReuseImpl,

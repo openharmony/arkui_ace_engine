@@ -155,6 +155,15 @@ public:
         return 0;
     }
 
+    uint32_t GetInnerColorGamut() const override
+    {
+        return 0;
+    }
+
+    void SetMemoryName(std::string pixelMapName) const override
+    {
+    }
+
 private:
     int32_t stubWidth = 2;
     int32_t stubHeight = 2;

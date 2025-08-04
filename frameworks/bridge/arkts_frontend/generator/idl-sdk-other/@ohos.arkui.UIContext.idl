@@ -1,0 +1,124 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.arkui.UIContext;
+
+import arkui.ComponentContent.ComponentContent as ComponentContent;
+import arkui.component.common.SheetOptions as SheetOptions;
+import ohos.app.ability.common.common.Context as Context;
+import arkui.FrameNode.FrameNode as FrameNode;
+import arkui.component.common.AnimateParam as AnimateParam;
+import arkui.component.textPicker.TextPickerDialogOptions as TextPickerDialogOptions;
+import ohos.graphics.drawing.drawing.Font as Font;
+import arkui.componen.enums.HeightBreakpoint as HeightBreakpoint;
+import arkui.componen.enums.WidthBreakpoint as WidthBreakpoint;
+import arkui.component.common.PopupCommonOptions as PopupCommonOptions;
+import arkui.component.common.MenuOptions as MenuOptions;
+
+[Synthetic]
+callback Callback_Void = void ();
+
+[Entity=Interface]
+interface TargetInfo {
+  attribute (String or number) id;
+  [Optional]
+  attribute number componentId;
+};
+
+[Entity=Class]
+interface PromptAction {
+  [Throws, TypeParameters="T extends Object"]
+  async void openPopup(ComponentContent content, TargetInfo target, optional PopupCommonOptions options);
+  [Throws, TypeParameters="T extends Object"]
+  async void upatePopup(ComponentContent content, PopupCommonOptions options, optional boolean partialUpdate);
+  [Throws, TypeParameters="T extends Object"]
+  async void closePopup(ComponentContent content);
+  [Throws, TypeParameters="T extends Object"]
+  async void openMenu(ComponentContent content, TargetInfo target, optional MenuOptions options);
+  [Throws, TypeParameters="T extends Object"]
+  async void updateMenu(ComponentContent content, MenuOptions options, optional boolean partialUpdate);
+  [Throws, TypeParameters="T extends Object"]
+  async void closeMenu(ComponentContent content);
+};
+
+[Entity=Class]
+interface UIContext {
+    Font getFont();
+    // MediaQuery getMediaQuery();
+    // UIInspector getUIInspector();
+    [Throws] String getFilteredInspectorTree(optional sequence<String> filters);
+    [Throws] String getFilteredInspectorTreeById(String id, number depth, optional sequence<String> filters);
+    // Router getRouter();
+    // PromptAction getPromptAction();
+    // ComponentUtils getComponentUtils();
+    // UIObserver getUIObserver();
+    // OverlayManager getOverlayManager();
+    // [Throws] AnimatorResult createAnimator(AnimatorOptions options);
+    void animateTo(AnimateParam value, Callback_Void event);
+    // void showAlertDialog((AlertDialogParamWithConfirm or AlertDialogParamWithButtons or AlertDialogParamWithOptions) options);
+    // void showActionSheet(ActionSheetOptions value);
+    // void showDatePickerDialog(DatePickerDialogOptions options);
+    // void showTimePickerDialog(TimePickerDialogOptions options);
+    void showTextPickerDialog(TextPickerDialogOptions options);
+    void runScopedTask(Callback_Void callback_);
+    // void setKeyboardAvoidMode(KeyboardAvoidMode value);
+    // KeyboardAvoidMode getKeyboardAvoidMode();
+    // ([TypeArguments="AtomicServiceBar"] Nullable) getAtomicServiceBar();
+    // DragController getDragController();
+    // MeasureUtils getMeasureUtils();
+    // void keyframeAnimateTo(KeyframeAnimateParam param, sequence<KeyframeState> keyframes);
+    void animateToImmediately(AnimateParam param, Callback_Void event);
+    (FrameNode or undefined) getFrameNodeById(String id);
+    (FrameNode or undefined) getAttachedFrameNodeById(String id);
+    (FrameNode or undefined) getFrameNodeByUniqueId(number id);
+    // PageInfo getPageInfoByUniqueId(number id);
+    // (NavigationInfo or undefined) getNavigationInfoByUniqueId(number id);
+    // FocusController getFocusController();
+    // CursorController getCursorController();
+    // ContextMenuController getContextMenuController();
+    // ComponentSnapshot getComponentSnapshot();
+    number vp2px(number value);
+    number px2vp(number value);
+    number fp2px(number value);
+    number px2fp(number value);
+    number lpx2px(number value);
+    number px2lpx(number value);
+    // (LocalStorage or undefined) getSharedLocalStorage();
+    (Context or undefined) getHostContext();
+    void setDynamicDimming(String id, number value);
+    (String or undefined) getWindowName();
+    WidthBreakpoint getWindowWidthBreakpoint();
+    HeightBreakpoint getWindowHeightBreakpoint();
+    [Throws, TypeParameters="T extends Object"]
+    async void openBindSheet(ComponentContent bindSheetContent, optional SheetOptions sheetOptions, optional number targetId);
+    [Throws, TypeParameters="T extends Object"]
+    async void updateBindSheet(ComponentContent bindSheetContent, SheetOptions sheetOptions, optional boolean partialUpdate);
+    [Throws, TypeParameters="T extends Object"]
+    async void closeBindSheet(ComponentContent bindSheetContent);
+    // void postFrameCallback(FrameCallback frameCallback);
+    // void postDelayedFrameCallback(FrameCallback frameCallback, number delayTime);
+    // sequence<DynamicSyncScene> requireDynamicSyncScene(String id);
+    [Throws] void clearResourceCache();
+    boolean isFollowingSystemFontScale();
+    number getMaxFontScale();
+    // void bindTabsToScrollable(TabsController tabsController, Scroller scroller);
+    // void unbindTabsFromScrollable(TabsController tabsController, Scroller scroller);
+    // void bindTabsToNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller childScroller);
+    // void unbindTabsFromNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller childScroller);
+};
+
+[Entity=Class]
+interface TextMenuController {
+  void setMenuOptions(TextMenuOptions options);
+};

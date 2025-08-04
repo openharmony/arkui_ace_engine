@@ -28,16 +28,16 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace WebviewControllerAccessor {
-void DestroyPeerImpl(Ark_WebviewController peer)
+namespace webview_WebviewControllerAccessor {
+void DestroyPeerImpl(Ark_webview_WebviewController peer)
 {
     if (peer) {
         peer->DecRefCount();
     }
 }
-Ark_WebviewController CtorImpl()
+Ark_webview_WebviewController ConstructImpl()
 {
-    auto peer = Referenced::MakeRefPtr<WebviewControllerPeer>();
+    auto peer = Referenced::MakeRefPtr<webview_WebviewControllerPeer>();
     peer->IncRefCount();
     return Referenced::RawPtr(peer);
 }
@@ -56,9 +56,9 @@ void InitializeWebEngineImpl()
     }
 #endif
 }
-void LoadUrlImpl(Ark_WebviewController peer,
+void LoadUrlImpl(Ark_webview_WebviewController peer,
                  const Ark_Union_String_Resource* url,
-                 const Opt_Array_WebHeader* headers)
+                 const Opt_Array_webview_WebHeader* headers)
 {
 #ifdef WEB_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -77,17 +77,17 @@ void LoadUrlImpl(Ark_WebviewController peer,
     nweb->Load(urlStr, httpHeaders);
 #endif
 }
-} // WebviewControllerAccessor
-const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor()
+} // webview_WebviewControllerAccessor
+const GENERATED_ArkUIWebview_WebviewControllerAccessor* GetWebview_WebviewControllerAccessor()
 {
-    static const GENERATED_ArkUIWebviewControllerAccessor WebviewControllerAccessorImpl {
-        WebviewControllerAccessor::DestroyPeerImpl,
-        WebviewControllerAccessor::CtorImpl,
-        WebviewControllerAccessor::GetFinalizerImpl,
-        WebviewControllerAccessor::InitializeWebEngineImpl,
-        WebviewControllerAccessor::LoadUrlImpl,
+    static const GENERATED_ArkUIWebview_WebviewControllerAccessor Webview_WebviewControllerAccessorImpl {
+        webview_WebviewControllerAccessor::DestroyPeerImpl,
+        webview_WebviewControllerAccessor::ConstructImpl,
+        webview_WebviewControllerAccessor::GetFinalizerImpl,
+        webview_WebviewControllerAccessor::InitializeWebEngineImpl,
+        webview_WebviewControllerAccessor::LoadUrlImpl,
     };
-    return &WebviewControllerAccessorImpl;
+    return &Webview_WebviewControllerAccessorImpl;
 }
 
 }

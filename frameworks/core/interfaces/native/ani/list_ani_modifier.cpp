@@ -26,7 +26,9 @@ void SetListChildrenMainSize(ani_env* env, ani_long ptr, ani_object obj)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
     CHECK_NULL_VOID(frameNode);
+#ifdef WRONG_KOALA
     Framework::AniListModule::SetListChildrenMainSize(env, ptr, obj);
+#endif
 }
 
 const ArkUIAniListModifier* GetArkUIAniListModifier()

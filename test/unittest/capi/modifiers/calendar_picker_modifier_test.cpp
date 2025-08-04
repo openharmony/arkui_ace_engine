@@ -43,14 +43,14 @@ const auto ATTRIBUTE_FONT_WEIGHT_NAME = "weight";
 const auto ATTRIBUTE_HINT_RADIUS_NAME = "hintRadius";
 const auto ATTRIBUTE_SELECTED_NAME = "selected";
 
-const auto RES_COLOR_ID = IntResourceId{102001, Converter::ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{102001, ResourceType::COLOR};
 const auto RES_COLOR_ID_VALUE = Color(0xFF654321);
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
 const auto RES_COLOR_NAME_VALUE = Color(0xFF123456);
 
-const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_NAME_VALUE = "res_font_family_string_id";
-const auto RES_FONT_FAMILY_ID = IntResourceId{102002, Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_ID = IntResourceId{102002, ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_ID_VALUE = "res_font_family_number_id";
 
 struct CalendarAlignTest {
@@ -67,7 +67,7 @@ const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 
@@ -133,12 +133,12 @@ public:
  */
 HWTEST_F(CalendarPickerModifierTest, setEdgeAlignTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setEdgeAlign0, nullptr);
+    ASSERT_NE(modifier_->setEdgeAlign, nullptr);
 
     for (const auto& data: CALENDAR_ALIGN_TEST_PLAN) {
         auto optOffset = ArkValue<Opt_Offset>(data.offset);
         auto align = Converter::ArkValue<Opt_CalendarAlign>(data.calendarAlignType);
-        modifier_->setEdgeAlign0(node_, &align, &optOffset);
+        modifier_->setEdgeAlign(node_, &align, &optOffset);
 
         auto fullJson = GetJsonValue(node_);
 
@@ -196,7 +196,7 @@ const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
  */
 HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
@@ -210,7 +210,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
     for (auto color : COLOR_TEST_PLAN) {
         pickerStyle.color = color.first;
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optPickerStyle);
+        modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_COLOR_NAME);
@@ -225,7 +225,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
@@ -240,7 +240,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optPickerStyle);
+        modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
@@ -258,7 +258,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1
  */
 HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
@@ -273,7 +273,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
         font.size = size.first;
         pickerStyle.font.value = font;
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optPickerStyle);
+        modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
@@ -332,7 +332,7 @@ const std::vector<PickerDateTest> CHANGE_EVENT_TEST_PLAN = {
  */
 HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnChange0, nullptr);
+    ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
@@ -351,7 +351,7 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
         .call = onChange
     };
     auto optFunk = Converter::ArkValue<Opt_Callback_Date_Void>(func);
-    modifier_->setOnChange0(node_, &optFunk);
+    modifier_->setOnChange(node_, &optFunk);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         std::string testStr = testValue.first.ToString(true);

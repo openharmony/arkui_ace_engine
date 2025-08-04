@@ -74,17 +74,18 @@ const std::vector<std::pair<Opt_String, std::string>> OPT_IMAGE_TYPE_TEST_PLAN {
     { Converter::ArkValue<Opt_String>(EMPTY_STRING),  IMAGE_PNG},
     { Converter::ArkValue<Opt_String>(Ark_Empty()),  IMAGE_PNG},
 };
-const std::vector<std::pair<Opt_Float32, float>> OPT_IMAGE_QUALITY_TEST_PLAN {
-    { Converter::ArkValue<Opt_Float32>(-10.0f), IMAGE_QUALITY_DEFAULT },
-    { Converter::ArkValue<Opt_Float32>(-1.0f), IMAGE_QUALITY_DEFAULT },
-    { Converter::ArkValue<Opt_Float32>(-0.75f), IMAGE_QUALITY_DEFAULT },
-    { Converter::ArkValue<Opt_Float32>(0.0f), 0.0f },
-    { Converter::ArkValue<Opt_Float32>(0.5f), 0.5f },
-    { Converter::ArkValue<Opt_Float32>(0.92f), 0.92f },
-    { Converter::ArkValue<Opt_Float32>(1.0f), 1.0f },
-    { Converter::ArkValue<Opt_Float32>(1.25f), IMAGE_QUALITY_DEFAULT },
-    { Converter::ArkValue<Opt_Float32>(10.0f), IMAGE_QUALITY_DEFAULT },
-    { Converter::ArkValue<Opt_Float32>(Ark_Empty()), IMAGE_QUALITY_DEFAULT },
+using QualityType = Opt_Number;
+const std::vector<std::pair<QualityType, float>> OPT_IMAGE_QUALITY_TEST_PLAN {
+    { Converter::ArkValue<QualityType>(-10.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<QualityType>(-1.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<QualityType>(-0.75f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<QualityType>(0.0f), 0.0f },
+    { Converter::ArkValue<QualityType>(0.5f), 0.5f },
+    { Converter::ArkValue<QualityType>(0.92f), 0.92f },
+    { Converter::ArkValue<QualityType>(1.0f), 1.0f },
+    { Converter::ArkValue<QualityType>(1.25f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<QualityType>(10.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<QualityType>(Ark_Empty()), IMAGE_QUALITY_DEFAULT },
 };
 } // namespace
 
@@ -94,8 +95,8 @@ class CanvasRenderingContext2DAccessorTest
 public:
     void SetUp(void) override
     {
-        ASSERT_NE(accessor_->ctor, nullptr);
-        peer_ = reinterpret_cast<CanvasRenderingContext2DPeer*>(accessor_->ctor(&DEFAULT_SETTINGS));
+        ASSERT_NE(accessor_->construct, nullptr);
+        peer_ = reinterpret_cast<CanvasRenderingContext2DPeer*>(accessor_->construct(&DEFAULT_SETTINGS, nullptr));
         ASSERT_NE(peer_, nullptr);
 
         AccessorTestBaseParent::SetUp();
@@ -301,7 +302,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onOnDetachTest, TestSize
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->onOnDetach(vmContext_, peer_, &checkEvents[i].first);
+        accessor_->onOnDetach(peer_, &checkEvents[i].first);
         EXPECT_FALSE(checkEvents[i].second);
         for (size_t j = 0; j <= i; ++j) {
             mockPatternKeeper_->DetachRenderContext();
@@ -422,11 +423,11 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTest, TestSiz
         };
         auto arkCallback = ArkValue<Callback_Void>(callback, i);
         checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
-        accessor_->onOnDetach(vmContext_, peer_, &arkCallback);
+        accessor_->onOnDetach(peer_, &arkCallback);
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->offOnDetach(vmContext_, peer_, &checkEvents[i].first);
+        accessor_->offOnDetach(peer_, &checkEvents[i].first);
         checkEvents[i].second = std::nullopt;
         for (size_t j = 0; j < eventsSize; ++j) {
             mockPatternKeeper_->DetachRenderContext();
@@ -468,10 +469,10 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offOnDetachTestAll, Test
         };
         auto arkCallback = ArkValue<Callback_Void>(callback, i);
         checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
-        accessor_->onOnDetach(vmContext_, peer_, &arkCallback);
+        accessor_->onOnDetach(peer_, &arkCallback);
     }
     auto optCallback = ArkValue<Opt_Callback_Void>();
-    accessor_->offOnDetach(vmContext_, peer_, &optCallback);
+    accessor_->offOnDetach(peer_, &optCallback);
     mockPatternKeeper_->DetachRenderContext();
     for (size_t j = 0; j < eventsSize; ++j) {
         EXPECT_FALSE(checkEvents[j].second);

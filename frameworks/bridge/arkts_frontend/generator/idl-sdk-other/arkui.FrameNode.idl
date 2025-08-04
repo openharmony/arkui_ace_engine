@@ -1,0 +1,100 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.FrameNode;
+
+import arkui.component.units.Position as Position;
+import ohos.arkui.UIContext.UIContext as UIContext;
+
+interface CrossLanguageOptions {
+   [Optional]
+   attribute boolean attributeSetting;
+};
+[Entity=Interface]
+interface LayoutConstraint {
+   attribute Size maxSize;
+   attribute Size minSize;
+   attribute Size percentReference;
+};
+[Entity=Class]
+interface FrameNode {
+    constructor(UIContext uiContext);
+    // [Accessor=Getter]
+    // readonly attribute UICommonEvent commonEvent;
+    // [Accessor=Getter]
+    // readonly attribute UIGestureEvent gestureEvent;
+    // [Accessor=Getter]
+    // readonly attribute CommonAttribute commonAttribute;
+    // (RenderNode or undefined) getRenderNode();
+    boolean isModifiable();
+    void appendChild(FrameNode node);
+    void insertChildAfter(FrameNode child, [Optional] FrameNode sibling);
+    void removeChild(FrameNode node);
+    void clearChildren();
+    [Optional] FrameNode getChild(number index, number expandMode);
+    [Optional] FrameNode getFirstChild();
+    [Optional] FrameNode getNextSibling();
+    [Optional] FrameNode getPreviousSibling();
+    [Optional] FrameNode getParent();
+    i32 getChildrenCount();
+    void dispose();
+    // Position getPositionToWindow();
+    // Position getPositionToParent();
+    // Size getMeasuredSize();
+    // Position getLayoutPosition();
+    // ([TypeArguments="LengthMetrics"] Edges) getUserConfigBorderWidth();
+    // ([TypeArguments="LengthMetrics"] Edges) getUserConfigPadding();
+    // ([TypeArguments="LengthMetrics"] Edges) getUserConfigMargin();
+    // ([TypeArguments="LengthMetrics"] SizeT) getUserConfigSize();
+    String getId();
+    number getUniqueId();
+    String getNodeType();
+    number getOpacity();
+    boolean isVisible();
+    boolean isClipToFrame();
+    boolean isAttached();
+    Object getInspectorInfo();
+    void invalidate();
+    void disposeTree();
+    void setCrossLanguageOptions(CrossLanguageOptions options);
+    CrossLanguageOptions getCrossLanguageOptions();
+    // (Object or undefined) getCustomProperty(String name);
+    // [Optional]
+    // void onDraw(DrawContext context);
+    // void onMeasure(LayoutConstraint constraint);
+    // void onLayout(Position position);
+    void setMeasuredSize(Size size);
+    void setLayoutPosition(Position position);
+    void measure(LayoutConstraint constraint);
+    void layout(Position position);
+    void setNeedsLayout();
+    // Position getPositionToScreen();
+    Position getPositionToWindowWithTransform();
+    // Position getPositionToParentWithTransform();
+    // Position getPositionToScreenWithTransform();
+    // [TypeParameters="T"]
+    // void addComponentContent([TypeArguments="T"] ComponentContent content);
+    static FrameNode getFrameNodeByKey(String name);
+    number getIdByFrameNode(FrameNode node);
+    void moveTo(FrameNode targetParent, number index);
+    number getFirstChildIndexWithoutExpand();
+    number getLastChildIndexWithoutExpand();
+    static FrameNode getAttachedFrameNodeById(String id);
+    static FrameNode getFrameNodeById(number id);
+    static FrameNode getFrameNodeByUniqueId(number id);
+    void reuse();
+    void recycle();
+    static pointer getFrameNodePtr(FrameNode node);
+    static FrameNode createTypedFrameNode(String type);
+};

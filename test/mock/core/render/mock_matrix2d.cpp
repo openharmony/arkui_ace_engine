@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/matrix2d.h"
+#include "core/components_ng/render/adapter/matrix_util.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -69,7 +70,8 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     param.skewY *= degree * ry;
 }
 
-Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint)
+Matrix4 MatrixUtil::SetMatrixPolyToPoly(const Matrix4& matrix,
+    const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint)
 {
     return Matrix4();
 }

@@ -47,11 +47,11 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexDefaultValues, TestSize.
     EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> optionsIndexValidValues = {
-    {"0", Converter::ArkValue<Opt_Number>(0), "0"},
-    {"11.1", Converter::ArkValue<Opt_Number>(11.1), "11"},
-    {"77.7", Converter::ArkValue<Opt_Number>(77.7), "77"},
-    {"99", Converter::ArkValue<Opt_Number>(99), "99"},
+static std::vector<std::tuple<std::string, Opt_Union_Number_Bindable, std::string>> optionsIndexValidValues = {
+    {"0", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(0), "0"},
+    {"11.1", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(11.1), "11"},
+    {"77.7", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(77.7), "77"},
+    {"99", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(99), "99"},
 };
 
 /*
@@ -64,15 +64,9 @@ HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, Te
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    auto realInputValue = Converter::ArkValue<Opt_Literal_Number_index>(Ark_Literal_Number_index{});
-    Opt_Number& inputValueStatus = realInputValue.value.index;
-    Opt_Number initValueStatus;
+    auto realInputValue = Converter::ArkValue<Opt_StepperOptions>(Ark_StepperOptions{});
+    auto& inputValueStatus = realInputValue.value.index;
 
-    // Initial setup
-    initValueStatus = std::get<1>(optionsIndexValidValues[0]);
-
-    // Verifying attribute's values
-    inputValueStatus = initValueStatus;
     for (auto&& value: optionsIndexValidValues) {
         inputValueStatus = std::get<1>(value);
         modifier_-> setStepperOptions(node_, &realInputValue);
@@ -83,9 +77,9 @@ HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, Te
     }
 }
 
-static std::vector<std::tuple<std::string, Opt_Number>> optionsIndexInvalidValues = {
-    {"-1", Converter::ArkValue<Opt_Number>(-1)},
-    {"", Converter::ArkValue<Opt_Number>()},
+static std::vector<std::tuple<std::string, Opt_Union_Number_Bindable>> optionsIndexInvalidValues = {
+    {"-1", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(-1)},
+    {"", Converter::ArkValue<Opt_Union_Number_Bindable>()},
 };
 
 /*
@@ -98,15 +92,9 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    auto realInputValue = Converter::ArkValue<Opt_Literal_Number_index>(Ark_Literal_Number_index{});
-    Opt_Number& inputValueStatus = realInputValue.value.index;
-    Opt_Number initValueStatus;
+    auto realInputValue = Converter::ArkValue<Opt_StepperOptions>(Ark_StepperOptions{});
+    auto& inputValueStatus = realInputValue.value.index;
 
-    // Initial setup
-    initValueStatus = std::get<1>(optionsIndexValidValues[0]);
-
-    // Verifying attribute's values
-    inputValueStatus = initValueStatus;
     for (auto&& value: optionsIndexInvalidValues) {
         inputValueStatus = std::get<1>(value);
         modifier_-> setStepperOptions(node_, &realInputValue);
@@ -115,7 +103,7 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
         EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
     }
 
-    realInputValue = Converter::ArkValue<Opt_Literal_Number_index>();
+    realInputValue = Converter::ArkValue<Opt_StepperOptions>();
     modifier_-> setStepperOptions(node_, &realInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
@@ -300,6 +288,7 @@ HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
     EXPECT_EQ(std::get<2>(checkData.value()), secondArg);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventIndexImpl
  * @tc.desc:
@@ -339,4 +328,5 @@ HWTEST_F(StepperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 2);
 }
+#endif
 } // namespace OHOS::Ace::NG

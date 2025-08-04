@@ -1,0 +1,78 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.app.ability.Want;
+
+[Entity=Class, DefaultExport]
+interface Want {
+    /**
+     * bundle name
+     */
+    [Optional]
+    attribute String bundleName;
+
+    /**
+     * ability name
+     */
+    [Optional]
+    attribute String abilityName;
+
+    /**
+     * device id
+     */
+    [Optional]
+    attribute String deviceId;
+
+    /**
+     * The description of a URI in a Want.
+     */
+    [Optional]
+    attribute String uri;
+
+    /**
+     * The description of the type in this Want.
+     */
+    [Optional]
+    attribute String type;
+
+    /**
+     * The options of the flags in this Want.
+     */
+    [Optional]
+    attribute number flags;
+
+    /**
+     * The description of an action in an want.
+     */
+    [Optional]
+    attribute String action;
+
+    /**
+     * The description of the WantParams object in an Want
+     */
+    [Optional]
+    attribute record<String, Object> parameters;
+
+    /**
+     * The description of a entities in a Want.
+     */
+    [Optional]
+    attribute sequence<String> entities;
+
+    /**
+     * The description of an module name in an want.
+     */
+    [Optional]
+    attribute String moduleName;
+};

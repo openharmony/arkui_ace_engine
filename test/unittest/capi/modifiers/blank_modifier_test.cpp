@@ -65,12 +65,12 @@ HWTEST_F(BlankModifierTest, BlankModifierTest001, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto optResNameColor = CreateResourceUnion<Opt_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", ResourceType::COLOR});
     modifier_->setColor(node_, &optResNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto optResIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto optResIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, ResourceType::COLOR});
     modifier_->setColor(node_, &optResIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -88,26 +88,6 @@ HWTEST_F(BlankModifierTest, BlankModifierTest002, TestSize.Level1)
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "0.00px");
-
-    auto intVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(123);
-    modifier_->setBlankOptions(node_, &intVal);
-    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal3, "123.00vp");
-
-    auto floatVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.23f);
-    modifier_->setBlankOptions(node_, &floatVal);
-    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal4, "1.23vp");
-
-    auto pxVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("45px");
-    modifier_->setBlankOptions(node_, &pxVal);
-    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal5, "45.00px");
-
-    auto vpVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("5.6vp");
-    modifier_->setBlankOptions(node_, &vpVal);
-    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal6, "5.60vp");
 
     auto intNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-123);
     modifier_->setBlankOptions(node_, &intNegVal);
@@ -133,5 +113,25 @@ HWTEST_F(BlankModifierTest, BlankModifierTest002, TestSize.Level1)
     modifier_->setBlankOptions(node_, &undefVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "0.00px");
+
+    auto intVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(123);
+    modifier_->setBlankOptions(node_, &intVal);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "123.00vp");
+
+    auto floatVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.23f);
+    modifier_->setBlankOptions(node_, &floatVal);
+    auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal4, "1.23vp");
+
+    auto pxVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("45px");
+    modifier_->setBlankOptions(node_, &pxVal);
+    auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal5, "45.00px");
+
+    auto vpVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("5.6vp");
+    modifier_->setBlankOptions(node_, &vpVal);
+    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal6, "5.60vp");
 }
 } // namespace OHOS::Ace::NG

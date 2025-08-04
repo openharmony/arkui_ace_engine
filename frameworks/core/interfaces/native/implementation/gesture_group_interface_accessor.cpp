@@ -13,75 +13,26 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
-#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
-#include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
-#include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
-#include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
-#include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
-#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+
 #include "arkoala_api_generated.h"
+#include "gesture_group_interface_peer.h"
+#include "gesture_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-RefPtr<Gesture> Convert(const Ark_GestureGroupInterface& src)
+RefPtr<Gesture> Convert(const Ark_CustomObject& src)
 {
-    return src ? src->gesture : nullptr;
+    return nullptr;
 }
 
 template<>
-RefPtr<Gesture> Convert(const Ark_LongPressGestureInterface& src)
+RefPtr<Gesture> Convert(const Ark_Gesture& src)
 {
-    return src ? src->gesture : nullptr;
-}
-
-template<>
-RefPtr<Gesture> Convert(const Ark_PanGestureInterface& src)
-{
-    return src ? src->gesture : nullptr;
-}
-
-template<>
-RefPtr<Gesture> Convert(const Ark_PinchGestureInterface& src)
-{
-    return src ? src->gesture : nullptr;
-}
-
-template<>
-RefPtr<Gesture> Convert(const Ark_RotationGestureInterface& src)
-{
-    return src ? src->gesture : nullptr;
-}
-
-template<>
-RefPtr<Gesture> Convert(const Ark_SwipeGestureInterface& src)
-{
-    return src ? src->gesture : nullptr;
-}
-
-template<>
-RefPtr<Gesture> Convert(const Ark_TapGestureInterface& src)
-{
-    return src ? src->gesture : nullptr;
-}
-
-template<>
-std::vector<RefPtr<Gesture>> Convert(const Array_GestureType& src)
-{
-    std::vector<RefPtr<Gesture>> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto opt = Converter::OptConvert<RefPtr<Gesture>>(*(src.array + i));
-        if (opt) {
-            dst.push_back(*opt);
-        }
-    }
-    return dst;
+    return src ? src->GetGesture() : nullptr;
 }
 }
 
@@ -91,14 +42,14 @@ void DestroyPeerImpl(Ark_GestureGroupInterface peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_GestureGroupInterface CtorImpl(Ark_GestureMode mode,
-                                   const Array_GestureType* gesture)
+Ark_GestureGroupInterface ConstructImpl(Ark_GestureMode mode,
+                                        const Array_GestureType* gesture)
 {
     auto peer = PeerUtils::CreatePeer<GestureGroupInterfacePeer>();
     auto gestureMode = (Converter::OptConvert<GestureMode>(mode)).value_or(GestureMode::Sequence);
     std::vector<RefPtr<Gesture>> gestures;
     if (gesture) {
-        gestures = Converter::Convert<std::vector<RefPtr<Gesture>>>(*gesture);
+        gestures = Converter::Squash(Converter::Convert<std::vector<std::optional<RefPtr<Gesture>>>>(*gesture));
     }
     peer->gesture = AceType::MakeRefPtr<GestureGroup>(gestureMode, gestures);
     return peer;
@@ -122,7 +73,7 @@ const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAcce
 {
     static const GENERATED_ArkUIGestureGroupInterfaceAccessor GestureGroupInterfaceAccessorImpl {
         GestureGroupInterfaceAccessor::DestroyPeerImpl,
-        GestureGroupInterfaceAccessor::CtorImpl,
+        GestureGroupInterfaceAccessor::ConstructImpl,
         GestureGroupInterfaceAccessor::GetFinalizerImpl,
         GestureGroupInterfaceAccessor::OnCancelImpl,
     };

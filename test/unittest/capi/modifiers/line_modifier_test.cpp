@@ -38,10 +38,10 @@ namespace  {
     constexpr int WIDTH = 111;
     constexpr int HEIGHT = 222;
     constexpr auto DEFAULT_VALUE = "-";
-    constexpr auto P1_X = 100.0_px;
-    constexpr auto P1_Y = 200.0_px;
-    constexpr auto P2_X = 300.0_px;
-    constexpr auto P2_Y = 400.0_px;
+    constexpr auto P1_X = "100px";
+    constexpr auto P1_Y = "200px";
+    constexpr auto P2_X = "300px";
+    constexpr auto P2_Y = "400px";
     const auto START_POINT_STR = "[100,200]";
     const auto END_POINT_STR = "[300,400]";
 } // namespace
@@ -122,7 +122,7 @@ HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
     Ark_ShapePoint array;
     array.value0 = x;
     array.value1 = y;
-    
+
     auto optArray = Converter::ArkValue<Opt_ShapePoint>(array);
     modifier_->setStartPoint(frameNode, &optArray);
 

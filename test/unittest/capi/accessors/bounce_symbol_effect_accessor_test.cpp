@@ -29,7 +29,7 @@ class BounceSymbolEffectAccessorTest : public AccessorTestCtorBase<GENERATED_Ark
     &GENERATED_ArkUIAccessors::getBounceSymbolEffectAccessor, BounceSymbolEffectPeer> {
     void* CreatePeerInstance() override
     {
-        return accessor_->ctor(nullptr, nullptr);
+        return accessor_->construct(nullptr, nullptr);
     }
 };
 
@@ -76,7 +76,7 @@ HWTEST_F(BounceSymbolEffectAccessorTest, ctorTest, TestSize.Level1)
             PeerUtils::CreatePeer<BounceSymbolEffectPeer>(OHOS::Ace::ScopeType::WHOLE, std::nullopt)},
     };
     for (auto [value1, value2, expected] : testPlan) {
-        Ark_BounceSymbolEffect peer = accessor_->ctor(value1, value2);
+        Ark_BounceSymbolEffect peer = accessor_->construct(value1, value2);
         ASSERT_NE(peer, nullptr);
         EXPECT_EQ(*peer, *expected);
     }
@@ -120,7 +120,8 @@ HWTEST_F(BounceSymbolEffectAccessorTest, setScopeTest, TestSize.Level1)
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->scope.reset();
-        accessor_->setScope(peer, value);
+        auto optVal = Converter::ArkValue<Opt_EffectScope>(value);
+        accessor_->setScope(peer, &optVal);
         EXPECT_EQ(peer_->scope, expected);
     }
 }
@@ -163,7 +164,8 @@ HWTEST_F(BounceSymbolEffectAccessorTest, setDirectionTest, TestSize.Level1)
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->direction.reset();
-        accessor_->setDirection(peer, value);
+        auto optVal = Converter::ArkValue<Opt_EffectDirection>(value);
+        accessor_->setDirection(peer, &optVal);
         EXPECT_EQ(peer_->direction, expected);
     }
 }

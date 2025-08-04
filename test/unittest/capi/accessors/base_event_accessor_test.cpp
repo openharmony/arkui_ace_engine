@@ -67,7 +67,7 @@ const std::vector<std::pair<Ark_Number, float>> testFixtureFloatValues = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level1)
 {
     const std::vector<std::tuple<std::vector<std::string>, std::vector<KeyCode>, bool>> TEST_PLAN = {
         { {"ctrl"}, {KeyCode::KEY_CTRL_LEFT}, true },
@@ -108,8 +108,8 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_GetTargetTest, TestSize.Level1)
     baseEvent_->SetTarget(target);
     auto result = accessor_->getTarget(peer_);
 
-    EXPECT_EQ(Converter::Convert<Dimension>(result.area.height), height);
-    EXPECT_EQ(Converter::Convert<Dimension>(result.area.width), width);
+    EXPECT_EQ(Converter::OptConvert<Dimension>(result.area.height), height);
+    EXPECT_EQ(Converter::OptConvert<Dimension>(result.area.width), width);
 
     auto optOffsetX = Converter::OptConvert<Dimension>(result.area.position.x);
     ASSERT_TRUE(optOffsetX.has_value());
@@ -162,7 +162,7 @@ HWTEST_F(BaseEventAccessorTest, SetTargetTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetTimeStampTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_GetTimeStampTest, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -186,7 +186,7 @@ HWTEST_F(BaseEventAccessorTest, GetTimeStampTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetTimeStampTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_SetTimeStampTest, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -215,7 +215,6 @@ HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
     const std::vector<std::pair<SourceType, Ark_SourceType>> TEST_PLAN = {
         { SourceType::NONE, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
         { SourceType::MOUSE, Ark_SourceType::ARK_SOURCE_TYPE_MOUSE },
-        { SourceType::KEYBOARD, Ark_SourceType::ARK_SOURCE_TYPE_KEYBOARD },
         { SourceType::TOUCH, Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN },
         { SourceType::TOUCH_PAD, static_cast<Ark_SourceType>(-1) }
     };

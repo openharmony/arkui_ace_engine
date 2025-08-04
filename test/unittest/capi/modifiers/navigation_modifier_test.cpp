@@ -1104,19 +1104,19 @@ HWTEST_F(NavigationModifierTest, setNavigationOptions1Test, TestSize.Level1)
     Ark_Materialized navPathStackUndef {nullptr};
     modifier_->setNavigationOptions1(node_, &navPathStackUndef);
 
-    // get accessor, ctor, finalyzer
+    // get accessor, construct, finalyzer
     const GENERATED_ArkUIAccessors *accessors
         = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
     const GENERATED_ArkUINavPathStackAccessor *accessorNavPathStack
         = accessors && accessors->getNavPathStackAccessor ? (*accessors->getNavPathStackAccessor)() : nullptr;
     ASSERT_NE(accessorNavPathStack, nullptr);
-    ASSERT_NE(accessorNavPathStack->ctor, nullptr);
+    ASSERT_NE(accessorNavPathStack->construct, nullptr);
     ASSERT_NE(accessorNavPathStack->getFinalizer, nullptr);
     auto finalyzer = reinterpret_cast<void (*)(NavPathStackPeer *)>(accessorNavPathStack->getFinalizer());
     ASSERT_NE(finalyzer, nullptr);
 
     // create the NavPathStack peer and attach it to modifier
-    auto navPathStackPeer = (*accessorNavPathStack->ctor)();
+    auto navPathStackPeer = (*accessorNavPathStack->construct)();
     Ark_Materialized navPathStackValid = { reinterpret_cast<Ark_NativePointer>(navPathStackPeer) };
     modifier_->setNavigationOptions1(node_, &navPathStackValid);
 
@@ -1161,19 +1161,19 @@ HWTEST_F(NavigationModifierTest, setNavDestinationTest, TestSize.Level1)
     Ark_Materialized navPathStackUndef {nullptr};
     modifier_->setNavigationOptions1(node_, &navPathStackUndef);
 
-    // get accessor, ctor, finalyzer
+    // get accessor, construct, finalyzer
     const GENERATED_ArkUIAccessors *accessors
         = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
     const GENERATED_ArkUINavPathStackAccessor *accessorNavPathStack
         = accessors && accessors->getNavPathStackAccessor ? (*accessors->getNavPathStackAccessor)() : nullptr;
     ASSERT_NE(accessorNavPathStack, nullptr);
-    ASSERT_NE(accessorNavPathStack->ctor, nullptr);
+    ASSERT_NE(accessorNavPathStack->construct, nullptr);
     ASSERT_NE(accessorNavPathStack->getFinalizer, nullptr);
     auto finalyzer = reinterpret_cast<void (*)(NavPathStackPeer *)>(accessorNavPathStack->getFinalizer());
     ASSERT_NE(finalyzer, nullptr);
 
     // create the NavPathStack peer and attach it to modifier
-    auto navPathStackPeer = (*accessorNavPathStack->ctor)();
+    auto navPathStackPeer = (*accessorNavPathStack->construct)();
     Ark_Materialized navPathStackValid = { reinterpret_cast<Ark_NativePointer>(navPathStackPeer) };
     modifier_->setNavigationOptions1(node_, &navPathStackValid);
 

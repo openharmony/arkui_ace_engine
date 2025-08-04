@@ -35,8 +35,8 @@ using TabBarLabelResourceTest = std::tuple<Ark_Resource, std::string>;
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
 const auto RES_ID = 11111;
-const auto RES_NAME_ID = NamedResourceId{RES_NAME, Converter::ResourceType::STRING};
-const auto RES_INT_ID = IntResourceId{RES_ID, Converter::ResourceType::STRING};
+const auto RES_NAME_ID = NamedResourceId{RES_NAME, ResourceType::STRING};
+const auto RES_INT_ID = IntResourceId{RES_ID, ResourceType::STRING};
 // resource values
 const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";

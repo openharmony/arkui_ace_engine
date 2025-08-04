@@ -267,6 +267,7 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
     auto navGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navGroupNode, nullptr);
     auto eventHub = navGroupNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     static const Ark_Int32 expectedResId = 123;
     auto onBackPressed = [](Ark_VMContext context, const Ark_Int32 resourceId,

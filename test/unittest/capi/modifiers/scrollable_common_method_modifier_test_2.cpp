@@ -45,9 +45,9 @@ const auto ATTRIBUTE_CLIP_CONTENT_RECT_POSITION_NAME = "position";
 const auto ATTRIBUTE_CLIP_CONTENT_RECT_COLOR_NAME = "color";
 const auto ATTRIBUTE_CLIP_CONTENT_RECT_STROKE_COLOR_NAME = "strokeColor";
 const auto ATTRIBUTE_CLIP_CONTENT_RECT_STROKE_WIDTH_NAME = "strokeWidth";
-const auto ATTRIBUTE_DIMENSTION_OFFSET_X = "x";
-const auto ATTRIBUTE_DIMENSTION_OFFSET_Y = "y";
-const auto ATTRIBUTE_DIMENSTION_OFFSET_Z = "z";
+const auto ATTRIBUTE_DIMENSION_OFFSET_X = "x";
+const auto ATTRIBUTE_DIMENSION_OFFSET_Y = "y";
+const auto ATTRIBUTE_DIMENSION_OFFSET_Z = "z";
 const auto ATTRIBUTE_CLIP_CONTENT_DEFAULT_BOUNDARY_VALUE = "ContentClipMode.BOUNDARY";
 const auto ATTRIBUTE_CLIP_CONTENT_DEFAULT_ONLY_VALUE = "ContentClipMode.CONTENT_ONLY";
 const auto ATTRIBUTE_CLIP_CONTENT_CUSTOM_VALUE = "RectShape";
@@ -127,13 +127,13 @@ public:
 
     void CompareDimensionOffset(std::unique_ptr<JsonValue> value, const DimensionOffset& expected)
     {
-        EXPECT_EQ(expected.GetX().ToString(), GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSTION_OFFSET_X));
-        EXPECT_EQ(expected.GetY().ToString(), GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSTION_OFFSET_Y));
+        EXPECT_EQ(expected.GetX().ToString(), GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSION_OFFSET_X));
+        EXPECT_EQ(expected.GetY().ToString(), GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSION_OFFSET_Y));
         auto optZ = expected.GetZ();
         if (optZ) {
-            EXPECT_EQ(optZ->ToString(), GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSTION_OFFSET_Z));
+            EXPECT_EQ(optZ->ToString(), GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSION_OFFSET_Z));
         } else {
-            EXPECT_EQ("", GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSTION_OFFSET_Z));
+            EXPECT_EQ("", GetAttrValue<std::string>(value, ATTRIBUTE_DIMENSION_OFFSET_Z));
         }
     }
 };
@@ -161,17 +161,17 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestDefaultValues, T
  */
 HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestClipContentValidValues, TestSize.Level1)
 {
-    Ark_Union_ContentClipMode_RectShape initValueClipContent;
+    Opt_Union_ContentClipMode_RectShape initValueClipContent;
 
     // Initial setup
-    initValueClipContent = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(
+    WriteTo(initValueClipContent) = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(
         std::get<1>(Fixtures::testFixtureEnumContentClipModeValidValues[0]));
 
     auto checkValue = [this, &initValueClipContent](const std::string& input, const std::string& expectedStr,
                           const Ark_Union_ContentClipMode_RectShape& value) {
-        Ark_Union_ContentClipMode_RectShape inputValueClipContent = initValueClipContent;
+        Opt_Union_ContentClipMode_RectShape inputValueClipContent = initValueClipContent;
 
-        inputValueClipContent = value;
+        WriteTo(inputValueClipContent) = value;
         modifier_->setClipContent(node_, &inputValueClipContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
@@ -191,18 +191,18 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestClipContentValid
  */
 HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestClipContentInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ContentClipMode_RectShape initValueClipContent;
+    Opt_Union_ContentClipMode_RectShape initValueClipContent;
 
     // Initial setup
-    initValueClipContent = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(
+    WriteTo(initValueClipContent) = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(
         std::get<1>(Fixtures::testFixtureEnumContentClipModeValidValues[0]));
 
     auto checkValue = [this, &initValueClipContent](
                           const std::string& input, const Ark_Union_ContentClipMode_RectShape& value) {
-        Ark_Union_ContentClipMode_RectShape inputValueClipContent = initValueClipContent;
+        Opt_Union_ContentClipMode_RectShape inputValueClipContent = initValueClipContent;
 
         modifier_->setClipContent(node_, &inputValueClipContent);
-        inputValueClipContent = value;
+        WriteTo(inputValueClipContent) = value;
         modifier_->setClipContent(node_, &inputValueClipContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
@@ -228,7 +228,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestRectShape, TestS
     RefPtr<ShapeRect> shape = Referenced::MakeRefPtr<ShapeRect>();
     initRectShape(shape);
     peer->shape = shape;
-    auto clipContentUnion = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_RectShape>(peer);
+    auto clipContentUnion = ArkUnion<Opt_Union_ContentClipMode_RectShape, Ark_RectShape>(peer);
     modifier_->setClipContent(node_, &clipContentUnion);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
@@ -268,7 +268,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestRectShape, TestS
 HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestRectShapeNullptr, TestSize.Level1)
 {
     Ark_RectShape peer = PeerUtils::CreatePeer<RectShapePeer>();
-    auto clipContentUnion = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_RectShape>(peer);
+    auto clipContentUnion = ArkUnion<Opt_Union_ContentClipMode_RectShape, Ark_RectShape>(peer);
 
     modifier_->setClipContent(node_, &clipContentUnion);
     auto jsonValue = GetJsonValue(node_);

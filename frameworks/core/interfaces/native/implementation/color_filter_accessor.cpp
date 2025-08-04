@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_ColorFilter peer)
         peer = nullptr;
     }
 }
-Ark_ColorFilter CtorImpl(const Array_Number* value)
+Ark_ColorFilter ConstructImpl(const Array_Number* value)
 {
     auto peer = new ColorFilterPeer();
     CHECK_NULL_RETURN(value, peer);
@@ -45,13 +45,75 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 } // ColorFilterAccessor
+namespace drawing_ColorFilterAccessor {
+void DestroyPeerImpl(Ark_drawing_ColorFilter peer)
+{
+}
+Ark_drawing_ColorFilter ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+Ark_drawing_ColorFilter CreateBlendModeColorFilter0Impl(const Ark_common2D_Color* color,
+                                                        Ark_drawing_BlendMode mode)
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateBlendModeColorFilter1Impl(const Ark_Number* color,
+                                                        Ark_drawing_BlendMode mode)
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateComposeColorFilterImpl(Ark_drawing_ColorFilter outer,
+                                                     Ark_drawing_ColorFilter inner)
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateLinearToSRGBGammaImpl()
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateSRGBGammaToLinearImpl()
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateLumaColorFilterImpl()
+{
+    return {};
+}
+Ark_drawing_ColorFilter CreateMatrixColorFilterImpl(const Array_Number* matrix)
+{
+    return {};
+}
+} // drawing_ColorFilterAccessor
 const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
 {
     static const GENERATED_ArkUIColorFilterAccessor ColorFilterAccessorImpl {
         ColorFilterAccessor::DestroyPeerImpl,
-        ColorFilterAccessor::CtorImpl,
+        ColorFilterAccessor::ConstructImpl,
         ColorFilterAccessor::GetFinalizerImpl,
     };
     return &ColorFilterAccessorImpl;
 }
+
+const GENERATED_ArkUIDrawing_ColorFilterAccessor* GetDrawing_ColorFilterAccessor()
+{
+    static const GENERATED_ArkUIDrawing_ColorFilterAccessor Drawing_ColorFilterAccessorImpl {
+        drawing_ColorFilterAccessor::DestroyPeerImpl,
+        drawing_ColorFilterAccessor::ConstructImpl,
+        drawing_ColorFilterAccessor::GetFinalizerImpl,
+        drawing_ColorFilterAccessor::CreateBlendModeColorFilter0Impl,
+        drawing_ColorFilterAccessor::CreateBlendModeColorFilter1Impl,
+        drawing_ColorFilterAccessor::CreateComposeColorFilterImpl,
+        drawing_ColorFilterAccessor::CreateLinearToSRGBGammaImpl,
+        drawing_ColorFilterAccessor::CreateSRGBGammaToLinearImpl,
+        drawing_ColorFilterAccessor::CreateLumaColorFilterImpl,
+        drawing_ColorFilterAccessor::CreateMatrixColorFilterImpl,
+    };
+    return &Drawing_ColorFilterAccessorImpl;
+}
+
 }

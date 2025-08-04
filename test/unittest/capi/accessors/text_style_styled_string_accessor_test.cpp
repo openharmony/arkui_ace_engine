@@ -33,8 +33,8 @@ const std::string g_fontWeight = "200";
 const Ace::FontStyle g_fontStyle = Ace::FontStyle::ITALIC;
 } // namespace
 
-class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyle_styled_stringAccessor,
-    &GENERATED_ArkUIAccessors::getTextStyle_styled_stringAccessor, TextStyle_styled_stringPeer> {
+class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyleAccessor,
+    &GENERATED_ArkUIAccessors::getTextStyleAccessor, TextStylePeer> {
 public:
     static void SetUpTestCase()
     {
@@ -55,7 +55,7 @@ public:
             .fontStyle = Converter::ArkValue<Opt_FontStyle>(g_fontStyle)
         };
         Opt_TextStyleInterface optionsOpt = Converter::ArkValue<Opt_TextStyleInterface>(options);
-        return accessor_->ctor(&optionsOpt);
+        return accessor_->construct(&optionsOpt);
     }
 };
 
@@ -70,7 +70,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
     finalyzer_(peer_);
 
     // create new peer
-    peer_ = accessor_->ctor(nullptr);
+    peer_ = accessor_->construct(nullptr);
     EXPECT_EQ(Converter::OptConvert<std::string>(accessor_->getFontFamily(peer_)), std::nullopt);
     EXPECT_EQ(Converter::OptConvert<float>(accessor_->getFontSize(peer_)), std::nullopt);
     EXPECT_EQ(Converter::OptConvert<int32_t>(accessor_->getFontWeight(peer_)), std::nullopt);

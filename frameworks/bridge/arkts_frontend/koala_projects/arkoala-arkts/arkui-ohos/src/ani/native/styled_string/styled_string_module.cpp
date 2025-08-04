@@ -47,7 +47,7 @@ ani_object StyledStringModule::GetPixelMap(ani_env* env, [[maybe_unused]] ani_ob
     CHECK_NULL_RETURN(modifier, nullptr);
     auto* styledStringModifier = modifier->getStyledStringAniModifier();
     CHECK_NULL_RETURN(styledStringModifier, nullptr);
-    auto* pixelMapPeer = reinterpret_cast<PixelMapPeer*>(styledStringModifier->getPixelMap(peer));
+    auto* pixelMapPeer = reinterpret_cast<image_PixelMapPeer*>(styledStringModifier->getPixelMap(peer));
     CHECK_NULL_RETURN(pixelMapPeer, nullptr);
     auto pixelMap = pixelMapPeer->pixelMap;
     CHECK_NULL_RETURN(pixelMap, nullptr);

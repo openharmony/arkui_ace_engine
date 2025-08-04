@@ -56,7 +56,7 @@ public:
  */
 HWTEST_F(LongPressRecognizerAccessorTest, ctorTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->ctor, nullptr);
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
 }
 
@@ -114,7 +114,7 @@ HWTEST_F(LongPressRecognizerAccessorTest, DISABLED_getDurationTest, TestSize.Lev
     // default
     auto result = accessor_->getDuration(peer_);
     auto actual = Converter::Convert<int32_t>(result);
-    EXPECT_EQ(actual, DEFAULT_LONG_PRESS_DURATION);
+    EXPECT_EQ(actual, ::DEFAULT_LONG_PRESS_DURATION);
 
     // update
     for (const auto& expected : intNumberTestPlan) {

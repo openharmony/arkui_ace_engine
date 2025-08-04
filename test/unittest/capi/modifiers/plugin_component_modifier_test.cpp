@@ -172,40 +172,6 @@ HWTEST_F(
 }
 
 /*
- * @tc.name: setPluginComponentOptionsTestOptionsDataValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestOptionsData, TestSize.Level1)
-{
-    Ark_PluginComponentOptions initValueOptions;
-
-    // Initial setup
-    initValueOptions.template_.source = std::get<1>(testFixtureStringValidValues[0]);
-    initValueOptions.template_.bundleName = std::get<1>(testFixtureStringValidValues[0]);
-    initValueOptions.data = std::get<1>(testFixtureStringValidValues[0]);
-
-    auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
-        Ark_PluginComponentOptions inputValueOptions = initValueOptions;
-
-        // Re-create node for 'options' attribute
-        auto node = CreateNode();
-        inputValueOptions.data = value;
-        modifier_->setPluginComponentOptions(node, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node);
-        auto resultString = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEMPLATE_I_DATA_NAME);
-        DisposeNode(node);
-        EXPECT_EQ(resultString, expectedStr) <<
-            "Input value is: " << input << ", method: setPluginComponentOptions, attribute: options.template.source";
-    };
-
-    for (auto& [input, value, expected] : testFixtureStringValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setOnCompleteTest
  * @tc.desc: check functionality setOnComplete
  * @tc.type: FUNC
@@ -214,6 +180,7 @@ HWTEST_F(PluginComponentModifierTest, setOnCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -247,6 +214,7 @@ HWTEST_F(PluginComponentModifierTest, setOnErrorTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     constexpr auto errCode = "404";
     constexpr auto msg = "not found";

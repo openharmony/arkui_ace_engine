@@ -43,7 +43,7 @@ void DestroyPeerImpl(Ark_FocusAxisEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_FocusAxisEvent CtorImpl()
+Ark_FocusAxisEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<FocusAxisEventPeer>();
 }
@@ -82,7 +82,7 @@ const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
 {
     static const GENERATED_ArkUIFocusAxisEventAccessor FocusAxisEventAccessorImpl {
         FocusAxisEventAccessor::DestroyPeerImpl,
-        FocusAxisEventAccessor::CtorImpl,
+        FocusAxisEventAccessor::ConstructImpl,
         FocusAxisEventAccessor::GetFinalizerImpl,
         FocusAxisEventAccessor::GetAxisMapImpl,
         FocusAxisEventAccessor::SetAxisMapImpl,

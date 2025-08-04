@@ -17,75 +17,14 @@
 #include <utility>
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_time_picker_dialog_view.h"
-#else
-#include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
-#endif
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-void BuildDialogPropertiesCallbacks(const Ark_TimePickerDialogOptions options, DialogProperties& dialogProps)
-{
-    auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
-    if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidAppear = onDidAppear;
-    }
-    auto didDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidDisappear);
-    if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidDisappear = onDidDisappear;
-    }
-    auto willAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillAppear);
-    if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillAppear = onWillAppear;
-    }
-    auto willDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillDisappear);
-    if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillDisappear = onWillDisappear;
-    }
-}
-
+#ifdef WRONG_GEN
 DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options)
 {
-    DialogProperties dialogProps;
-    auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
-    if (alignment) {
-        dialogProps.alignment = alignment.value();
-    }
-    auto offset = Converter::OptConvert<DimensionOffset>(options.offset);
-    if (offset) {
-        dialogProps.offset = offset.value();
-    }
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
-    dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
-    dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
-    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
-    if (enableHoverMode) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
-    }
-    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
-    if (hoverModeArea) {
-        dialogProps.hoverModeArea = hoverModeArea.value();
-    }
-    dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    BuildDialogPropertiesCallbacks(options, dialogProps);
-    return dialogProps;
+    return {};
 }
 
 PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions options)
@@ -252,13 +191,27 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
         std::move(acceptEvent), std::move(changeEvent), std::move(enterSelectedAreaEvent),
         timePickerDialogEvent, buttonInfos);
 }
+#endif
+void DestroyPeerImpl(Ark_TimePickerDialog peer)
+{
+}
+Ark_TimePickerDialog ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 } // TimePickerDialogAccessor
-
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-        TimePickerDialogAccessor::ShowImpl,
+        TimePickerDialogAccessor::DestroyPeerImpl,
+        TimePickerDialogAccessor::ConstructImpl,
+        TimePickerDialogAccessor::GetFinalizerImpl,
     };
     return &TimePickerDialogAccessorImpl;
 }
+
 }

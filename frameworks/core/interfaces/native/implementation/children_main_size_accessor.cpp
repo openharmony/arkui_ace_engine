@@ -28,7 +28,7 @@ void DestroyPeerImpl(Ark_ChildrenMainSize peer)
 {
     delete peer;
 }
-Ark_ChildrenMainSize CtorImpl(const Ark_Number* childDefaultSize)
+Ark_ChildrenMainSize ConstructImpl(const Ark_Number* childDefaultSize)
 {
     CHECK_NULL_RETURN(childDefaultSize, nullptr);
     float size = Converter::Convert<float>(*childDefaultSize);
@@ -38,8 +38,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SpliceImpl(Ark_VMContext vmContext,
-                Ark_ChildrenMainSize peer,
+void SpliceImpl(Ark_ChildrenMainSize peer,
                 const Ark_Number* start,
                 const Opt_Number* deleteCount,
                 const Opt_Array_Number* childrenSize)
@@ -54,13 +53,13 @@ void SpliceImpl(Ark_VMContext vmContext,
     if (convStart < 0) {
         return; // throw an exception by TS
     }
-    auto convDeleteCount = deleteCount ? Converter::OptConvert<int32_t>(*deleteCount) : std::nullopt;
+    auto convDeleteCount = Converter::OptConvertPtr<int32_t>(deleteCount);
     if (convDeleteCount.has_value() && convDeleteCount.value() < 0) {
         convDeleteCount = 0;
     }
     auto delCount = convDeleteCount.value_or(-1); // -1 update all from 'start'
 
-    auto convFloatArray = childrenSize ? Converter::OptConvert<std::vector<float>>(*childrenSize) : std::nullopt;
+    auto convFloatArray = Converter::OptConvertPtr<std::vector<float>>(childrenSize);
     auto floatArray = convFloatArray.value_or(std::vector<float>());
     std::for_each(floatArray.begin(), floatArray.end(), [](float& size) {
         if (size < 0.0f) {
@@ -70,8 +69,7 @@ void SpliceImpl(Ark_VMContext vmContext,
 
     handler->ChangeData(convStart, delCount, floatArray);
 }
-void UpdateImpl(Ark_VMContext vmContext,
-                Ark_ChildrenMainSize peer,
+void UpdateImpl(Ark_ChildrenMainSize peer,
                 const Ark_Number* index,
                 const Ark_Number* childSize)
 {
@@ -112,7 +110,7 @@ const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
 {
     static const GENERATED_ArkUIChildrenMainSizeAccessor ChildrenMainSizeAccessorImpl {
         ChildrenMainSizeAccessor::DestroyPeerImpl,
-        ChildrenMainSizeAccessor::CtorImpl,
+        ChildrenMainSizeAccessor::ConstructImpl,
         ChildrenMainSizeAccessor::GetFinalizerImpl,
         ChildrenMainSizeAccessor::SpliceImpl,
         ChildrenMainSizeAccessor::UpdateImpl,

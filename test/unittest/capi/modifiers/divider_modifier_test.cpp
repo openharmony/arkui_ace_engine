@@ -49,10 +49,10 @@ const std::vector<OneColorStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(Converter::ArkValue<Ark_Number>(0.5f)), "#00000000" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("65535")), "#FF00FFFF" },
-    { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR}),
+    { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"aa.bb.cc", ResourceType::COLOR}),
         "#FFFF0000" },
-    { CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR}), "#FFFF0000" },
-    { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"incorrect_color", Converter::ResourceType::STRING}),
+    { CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, ResourceType::COLOR}), "#FFFF0000" },
+    { CreateResourceUnion<Ark_ResourceColor>(NamedResourceId{"incorrect_color", ResourceType::STRING}),
         "#FFFF0000" },
 };
 
@@ -214,12 +214,12 @@ const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-4.5px")), "-4.50px" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-56vp")), "-56.00vp" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("undefVal")),
-        "0.00fp" },
+        "0.00vp" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-10%")),
         DEFAULT_STROKE_WIDTH },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00vp" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111vp")), "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00vp" },
 };
 
 /**

@@ -45,8 +45,8 @@ inline Ark_GuideLineStyle GetGuideLineStyle(const std::string& idValue, const Ar
     Ark_GuideLineStyle style;
     style.id = Converter::ArkValue<Ark_String>(idValue);
     style.position = {
-        .start = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(startValue)),
-        .end = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(endValue))
+        .start = Converter::ArkValue<Opt_Dimension>(startValue),
+        .end = Converter::ArkValue<Opt_Dimension>(endValue),
     };
     style.direction = directionValue;
     return style;
@@ -82,28 +82,6 @@ std::string ArkBarrierDirection(Ark_BarrierDirection value)
         case ARK_BARRIER_DIRECTION_BOTTOM: return "BarrierDirection.BOTTOM";
         default: return "";
     }
-}
-
-std::string ArkLocBarrierDirection(Ark_LocalizedBarrierDirection value)
-{
-    switch (value) {
-        case ARK_LOCALIZED_BARRIER_DIRECTION_START: return "BarrierDirection.START";
-        case ARK_LOCALIZED_BARRIER_DIRECTION_END: return "BarrierDirection.END";
-        case ARK_BARRIER_DIRECTION_TOP: return "BarrierDirection.TOP";
-        case ARK_BARRIER_DIRECTION_BOTTOM: return "BarrierDirection.BOTTOM";
-        default: return "";
-    }
-}
-
-inline Ark_LocalizedBarrierStyle GetLocalizedBarrierStyle(const std::string& idValue,
-    const Ark_LocalizedBarrierDirection directionValue,
-    const Array_String& vecRefId)
-{
-    return {
-        .id = Converter::ArkValue<Ark_String>(idValue),
-        .localizedDirection = directionValue,
-        .referencedId = vecRefId
-    };
 }
 
 void checkGuideLineData(Ark_NodeHandle node, std::vector<string> vecId,
@@ -157,36 +135,6 @@ void checkBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
         }
     }
 }
-
-std::string ExpectedLocBarrierDirValue(Ark_LocalizedBarrierDirection value)
-{
-    if (value == ARK_LOCALIZED_BARRIER_DIRECTION_START || value == ARK_LOCALIZED_BARRIER_DIRECTION_END ||
-        value == ARK_LOCALIZED_BARRIER_DIRECTION_TOP || value == ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM) {
-        return ArkLocBarrierDirection(value);
-    }
-    return "BarrierDirection.START";
-}
-void checkLocBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
-                         std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir,
-                         std::vector<string> vecRedId)
-{
-    auto jsonValue = GetJsonValue(node);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BARRIER_NAME);
-    ASSERT_NE(jsonArray, nullptr);
-    EXPECT_EQ(jsonArray->GetArraySize(), vecId.size());
-    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
-        auto itemJson = jsonArray->GetArrayItem(i);
-        EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_ID), vecId[i]);
-        auto expectedDir =  ExpectedLocBarrierDirValue(vecBarrierDir[i]);
-        EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_DIRECTION), expectedDir);
-        auto refIdJson = GetAttrValue<std::unique_ptr<JsonValue>>(itemJson, ATTR_BARRIER_REF_ID);
-        for (int j = 0; j < refIdJson->GetArraySize(); j++) {
-            auto refIdItem = refIdJson->GetArrayItem(j);
-            EXPECT_EQ(refIdItem->GetString(), vecRedId[j]);
-        }
-    }
-}
-
 } // namespace
 
 class RelativeContainerModifierTest : public ModifierTestBase<
@@ -342,11 +290,11 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestInvalidValues2,
 }
 
 /*
- * @tc.name: setBarrier0TestValidValues
+ * @tc.name: setBarrierTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestValidValues, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"10.f", "4.f", "5", "9", "100"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_BOTTOM, ARK_BARRIER_DIRECTION_RIGHT,
@@ -361,7 +309,7 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues, Tes
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
     auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
-    modifier_->setBarrier0(node_, &optInputValueBarrier);
+    modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
 
@@ -370,7 +318,7 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestValidValues2, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"abc1", "abc2", "abc3", "abc4", "abc5"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
@@ -385,16 +333,16 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues2, Te
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
     auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
-    modifier_->setBarrier0(node_, &optInputValueBarrier);
+    modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
 
 /*
- * @tc.name: setBarrier0TestInvalidValues
+ * @tc.name: setBarrierTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestInvalidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestInvalidValues, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"-10.f", "", "", "", "-100"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
@@ -410,16 +358,16 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestInvalidValues, T
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
     auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
-    modifier_->setBarrier0(node_, &optInputValueBarrier);
+    modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
 
 /*
- * @tc.name: setBarrier0TestInvalidValues2
+ * @tc.name: setBarrierTestInvalidValues2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestInvalidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestInvalidValues2, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"-10", "", "abc", "40%", "-"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
@@ -435,95 +383,7 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestInvalidValues2, 
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
     auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
-    modifier_->setBarrier0(node_, &optInputValueBarrier);
+    modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
-
-/*
- * @tc.name: setBarrier1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier1TestValidValues, TestSize.Level1)
-{
-    std::vector<std::string> vecId = {"abc1", "abc2", "abc3", "abc4", "abc5"};
-    std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir = {
-    ARK_LOCALIZED_BARRIER_DIRECTION_START,
-    ARK_LOCALIZED_BARRIER_DIRECTION_END,
-    ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
-    ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM,
-    ARK_LOCALIZED_BARRIER_DIRECTION_START};
-
-    std::vector<Ark_LocalizedBarrierStyle> inputVec;
-    std::vector<string> vecDataRefIds = {"bbb1", "bbb2", "bbb3", "bbb4", "bbb5"};
-    Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
-    Array_String vecRefIds = vecHolder.ArkValue();
-    for (int i = 0; i < vecId.size(); i++) {
-        inputVec.push_back(GetLocalizedBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
-    }
-    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inputHolder(inputVec);
-    Array_LocalizedBarrierStyle inputValueBarrierLoc = inputHolder.ArkValue();
-    auto optInputValueBarrierLoc = Converter::ArkValue<Opt_Array_LocalizedBarrierStyle>(inputValueBarrierLoc);
-    modifier_->setBarrier1(node_, &optInputValueBarrierLoc);
-    checkLocBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
-}
-
-/*
- * @tc.name: setBarrier1TestValidValues2
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier1TestValidValues2, TestSize.Level1)
-{
-    std::vector<std::string> vecId = {"10.f", "4.f", "5", "9", "100"};
-    std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir = {
-    ARK_LOCALIZED_BARRIER_DIRECTION_START,
-    ARK_LOCALIZED_BARRIER_DIRECTION_END,
-    ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
-    ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM,
-    ARK_LOCALIZED_BARRIER_DIRECTION_START};
-
-    std::vector<Ark_LocalizedBarrierStyle> inputVec;
-    std::vector<string> vecDataRefIds = {"10.f", "4.f", "5", "9", "100"};
-    Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
-    Array_String vecRefIds = vecHolder.ArkValue();
-    for (int i = 0; i < vecId.size(); i++) {
-        inputVec.push_back(GetLocalizedBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
-    }
-    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inputHolder(inputVec);
-    Array_LocalizedBarrierStyle inputValueBarrierLoc = inputHolder.ArkValue();
-    auto optInputValueBarrierLoc = Converter::ArkValue<Opt_Array_LocalizedBarrierStyle>(inputValueBarrierLoc);
-    modifier_->setBarrier1(node_, &optInputValueBarrierLoc);
-    checkLocBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
-}
-
-/*
- * @tc.name: setBarrier1TestInvalidValues3
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier1TestInvalidValues3, TestSize.Level1)
-{
-    std::vector<std::string> vecId = {"-10", "", "abc", "40%", "-"};
-    std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir = {
-    ARK_LOCALIZED_BARRIER_DIRECTION_START,
-    ARK_LOCALIZED_BARRIER_DIRECTION_END,
-    ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
-    static_cast<Ark_LocalizedBarrierDirection>(-1),
-    static_cast<Ark_LocalizedBarrierDirection>(100)};
-
-    std::vector<Ark_LocalizedBarrierStyle> inputVec;
-    std::vector<string> vecDataRefIds = {"-10", "", "abc", "40%", "-"};
-    Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
-    Array_String vecRefIds = vecHolder.ArkValue();
-    for (int i = 0; i < vecId.size(); i++) {
-        inputVec.push_back(GetLocalizedBarrierStyle(vecId[i], vecBarrierDir[i], vecRefIds));
-    }
-    Converter::ArkArrayHolder<Array_LocalizedBarrierStyle> inputHolder(inputVec);
-    Array_LocalizedBarrierStyle inputValueBarrierLoc = inputHolder.ArkValue();
-    auto optInputValueBarrierLoc = Converter::ArkValue<Opt_Array_LocalizedBarrierStyle>(inputValueBarrierLoc);
-    modifier_->setBarrier1(node_, &optInputValueBarrierLoc);
-    checkLocBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
-}
-
 } // namespace OHOS::Ace::NG

@@ -66,9 +66,8 @@ void AddPathImpl(Ark_Path2D peer,
                  const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(transform);
     auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
-    auto matrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    auto matrix = Converter::OptConvertPtr<Ark_Matrix2D>(transform);
     peerImpl->Path2DAddPath(path, matrix);
 }
 } // Path2DAccessor

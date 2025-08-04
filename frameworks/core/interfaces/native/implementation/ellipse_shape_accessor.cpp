@@ -25,11 +25,11 @@ void DestroyPeerImpl(Ark_EllipseShape peer)
 {
     delete peer;
 }
-Ark_EllipseShape CtorImpl(const Opt_ShapeSize* options)
+Ark_EllipseShape ConstructImpl(const Opt_ShapeSize* options)
 {
     auto peer = new EllipseShapePeer();
     peer->shape = AceType::MakeRefPtr<Ellipse>();
-    std::optional<Ark_ShapeSize> shapeSize = options ? Converter::OptConvert<Ark_ShapeSize>(*options) : std::nullopt;
+    auto shapeSize = Converter::OptConvertPtr<Ark_ShapeSize>(options);
     if (shapeSize) {
         auto width = Converter::OptConvert<CalcDimension>(shapeSize->width);
         Validator::ValidateNonNegative(width);
@@ -140,7 +140,7 @@ const GENERATED_ArkUIEllipseShapeAccessor* GetEllipseShapeAccessor()
 {
     static const GENERATED_ArkUIEllipseShapeAccessor EllipseShapeAccessorImpl {
         EllipseShapeAccessor::DestroyPeerImpl,
-        EllipseShapeAccessor::CtorImpl,
+        EllipseShapeAccessor::ConstructImpl,
         EllipseShapeAccessor::GetFinalizerImpl,
         EllipseShapeAccessor::OffsetImpl,
         EllipseShapeAccessor::FillImpl,

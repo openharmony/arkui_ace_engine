@@ -49,7 +49,7 @@ HWTEST_F(ControllerHandlerAccessorTest, setWebControllerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setWebController, nullptr);
 
-    auto webControllerPeer = accessors_->getWebviewControllerAccessor()->ctor();
+    auto webControllerPeer = accessors_->getWebviewControllerAccessor()->construct();
     ASSERT_NE(webControllerPeer, nullptr);
     EXPECT_TRUE(ControllerHandlerPeer::controllerMap.empty());
     accessor_->setWebController(peer_, webControllerPeer);

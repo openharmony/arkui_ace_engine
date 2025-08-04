@@ -66,17 +66,17 @@ public:
         NG::LeadingMargin margin {.size = LeadingMarginSize(Dimension(TEST_MARGIN), Dimension(TEST_MARGIN_2))};
         margin.pixmap = AceType::MakeRefPtr<MockPixelMap>();
 
-        auto arkPlaceHolder = Converter::ArkValue<Ark_LeadingMarginPlaceholder>(margin);
         auto leadingMargin = Converter::ArkUnion<Ark_Union_LengthMetrics_LeadingMarginPlaceholder,
-            Ark_LeadingMarginPlaceholder>(arkPlaceHolder);
+            Ark_LeadingMarginPlaceholder>(margin, &ctx_);
         auto& holder = TypeHelper::WriteTo(interface.leadingMargin);
         holder = leadingMargin;
 
-        return accessor_->ctor(&param_);
+        return accessor_->construct(&param_);
     }
 
 private:
     Opt_ParagraphStyleInterface param_ = {};
+    Converter::ConvContext ctx_;
 };
 
 /**

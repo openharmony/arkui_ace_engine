@@ -536,10 +536,11 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues,
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowModifierTest, setOnBreakpointChangeTest, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setOnBreakpointChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;

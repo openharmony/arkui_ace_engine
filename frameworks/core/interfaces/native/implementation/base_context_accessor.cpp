@@ -22,31 +22,21 @@ namespace BaseContextAccessor {
 void DestroyPeerImpl(Ark_BaseContext peer)
 {
 }
-Ark_BaseContext CtorImpl()
+Ark_BaseContext ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-Ark_Boolean GetStageModeImpl(Ark_BaseContext peer)
-{
-    return {};
-}
-void SetStageModeImpl(Ark_BaseContext peer,
-                      Ark_Boolean stageMode)
-{
 }
 } // BaseContextAccessor
 const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor()
 {
     static const GENERATED_ArkUIBaseContextAccessor BaseContextAccessorImpl {
         BaseContextAccessor::DestroyPeerImpl,
-        BaseContextAccessor::CtorImpl,
+        BaseContextAccessor::ConstructImpl,
         BaseContextAccessor::GetFinalizerImpl,
-        BaseContextAccessor::GetStageModeImpl,
-        BaseContextAccessor::SetStageModeImpl,
     };
     return &BaseContextAccessorImpl;
 }

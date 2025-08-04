@@ -69,7 +69,8 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, settersGettersTest, TestSize.Lev
 
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     peer_->SetHandler(proxy);
-    accessor_->setIsInteractive(peer_, ArkValue<Ark_Boolean>(true));
+    auto isInteractive = ArkValue<Opt_Boolean>(true);
+    accessor_->setIsInteractive(peer_, &isInteractive);
     EXPECT_EQ(Converter::GetOpt(accessor_->getIsInteractive(peer_)), true);
 }
 
@@ -108,94 +109,5 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, finishTransactionTest, TestSize.
     EXPECT_FALSE(wasInvoked);
     accessor_->finishTransition(peer_);
     EXPECT_TRUE(wasInvoked);
-}
-
-/**
- * @tc.name: cancelTransactionTest
- * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTransitionProxyAccessorTest, cancelTransactionTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->finishTransition, nullptr);
-
-    // expect nothing bad when no proxy
-    accessor_->cancelTransition(peer_);
-
-    // set null handler to peer
-    peer_->SetHandler(nullptr);
-
-    // expect nothing bad with nothing handler
-    accessor_->cancelTransition(peer_);
-
-    // set handler to peer
-    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
-    peer_->SetHandler(proxy);
-
-    // expect nothing bad when proxy has the nullptr cancelTransactionEvent (by default)
-    accessor_->cancelTransition(peer_);
-
-    // add the valid data to proxy
-    static std::optional<bool> wasInvoked;
-    std::function<void(bool)> endCallback = [](bool canceled) {
-        wasInvoked = canceled;
-    };
-    proxy->SetInteractive(true);
-    proxy->SetEndCallback(std::move(endCallback));
-
-    std::function<void()> finishCallback = []() {
-        wasInvoked = true;
-    };
-
-    auto animation =  AnimationUtils::CreateInteractiveAnimation(finishCallback, finishCallback);
-    proxy->SetInteractiveAnimation(animation, finishCallback);
-
-    accessor_->cancelTransition(peer_);
-    ASSERT_TRUE(wasInvoked.has_value());
-    EXPECT_FALSE(wasInvoked.value());
-}
-
-/**
- * @tc.name: updateTransitionTest
- * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTransitionProxyAccessorTest, updateTransitionTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->updateTransition, nullptr);
-
-    // init
-    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
-    peer_->SetHandler(proxy);
-    std::function<void(bool)> endCallback = [](bool canceled) {};
-    proxy->SetEndCallback(std::move(endCallback));
-    std::function<void()> finishCallback = []() {};
-    auto animation =  AnimationUtils::CreateInteractiveAnimation(finishCallback, finishCallback);
-    proxy->SetInteractiveAnimation(animation, finishCallback);
-    proxy->SetInteractive(true);
-    proxy->SetIsFinished(false);
-
-    EXPECT_EQ(0.0f, animation->progress_);
-
-    // valid values
-    auto progress = Converter::ArkValue<Ark_Number>(1.0f);
-    accessor_->updateTransition(peer_, &progress);
-    EXPECT_EQ(1.0f, animation->progress_);
-
-    progress = Converter::ArkValue<Ark_Number>(0.0f);
-    accessor_->updateTransition(peer_, &progress);
-    EXPECT_EQ(0.0f, animation->progress_);
-
-    progress = Converter::ArkValue<Ark_Number>(0.5f);
-    accessor_->updateTransition(peer_, &progress);
-    EXPECT_EQ(0.5f, animation->progress_);
-
-    // invalid values
-    progress = Converter::ArkValue<Ark_Number>(1.5f);
-    accessor_->updateTransition(peer_, &progress);
-    EXPECT_EQ(0.5f, animation->progress_);
-    progress = Converter::ArkValue<Ark_Number>(-0.5f);
-    accessor_->updateTransition(peer_, &progress);
-    EXPECT_EQ(0.5f, animation->progress_);
 }
 } // namespace OHOS::Ace::NG

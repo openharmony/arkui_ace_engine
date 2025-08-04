@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_CircleShape peer)
     CHECK_NULL_VOID(peer);
     delete peer;
 }
-Ark_CircleShape CtorImpl(const Opt_ShapeSize* options)
+Ark_CircleShape ConstructImpl(const Opt_ShapeSize* options)
 {
     auto peer = new CircleShapePeer();
     peer->shape = Referenced::MakeRefPtr<OHOS::Ace::Circle>();
@@ -100,7 +100,7 @@ const GENERATED_ArkUICircleShapeAccessor* GetCircleShapeAccessor()
 {
     static const GENERATED_ArkUICircleShapeAccessor CircleShapeAccessorImpl {
         CircleShapeAccessor::DestroyPeerImpl,
-        CircleShapeAccessor::CtorImpl,
+        CircleShapeAccessor::ConstructImpl,
         CircleShapeAccessor::GetFinalizerImpl,
         CircleShapeAccessor::OffsetImpl,
         CircleShapeAccessor::FillImpl,

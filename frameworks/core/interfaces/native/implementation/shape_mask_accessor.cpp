@@ -29,7 +29,7 @@ void DestroyPeerImpl(Ark_ShapeMask peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ShapeMask CtorImpl()
+Ark_ShapeMask ConstructImpl()
 {
     return PeerUtils::CreatePeer<ShapeMaskPeer>();
 }
@@ -38,7 +38,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetRectShapeImpl(Ark_ShapeMask peer,
-                      const Ark_Rect* rect)
+                      const Ark_common2D_Rect* rect)
 {
     if (peer && rect) {
         peer->SetRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect));
@@ -59,7 +59,7 @@ void SetCircleShapeImpl(Ark_ShapeMask peer,
     }
 }
 void SetOvalShapeImpl(Ark_ShapeMask peer,
-                      const Ark_Rect* oval)
+                      const Ark_common2D_Rect* oval)
 {
     if (peer && oval) {
         peer->SetOvalShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*oval));
@@ -110,7 +110,7 @@ const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor()
 {
     static const GENERATED_ArkUIShapeMaskAccessor ShapeMaskAccessorImpl {
         ShapeMaskAccessor::DestroyPeerImpl,
-        ShapeMaskAccessor::CtorImpl,
+        ShapeMaskAccessor::ConstructImpl,
         ShapeMaskAccessor::GetFinalizerImpl,
         ShapeMaskAccessor::SetRectShapeImpl,
         ShapeMaskAccessor::SetRoundRectShapeImpl,

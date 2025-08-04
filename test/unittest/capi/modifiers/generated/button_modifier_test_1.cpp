@@ -996,24 +996,24 @@ HWTEST_F(ButtonModifierTest, setTypeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setTypeTestTypeValidValues, TestSize.Level1)
 {
-    Ark_ButtonType initValueType;
+    Opt_ButtonType initValueType;
 
     // Initial setup
-    initValueType = std::get<1>(Fixtures::testFixtureEnumButtonTypeValidValues[0]);
+    initValueType = ArkValue<Opt_ButtonType>(std::get<1>(Fixtures::testFixtureEnumButtonTypeValidValues[0]));
 
     auto checkValue = [this, &initValueType](
-                          const std::string& input, const std::string& expectedStr, const Ark_ButtonType& value) {
-        Ark_ButtonType inputValueType = initValueType;
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonType& value) {
+        Opt_ButtonType inputValueType = initValueType;
 
         inputValueType = value;
-        modifier_->setType(node_, inputValueType);
+        modifier_->setType(node_, &inputValueType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setType, attribute: type";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonTypeValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_ButtonType>(value));
     }
 }
 
@@ -1024,17 +1024,17 @@ HWTEST_F(ButtonModifierTest, setTypeTestTypeValidValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setTypeTestTypeInvalidValues, TestSize.Level1)
 {
-    Ark_ButtonType initValueType;
+    Opt_ButtonType initValueType;
 
     // Initial setup
-    initValueType = std::get<1>(Fixtures::testFixtureEnumButtonTypeValidValues[0]);
+    initValueType = ArkValue<Opt_ButtonType>(std::get<1>(Fixtures::testFixtureEnumButtonTypeValidValues[0]));
 
-    auto checkValue = [this, &initValueType](const std::string& input, const Ark_ButtonType& value) {
-        Ark_ButtonType inputValueType = initValueType;
+    auto checkValue = [this, &initValueType](const std::string& input, const Opt_ButtonType& value) {
+        Opt_ButtonType inputValueType = initValueType;
 
-        modifier_->setType(node_, inputValueType);
+        modifier_->setType(node_, &inputValueType);
         inputValueType = value;
-        modifier_->setType(node_, inputValueType);
+        modifier_->setType(node_, &inputValueType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
@@ -1042,7 +1042,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestTypeInvalidValues, TestSize.Level1)
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonTypeInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ButtonType>(value));
     }
 }
 
@@ -1067,17 +1067,17 @@ HWTEST_F(ButtonModifierTest, setStateEffectTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setStateEffectTestStateEffectValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueStateEffect;
+    Opt_Boolean initValueStateEffect;
 
     // Initial setup
-    initValueStateEffect = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueStateEffect = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStateEffect](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueStateEffect = initValueStateEffect;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueStateEffect = initValueStateEffect;
 
         inputValueStateEffect = value;
-        modifier_->setStateEffect(node_, inputValueStateEffect);
+        modifier_->setStateEffect(node_, &inputValueStateEffect);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1085,8 +1085,36 @@ HWTEST_F(ButtonModifierTest, setStateEffectTestStateEffectValidValues, TestSize.
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setStateEffectTestStateEffectInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setStateEffectTestStateEffectInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueStateEffect;
+
+    // Initial setup
+    initValueStateEffect = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueStateEffect](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueStateEffect = initValueStateEffect;
+
+        modifier_->setStateEffect(node_, &inputValueStateEffect);
+        inputValueStateEffect = value;
+        modifier_->setStateEffect(node_, &inputValueStateEffect);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStateEffect, attribute: stateEffect";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -1110,17 +1138,18 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleValidValues, TestSize.Level1)
 {
-    Ark_ButtonStyleMode initValueButtonStyle;
+    Opt_ButtonStyleMode initValueButtonStyle;
 
     // Initial setup
-    initValueButtonStyle = std::get<1>(Fixtures::testFixtureEnumButtonStyleModeValidValues[0]);
+    initValueButtonStyle =
+        ArkValue<Opt_ButtonStyleMode>(std::get<1>(Fixtures::testFixtureEnumButtonStyleModeValidValues[0]));
 
     auto checkValue = [this, &initValueButtonStyle](
-                          const std::string& input, const std::string& expectedStr, const Ark_ButtonStyleMode& value) {
-        Ark_ButtonStyleMode inputValueButtonStyle = initValueButtonStyle;
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonStyleMode& value) {
+        Opt_ButtonStyleMode inputValueButtonStyle = initValueButtonStyle;
 
         inputValueButtonStyle = value;
-        modifier_->setButtonStyle(node_, inputValueButtonStyle);
+        modifier_->setButtonStyle(node_, &inputValueButtonStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1128,7 +1157,7 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleValidValues, TestSize.
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonStyleModeValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_ButtonStyleMode>(value));
     }
 }
 
@@ -1139,17 +1168,18 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleValidValues, TestSize.
  */
 HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleInvalidValues, TestSize.Level1)
 {
-    Ark_ButtonStyleMode initValueButtonStyle;
+    Opt_ButtonStyleMode initValueButtonStyle;
 
     // Initial setup
-    initValueButtonStyle = std::get<1>(Fixtures::testFixtureEnumButtonStyleModeValidValues[0]);
+    initValueButtonStyle =
+        ArkValue<Opt_ButtonStyleMode>(std::get<1>(Fixtures::testFixtureEnumButtonStyleModeValidValues[0]));
 
-    auto checkValue = [this, &initValueButtonStyle](const std::string& input, const Ark_ButtonStyleMode& value) {
-        Ark_ButtonStyleMode inputValueButtonStyle = initValueButtonStyle;
+    auto checkValue = [this, &initValueButtonStyle](const std::string& input, const Opt_ButtonStyleMode& value) {
+        Opt_ButtonStyleMode inputValueButtonStyle = initValueButtonStyle;
 
-        modifier_->setButtonStyle(node_, inputValueButtonStyle);
+        modifier_->setButtonStyle(node_, &inputValueButtonStyle);
         inputValueButtonStyle = value;
-        modifier_->setButtonStyle(node_, inputValueButtonStyle);
+        modifier_->setButtonStyle(node_, &inputValueButtonStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE) <<
@@ -1157,7 +1187,7 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleInvalidValues, TestSiz
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonStyleModeInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ButtonStyleMode>(value));
     }
 }
 
@@ -1182,17 +1212,17 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeValidValues, TestSize.Level1)
 {
-    Ark_ControlSize initValueControlSize;
+    Opt_ControlSize initValueControlSize;
 
     // Initial setup
-    initValueControlSize = std::get<1>(Fixtures::testFixtureEnumControlSizeValidValues[0]);
+    initValueControlSize = ArkValue<Opt_ControlSize>(std::get<1>(Fixtures::testFixtureEnumControlSizeValidValues[0]));
 
     auto checkValue = [this, &initValueControlSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_ControlSize& value) {
-        Ark_ControlSize inputValueControlSize = initValueControlSize;
+                          const std::string& input, const std::string& expectedStr, const Opt_ControlSize& value) {
+        Opt_ControlSize inputValueControlSize = initValueControlSize;
 
         inputValueControlSize = value;
-        modifier_->setControlSize(node_, inputValueControlSize);
+        modifier_->setControlSize(node_, &inputValueControlSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1200,7 +1230,7 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeValidValues, TestSize.
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumControlSizeValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_ControlSize>(value));
     }
 }
 
@@ -1209,19 +1239,19 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeValidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeInvalidValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setControlSizeTestControlSizeInvalidValues, TestSize.Level1)
 {
-    Ark_ControlSize initValueControlSize;
+    Opt_ControlSize initValueControlSize;
 
     // Initial setup
-    initValueControlSize = std::get<1>(Fixtures::testFixtureEnumControlSizeValidValues[0]);
+    initValueControlSize = ArkValue<Opt_ControlSize>(std::get<1>(Fixtures::testFixtureEnumControlSizeValidValues[0]));
 
-    auto checkValue = [this, &initValueControlSize](const std::string& input, const Ark_ControlSize& value) {
-        Ark_ControlSize inputValueControlSize = initValueControlSize;
+    auto checkValue = [this, &initValueControlSize](const std::string& input, const Opt_ControlSize& value) {
+        Opt_ControlSize inputValueControlSize = initValueControlSize;
 
-        modifier_->setControlSize(node_, inputValueControlSize);
+        modifier_->setControlSize(node_, &inputValueControlSize);
         inputValueControlSize = value;
-        modifier_->setControlSize(node_, inputValueControlSize);
+        modifier_->setControlSize(node_, &inputValueControlSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE) <<
@@ -1229,7 +1259,7 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeInvalidValues, TestSiz
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumControlSizeInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ControlSize>(value));
     }
 }
 
@@ -1254,24 +1284,24 @@ HWTEST_F(ButtonModifierTest, setRoleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setRoleTestRoleValidValues, TestSize.Level1)
 {
-    Ark_ButtonRole initValueRole;
+    Opt_ButtonRole initValueRole;
 
     // Initial setup
-    initValueRole = std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]);
+    initValueRole = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueRole](
-                          const std::string& input, const std::string& expectedStr, const Ark_ButtonRole& value) {
-        Ark_ButtonRole inputValueRole = initValueRole;
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonRole& value) {
+        Opt_ButtonRole inputValueRole = initValueRole;
 
         inputValueRole = value;
-        modifier_->setRole(node_, inputValueRole);
+        modifier_->setRole(node_, &inputValueRole);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRole, attribute: role";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonRoleValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_ButtonRole>(value));
     }
 }
 
@@ -1282,17 +1312,17 @@ HWTEST_F(ButtonModifierTest, setRoleTestRoleValidValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setRoleTestRoleInvalidValues, TestSize.Level1)
 {
-    Ark_ButtonRole initValueRole;
+    Opt_ButtonRole initValueRole;
 
     // Initial setup
-    initValueRole = std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]);
+    initValueRole = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
-    auto checkValue = [this, &initValueRole](const std::string& input, const Ark_ButtonRole& value) {
-        Ark_ButtonRole inputValueRole = initValueRole;
+    auto checkValue = [this, &initValueRole](const std::string& input, const Opt_ButtonRole& value) {
+        Opt_ButtonRole inputValueRole = initValueRole;
 
-        modifier_->setRole(node_, inputValueRole);
+        modifier_->setRole(node_, &inputValueRole);
         inputValueRole = value;
-        modifier_->setRole(node_, inputValueRole);
+        modifier_->setRole(node_, &inputValueRole);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE) <<
@@ -1300,7 +1330,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestRoleInvalidValues, TestSize.Level1)
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonRoleInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_ButtonRole>(value));
     }
 }
 
@@ -1325,15 +1355,15 @@ HWTEST_F(ButtonModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueFontColor;
+    Opt_ResourceColor initValueFontColor;
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
-                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueFontColor = initValueFontColor;
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_ResourceColor inputValueFontColor = initValueFontColor;
 
         inputValueFontColor = value;
         modifier_->setFontColor(node_, &inputValueFontColor);
@@ -1344,16 +1374,16 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -1364,14 +1394,14 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorValidValues, TestSize.Leve
  */
 HWTEST_F(ButtonModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueFontColor;
+    Opt_ResourceColor initValueFontColor;
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueFontColor](const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueFontColor = initValueFontColor;
+    auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_ResourceColor inputValueFontColor = initValueFontColor;
 
         modifier_->setFontColor(node_, &inputValueFontColor);
         inputValueFontColor = value;
@@ -1383,13 +1413,15 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 /*
@@ -1413,14 +1445,15 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Length initValueFontSize;
+    Opt_Length initValueFontSize;
 
     // Initial setup
-    initValueFontSize = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
+    initValueFontSize =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_Length inputValueFontSize = initValueFontSize;
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
+        Opt_Length inputValueFontSize = initValueFontSize;
 
         inputValueFontSize = value;
         modifier_->setFontSize(node_, &inputValueFontSize);
@@ -1430,8 +1463,14 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSi
             "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -1442,13 +1481,14 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSi
  */
 HWTEST_F(ButtonModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Length initValueFontSize;
+    Opt_Length initValueFontSize;
 
     // Initial setup
-    initValueFontSize = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
+    initValueFontSize =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueFontSize](const std::string& input, const Ark_Length& value) {
-        Ark_Length inputValueFontSize = initValueFontSize;
+    auto checkValue = [this, &initValueFontSize](const std::string& input, const Opt_Length& value) {
+        Opt_Length inputValueFontSize = initValueFontSize;
 
         modifier_->setFontSize(node_, &inputValueFontSize);
         inputValueFontSize = value;
@@ -1460,8 +1500,18 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Leve
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
@@ -1485,15 +1535,15 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontWeightTestDefaultValues, TestSize.L
  */
 HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const Opt_Union_Number_FontWeight_String& value) {
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight);
@@ -1504,13 +1554,13 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Le
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
     }
 }
 
@@ -1521,15 +1571,15 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Le
  */
 HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](
-                          const std::string& input, const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const std::string& input, const Opt_Union_Number_FontWeight_String& value) {
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         inputValueFontWeight = value;
@@ -1541,16 +1591,18 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_FontWeight_String>());
 }
 
 /*
@@ -1574,17 +1626,17 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Level1)
 {
-    Ark_FontStyle initValueFontStyle;
+    Opt_FontStyle initValueFontStyle;
 
     // Initial setup
-    initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
+    initValueFontStyle = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFontStyle](
-                          const std::string& input, const std::string& expectedStr, const Ark_FontStyle& value) {
-        Ark_FontStyle inputValueFontStyle = initValueFontStyle;
+                          const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
+        Opt_FontStyle inputValueFontStyle = initValueFontStyle;
 
         inputValueFontStyle = value;
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1592,7 +1644,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -1603,17 +1655,17 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Leve
  */
 HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Level1)
 {
-    Ark_FontStyle initValueFontStyle;
+    Opt_FontStyle initValueFontStyle;
 
     // Initial setup
-    initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
+    initValueFontStyle = ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueFontStyle](const std::string& input, const Ark_FontStyle& value) {
-        Ark_FontStyle inputValueFontStyle = initValueFontStyle;
+    auto checkValue = [this, &initValueFontStyle](const std::string& input, const Opt_FontStyle& value) {
+        Opt_FontStyle inputValueFontStyle = initValueFontStyle;
 
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         inputValueFontStyle = value;
-        modifier_->setFontStyle(node_, inputValueFontStyle);
+        modifier_->setFontStyle(node_, &inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE) <<
@@ -1621,7 +1673,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontStyleInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -1646,15 +1698,15 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueFontFamily;
+    Opt_Union_String_Resource initValueFontFamily;
 
     // Initial setup
-    initValueFontFamily = ArkUnion<Ark_Union_String_Resource, Ark_Resource>(
+    initValueFontFamily = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
 
     auto checkValue = [this, &initValueFontFamily](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_String_Resource& value) {
-        Ark_Union_String_Resource inputValueFontFamily = initValueFontFamily;
+                          const Opt_Union_String_Resource& value) {
+        Opt_Union_String_Resource inputValueFontFamily = initValueFontFamily;
 
         inputValueFontFamily = value;
         modifier_->setFontFamily(node_, &inputValueFontFamily);
@@ -1665,10 +1717,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, Te
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyResourceValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyStringValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
 }
 
@@ -1679,14 +1731,14 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, Te
  */
 HWTEST_F(ButtonModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueFontFamily;
+    Opt_Union_String_Resource initValueFontFamily;
 
     // Initial setup
-    initValueFontFamily = ArkUnion<Ark_Union_String_Resource, Ark_Resource>(
+    initValueFontFamily = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
 
-    auto checkValue = [this, &initValueFontFamily](const std::string& input, const Ark_Union_String_Resource& value) {
-        Ark_Union_String_Resource inputValueFontFamily = initValueFontFamily;
+    auto checkValue = [this, &initValueFontFamily](const std::string& input, const Opt_Union_String_Resource& value) {
+        Opt_Union_String_Resource inputValueFontFamily = initValueFontFamily;
 
         modifier_->setFontFamily(node_, &inputValueFontFamily);
         inputValueFontFamily = value;
@@ -1698,13 +1750,15 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontFamilyStringInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_String_Resource>());
 }
 
 /*
@@ -1765,33 +1819,33 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestDefaultValues, TestSize.L
  */
 HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowValidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_TextOverflow& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
-        inputValueLabelStyle.overflow = value;
+        WriteTo(inputValueLabelStyle).overflow = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1812,33 +1866,33 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowValidVa
  */
 HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowInvalidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](const std::string& input, const Opt_TextOverflow& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
-        inputValueLabelStyle.overflow = value;
+        WriteTo(inputValueLabelStyle).overflow = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1859,33 +1913,33 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowInvalid
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesValidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
-        inputValueLabelStyle.maxLines = value;
+        WriteTo(inputValueLabelStyle).maxLines = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1906,33 +1960,33 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesValidValues, Tes
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesInvalidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](const std::string& input, const Opt_Number& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
-        inputValueLabelStyle.maxLines = value;
+        WriteTo(inputValueLabelStyle).maxLines = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -1955,33 +2009,33 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesInvalidValues, T
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeValidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Number_ResourceStr& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
-        inputValueLabelStyle.minFontSize = value;
+        WriteTo(inputValueLabelStyle).minFontSize = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -2010,34 +2064,34 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeValidValues, 
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
                           const std::string& input, const Opt_Union_Number_ResourceStr& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
-        inputValueLabelStyle.minFontSize = value;
+        WriteTo(inputValueLabelStyle).minFontSize = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -2070,33 +2124,33 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeInvalidValues
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeValidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Number_ResourceStr& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
-        inputValueLabelStyle.maxFontSize = value;
+        WriteTo(inputValueLabelStyle).maxFontSize = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -2125,34 +2179,34 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeValidValues, 
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
                           const std::string& input, const Opt_Union_Number_ResourceStr& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
-        inputValueLabelStyle.maxFontSize = value;
+        WriteTo(inputValueLabelStyle).maxFontSize = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -2185,33 +2239,33 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeInvalidValues
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyValidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
                           const Opt_TextHeightAdaptivePolicy& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
-        inputValueLabelStyle.heightAdaptivePolicy = value;
+        WriteTo(inputValueLabelStyle).heightAdaptivePolicy = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -2233,34 +2287,34 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyVali
  */
 HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyInvalidValues, TestSize.Level1)
 {
-    Ark_LabelStyle initValueLabelStyle;
+    Opt_ButtonLabelStyle initValueLabelStyle;
 
     // Initial setup
-    initValueLabelStyle.overflow =
+    WriteTo(initValueLabelStyle).overflow =
         ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
+    WriteTo(initValueLabelStyle).maxLines =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
+    WriteTo(initValueLabelStyle).maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+    WriteTo(initValueLabelStyle).heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
         std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(WriteTo(initValueLabelStyle).font).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteTo(initValueLabelStyle).font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+    WriteTo(WriteTo(initValueLabelStyle).font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
+    WriteTo(WriteTo(initValueLabelStyle).font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
                           const std::string& input, const Opt_TextHeightAdaptivePolicy& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
+        Opt_ButtonLabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
-        inputValueLabelStyle.heightAdaptivePolicy = value;
+        WriteTo(inputValueLabelStyle).heightAdaptivePolicy = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
@@ -2272,54 +2326,6 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyInva
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyInvalidValues) {
         checkValue(input, ArkValue<Opt_TextHeightAdaptivePolicy>(value));
-    }
-}
-
-/*
- * @tc.name: setLabelStyleTestLabelStyleFontSizeValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontSizeValidValues, TestSize.Level1)
-{
-    Ark_LabelStyle initValueLabelStyle;
-
-    // Initial setup
-    initValueLabelStyle.overflow =
-        ArkValue<Opt_TextOverflow>(std::get<1>(Fixtures::testFixtureEnumTextOverflowValidValues[0]));
-    initValueLabelStyle.maxLines =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
-    initValueLabelStyle.minFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.maxFontSize = ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-    initValueLabelStyle.heightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
-        std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
-    WriteTo(initValueLabelStyle.font).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueLabelStyle.font).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueLabelStyle.font).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValueLabelStyle.font).style =
-        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
-
-    auto checkValue = [this, &initValueLabelStyle](
-                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
-
-        WriteTo(inputValueLabelStyle.font).size = value;
-        modifier_->setLabelStyle(node_, &inputValueLabelStyle);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 

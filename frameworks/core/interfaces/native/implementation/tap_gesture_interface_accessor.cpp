@@ -34,15 +34,15 @@ void DestroyPeerImpl(Ark_TapGestureInterface peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_TapGestureInterface CtorImpl(const Opt_TapGestureParameters* value)
+Ark_TapGestureInterface ConstructImpl(const Ark_TapGestureParameters* value)
 {
     bool isLimitFingerCount = DEFAULT_IS_LIMIT_FINGER_COUNT;
     int32_t fingers = DEFAULT_TAP_FINGERS;
     int32_t count = DEFAULT_TAP_COUNT;
     double distance = DEFAULT_TAP_DISTANCE;
     auto peer = PeerUtils::CreatePeer<TapGestureInterfacePeer>();
-    std::optional<Ark_TapGestureParameters> params = value ? Converter::GetOpt(*value) : std::nullopt;
-    if (params.has_value()) {
+    auto params = value;
+    if (params) {
         fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_TAP_FINGERS);
         fingers = fingers <= DEFAULT_TAP_FINGERS ? DEFAULT_TAP_FINGERS : fingers;
         count = Converter::OptConvert<int32_t>(params->count).value_or(DEFAULT_TAP_COUNT);
@@ -82,7 +82,7 @@ const GENERATED_ArkUITapGestureInterfaceAccessor* GetTapGestureInterfaceAccessor
 {
     static const GENERATED_ArkUITapGestureInterfaceAccessor TapGestureInterfaceAccessorImpl {
         TapGestureInterfaceAccessor::DestroyPeerImpl,
-        TapGestureInterfaceAccessor::CtorImpl,
+        TapGestureInterfaceAccessor::ConstructImpl,
         TapGestureInterfaceAccessor::GetFinalizerImpl,
         TapGestureInterfaceAccessor::OnActionImpl,
     };

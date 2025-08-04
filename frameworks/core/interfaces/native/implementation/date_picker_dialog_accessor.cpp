@@ -17,15 +17,12 @@
 #include <utility>
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
 
+#ifdef WRONG_GEN
 PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions options)
 {
     PickerDialogInfo dialogInfo;
@@ -210,12 +207,26 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
         std::move(interEvents.dateAcceptEvent), std::move(interEvents.dateChangeEvent),
         pickType, datePickerDialogEvent, buttonInfos);
 }
+#endif
+void DestroyPeerImpl(Ark_DatePickerDialog peer)
+{
+}
+Ark_DatePickerDialog ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 } // DatePickerDialogAccessor
 
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
 {
     static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
-        DatePickerDialogAccessor::ShowImpl,
+        DatePickerDialogAccessor::DestroyPeerImpl,
+        DatePickerDialogAccessor::ConstructImpl,
+        DatePickerDialogAccessor::GetFinalizerImpl,
     };
     return &DatePickerDialogAccessorImpl;
 }

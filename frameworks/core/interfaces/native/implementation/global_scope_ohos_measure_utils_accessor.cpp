@@ -33,18 +33,6 @@ void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_Number& src)
 }
 
 template<>
-void AssignCast(std::optional<TextAlign>& dst, const Ark_Number& src)
-{
-    auto alignValue = Converter::Convert<int32_t>(src);
-    if (alignValue > static_cast<int32_t>(ARK_TEXT_ALIGN_JUSTIFY) ||
-        alignValue < static_cast<int32_t>(ARK_TEXT_ALIGN_CENTER)) {
-        return;
-    }
-    auto arkTextAlign = static_cast<Ark_TextAlign>(alignValue);
-    dst = Converter::OptConvert<TextAlign>(arkTextAlign);
-}
-
-template<>
 void AssignCast(std::optional<TextOverflow>& dst, const Ark_Number& src)
 {
     auto overflowValue = Converter::Convert<int32_t>(src);

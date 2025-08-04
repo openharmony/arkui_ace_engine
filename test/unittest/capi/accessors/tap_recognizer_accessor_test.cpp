@@ -34,7 +34,7 @@ class TapRecognizerAccessorTest : public AccessorTestBase<GENERATED_ArkUITapReco
  */
 HWTEST_F(TapRecognizerAccessorTest, CreatePeerTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->ctor, nullptr);
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
 }
 

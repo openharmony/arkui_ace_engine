@@ -47,7 +47,7 @@ public:
             g_onLongPress = true;
         };
         param_.value.onLongPress.value = Converter::ArkValue<Callback_GestureEvent_Void>(onLongPress, resId);
-        return accessor_->ctor(&param_);
+        return accessor_->construct(&param_);
     }
 
     Opt_GestureStyleInterface param_;

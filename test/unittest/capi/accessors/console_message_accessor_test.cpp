@@ -40,7 +40,7 @@ public:
         Ark_String arkMessage = Converter::ArkValue<Ark_String>(g_message);
         Ark_String arkSourceId = Converter::ArkValue<Ark_String>(g_sourceId);
         Ark_Number arkLineNumber = Converter::ArkValue<Ark_Number>(g_lineNumber);
-        return accessor_->ctor(&arkMessage, &arkSourceId, &arkLineNumber, ARK_MESSAGE_LEVEL_INFO);
+        return accessor_->construct(&arkMessage, &arkSourceId, &arkLineNumber, ARK_MESSAGE_LEVEL_INFO);
     }
 };
 

@@ -34,7 +34,7 @@ void DestroyPeerImpl(Ark_WebResourceResponse peer)
 {
     delete peer;
 }
-Ark_WebResourceResponse CtorImpl()
+Ark_WebResourceResponse ConstructImpl()
 {
     return new WebResourceResponsePeer();
 }
@@ -217,7 +217,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
 {
     static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
         WebResourceResponseAccessor::DestroyPeerImpl,
-        WebResourceResponseAccessor::CtorImpl,
+        WebResourceResponseAccessor::ConstructImpl,
         WebResourceResponseAccessor::GetFinalizerImpl,
         WebResourceResponseAccessor::GetResponseDataImpl,
         WebResourceResponseAccessor::GetResponseDataExImpl,

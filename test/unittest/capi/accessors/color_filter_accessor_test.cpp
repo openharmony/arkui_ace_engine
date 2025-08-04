@@ -65,7 +65,7 @@ public:
     void* CreatePeerInstance() override
     {
         auto value = EMPTY_HOLDER.ArkValue();
-        return this->accessor_->ctor(&value);
+        return this->accessor_->construct(&value);
     }
 };
 
@@ -79,7 +79,7 @@ HWTEST_F(ColorFilterAccessorTest, CtorTest, TestSize.Level1)
     EXPECT_EQ(peer_->GetColorFilterMatrix(), EMPTY_VECTOR);
     for (auto& [name, value, expected] : floatMatrixTest) {
         this->accessor_->destroyPeer(peer_);
-        peer_ = this->accessor_->ctor(&value);
+        peer_ = this->accessor_->construct(&value);
         ASSERT_TRUE(peer_);
         EXPECT_EQ(peer_->GetColorFilterMatrix(), expected) << "Value is: " << name;
     }

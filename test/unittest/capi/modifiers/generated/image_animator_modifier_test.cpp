@@ -28,8 +28,6 @@ using namespace testing::ext;
 using namespace Converter;
 using namespace TypeHelper;
 namespace {
-const auto ATTRIBUTE_IMAGES_NAME = "images";
-const auto ATTRIBUTE_IMAGES_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STATE_NAME = "state";
 const auto ATTRIBUTE_STATE_DEFAULT_VALUE = "AnimationStatus.Initial";
 const auto ATTRIBUTE_DURATION_NAME = "duration";
@@ -41,9 +39,9 @@ const auto ATTRIBUTE_FIXED_SIZE_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_FILL_MODE_NAME = "fillMode";
 const auto ATTRIBUTE_FILL_MODE_DEFAULT_VALUE = "FillMode.Forwards";
 const auto ATTRIBUTE_ITERATIONS_NAME = "iterations";
-const auto ATTRIBUTE_ITERATIONS_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_ITERATIONS_DEFAULT_VALUE = "1";
 const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME = "monitorInvisibleArea";
-const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE = "false";
 } // namespace
 
 class ImageAnimatorModifierTest
@@ -62,27 +60,13 @@ public:
 };
 
 /*
- * @tc.name: setImagesTestDefaultValues
+ * @tc.name: setImagesTestPlaceholder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setImagesTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setImagesTestPlaceholder, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IMAGES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_DEFAULT_VALUE) << "Default value for attribute 'images'";
-}
-
-/*
- * @tc.name: setImagesTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setImagesTestValidValues, TestSize.Level1)
-{
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    // This is placeholder to have disabled test
 }
 
 /*
@@ -106,24 +90,24 @@ HWTEST_F(ImageAnimatorModifierTest, setStateTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageAnimatorModifierTest, setStateTestStateValidValues, TestSize.Level1)
 {
-    Ark_AnimationStatus initValueState;
+    Opt_AnimationStatus initValueState;
 
     // Initial setup
-    initValueState = std::get<1>(Fixtures::testFixtureEnumAnimationStatusValidValues[0]);
+    initValueState = ArkValue<Opt_AnimationStatus>(std::get<1>(Fixtures::testFixtureEnumAnimationStatusValidValues[0]));
 
     auto checkValue = [this, &initValueState](
-                          const std::string& input, const std::string& expectedStr, const Ark_AnimationStatus& value) {
-        Ark_AnimationStatus inputValueState = initValueState;
+                          const std::string& input, const std::string& expectedStr, const Opt_AnimationStatus& value) {
+        Opt_AnimationStatus inputValueState = initValueState;
 
         inputValueState = value;
-        modifier_->setState(node_, inputValueState);
+        modifier_->setState(node_, &inputValueState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setState, attribute: state";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumAnimationStatusValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_AnimationStatus>(value));
     }
 }
 
@@ -134,17 +118,17 @@ HWTEST_F(ImageAnimatorModifierTest, setStateTestStateValidValues, TestSize.Level
  */
 HWTEST_F(ImageAnimatorModifierTest, setStateTestStateInvalidValues, TestSize.Level1)
 {
-    Ark_AnimationStatus initValueState;
+    Opt_AnimationStatus initValueState;
 
     // Initial setup
-    initValueState = std::get<1>(Fixtures::testFixtureEnumAnimationStatusValidValues[0]);
+    initValueState = ArkValue<Opt_AnimationStatus>(std::get<1>(Fixtures::testFixtureEnumAnimationStatusValidValues[0]));
 
-    auto checkValue = [this, &initValueState](const std::string& input, const Ark_AnimationStatus& value) {
-        Ark_AnimationStatus inputValueState = initValueState;
+    auto checkValue = [this, &initValueState](const std::string& input, const Opt_AnimationStatus& value) {
+        Opt_AnimationStatus inputValueState = initValueState;
 
-        modifier_->setState(node_, inputValueState);
+        modifier_->setState(node_, &inputValueState);
         inputValueState = value;
-        modifier_->setState(node_, inputValueState);
+        modifier_->setState(node_, &inputValueState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_STATE_DEFAULT_VALUE) <<
@@ -152,7 +136,7 @@ HWTEST_F(ImageAnimatorModifierTest, setStateTestStateInvalidValues, TestSize.Lev
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumAnimationStatusInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_AnimationStatus>(value));
     }
 }
 
@@ -177,14 +161,14 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDefaultValues, TestSize.Level
  */
 HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationValidValues, TestSize.Level1)
 {
-    Ark_Number initValueDuration;
+    Opt_Number initValueDuration;
 
     // Initial setup
-    initValueDuration = std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
+    initValueDuration = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
 
     auto checkValue = [this, &initValueDuration](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Number inputValueDuration = initValueDuration;
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Opt_Number inputValueDuration = initValueDuration;
 
         inputValueDuration = value;
         modifier_->setDuration(node_, &inputValueDuration);
@@ -195,7 +179,7 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationValidValues, TestSize
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -206,13 +190,13 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationValidValues, TestSize
  */
 HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationInvalidValues, TestSize.Level1)
 {
-    Ark_Number initValueDuration;
+    Opt_Number initValueDuration;
 
     // Initial setup
-    initValueDuration = std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
+    initValueDuration = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]));
 
-    auto checkValue = [this, &initValueDuration](const std::string& input, const Ark_Number& value) {
-        Ark_Number inputValueDuration = initValueDuration;
+    auto checkValue = [this, &initValueDuration](const std::string& input, const Opt_Number& value) {
+        Opt_Number inputValueDuration = initValueDuration;
 
         modifier_->setDuration(node_, &inputValueDuration);
         inputValueDuration = value;
@@ -224,8 +208,10 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntFloorInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_Number>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -249,25 +235,53 @@ HWTEST_F(ImageAnimatorModifierTest, setReverseTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(ImageAnimatorModifierTest, setReverseTestReverseValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueReverse;
+    Opt_Boolean initValueReverse;
 
     // Initial setup
-    initValueReverse = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueReverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueReverse](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueReverse = initValueReverse;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueReverse = initValueReverse;
 
         inputValueReverse = value;
-        modifier_->setReverse(node_, inputValueReverse);
+        modifier_->setReverse(node_, &inputValueReverse);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setReverse, attribute: reverse";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setReverseTestReverseInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setReverseTestReverseInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueReverse;
+
+    // Initial setup
+    initValueReverse = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueReverse](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueReverse = initValueReverse;
+
+        modifier_->setReverse(node_, &inputValueReverse);
+        inputValueReverse = value;
+        modifier_->setReverse(node_, &inputValueReverse);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_REVERSE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setReverse, attribute: reverse";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -291,17 +305,17 @@ HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestFixedSizeValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueFixedSize;
+    Opt_Boolean initValueFixedSize;
 
     // Initial setup
-    initValueFixedSize = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueFixedSize = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueFixedSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueFixedSize = initValueFixedSize;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueFixedSize = initValueFixedSize;
 
         inputValueFixedSize = value;
-        modifier_->setFixedSize(node_, inputValueFixedSize);
+        modifier_->setFixedSize(node_, &inputValueFixedSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIXED_SIZE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -309,8 +323,36 @@ HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestFixedSizeValidValues, TestSi
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setFixedSizeTestFixedSizeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestFixedSizeInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueFixedSize;
+
+    // Initial setup
+    initValueFixedSize = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueFixedSize](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueFixedSize = initValueFixedSize;
+
+        modifier_->setFixedSize(node_, &inputValueFixedSize);
+        inputValueFixedSize = value;
+        modifier_->setFixedSize(node_, &inputValueFixedSize);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIXED_SIZE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FIXED_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFixedSize, attribute: fixedSize";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -334,17 +376,17 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestDefaultValues, TestSize.Level
  */
 HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeValidValues, TestSize.Level1)
 {
-    Ark_FillMode initValueFillMode;
+    Opt_FillMode initValueFillMode;
 
     // Initial setup
-    initValueFillMode = std::get<1>(Fixtures::testFixtureEnumFillModeValidValues[0]);
+    initValueFillMode = ArkValue<Opt_FillMode>(std::get<1>(Fixtures::testFixtureEnumFillModeValidValues[0]));
 
     auto checkValue = [this, &initValueFillMode](
-                          const std::string& input, const std::string& expectedStr, const Ark_FillMode& value) {
-        Ark_FillMode inputValueFillMode = initValueFillMode;
+                          const std::string& input, const std::string& expectedStr, const Opt_FillMode& value) {
+        Opt_FillMode inputValueFillMode = initValueFillMode;
 
         inputValueFillMode = value;
-        modifier_->setFillMode(node_, inputValueFillMode);
+        modifier_->setFillMode(node_, &inputValueFillMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_MODE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -352,7 +394,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeValidValues, TestSize
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFillModeValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_FillMode>(value));
     }
 }
 
@@ -363,17 +405,17 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeValidValues, TestSize
  */
 HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeInvalidValues, TestSize.Level1)
 {
-    Ark_FillMode initValueFillMode;
+    Opt_FillMode initValueFillMode;
 
     // Initial setup
-    initValueFillMode = std::get<1>(Fixtures::testFixtureEnumFillModeValidValues[0]);
+    initValueFillMode = ArkValue<Opt_FillMode>(std::get<1>(Fixtures::testFixtureEnumFillModeValidValues[0]));
 
-    auto checkValue = [this, &initValueFillMode](const std::string& input, const Ark_FillMode& value) {
-        Ark_FillMode inputValueFillMode = initValueFillMode;
+    auto checkValue = [this, &initValueFillMode](const std::string& input, const Opt_FillMode& value) {
+        Opt_FillMode inputValueFillMode = initValueFillMode;
 
-        modifier_->setFillMode(node_, inputValueFillMode);
+        modifier_->setFillMode(node_, &inputValueFillMode);
         inputValueFillMode = value;
-        modifier_->setFillMode(node_, inputValueFillMode);
+        modifier_->setFillMode(node_, &inputValueFillMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_MODE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_FILL_MODE_DEFAULT_VALUE) <<
@@ -381,7 +423,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFillModeInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_FillMode>(value));
     }
 }
 
@@ -390,7 +432,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeInvalidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setIterationsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -406,14 +448,14 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestDefaultValues, Tes
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestIterationsValidValues, TestSize.Level1)
 {
-    Ark_Number initValueIterations;
+    Opt_Number initValueIterations;
 
     // Initial setup
-    initValueIterations = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+    initValueIterations = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
 
     auto checkValue = [this, &initValueIterations](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Number inputValueIterations = initValueIterations;
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Opt_Number inputValueIterations = initValueIterations;
 
         inputValueIterations = value;
         modifier_->setIterations(node_, &inputValueIterations);
@@ -423,9 +465,40 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestIterationsValidVal
             "Input value is: " << input << ", method: setIterations, attribute: iterations";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, expected, value);
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
+}
+
+/*
+ * @tc.name: setIterationsTestIterationsInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorModifierTest, setIterationsTestIterationsInvalidValues, TestSize.Level1)
+{
+    Opt_Number initValueIterations;
+
+    // Initial setup
+    initValueIterations = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
+
+    auto checkValue = [this, &initValueIterations](const std::string& input, const Opt_Number& value) {
+        Opt_Number inputValueIterations = initValueIterations;
+
+        modifier_->setIterations(node_, &inputValueIterations);
+        inputValueIterations = value;
+        modifier_->setIterations(node_, &inputValueIterations);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ITERATIONS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setIterations, attribute: iterations";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
+        checkValue(input, ArkValue<Opt_Number>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -433,7 +506,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestIterationsValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setMonitorInvisibleAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -448,20 +521,19 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestDefaultV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueMonitorInvisibleArea;
+    Opt_Boolean initValueMonitorInvisibleArea;
 
     // Initial setup
-    initValueMonitorInvisibleArea = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueMonitorInvisibleArea = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueMonitorInvisibleArea](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueMonitorInvisibleArea = initValueMonitorInvisibleArea;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueMonitorInvisibleArea = initValueMonitorInvisibleArea;
 
         inputValueMonitorInvisibleArea = value;
-        modifier_->setMonitorInvisibleArea(node_, inputValueMonitorInvisibleArea);
+        modifier_->setMonitorInvisibleArea(node_, &inputValueMonitorInvisibleArea);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -469,7 +541,36 @@ HWTEST_F(
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setMonitorInvisibleAreaTestMonitorInvisibleAreaInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestMonitorInvisibleAreaInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueMonitorInvisibleArea;
+
+    // Initial setup
+    initValueMonitorInvisibleArea = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueMonitorInvisibleArea](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueMonitorInvisibleArea = initValueMonitorInvisibleArea;
+
+        modifier_->setMonitorInvisibleArea(node_, &inputValueMonitorInvisibleArea);
+        inputValueMonitorInvisibleArea = value;
+        modifier_->setMonitorInvisibleArea(node_, &inputValueMonitorInvisibleArea);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMonitorInvisibleArea, attribute: monitorInvisibleArea";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 } // namespace OHOS::Ace::NG

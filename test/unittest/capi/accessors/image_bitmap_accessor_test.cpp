@@ -46,7 +46,7 @@ public:
     static void SetUpTestCase()
     {
         ASSERT_NE(accessor_, nullptr);
-        ASSERT_NE(accessor_->ctor, nullptr);
+        ASSERT_NE(accessor_->construct, nullptr);
         finalyzer_ = reinterpret_cast<void (*)(MockImageBitmapPeer *)>(accessor_->getFinalizer());
         ASSERT_NE(accessor_->getFinalizer, nullptr);
     }
@@ -90,8 +90,10 @@ public:
  */
 HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 {
-    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
-    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
+    Converter::ConvContext ctx;
+    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
+    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     bool result = false;
     auto clouseFunc = [&result]() {
         result = true;
@@ -111,8 +113,10 @@ HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
  */
 HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 {
-    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
-    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
+    Converter::ConvContext ctx;
+    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
+    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     ASSERT_NE(peer_, nullptr);
     peer_->SetHeight(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);
@@ -129,8 +133,10 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
  */
 HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
 {
-    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
-    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
+    Converter::ConvContext ctx;
+    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
+    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     ASSERT_NE(peer_, nullptr);
     peer_->SetWidth(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);

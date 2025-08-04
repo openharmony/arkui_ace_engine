@@ -71,9 +71,7 @@ namespace Converter {
     template<>
     void AssignArkValue(Ark_Resource& dst, const std::string& src, ConvContext *ctx)
     {
-        dst.type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(ResourceType::STRING));
-        dst.bundleName = Converter::ArkValue<Ark_String>(src);
-        LOGE("this converter is disabled");
+        dst = ArkCreate<Ark_Resource>(src, ResourceType::STRING, ctx);
     }
 #ifdef SUPPORT_DIGITAL_CROWN
     template<>
@@ -312,7 +310,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestVal
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription1, nullptr);
-    auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, Converter::ResourceType::STRING);
+    auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, ResourceType::STRING);
     auto src = Converter::ArkValue<Opt_Resource>(CreateResource(resName));
 
     modifier_->setAccessibilityDescription1(node_, &src);
@@ -695,7 +693,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
-    auto callBackValue = Converter::ArkValue<Opt_Callback_Void>(Callback_Void {
+    auto callBackValue = Converter::ArkValue<Opt_VoidCallback>(VoidCallback {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
@@ -734,7 +732,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
-    auto callBackValue = Converter::ArkValue<Opt_Callback_Void>(Callback_Void {
+    auto callBackValue = Converter::ArkValue<Opt_VoidCallback>(VoidCallback {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
@@ -897,7 +895,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnDigitalCrownTest, TestSize.Lev
         focusCallback(info);
         ASSERT_TRUE(checkEvent);
         EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
-        
+
         EXPECT_THAT(checkEvent->eventInfo, CompareCrownEventInfo(info));
     }
     checkEvent = std::nullopt;

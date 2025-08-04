@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_EventResult peer)
 {
     delete peer;
 }
-Ark_EventResult CtorImpl()
+Ark_EventResult ConstructImpl()
 {
     return new EventResultPeer();
 }
@@ -50,7 +50,7 @@ const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
 {
     static const GENERATED_ArkUIEventResultAccessor EventResultAccessorImpl {
         EventResultAccessor::DestroyPeerImpl,
-        EventResultAccessor::CtorImpl,
+        EventResultAccessor::ConstructImpl,
         EventResultAccessor::GetFinalizerImpl,
         EventResultAccessor::SetGestureEventResult0Impl,
         EventResultAccessor::SetGestureEventResult1Impl,

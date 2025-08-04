@@ -33,8 +33,8 @@ public:
 };
 } // namespace
 
-class ICurveAccessorTest : public AccessorTestBase<GENERATED_ArkUIICurveAccessor,
-    &GENERATED_ArkUIAccessors::getICurveAccessor, ICurvePeer> {
+class ICurveAccessorTest : public AccessorTestBase<GENERATED_ArkUICurves_ICurveAccessor,
+    &GENERATED_ArkUIAccessors::getCurves_ICurveAccessor, curves_ICurvePeer> {
 public:
     void SetUp() override
     {

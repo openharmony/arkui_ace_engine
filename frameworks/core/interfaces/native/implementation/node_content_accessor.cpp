@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ void DestroyPeerImpl(Ark_NodeContent peer)
         delete peerImpl;
     }
 }
-Ark_NodeContent CtorImpl()
+Ark_NodeContent ConstructImpl()
 {
     auto NodeContent = AceType::MakeRefPtr<NG::NodeContent>();
     auto peer = NodeContentPeer::Create(NodeContent);
@@ -38,48 +38,49 @@ Ark_NodeContent CtorImpl()
 
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
+void AddFrameNodeImpl(Ark_NodeContent peer,
+                      Ark_FrameNode node)
 {
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(peer->content, false);
-    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->content);
+    CHECK_NULL_VOID(node);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
-    CHECK_NULL_RETURN(frameNode, false);
+    CHECK_NULL_VOID(frameNode);
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peer->content);
-    CHECK_NULL_RETURN(nodeContent, false);
+    CHECK_NULL_VOID(nodeContent);
     auto childNode = AceType::DynamicCast<UINode>(frameNode);
-    CHECK_NULL_RETURN(childNode, false);
+    CHECK_NULL_VOID(childNode);
     nodeContent->AddNode(AceType::RawPtr(childNode));
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    return true;
 }
-Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer, Ark_FrameNode node)
+void RemoveFrameNodeImpl(Ark_NodeContent peer,
+                         Ark_FrameNode node)
 {
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(peer->content, false);
-    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->content);
+    CHECK_NULL_VOID(node);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
-    CHECK_NULL_RETURN(frameNode, false);
+    CHECK_NULL_VOID(frameNode);
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peer->content);
-    CHECK_NULL_RETURN(nodeContent, false);
+    CHECK_NULL_VOID(nodeContent);
     auto childNode = AceType::DynamicCast<UINode>(frameNode);
-    CHECK_NULL_RETURN(childNode, false);
+    CHECK_NULL_VOID(childNode);
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     nodeContent->RemoveNode(AceType::RawPtr(childNode));
-    return true;
 }
-} // namespace NodeContentAccessor
+} // NodeContentAccessor
 const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
 {
     static const GENERATED_ArkUINodeContentAccessor NodeContentAccessorImpl {
         NodeContentAccessor::DestroyPeerImpl,
-        NodeContentAccessor::CtorImpl,
+        NodeContentAccessor::ConstructImpl,
         NodeContentAccessor::GetFinalizerImpl,
         NodeContentAccessor::AddFrameNodeImpl,
         NodeContentAccessor::RemoveFrameNodeImpl,
     };
     return &NodeContentAccessorImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

@@ -1,0 +1,406 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.graphics.text;
+import ohos.graphics.drawing.default as drawing;
+import ohos.graphics.common2D.default as common2D;
+import global.resource.Resource as Resource;
+[DefaultExport]
+namespace text {
+    dictionary TextAlign {
+        number LEFT = 0;
+        number RIGHT = 1;
+        number CENTER = 2;
+        number JUSTIFY = 3;
+        number START = 4;
+        number END = 5;
+    };
+    dictionary TextDirection {
+        number RTL;
+        number LTR;
+    };
+    dictionary BreakStrategy {
+        number GREEDY;
+        number HIGH_QUALITY;
+        number BALANCED;
+    };
+    dictionary WordBreak {
+        number NORMAL;
+        number BREAK_ALL;
+        number BREAK_WORD;
+    };
+    interface Decoration {
+        [Optional]
+        attribute TextDecorationType textDecoration;
+        [Optional]
+        attribute common2D.Color color;
+        [Optional]
+        attribute TextDecorationStyle decorationStyle;
+        [Optional]
+        attribute number decorationThicknessScale;
+    };
+    dictionary TextDecorationType {
+        number NONE;
+        number UNDERLINE;
+        number OVERLINE;
+        number LINE_THROUGH;
+    };
+    dictionary TextDecorationStyle {
+        number SOLID;
+        number DOUBLE;
+        number DOTTED;
+        number DASHED;
+        number WAVY;
+    };
+    dictionary FontWeight {
+        number W100;
+        number W200;
+        number W300;
+        number W400;
+        number W500;
+        number W600;
+        number W700;
+        number W800;
+        number W900;
+    };
+    dictionary FontStyle {
+        number NORMAL;
+        number ITALIC;
+        number OBLIQUE;
+    };
+    dictionary FontWidth {
+        number ULTRA_CONDENSED = 1;
+        number EXTRA_CONDENSED = 2;
+        number CONDENSED = 3;
+        number SEMI_CONDENSED = 4;
+        number NORMAL = 5;
+        number SEMI_EXPANDED = 6;
+        number EXPANDED = 7;
+        number EXTRA_EXPANDED = 8;
+        number ULTRA_EXPANDED = 9;
+    };
+    dictionary TextHeightBehavior {
+        number ALL;
+        number DISABLE_FIRST_ASCENT;
+        number DISABLE_LAST_ASCENT;
+        number DISABLE_ALL;
+    };
+    dictionary TextBaseline {
+        number ALPHABETIC;
+        number IDEOGRAPHIC;
+    };
+    dictionary EllipsisMode {
+        number START;
+        number MIDDLE;
+        number END;
+    };
+    interface TextShadow {
+        [Optional]
+        attribute common2D.Color color;
+        [Optional]
+        attribute common2D.Point point;
+        [Optional]
+        attribute number blurRadius;
+    };
+    interface RectStyle {
+        attribute common2D.Color color;
+        attribute number leftTopRadius;
+        attribute number rightTopRadius;
+        attribute number rightBottomRadius;
+        attribute number leftBottomRadius;
+    };
+    interface FontFeature {
+        attribute String name;
+        attribute number value;
+    };
+    interface FontVariation {
+        attribute String axis;
+        attribute number value;
+    };
+    interface TextStyle {
+        [Optional]
+        attribute Decoration decoration;
+        [Optional]
+        attribute common2D.Color color;
+        [Optional]
+        attribute FontWeight fontWeight;
+        [Optional]
+        attribute FontStyle fontStyle;
+        [Optional]
+        attribute TextBaseline baseline;
+        [Optional]
+        attribute sequence<String> fontFamilies;
+        [Optional]
+        attribute number fontSize;
+        [Optional]
+        attribute number letterSpacing;
+        [Optional]
+        attribute number wordSpacing;
+        [Optional]
+        attribute number heightScale;
+        [Optional]
+        attribute boolean halfLeading;
+        [Optional]
+        attribute boolean heightOnly;
+        [Optional]
+        attribute String ellipsis;
+        [Optional]
+        attribute EllipsisMode ellipsisMode;
+        [Optional]
+        attribute String locale;
+        [Optional]
+        attribute number baselineShift;
+        [Optional]
+        attribute sequence<FontFeature> fontFeatures;
+        [Optional]
+        attribute sequence<TextShadow> textShadows;
+        [Optional]
+        attribute RectStyle backgroundRect;
+        [Optional]
+        attribute sequence<FontVariation> fontVariations;
+    };
+    [Entity=Class]
+    interface FontCollection {
+        constructor();
+        static FontCollection getGlobalInstance();
+        void loadFontSync(String name, (String or Resource) path);
+        Promise<void> loadFont(String name, (String or Resource) path);
+        void clearCaches();
+    };
+    interface StrutStyle {
+        [Optional]
+        attribute sequence<String> fontFamilies;
+        [Optional]
+        attribute FontStyle fontStyle;
+        [Optional]
+        attribute FontWidth fontWidth;
+        [Optional]
+        attribute FontWeight fontWeight;
+        [Optional]
+        attribute number fontSize;
+        [Optional]
+        attribute number height;
+        [Optional]
+        attribute number leading;
+        [Optional]
+        attribute boolean forceHeight;
+        [Optional]
+        attribute boolean enabled;
+        [Optional]
+        attribute boolean heightOverride;
+        [Optional]
+        attribute boolean halfLeading;
+    };
+    interface ParagraphStyle {
+        [Optional]
+        attribute TextStyle textStyle;
+        [Optional]
+        attribute TextDirection textDirection;
+        [Optional]
+        attribute TextAlign align;
+        [Optional]
+        attribute WordBreak wordBreak;
+        [Optional]
+        attribute number maxLines;
+        [Optional]
+        attribute BreakStrategy breakStrategy;
+        [Optional]
+        attribute StrutStyle strutStyle;
+        [Optional]
+        attribute TextHeightBehavior textHeightBehavior;
+        [Optional]
+        attribute TextTab tab;
+    };
+    dictionary PlaceholderAlignment {
+        number OFFSET_AT_BASELINE;
+        number ABOVE_BASELINE;
+        number BELOW_BASELINE;
+        number TOP_OF_ROW_BOX;
+        number BOTTOM_OF_ROW_BOX;
+        number CENTER_OF_ROW_BOX;
+    };
+    interface PlaceholderSpan {
+        attribute number width;
+        attribute number height;
+        attribute PlaceholderAlignment align;
+        attribute TextBaseline baseline;
+        attribute number baselineOffset;
+    };
+    interface Range {
+        attribute number start;
+        attribute number end;
+    };
+    dictionary SystemFontType {
+        number ALL;
+        number GENERIC;
+        number STYLISH;
+        number INSTALLED;
+    };
+    interface FontDescriptor {
+        [Optional]
+        attribute String path;
+        [Optional]
+        attribute String postScriptName;
+        [Optional]
+        attribute String fullName;
+        [Optional]
+        attribute String fontFamily;
+        [Optional]
+        attribute String fontSubfamily;
+        [Optional]
+        attribute FontWeight weight;
+        [Optional]
+        attribute number width;
+        [Optional]
+        attribute number italic;
+        [Optional]
+        attribute boolean monoSpace;
+        [Optional]
+        attribute boolean symbolic;
+    };
+    [Entity=Class]
+    interface Paragraph {
+        constructor();
+        void layoutSync(number width);
+        Promise<void> layout(number width);
+        void paint(drawing.Canvas canvas, number x, number y);
+        void paintOnPath(drawing.Canvas canvas, drawing.Path path, number hOffset, number vOffset);
+        number getMaxWidth();
+        number getHeight();
+        number getLongestLine();
+        number getLongestLineWithIndent();
+        number getMinIntrinsicWidth();
+        number getMaxIntrinsicWidth();
+        number getAlphabeticBaseline();
+        number getIdeographicBaseline();
+        sequence<TextBox> getRectsForRange(Range range, RectWidthStyle widthStyle, RectHeightStyle heightStyle);
+        sequence<TextBox> getRectsForPlaceholders();
+        PositionWithAffinity getGlyphPositionAtCoordinate(number x, number y);
+        Range getWordBoundary(number offset);
+        number getLineCount();
+        number getLineHeight(number line);
+        number getLineWidth(number line);
+        boolean didExceedMaxLines();
+        sequence<TextLine> getTextLines();
+        Range getActualTextRange(number lineNumber, boolean includeSpaces);
+        sequence<LineMetrics> getLineMetrics();
+        (LineMetrics or undefined) getLineMetrics(number lineNumber);
+    };
+    [Entity=Class]
+    interface LineTypeset {
+        constructor();
+        number getLineBreak(number startIndex, number width);
+        TextLine createLine(number startIndex, number count);
+    };
+    interface TextBox {
+        attribute common2D.Rect rect;
+        attribute TextDirection direction;
+    };
+    interface PositionWithAffinity {
+        attribute number position;
+        attribute Affinity affinity;
+    };
+    dictionary RectWidthStyle {
+        number TIGHT;
+        number MAX;
+    };
+    dictionary RectHeightStyle {
+        number TIGHT;
+        number MAX;
+        number INCLUDE_LINE_SPACE_MIDDLE;
+        number INCLUDE_LINE_SPACE_TOP;
+        number INCLUDE_LINE_SPACE_BOTTOM;
+        number STRUT;
+    };
+    dictionary Affinity {
+        number UPSTREAM;
+        number DOWNSTREAM;
+    };
+    [Entity=Class]
+    interface ParagraphBuilder {
+        constructor(ParagraphStyle paragraphStyle, FontCollection fontCollection);
+        void pushStyle(TextStyle textStyle);
+        void popStyle();
+        void addText(String text);
+        void addPlaceholder(PlaceholderSpan placeholderSpan);
+        Paragraph build();
+        LineTypeset buildLineTypeset();
+        void addSymbol(number symbolId);
+    };
+    interface TypographicBounds {
+        attribute number ascent;
+        attribute number descent;
+        attribute number leading;
+        attribute number width;
+    };
+    [Synthetic]
+    callback Callback_Number_Number_Boolean_Boolean = boolean (number offset, number index, boolean leadingEdge);
+    typedef Callback_Number_Number_Boolean_Boolean CaretOffsetsCallback;
+    [Entity=Class]
+    interface TextLine {
+        constructor();
+        number getGlyphCount();
+        Range getTextRange();
+        sequence<Run> getGlyphRuns();
+        void paint(drawing.Canvas canvas, number x, number y);
+        TextLine createTruncatedLine(number width, EllipsisMode ellipsisMode, String ellipsis);
+        TypographicBounds getTypographicBounds();
+        common2D.Rect getImageBounds();
+        number getTrailingSpaceWidth();
+        number getStringIndexForPosition(common2D.Point point);
+        number getOffsetForStringIndex(number index);
+        void enumerateCaretOffsets(CaretOffsetsCallback callback_);
+        number getAlignmentOffset(number alignmentFactor, number alignmentWidth);
+    };
+    [Entity=Class]
+    interface Run {
+        constructor();
+        number getGlyphCount();
+        sequence<number> getGlyphs();
+        sequence<number> getGlyphs(Range range);
+        sequence<common2D.Point> getPositions();
+        sequence<common2D.Point> getPositions(Range range);
+        sequence<common2D.Point> getOffsets();
+        drawing.Font getFont();
+        void paint(drawing.Canvas canvas, number x, number y);
+        sequence<number> getStringIndices(Range range);
+        Range getStringRange();
+        TypographicBounds getTypographicBounds();
+        common2D.Rect getImageBounds();
+    };
+    interface RunMetrics {
+        attribute TextStyle textStyle;
+        attribute drawing.FontMetrics fontMetrics;
+    };
+    interface LineMetrics {
+        attribute number startIndex;
+        attribute number endIndex;
+        attribute number ascent;
+        attribute number descent;
+        attribute number height;
+        attribute number width;
+        attribute number left;
+        attribute number baseline;
+        attribute number lineNumber;
+        attribute number topHeight;
+        attribute record<number, RunMetrics> runMetrics;
+    };
+    Promise<sequence<String>> getSystemFontFullNamesByType(SystemFontType fontType);
+    Promise<FontDescriptor> getFontDescriptorByFullName(String fullName, SystemFontType fontType);
+    Promise<sequence<FontDescriptor>> matchFontDescriptors(FontDescriptor desc);
+    interface TextTab {
+        attribute TextAlign alignment;
+        attribute number location;
+    };
+};

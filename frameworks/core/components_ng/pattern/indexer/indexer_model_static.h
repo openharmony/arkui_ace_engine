@@ -44,7 +44,7 @@ public:
         const std::optional<OHOS::Ace::FontStyle>& fontStyle);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
-    static void SetItemSize(FrameNode* frameNode, const Dimension& value);
+    static void SetItemSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
         const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
         const std::optional<OHOS::Ace::FontStyle>& fontStyle);

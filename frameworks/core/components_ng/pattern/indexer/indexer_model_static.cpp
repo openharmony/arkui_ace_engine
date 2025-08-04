@@ -196,14 +196,16 @@ void IndexerModelStatic::SetFontWeight(FrameNode* frameNode, const FontWeight we
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontWeight, weight, frameNode);
 }
 
-void IndexerModelStatic::SetItemSize(FrameNode* frameNode, const Dimension& itemSize)
+void IndexerModelStatic::SetItemSize(FrameNode* frameNode, const std::optional<Dimension>& itemSize)
 {
-    auto itemSizeValue = itemSize.Value();
+    const auto defaultValue = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
+    auto value = itemSize.value_or(defaultValue);
+    auto itemSizeValue = value.Value();
     if (itemSizeValue > 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemSize, itemSize, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemSize, value, frameNode);
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            IndexerLayoutProperty, ItemSize, Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP), frameNode);
+            IndexerLayoutProperty, ItemSize, defaultValue, frameNode);
     }
 }
 

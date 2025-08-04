@@ -69,8 +69,8 @@ const std::string EXPECTED_NUM_VILID_PX("1234.00px");
 const std::string EXPECTED_NUM_MAX_PX("2147483648.00px");
 const std::string EXPECTED_NUM_ZERO_PX("0.00px");
 
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
-const auto RES_COLOR_ID = IntResourceId{123456, Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{123456, ResourceType::COLOR};
 
 const auto COLOR_BY_STRING1 = Color(0xFF123456);
 const auto COLOR_BY_NUMBER = Color(0xFF654321);
@@ -105,7 +105,7 @@ HWTEST_F(PatternLockModifierTest, setSideLengthTestDefaultValues, TestSize.Level
 
 // Valid values for attribute 'sideLength' of method 'sideLength'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideLengthValidValues = {
-    {EXPECTED_NUM_NEG_PX, LEN_NUM_NEG, ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE},
+    {EXPECTED_NUM_NEG_PX, LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
     {EXPECTED_NUM_ZERO_PX, LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
     {EXPECTED_NUM_VILID_PX, LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
     {EXPECTED_NUM_MAX_PX, LEN_NUM_MAX, EXPECTED_NUM_MAX_PX},

@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_TabContentTransitionProxy peer)
         delete peer;
     }
 }
-Ark_TabContentTransitionProxy CtorImpl()
+Ark_TabContentTransitionProxy ConstructImpl()
 {
     return new TabContentTransitionProxyPeer();
 }
@@ -73,7 +73,7 @@ const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionP
 {
     static const GENERATED_ArkUITabContentTransitionProxyAccessor TabContentTransitionProxyAccessorImpl {
         TabContentTransitionProxyAccessor::DestroyPeerImpl,
-        TabContentTransitionProxyAccessor::CtorImpl,
+        TabContentTransitionProxyAccessor::ConstructImpl,
         TabContentTransitionProxyAccessor::GetFinalizerImpl,
         TabContentTransitionProxyAccessor::FinishTransitionImpl,
         TabContentTransitionProxyAccessor::GetFromImpl,

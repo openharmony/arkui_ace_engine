@@ -300,8 +300,8 @@ HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     LOGE("Custom objects are not supported.");
+#ifdef WRONG_GEN
     ASSERT_NE(modifier_->setTransform0, nullptr);
     using OneTestStep = std::tuple<Opt_CustomObject, std::string>;
     double matrix1[4][4] = {{11, 12, 13, 14}, {21, 22, 23, 24}, {31, 32, 33, 34}, {41, 42, 43, 44}};
@@ -334,8 +334,9 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues2, TestSize.Level1)
 {
+    LOGE("Custom objects are not supported.");
 #ifdef WRONG_GEN
     ASSERT_NE(modifier_->setTransform0, nullptr);
     using OneTestStep = std::tuple<Opt_CustomObject, std::string>;

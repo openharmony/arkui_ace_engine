@@ -62,10 +62,14 @@ public:
     std::optional<bool> OnContentWillScroll(FrameNode* node,
         int32_t currentIndex, int32_t comingIndex, float offset) const
     {
+#ifdef WRONG_NEW_ACE
         CHECK_NULL_RETURN(node, std::nullopt);
         auto pattern = node->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(pattern, std::nullopt);
         return pattern->OnContentWillScroll(currentIndex, comingIndex, offset);
+#else
+        return std::nullopt;
+#endif
     }
 
     Ark_NodeHandle CreateIndicatorComponent(Ark_IndicatorComponentController controller)
@@ -338,14 +342,14 @@ HWTEST_F(SwiperModifierTest2, setOnContentWillScrollTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator1TestController
+ * @tc.name: setIndicatorTestController
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Boolean type
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest2, setIndicator1TestController, TestSize.Level1)
+HWTEST_F(SwiperModifierTest2, setIndicatorTestController, TestSize.Level1)
 {
     using namespace Converter;
-    ASSERT_NE(modifier_->setIndicator1, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     // create the external IndicatorComponentController
     auto peer = PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
@@ -358,8 +362,9 @@ HWTEST_F(SwiperModifierTest2, setIndicator1TestController, TestSize.Level1)
     EXPECT_EQ(GetBoundSwiperNodeFromIndicator(indicatorNode), nullptr);
 
     // attach this modifier to external IndicatorComponentController
-    auto optIndicator = ArkUnion<Opt_Type_SwiperAttribute_indicator_indicator, Ark_IndicatorComponentController>(peer);
-    modifier_->setIndicator1(node_, &optIndicator);
+    auto optIndicator = ArkUnion<Opt_Union_IndicatorComponentController_DotIndicator_DigitIndicator_Boolean,
+        Ark_IndicatorComponentController>(peer);
+    modifier_->setIndicator(node_, &optIndicator);
 
     // check the expected state
     EXPECT_EQ(GetBoundSwiperNodeFromIndicator(indicatorNode), node_);

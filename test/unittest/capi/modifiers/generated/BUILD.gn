@@ -22,7 +22,7 @@ ace_unittest("capi_generated_modifiers_test") {
     "test_fixtures.cpp",
     "test_fixtures_enums.cpp",
   ]
-  #sources += generated_sources
+  sources += generated_sources
   extra_deps = []
   extra_deps += [
     "..:capi_deps",

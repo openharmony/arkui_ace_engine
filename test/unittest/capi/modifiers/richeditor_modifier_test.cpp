@@ -35,7 +35,6 @@ static constexpr auto TEST_COLOR = "#FFFF0000";
 static const std::u16string TEST_VALUE = u"test value";
 static const auto TEST_VALUE_2 = u"test value 2";
 static constexpr int TEST_INDEX_2 = 2;
-static constexpr auto TEST_FONT_SIZE = 30._px;
 static constexpr int TEST_FONT_WEIGHT = static_cast<int>(FontWeight::BOLD);
 static const std::string COLOR_TRANSPARENT = "#00000000";
 static constexpr int TEST_RESOURCE_ID = 1000;
@@ -360,16 +359,16 @@ HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
     Converter::ConvContext ctx;
     Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     Ark_Font label;
-    label.size = Converter::ArkValue<Opt_Length>(TEST_FONT_SIZE);
+    label.size = Converter::ArkValue<Opt_Length>("30px");
     label.weight = Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(TEST_FONT_WEIGHT);
     label.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL);
-    Opt_PlaceholderStyle style;
-    style.value.font = Converter::ArkValue<Opt_Font>(label);
-    Ark_ResourceColor fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR);
-    style.value.fontColor = Converter::ArkValue<Opt_ResourceColor>(fontColor);
+    Ark_PlaceholderStyle style;
+    style.font = Converter::ArkValue<Opt_Font>(label);
+    style.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(TEST_COLOR);
+    auto optStyle = Converter::ArkValue<Opt_PlaceholderStyle>(style);
 
     auto optValue = Converter::ArkValue<Opt_ResourceStr>(value);
-    modifier_->setPlaceholder(node_, &optValue, &style);
+    modifier_->setPlaceholder(node_, &optValue, &optStyle);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
@@ -550,8 +549,8 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBindSelectionMenuTest, TestSize.Lev
     value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
     auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
     value.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(onAppearCb);
-    auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
-    value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
+    auto onDisappearCb = Converter::ArkValue<VoidCallback>(onDisappearCallback, TEST_RESOURCE_ID);
+    value.onDisappear = Converter::ArkValue<Opt_VoidCallback>(onDisappearCb);
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();

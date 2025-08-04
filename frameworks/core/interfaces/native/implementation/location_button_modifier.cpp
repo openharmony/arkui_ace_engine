@@ -120,7 +120,7 @@ void OnClickImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        // Implement Reset value
         return;
     }
     auto onClick = [arkCallback = CallbackHelper(*optValue)](GestureEvent& info) {

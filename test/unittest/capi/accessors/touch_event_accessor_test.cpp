@@ -156,8 +156,6 @@ HWTEST_F(TouchEventAccessorTest, DISABLED_GetHistoricalPointsTest, TestSize.Leve
     ASSERT_NE(history.array, nullptr);
     EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.displayX), expectedDisplayX);
     EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.displayY), expectedDisplayY);
-    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.screenX), expectedWindowX);
-    EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.screenY), expectedWindowY);
     EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.windowX), expectedWindowX);
     EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.windowY), expectedWindowY);
     EXPECT_EQ(Converter::Convert<float>(history.array->touchObject.x), expectedX);
@@ -204,8 +202,6 @@ HWTEST_F(TouchEventAccessorTest, DISABLED_GetTouchesTest, TestSize.Level1)
     ASSERT_NE(touches.array, nullptr);
     EXPECT_EQ(Converter::Convert<float>(touches.array->displayX), expectedDisplayX);
     EXPECT_EQ(Converter::Convert<float>(touches.array->displayY), expectedDisplayY);
-    EXPECT_EQ(Converter::Convert<float>(touches.array->screenX), expectedWindowX);
-    EXPECT_EQ(Converter::Convert<float>(touches.array->screenY), expectedWindowY);
     EXPECT_EQ(Converter::Convert<float>(touches.array->windowX), expectedWindowX);
     EXPECT_EQ(Converter::Convert<float>(touches.array->windowY), expectedWindowY);
     EXPECT_EQ(Converter::Convert<float>(touches.array->x), expectedX);
@@ -249,8 +245,6 @@ HWTEST_F(TouchEventAccessorTest, DISABLED_GetChangedTouchesTest, TestSize.Level1
     ASSERT_NE(touches.array, nullptr);
     EXPECT_EQ(Converter::Convert<float>(touches.array->displayX), expectedDisplayX);
     EXPECT_EQ(Converter::Convert<float>(touches.array->displayY), expectedDisplayY);
-    EXPECT_EQ(Converter::Convert<float>(touches.array->screenX), expectedWindowX);
-    EXPECT_EQ(Converter::Convert<float>(touches.array->screenY), expectedWindowY);
     EXPECT_EQ(Converter::Convert<float>(touches.array->windowX), expectedWindowX);
     EXPECT_EQ(Converter::Convert<float>(touches.array->windowY), expectedWindowY);
     EXPECT_EQ(Converter::Convert<float>(touches.array->x), expectedX);

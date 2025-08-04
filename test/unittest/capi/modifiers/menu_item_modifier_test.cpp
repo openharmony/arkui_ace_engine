@@ -42,9 +42,9 @@ const std::string COLOR_TRANSPARENT = "#00000000";
 const std::string COLOR_THEME_FONT = "#FF888888";
 const std::string COLOR_THEME_FONT_ALPHA_06 = "#99888888";
 
-const auto COLOR_COLOR_RES = CreateResource("color_name", Converter::ResourceType::COLOR);
-const auto COLOR_ID_RES = CreateResource(1234, Converter::ResourceType::COLOR);
-const auto COLOR_STRING_RES = CreateResource("color_name", Converter::ResourceType::STRING);
+const auto COLOR_COLOR_RES = CreateResource("color_name", ResourceType::COLOR);
+const auto COLOR_ID_RES = CreateResource(1234, ResourceType::COLOR);
+const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING);
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
@@ -88,7 +88,7 @@ const Ark_Float32 AFLT32_NEG(-5.6789f);
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
 const auto FAMILY_RES_ID = 555;
-const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, Converter::ResourceType::STRARRAY);
+const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, ResourceType::STRARRAY);
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
     Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(FAMILY_NAME_RES);
 
@@ -203,7 +203,7 @@ HWTEST_F(MenuItemModifierTest, setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);
-    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_TRUE(selected);
@@ -253,7 +253,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "false");
-    Ark_Resource iconRes = CreateResource(ICON_OK_STR.c_str(), Converter::ResourceType::STRING);
+    Ark_Resource iconRes = CreateResource(ICON_OK_STR.c_str(), ResourceType::STRING);
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &optIcon);
@@ -770,6 +770,7 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_FALSE(checkEvent->selected);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedImpl
  * @tc.desc:
@@ -809,4 +810,5 @@ HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

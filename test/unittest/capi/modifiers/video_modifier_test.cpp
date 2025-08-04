@@ -273,7 +273,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
     auto controllerPtr =
-        fullAPI_->getAccessors()->getVideoControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getVideoControllerAccessor()->construct();
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::VideoControllerPeerImpl*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -629,7 +629,7 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
-    ASSERT_TRUE(eventHub);
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -661,7 +661,7 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
-    ASSERT_TRUE(eventHub);
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -693,7 +693,7 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
-    ASSERT_TRUE(eventHub);
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -725,6 +725,7 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -765,6 +766,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -805,6 +807,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -846,6 +849,7 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -887,6 +891,7 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -927,7 +932,7 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
-    ASSERT_TRUE(eventHub);
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -959,7 +964,7 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
-    ASSERT_TRUE(eventHub);
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;

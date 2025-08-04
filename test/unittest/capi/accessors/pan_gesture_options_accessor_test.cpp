@@ -40,7 +40,7 @@ public:
         const Opt_PanGestureHandlerOptions DEFAULT_SETTINGS =
             Converter::ArkValue<Opt_PanGestureHandlerOptions>(ARK_DEFAULT_SETTINGS);
 
-        return accessor_->ctor(&DEFAULT_SETTINGS);
+        return accessor_->construct(&DEFAULT_SETTINGS);
     }
 };
 

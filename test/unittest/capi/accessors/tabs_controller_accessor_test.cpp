@@ -193,7 +193,7 @@ HWTEST_F(TabsControllerAccessorTest, setTabBarTranslateTest, TestSize.Level1)
     static bool wasInvoke = false;
     mockSwiperController_->SetTabBarTranslateImpl([](const NG::TranslateOptions& translate) {
         EXPECT_EQ(translate.x.ToString(), "1.00vp");
-        EXPECT_EQ(translate.y.ToString(), "-2.2vpcalc");
+        EXPECT_EQ(translate.y.ToString(), "-2.20vp");
         EXPECT_EQ(translate.z.ToString(), "0.00px");
         wasInvoke = true;
     });

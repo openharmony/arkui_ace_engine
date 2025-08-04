@@ -1,0 +1,451 @@
+diff --git a/api/@internal/component/ets/column.d.ts b/api/@internal/component/ets/column.d.ts
+index 96457a9ee..5916a7c5b 100644
+--- a/api/@internal/component/ets/column.d.ts
++++ b/api/@internal/component/ets/column.d.ts
+@@ -110,7 +110,7 @@ interface ColumnOptionsV2 {
+    * @since arkts {'1.1':'18','1.2':'20'}
+    * @arkts 1.1&1.2
+    */
+-  space?: SpaceType;
++  doNotUseMe: boolean
+ }
+ 
+ /**
+@@ -149,65 +149,6 @@ interface ColumnOptionsV2 {
+  * @arkts 1.1&1.2
+  */
+ interface ColumnInterface {
+-  /**
+-   * Set the value.
+-   * useAlign:Use a custom alignment.
+-   * space: Vertical layout element spacing.
+-   *
+-   * @param { object } value
+-   * @returns { ColumnAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @since 7
+-   */
+-  /**
+-   * Set the value.
+-   * useAlign:Use a custom alignment.
+-   * space: Vertical layout element spacing.
+-   *
+-   * @param { object } value
+-   * @returns { ColumnAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @form
+-   * @since 9
+-   */
+-  /**
+-   * Set the value.
+-   * useAlign:Use a custom alignment.
+-   * space: Vertical layout element spacing.
+-   *
+-   * @param { object } value
+-   * @returns { ColumnAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @form
+-   * @since 10
+-   */
+-  /**
+-   * Set the value.
+-   * useAlign:Use a custom alignment.
+-   * space: Vertical layout element spacing.
+-   *
+-   * @param { object } value
+-   * @returns { ColumnAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @form
+-   * @atomicservice
+-   * @since 11
+-   */
+-  /**
+-   * Set the options.
+-   *
+-   * @param { ColumnOptions } [options] - column options
+-   * @returns { ColumnAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @form
+-   * @atomicservice
+-   * @since arkts {'1.1':'18','1.2':'20'}
+-   * @arkts 1.1&1.2
+-   */
+-  (options?: ColumnOptions): ColumnAttribute;
+   /**
+    * Set the options.
+    *
+diff --git a/api/@internal/component/ets/relative_container.d.ts b/api/@internal/component/ets/relative_container.d.ts
+index 1caa3043b..82659bec9 100644
+--- a/api/@internal/component/ets/relative_container.d.ts
++++ b/api/@internal/component/ets/relative_container.d.ts
+@@ -436,7 +436,7 @@ declare class RelativeContainerAttribute extends CommonMethod<RelativeContainerA
+    * @since arkts {'1.1':'12','1.2':'20'}
+    * @arkts 1.1&1.2
+    */
+-  barrier(barrierStyle: Array<LocalizedBarrierStyle>): RelativeContainerAttribute;
++  // barrier(barrierStyle: Array<LocalizedBarrierStyle>): RelativeContainerAttribute;
+ }
+ 
+ /**
+diff --git a/api/@internal/component/ets/row.d.ts b/api/@internal/component/ets/row.d.ts
+index b3981964e..9fc357aa2 100644
+--- a/api/@internal/component/ets/row.d.ts
++++ b/api/@internal/component/ets/row.d.ts
+@@ -109,7 +109,7 @@ interface RowOptionsV2 {
+    * @since arkts {'1.1':'18','1.2':'20'}
+    * @arkts 1.1&1.2
+    */
+-  space?: SpaceType;
++  doNotUseMe: boolean;
+ }
+ 
+ /**
+@@ -151,59 +151,6 @@ interface RowInterface {
+   /**
+    * Called when the layout is set in the horizontal direction.
+    *
+-   * @param { object } value
+-   * @returns { RowAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @since 7
+-   */
+-  /**
+-   * Called when the layout is set in the horizontal direction.
+-   *
+-   * @param { object } value
+-   * @returns { RowAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @form
+-   * @since 9
+-   */
+-  /**
+-   * Called when the layout is set in the horizontal direction.
+-   *
+-   * @param { object } value
+-   * @returns { RowAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @form
+-   * @since 10
+-   */
+-  /**
+-   * Called when the layout is set in the horizontal direction.
+-   *
+-   * @param { object } value
+-   * @returns { RowAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @form
+-   * @atomicservice
+-   * @since 11
+-   */
+-  /**
+-   * Called when the layout is set in the horizontal direction.
+-   *
+-   * Anonymous Object Rectification
+-   * @param { ?RowOptions } options - row options
+-   * @returns { RowAttribute }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @form
+-   * @atomicservice
+-   * @since arkts {'1.1':'18','1.2':'20'}
+-   * @arkts 1.1&1.2
+-   */
+-  (options?: RowOptions): RowAttribute;
+-  /**
+-   * Called when the layout is set in the horizontal direction.
+-   *
+-   * Anonymous Object Rectification
+    * @param { ?(RowOptions | RowOptionsV2) } options - row options
+    * @returns { RowAttribute }
+    * @syscap SystemCapability.ArkUI.ArkUI.Full
+diff --git a/api/@internal/component/ets/sidebar.d.ts b/api/@internal/component/ets/sidebar.d.ts
+index d60a3cd14..17e68d541 100644
+--- a/api/@internal/component/ets/sidebar.d.ts
++++ b/api/@internal/component/ets/sidebar.d.ts
+@@ -21,7 +21,7 @@
+ /*** if arkts 1.2 */
+ import { Resource } from '../../global/resource'
+ import { Length, ResourceColor, Dimension } from './units'
+-import { CommonMethod, PixelMap, Bindable } from './common'
++import { CommonMethod, PixelMap, Bindable, DividerStyle } from './common'
+ /*** endif */
+ 
+ /**
+@@ -554,110 +554,6 @@ interface SideBarContainerInterface {
+   (type?: SideBarContainerType): SideBarContainerAttribute;
+ }
+ 
+-/**
+- * Provides an interface for the style of a divider including stroke width, color, start margin
+- * and end margin
+- *
+- * @interface DividerStyle
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @crossplatform
+- * @since 10
+- */
+-/**
+- * Provides an interface for the style of a divider including stroke width, color, start margin
+- * and end margin
+- *
+- * @interface DividerStyle
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @crossplatform
+- * @atomicservice
+- * @since arkts {'1.1':'11','1.2':'20'}
+- * @arkts 1.1&1.2
+- */
+-interface DividerStyle {
+-  /**
+-   * Define the stroke width of the divider
+-   *
+-   * @type { Length }
+-   * @default 1vp
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @since 10
+-   */
+-  /**
+-   * Define the stroke width of the divider
+-   *
+-   * @type { Length }
+-   * @default 1vp
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @atomicservice
+-   * @since arkts {'1.1':'11','1.2':'20'}
+-   * @arkts 1.1&1.2
+-   */
+-  strokeWidth: Length;
+-
+-  /**
+-   * Define the color of the divider
+-   *
+-   * @type { ?ResourceColor }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @since 10
+-   */
+-  /**
+-   * Define the color of the divider
+-   *
+-   * @type { ?ResourceColor }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @atomicservice
+-   * @since arkts {'1.1':'11','1.2':'20'}
+-   * @arkts 1.1&1.2
+-   */
+-  color?: ResourceColor;
+-
+-  /**
+-   * Define the start margin of the divider
+-   *
+-   * @type { ?Length }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @since 10
+-   */
+-  /**
+-   * Define the start margin of the divider
+-   *
+-   * @type { ?Length }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @atomicservice
+-   * @since arkts {'1.1':'11','1.2':'20'}
+-   * @arkts 1.1&1.2
+-   */
+-  startMargin?: Length;
+-
+-  /**
+-   * Define the end margin of the divider
+-   *
+-   * @type { ?Length }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @since 10
+-   */
+-  /**
+-   * Define the end margin of the divider
+-   *
+-   * @type { ?Length }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @crossplatform
+-   * @atomicservice
+-   * @since arkts {'1.1':'11','1.2':'20'}
+-   * @arkts 1.1&1.2
+-   */
+-  endMargin?: Length;
+-}
+-
+ /**
+  * The attribute function of sidebar
+  *
+diff --git a/api/@internal/component/ets/toggle.d.ts b/api/@internal/component/ets/toggle.d.ts
+index 4f1a07f30..73b56ec38 100644
+--- a/api/@internal/component/ets/toggle.d.ts
++++ b/api/@internal/component/ets/toggle.d.ts
+@@ -255,7 +255,7 @@ declare interface ToggleConfiguration extends CommonConfiguration<ToggleConfigur
+    * @since arkts {'1.1':'12','1.2':'20'}
+    * @arkts 1.1&1.2
+    */
+-  enabled: boolean;
++  toggleEnabled: boolean;
+ 
+   /**
+    * Trigger toggle select change
+diff --git a/api/@internal/component/ets/ui_extension_component.d.ts b/api/@internal/component/ets/ui_extension_component.d.ts
+index 7637cdeaa..1b658f684 100644
+--- a/api/@internal/component/ets/ui_extension_component.d.ts
++++ b/api/@internal/component/ets/ui_extension_component.d.ts
+@@ -156,36 +156,6 @@ declare interface UIExtensionOptions {
+     windowModeFollowStrategy?: WindowModeFollowStrategy;
+ }
+ 
+-/**
+- * Indicates the information when the provider of the embedded UI is terminated.
+- *
+- * @interface TerminationInfo
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @systemapi
+- * @since 12
+- */
+-declare interface TerminationInfo {
+-  /**
+-   * Defines the termination code.
+-   *
+-   * @type { number }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @systemapi
+-   * @since 12
+-   */
+-   code: number;
+-
+-  /**
+-   * Defines the additional termination information.
+-   *
+-   * @type { ?import('../api/@ohos.app.ability.Want').default }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @systemapi
+-   * @since 12
+-   */
+-   want?: import('../api/@ohos.app.ability.Want').default;
+-}
+-
+ /**
+  * Get Callback from @ohos.base.
+  * AnonyMous Object Rectification
+diff --git a/api/arkui/component/common.static.d.ets b/api/arkui/component/common.static.d.ets
+index 7d6b68079..94732388b 100644
+--- a/api/arkui/component/common.static.d.ets
++++ b/api/arkui/component/common.static.d.ets
+@@ -4864,7 +4864,7 @@ export declare interface BaseEvent {
+      * @atomicservice
+      * @since 20
+      */
+-    timestamp: number;
++    timestamp: long;
+     /**
+      * Event input device.
+      *
+@@ -5649,7 +5649,7 @@ export declare interface HistoricalPoint {
+      * @atomicservice
+      * @since 20
+      */
+-    timestamp: number;
++    timestamp: long;
+ }
+ /**
+  * Touch Action Function Parameters
+@@ -6710,7 +6710,7 @@ export declare interface KeyEvent {
+      * @atomicservice
+      * @since 20
+      */
+-    timestamp: number;
++    timestamp: long;
+     /**
+      * Block event bubbling.
+      *
+@@ -6797,7 +6797,7 @@ export declare interface CrownEvent {
+      * @atomicservice
+      * @since 20
+      */
+-    timestamp: number;
++    timestamp: long;
+     /**
+      * The angular velocity of a rotating crown.
+      *
+@@ -7323,7 +7323,7 @@ export declare interface SheetOptions extends BindOptions {
+      * @atomicservice
+      * @since 20
+      */
+-    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
++    detents?: TripleLengthDetents;
+     /**
+      * Background blur of the sheet. By default, there is no background blur.
+      *
+@@ -7709,7 +7709,7 @@ export declare interface SheetOptions extends BindOptions {
+  * @atomicservice
+  * @since 20
+  */
+-export type CustomStyles = (instance: CommonMethod) => void;
++export type CustomStyles = (instance: string) => void;
+ /**
+  * Component State Styles.
+  *
+@@ -11066,7 +11066,7 @@ export declare interface CommonMethod {
+      * @atomicservice
+      * @since 20
+      */
+-    default onKeyEvent(event: Callback<KeyEvent, boolean> | undefined): this;
++    //default onKeyEvent(event: Callback<KeyEvent, boolean> | undefined): this;
+     /**
+      * Digital crown input.
+      *
+@@ -15336,4 +15336,4 @@ export declare function $$<T>(value: T): Bindable<T>;
+  * @syscap SystemCapability.ArkUI.ArkUI.Full
+  * @since 20
+  */
+-export declare function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T;
++export declare function applyStyles<T extends CommonMethod>(self: T, customStyles: CustomStyles): T;
+diff --git a/api/arkui/component/customComponent.d.ets b/api/arkui/component/customComponent.d.ets
+index cfd065cf4..19513faca 100644
+--- a/api/arkui/component/customComponent.d.ets
++++ b/api/arkui/component/customComponent.d.ets
+@@ -229,7 +229,7 @@ export declare abstract class CustomComponent<T extends CustomComponent<T, T_Opt
+      * @since 20
+      */
+     @ComponentBuilder
+-    static $_instantiate(
++    static $_instantiate<T, T_Options>(
+         factory: () => T,
+         initializers?: T_Options,
+         reuseId?: string,
+@@ -271,7 +271,7 @@ export declare abstract class CustomComponentV2<T extends CustomComponentV2<T, T
+      * @since 20
+      */
+     @ComponentBuilder
+-    static $_instantiate(
++    static $_instantiate<T, T_Options>(
+         factory: () => T,
+         initializers?: T_Options,
+         reuseId?: string,
+diff --git a/api/global/resource.d.ts b/api/global/resource.d.ts
+index bb8beb45b..8b4b84bff 100644
+--- a/api/global/resource.d.ts
++++ b/api/global/resource.d.ts
+@@ -103,7 +103,7 @@ export interface Resource {
+    * @since 20
+    * @arkts 1.2
+    */
+-  params?: Array<Object | undefined>;
++  params?: Array<String>;
+ 
+   /**
+    * Set params.

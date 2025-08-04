@@ -42,7 +42,7 @@ HWTEST_F(ComponentSnapshotAccessorTest, getMethodTest, TestSize.Level1)
     static bool called = false;
     ASSERT_NE(accessor_->get, nullptr);
     Ark_String id = Converter::ArkValue<Ark_String>("Button.1");
-    auto callback = [](const Ark_Int32 resourceId, const Ark_PixelMap result) {
+    auto callback = [](const Ark_Int32 resourceId, const Ark_image_PixelMap result) {
         called = (result != nullptr);
     };
     auto func = Converter::ArkValue<AsyncCallback_image_PixelMap_Void>(callback, CONTEXT_ID);

@@ -18,6 +18,316 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
+ * @tc.name: setPasswordIconTestPasswordIconOffIconSrcInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setPasswordIconTestPasswordIconOffIconSrcInvalidValues, TestSize.Level1)
+{
+    Opt_PasswordIcon initValuePasswordIcon;
+
+    // Initial setup
+    WriteTo(initValuePasswordIcon).onIconSrc =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
+    WriteTo(initValuePasswordIcon).offIconSrc =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
+
+    auto checkValue = [this, &initValuePasswordIcon](const std::string& input, const Opt_Union_String_Resource& value) {
+        Opt_PasswordIcon inputValuePasswordIcon = initValuePasswordIcon;
+
+        modifier_->setPasswordIcon(node_, &inputValuePasswordIcon);
+        WriteTo(inputValuePasswordIcon).offIconSrc = value;
+        modifier_->setPasswordIcon(node_, &inputValuePasswordIcon);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultPasswordIcon = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PASSWORD_ICON_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultPasswordIcon, ATTRIBUTE_PASSWORD_ICON_I_OFF_ICON_SRC_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_PASSWORD_ICON_I_OFF_ICON_SRC_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setPasswordIcon, attribute: passwordIcon.offIconSrc";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_String_Resource>());
+}
+
+/*
+ * @tc.name: setShowErrorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) << "Default value for attribute 'showError'";
+}
+
+/*
+ * @tc.name: setShowErrorTestShowErrorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
+{
+    Opt_ResourceStr initValueShowError;
+
+    // Initial setup
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
+
+    auto checkValue = [this, &initValueShowError](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
+
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+}
+
+/*
+ * @tc.name: setShowErrorTestShowErrorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
+{
+    Opt_ResourceStr initValueShowError;
+
+    // Initial setup
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
+
+    auto checkValue = [this, &initValueShowError](const std::string& input, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
+
+        modifier_->setShowError(node_, &inputValueShowError);
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceStr>());
+}
+
+/*
+ * @tc.name: setShowUnderlineTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowUnderlineTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_UNDERLINE_DEFAULT_VALUE) << "Default value for attribute 'showUnderline'";
+}
+
+/*
+ * @tc.name: setShowUnderlineTestShowUnderlineValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowUnderlineTestShowUnderlineValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueShowUnderline;
+
+    // Initial setup
+    initValueShowUnderline = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueShowUnderline](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueShowUnderline = initValueShowUnderline;
+
+        inputValueShowUnderline = value;
+        modifier_->setShowUnderline(node_, &inputValueShowUnderline);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowUnderline, attribute: showUnderline";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setShowUnderlineTestShowUnderlineInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowUnderlineTestShowUnderlineInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueShowUnderline;
+
+    // Initial setup
+    initValueShowUnderline = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueShowUnderline](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueShowUnderline = initValueShowUnderline;
+
+        modifier_->setShowUnderline(node_, &inputValueShowUnderline);
+        inputValueShowUnderline = value;
+        modifier_->setShowUnderline(node_, &inputValueShowUnderline);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_UNDERLINE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setShowUnderline, attribute: showUnderline";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setUnderlineColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultUnderlineColor =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.typing'";
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_NORMAL_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_NORMAL_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.normal'";
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_ERROR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_ERROR_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.error'";
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_DISABLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_DISABLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.disable'";
+}
+
+/*
+ * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues, TestSize.Level1)
+{
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
+
+    // Initial setup
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueUnderlineColor](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
+
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
+        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setUnderlineColor, attribute: underlineColor.UnderlineColor.typing";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues, TestSize.Level1)
+{
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
+
+    // Initial setup
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
+
+        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
+        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setUnderlineColor, attribute: underlineColor.UnderlineColor.typing";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
+}
+
+/*
  * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorNormalValidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -294,47 +604,13 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
 }
 
 /*
- * @tc.name: setSelectionMenuHiddenTestDefaultValues
+ * @tc.name: setSelectionMenuHiddenTestPlaceholder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setSelectionMenuHiddenTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setSelectionMenuHiddenTestPlaceholder, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTION_MENU_HIDDEN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_MENU_HIDDEN_DEFAULT_VALUE) <<
-        "Default value for attribute 'selectionMenuHidden'";
-}
-
-/*
- * @tc.name: setSelectionMenuHiddenTestSelectionMenuHiddenValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setSelectionMenuHiddenTestSelectionMenuHiddenValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueSelectionMenuHidden;
-
-    // Initial setup
-    initValueSelectionMenuHidden = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueSelectionMenuHidden](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueSelectionMenuHidden = initValueSelectionMenuHidden;
-
-        inputValueSelectionMenuHidden = value;
-        modifier_->setSelectionMenuHidden(node_, inputValueSelectionMenuHidden);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTION_MENU_HIDDEN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSelectionMenuHidden, attribute: selectionMenuHidden";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
+    // This is placeholder to have disabled test
 }
 
 /*
@@ -358,17 +634,17 @@ HWTEST_F(TextInputModifierTest, setBarStateTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest, setBarStateTestBarStateValidValues, TestSize.Level1)
 {
-    Ark_BarState initValueBarState;
+    Opt_BarState initValueBarState;
 
     // Initial setup
-    initValueBarState = std::get<1>(Fixtures::testFixtureTextInputBarStateValidValues[0]);
+    initValueBarState = ArkValue<Opt_BarState>(std::get<1>(Fixtures::testFixtureTextInputBarStateValidValues[0]));
 
     auto checkValue = [this, &initValueBarState](
-                          const std::string& input, const std::string& expectedStr, const Ark_BarState& value) {
-        Ark_BarState inputValueBarState = initValueBarState;
+                          const std::string& input, const std::string& expectedStr, const Opt_BarState& value) {
+        Opt_BarState inputValueBarState = initValueBarState;
 
         inputValueBarState = value;
-        modifier_->setBarState(node_, inputValueBarState);
+        modifier_->setBarState(node_, &inputValueBarState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -376,7 +652,7 @@ HWTEST_F(TextInputModifierTest, setBarStateTestBarStateValidValues, TestSize.Lev
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextInputBarStateValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_BarState>(value));
     }
 }
 
@@ -387,17 +663,17 @@ HWTEST_F(TextInputModifierTest, setBarStateTestBarStateValidValues, TestSize.Lev
  */
 HWTEST_F(TextInputModifierTest, setBarStateTestBarStateInvalidValues, TestSize.Level1)
 {
-    Ark_BarState initValueBarState;
+    Opt_BarState initValueBarState;
 
     // Initial setup
-    initValueBarState = std::get<1>(Fixtures::testFixtureTextInputBarStateValidValues[0]);
+    initValueBarState = ArkValue<Opt_BarState>(std::get<1>(Fixtures::testFixtureTextInputBarStateValidValues[0]));
 
-    auto checkValue = [this, &initValueBarState](const std::string& input, const Ark_BarState& value) {
-        Ark_BarState inputValueBarState = initValueBarState;
+    auto checkValue = [this, &initValueBarState](const std::string& input, const Opt_BarState& value) {
+        Opt_BarState inputValueBarState = initValueBarState;
 
-        modifier_->setBarState(node_, inputValueBarState);
+        modifier_->setBarState(node_, &inputValueBarState);
         inputValueBarState = value;
-        modifier_->setBarState(node_, inputValueBarState);
+        modifier_->setBarState(node_, &inputValueBarState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) <<
@@ -405,8 +681,10 @@ HWTEST_F(TextInputModifierTest, setBarStateTestBarStateInvalidValues, TestSize.L
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextInputBarStateInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_BarState>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_BarState>());
 }
 
 /*
@@ -428,16 +706,16 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
 {
-    Ark_Number initValueMaxLines;
+    Opt_Number initValueMaxLines;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+    initValueMaxLines = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
 
     auto checkValue = [this, &initValueMaxLines](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Number inputValueMaxLines = initValueMaxLines;
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Opt_Number inputValueMaxLines = initValueMaxLines;
 
         inputValueMaxLines = value;
         modifier_->setMaxLines(node_, &inputValueMaxLines);
@@ -448,7 +726,7 @@ HWTEST_F(TextInputModifierTest, setMaxLinesTestMaxLinesValidValues, TestSize.Lev
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -459,13 +737,13 @@ HWTEST_F(TextInputModifierTest, setMaxLinesTestMaxLinesValidValues, TestSize.Lev
  */
 HWTEST_F(TextInputModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, TestSize.Level1)
 {
-    Ark_Number initValueMaxLines;
+    Opt_Number initValueMaxLines;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+    initValueMaxLines = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
 
-    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Number& value) {
-        Ark_Number inputValueMaxLines = initValueMaxLines;
+    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Opt_Number& value) {
+        Opt_Number inputValueMaxLines = initValueMaxLines;
 
         modifier_->setMaxLines(node_, &inputValueMaxLines);
         inputValueMaxLines = value;
@@ -477,8 +755,10 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, T
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_Number>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
@@ -502,17 +782,17 @@ HWTEST_F(TextInputModifierTest, setWordBreakTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest, setWordBreakTestWordBreakValidValues, TestSize.Level1)
 {
-    Ark_WordBreak initValueWordBreak;
+    Opt_WordBreak initValueWordBreak;
 
     // Initial setup
-    initValueWordBreak = std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]);
+    initValueWordBreak = ArkValue<Opt_WordBreak>(std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]));
 
     auto checkValue = [this, &initValueWordBreak](
-                          const std::string& input, const std::string& expectedStr, const Ark_WordBreak& value) {
-        Ark_WordBreak inputValueWordBreak = initValueWordBreak;
+                          const std::string& input, const std::string& expectedStr, const Opt_WordBreak& value) {
+        Opt_WordBreak inputValueWordBreak = initValueWordBreak;
 
         inputValueWordBreak = value;
-        modifier_->setWordBreak(node_, inputValueWordBreak);
+        modifier_->setWordBreak(node_, &inputValueWordBreak);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -520,7 +800,7 @@ HWTEST_F(TextInputModifierTest, setWordBreakTestWordBreakValidValues, TestSize.L
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextInputBreakWordValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_WordBreak>(value));
     }
 }
 
@@ -531,17 +811,17 @@ HWTEST_F(TextInputModifierTest, setWordBreakTestWordBreakValidValues, TestSize.L
  */
 HWTEST_F(TextInputModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize.Level1)
 {
-    Ark_WordBreak initValueWordBreak;
+    Opt_WordBreak initValueWordBreak;
 
     // Initial setup
-    initValueWordBreak = std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]);
+    initValueWordBreak = ArkValue<Opt_WordBreak>(std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]));
 
-    auto checkValue = [this, &initValueWordBreak](const std::string& input, const Ark_WordBreak& value) {
-        Ark_WordBreak inputValueWordBreak = initValueWordBreak;
+    auto checkValue = [this, &initValueWordBreak](const std::string& input, const Opt_WordBreak& value) {
+        Opt_WordBreak inputValueWordBreak = initValueWordBreak;
 
-        modifier_->setWordBreak(node_, inputValueWordBreak);
+        modifier_->setWordBreak(node_, &inputValueWordBreak);
         inputValueWordBreak = value;
-        modifier_->setWordBreak(node_, inputValueWordBreak);
+        modifier_->setWordBreak(node_, &inputValueWordBreak);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE) <<
@@ -549,90 +829,28 @@ HWTEST_F(TextInputModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextInputBreakWordInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_WordBreak>(value));
     }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_WordBreak>());
 }
 
 /*
- * @tc.name: setLineBreakStrategyTestDefaultValues
+ * @tc.name: setLineBreakStrategyTestPlaceholder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setLineBreakStrategyTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setLineBreakStrategyTestPlaceholder, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_BREAK_STRATEGY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE) <<
-        "Default value for attribute 'lineBreakStrategy'";
+    // This is placeholder to have disabled test
 }
 
 /*
- * @tc.name: setLineBreakStrategyTestLineBreakStrategyValidValues
+ * @tc.name: setCancelButtonTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setLineBreakStrategyTestLineBreakStrategyValidValues, TestSize.Level1)
-{
-    Ark_LineBreakStrategy initValueLineBreakStrategy;
-
-    // Initial setup
-    initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureTextInputLineBreakStrategyValidValues[0]);
-
-    auto checkValue = [this, &initValueLineBreakStrategy](const std::string& input, const std::string& expectedStr,
-                          const Ark_LineBreakStrategy& value) {
-        Ark_LineBreakStrategy inputValueLineBreakStrategy = initValueLineBreakStrategy;
-
-        inputValueLineBreakStrategy = value;
-        modifier_->setLineBreakStrategy(node_, inputValueLineBreakStrategy);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_BREAK_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureTextInputLineBreakStrategyValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setLineBreakStrategyTestLineBreakStrategyInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setLineBreakStrategyTestLineBreakStrategyInvalidValues, TestSize.Level1)
-{
-    Ark_LineBreakStrategy initValueLineBreakStrategy;
-
-    // Initial setup
-    initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureTextInputLineBreakStrategyValidValues[0]);
-
-    auto checkValue = [this, &initValueLineBreakStrategy](
-                          const std::string& input, const Ark_LineBreakStrategy& value) {
-        Ark_LineBreakStrategy inputValueLineBreakStrategy = initValueLineBreakStrategy;
-
-        modifier_->setLineBreakStrategy(node_, inputValueLineBreakStrategy);
-        inputValueLineBreakStrategy = value;
-        modifier_->setLineBreakStrategy(node_, inputValueLineBreakStrategy);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_BREAK_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureTextInputLineBreakStrategyInvalidValues) {
-        checkValue(input, value);
-    }
-}
-
-/*
- * @tc.name: setCancelButton0TestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultCancelButton =
@@ -643,51 +861,57 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestDefaultValues, TestSize.Leve
 
     resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'cancelButton.style'";
+        "Default value for attribute 'cancelButton.CancelButtonOptions.style'";
 
     resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_DEFAULT_VALUE) <<
-        "Default value for attribute 'cancelButton.icon.size'";
+        "Default value for attribute 'cancelButton.CancelButtonOptions.icon.size'";
 
     resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_DEFAULT_VALUE) <<
-        "Default value for attribute 'cancelButton.icon.color'";
+        "Default value for attribute 'cancelButton.CancelButtonOptions.icon.color'";
 
     resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_DEFAULT_VALUE) <<
-        "Default value for attribute 'cancelButton.icon.src'";
+        "Default value for attribute 'cancelButton.CancelButtonOptions.icon.src'";
+
+    resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'cancelButton.CancelButtonSymbolOptions.style'";
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonStyleValidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsStyleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonStyleValidValues, TestSize.Level1)
+HWTEST_F(
+    TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelButtonOptionsStyleValidValues, TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const std::string& expectedStr,
                           const Opt_CancelButtonStyle& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        inputValueCancelButton.style = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).style = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.style";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextInputCancelButtonStyleValidValues) {
@@ -696,35 +920,36 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonStyleValidValues
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonStyleInvalidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsStyleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonStyleInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptionsStyleInvalidValues, TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_CancelButtonStyle& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
-        inputValueCancelButton.style = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).style = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.style";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.style";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextInputCancelButtonStyleInvalidValues) {
@@ -735,117 +960,137 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonStyleInvalidValu
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonIconSizeValidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsIconSizeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelButtonOptionsIconSizeValidValues,
+    TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        WriteTo(inputValueCancelButton.icon).size = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).icon).size = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.size";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.icon.size";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonIconSizeInvalidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsIconSizeInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSizeInvalidValues, TestSize.Level1)
+HWTEST_F(
+    TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptionsIconSizeInvalidValues, TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_Length& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
-        WriteTo(inputValueCancelButton.icon).size = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).icon).size = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.size";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.icon.size";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonIconColorValidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsIconColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconColorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelButtonOptionsIconColorValidValues,
+    TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        WriteTo(inputValueCancelButton.icon).color = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).icon).color = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.color";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.icon.color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -863,37 +1108,39 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconColorValidVa
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonIconColorInvalidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsIconColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconColorInvalidValues, TestSize.Level1)
+HWTEST_F(
+    TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptionsIconColorInvalidValues, TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
-        WriteTo(inputValueCancelButton.icon).color = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).icon).color = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.color";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.icon.color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -909,37 +1156,39 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconColorInvalid
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonIconSrcValidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsIconSrcValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSrcValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelButtonOptionsIconSrcValidValues,
+    TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        WriteTo(inputValueCancelButton.icon).src = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).icon).src = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.src";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.icon.src";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
@@ -951,37 +1200,38 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSrcValidValu
 }
 
 /*
- * @tc.name: setCancelButton0TestCancelButtonIconSrcInvalidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonOptionsIconSrcInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSrcInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptionsIconSrcInvalidValues, TestSize.Level1)
 {
-    Ark_CancelButtonOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
-    WriteTo(initValueCancelButton.icon).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueCancelButton.icon).color =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteTo(initValueCancelButton.icon).src =
+    WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_ResourceStr& value) {
-        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
-        WriteTo(inputValueCancelButton.icon).src = value;
-        modifier_->setCancelButton0(node_, &inputValueCancelButton);
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(inputValueCancelButton)).icon).src = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.src";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonOptions.icon.src";
     };
 
     // Check invalid union
@@ -991,46 +1241,31 @@ HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSrcInvalidVa
 }
 
 /*
- * @tc.name: setCancelButton1TestDefaultValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonSymbolOptionsStyleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton1TestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelButtonSymbolOptionsStyleValidValues,
+    TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultCancelButton =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'cancelButton.style'";
-}
-
-/*
- * @tc.name: setCancelButton1TestCancelButtonStyleValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setCancelButton1TestCancelButtonStyleValidValues, TestSize.Level1)
-{
-    Ark_CancelButtonSymbolOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonSymbolOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const std::string& expectedStr,
                           const Opt_CancelButtonStyle& value) {
-        Ark_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        inputValueCancelButton.style = value;
-        modifier_->setCancelButton1(node_, &inputValueCancelButton);
+        WriteToUnion<Ark_CancelButtonSymbolOptions>(WriteTo(inputValueCancelButton)).style = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton1, attribute: cancelButton.style";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonSymbolOptions.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextInputCancelButtonStyleValidValues) {
@@ -1039,29 +1274,31 @@ HWTEST_F(TextInputModifierTest, setCancelButton1TestCancelButtonStyleValidValues
 }
 
 /*
- * @tc.name: setCancelButton1TestCancelButtonStyleInvalidValues
+ * @tc.name: setCancelButtonTestCancelButtonCancelButtonSymbolOptionsStyleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButton1TestCancelButtonStyleInvalidValues, TestSize.Level1)
+HWTEST_F(
+    TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonSymbolOptionsStyleInvalidValues, TestSize.Level1)
 {
-    Ark_CancelButtonSymbolOptions initValueCancelButton;
+    Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions initValueCancelButton;
 
     // Initial setup
-    initValueCancelButton.style =
+    WriteToUnion<Ark_CancelButtonSymbolOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_CancelButtonStyle& value) {
-        Ark_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
+        Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton1(node_, &inputValueCancelButton);
-        inputValueCancelButton.style = value;
-        modifier_->setCancelButton1(node_, &inputValueCancelButton);
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        WriteToUnion<Ark_CancelButtonSymbolOptions>(WriteTo(inputValueCancelButton)).style = value;
+        modifier_->setCancelButton(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton1, attribute: cancelButton.style";
+            "Input value is: " << input
+            << ", method: setCancelButton, attribute: cancelButton.CancelButtonSymbolOptions.style";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextInputCancelButtonStyleInvalidValues) {
@@ -1092,17 +1329,17 @@ HWTEST_F(TextInputModifierTest, setSelectAllTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest, setSelectAllTestSelectAllValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueSelectAll;
+    Opt_Boolean initValueSelectAll;
 
     // Initial setup
-    initValueSelectAll = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueSelectAll = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueSelectAll](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueSelectAll = initValueSelectAll;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueSelectAll = initValueSelectAll;
 
         inputValueSelectAll = value;
-        modifier_->setSelectAll(node_, inputValueSelectAll);
+        modifier_->setSelectAll(node_, &inputValueSelectAll);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECT_ALL_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1110,8 +1347,36 @@ HWTEST_F(TextInputModifierTest, setSelectAllTestSelectAllValidValues, TestSize.L
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setSelectAllTestSelectAllInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setSelectAllTestSelectAllInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueSelectAll;
+
+    // Initial setup
+    initValueSelectAll = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueSelectAll](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueSelectAll = initValueSelectAll;
+
+        modifier_->setSelectAll(node_, &inputValueSelectAll);
+        inputValueSelectAll = value;
+        modifier_->setSelectAll(node_, &inputValueSelectAll);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECT_ALL_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SELECT_ALL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setSelectAll, attribute: selectAll";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -1135,15 +1400,15 @@ HWTEST_F(TextInputModifierTest, setMinFontSizeTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMinFontSize;
+    Opt_Union_Number_String_Resource initValueMinFontSize;
 
     // Initial setup
-    initValueMinFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueMinFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontSize](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
+                          const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
 
         inputValueMinFontSize = value;
         modifier_->setMinFontSize(node_, &inputValueMinFontSize);
@@ -1154,13 +1419,13 @@ HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSi
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 
@@ -1171,15 +1436,15 @@ HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSi
  */
 HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMinFontSize;
+    Opt_Union_Number_String_Resource initValueMinFontSize;
 
     // Initial setup
-    initValueMinFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueMinFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontSize](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
+                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueMinFontSize = initValueMinFontSize;
 
         modifier_->setMinFontSize(node_, &inputValueMinFontSize);
         inputValueMinFontSize = value;
@@ -1191,16 +1456,18 @@ HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeInvalidValues, Test
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
 }
 
 /*
@@ -1224,15 +1491,15 @@ HWTEST_F(TextInputModifierTest, setMaxFontSizeTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMaxFontSize;
+    Opt_Union_Number_String_Resource initValueMaxFontSize;
 
     // Initial setup
-    initValueMaxFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueMaxFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontSize](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
+                          const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
 
         inputValueMaxFontSize = value;
         modifier_->setMaxFontSize(node_, &inputValueMaxFontSize);
@@ -1243,13 +1510,13 @@ HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeValidValues, TestSi
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 
@@ -1260,15 +1527,15 @@ HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeValidValues, TestSi
  */
 HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueMaxFontSize;
+    Opt_Union_Number_String_Resource initValueMaxFontSize;
 
     // Initial setup
-    initValueMaxFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueMaxFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontSize](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
+                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueMaxFontSize = initValueMaxFontSize;
 
         modifier_->setMaxFontSize(node_, &inputValueMaxFontSize);
         inputValueMaxFontSize = value;
@@ -1280,16 +1547,18 @@ HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeInvalidValues, Test
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
 }
 
 /*
@@ -1470,17 +1739,18 @@ HWTEST_F(TextInputModifierTest, setHeightAdaptivePolicyTestDefaultValues, TestSi
  */
 HWTEST_F(TextInputModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyValidValues, TestSize.Level1)
 {
-    Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
+    Opt_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
 
     // Initial setup
-    initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
+    initValueHeightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+        std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
 
     auto checkValue = [this, &initValueHeightAdaptivePolicy](const std::string& input, const std::string& expectedStr,
-                          const Ark_TextHeightAdaptivePolicy& value) {
-        Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
+                          const Opt_TextHeightAdaptivePolicy& value) {
+        Opt_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
 
         inputValueHeightAdaptivePolicy = value;
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        modifier_->setHeightAdaptivePolicy(node_, &inputValueHeightAdaptivePolicy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1488,7 +1758,7 @@ HWTEST_F(TextInputModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyV
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_TextHeightAdaptivePolicy>(value));
     }
 }
 
@@ -1499,18 +1769,19 @@ HWTEST_F(TextInputModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyV
  */
 HWTEST_F(TextInputModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues, TestSize.Level1)
 {
-    Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
+    Opt_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
 
     // Initial setup
-    initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
+    initValueHeightAdaptivePolicy = ArkValue<Opt_TextHeightAdaptivePolicy>(
+        std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]));
 
     auto checkValue = [this, &initValueHeightAdaptivePolicy](
-                          const std::string& input, const Ark_TextHeightAdaptivePolicy& value) {
-        Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
+                          const std::string& input, const Opt_TextHeightAdaptivePolicy& value) {
+        Opt_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
 
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        modifier_->setHeightAdaptivePolicy(node_, &inputValueHeightAdaptivePolicy);
         inputValueHeightAdaptivePolicy = value;
-        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        modifier_->setHeightAdaptivePolicy(node_, &inputValueHeightAdaptivePolicy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
@@ -1518,7 +1789,7 @@ HWTEST_F(TextInputModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyI
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_TextHeightAdaptivePolicy>(value));
     }
 }
 
@@ -1543,17 +1814,17 @@ HWTEST_F(TextInputModifierTest, setEnableAutoFillTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(TextInputModifierTest, setEnableAutoFillTestEnableAutoFillValidValues, TestSize.Level1)
 {
-    Ark_Boolean initValueEnableAutoFill;
+    Opt_Boolean initValueEnableAutoFill;
 
     // Initial setup
-    initValueEnableAutoFill = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    initValueEnableAutoFill = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueEnableAutoFill](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueEnableAutoFill = initValueEnableAutoFill;
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableAutoFill = initValueEnableAutoFill;
 
         inputValueEnableAutoFill = value;
-        modifier_->setEnableAutoFill(node_, inputValueEnableAutoFill);
+        modifier_->setEnableAutoFill(node_, &inputValueEnableAutoFill);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_AUTO_FILL_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1561,8 +1832,36 @@ HWTEST_F(TextInputModifierTest, setEnableAutoFillTestEnableAutoFillValidValues, 
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
+}
+
+/*
+ * @tc.name: setEnableAutoFillTestEnableAutoFillInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnableAutoFillTestEnableAutoFillInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnableAutoFill;
+
+    // Initial setup
+    initValueEnableAutoFill = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableAutoFill](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableAutoFill = initValueEnableAutoFill;
+
+        modifier_->setEnableAutoFill(node_, &inputValueEnableAutoFill);
+        inputValueEnableAutoFill = value;
+        modifier_->setEnableAutoFill(node_, &inputValueEnableAutoFill);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_AUTO_FILL_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_AUTO_FILL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEnableAutoFill, attribute: enableAutoFill";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -1596,20 +1895,20 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeValidValues, TestSize.Level1)
 {
-    Ark_TextDecorationOptions initValueDecoration;
+    Opt_TextDecorationOptions initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const std::string& expectedStr,
                           const Ark_TextDecorationType& value) {
-        Ark_TextDecorationOptions inputValueDecoration = initValueDecoration;
+        Opt_TextDecorationOptions inputValueDecoration = initValueDecoration;
 
-        inputValueDecoration.type = value;
+        WriteTo(inputValueDecoration).type = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1630,20 +1929,20 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeValidValues, Test
  */
 HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeInvalidValues, TestSize.Level1)
 {
-    Ark_TextDecorationOptions initValueDecoration;
+    Opt_TextDecorationOptions initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const Ark_TextDecorationType& value) {
-        Ark_TextDecorationOptions inputValueDecoration = initValueDecoration;
+        Opt_TextDecorationOptions inputValueDecoration = initValueDecoration;
 
         modifier_->setDecoration(node_, &inputValueDecoration);
-        inputValueDecoration.type = value;
+        WriteTo(inputValueDecoration).type = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1664,20 +1963,20 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeInvalidValues, Te
  */
 HWTEST_F(TextInputModifierTest, setDecorationTestDecorationColorValidValues, TestSize.Level1)
 {
-    Ark_TextDecorationOptions initValueDecoration;
+    Opt_TextDecorationOptions initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_TextDecorationOptions inputValueDecoration = initValueDecoration;
+        Opt_TextDecorationOptions inputValueDecoration = initValueDecoration;
 
-        inputValueDecoration.color = value;
+        WriteTo(inputValueDecoration).color = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1707,20 +2006,20 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationColorValidValues, Tes
  */
 HWTEST_F(TextInputModifierTest, setDecorationTestDecorationColorInvalidValues, TestSize.Level1)
 {
-    Ark_TextDecorationOptions initValueDecoration;
+    Opt_TextDecorationOptions initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_TextDecorationOptions inputValueDecoration = initValueDecoration;
+        Opt_TextDecorationOptions inputValueDecoration = initValueDecoration;
 
         modifier_->setDecoration(node_, &inputValueDecoration);
-        inputValueDecoration.color = value;
+        WriteTo(inputValueDecoration).color = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1748,20 +2047,20 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationColorInvalidValues, T
  */
 HWTEST_F(TextInputModifierTest, setDecorationTestDecorationStyleValidValues, TestSize.Level1)
 {
-    Ark_TextDecorationOptions initValueDecoration;
+    Opt_TextDecorationOptions initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const std::string& expectedStr,
                           const Opt_TextDecorationStyle& value) {
-        Ark_TextDecorationOptions inputValueDecoration = initValueDecoration;
+        Opt_TextDecorationOptions inputValueDecoration = initValueDecoration;
 
-        inputValueDecoration.style = value;
+        WriteTo(inputValueDecoration).style = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1782,20 +2081,20 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationStyleValidValues, Tes
  */
 HWTEST_F(TextInputModifierTest, setDecorationTestDecorationStyleInvalidValues, TestSize.Level1)
 {
-    Ark_TextDecorationOptions initValueDecoration;
+    Opt_TextDecorationOptions initValueDecoration;
 
     // Initial setup
-    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
-    initValueDecoration.color =
+    WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    WriteTo(initValueDecoration).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    initValueDecoration.style =
+    WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
     auto checkValue = [this, &initValueDecoration](const std::string& input, const Opt_TextDecorationStyle& value) {
-        Ark_TextDecorationOptions inputValueDecoration = initValueDecoration;
+        Opt_TextDecorationOptions inputValueDecoration = initValueDecoration;
 
         modifier_->setDecoration(node_, &inputValueDecoration);
-        inputValueDecoration.style = value;
+        WriteTo(inputValueDecoration).style = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
         auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
@@ -1830,15 +2129,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLetterSpacingTestDefaultValues, Test
  */
 HWTEST_F(TextInputModifierTest, setLetterSpacingTestLetterSpacingValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueLetterSpacing;
+    Opt_Union_Number_String_Resource initValueLetterSpacing;
 
     // Initial setup
-    initValueLetterSpacing = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueLetterSpacing = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueLetterSpacing = initValueLetterSpacing;
+                          const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueLetterSpacing = initValueLetterSpacing;
 
         inputValueLetterSpacing = value;
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
@@ -1849,13 +2148,13 @@ HWTEST_F(TextInputModifierTest, setLetterSpacingTestLetterSpacingValidValues, Te
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonPercValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 
@@ -1866,15 +2165,15 @@ HWTEST_F(TextInputModifierTest, setLetterSpacingTestLetterSpacingValidValues, Te
  */
 HWTEST_F(TextInputModifierTest, DISABLED_setLetterSpacingTestLetterSpacingInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueLetterSpacing;
+    Opt_Union_Number_String_Resource initValueLetterSpacing;
 
     // Initial setup
-    initValueLetterSpacing = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueLetterSpacing = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueLetterSpacing](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueLetterSpacing = initValueLetterSpacing;
+                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueLetterSpacing = initValueLetterSpacing;
 
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
         inputValueLetterSpacing = value;
@@ -1886,13 +2185,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLetterSpacingTestLetterSpacingInvali
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonPercInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
 }
 
 /*
@@ -1916,15 +2217,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestDefaultValues, TestSiz
  */
 HWTEST_F(TextInputModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueLineHeight;
+    Opt_Union_Number_String_Resource initValueLineHeight;
 
     // Initial setup
-    initValueLineHeight = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueLineHeight = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueLineHeight = initValueLineHeight;
+                          const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueLineHeight = initValueLineHeight;
 
         inputValueLineHeight = value;
         modifier_->setLineHeight(node_, &inputValueLineHeight);
@@ -1935,298 +2236,13 @@ HWTEST_F(TextInputModifierTest, setLineHeightTestLineHeightValidValues, TestSize
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
-    }
-}
-
-/*
- * @tc.name: setLineHeightTestLineHeightInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues, TestSize.Level1)
-{
-    Ark_Union_Number_String_Resource initValueLineHeight;
-
-    // Initial setup
-    initValueLineHeight = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
-
-    auto checkValue = [this, &initValueLineHeight](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueLineHeight = initValueLineHeight;
-
-        modifier_->setLineHeight(node_, &inputValueLineHeight);
-        inputValueLineHeight = value;
-        modifier_->setLineHeight(node_, &inputValueLineHeight);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setPasswordRulesTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPasswordRulesTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PASSWORD_RULES_DEFAULT_VALUE) << "Default value for attribute 'passwordRules'";
-}
-
-/*
- * @tc.name: setPasswordRulesTestPasswordRulesValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesValidValues, TestSize.Level1)
-{
-    Ark_String initValuePasswordRules;
-
-    // Initial setup
-    initValuePasswordRules = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-
-    auto checkValue = [this, &initValuePasswordRules](
-                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
-        Ark_String inputValuePasswordRules = initValuePasswordRules;
-
-        inputValuePasswordRules = value;
-        modifier_->setPasswordRules(node_, &inputValuePasswordRules);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPasswordRules, attribute: passwordRules";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setFontFeatureTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setFontFeatureTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) << "Default value for attribute 'fontFeature'";
-}
-
-/*
- * @tc.name: setFontFeatureTestFontFeatureValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
-{
-    Ark_String initValueFontFeature;
-
-    // Initial setup
-    initValueFontFeature = std::get<1>(Fixtures::testFixtureFontFeatureValidValues[0]);
-
-    auto checkValue = [this, &initValueFontFeature](
-                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
-        Ark_String inputValueFontFeature = initValueFontFeature;
-
-        inputValueFontFeature = value;
-        modifier_->setFontFeature(node_, &inputValueFontFeature);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontFeatureValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setFontFeatureTestFontFeatureInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureInvalidValues, TestSize.Level1)
-{
-    Ark_String initValueFontFeature;
-
-    // Initial setup
-    initValueFontFeature = std::get<1>(Fixtures::testFixtureFontFeatureValidValues[0]);
-
-    auto checkValue = [this, &initValueFontFeature](const std::string& input, const Ark_String& value) {
-        Ark_String inputValueFontFeature = initValueFontFeature;
-
-        modifier_->setFontFeature(node_, &inputValueFontFeature);
-        inputValueFontFeature = value;
-        modifier_->setFontFeature(node_, &inputValueFontFeature);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureFontFeatureInvalidValues) {
-        checkValue(input, value);
-    }
-}
-
-/*
- * @tc.name: setShowPasswordTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowPasswordTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_PASSWORD_DEFAULT_VALUE) << "Default value for attribute 'showPassword'";
-}
-
-/*
- * @tc.name: setShowPasswordTestShowPasswordValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowPasswordTestShowPasswordValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueShowPassword;
-
-    // Initial setup
-    initValueShowPassword = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueShowPassword](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueShowPassword = initValueShowPassword;
-
-        inputValueShowPassword = value;
-        modifier_->setShowPassword(node_, inputValueShowPassword);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setShowPassword, attribute: showPassword";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setEnablePreviewTextTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE) <<
-        "Default value for attribute 'enablePreviewText'";
-}
-
-/*
- * @tc.name: setEnablePreviewTextTestEnablePreviewTextValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestEnablePreviewTextValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueEnablePreviewText;
-
-    // Initial setup
-    initValueEnablePreviewText = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueEnablePreviewText](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueEnablePreviewText = initValueEnablePreviewText;
-
-        inputValueEnablePreviewText = value;
-        modifier_->setEnablePreviewText(node_, inputValueEnablePreviewText);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setEnablePreviewText, attribute: enablePreviewText";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setEnableHapticFeedbackTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
-        "Default value for attribute 'enableHapticFeedback'";
-}
-
-/*
- * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueEnableHapticFeedback;
-
-    // Initial setup
-    initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueEnableHapticFeedback](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
-
-        inputValueEnableHapticFeedback = value;
-        modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 

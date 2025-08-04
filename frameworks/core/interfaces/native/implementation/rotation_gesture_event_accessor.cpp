@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_RotationGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_RotationGestureEvent CtorImpl()
+Ark_RotationGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<RotationGestureEventPeer>();
 }
@@ -55,7 +55,7 @@ const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccess
 {
     static const GENERATED_ArkUIRotationGestureEventAccessor RotationGestureEventAccessorImpl {
         RotationGestureEventAccessor::DestroyPeerImpl,
-        RotationGestureEventAccessor::CtorImpl,
+        RotationGestureEventAccessor::ConstructImpl,
         RotationGestureEventAccessor::GetFinalizerImpl,
         RotationGestureEventAccessor::GetAngleImpl,
         RotationGestureEventAccessor::SetAngleImpl,

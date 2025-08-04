@@ -53,9 +53,7 @@ static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 static std::optional<RefPtr<NG::ChainedTransitionEffect>> previewTransition = std::nullopt;
 static std::optional<MenuParam> menuParams = std::nullopt;
 static Ark_TransitionEffect effect = nullptr;
-static Ark_TransitionEffects* arkEffects = nullptr;
 
-constexpr auto MESSAGE = "message";
 constexpr int32_t CONTAINER_INSTANCE_ID = 777;
 constexpr auto TEST_RESOURCE_ID = 1000;
 constexpr auto TEST_RESOURCE_ID_2 = 1000;
@@ -91,14 +89,21 @@ const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBoolean
 };
 
 const std::vector<std::tuple<std::string, Ark_Length, CalcDimension>> testFixtureDimensionAnyValidValues = {
-    { "123.0_vp", ArkValue<Ark_Length>(123.0_vp), 123.0_vp }, { "0.0_vp", ArkValue<Ark_Length>(0.0_vp), 0.0_vp },
-    { "1.23_vp", ArkValue<Ark_Length>(1.23_vp), 1.23_vp }, { "123.0_fp", ArkValue<Ark_Length>(123.0_fp), 123.0_fp },
-    { "0.0_fp", ArkValue<Ark_Length>(0.0_fp), 0.0_fp }, { "1.23_fp", ArkValue<Ark_Length>(1.23_fp), 1.23_fp },
-    { "123.0_px", ArkValue<Ark_Length>(123.0_px), 123.0_px }, { "0.0_px", ArkValue<Ark_Length>(0.0_px), 0.0_px },
-    { "1.23_px", ArkValue<Ark_Length>(1.23_px), 1.23_px }, { "-2.3_vp", ArkValue<Ark_Length>(-2.3_vp), -2.3_vp },
-    { "-4.5_fp", ArkValue<Ark_Length>(-4.5_fp), -4.5_fp }, { "-5.6_px", ArkValue<Ark_Length>(-5.6_px), -5.6_px },
-    { "0.5_pct", ArkValue<Ark_Length>(0.5_pct), 0.5_pct }, { "0.0_pct", ArkValue<Ark_Length>(0.0_pct), 0.0_pct },
-    { "-0.8_pct", ArkValue<Ark_Length>(-0.8_pct), -0.8_pct }
+    { "123.0vp", ArkValue<Ark_Length>("123.0vp"), 123.0_vp },
+    { "0.0vp", ArkValue<Ark_Length>("0.0vp"), 0.0_vp },
+    { "1.23vp", ArkValue<Ark_Length>("1.23vp"), 1.23_vp },
+    { "123.0fp", ArkValue<Ark_Length>("123.0fp"), 123.0_fp },
+    { "0.0fp", ArkValue<Ark_Length>("0.0fp"), 0.0_fp },
+    { "1.23fp", ArkValue<Ark_Length>("1.23fp"), 1.23_fp },
+    { "123.0px", ArkValue<Ark_Length>("123.0px"), 123.0_px },
+    { "0.0px", ArkValue<Ark_Length>("0.0px"), 0.0_px },
+    { "1.23px", ArkValue<Ark_Length>("1.23px"), 1.23_px },
+    { "-2.3vp", ArkValue<Ark_Length>("-2.3vp"), -2.3_vp },
+    { "-4.5fp", ArkValue<Ark_Length>("-4.5fp"), -4.5_fp },
+    { "-5.6px", ArkValue<Ark_Length>("-5.6px"), -5.6_px },
+    { "50%", ArkValue<Ark_Length>("50%"), 0.5_pct },
+    { "0%", ArkValue<Ark_Length>("0%"), 0.0_pct },
+    { "-80%", ArkValue<Ark_Length>("-80%"), -0.8_pct },
 };
 
 const std::vector<std::tuple<std::string, Ark_MenuPreviewMode, MenuPreviewMode>> testFixtureMenuPreviewMode = {
@@ -212,12 +217,12 @@ CustomNodeBuilder getBuilderCb()
     return customBuilder;
 }
 
-Opt_AnimationRange_Number getAnimationRange()
+Opt_AnimationNumberRange getAnimationRange()
 {
-    Ark_AnimationRange_Number range;
+    Ark_AnimationNumberRange range;
     range.value0 = ArkValue<Ark_Number>(SCALE_FROM_TEST_VALUE);
     range.value1 = ArkValue<Ark_Number>(SCALE_TO_TEST_VALUE);
-    return ArkValue<Opt_AnimationRange_Number>(range);
+    return ArkValue<Opt_AnimationNumberRange>(range);
 }
 
 Opt_TransitionEffect getTransitionEffect()
@@ -264,9 +269,7 @@ Opt_ContextMenuOptions getContextMenuOptions(Ark_ContextMenuOptions options = {}
 namespace Converter {
 void AssignArkValue(Ark_TransitionEffect& dst, const RefPtr<NG::ChainedTransitionEffect>& src)
 {
-    Ark_String arkType = ArkValue<Ark_String>(MESSAGE);
-    arkEffects = new (Ark_TransitionEffects);
-    const auto peer = GeneratedModifier::GetTransitionEffectAccessor()->ctor(&arkType, arkEffects);
+    const auto peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = src;
     dst = peer;
 }
@@ -363,7 +366,6 @@ public:
         SubwindowManager::GetInstance()->RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
         GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(effect);
         effect = nullptr;
-        arkEffects = nullptr;
         CHECK_NULL_VOID(eventHub);
         auto inputEventHub = eventHub->GetInputEventHub();
         CHECK_NULL_VOID(inputEventHub);

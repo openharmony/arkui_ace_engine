@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_WebResourceError peer)
 {
     delete peer;
 }
-Ark_WebResourceError CtorImpl()
+Ark_WebResourceError ConstructImpl()
 {
     return new WebResourceErrorPeer();
 }
@@ -51,7 +51,7 @@ const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
 {
     static const GENERATED_ArkUIWebResourceErrorAccessor WebResourceErrorAccessorImpl {
         WebResourceErrorAccessor::DestroyPeerImpl,
-        WebResourceErrorAccessor::CtorImpl,
+        WebResourceErrorAccessor::ConstructImpl,
         WebResourceErrorAccessor::GetFinalizerImpl,
         WebResourceErrorAccessor::GetErrorInfoImpl,
         WebResourceErrorAccessor::GetErrorCodeImpl,

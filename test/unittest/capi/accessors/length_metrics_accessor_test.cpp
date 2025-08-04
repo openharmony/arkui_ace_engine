@@ -45,12 +45,12 @@ const std::vector<std::pair<DimensionUnit, Ark_LengthUnit>> unitTestPlan = {
 }
 
 class LengthMetricsAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUILengthMetricsAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUILengthMetricsAccessor,
         &GENERATED_ArkUIAccessors::getLengthMetricsAccessor, LengthMetricsPeer> {
 public:
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
         dragEvent_ = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         ASSERT_NE(dragEvent_, nullptr);
 
@@ -58,6 +58,11 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
+    }
+    void *CreatePeerInstance() override
+    {
+        auto val = Converter::ArkValue<Ark_Number>(0);
+        return accessor_->construct(&val, ARK_LENGTH_UNIT_VP);
     }
     RefPtr<OHOS::Ace::DragEvent> dragEvent_ = nullptr;
 };
@@ -157,17 +162,15 @@ HWTEST_F(LengthMetricsAccessorTest, ResourceTest, TestSize.Level1)
         Converter::ConvContext ctx;
         auto expectPointer = std::get_if<Dimension>(&expected);
         ASSERT_TRUE(expectPointer);
-        std::variant<int32_t, std::string> resource = num_id;
-        auto resourceNum = Converter::ArkValue<Ark_Resource>(resource, &ctx);
-        auto pointerNum = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceNum));
+        auto resourceNum = Converter::ArkCreate<Ark_Resource>(num_id, ResourceType::FLOAT);
+        auto pointerNum = accessor_->resource(&resourceNum);
         ASSERT_TRUE(pointerNum);
         EXPECT_EQ(pointerNum->value.ToString(), expectPointer->ToString())  <<
              "Input value is: " << num_id << ", method: resource";
         accessor_->destroyPeer(pointerNum);
 
-        resource = str_id;
-        auto resourceStr = Converter::ArkValue<Ark_Resource>(resource, &ctx);
-        auto pointerStr = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceStr));
+        auto resourceStr = Converter::ArkCreate<Ark_Resource>(str_id, ResourceType::FLOAT, &ctx);
+        auto pointerStr = accessor_->resource(&resourceStr);
         ASSERT_TRUE(pointerStr);
         EXPECT_EQ(pointerStr->value.ToString(), expectPointer->ToString())  <<
              "Input value is: " << str_id << ", method: resource";

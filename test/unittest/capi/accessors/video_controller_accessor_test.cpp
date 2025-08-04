@@ -171,7 +171,7 @@ HWTEST_F(VideoControllerAccessorTest, requestFullscreenTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoControllerAccessorTest, setCurrentTimeTest, TestSize.Level1)
+HWTEST_F(VideoControllerAccessorTest, DISABLED_setCurrentTimeTest, TestSize.Level1)
 {
     constexpr float pos1 = 1000;
     constexpr float pos2 = 3000.5;

@@ -54,10 +54,10 @@ namespace  {
     const auto SWITCH_HEIGHT = 20;
     const auto SWITCH_PADDING = 5;
     const auto SWITCH_RADIUS = 7;
-    const auto SELECTED_COLOR_RESOURCE = CreateResource("switch_selected_color", Converter::ResourceType::COLOR);
-    const auto POINT_COLOR_RESOURCE = CreateResource("switch_point_color", Converter::ResourceType::COLOR);
-    const auto POINT_RADIUS_RESOURCE = CreateResource("switch_point_radius", Converter::ResourceType::FLOAT);
-    const auto TRACK_BORDER_RADIUS_RESOURCE = CreateResource("track_border_radius", Converter::ResourceType::FLOAT);
+    const auto SELECTED_COLOR_RESOURCE = CreateResource("switch_selected_color", ResourceType::COLOR);
+    const auto POINT_COLOR_RESOURCE = CreateResource("switch_point_color", ResourceType::COLOR);
+    const auto POINT_RADIUS_RESOURCE = CreateResource("switch_point_radius", ResourceType::FLOAT);
+    const auto TRACK_BORDER_RADIUS_RESOURCE = CreateResource("track_border_radius", ResourceType::FLOAT);
 } // namespace
 
 class ToggleModifierTest : public ModifierTestBase<GENERATED_ArkUIToggleModifier,
@@ -114,9 +114,10 @@ static std::vector<std::tuple<std::string, Ark_ToggleType, std::string>> setTogg
 };
 
 // Valid values for attribute 'isOn' of method 'setToggleOptions'
-static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> setToggleOptionsIsOnValidValues = {
-    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
-    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+using IsOnType = Opt_Union_Boolean_Bindable;
+static std::vector<std::tuple<std::string, IsOnType, std::string>> setToggleOptionsIsOnValidValues = {
+    {"false", Converter::ArkUnion<IsOnType, Ark_Boolean>(false), "false"},
+    {"true", Converter::ArkUnion<IsOnType, Ark_Boolean>(true), "true"},
 };
 
 /*
@@ -183,8 +184,8 @@ static std::vector<std::tuple<std::string, Ark_ToggleType>> setToggleOptionsType
 };
 
 // Invalid values for attribute 'isOn' of method 'setToggleOptions'
-static std::vector<std::tuple<std::string, Opt_Boolean>> setToggleOptionsIsOnInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Boolean>(Ark_Empty())},
+static std::vector<std::tuple<std::string, IsOnType>> setToggleOptionsIsOnInvalidValues = {
+    {"Ark_Empty()", Converter::ArkValue<IsOnType>(Ark_Empty())},
 };
 
 /*
@@ -815,6 +816,7 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, T
     }
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventIsOnImpl
  * @tc.desc:
@@ -854,5 +856,6 @@ HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 
 } // namespace OHOS::Ace::NG

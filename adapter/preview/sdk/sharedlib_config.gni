@@ -339,7 +339,7 @@ napi_modules = [
         ]
       },
     ]
-    if (use_linux) {
+    if (false && use_linux) {
       shard_libs += [
         {
           label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"

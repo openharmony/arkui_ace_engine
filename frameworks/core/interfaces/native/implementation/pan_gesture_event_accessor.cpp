@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_PanGestureEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_PanGestureEvent CtorImpl()
+Ark_PanGestureEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<PanGestureEventPeer>();
 }
@@ -149,7 +149,7 @@ const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor()
 {
     static const GENERATED_ArkUIPanGestureEventAccessor PanGestureEventAccessorImpl {
         PanGestureEventAccessor::DestroyPeerImpl,
-        PanGestureEventAccessor::CtorImpl,
+        PanGestureEventAccessor::ConstructImpl,
         PanGestureEventAccessor::GetFinalizerImpl,
         PanGestureEventAccessor::GetOffsetXImpl,
         PanGestureEventAccessor::SetOffsetXImpl,

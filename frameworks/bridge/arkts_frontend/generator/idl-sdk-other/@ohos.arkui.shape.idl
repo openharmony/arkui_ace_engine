@@ -1,0 +1,105 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package ohos.arkui.shape;
+
+import arkui.component.units;
+
+[Entity=Class]
+interface CircleShape {
+
+    constructor(optional ShapeSize options);
+
+    // the CommonShapeMethod part
+    CircleShape offset(Position offset);
+    CircleShape fill(ResourceColor color);
+    CircleShape position(Position position);
+
+    // the BaseShape part
+    CircleShape width(Length width);
+    CircleShape height(Length height);
+    CircleShape size(SizeOptions size);
+};
+
+[Entity=Class]
+interface EllipseShape {
+    constructor(optional ShapeSize options);
+
+    // the CommonShapeMethod part
+    EllipseShape offset(Position offset);
+    EllipseShape fill(ResourceColor color);
+    EllipseShape position(Position position);
+
+    // the BaseShape part
+    EllipseShape width(Length width);
+    EllipseShape height(Length height);
+    EllipseShape size(SizeOptions size);
+};
+
+[Entity=Interface]
+interface PathShapeOptions {
+    [Optional]
+    attribute String commands;
+};
+
+[Entity=Class]
+interface PathShape {
+    constructor(optional PathShapeOptions options);
+
+    // the CommonShapeMethod part
+    PathShape offset(Position offset);
+    PathShape fill(ResourceColor color);
+    PathShape position(Position position);
+
+    PathShape commands(String commands);
+};
+
+[Entity=Interface]
+interface ShapeSize {
+    [Optional]
+    attribute (number or String) width;
+    [Optional]
+    attribute (number or String) height;
+};
+
+[Entity=Interface]
+interface RectShapeOptions: ShapeSize {
+    [Optional]
+    attribute (number or String or sequence<(number or String)>) radius;
+};
+[Entity=Interface]
+interface RoundRectShapeOptions: ShapeSize {
+    [Optional]
+    attribute (number or String) radiusWidth;
+    [Optional]
+    attribute (number or String) radiusHeight;
+};
+
+interface RectShape {
+    constructor(optional (RectShapeOptions or RoundRectShapeOptions) options);
+
+    // the CommonShapeMethod part
+    RectShape offset(Position offset);
+    RectShape fill(ResourceColor color);
+    RectShape position(Position position);
+
+    // the BaseShape part
+    RectShape width(Length width);
+    RectShape height(Length height);
+    RectShape size(SizeOptions size);
+
+    RectShape radiusWidth((number or String) rWidth);
+    RectShape radiusHeight((number or String) rHeight);
+    RectShape radius((number or String or sequence<(number or String)>) radius);
+};

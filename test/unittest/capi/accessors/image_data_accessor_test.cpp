@@ -67,7 +67,7 @@ HWTEST_F(ImageDataAccessorTest, CtorTest, TestSize.Level1)
     };
     auto bufferOpt = Converter::ArkValue<Opt_Buffer>(buffer);
 
-    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->ctor(&arkWidth, &arkHeight, &bufferOpt));
+    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->construct(&arkWidth, &arkHeight, &bufferOpt, nullptr));
     EXPECT_EQ(peer_->value.dirtyWidth, WIDTH);
     EXPECT_EQ(peer_->value.dirtyHeight, HEIGHT);
     ASSERT_EQ(peer_->value.data.size(), ARRAY_LENGTH / sizeof(uint32_t));
@@ -91,11 +91,11 @@ HWTEST_F(ImageDataAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
     };
     auto bufferOpt = Converter::ArkValue<Opt_Buffer>(buffer);
 
-    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->ctor(nullptr, &arkHeight, &bufferOpt));
+    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->construct(nullptr, &arkHeight, &bufferOpt, nullptr));
     EXPECT_EQ(peer_, nullptr);
-    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->ctor(&arkWidth, nullptr, &bufferOpt));
+    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->construct(&arkWidth, nullptr, &bufferOpt, nullptr));
     EXPECT_EQ(peer_, nullptr);
-    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->ctor(&arkWidth, &arkHeight, nullptr));
+    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->construct(&arkWidth, &arkHeight, nullptr, nullptr));
     ASSERT_NE(peer_, nullptr);
     EXPECT_EQ(peer_->value.data.size(), 0);
 }
@@ -110,7 +110,7 @@ HWTEST_F(ImageDataAccessorTest, GetWidthTest, TestSize.Level1)
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
 
-    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->ctor(&arkWidth, &arkHeight, nullptr));
+    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->construct(&arkWidth, &arkHeight, nullptr, nullptr));
     ASSERT_NE(peer_, nullptr);
     auto resultVal = Converter::Convert<int32_t>(accessor_->getWidth(peer_));
     EXPECT_EQ(resultVal, WIDTH);
@@ -126,7 +126,7 @@ HWTEST_F(ImageDataAccessorTest, GetHeightTest, TestSize.Level1)
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
 
-    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->ctor(&arkWidth, &arkHeight, nullptr));
+    peer_ = reinterpret_cast<ImageDataPeer*>(accessor_->construct(&arkWidth, &arkHeight, nullptr, nullptr));
     ASSERT_NE(peer_, nullptr);
     auto resultVal = Converter::Convert<int32_t>(accessor_->getHeight(peer_));
     EXPECT_EQ(resultVal, HEIGHT);

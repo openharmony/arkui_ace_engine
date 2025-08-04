@@ -77,8 +77,8 @@ class TapGestureInterfaceAccessorTest
 public:
     void *CreatePeerInstance() override
     {
-        auto value = Converter::ArkValue<Opt_TapGestureParameters>();
-        return accessor_->ctor(&value);
+        Ark_TapGestureParameters value{};
+        return accessor_->construct(&value);
     }
     void SetUp(void) override
     {
@@ -106,8 +106,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
         params.count = Converter::ArkValue<Opt_Number>(count);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>(distance);
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -127,8 +126,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
         params.count = Converter::ArkValue<Opt_Number>();
         params.distanceThreshold = Converter::ArkValue<Opt_Number>();
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -160,8 +158,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestCount, TestSize.Level1)
         params.count = Converter::ArkValue<Opt_Number>(value.first);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>(distance);
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -181,8 +178,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestCount, TestSize.Level1)
         params.count = Converter::ArkValue<Opt_Number>(value.first);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>();
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -214,8 +210,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
         params.count = Converter::ArkValue<Opt_Number>(count);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>(value.first);
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -235,8 +230,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
         params.count = Converter::ArkValue<Opt_Number>();
         params.distanceThreshold = Converter::ArkValue<Opt_Number>(value.first);
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -272,8 +266,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistanceInvalid, TestSize.Leve
         params.count = Converter::ArkValue<Opt_Number>(count);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>(value.first);
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -293,8 +286,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistanceInvalid, TestSize.Leve
         params.count = Converter::ArkValue<Opt_Number>(value.first);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>();
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -330,8 +322,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingerCountLimited, TestSize.L
         params.count = Converter::ArkValue<Opt_Number>(count);
         params.distanceThreshold = Converter::ArkValue<Opt_Number>(distance);
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(value.first);
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -351,8 +342,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingerCountLimited, TestSize.L
         params.count = Converter::ArkValue<Opt_Number>();
         params.distanceThreshold = Converter::ArkValue<Opt_Number>();
         params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(value.first);
-        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -374,7 +364,7 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingerCountLimited, TestSize.L
  */
 HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 {
-    auto peer = accessor_->ctor(nullptr);
+    auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->gesture, nullptr);
     auto fingers = peer->gesture->GetFingers();
