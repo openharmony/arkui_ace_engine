@@ -41,6 +41,8 @@ public:
 
     void CalculatePosMapNode();
 
+    bool CalculateRangeWithPosMap(int start, int end);
+
     int32_t GetPosMapStartIndex();
 
     int32_t GetPosMapEndIndex();
@@ -83,6 +85,8 @@ private:
     float estimateHeight_ = 0.0f;
     float estimateOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
+
+    bool hasGroup_ = false;
 
     float totalItemHeight_ = 0.0f;
     float totalItemCount_ = 0.0f;

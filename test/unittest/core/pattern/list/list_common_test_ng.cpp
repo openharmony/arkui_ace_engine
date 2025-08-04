@@ -23,6 +23,7 @@
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
+#include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -2880,6 +2881,81 @@ HWTEST_F(ListCommonTestNg, GetTotalOffset001, TestSize.Level1)
     UpdateCurrentOffset(delta);
     currentOffset = pattern_->GetTotalOffset();
     EXPECT_TRUE(IsEqual(currentOffset, prevOffset - delta));
+}
+
+/**
+ * @tc.name: EstimateHeight001
+ * @tc.desc: While updating the position of scroll bar, test estimateHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, EstimateHeight001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    int32_t itemNumber = 1000;
+    float itemMainSize = 100.0f;
+    int32_t lanes = 3;
+    model.SetSpace(Dimension(SPACE));
+    model.SetLanes(lanes);
+    CreateItemsInLazyForEach(itemNumber, itemMainSize);
+
+    CreateDone();
+    auto gtHeight = ((itemNumber + lanes - 1) / lanes - 1) * SPACE + itemMainSize * ((itemNumber + lanes - 1) / lanes);
+
+    ScrollToIndex(900, false, ScrollAlign::START);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+
+    UpdateCurrentOffset(-157.0f);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+}
+
+/**
+ * @tc.name: EstimateHeight002
+ * @tc.desc: While updating the position of scroll bar, test estimateHeight for ItemGroups
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, EstimateHeight002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    int32_t groupNumber = 1000;
+    CreateItemGroupsInLazyForEach(1000);
+    CreateDone();
+    auto gtHeight = (groupNumber - 1) * SPACE + 100.0 * 2 * groupNumber;
+
+    ScrollToIndex(900, false, ScrollAlign::START);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+
+    UpdateCurrentOffset(157.0f);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
 }
 
 /**
