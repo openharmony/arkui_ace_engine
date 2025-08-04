@@ -252,6 +252,12 @@ public:
         return nullptr;
     }
 
+    bool IsRegisteredObjectEvent(const std::string& eventId)
+    {
+        auto event = eventObjectWithResponseReturnMap_.find(eventId);
+        return event != eventObjectWithResponseReturnMap_.end() && event->second;
+    }
+
     const RefPtr<WebResourceRequestObject>& GetResourceRequestObject()
     {
         return resourceRequestObject_;

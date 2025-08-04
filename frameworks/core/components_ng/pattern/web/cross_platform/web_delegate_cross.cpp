@@ -17,6 +17,10 @@
 
 #include "bridge/js_frontend/frontend_delegate_impl.h"
 
+#ifdef IOS_PLATFORM
+#include <dispatch/dispatch.h>
+#endif
+
 namespace OHOS::Ace {
 namespace {
 constexpr char WEB_METHOD_RELOAD[] = "reload";
@@ -170,6 +174,11 @@ constexpr int FONT_MAX_SIZE = 72;
 constexpr int RESOURCESID_ONE = 1;
 constexpr int RESOURCESID_TWO = 2;
 constexpr int RESOURCESID_THREE = 3;
+
+constexpr int TIMEOUT_DURATION_MS = 15000;
+constexpr int POLLING_INTERVAL_MS = 50;
+constexpr int HTTP_STATUS_GATEWAY_TIMEOUT = 504;
+constexpr int TIMEOUT_SEMAPHORE_S = 20;
 
 const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
@@ -1435,6 +1444,59 @@ bool WebDelegateCross::OnLoadIntercept(void* object)
     return result;
 }
 
+auto WaitForReady(std::function<bool()> checkFunc, int timeoutMs) -> bool
+{
+    const auto start = std::chrono::steady_clock::now();
+    const auto timeout = std::chrono::milliseconds(timeoutMs);
+
+    while (!checkFunc()) {
+        if (std::chrono::steady_clock::now() - start >= timeout) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(POLLING_INTERVAL_MS));
+    }
+    return true;
+}
+
+RefPtr<WebResponse> TimeoutResponse()
+{
+    TAG_LOGE(AceLogTag::ACE_WEB, "OnInterceptRequest request has timed out.");
+    auto timeoutResponse = AceType::MakeRefPtr<WebResponse>();
+    std::string errorHtml = "<html><body><h1>Response Timeout</h1><p>The request has timed out.</p></body></html>";
+    std::string mimeType = "text/html";
+    std::string encoding = "utf-8";
+    std::string reason = "Response timed out";
+    timeoutResponse->SetData(errorHtml);
+    timeoutResponse->SetMimeType(mimeType);
+    timeoutResponse->SetEncoding(encoding);
+    timeoutResponse->SetStatusCode(HTTP_STATUS_GATEWAY_TIMEOUT);
+    timeoutResponse->SetReason(reason);
+    CHECK_NULL_RETURN(timeoutResponse, nullptr);
+    return timeoutResponse;
+}
+
+#ifdef IOS_PLATFORM
+RefPtr<WebResponse> WaitForResponse(const RefPtr<WebResponse>& result)
+{
+    __block auto realResult = result;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        bool ready = WaitForReady([&] { return result->GetResponseStatus(); }, TIMEOUT_DURATION_MS);
+        if (!ready) {
+            realResult = TimeoutResponse();
+        }
+        dispatch_semaphore_signal(semaphore);
+        dispatch_release(semaphore);
+    });
+    dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(TIMEOUT_SEMAPHORE_S * NSEC_PER_SEC));
+    if (dispatch_semaphore_wait(semaphore, timeout) != 0) {
+        dispatch_semaphore_signal(semaphore);
+        dispatch_release(semaphore);
+    }
+    return realResult;
+}
+#endif
+
 RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
 {
     ContainerScope scope(instanceId_);
@@ -1469,6 +1531,21 @@ RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
             }
         },
         "ArkUIWebInterceptRequest");
+    if (!result) {
+        return nullptr;
+    }
+    auto isReady = result->GetResponseStatus();
+    if (!isReady) {
+#ifdef ANDROID_PLATFORM
+        isReady = WaitForReady([&] { return result->GetResponseStatus(); }, TIMEOUT_DURATION_MS);
+        if (!isReady) {
+            result = TimeoutResponse();
+        }
+#endif
+#ifdef IOS_PLATFORM
+        result = WaitForResponse(result);
+#endif
+    }
     return result;
 }
 
