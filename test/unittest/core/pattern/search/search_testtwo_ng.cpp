@@ -3996,4 +3996,39 @@ HWTEST_F(SearchTestTwoNg, GetSearchFixAtIdealMaxWidth, TestSize.Level1)
     ASSERT_TRUE(fixAtIdealMaxWidth.has_value());
     EXPECT_EQ(fixAtIdealMaxWidth.value(), 100.0f);
 }
+
+/**
+ * @tc.name: SearchOnWillAttachIME
+ * @tc.desc: test search OnWillAttachIME event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SearchOnWillAttachIME, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create search, get frameNode and pattern.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set OnWillAttachIME event.
+     */
+    bool fireOnWillAttachIME = false;
+    auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
+    searchModelInstance.SetOnWillAttachIME(onWillAttachIME);
+
+    /**
+     * @tc.steps: step3. fire OnWillAttachIME event.
+     */
+    textFieldPattern->FireOnWillAttachIME();
+    EXPECT_EQ(fireOnWillAttachIME, true);
+}
 } // namespace OHOS::Ace::NG
