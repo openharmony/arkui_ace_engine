@@ -535,6 +535,7 @@ const ArkUIAniWebModifier* GetWebAniModifier()
     static const ArkUIAniWebModifier impl = {
         .setWebOptions = OHOS::Ace::NG::SetWebOptions,
         .setWebControllerControllerHandler = OHOS::Ace::NG::SetWebControllerControllerHandler,
+        .transferScreenCaptureHandlerToStatic = OHOS::Ace::NG::TransferScreenCaptureHandlerToStatic,
         .transferJsGeolocationToStatic = OHOS::Ace::NG::TransferJsGeolocationToStatic,
         .transferJsResultToStatic = OHOS::Ace::NG::TransferJsResultToStatic,
         .transferEventResultToStatic = OHOS::Ace::NG::TransferEventResultToStatic,
@@ -549,7 +550,9 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .transferDataResubmissionHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
         .transferClientAuthenticationHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
         .transferSslErrorHandlerToStatic = OHOS::Ace::NG::TransferSslErrorHandlerToStatic,
-        .transferScreenCaptureHandlerToStatic = OHOS::Ace::NG::TransferScreenCaptureHandlerToStatic,
+        .transferPermissionRequestToStatic = OHOS::Ace::NG::TransferPermissionRequestToStatic,
+        .transferControllerHandlerToStatic = OHOS::Ace::NG::TransferControllerHandlerToStatic,
+        .transferWebKeyboardControllerToStatic = OHOS::Ace::NG::TransferWebKeyboardControllerToStatic,
         .transferScreenCaptureHandlerToDynamic = OHOS::Ace::NG::TransferScreenCaptureHandlerToDynamic,
         .transferJsGeolocationToDynamic = OHOS::Ace::NG::TransferJsGeolocationToDynamic,
         .transferJsResultToDynamic = OHOS::Ace::NG::TransferJsResultToDynamic,
@@ -564,12 +567,9 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .transferConsoleMessageToDynamic = OHOS::Ace::NG::TransferConsoleMessageToDynamic,
         .transferDataResubmissionHandlerToDynamic = OHOS::Ace::NG::TransferDataResubmissionHandlerToDynamic,
         .transferClientAuthenticationHandlerToDynamic = OHOS::Ace::NG::TransferClientAuthenticationHandlerToDynamic,
-        .transferSslErrorHandlerToDynamic = OHOS::Ace::NG::TransferClientAuthenticationHandlerToDynamic,
-        .transferPermissionRequestToStatic = OHOS::Ace::NG::TransferPermissionRequestToStatic,
-        .transferPermissionRequestToDynamic = OHOS::Ace::NG::TransferPermissionRequestToDynamic,
-        .transferControllerHandlerToStatic = OHOS::Ace::NG::TransferControllerHandlerToStatic,
+        .transferSslErrorHandlerToDynamic = OHOS::Ace::NG::TransferSslErrorHandlerToDynamic,
         .transferControllerHandlerToDynamic = OHOS::Ace::NG::TransferControllerHandlerToDynamic,
-        .transferWebKeyboardControllerToStatic = OHOS::Ace::NG::TransferWebKeyboardControllerToStatic,
+        .transferPermissionRequestToDynamic = OHOS::Ace::NG::TransferPermissionRequestToDynamic,
         .transferWebKeyboardControllerToDynamic = OHOS::Ace::NG::TransferWebKeyboardControllerToDynamic,
     };
     return &impl;
