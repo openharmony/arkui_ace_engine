@@ -250,15 +250,15 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
 }
 
 export class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
-    protected manager: StateManagerImpl | undefined = undefined
-    public dependencies: Dependencies | undefined = undefined
+    protected manager: StateManagerImpl | undefined
+    public dependencies: Dependencies | undefined
     protected snapshot: Value
     protected myModified = false
     protected myUpdated = true
     private readonly myGlobal: boolean
-    protected equivalent: Equivalent<Value> | undefined = undefined
-    private tracker: ValueTracker<Value> | undefined = undefined
-    private name: string | undefined = undefined
+    protected equivalent: Equivalent<Value> | undefined
+    private tracker: ValueTracker<Value> | undefined
+    private name: string | undefined
 
     /**
      * @param manager - current state manager to register with

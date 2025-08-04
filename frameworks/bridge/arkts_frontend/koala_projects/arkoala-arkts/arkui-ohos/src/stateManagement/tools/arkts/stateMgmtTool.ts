@@ -32,7 +32,10 @@ import { StateManager, GlobalStateManager } from '@koalaui/runtime';
 import { UIContextUtil } from '../../../handwritten/UIContextUtil';
 import { UIContextImpl } from '../../../handwritten/UIContextImpl';
 import { StateMgmtConsole } from '../stateMgmtDFX';
+import { int32 } from '@koalaui/common';
 export class StateMgmtTool {
+    static lastCoroutineId: int32 | undefined = undefined;
+    static lastGlobalStateManager: StateManager | undefined = undefined;
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
     }
@@ -81,14 +84,17 @@ export class StateMgmtTool {
             ? (proxy.Proxy.tryGetHandler(value) as NullableObject) // a very slow call so need to judge proxy first
             : undefined;
     }
-    static createProxy<T extends Object>(value: T): T {
-        return proxy.Proxy.create(value, new InterfaceProxyHandler<T>()) as T;
+    static createProxy<T extends Object>(value: T, allowDeep: boolean = false): T {
+        return proxy.Proxy.create(value, new InterfaceProxyHandler<T>(allowDeep)) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);
     }
     static getGlobalStateManager(): StateManager {
-        return GlobalStateManager.instance;
+        if (StateMgmtTool.checkCoroutineIdChange()) {
+            StateMgmtTool.lastGlobalStateManager = GlobalStateManager.instance;
+        }
+        return StateMgmtTool.lastGlobalStateManager!;
     }
     static tryGetCurrentGlobalStateManager(): StateManager {
         let context: UIContextImpl | undefined = undefined;
@@ -99,5 +105,15 @@ export class StateMgmtTool {
             StateMgmtConsole.log('Get current UIContext fail, will directly use GlobalStateManager');
         }
         return context && context.stateMgr ? context.stateMgr! : GlobalStateManager.instance;
+    }
+    static checkCoroutineIdChange(): boolean {
+        if (StateMgmtTool.lastCoroutineId === undefined || StateMgmtTool.lastGlobalStateManager === undefined) {
+            StateMgmtTool.lastCoroutineId = CoroutineExtras.getCoroutineId();
+            return true;
+        }
+        const nowId = CoroutineExtras.getCoroutineId();
+        const res = StateMgmtTool.lastCoroutineId !== nowId;
+        StateMgmtTool.lastCoroutineId = nowId;
+        return res;
     }
 }

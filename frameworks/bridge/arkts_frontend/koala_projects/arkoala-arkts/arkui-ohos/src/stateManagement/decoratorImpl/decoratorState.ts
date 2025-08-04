@@ -28,6 +28,7 @@ import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
+import { uiUtils } from '../base/uiUtilsImpl';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
@@ -73,7 +74,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         if (isDynamicObject(newValue)) {
             newValue = getObservedObject(newValue, this);
         }
-        const value = UIUtils.makeObserved(newValue);
+        const value = uiUtils.makeObserved(newValue);
         if (this.backing_.set(value)) {
             if (this.setProxyValue) {
                 this.setProxyValue!(newValue);

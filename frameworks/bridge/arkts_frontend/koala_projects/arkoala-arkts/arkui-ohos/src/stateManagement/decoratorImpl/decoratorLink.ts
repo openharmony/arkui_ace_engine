@@ -19,6 +19,7 @@ import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
+import { uiUtils } from '../base/uiUtilsImpl';
 
 /**
  * implementation of V1 @Link
@@ -84,7 +85,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             if (this.sourceSet_ === undefined) {
                 throw new Error(`${this.getInfo()}: Can not set @Link value. @Link source is immutable error.`);
             }
-            const value = UIUtils.makeObserved(newValue);
+            const value = uiUtils.makeObserved(newValue);
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec

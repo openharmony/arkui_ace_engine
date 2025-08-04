@@ -18,6 +18,7 @@ import { FactoryInternal } from '../base/iFactoryInternal';
 import { IProviderDecoratedVariable } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
+import { uiUtils } from '../base/uiUtilsImpl';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
@@ -38,7 +39,7 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
+        if (this.backing_.set(uiUtils.makeObserved(newValue, true) as T)) {
         }
     }
 }

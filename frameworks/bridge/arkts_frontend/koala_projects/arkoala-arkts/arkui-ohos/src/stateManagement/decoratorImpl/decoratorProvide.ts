@@ -25,6 +25,7 @@ import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 import { WatchFunc } from './decoratorWatch';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
+import { uiUtils } from '../base/uiUtilsImpl';
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
@@ -65,7 +66,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (isDynamicObject(newValue)) {
             newValue = getObservedObject(newValue, this);
         }
-        const value = UIUtils.makeObserved(newValue);
+        const value = uiUtils.makeObserved(newValue);
         if (this.backing_.set(value)) {
             if (this.setProxyValue) {
                 this.setProxyValue!(newValue);

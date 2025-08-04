@@ -62,6 +62,7 @@ import { ProviderDecoratedVariable } from '../decoratorImpl/decoratorProvider';
 import { ConsumerDecoratedVariable } from '../decoratorImpl/decoratorConsumer';
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
+import { uiUtils } from './uiUtilsImpl';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
@@ -71,15 +72,15 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         return new SubscribedWatches();
     }
     makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
-        return new LocalDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+        return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
     }
 
     makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T> {
-        return new ParamDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+        return new ParamDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
     }
 
     makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T> {
-        return new ParamOnceDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+        return new ParamOnceDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
     }
 
     makeProvider<T>(
@@ -92,7 +93,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             varName,
             provideAlias,
-            UIUtils.makeObserved(initValue) as T
+            uiUtils.makeObserved(initValue, true) as T
         );
     }
 
@@ -106,7 +107,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             varName,
             provideAlias,
-            UIUtils.makeObserved(initValue) as T
+            uiUtils.makeObserved(initValue, true) as T
         );
     }
 
@@ -116,7 +117,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStateDecoratedVariable<T> {
-        return new StateDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new StateDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue) as T, watchFunc);
     }
 
     makeProp<T>(
@@ -125,7 +126,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IPropDecoratedVariable<T> {
-        return new PropDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new PropDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue) as T, watchFunc);
     }
 
     makePropRef<T>(
@@ -134,7 +135,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IPropRefDecoratedVariable<T> {
-        return new PropRefDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new PropRefDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue) as T, watchFunc);
     }
 
     makeLink<T>(
@@ -439,7 +440,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IObjectLinkDecoratedVariable<T> {
-        return new ObjectLinkDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new ObjectLinkDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue) as T, watchFunc);
     }
 
     makeProvide<T>(
@@ -454,7 +455,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             varName,
             provideAlias,
-            UIUtils.makeObserved(initValue) as T,
+            uiUtils.makeObserved(initValue) as T,
             allowOverride,
             watchFunc
         );
@@ -481,7 +482,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             propertyNameInAppStorage,
             varName,
-            UIUtils.makeObserved(defaultValue) as T,
+            uiUtils.makeObserved(defaultValue) as T,
             ttype,
             watchFunc
         );
@@ -505,7 +506,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             propertyNameInAppStorage,
             varName,
-            UIUtils.makeObserved(defaultValue) as T,
+            uiUtils.makeObserved(defaultValue) as T,
             ttype,
             watchFunc
         );
@@ -525,7 +526,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         ttype: Type,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T> {
-        const ref = AppStorage.setAndRef<T>(propName, UIUtils.makeObserved(initValue), ttype);
+        const ref = AppStorage.setAndRef<T>(propName, uiUtils.makeObserved(initValue), ttype);
         if (ref === undefined) {
             throw new TypeError(
                 `@StoragePropRef('${propName}') ${varName} configured Type ${ttype.toString()} does not match property type in storage`
@@ -548,7 +549,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T> {
-        const ref = owningView.localStorage_.setAndRef<T>(propName, UIUtils.makeObserved(initValue), ttype);
+        const ref = owningView.localStorage_.setAndRef<T>(propName, uiUtils.makeObserved(initValue), ttype);
         if (ref === undefined) {
             throw new TypeError(
                 `@LocalStoragePropRef('${propName}') ${varName} configured Type ${ttype.toString()} does not match property type in storage`

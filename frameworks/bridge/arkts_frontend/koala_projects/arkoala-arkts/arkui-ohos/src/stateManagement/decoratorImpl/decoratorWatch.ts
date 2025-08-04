@@ -18,7 +18,10 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 // WatchFunc: Representaton of a @Watch function isnide V1 decorator class
 export class WatchFunc {
     private static nextWatchId_: WatchIdType = 1;
-    private static readonly watchId2WatchFunc: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
+    private static readonly watchId2WatchFunc: Map<WatchIdType, WeakRef<WatchFunc>> = new Map<
+        WatchIdType,
+        WeakRef<WatchFunc>
+    >();
     private static readonly watchFinalizer: FinalizationRegistry<WatchIdType> = new FinalizationRegistry<WatchIdType>(
         (watchId: WatchIdType) => {
             // remove @Watch id from watchId2WatchFunc Map to avoid memory growth
@@ -33,8 +36,9 @@ export class WatchFunc {
      * otherwise false
      */
     public static execWatchById(watchId: WatchIdType, propertyName: string): boolean {
-        const watchFuncOpt = WatchFunc.watchId2WatchFunc.get(watchId);
-        if (watchFuncOpt) {
+        const weak = WatchFunc.watchId2WatchFunc.get(watchId);
+        const watchFuncOpt = weak?.deref();
+        if (watchFuncOpt && watchFuncOpt instanceof WatchFunc) {
             watchFuncOpt!.execute(propertyName);
             return true;
         } else {
@@ -47,7 +51,7 @@ export class WatchFunc {
 
     constructor(func: WatchFuncType) {
         this.id_ = WatchFunc.nextWatchId_++;
-        WatchFunc.watchId2WatchFunc.set(this.id_, this);
+        WatchFunc.watchId2WatchFunc.set(this.id_, new WeakRef<WatchFunc>(this));
         this.func_ = func;
         // when this instance gets GC'ed, unregister its id from
         // static watchId2WatchFunc Map

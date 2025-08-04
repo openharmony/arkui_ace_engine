@@ -105,7 +105,7 @@ export class InteropStorageBase extends StorageBase {
             this.interopStorage_.delete(key);
         };
         const clearKeyFunc = (): boolean => {
-            if(!this.staticClear()){
+            if (!this.staticClear()) {
                 return false;
             }
             this.interopStorage_.clear();
@@ -113,7 +113,7 @@ export class InteropStorageBase extends StorageBase {
         };
         const checkClearKeyFunc = (): boolean => {
             return this.checkStaticClear();
-        }
+        };
         // used by ArkTS1.1 to interop with static storage map.
         const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
@@ -140,7 +140,7 @@ export class InteropStorageBase extends StorageBase {
         };
         const setCheckClearValueFunc = (event: () => boolean): void => {
             this.checkClearDynamicValue_ = event;
-        }
+        };
         let proxyStorage = bindFunc.invoke(
             ESValue.wrap(getValue),
             ESValue.wrap(removeValue),
@@ -451,7 +451,7 @@ export class InteropStorageBase extends StorageBase {
      * @since 20
      */
     clear(): boolean {
-        if(!(this.checkStaticClear() && this.checkClearDynamicValue_())) {
+        if (!(this.checkStaticClear() && this.checkClearDynamicValue_())) {
             return false;
         }
         this.staticClear();
@@ -541,7 +541,7 @@ export class InteropAppStorageBase extends InteropStorageBase {
             this.interopStorage_.delete(key);
         };
         const clearKeyFunc = (): boolean => {
-            if(!this.staticClear()){
+            if (!this.staticClear()) {
                 return false;
             }
             this.interopStorage_.clear();
@@ -549,7 +549,7 @@ export class InteropAppStorageBase extends InteropStorageBase {
         };
         const checkClearKeyFunc = (): boolean => {
             return this.checkStaticClear();
-        }
+        };
         // used by ArkTS1.1 to interop with static storage map.
         const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
