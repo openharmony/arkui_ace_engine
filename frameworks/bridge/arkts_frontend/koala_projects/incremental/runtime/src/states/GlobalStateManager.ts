@@ -52,7 +52,7 @@ export class GlobalStateManager {
      */
     static GetLocalManager(): StateManager | undefined {
         // @ts-ignore
-        const coroutineId = CoroutineExtras.getCoroutineId()
+        const coroutineId = CoroutineExtras.getWorkerId()
         return GlobalStateManager.localManagerMap.get(coroutineId)
     }
 
@@ -62,7 +62,7 @@ export class GlobalStateManager {
      */
     static SetLocalManager(manager: StateManager | undefined): void {
         // @ts-ignore
-        const coroutineId = CoroutineExtras.getCoroutineId()
+        const coroutineId = CoroutineExtras.getWorkerId()
         if (manager === undefined) {
             GlobalStateManager.localManagerMap.delete(coroutineId)
             return
