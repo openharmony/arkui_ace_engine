@@ -885,6 +885,43 @@ HWTEST_F(NavigationPatternTestFiveNg, GetFirstNewDestinationIndex002, TestSize.L
 }
 
 /**
+ * @tc.name: GetFirstNewDestinationIndex003
+ * @tc.desc: Branch: first loop: if (preNodeSet.find(uiNode) != preNodeSet.end()) { => true
+ *                   second loop: if (preNodeSet.find(uiNode) != preNodeSet.end()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, GetFirstNewDestinationIndex003, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    NavPathList preList;
+    preList.push_back(testPair1);
+    NavPathList curList;
+    curList.push_back(testPair1);
+    curList.push_back(testPair2);
+
+    EXPECT_EQ(pattern->GetFirstNewDestinationIndex(preList, curList), 1);
+}
+
+/**
  * @tc.name: ClearSecondaryNodesIfNeeded001
  * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => true
  * @tc.type: FUNC
