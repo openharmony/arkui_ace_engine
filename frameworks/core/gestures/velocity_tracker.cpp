@@ -104,13 +104,23 @@ void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double
     v = GetLinearSlope(axis);
     CheckExtremePoint(axis, extremX, valSize);
 }
+} // namespace
 
-double UpdateAxisVelocity(LeastSquareImpl& axis)
+double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
 {
+    LeastSquareImpl axis = axisRaw;
+    if (SystemProperties::IsVelocityWithinTimeWindow()) {
+        auto xTimes = axis.GetXVals();
+        auto timeThreshold = xTimes.back() - VelocityTracker::DURATION_LONGEST_THRESHOLD;
+        int32_t cnt = (std::lower_bound(xTimes.begin(), xTimes.end(), timeThreshold) - xTimes.begin());
+        while (cnt) {
+            axis.PopFrontPoint();
+            --cnt;
+        }
+    }
     std::vector<double> param(VelocityTracker::LEAST_SQUARE_PARAM_NUM, 0);
     auto x = axis.GetXVals().back();
-    // curve is param[0] * x^2 + param[1] * x + param[2]
-    // the velocity is 2 * param[0] * x + param[1];
+    // the velocity is 2 * param[0] * x + param[1]; with param[2] unused
     double velocity = 0.0;
     if (axis.GetLeastSquareParams(param)) {
         velocity = 2 * param[0] * x + param[1];      // 2: const of formula
@@ -121,7 +131,6 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
     }
     return velocity;
 }
-} // namespace
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
@@ -155,15 +164,8 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
         }
     }
     // nanoseconds duration to seconds.
-    touchEventTime_.push_back(event.time);
-    std::chrono::duration<double> duration = event.time - touchEventTime_[mIndex_];
+    std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;
     auto seconds = duration.count();
-    auto timeWindowEnabled = SystemProperties::IsVelocityWithinTimeWindow();
-    if (timeWindowEnabled && seconds > DURATION_LONGEST_THRESHOLD) {
-        xAxis_.PopFrontPoint();
-        yAxis_.PopFrontPoint();
-        mIndex_++;
-    }
     xAxis_.UpdatePoint(seconds, event.x);
     yAxis_.UpdatePoint(seconds, event.y);
 }
@@ -214,6 +216,8 @@ void VelocityTracker::DumpVelocityPoints() const
     auto func = [](const LeastSquareImpl &axis, const char* str) {
         const auto& xVal = axis.GetXVals();
         const auto& yVal = axis.GetYVals();
+        if (xVal.size() == 0 || yVal.size() == 0)
+            return;
         int32_t i = static_cast<int32_t>(xVal.size());
         auto baseVal = yVal[0];
         std::stringstream oss;

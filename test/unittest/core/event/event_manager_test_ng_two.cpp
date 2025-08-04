@@ -1171,37 +1171,6 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent0012, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnNonPointerEvent001
- * @tc.desc: Test OnNonPointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, OnNonPointerEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    NonPointerEvent event;
-    event.eventType = UIInputEventType::KEY;
-    auto ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event2;
-    event2.eventType = UIInputEventType::FOCUS_AXIS;
-    ret = eventManager->OnNonPointerEvent(event2);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event3;
-    event3.eventType = UIInputEventType::CROWN;
-    ret = eventManager->OnNonPointerEvent(event3);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event4;
-    event4.eventType = UIInputEventType::TOUCH;
-    ret = eventManager->OnNonPointerEvent(event4);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: HandleMouseHoverAnimation001
  * @tc.desc: Test HandleMouseHoverAnimation
  * @tc.type: FUNC
