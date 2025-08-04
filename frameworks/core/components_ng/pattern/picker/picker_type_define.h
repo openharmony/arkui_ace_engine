@@ -146,6 +146,7 @@ struct TextPickerSettingData {
     NG::TextCascadePickerOptionsAttr attr;
     bool isDisableTextStyleAnimation = false;
     bool isEnableHapticFeedback = true;
+    std::vector<Dimension> columnWidths;
 };
 
 struct TimePickerSettingData {
