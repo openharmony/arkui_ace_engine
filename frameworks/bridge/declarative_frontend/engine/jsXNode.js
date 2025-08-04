@@ -179,6 +179,8 @@ class JSBuilderNode extends BaseNode {
         this.parentallowFreeze = false;
         this.isFreeze = false;
         this.__parentViewOfBuildNode = undefined;
+        this.updateParams_ = null;
+        this.activeCount_ = 1;
     }
     findProvidePU__(providePropName) {
         if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
@@ -322,7 +324,7 @@ class JSBuilderNode extends BaseNode {
     }
     update(param) {
         if (this.isFreeze) {
-            this.params_ = param;
+            this.updateParams_ = param;
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -373,13 +375,18 @@ class JSBuilderNode extends BaseNode {
             this.finishUpdateFunc();
         }
     }
+    isBuilderNodeActive() {
+        return this.activeCount_ > 0;
+    }
     setActiveInternal(active, isReuse = false) {
         stateMgmtProfiler.begin('BuilderNode.setActive');
         if (!isReuse) {
-            if (active && this.isFreeze) {
+            this.activeCount_ += active ? 1 : -1;
+            if (this.isBuilderNodeActive() && this.isFreeze && this.updateParams_ !== null) {
                 this.isFreeze = false;
-                this.update(this.params_);
-            } else if (!active) {
+                this.update(this.updateParams_);
+                this.updateParams_ = null;
+            } else if (!this.isBuilderNodeActive()) {
                 this.isFreeze = this.allowFreezeWhenInactive;
             }
         }
