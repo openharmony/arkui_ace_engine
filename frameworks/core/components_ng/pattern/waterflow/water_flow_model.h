@@ -92,6 +92,7 @@ public:
     virtual void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) {};
 
     virtual void SetSyncLoad(bool syncLoad) {}
+    virtual void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;

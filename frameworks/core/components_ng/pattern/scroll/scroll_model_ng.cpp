@@ -932,4 +932,16 @@ void ScrollModelNG::SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& 
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnZoomStop(std::move(event));
 }
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
 } // namespace OHOS::Ace::NG

@@ -1476,6 +1476,7 @@ void ScrollPattern::OnColorModeChange(uint32_t colorMode)
         CaleSnapOffsets();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)

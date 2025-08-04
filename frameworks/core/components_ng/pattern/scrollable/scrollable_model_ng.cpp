@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
@@ -458,5 +459,33 @@ void ScrollableModelNG::SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDr
     auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillStopDragging(std::move(onWillStopDragging));
+}
+
+void ScrollableModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "ScrollBarColor";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(theme);
+        Color color(theme->GetForegroundColor());
+        ResourceParseUtils::ParseResColor(resObj, color);
+        auto scrollBarColor = color.ColorToString();
+        ScrollableModelNG::SetScrollBarColor(AceType::RawPtr(frameNode), scrollBarColor);
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(color);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

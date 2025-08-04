@@ -1785,4 +1785,18 @@ int32_t GridPattern::OnInjectionEvent(const std::string& command)
     }
     return RET_SUCCESS;
 }
+
+void GridPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

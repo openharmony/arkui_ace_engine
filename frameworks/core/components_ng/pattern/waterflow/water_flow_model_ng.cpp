@@ -813,4 +813,17 @@ void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& f
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerNode);
 }
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjScrollBarColor(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
 } // namespace OHOS::Ace::NG

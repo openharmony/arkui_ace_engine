@@ -3426,6 +3426,7 @@ struct ArkUIListModifier {
     void (*parseResObjDividerEndMargin)(ArkUINodeHandle node, void* resObj);
     void (*createWithResourceObjLaneConstrain)(
         ArkUINodeHandle node, void* resObjMinLengthValue, void* resObjMaxLengthValue);
+    void (*createWithResourceObjScrollBarColor)(ArkUINodeHandle node, void* resObj);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -3828,6 +3829,7 @@ struct ArkUIGridModifier {
     void (*setOnGridItemDrop)(ArkUINodeHandle node, void* callback);
     void (*resetOnGridItemDrop)(ArkUINodeHandle node);
     void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
+    void (*createWithResourceObjScrollBarColor)(ArkUINodeHandle node, void* resObj);
 };
 
 struct ArkUIGridItemModifier {
@@ -3962,6 +3964,7 @@ struct ArkUIScrollModifier {
     void (*setScrollFling)(ArkUINodeHandle node, ArkUI_Float64 value);
     void (*getScrollContentSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2]);
     void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
+    void (*createWithResourceObjScrollBarColor)(ArkUINodeHandle node, void* resObj);
     void (*createWithResourceObjSnap)(ArkUINodeHandle node, const ArkUI_Float32* paginationValue,
         ArkUI_Int32 paginationSize, const ArkUI_Int32* paginationParam, void* resObjs);
     void (*setMaxZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
@@ -4004,6 +4007,7 @@ struct ArkUIScrollBarModifier {
     void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
     void (*setScrollBarScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollBarScrollBarColor)(ArkUINodeHandle node);
+    void (*createScrollBarScrollBarColorWithResourceObj)(ArkUINodeHandle node, void* colorRawPtr);
 };
 
 struct ArkUIScrollerModifier {
@@ -5345,6 +5349,7 @@ struct ArkUIWaterFlowModifier {
     void (*resetWaterFlowFadingEdge)(ArkUINodeHandle node);
     void (*setOnWaterFlowScrollIndexCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnWaterFlowScrollIndex)(ArkUINodeHandle node);
+    void (*createWaterFlowScrollBarColorWithResourceObj)(ArkUINodeHandle node, void* resObj);
 };
 
 struct ArkUIMenuItemModifier {

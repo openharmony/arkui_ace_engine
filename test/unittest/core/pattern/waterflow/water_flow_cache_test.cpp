@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "water_flow_test_ng.h"
 
@@ -392,5 +396,85 @@ HWTEST_F(WaterFlowTestNg, LargeDataPerformance001, TestSize.Level1)
 
     // Verify cached items count control
     EXPECT_LE(pattern_->preloadItems_.size(), 5);
+}
+
+/**
+ * @tc.name: OnColorModeChange
+ * @tc.desc: Test WaterFlow's OnColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnColorModeChange001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+
+    auto model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(5);
+
+    CreateDone();
+
+    /**
+     * @tc.steps: Set startIndex_ of pattern_ to 2
+     */
+    pattern_->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
+    auto paintProperty = pattern_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_NE(paintProperty->GetScrollBarProperty(), nullptr);
+
+    paintProperty = pattern_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ResetScrollBarProperty();
+    pattern_->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetScrollBarProperty(), nullptr);
+
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: ParseResObjScrollBarColor
+ * @tc.desc: Test WaterFlow's ParseResObjScrollBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ParseResObjScrollBarColor001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+
+    const int32_t resId = 0;
+    const int32_t resType = static_cast<int32_t>(ResourceType::COLOR);
+    const Color resData = Color::RED;
+    AddMockResourceData(0, resData);
+
+    /**
+     * @tc.steps: step1. Construct the objects for test
+     */
+    auto model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(5);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Test
+     */
+    model.ParseResObjScrollBarColor(nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(resId, resType, params, "", "", Container::CurrentIdSafely());
+    model.ParseResObjScrollBarColor(resObj);
+    pattern_->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
+
+    auto currentColor = WaterFlowModelNG::GetScrollBarColor(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(resData.GetValue(), currentColor);
+
+    CreateDone();
+
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

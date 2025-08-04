@@ -3948,6 +3948,11 @@ void ListPattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     UpdateDefaultColor();
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
 }
 

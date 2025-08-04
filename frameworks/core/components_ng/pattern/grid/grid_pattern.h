@@ -268,6 +268,7 @@ public:
 
     void HandleOnItemFocus(int32_t index);
 
+    void OnColorModeChange(uint32_t colorMode) override;
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

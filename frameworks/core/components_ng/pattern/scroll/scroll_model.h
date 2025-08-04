@@ -69,6 +69,7 @@ public:
     virtual void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjSnapPaginations(
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetMaxZoomScale(float scale) {};
     virtual void SetMinZoomScale(float scale) {};
     virtual void SetZoomScale(float scale) {};

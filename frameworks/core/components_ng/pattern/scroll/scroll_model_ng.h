@@ -61,6 +61,7 @@ public:
     void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjSnapPaginations(
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs) override;
+    void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetMaxZoomScale(float scale) override;
     void SetMinZoomScale(float scale) override;
     void SetZoomScale(float scale) override;
@@ -115,6 +116,7 @@ public:
     static void CreateWithResourceObjIntervalSize(FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs);
     static void CreateWithResourceObjSnapPaginations(FrameNode* frameNode,
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetMaxZoomScale(FrameNode* frameNode, float scale);
     static float GetMaxZoomScale(FrameNode* frameNode);
     static void SetMinZoomScale(FrameNode* frameNode, float scale);

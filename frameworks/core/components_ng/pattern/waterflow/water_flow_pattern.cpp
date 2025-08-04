@@ -955,4 +955,18 @@ SizeF WaterFlowPattern::GetChildrenExpandedSize()
     }
     return {};
 }
+
+void WaterFlowPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

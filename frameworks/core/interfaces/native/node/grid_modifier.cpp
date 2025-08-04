@@ -607,6 +607,7 @@ const ArkUIGridModifier* GetGridModifier()
         .setOnGridItemDrop = SetOnGridItemDrop,
         .resetOnGridItemDrop = ResetOnGridItemDrop,
         .createWithResourceObjFriction = CreateWithResourceObjGridFriction,
+        .createWithResourceObjScrollBarColor = CreateWithResourceObjGridScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -830,6 +831,15 @@ void CreateWithResourceObjGridFriction(ArkUINodeHandle node, void* resObj)
     CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     GridModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
+}
+
+void CreateWithResourceObjGridScrollBarColor(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    GridModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
