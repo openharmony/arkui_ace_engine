@@ -82,18 +82,6 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
     if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth_, minHeight_, maxWidth_, maxHeight_)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth_)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight_)) {
-        return nullptr;
-    }
     return constraint_obj;
 }
 
