@@ -125,7 +125,7 @@ void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src, Conv
             dst.spans.array = nullptr;
             return;
         }
-        dst.spans.length = resultObjects.size();
+        dst.spans.length = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(resultObjects.size()));
         dst.spans.array = new Union_Span_Result[resultObjects.size()];
         size_t idx = 0;
         for (auto& resultObject : resultObjects) {
