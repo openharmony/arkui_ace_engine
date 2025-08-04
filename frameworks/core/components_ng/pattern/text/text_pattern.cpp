@@ -3023,6 +3023,11 @@ void TextPattern::OnModifyDone()
         if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
             ParseOriText(textForDisplay_);
         }
+
+        if (textCache != textForDisplay_) { // textForDisplay_ is updated by ParseOriText
+            CloseSelectOverlay();
+            ResetSelection();
+        }
     }
     RecoverCopyOption();
     RegisterFormVisibleChangeCallback();
