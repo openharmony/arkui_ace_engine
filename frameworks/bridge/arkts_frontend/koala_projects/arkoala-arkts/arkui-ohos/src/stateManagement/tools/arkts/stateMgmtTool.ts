@@ -34,8 +34,6 @@ import { UIContextImpl } from '../../../handwritten/UIContextImpl';
 import { StateMgmtConsole } from '../stateMgmtDFX';
 import { int32 } from '@koalaui/common';
 export class StateMgmtTool {
-    static lastCoroutineId: int32 | undefined = undefined;
-    static lastGlobalStateManager: StateManager | undefined = undefined;
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
     }
@@ -91,10 +89,7 @@ export class StateMgmtTool {
         return Reflect.isLiteralInitializedInterface(value);
     }
     static getGlobalStateManager(): StateManager {
-        if (StateMgmtTool.checkCoroutineIdChange()) {
-            StateMgmtTool.lastGlobalStateManager = GlobalStateManager.instance;
-        }
-        return StateMgmtTool.lastGlobalStateManager!;
+        return GlobalStateManager.instance;
     }
     static tryGetCurrentGlobalStateManager(): StateManager {
         let context: UIContextImpl | undefined = undefined;
@@ -105,15 +100,5 @@ export class StateMgmtTool {
             StateMgmtConsole.log('Get current UIContext fail, will directly use GlobalStateManager');
         }
         return context && context.stateMgr ? context.stateMgr! : GlobalStateManager.instance;
-    }
-    static checkCoroutineIdChange(): boolean {
-        if (StateMgmtTool.lastCoroutineId === undefined || StateMgmtTool.lastGlobalStateManager === undefined) {
-            StateMgmtTool.lastCoroutineId = CoroutineExtras.getCoroutineId();
-            return true;
-        }
-        const nowId = CoroutineExtras.getCoroutineId();
-        const res = StateMgmtTool.lastCoroutineId !== nowId;
-        StateMgmtTool.lastCoroutineId = nowId;
-        return res;
     }
 }
