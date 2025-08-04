@@ -27,6 +27,7 @@
 #include "test/unittest/core/common/asset/mock_asset.h"
 
 #include "common/include/window_session_property.h"
+#include "session/host/include/scene_persistent_storage.h"
 #include "session_manager/include/scene_session_manager.h"
 
 #include "base/memory/ace_type.h"
@@ -289,6 +290,45 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback04, TestSize.Level1)
     windowScene->BufferAvailableCallback();
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->startingWindow_, nullptr);
+}
+
+/**
+ * @tc.name: AddPersistentImage
+ * @tc.desc: add persistent image
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, AddPersistentImage, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
+    /**
+     * @tc.steps: step2. Test add persistent image return false.
+     */
+    auto result = windowScene->AddPersistentImage(windowScene->session_->surfaceNode_, windowScene->GetHost());
+    EXPECT_EQ(result, false);
+    /**
+     * @tc.steps: step3. Test add persistent image return true.
+     */
+    Rosen::ScenePersistentStorage::InitDir("/data/Snapshot");
+    Rosen::ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(windowScene->session_->GetPersistentId()),
+        static_cast<int32_t>(1), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    result = windowScene->AddPersistentImage(windowScene->session_->surfaceNode_, windowScene->GetHost());
+    EXPECT_EQ(result, true);
 }
 
 /**

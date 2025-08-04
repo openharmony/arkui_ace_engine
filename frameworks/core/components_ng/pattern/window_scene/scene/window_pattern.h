@@ -80,7 +80,7 @@ protected:
     void CreateStartingWindow();
     void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow);
-    bool IsAddSnapshotWindow(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    bool AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
         const RefPtr<NG::FrameNode>& host);
 
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
