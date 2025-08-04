@@ -1220,10 +1220,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage048, TestSi
     dragDropManager->isDragFwkShow_ = false;
     dragDropManager->isDragWithContextMenu_ = true;
     DragPointerEvent pointerEvent;
+    dragDropManager->info_.isDragController = false;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     pointerEvent.x = 3.0f;
     pointerEvent.y = 4.0f;
     dragDropManager->info_.scale = 0.5f;
+    dragDropManager->info_.isDragController = true;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_NE(frameNode, nullptr);
 }
