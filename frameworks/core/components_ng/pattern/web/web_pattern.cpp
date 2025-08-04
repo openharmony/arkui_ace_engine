@@ -356,17 +356,17 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
     std::error_code ec;
     std::filesystem::path canonicalPath = std::filesystem::canonical(snapshotPath, ec);
     if (ec) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "canonical failed:%{public}s", ec.message().c_str());
+        TAG_LOGE(AceLogTag::ACE_WEB, "blankless canonical failed:%{public}s", ec.message().c_str());
         return false;
     }
     // 4为后缀".png"的长度
     if (snapshotPath.rfind(WEB_SNAPSHOT_PATH_PREFIX, 0) != 0 ||
         snapshotPath.length() <= 4 || snapshotPath.rfind(WEB_SNAPSHOT_PATH_SUFFIX) != snapshotPath.length() - 4) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "the path or the format is wrong:%{public}s", snapshotPath.c_str());
+        TAG_LOGE(AceLogTag::ACE_WEB, "blankless the path or the format is wrong:%{public}s", snapshotPath.c_str());
         return false;
     }
     if (!std::filesystem::exists(canonicalPath, ec)) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "canonical path:%{public}s does not exist:%{public}s",
+        TAG_LOGE(AceLogTag::ACE_WEB, "blankless canonical path:%{public}s does not exist:%{public}s",
                  snapshotPath.c_str(), ec.message().c_str());
         return false;
     }
@@ -811,7 +811,7 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
 
 void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateSnapshotImageFrameNode");
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless WebPattern::CreateSnapshotImageFrameNode");
     if (snapshotImageNodeId_.has_value()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless already create snapshot image node!");
         return;
@@ -851,7 +851,7 @@ void WebPattern::RemoveSnapshotFrameNode()
     if (!snapshotImageNodeId_.has_value()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "RemoveSnapshotFrameNode");
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNode");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
     snapshotImageNodeId_.reset();
     CHECK_NULL_VOID(snapshotNode);
