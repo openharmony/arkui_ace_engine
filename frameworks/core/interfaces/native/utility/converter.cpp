@@ -2708,6 +2708,24 @@ void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src)
     }
 }
 
+template<>
+std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& src)
+{
+    std::vector<std::pair<PickerDate, PickerDate>> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto startDate = Converter::OptConvert<PickerDate>(src.array[i].start).value_or(PickerDate());
+        auto endDate = Converter::OptConvert<PickerDate>(src.array[i].end).value_or(PickerDate());
+        if (startDate.GetYear() == 0 || endDate.GetYear() == 0 || endDate < startDate) {
+            continue;
+        }
+        std::pair<PickerDate, PickerDate> pickerDateRange;
+        pickerDateRange.first = startDate;
+        pickerDateRange.second = endDate;
+        dst.push_back(pickerDateRange);
+    }
+    return dst;
+}
 
 template<>
 LightSource Convert(const Ark_LightSource& src)

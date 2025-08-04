@@ -649,6 +649,7 @@ namespace Converter {
     template<> BindSheetDismissReason Convert(const Ark_DismissReason& src);
     template<> RotateOptions Convert(const Ark_RotateOptions& src);
     template<> ScaleOptions Convert(const Ark_ScaleOptions& src);
+    template<> std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);

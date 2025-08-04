@@ -36,25 +36,6 @@ void AssignCast(std::optional<CalendarEdgeAlign>& dst, const Ark_CalendarAlign& 
 }
 
 template<>
-std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& src)
-{
-    std::vector<std::pair<PickerDate, PickerDate>> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto startDate = Converter::OptConvert<PickerDate>(src.array[i].start).value_or(PickerDate());
-        auto endDate = Converter::OptConvert<PickerDate>(src.array[i].end).value_or(PickerDate());
-        if (startDate.GetYear() == 0 || endDate.GetYear() == 0 || endDate < startDate) {
-            continue;
-        }
-        std::pair<PickerDate, PickerDate> pickerDateRange;
-        pickerDateRange.first = startDate;
-        pickerDateRange.second = endDate;
-        dst.push_back(pickerDateRange);
-    }
-    return dst;
-}
-
-template<>
 void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptions& src)
 {
     CalendarSettingData options;
@@ -63,14 +44,14 @@ void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptio
     if (selected) {
         options.selectedDate = selected.value();
     }
-    auto start = Converter::OptConvert<PickerDate>(src.start);
-    if (start) {
-        options.startDate = start.value();
+    auto startDate = Converter::OptConvert<PickerDate>(src.start).value_or(PickerDate());
+    auto endDate = Converter::OptConvert<PickerDate>(src.end).value_or(PickerDate());
+    if (endDate.GetYear() > 0 && startDate.ToDays() > endDate.ToDays()) {
+        startDate = PickerDate();
+        endDate = PickerDate();
     }
-    auto end = Converter::OptConvert<PickerDate>(src.end);
-    if (end) {
-        options.endDate = end.value();
-    }
+    options.startDate = startDate;
+    options.endDate = endDate;
     options.disabledDateRange =
         Converter::Convert<std::vector<std::pair<PickerDate, PickerDate>>>(src.disabledDateRange.value);
     PickerDate::SortAndMergeDisabledDateRange(options.disabledDateRange);
