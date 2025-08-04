@@ -28,13 +28,11 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_pattern_v2.cpp",
     "xcomponent_utils.cpp",
     "xcomponent_inner_surface_controller.cpp",
+    "xcomponent_pattern_multithread.cpp",
   ]
 
   if (ace_engine_feature_enable_static_instructive_code) {
-    sources += [
-      "xcomponent_model_static.cpp",
-      "xcomponent_pattern_multithread.cpp",
-    ]
+    sources += [ "xcomponent_model_static.cpp" ]
   }
 
   if (is_ohos_standard_system) {
