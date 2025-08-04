@@ -416,16 +416,23 @@ bool GetEnumStringOpt(ani_env* env, ani_object object, const char *name, const c
 bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
 {
     ani_ref globalRef;
-    env->GlobalReference_Create(ref, &globalRef);
+    ani_status status = env->GlobalReference_Create(ref, &globalRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
     result = [env, globalRef]() {
-        if (globalRef) {
-            ani_fn_object func = static_cast<ani_fn_object>(globalRef);
-            std::vector<ani_ref> args;
-            ani_ref fnReturnVal {};
-            ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
-            if (status != ANI_OK) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
-            }
+        if (!globalRef) {
+            return;
+        }
+
+        ani_fn_object func = static_cast<ani_fn_object>(globalRef);
+        std::vector<ani_ref> args;
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
+        env->GlobalReference_Delete(globalRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
         }
     };
     return true;
