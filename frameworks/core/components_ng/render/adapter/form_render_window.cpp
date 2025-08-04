@@ -46,7 +46,9 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 #ifdef ENABLE_ROSEN_BACKEND
     ContainerScope scope(id);
     auto container = Container::Current();
-    uiContentType_ = container->GetUIContentType();
+    if (container != nullptr) {
+        uiContentType_ = container->GetUIContentType();
+    }
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         frameRateLinker_ = Rosen::RSFrameRateLinker::Create();

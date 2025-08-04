@@ -71,6 +71,7 @@ const std::unordered_set<std::string> VALID_TAG = {
     V2::WEB_ETS_TAG,
 };
 constexpr int32_t HALF_PIXELMAP = 2;
+constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 
@@ -280,7 +281,8 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
     }
 
     // use menuPreview's size and offset for drag framework.
-    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+    if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
+        GreatNotEqual(DragAnimationHelper::GetPreviewMenuAnimationRate(), 0.0f)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
@@ -795,15 +797,25 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     data.originPreviewRect = DragDropFuncWrapper::GetPaintRectToScreen(menuPreview);
     CHECK_EQUAL_VOID(isShowHoverImage, false);
     auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
-    auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
-    CHECK_NULL_VOID(previewNode);
-    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    auto previewPattern = menuPreview->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
     auto rate = animationInfo.clipRate;
-    auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth();
-    auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight();
-    auto clipEndWidth = previewPattern->GetStackAfterScaleActualWidth();
-    auto clipEndHeight = previewPattern->GetStackAfterScaleActualHeight();
+    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
+    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    auto previewBeforeAnimationScale =
+        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto previewAfterAnimationScale =
+        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+    auto previewScale = rate * (previewAfterAnimationScale - previewBeforeAnimationScale) + previewBeforeAnimationScale;
+    if (!GreatNotEqual(rate, 0.0f)) {
+        data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+        data.dragPreviewRect = data.originPreviewRect;
+        return;
+    }
+    auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth() * previewScale;
+    auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight() * previewScale;
+    auto clipEndWidth = previewPattern->GetStackAfterScaleActualWidth() * previewScale;
+    auto clipEndHeight = previewPattern->GetStackAfterScaleActualHeight() * previewScale;
     auto curentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
     auto curentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
     auto centerX = data.originPreviewRect.GetX() + data.originPreviewRect.Width() / 2;
@@ -983,9 +995,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragMoveLastPoint.GetScreenX() : info.GetScreenLocation().GetX();
     auto screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ?
         dragMoveLastPoint.GetScreenY() : info.GetScreenLocation().GetY();
-    
+
+    const int32_t pointerId = info.GetPassThrough() ? info.GetPointerId() % PASS_THROUGH_EVENT_ID : info.GetPointerId();
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), screenX, screenY,
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, pointerId, screenX, screenY,
         info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, false,
         dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
         dragSummaryInfo.totalSize };
@@ -1002,7 +1015,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
         "eventId %{public}d, detailedSummary %{public}s.",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
-        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(),
+        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), pointerId,
         info.GetTargetDisplayId(), windowId, summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {

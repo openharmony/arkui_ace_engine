@@ -20,6 +20,8 @@
 #define private public
 #define protected public
 
+#include "base/utils/system_properties.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -126,5 +128,51 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode003, TestSize.Level1)
     manager->isForceSplitEnable_ = false;
     manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
+}
+
+/**
+ * @tc.name: GetIgnoreOrientation001
+ * @tc.desc: Branch: if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) { => true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, GetIgnoreOrientation001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    auto backupProperty = SystemProperties::forceSplitIgnoreOrientationEnabled_;
+    SystemProperties::forceSplitIgnoreOrientationEnabled_ = true;
+    auto ignore = manager->GetIgnoreOrientation();
+    EXPECT_TRUE(ignore);
+    SystemProperties::forceSplitIgnoreOrientationEnabled_ = backupProperty;
+}
+
+/**
+ * @tc.name: GetIgnoreOrientation002
+ * @tc.desc: Branch: if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) { => false
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, GetIgnoreOrientation002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    auto backupProperty = SystemProperties::forceSplitIgnoreOrientationEnabled_;
+    SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
+    manager->ignoreOrientation_ = false;
+    auto ignore = manager->GetIgnoreOrientation();
+    EXPECT_FALSE(ignore);
+
+    manager->ignoreOrientation_ = true;
+    ignore = manager->GetIgnoreOrientation();
+    EXPECT_TRUE(ignore);
+
+    SystemProperties::forceSplitIgnoreOrientationEnabled_ = backupProperty;
 }
 } // namespace OHOS::Ace::NG

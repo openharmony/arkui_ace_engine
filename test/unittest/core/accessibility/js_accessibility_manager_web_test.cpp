@@ -282,7 +282,7 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect001, TestSize.Level1)
 
 /**
  * @tc.name: WebSetScreenRect002
- * @tc.desc: WebSetScreenRect degree = 0, scaleX != 1, scaleY = 1
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX != 0, scaleY = 0
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect002, TestSize.Level1)
@@ -291,7 +291,7 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect002, TestSize.Level1)
     Framework::CommonProperty commonProperty;
     commonProperty.rotateTransform.rotateDegree = 0;
     commonProperty.scaleX = 3.0f;
-    commonProperty.scaleY = 1.0f;
+    commonProperty.scaleY = 0.0f;
     auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
     auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
     AccessibilityElementInfo nodeInfo;
@@ -306,7 +306,7 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect002, TestSize.Level1)
 
 /**
  * @tc.name: WebSetScreenRect003
- * @tc.desc: WebSetScreenRect degree = 0, scaleX = 1, scaleY != 1
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX = 0, scaleY != 0
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect003, TestSize.Level1)
@@ -314,7 +314,7 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect003, TestSize.Level1)
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     Framework::CommonProperty commonProperty;
     commonProperty.rotateTransform.rotateDegree = 0;
-    commonProperty.scaleX = 1.0f;
+    commonProperty.scaleX = 0.0f;
     commonProperty.scaleY = 3.0f;
     auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
     auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
@@ -330,7 +330,7 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect003, TestSize.Level1)
 
 /**
  * @tc.name: WebSetScreenRect004
- * @tc.desc: WebSetScreenRect degree = 0, scaleX != 1, scaleY != 1
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX != 0, scaleY != 0
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect004, TestSize.Level1)
@@ -354,7 +354,7 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect004, TestSize.Level1)
 
 /**
  * @tc.name: WebSetScreenRect005
- * @tc.desc: WebSetScreenRect degree = 0, scaleX = 1, scaleY = 1
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX = 0, scaleY = 0
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect005, TestSize.Level1)
@@ -362,8 +362,8 @@ HWTEST_F(JsAccessibilityManagerWebTest, WebSetScreenRect005, TestSize.Level1)
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     Framework::CommonProperty commonProperty;
     commonProperty.rotateTransform.rotateDegree = 0;
-    commonProperty.scaleX = 1.0f;
-    commonProperty.scaleY = 1.0f;
+    commonProperty.scaleX = 0.0f;
+    commonProperty.scaleY = 0.0f;
     auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
     auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
     AccessibilityElementInfo nodeInfo;

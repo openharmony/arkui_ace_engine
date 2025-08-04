@@ -198,6 +198,7 @@ private:
     void ResetFormAnimationStartTime();
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
+    void ShowIndex(int32_t index);
     void UpdateBorderRadius();
     void RegisterVisibleAreaChange();
     void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
@@ -215,6 +216,7 @@ private:
     bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
+    bool showingIndexByStoppedOrPaused_ = false;
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;

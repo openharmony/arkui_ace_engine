@@ -638,6 +638,49 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNGIssue021, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DragDropEventTestNgIssue022
+ * @tc.desc: Test onActionStart_ function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue022, TestSize.Level1)
+{
+    auto testCase = DragDropStartTestCase(GlobalDraggingInfo(false, false), DragInfo(false, false, false, false),
+        MultiDragInfo(false, false, false), InputEventType::TOUCH_SCREEN, DragDropInitiatingStatus::READY);
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->SetDragForbiddenForcely(testCase.dragInfo.isDragForbidden);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    /**
+     * @tc.steps: step2. call onActionStart_ function.
+     * @tc.expected: step2. onActionStart_ exit.
+     */
+    dragDropEventActuator->InitPanAction();
+    GestureEvent gestureEvent;
+    gestureEvent.SetPassThrough(false);
+    auto callback = *(dragDropEventActuator->panRecognizer_->onActionStart_);
+    if (callback) {
+        callback(gestureEvent);
+    }
+    gestureEvent.SetPassThrough(true);
+    callback = *(dragDropEventActuator->panRecognizer_->onActionStart_);
+    if (callback) {
+        callback(gestureEvent);
+    }
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
  * @tc.name: DragDropProxyTest001
  * @tc.desc: Test onDragStart
  * @tc.type: FUNC

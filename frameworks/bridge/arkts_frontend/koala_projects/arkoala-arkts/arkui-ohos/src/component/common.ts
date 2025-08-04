@@ -8972,6 +8972,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
 }
 export type CommonAttribute = CommonMethod
 export type CustomBuilder = 
+/** @memo */
 () => void;
 export interface OverlayOptions {
     align?: Alignment;

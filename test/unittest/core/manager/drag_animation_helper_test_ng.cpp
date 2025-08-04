@@ -725,5 +725,26 @@ HWTEST_F(DragAnimationHelperTestNg, CreateTextNode001, TestSize.Level1)
     DragAnimationHelper::CreateTextNode(data);
     data.deviceType = SourceType::MOUSE;
     EXPECT_NE(data.textRowNode, nullptr);
+    data.textRowNode = nullptr;
+    data.badgeNumber = 1;
+    DragAnimationHelper::CreateTextNode(data);
+    EXPECT_EQ(data.textRowNode, nullptr);
+}
+
+/**
+ * @tc.name: GetPreviewMenuAnimationRate001
+ * @tc.desc: Test GetPreviewMenuAnimationRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetPreviewMenuAnimationRate001, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    dragDropManager->SetMenuWrapperNode(frameNode);
+
+    auto getsize = DragAnimationHelper::GetPreviewMenuAnimationRate();
+    EXPECT_EQ(getsize, -1);
 }
 } // namespace OHOS::Ace::NG

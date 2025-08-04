@@ -67,4 +67,9 @@ float GridUtils::GetCrossGap(const RefPtr<GridLayoutProperty>& props, const Size
     return axis == Axis::HORIZONTAL ? GetRowGap(props, frameSize.Height()) : GetColumnGap(props, frameSize.Width());
 }
 
+bool GridUtils::CheckNeedCacheLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    return !layoutWrapper || (layoutWrapper->CheckNeedForceMeasureAndLayout() && !layoutWrapper->CheckHasPreMeasured());
+}
+
 } // namespace OHOS::Ace::NG

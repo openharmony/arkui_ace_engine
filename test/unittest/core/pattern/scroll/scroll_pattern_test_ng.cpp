@@ -106,6 +106,43 @@ HWTEST_F(ScrollPatternTestNg, ScrollPatternTestNg004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollPatternTestNg005
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ScrollPatternTestNg005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipLayout = false;
+    dirtySwapConfig.skipMeasure = false;
+    auto result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(result, false);
+    auto paintProperty = scrollPattern->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    paintProperty->UpdateFadingEdge(true);
+    result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(result, true);
+    paintProperty->ResetFadingEdge();
+    dirtySwapConfig.frameSizeChange = true;
+    result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(result, false);
+    dirtySwapConfig.contentSizeChange = true;
+    paintProperty->UpdateContentClip(std::make_pair(ContentClipMode::DEFAULT, nullptr));
+    result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(result, true);
+    dirtySwapConfig.frameSizeChange = false;
+    paintProperty->ResetContentClip();
+    result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Test OnDirtyLayoutWrapperSwap 1,1
  * @tc.type: FUNC

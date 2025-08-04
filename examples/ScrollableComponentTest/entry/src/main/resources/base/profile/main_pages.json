@@ -89,6 +89,10 @@
     "pages/Scroll/ScrollNode",
     "pages/Scroll/ScrollWithLayoutWeight",
     "pages/Scroll/FreeScroll",
+    "pages/Scroll/OnDidScrollAndTranslate",
+    "pages/Scroll/ParentDriveChild",
+    "pages/Scroll/NestedScrollTypeOne",
+    "pages/Scroll/NestedScrollTypeTwo",
     "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
     "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
   ]

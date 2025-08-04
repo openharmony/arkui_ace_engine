@@ -33,6 +33,8 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1348,5 +1350,255 @@ HWTEST_F(NavigationPatternTestSevenNg, SetTitleHeight002, TestSize.Level1)
     auto heightValue = navigationModel.ParseTitleHeight(titleBarNode, resObj);
     EXPECT_EQ(height, heightValue);
     titleBarPattern->OnColorModeChange(1);
+}
+
+/**
+ * @tc.name: BarItemPattern_ToJsonValue001
+ * @tc.desc: Test ToJsonValue when filter.IsFastFilter() is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, BarItemPattern_ToJsonValue001, TestSize.Level1)
+{
+    auto barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 1; // Make IsFastFilter() true
+    barItemPattern->ToJsonValue(json, filter);
+    // Only check that function runs, as fast filter returns early
+    SUCCEED();
+}
+
+/**
+ * @tc.name: BarItemPattern_ToJsonValue002
+ * @tc.desc: Test ToJsonValue when filter.IsFastFilter() is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, BarItemPattern_ToJsonValue002, TestSize.Level1)
+{
+    auto barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+
+    // Set up text node and property
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->propContent_ = u"TestLabel";
+    barItemNode->SetTextNode(textNode);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter; // IsFastFilter() false
+    barItemPattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("label"), "TestLabel");
+}
+
+/**
+ * @tc.name: BarItemPattern_OnThemeScopeUpdate001
+ * @tc.desc: Test OnThemeScopeUpdate with ToolbarIconStatus::ACTIVE and iconNode is SYMBOL_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, BarItemPattern_OnThemeScopeUpdate001, TestSize.Level1)
+{
+    auto barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+
+    // Set icon node as SYMBOL_ETS_TAG
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    barItemNode->SetIconNode(iconNode);
+
+    // Set text node
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    barItemNode->SetTextNode(textNode);
+
+    barItemPattern->SetCurrentIconStatus(ToolbarIconStatus::ACTIVE);
+    bool result = barItemPattern->OnThemeScopeUpdate(0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: BarItemPattern_OnThemeScopeUpdate002
+ * @tc.desc: Test OnThemeScopeUpdate with ToolbarIconStatus::INITIAL and iconNode is not SYMBOL_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, BarItemPattern_OnThemeScopeUpdate002, TestSize.Level1)
+{
+    auto barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+
+    // Set icon node as IMAGE_ETS_TAG (not SYMBOL_ETS_TAG)
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    barItemNode->SetIconNode(iconNode);
+
+    // Set text node
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    barItemNode->SetTextNode(textNode);
+
+    barItemPattern->SetCurrentIconStatus(ToolbarIconStatus::INITIAL);
+    bool result = barItemPattern->OnThemeScopeUpdate(0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: InnerNavigationController_DeletePIPMode001
+ * @tc.desc: Test DeletePIPMode with valid navigation pattern and stack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, InnerNavigationController_DeletePIPMode001, TestSize.Level1)
+{
+    // Create navigation pattern
+    auto navigationPattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    // Create navigation stack
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationPattern->SetNavigationStack(navigationStack);
+
+    // Create InnerNavigationController using std::make_unique since it's not a Referenced subclass
+    auto controller = std::make_unique<InnerNavigationController>(navigationPattern, 1);
+    ASSERT_NE(controller, nullptr);
+
+    // Test DeletePIPMode
+    int32_t handle = 123;
+    controller->DeletePIPMode(handle);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: NavBarNode_InitSoftTransitionPop001
+ * @tc.desc: Test InitSoftTransitionPop function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, NavBarNode_InitSoftTransitionPop001, TestSize.Level1)
+{
+    // Create NavBarNode
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    // Test InitSoftTransitionPop
+    navBarNode->InitSoftTransitionPop();
+
+    // Verify the function executed without crashing
+    auto renderContext = navBarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: NavBarNode_SoftTransitionPushAction001
+ * @tc.desc: Test SoftTransitionPushAction with isStart = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, NavBarNode_SoftTransitionPushAction001, TestSize.Level1)
+{
+    // Create NavBarNode
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    // Test SoftTransitionPushAction with isStart = true
+    navBarNode->SoftTransitionPushAction(true);
+
+    // Verify the function executed without crashing
+    auto renderContext = navBarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: NavBarNode_SoftTransitionPushAction002
+ * @tc.desc: Test SoftTransitionPushAction with isStart = false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, NavBarNode_SoftTransitionPushAction002, TestSize.Level1)
+{
+    // Create NavBarNode
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    // Test SoftTransitionPushAction with isStart = false
+    navBarNode->SoftTransitionPushAction(false);
+
+    // Verify the function executed without crashing
+    auto renderContext = navBarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: NavBarNode_StartSoftTransitionPush001
+ * @tc.desc: Test StartSoftTransitionPush function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, NavBarNode_StartSoftTransitionPush001, TestSize.Level1)
+{
+    // Create NavBarNode
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    // Test StartSoftTransitionPush
+    navBarNode->StartSoftTransitionPush();
+
+    // Verify the function executed without crashing
+    auto renderContext = navBarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: NavBarNode_StartSoftTransitionPop001
+ * @tc.desc: Test StartSoftTransitionPop function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, NavBarNode_StartSoftTransitionPop001, TestSize.Level1)
+{
+    // Create NavBarNode
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    // Test StartSoftTransitionPop
+    navBarNode->StartSoftTransitionPop();
+
+    // Verify the function executed without crashing
+    auto renderContext = navBarNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarNode_MarkIsInitialTitle001
+ * @tc.desc: Test MarkIsInitialTitle with true and false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TitleBarNode_MarkIsInitialTitle001, TestSize.Level1)
+{
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    titleBarNode->MarkIsInitialTitle(true);
+    EXPECT_TRUE(pattern->isInitialTitle_);
+
+    titleBarNode->MarkIsInitialTitle(false);
+    EXPECT_FALSE(pattern->isInitialTitle_);
 }
 } // namespace OHOS::Ace::NG
