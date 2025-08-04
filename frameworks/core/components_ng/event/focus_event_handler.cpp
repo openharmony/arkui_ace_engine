@@ -288,7 +288,8 @@ bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent
             GetFrameName().c_str(), GetFrameId());
         return info.IsStopPropagation();
     } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
-               GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+               GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
+               GetFrameName() == V2::DYNAMIC_COMPONENT_ETS_TAG) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d try to process OnKeyEventInternal",
             GetFrameName().c_str(), GetFrameId());
         return ProcessOnKeyEventInternal(keyEvent);
