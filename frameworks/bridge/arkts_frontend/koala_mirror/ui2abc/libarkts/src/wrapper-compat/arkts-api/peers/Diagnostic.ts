@@ -31,9 +31,8 @@ export class Diagnostic extends ArktsObject {
     global.es2panda._LogDiagnostic(global.context, kind.peer, passStringArray(args), args.length, pos.peer);
   }
 
-  static logDiagnosticWithSuggestion(diagnosticInfo: DiagnosticInfo, suggestionInfo: SuggestionInfo,
-    range: SourceRange): void {
-    global.es2panda._LogDiagnosticWithSuggestion(global.context, diagnosticInfo.peer, suggestionInfo.peer, range.peer);
+  static logDiagnosticWithSuggestion(diagnosticInfo: DiagnosticInfo, suggestionInfo: SuggestionInfo): void {
+    global.es2panda._LogDiagnosticWithSuggestion(global.context, diagnosticInfo.peer, suggestionInfo.peer);
   }
 
 }

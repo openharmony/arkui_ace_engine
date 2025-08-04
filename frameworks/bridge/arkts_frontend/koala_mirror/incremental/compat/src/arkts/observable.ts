@@ -360,13 +360,22 @@ class ObservableArray<T> extends Array<T> {
         return result
     }
 
-    override push(...items: T[]): number {
+    override pushArray(...items: T[]): number {
         const handler = this.handler
         if (handler) {
             handler.onModify()
             proxyChildrenOnly(items, handler)
         }
-        return super.push(...items)
+        return super.pushArray(...items)
+    }
+
+    override pushOne(value: T): number {
+        const handler = this.handler
+        if (handler) {
+            handler.onModify()
+            value = observableProxy(value, handler)
+        }
+        return super.pushOne(value)
     }
 
     override pushECMA(...items: T[]): number {

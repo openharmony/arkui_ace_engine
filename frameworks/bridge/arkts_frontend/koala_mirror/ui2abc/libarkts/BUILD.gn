@@ -205,7 +205,7 @@ npm_cmd("regenerate") {
         "$ui2abc_root:ui2abc_panda_sdk"
     ]
     project_path = rebase_path(".")
-    run_tasks = [ "regenerate:ohos" ]
+    run_tasks = [ "regenerate" ]
 }
 
 if (current_toolchain == host_toolchain) {
@@ -225,8 +225,7 @@ npm_cmd("es2panda.js") {
         "$target_out_dir/es2panda.js"
     ]
     deps = [
-        ":es2panda_copy_lib",
-        "$ui2abc_root:ui2abc_panda_sdk"
+        ":es2panda_copy_lib"
     ]
     project_path = rebase_path(".")
     run_tasks = [ "compile:koala:interop", "compile:js" ]

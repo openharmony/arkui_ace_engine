@@ -25,7 +25,6 @@
     "config": {
         "gen_version": "2.1.9-arktscgen-6",
         "panda_sdk_path": "../../incremental/tools/panda/node_modules/@panda/sdk",
-        "ohos_panda_sdk_path": "../build/sdk",
         "panda_sdk_version": "next"
     },
     "dependencies": {
@@ -68,7 +67,6 @@
         "run:memo": "npm run compile && npm run compile:plugins && npm run compile --prefix ../memo-plugin && npm run memo",
         "run:abc": "$npm_package_config_panda_sdk_path/linux_host_tools/bin/ark --load-runtimes=ets --boot-panda-files=$npm_package_config_panda_sdk_path/ets/etsstdlib.abc ./main.abc main.ETSGLOBAL::main",
         "mocha": "PANDA_SDK_PATH=${PANDA_SDK_PATH:=$npm_package_config_panda_sdk_path} TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register --reporter-option maxDiffSize=0",
-        "mocha:ohos": "PANDA_SDK_PATH=${PANDA_SDK_PATH:=$npm_package_config_ohos_panda_sdk_path} TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register --reporter-option maxDiffSize=0",
         "test:light": "npm run mocha",
         "test": "npm run compile:native && npm run test:light",
         "test:golden": "npm run compile:native && TEST_GOLDEN=1 npm run test:light",
@@ -78,8 +76,7 @@
         "panda:sdk:install": "cd ../../incremental/tools/panda && echo \"Installing panda sdk $npm_package_config_panda_sdk_version\" && PANDA_SDK_VERSION=$npm_package_config_panda_sdk_version npm run panda:sdk:install",
         "panda:sdk:reinstall": "npm run panda:sdk:clean && npm run panda:sdk:install",
         "regenerate:current": "rimraf -rf src/generated && npm run compile -C ../../../arktscgen && node ../../../arktscgen --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize --debug",
-        "regenerate": "rimraf -rf src/generated && npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
-        "regenerate:ohos": "npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path ${PANDA_SDK_PATH:=$npm_package_config_ohos_panda_sdk_path} --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
+        "regenerate": "rimraf -rf src/generated && npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path ${PANDA_SDK_PATH:=$npm_package_config_panda_sdk_path} --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
         "reinstall:regenerate": "npm run panda:sdk:reinstall && npm run regenerate && git diff --shortstat"
     }
 }

@@ -256,14 +256,16 @@ export function generateTsDeclarationsFromContext(
   outputDeclEts: string,
   outputEts: string,
   exportAll: boolean,
-  isolated: boolean
+  isolated: boolean,
+  recordFile: string
 ): KInt {
   return global.es2panda._GenerateTsDeclarationsFromContext(
     global.context,
     passString(outputDeclEts),
     passString(outputEts),
     exportAll,
-    isolated
+    isolated,
+    recordFile
   );
 }
 
