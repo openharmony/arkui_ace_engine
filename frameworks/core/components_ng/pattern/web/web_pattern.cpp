@@ -2390,6 +2390,8 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->SetCustomDragEvent(dragEvent_, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::NONE);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop, init drag event done, isReceivedArkDrag_ is %{public}d",
+        (int)isReceivedArkDrag_);
 }
 
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
@@ -2500,13 +2502,20 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
             "fileUri ToString:%{public}zu", fileUri.ToString().length());
         std::string uriRealPath = FileUriHelper::GetRealPath(url);
-        if (!uriRealPath.empty() && access(uriRealPath.c_str(), F_OK) == 0) { // file exist
-            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-            "url real path:%{public}zu", uriRealPath.length());
+        if (uriRealPath.empty()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId, url is empty ");
+            continue;
+        }
+        int access_result = access(uriRealPath.c_str(), F_OK);
+        if (access_result == 0) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,url real path:%{public}zu",
+                uriRealPath.length());
             delegate_->dragData_->SetFileUri(uriRealPath);
         } else {
-            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-                "url is empty or not exist, uriRealPath:%{public}zu", uriRealPath.length());
+            TAG_LOGW(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragDropId, url can't access, "
+                "uriRealPath:%{public}zu, access_result:%{public}d",
+                uriRealPath.length(), access_result);
         }
     }
 }
@@ -2585,6 +2594,9 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
         return;
     }
     CHECK_NULL_VOID(delegate_);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "DragDrop, HandleOnDragLeave, isDragStartFromWeb_ %{public}d, isReceivedArkDrag_ %{public}d",
+        (int)isDragStartFromWeb_, (int)isReceivedArkDrag_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
     isReceivedArkDrag_ = isDragStartFromWeb_ ? isReceivedArkDrag_ : false;
