@@ -120,8 +120,7 @@ double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
     }
     std::vector<double> param(VelocityTracker::LEAST_SQUARE_PARAM_NUM, 0);
     auto x = axis.GetXVals().back();
-    // curve is param[0] * x^2 + param[1] * x + param[2]
-    // the velocity is 2 * param[0] * x + param[1];
+    // the velocity is 2 * param[0] * x + param[1]; with param[2] unused
     double velocity = 0.0;
     if (axis.GetLeastSquareParams(param)) {
         velocity = 2 * param[0] * x + param[1];      // 2: const of formula
