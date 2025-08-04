@@ -940,6 +940,14 @@ static ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unuse
     return dragPreviewObj;
 }
 
+void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr)
+{
+    Ani::DragPreview* ptr = reinterpret_cast<Ani::DragPreview *>(dragPreviewPtr);
+    delete ptr;
+    ptr = nullptr;
+    dragPreviewPtr = 0;
+}
+
 void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
     ani_object colorObj, ani_long dragPreviewPtr)
 {
@@ -983,6 +991,7 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
         .aniHandleDragActionStartDrag = NG::ANIHandleDragActionStartDrag,
         .createDragEventPeer = NG::CreateDragEventPeer,
         .aniGetDragPreview = NG::ANIGetDragPreview,
+        .aniCleanDragPreview = NG::ANICleanDragPreview,
         .aniDragPreviewSetForegroundColor = NG::ANIDragPreviewSetForegroundColor,
         .aniDragPreviewAnimate = NG::ANIDragPreviewAnimate,
         .aniDragActionSetDragEventStrictReportingEnabled = NG::ANIDragActionSetDragEventStrictReportingEnabled,

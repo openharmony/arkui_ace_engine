@@ -165,6 +165,8 @@ export class ArkUIAniModule {
 
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
+    native static _DragController_cleanDragAction(dragActionptr: KPointer): void
+    native static _DragController_cleanDragPreview(dragPreviewptr: KPointer): void
 
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void

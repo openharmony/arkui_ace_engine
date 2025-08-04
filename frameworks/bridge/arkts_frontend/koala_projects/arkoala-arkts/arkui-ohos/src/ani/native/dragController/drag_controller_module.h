@@ -43,6 +43,8 @@ void ANIDragActionCancelDataLoading(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
 void ANIDragActionNotifyDragStartReques(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus);
+void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
+void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_DRAG_CONTROLLER_MODULE_H
