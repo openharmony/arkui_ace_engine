@@ -167,7 +167,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
 }
 
 
-static ani_status SetSecurityUiExtensionWant(
+static ani_status NativeSecurityUiExtension::SetSecurityUiExtensionWant(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj)
 {
@@ -203,7 +203,7 @@ TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
     return ANI_OK;
 }
 
-static ani_status SetSecurityOnError(
+static ani_status NativeSecurityUiExtension::SetSecurityOnError(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -268,7 +268,7 @@ static ani_status SetSecurityOnError(
     return ANI_OK;
 }
 
-static ani_status SetSecurityOnRecive(
+static ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -325,7 +325,7 @@ static ani_status SetSecurityOnRecive(
     return ANI_OK;
 }
 
-static ani_status SetSecurityOnTerminate(
+static ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -393,7 +393,7 @@ static ani_status SetSecurityOnTerminate(
 
 
 
-static ani_status SetSecurityOnRelease(
+static ani_status NativeSecurityUiExtension::SetSecurityOnRelease(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -402,7 +402,7 @@ static ani_status SetSecurityOnRelease(
     return ANI_OK;
 }
 
-static ani_status SetSecurityOnDrawReady(
+static ani_status NativeSecurityUiExtension::SetSecurityOnDrawReady(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -411,7 +411,7 @@ static ani_status SetSecurityOnDrawReady(
     return ANI_OK;
 }
 
-static ani_status SetSecurityOnResult(
+static ani_status NativeSecurityUiExtension::SetSecurityOnResult(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
