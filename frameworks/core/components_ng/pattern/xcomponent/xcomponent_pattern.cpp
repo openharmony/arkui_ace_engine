@@ -641,9 +641,12 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weak = WeakClaim(this), geometryNode]() {
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
         pattern->UpdateAnalyzerUIConfig(geometryNode);
     });
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
