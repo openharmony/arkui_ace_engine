@@ -784,11 +784,14 @@ void JSText::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
+    if (!controller) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::Create controller is null");
+    }
     if (jsController) {
         jsController->SetController(controller);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
             auto styledString = jsController->GetStyledString();
-            if (styledString) {
+            if (styledString && controller) {
                 controller->SetStyledString(styledString, false);
                 jsController->ClearStyledString();
             }
