@@ -217,6 +217,8 @@ void VelocityTracker::DumpVelocityPoints() const
     auto func = [](const LeastSquareImpl &axis, const char* str) {
         const auto& xVal = axis.GetXVals();
         const auto& yVal = axis.GetYVals();
+        if (xVal.size() == 0 || yVal.size() == 0)
+            return;
         int32_t i = static_cast<int32_t>(xVal.size());
         auto baseVal = yVal[0];
         std::stringstream oss;
