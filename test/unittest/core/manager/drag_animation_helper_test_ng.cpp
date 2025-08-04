@@ -723,6 +723,8 @@ HWTEST_F(DragAnimationHelperTestNg, CreateTextNode001, TestSize.Level1)
     data.badgeNumber = DEFAULT_BADGE_NUM;
     EXPECT_EQ(data.textRowNode, nullptr);
     DragAnimationHelper::CreateTextNode(data);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    DragAnimationHelper::CreateTextNode(data);
     data.deviceType = SourceType::MOUSE;
     EXPECT_NE(data.textRowNode, nullptr);
     data.textRowNode = nullptr;

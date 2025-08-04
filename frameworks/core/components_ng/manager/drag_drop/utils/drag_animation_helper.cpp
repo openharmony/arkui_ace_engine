@@ -1283,8 +1283,15 @@ void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     auto windowScale = dragDropManager->GetWindowScale();
-    textRowRenderContext->UpdateOffset(OffsetT<Dimension>(Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
-        Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        textRowRenderContext->UpdateOffset(
+            OffsetT<Dimension>(Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
+                Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    } else {
+        textRowRenderContext->UpdateOffset(
+            OffsetT<Dimension>(Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
+                Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    }
     textRowProperty->UpdateAlignRules(
         { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
             { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });
