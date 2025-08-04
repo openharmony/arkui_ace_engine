@@ -18,13 +18,13 @@ import {
     CustomOutlines, Borders, CustomBorders, Shapes, CustomShapes
 } from './index';
 import { Length } from 'arkui/component/units';
-import { ArkResourcesHelper } from './ArkResourcesHelper';
 import {
     ArkSystemCornerRadius,
     ArkSystemPaddings,
     ArkSystemBorders,
     ArkSystemOutlines,
 } from './system/ArkSystemShapes';
+import { _r } from 'arkui/component/resources';
 
 export class ArkCornerRadiusImpl implements CornerRadius {
     none: Length = 0;
@@ -157,12 +157,12 @@ export class ArkPaddingsImpl implements Paddings {
 }
 
 export class ArkOutlinesImpl implements Outlines {
-    none: Dimension = ArkResourcesHelper.$r('sys.float.outline_none');
-    xs: Dimension = ArkResourcesHelper.$r('sys.float.outline_extra_small');
-    s: Dimension = ArkResourcesHelper.$r('sys.float.outline_small');
-    m: Dimension = ArkResourcesHelper.$r('sys.float.outline_medium');
-    l: Dimension = ArkResourcesHelper.$r('sys.float.outline_larger');
-    xl: Dimension = ArkResourcesHelper.$r('sys.float.outline_extra_larger');
+    none: Dimension = _r('', '', 'sys.float.outline_none');
+    xs: Dimension = _r('', '', 'sys.float.outline_extra_small');
+    s: Dimension = _r('', '', 'sys.float.outline_small');
+    m: Dimension = _r('', '', 'sys.float.outline_medium');
+    l: Dimension = _r('', '', 'sys.float.outline_larger');
+    xl: Dimension = _r('', '', 'sys.float.outline_extra_larger');
 
     constructor(outlines: CustomOutlines | undefined, baselineOutlines: Outlines) {
         ArkOutlinesImpl.assign(this, baselineOutlines);

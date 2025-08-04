@@ -14,7 +14,7 @@
  */
 
 import { Typography, TypographyStyle } from '../index';
-import { ArkResourcesHelper } from '../ArkResourcesHelper';
+import { _r } from 'arkui/component/resources';
 
 export class ArkTypographyWeights {
     public static thin = 100;
@@ -58,71 +58,71 @@ export class ArkSystemTypography implements Typography {
         // Display
         this.displayLarge = {
             weight: ArkTypographyWeights.light,
-            size: ArkResourcesHelper.$r('sys.float.Display_L')
+            size: _r('', '', 'sys.float.Display_L')
         };
         this.displayMiddle = {
             weight: ArkTypographyWeights.light,
-            size: ArkResourcesHelper.$r('sys.float.Display_M')
+            size: _r('', '', 'sys.float.Display_M')
         };
         this.displaySmall = {
             weight: ArkTypographyWeights.light,
-            size: ArkResourcesHelper.$r('sys.float.Display_S')
+            size: _r('', '', 'sys.float.Display_S')
         };
 
         // Title
         this.titleLarge = {
             weight: ArkTypographyWeights.bold,
-            size: ArkResourcesHelper.$r('sys.float.Title_L')
+            size: _r('', '', 'sys.float.Title_L')
         };
         this.titleMiddle = {
             weight: ArkTypographyWeights.bold,
-            size: ArkResourcesHelper.$r('sys.float.Title_M')
+            size: _r('', '', 'sys.float.Title_M')
         };
         this.titleSmall = {
             weight: ArkTypographyWeights.bold,
-            size: ArkResourcesHelper.$r('sys.float.Title_S')
+            size: _r('', '', 'sys.float.Title_S')
         };
 
         // Subtitle
         this.subtitleLarge = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Subtitle_L')
+            size: _r('', '', 'sys.float.Subtitle_L')
         };
         this.subtitleMiddle = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Subtitle_M')
+            size: _r('', '', 'sys.float.Subtitle_M')
         };
         this.subtitleSmall = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Subtitle_S')
+            size: _r('', '', 'sys.float.Subtitle_S')
         };
 
         // Body
         this.bodyLarge = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Body_L')
+            size: _r('', '', 'sys.float.Body_L')
         };
         this.bodyMiddle = {
             weight: ArkTypographyWeights.regular,
-            size: ArkResourcesHelper.$r('sys.float.Body_M')
+            size: _r('', '', 'sys.float.Body_M')
         };
         this.bodySmall = {
             weight: ArkTypographyWeights.regular,
-            size: ArkResourcesHelper.$r('sys.float.Body_S')
+            size: _r('', '', 'sys.float.Body_S')
         };
 
         // Caption
         this.captionLarge = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Caption_L')
+            size: _r('', '', 'sys.float.Caption_L')
         };
         this.captionMiddle = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Caption_M')
+            size: _r('', '', 'sys.float.Caption_M')
         };
         this.captionSmall = {
             weight: ArkTypographyWeights.medium,
-            size: ArkResourcesHelper.$r('sys.float.Caption_S')
+            size: _r('', '', 'sys.float.Caption_S')
         };
     }
 }

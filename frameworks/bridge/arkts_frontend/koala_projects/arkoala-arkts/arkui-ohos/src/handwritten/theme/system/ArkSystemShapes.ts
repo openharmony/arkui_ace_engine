@@ -14,8 +14,8 @@
  */
 
 import { CornerRadius, Paddings, Outlines, Dimension, Borders, Shapes } from '../index';
-import { ArkResourcesHelper } from '../ArkResourcesHelper';
 import { Length } from 'arkui/component/units';
+import { _r } from 'arkui/component/resources';
 
 export class ArkSystemCornerRadius implements CornerRadius {
     none: Length;
@@ -34,20 +34,20 @@ export class ArkSystemCornerRadius implements CornerRadius {
     level16: Length;
 
     constructor() {
-        this.none = ArkResourcesHelper.$r('sys.float.corner_radius_none');
-        this.level1 = ArkResourcesHelper.$r('sys.float.corner_radius_level1');
-        this.level2 = ArkResourcesHelper.$r('sys.float.corner_radius_level2');
-        this.level3 = ArkResourcesHelper.$r('sys.float.corner_radius_level3');
-        this.level4 = ArkResourcesHelper.$r('sys.float.corner_radius_level4');
-        this.level5 = ArkResourcesHelper.$r('sys.float.corner_radius_level5');
-        this.level6 = ArkResourcesHelper.$r('sys.float.corner_radius_level6');
-        this.level7 = ArkResourcesHelper.$r('sys.float.corner_radius_level7');
-        this.level8 = ArkResourcesHelper.$r('sys.float.corner_radius_level8');
-        this.level9 = ArkResourcesHelper.$r('sys.float.corner_radius_level9');
-        this.level10 = ArkResourcesHelper.$r('sys.float.corner_radius_level10');
-        this.level11 = ArkResourcesHelper.$r('sys.float.corner_radius_level11');
-        this.level12 = ArkResourcesHelper.$r('sys.float.corner_radius_level12');
-        this.level16 = ArkResourcesHelper.$r('sys.float.corner_radius_level16');
+        this.none = _r('', '', 'sys.float.corner_radius_none');
+        this.level1 = _r('', '', 'sys.float.corner_radius_level1');
+        this.level2 = _r('', '', 'sys.float.corner_radius_level2');
+        this.level3 = _r('', '', 'sys.float.corner_radius_level3');
+        this.level4 = _r('', '', 'sys.float.corner_radius_level4');
+        this.level5 = _r('', '', 'sys.float.corner_radius_level5');
+        this.level6 = _r('', '', 'sys.float.corner_radius_level6');
+        this.level7 = _r('', '', 'sys.float.corner_radius_level7');
+        this.level8 = _r('', '', 'sys.float.corner_radius_level8');
+        this.level9 = _r('', '', 'sys.float.corner_radius_level9');
+        this.level10 = _r('', '', 'sys.float.corner_radius_level10');
+        this.level11 = _r('', '', 'sys.float.corner_radius_level11');
+        this.level12 = _r('', '', 'sys.float.corner_radius_level12');
+        this.level16 = _r('', '', 'sys.float.corner_radius_level16');
     }
 }
 
@@ -71,23 +71,23 @@ export class ArkSystemPaddings implements Paddings {
     level36: Length;
 
     constructor() {
-        this.level0 = ArkResourcesHelper.$r('sys.float.padding_level0');
-        this.level1 = ArkResourcesHelper.$r('sys.float.padding_level1');
-        this.level2 = ArkResourcesHelper.$r('sys.float.padding_level2');
-        this.level3 = ArkResourcesHelper.$r('sys.float.padding_level3');
-        this.level4 = ArkResourcesHelper.$r('sys.float.padding_level4');
-        this.level5 = ArkResourcesHelper.$r('sys.float.padding_level5');
-        this.level6 = ArkResourcesHelper.$r('sys.float.padding_level6');
-        this.level7 = ArkResourcesHelper.$r('sys.float.padding_level7');
-        this.level8 = ArkResourcesHelper.$r('sys.float.padding_level8');
-        this.level9 = ArkResourcesHelper.$r('sys.float.padding_level9');
-        this.level10 = ArkResourcesHelper.$r('sys.float.padding_level10');
-        this.level11 = ArkResourcesHelper.$r('sys.float.padding_level11');
-        this.level12 = ArkResourcesHelper.$r('sys.float.padding_level12');
-        this.level16 = ArkResourcesHelper.$r('sys.float.padding_level16');
-        this.level24 = ArkResourcesHelper.$r('sys.float.padding_level24');
-        this.level32 = ArkResourcesHelper.$r('sys.float.padding_level32');
-        this.level36 = ArkResourcesHelper.$r('sys.float.padding_level36');
+        this.level0 = _r('', '', 'sys.float.padding_level0');
+        this.level1 = _r('', '', 'sys.float.padding_level1');
+        this.level2 = _r('', '', 'sys.float.padding_level2');
+        this.level3 = _r('', '', 'sys.float.padding_level3');
+        this.level4 = _r('', '', 'sys.float.padding_level4');
+        this.level5 = _r('', '', 'sys.float.padding_level5');
+        this.level6 = _r('', '', 'sys.float.padding_level6');
+        this.level7 = _r('', '', 'sys.float.padding_level7');
+        this.level8 = _r('', '', 'sys.float.padding_level8');
+        this.level9 = _r('', '', 'sys.float.padding_level9');
+        this.level10 = _r('', '', 'sys.float.padding_level10');
+        this.level11 = _r('', '', 'sys.float.padding_level11');
+        this.level12 = _r('', '', 'sys.float.padding_level12');
+        this.level16 = _r('', '', 'sys.float.padding_level16');
+        this.level24 = _r('', '', 'sys.float.padding_level24');
+        this.level32 = _r('', '', 'sys.float.padding_level32');
+        this.level36 = _r('', '', 'sys.float.padding_level36');
     }
 }
 
@@ -100,12 +100,12 @@ export class ArkSystemOutlines implements Outlines {
     xl: Dimension;
 
     constructor() {
-        this.none = ArkResourcesHelper.$r('sys.float.outline_none');
-        this.xs = ArkResourcesHelper.$r('sys.float.outline_extra_small');
-        this.s = ArkResourcesHelper.$r('sys.float.outline_small');
-        this.m = ArkResourcesHelper.$r('sys.float.outline_medium');
-        this.l = ArkResourcesHelper.$r('sys.float.outline_larger');
-        this.xl = ArkResourcesHelper.$r('sys.float.outline_extra_larger');
+        this.none = _r('', '', 'sys.float.outline_none');
+        this.xs = _r('', '', 'sys.float.outline_extra_small');
+        this.s = _r('', '', 'sys.float.outline_small');
+        this.m = _r('', '', 'sys.float.outline_medium');
+        this.l = _r('', '', 'sys.float.outline_larger');
+        this.xl = _r('', '', 'sys.float.outline_extra_larger');
     }
 }
 
@@ -118,12 +118,12 @@ export class ArkSystemBorders implements Borders {
     xl: Length;
 
     constructor() {
-        this.none = ArkResourcesHelper.$r('sys.float.border_none');
-        this.xs = ArkResourcesHelper.$r('sys.float.border_extra_small');
-        this.s = ArkResourcesHelper.$r('sys.float.border_small');
-        this.m = ArkResourcesHelper.$r('sys.float.border_medium');
-        this.l = ArkResourcesHelper.$r('sys.float.border_larger');
-        this.xl = ArkResourcesHelper.$r('sys.float.border_extra_larger');
+        this.none = _r('', '', 'sys.float.border_none');
+        this.xs = _r('', '', 'sys.float.border_extra_small');
+        this.s = _r('', '', 'sys.float.border_small');
+        this.m = _r('', '', 'sys.float.border_medium');
+        this.l = _r('', '', 'sys.float.border_larger');
+        this.xl = _r('', '', 'sys.float.border_extra_larger');
     }
 }
 

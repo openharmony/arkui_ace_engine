@@ -15,75 +15,72 @@
 
 import { ResourceColor, Color } from 'arkui/component';
 import { ArkThemeScopeManager } from 'arkui/handwritten/theme/ArkThemeScopeManager';
-import { ArkResourcesHelper } from 'arkui/handwritten/theme/ArkResourcesHelper';
 import { ArkSystemShapes } from 'arkui/handwritten/theme/system/ArkSystemShapes';
 import { ArkSystemTypography } from 'arkui/handwritten/theme/system/ArkSystemTypography';
 import { Shapes, Typography, CustomTypography, CustomShapes, BrandColors, ArkThemeResource } from 'arkui/handwritten/theme';
 import { Resource } from 'global.resource';
 import { ArkUIAniModule } from 'arkui.ani';
+import { _r } from 'arkui/component/resources';
 
 export class Colors {
-    brand: ResourceColor = ArkResourcesHelper.$r('sys.color.brand', 125830976);
-    warning: ResourceColor = ArkResourcesHelper.$r('sys.color.warning', 125830979);
-    alert: ResourceColor = ArkResourcesHelper.$r('sys.color.alert', 125830980);
-    confirm: ResourceColor = ArkResourcesHelper.$r('sys.color.confirm', 125830981);
+    brand: ResourceColor = _r(125830976, 10001, "", "");
+    warning: ResourceColor = _r(125830979, 10001, "", "");
+    alert: ResourceColor = _r(125830980, 10001, "", "");
+    confirm: ResourceColor = _r(125830981, 10001, "", "");
 
-    fontPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.font_primary', 125830982);
-    fontSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.font_secondary', 125830983);
-    fontTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.font_tertiary', 125830984);
-    fontFourth: ResourceColor = ArkResourcesHelper.$r('sys.color.font_fourth', 125830985);
-    fontEmphasize: ResourceColor = ArkResourcesHelper.$r('sys.color.font_emphasize', 125830986);
+    fontPrimary: ResourceColor = _r(125830982, 10001, "", "");
+    fontSecondary: ResourceColor = _r(125830983, 10001, "", "");
+    fontTertiary: ResourceColor = _r(125830984, 10001, "", "");
+    fontFourth: ResourceColor = _r(125830985, 10001, "", "");
+    fontEmphasize: ResourceColor = _r(125830986, 10001, "", "");
 
-    fontOnPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.font_on_primary', 125830987);
-    fontOnSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.font_on_secondary', 125830988);
-    fontOnTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.font_on_tertiary', 125830989);
-    fontOnFourth: ResourceColor = ArkResourcesHelper.$r('sys.color.font_on_fourth', 125830990);
+    fontOnPrimary: ResourceColor = _r(125830987, 10001, "", "");
+    fontOnSecondary: ResourceColor = _r(125830988, 10001, "", "");
+    fontOnTertiary: ResourceColor = _r(125830989, 10001, "", "");
+    fontOnFourth: ResourceColor = _r(125830990, 10001, "", "");
 
-    iconPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_primary', 125830991);
-    iconSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_secondary', 125830992);
-    iconTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_tertiary', 125830993);
-    iconFourth: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_fourth', 125830994);
-    iconEmphasize: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_emphasize', 125830995);
-    iconSubEmphasize: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_sub_emphasize', 125830996);
+    iconPrimary: ResourceColor = _r(125830991, 10001, "", "");
+    iconSecondary: ResourceColor = _r(125830992, 10001, "", "");
+    iconTertiary: ResourceColor = _r(125830993, 10001, "", "");
+    iconFourth: ResourceColor = _r(125830994, 10001, "", "");
+    iconEmphasize: ResourceColor = _r(125830995, 10001, "", "");
+    iconSubEmphasize: ResourceColor = _r(125830996, 10001, "", "");
 
-    iconOnPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_on_primary', 125831057);
-    iconOnSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_on_secondary', 125831058);
-    iconOnTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_on_tertiary', 125831059);
-    iconOnFourth: ResourceColor = ArkResourcesHelper.$r('sys.color.icon_on_fourth', 125831060);
+    iconOnPrimary: ResourceColor = _r(125831057, 10001, "", "");
+    iconOnSecondary: ResourceColor = _r(125831058, 10001, "", "");
+    iconOnTertiary: ResourceColor = _r(125831059, 10001, "", "");
+    iconOnFourth: ResourceColor = _r(125831060, 10001, "", "");
 
-    backgroundPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.background_primary', 125831061);
-    backgroundSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.background_secondary', 125831062);
-    backgroundTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.background_tertiary', 125831063);
-    backgroundFourth: ResourceColor = ArkResourcesHelper.$r('sys.color.background_fourth', 125831064);
-    backgroundEmphasize: ResourceColor = ArkResourcesHelper.$r('sys.color.background_emphasize', 125831065);
+    backgroundPrimary: ResourceColor = _r(125831061, 10001, "", "");
+    backgroundSecondary: ResourceColor = _r(125831062, 10001, "", "");
+    backgroundTertiary: ResourceColor = _r(125831063, 10001, "", "");
+    backgroundFourth: ResourceColor = _r(125831064, 10001, "", "");
+    backgroundEmphasize: ResourceColor = _r(125831065, 10001, "", "");
 
-    compForegroundPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_foreground_primary', 125831003);
-    compBackgroundPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_primary', 125831004);
-    compBackgroundPrimaryTran: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_primary_tran');
-    compBackgroundPrimaryContrary: ResourceColor = ArkResourcesHelper.$r(
-        'sys.color.comp_background_primary_contrary',
-        125831005
-    );
-    compBackgroundGray: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_gray', 125831006);
-    compBackgroundSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_secondary', 125831007);
-    compBackgroundTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_tertiary', 125831008);
-    compBackgroundEmphasize: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_emphasize', 125831009);
-    compBackgroundNeutral: ResourceColor = ArkResourcesHelper.$r('sys.color.neutral', 125831066);
-    compEmphasizeSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_emphasize_secondary', 125831011);
-    compEmphasizeTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_emphasize_tertiary', 125831012);
-    compDivider: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_divider', 125831013);
-    compCommonContrary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_common_contrary', 125831014);
-    compBackgroundFocus: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_background_focus', 125831015);
-    compFocusedPrimary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_focused_primary', 125831016);
-    compFocusedSecondary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_focused_secondary', 125831017);
-    compFocusedTertiary: ResourceColor = ArkResourcesHelper.$r('sys.color.comp_focused_tertiary', 125831018);
+    compForegroundPrimary: ResourceColor = _r(125831003, 10001, "", "");
+    compBackgroundPrimary: ResourceColor = _r(125831004, 10001, "", "");
+    compBackgroundPrimaryTran: ResourceColor = _r("", "", 'sys.color.comp_background_primary_tran');
+    compBackgroundPrimaryContrary: ResourceColor = _r(125831005, 10001, "", "");
+    compBackgroundGray: ResourceColor = _r(125831006, 10001, "", "");
+    compBackgroundSecondary: ResourceColor = _r(125831007, 10001, "", "");
+    compBackgroundTertiary: ResourceColor = _r(125831008, 10001, "", "");
+    compBackgroundEmphasize: ResourceColor = _r(125831009, 10001, "", "");
+    compBackgroundNeutral: ResourceColor = _r(125831066, 10001, "", "");
+    compEmphasizeSecondary: ResourceColor = _r(125831011, 10001, "", "");
+    compEmphasizeTertiary: ResourceColor = _r(125831012, 10001, "", "");
+    compDivider: ResourceColor = _r(125831013, 10001, "", "");
+    compCommonContrary: ResourceColor = _r(125831014, 10001, "", "");
+    compBackgroundFocus: ResourceColor = _r(125831015, 10001, "", "");
+    compFocusedPrimary: ResourceColor = _r(125831016, 10001, "", "");
+    compFocusedSecondary: ResourceColor = _r(125831017, 10001, "", "");
+    compFocusedTertiary: ResourceColor = _r(125831018, 10001, "", "");
 
-    interactiveHover: ResourceColor = ArkResourcesHelper.$r('sys.color.interactive_hover', 125831019);
-    interactivePressed: ResourceColor = ArkResourcesHelper.$r('sys.color.interactive_pressed', 125831020);
-    interactiveFocus: ResourceColor = ArkResourcesHelper.$r('sys.color.interactive_focus', 125831021);
-    interactiveActive: ResourceColor = ArkResourcesHelper.$r('sys.color.interactive_active', 125831022);
-    interactiveSelect: ResourceColor = ArkResourcesHelper.$r('sys.color.interactive_select', 125831023);
-    interactiveClick: ResourceColor = ArkResourcesHelper.$r('sys.color.interactive_click', 125831024);
+    interactiveHover: ResourceColor = _r(125831019, 10001, "", "");
+    interactivePressed: ResourceColor = _r(125831020, 10001, "", "");
+    interactiveFocus: ResourceColor = _r(125831021, 10001, "", "");
+    interactiveActive: ResourceColor = _r(125831022, 10001, "", "");
+    interactiveSelect: ResourceColor = _r(125831023, 10001, "", "");
+    interactiveClick: ResourceColor = _r(125831024, 10001, "", "");
 
     constructor() { }
 

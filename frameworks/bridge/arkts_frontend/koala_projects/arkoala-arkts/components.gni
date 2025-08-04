@@ -401,7 +401,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkXComponentNode.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/FrameNodeTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
-  "arkui-preprocessed/arkui/handwritten/theme/ArkResourcesHelper.ets",
   "arkui-preprocessed/arkui/handwritten/theme/ArkShapesImpl.ets",
   "arkui-preprocessed/arkui/handwritten/theme/ArkThemeBase.ets",
   "arkui-preprocessed/arkui/handwritten/theme/ArkThemeCache.ets",
