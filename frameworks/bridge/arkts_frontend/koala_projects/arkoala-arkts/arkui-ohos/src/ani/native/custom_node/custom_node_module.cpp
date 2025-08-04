@@ -160,7 +160,29 @@ ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     if (!modifier) {
         return nullptr;
     }
-    ani_object res = modifier->getCustomNodeAniModifier()->queryNavigationInfo(env, node);
+    ArkUINavigationInfo info;
+    modifier->getCustomNodeAniModifier()->queryNavigationInfo(node, info);
+
+    ani_object res = {};
+    static const char* className = "@ohos.arkui.observer.uiObserver.NavigationInfoImpl";
+    ani_class cls;
+    env->FindClass(className, &cls);
+    ani_method navInfoCtor;
+    env->Class_FindMethod(cls, "<ctor>", nullptr, &navInfoCtor);
+    env->Object_New(cls, navInfoCtor, &res);
+
+    // set navigationId
+    std::string navigationId = info.navigationId;
+    ani_string id_string{};
+    env->String_NewUTF8(navigationId.c_str(), navigationId.size(), &id_string);
+    env->Object_SetPropertyByName_Ref(res, "navigationId", id_string);
+    
+    // set pathStack
+    ani_class interCls;
+    env->FindClass("arkui.component.navigation.NavPathStackInternal", &interCls);
+    ani_ref pathStack;
+    env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr", nullptr, &pathStack, info.navPathStack);
+    env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
     return res;
 }
 
@@ -170,7 +192,43 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     if (!modifier) {
         return nullptr;
     }
-    ani_object res = modifier->getCustomNodeAniModifier()->queryNavDestinationInfo(env, node);
+    ArkUINavDestinationInfo info;
+    modifier->getCustomNodeAniModifier()->queryNavDestinationInfo(node, info);
+
+    ani_object res = {};
+    static const char* className = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
+    ani_class cls;
+    env->FindClass(className, &cls);
+    ani_method routerInfoCtor;
+    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Object_New(cls, routerInfoCtor, &res);
+
+    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    env->Object_SetPropertyByName_Int(res, "index", info.index);
+
+    ani_string navDesName {};
+    env->String_NewUTF8(info.name.c_str(), info.name.size(), &navDesName);
+    env->Object_SetPropertyByName_Ref(res, "name", navDesName);
+
+    ani_string navDesId {};
+    env->String_NewUTF8(info.navDestinationId.c_str(), info.navDestinationId.size(), &navDesId);
+    env->Object_SetPropertyByName_Ref(res, "navDestinationId", navDesId);
+
+    ani_string navigationId {};
+    env->String_NewUTF8(info.navigationId.c_str(), info.navigationId.size(), &navigationId);
+    env->Object_SetPropertyByName_Ref(res, "navigationId", navigationId);
+    
+    ani_enum navDesState;
+    env->FindEnum("@ohos.arkui.observer.uiObserver.NavDestinationState", &navDesState);
+    ani_enum_item navDesStateItem;
+    env->Enum_GetEnumItemByIndex(navDesState, info.state, &navDesStateItem);
+    env->Object_SetPropertyByName_Ref(res, "state", navDesStateItem);
+    
+    ani_enum navMode;
+    env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
+    ani_enum_item navModeItem;
+    env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
+    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
     return res;
 }
 
@@ -180,7 +238,43 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     if (!modifier) {
         return nullptr;
     }
-    ani_object res = modifier->getCustomNodeAniModifier()->queryNavDestinationInfo0(env, node, isInner);
+    ArkUINavDestinationInfo info;
+    modifier->getCustomNodeAniModifier()->queryNavDestinationInfo0(node, info, isInner);
+
+    ani_object res = {};
+    static const char* className = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
+    ani_class cls;
+    env->FindClass(className, &cls);
+    ani_method routerInfoCtor;
+    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Object_New(cls, routerInfoCtor, &res);
+
+    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    env->Object_SetPropertyByName_Int(res, "index", info.index);
+
+    ani_string navDesName {};
+    env->String_NewUTF8(info.name.c_str(), info.name.size(), &navDesName);
+    env->Object_SetPropertyByName_Ref(res, "name", navDesName);
+
+    ani_string navDesId {};
+    env->String_NewUTF8(info.navDestinationId.c_str(), info.navDestinationId.size(), &navDesId);
+    env->Object_SetPropertyByName_Ref(res, "navDestinationId", navDesId);
+
+    ani_string navigationId {};
+    env->String_NewUTF8(info.navigationId.c_str(), info.navigationId.size(), &navigationId);
+    env->Object_SetPropertyByName_Ref(res, "navigationId", navigationId);
+    
+    ani_enum navDesState;
+    env->FindEnum("@ohos.arkui.observer.uiObserver.NavDestinationState", &navDesState);
+    ani_enum_item navDesStateItem;
+    env->Enum_GetEnumItemByIndex(navDesState, info.state, &navDesStateItem);
+    env->Object_SetPropertyByName_Ref(res, "state", navDesStateItem);
+    
+    ani_enum navMode;
+    env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
+    ani_enum_item navModeItem;
+    env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
+    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
     return res;
 }
 
@@ -190,7 +284,38 @@ ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     if (!modifier) {
         return nullptr;
     }
-    ani_object res = modifier->getCustomNodeAniModifier()->queryRouterPageInfo(env, node);
+    ArkUIRouterPageInfo info;
+    modifier->getCustomNodeAniModifier()->queryRouterPageInfo(node, info);
+
+    ani_object res = {};
+    static const char* className = "@ohos.arkui.observer.uiObserver.RouterPageInfo";
+    ani_class cls;
+    env->FindClass(className, &cls);
+    ani_method routerInfoCtor;
+    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Object_New(cls, routerInfoCtor, &res);
+
+    env->Object_SetPropertyByName_Double(res, "index", static_cast<ani_double>(info.index));
+
+    ani_string pageName{};
+    env->String_NewUTF8(info.name.c_str(), info.name.size(), &pageName);
+    env->Object_SetPropertyByName_Ref(res, "name", pageName);
+
+    ani_string pagePath{};
+    env->String_NewUTF8(info.path.c_str(), info.path.size(), &pagePath);
+    env->Object_SetPropertyByName_Ref(res, "path", pagePath);
+    env->Object_SetPropertyByName_Int(res, "state", static_cast<ani_int>(info.state));
+
+    ani_string aniPageId{};
+    env->String_NewUTF8(info.pageId.c_str(), info.pageId.size(), &aniPageId);
+    env->Object_SetPropertyByName_Ref(res, "pageId", aniPageId);
+
+    ani_enum routerPageState;
+    env->FindEnum("@ohos.arkui.observer.uiObserver.RouterPageState", &routerPageState);
+    ani_enum_item enumItem;
+    env->Enum_GetEnumItemByIndex(routerPageState, info.state, &enumItem);
+    env->Object_SetPropertyByName_Ref(res, "state", enumItem);
+
     return res;
 }
 } // namespace OHOS::Ace::Ani

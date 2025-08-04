@@ -130,6 +130,29 @@ struct ArkUIDragInfo {
     bool delayCreating = false;
 };
 
+struct ArkUINavigationInfo {
+    std::string navigationId;
+    ani_ref navPathStack;
+};
+
+struct ArkUINavDestinationInfo {
+    ani_double uniqueId;
+    ani_int index;
+    std::string name;
+    std::string navDestinationId;
+    std::string navigationId;
+    ani_size state;
+    ani_size mode;
+};
+
+struct ArkUIRouterPageInfo {
+    int32_t index;
+    std::string name;
+    std::string path;
+    ani_size state;
+    std::string pageId;
+};
+
 struct AniOverlayOptions {
     int32_t alignment = 0;
     float x = 0.0f;
@@ -387,10 +410,10 @@ struct ArkUIAniCustomNodeModifier {
         std::function<bool()>&& onBackPress, std::function<void()>&& pageTransitionFunc,
         std::function<void()>&& onCleanupFunc, std::function<std::string()>&& onDumpInspectorFunc);
     void (*requestFrame)();
-    ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
-    ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
-    ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);
-    ani_object (*queryRouterPageInfo)(ani_env* env, ani_long node);
+    void (*queryNavigationInfo)(ani_long node, ArkUINavigationInfo& info);
+    void (*queryNavDestinationInfo)(ani_long node, ArkUINavDestinationInfo& info);
+    void (*queryNavDestinationInfo0)(ani_long node, ArkUINavDestinationInfo& info, ani_int isInner);
+    void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_env* env, ani_long ptr, uint32_t flag, ani_object fnObj);

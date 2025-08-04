@@ -78,90 +78,46 @@ RefPtr<UINode> GetTargetNode(const RefPtr<AceType>& node, const std::string& tag
     return current;
 }
 
-ani_object QueryNavigationInfo(ani_env* env, ani_long node)
+void QueryNavigationInfo(ani_long node, ArkUINavigationInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
-    CHECK_NULL_RETURN(customNode, {});
+    CHECK_NULL_VOID(customNode);
     auto pipeline = customNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, {});
+    CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
-    CHECK_NULL_RETURN(navigationMgr, {});
+    CHECK_NULL_VOID(navigationMgr);
     auto result = navigationMgr->GetNavigationInfo(AceType::Claim(customNode));
-    CHECK_NULL_RETURN(result, {});
+    CHECK_NULL_VOID(result);
     auto stack = result->pathStack.Upgrade();
-    CHECK_NULL_RETURN(stack, {});
+    CHECK_NULL_VOID(stack);
     NavPathStackPeer* ptr = new NavPathStackPeer(stack);
 
-    ani_object res = {};
-    static const char* className = "@ohos.arkui.observer.uiObserver.NavigationInfoImpl";
-    ani_class cls;
-    env->FindClass(className, &cls);
-    ani_method navInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &navInfoCtor);
-    env->Object_New(cls, navInfoCtor, &res);
-
-    // set navigationId
-    std::string navigationId = result->navigationId;
-    ani_string id_string{};
-    env->String_NewUTF8(navigationId.c_str(), navigationId.size(), &id_string);
-    env->Object_SetPropertyByName_Ref(res, "navigationId", id_string);
-    
-    // set pathStack
-    ani_class interCls;
-    env->FindClass("arkui.component.navigation.NavPathStackInternal", &interCls);
-    ani_ref pathStack;
-    env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr", nullptr, &pathStack, reinterpret_cast<ani_ref>(ptr));
-    env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
-    
-    return res;
+    info.navigationId = result->navigationId;
+    info.navPathStack = reinterpret_cast<ani_ref>(ptr);
+    return;
 }
 
-ani_object QueryRouterPageInfo(ani_env* env, ani_long node)
+void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
 {
-    ani_object res = {};
     auto customNode = reinterpret_cast<CustomNode*>(node);
-    CHECK_NULL_RETURN(customNode, {});
+    CHECK_NULL_VOID(customNode);
     
     auto curNode = GetTargetNode(AceType::Claim(customNode), V2::PAGE_ETS_TAG, false, false);
     auto pageNode = AceType::DynamicCast<FrameNode>(curNode);
-    CHECK_NULL_RETURN(pageNode, res);
+    CHECK_NULL_VOID(pageNode);
     auto pattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pattern, res);
+    CHECK_NULL_VOID(pattern);
     auto pageInfo = pattern->GetPageInfo();
-    static const char* className = "@ohos.arkui.observer.uiObserver.RouterPageInfo";
-    ani_status status = ANI_OK;
-    ani_class cls;
-    env->FindClass(className, &cls);
-    ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
-    env->Object_New(cls, routerInfoCtor, &res);
 
-    env->Object_SetPropertyByName_Double(res, "index", static_cast<ani_double>(pageInfo->GetPageIndex()));
-
-    ani_string pageName{};
-    env->String_NewUTF8(pageInfo->GetPageUrl().c_str(), pageInfo->GetPageUrl().size(), &pageName);
-    env->Object_SetPropertyByName_Ref(res, "name", pageName);
-
-    ani_string pagePath{};
-    env->String_NewUTF8(pageInfo->GetPagePath().c_str(), pageInfo->GetPagePath().size(), &pagePath);
-    env->Object_SetPropertyByName_Ref(res, "path", pagePath);
-    env->Object_SetPropertyByName_Int(res, "state", static_cast<ani_int>(pattern->GetPageState()));
-
-    ani_string aniPageId{};
-    std::string pageId = std::to_string(pageInfo->GetPageId());
-    env->String_NewUTF8(pageId.c_str(), pageId.size(), &aniPageId);
-    env->Object_SetPropertyByName_Ref(res, "pageId", aniPageId);
-
-    ani_enum routerPgaeState;
-    env->FindEnum("@ohos.arkui.observer.uiObserver.RouterPageState", &routerPgaeState);
-    ani_enum_item enumItem;
-    env->Enum_GetEnumItemByIndex(routerPgaeState, static_cast<ani_size>(pattern->GetPageState()), &enumItem);
-    env->Object_SetPropertyByName_Ref(res, "state", enumItem);
-
-    return res;
+    info.index = pageInfo->GetPageIndex();
+    info.name = pageInfo->GetPageUrl();
+    info.pageId = std::to_string(pageInfo->GetPageId());
+    info.path = pageInfo->GetPagePath();
+    info.state = static_cast<ani_size>(pattern->GetPageState());
+    return;
 }
 
-void GetNavDestinationInfo(ani_env* env, ani_object& res, RefPtr<UINode> node)
+void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
 {
     auto nav = AceType::DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(nav);
@@ -183,68 +139,39 @@ void GetNavDestinationInfo(ani_env* env, ani_object& res, RefPtr<UINode> node)
         state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
     }
 
-    static const char* className = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
-    ani_status status = ANI_OK;
-    ani_class cls;
-    env->FindClass(className, &cls);
-    ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
-    env->Object_New(cls, routerInfoCtor, &res);
-
-    env->Object_SetPropertyByName_Double(res, "uniqueId", static_cast<ani_double>(host->GetId()));
-    env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(host->GetIndex()));
-
-    ani_string navDesName {};
-    env->String_NewUTF8(pattern->GetName().c_str(), pattern->GetName().size(), &navDesName);
-    env->Object_SetPropertyByName_Ref(res, "name", navDesName);
-
-    ani_string navDesId {};
-    env->String_NewUTF8(std::to_string(pattern->GetNavDestinationId()).c_str(),
-        std::to_string(pattern->GetNavDestinationId()).size(), &navDesId);
-    env->Object_SetPropertyByName_Ref(res, "navDestinationId", navDesId);
-
-    ani_string navigationId {};
-    env->String_NewUTF8(pattern->GetNavigationId().c_str(), pattern->GetNavigationId().size(), &navigationId);
-    env->Object_SetPropertyByName_Ref(res, "navigationId", navigationId);
-    
-    ani_enum navDesState;
-    env->FindEnum("@ohos.arkui.observer.uiObserver.NavDestinationState", &navDesState);
-    ani_enum_item navDesStateItem;
-    env->Enum_GetEnumItemByIndex(navDesState, static_cast<ani_size>(state), &navDesStateItem);
-    env->Object_SetPropertyByName_Ref(res, "state", navDesStateItem);
-    
-    ani_enum navMode;
-    env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
-    ani_enum_item navModeItem;
-    env->Enum_GetEnumItemByIndex(navMode, static_cast<ani_size>(mode), &navModeItem);
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    info.uniqueId = static_cast<ani_double>(host->GetId());
+    info.index = static_cast<ani_int>(host->GetIndex());
+    info.name = pattern->GetName();
+    info.navDestinationId = std::to_string(pattern->GetNavDestinationId());
+    info.navigationId = pattern->GetNavigationId();
+    info.state = static_cast<ani_size>(state);
+    info.mode = static_cast<ani_size>(mode);
+    return;
 }
 
-ani_object QueryNavDestinationInfo(ani_env* env, ani_long node)
+void QueryNavDestinationInfo(ani_long node, ArkUINavDestinationInfo& info)
 {
-    ani_object res = {};
     auto customNode = reinterpret_cast<CustomNode*>(node);
-    CHECK_NULL_RETURN(customNode, res);
+    CHECK_NULL_VOID(customNode);
     
     // get navdestination node
     auto current = GetTargetNode(AceType::Claim(customNode), V2::NAVDESTINATION_VIEW_ETS_TAG, false, false);
-    CHECK_NULL_RETURN(current, res);
+    CHECK_NULL_VOID(current);
 
-    GetNavDestinationInfo(env, res, current);
-    return res;
+    GetNavDestinationInfo(current, info);
+    return;
 }
 
-ani_object QueryNavDestinationInfo0(ani_env* env, ani_long node, ani_int isInner)
+void QueryNavDestinationInfo0(ani_long node, ArkUINavDestinationInfo& info, ani_int isInner)
 {
-    ani_object res = {};
     auto customNode = reinterpret_cast<CustomNode*>(node);
-    CHECK_NULL_RETURN(customNode, res);
+    CHECK_NULL_VOID(customNode);
     auto current =
         GetTargetNode(AceType::Claim(customNode), V2::NAVDESTINATION_VIEW_ETS_TAG, static_cast<bool>(isInner), true);
-    CHECK_NULL_RETURN(current, res);
+    CHECK_NULL_VOID(current);
 
-    GetNavDestinationInfo(env, res, current);
-    return res;
+    GetNavDestinationInfo(current, info);
+    return;
 }
 
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
