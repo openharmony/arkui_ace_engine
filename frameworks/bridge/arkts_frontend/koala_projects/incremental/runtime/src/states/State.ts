@@ -151,6 +151,7 @@ export interface StateContext {
     fork(builder: (manager: StateContext) => void, complete: () => void): StateContext
     merge<Value>(main: StateContext, rootNode: ComputableState<Value>, compute: () => void): void
     terminate<Value>(rootScope: ComputableState<Value>): void
+    _isNeedCreate: boolean
 }
 
 /**
@@ -567,6 +568,7 @@ export class StateManagerImpl implements StateManager {
     private threadCheckerCallback?: () => boolean
     private childManager: Array<StateManagerImpl> = new Array<StateManagerImpl>()
     private parentManager: StateManagerImpl | undefined = undefined
+    _isNeedCreate: boolean
 
     constructor() {
     }
