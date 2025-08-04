@@ -1358,7 +1358,10 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
 void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath) {}
-void WebDelegate::SetVisibility(bool isVisible) {}
+void WebDelegate::SetVisibility(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
