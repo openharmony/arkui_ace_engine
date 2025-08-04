@@ -21,6 +21,17 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
+namespace {
+const std::string EMPTY_STRING = "";
+RefPtr<Path2DPeerImpl> CreatePeerImpl()
+{
+    auto peerImpl = Referenced::MakeRefPtr<Path2DPeerImpl>();
+    peerImpl->IncRefCount();
+    peerImpl->SetOptions();
+    return peerImpl;
+}
+} // namespace
+
 void DestroyPeerImpl(Ark_Path2D peer)
 {
     auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
@@ -30,32 +41,59 @@ void DestroyPeerImpl(Ark_Path2D peer)
 }
 Ark_Path2D Construct0Impl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<Path2DPeerImpl>();
-    peerImpl->IncRefCount();
-    peerImpl->SetOptions();
+    auto peerImpl = CreatePeerImpl();
     return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_Path2D Construct1Impl(Ark_LengthMetricsUnit unit)
 {
-    return {};
+    auto peerImpl = CreatePeerImpl();
+    auto optUnit = Converter::OptConvert<Ace::CanvasUnit>(unit).value_or(Ace::CanvasUnit::DEFAULT);
+    peerImpl->SetUnit(optUnit);
+    return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_Path2D Construct2Impl(Ark_Path2D path)
 {
-    return {};
+    auto peerImpl = CreatePeerImpl();
+    if (path) {
+        auto canvasPath = path->GetCanvasPath2d();
+        peerImpl->SetCanvasPath2d(canvasPath);
+    }
+    return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_Path2D Construct3Impl(Ark_Path2D path,
                           Ark_LengthMetricsUnit unit)
 {
-    return {};
+    auto peerImpl = CreatePeerImpl();
+    auto optUnit = Converter::OptConvert<Ace::CanvasUnit>(unit).value_or(Ace::CanvasUnit::DEFAULT);
+    peerImpl->SetUnit(optUnit);
+    if (path) {
+        auto canvasPath = path->GetCanvasPath2d();
+        peerImpl->SetCanvasPath2d(canvasPath);
+    }
+    return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_Path2D Construct4Impl(const Ark_String* d)
 {
-    return {};
+    auto peerImpl = CreatePeerImpl();
+    auto path = Converter::OptConvertPtr<std::string>(d).value_or(EMPTY_STRING);
+    if (!path.empty()) {
+        auto canvasPath = Referenced::MakeRefPtr<CanvasPath2D>(path);
+        peerImpl->SetCanvasPath2d(canvasPath);
+    }
+    return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_Path2D Construct5Impl(const Ark_String* description,
                           Ark_LengthMetricsUnit unit)
 {
-    return {};
+    auto peerImpl = CreatePeerImpl();
+    auto optUnit = Converter::OptConvert<Ace::CanvasUnit>(unit).value_or(Ace::CanvasUnit::DEFAULT);
+    peerImpl->SetUnit(optUnit);
+    auto path = Converter::OptConvertPtr<std::string>(description).value_or(EMPTY_STRING);
+    if (!path.empty()) {
+        auto canvasPath = Referenced::MakeRefPtr<CanvasPath2D>(path);
+        peerImpl->SetCanvasPath2d(canvasPath);
+    }
+    return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
