@@ -325,7 +325,8 @@ HWTEST_F(WindowSceneTest, AddPersistentImage, TestSize.Level1)
      * @tc.steps: step3. Test add persistent image return true.
      */
     Rosen::ScenePersistentStorage::InitDir("/data/Snapshot");
-    Rosen::ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(windowScene->session_->GetPersistentId()),
+    Rosen::ScenePersistentStorage::Insert(
+        "SetImageForRecent_" + std::to_string(windowScene->session_->GetPersistentId()),
         static_cast<int32_t>(1), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     result = windowScene->AddPersistentImage(windowScene->session_->surfaceNode_, windowScene->GetHost());
     EXPECT_EQ(result, true);
