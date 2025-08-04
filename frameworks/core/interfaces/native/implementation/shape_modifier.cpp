@@ -138,7 +138,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     // if odd,add twice
     auto dashArraySize = dashArray.size();
     if (dashArraySize & 1) {
-        for (int32_t i = 0; i < dashArraySize; i++) {
+        for (size_t i = 0; i < dashArraySize; i++) {
             dashArray.emplace_back(dashArray[i]);
         }
     }
