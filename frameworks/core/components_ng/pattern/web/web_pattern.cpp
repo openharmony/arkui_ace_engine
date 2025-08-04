@@ -1327,6 +1327,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
+
+        if (delegate_->IsFileSelectorShow()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "WebPattern::WebSendMouseEvent blocked when FileSelector show.");
+            return;
+        }
     }
 
     if (!HandleDoubleClickEvent(info)) {
@@ -4258,9 +4263,16 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     }
     std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
     CHECK_NULL_VOID(cursorPixelMap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    float dipScale = pipeline->GetDipScale();
+    cursorPixelMap->scale(dipScale, dipScale);
+
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
-    mouseStyle->SetCustomCursor(windowId, x, y, cursorPixelMap);
+    mouseStyle->SetCustomCursor(windowId, x * dipScale, y * dipScale, cursorPixelMap);
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)

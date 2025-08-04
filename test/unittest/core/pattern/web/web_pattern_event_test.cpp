@@ -209,4 +209,22 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_004, TestSize.Level1)
     EXPECT_FALSE(result);
 #endif
 }
+
+/**
+ * @tc.name: WebPatternTestNg_005
+ * @tc.desc: Test SendMouseEvent when FileSelectorShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebPatternTestNg_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+
+    ASSERT_NE(g_webPattern->delegate_, nullptr);
+    g_webPattern->delegate_->SetIsFileSelectorShow(true);
+    MouseInfo info;
+    info.SetAction(MouseAction::HOVER_EXIT);
+    g_webPattern->WebSendMouseEvent(info, 0);
+    EXPECT_EQ(g_webPattern->delegate_->IsFileSelectorShow(), true);
+#endif
+}
 } // namespace OHOS::Ace::NG
