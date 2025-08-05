@@ -222,6 +222,7 @@ bool SimplifiedInspector::GetInspectorStep1(const std::unique_ptr<JsonValue>& js
     jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+    jsonRoot->Put(INSPECTOR_NAV_DST_NAME, context->GetCurrentPageNameCallback().c_str());
 
     CHECK_NULL_RETURN(context->GetStageManager(), false);
     pageRootNode = context->GetStageManager()->GetLastPage();
@@ -238,7 +239,6 @@ bool SimplifiedInspector::GetInspectorStep2(
     jsonRoot->Put(INSPECTOR_BUNDLE, AceApplicationInfo::GetInstance().GetPackageName().c_str());
     jsonRoot->Put(INSPECTOR_ABILITY, AceApplicationInfo::GetInstance().GetAbilityName().c_str());
     jsonRoot->Put(INSPECTOR_PAGE_URL, pageInfo->GetPageUrl().c_str());
-    jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
 
     pageId_ = pageRootNode->GetPageId();
     std::list<RefPtr<NG::UINode>> children;
@@ -261,8 +261,7 @@ bool SimplifiedInspector::GetInspectorStep2(
     return true;
 }
 
-void SimplifiedInspector::GetFrameNodeChildren(
-    const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::UINode>>& children)
+void SimplifiedInspector::GetFrameNodeChildren(const RefPtr<UINode>& uiNode, std::list<RefPtr<UINode>>& children)
 {
     CHECK_NULL_VOID(uiNode);
     if (isBackground_) {
@@ -334,8 +333,7 @@ void SimplifiedInspector::GetInspectorChildren(
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
-void SimplifiedInspector::GetSpanInspector(
-    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray)
+void SimplifiedInspector::GetSpanInspector(const RefPtr<UINode>& parent, std::unique_ptr<JsonValue>& jsonNodeArray)
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
@@ -353,8 +351,7 @@ void SimplifiedInspector::GetSpanInspector(
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
-void SimplifiedInspector::FillInspectorAttrs(
-    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode)
+void SimplifiedInspector::FillInspectorAttrs(const RefPtr<UINode>& parent, std::unique_ptr<JsonValue>& jsonNode)
 {
     if (params_.isNewVersion) {
         auto tmpJson = JsonUtil::Create(true);
@@ -405,8 +402,26 @@ void SimplifiedInspector::GetWebContentIfNeed(const RefPtr<FrameNode>& node)
     if (!isAsync_ || !collector_) {
         return;
     }
+    if (node->GetTag() != V2::WEB_ETS_TAG) {
+        return;
+    }
 #if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
-    if (params_.enableWeb && !params_.webContentJs.empty() && node->GetTag() == V2::WEB_ETS_TAG) {
+    if (params_.enableWeb && params_.webAccessibility && !params_.enableBackground) {
+        auto pattern = node->GetPattern<WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->GetActiveStatus()) {
+            return;
+        }
+        auto lambda = [collector = collector_](std::shared_ptr<JsonValue>& jsonValue, int32_t webId) {
+            std::string key = "Web_" + std::to_string(webId);
+            collector->GetJson()->Put(key.c_str(), jsonValue->ToString().c_str());
+            collector->DecreaseTaskNum();
+        };
+        collector_->IncreaseTaskNum();
+        pattern->GetAllWebAccessibilityNodeInfos(std::move(lambda), node->GetId(), false);
+        return;
+    }
+    if (params_.enableWeb && !params_.webContentJs.empty()) {
         auto pattern = node->GetPattern<WebPattern>();
         CHECK_NULL_VOID(pattern);
         if (!pattern->GetActiveStatus()) {
@@ -428,6 +443,7 @@ void SimplifiedInspector::GetWebContentIfNeed(const RefPtr<FrameNode>& node)
 void SimplifiedInspector::GetInspectorAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    ContainerScope scope(Container::CurrentIdSafely());
     CHECK_NULL_VOID(collector);
     collector->CreateJson();
     collector_ = collector;
@@ -449,11 +465,11 @@ void SimplifiedInspector::GetInspectorAsync(const std::shared_ptr<Recorder::Insp
 void SimplifiedInspector::GetInspectorBackgroundAsync(
     const std::shared_ptr<Recorder::InspectorTreeCollector>& collector)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     CHECK_NULL_VOID(collector);
     collector->CreateJson();
     collector_ = collector;
     isAsync_ = true;
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector3:container %{public}d", containerId_);
     auto context = NG::PipelineContext::GetContextByContainerId(containerId_);
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetStageManager());
@@ -465,6 +481,7 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
     auto pageUrl = pageInfo->GetPageUrl();
+    auto pageName = context->GetCurrentPageNameCallback();
 
     auto treeNode = std::make_shared<SimplifiedInspectorTree>();
     GetInspectorTreeNode(pageRootNode, treeNode);
@@ -473,7 +490,7 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
     collector->SetTaskExecutor(context->GetTaskExecutor());
     collector->IncreaseTaskNum();
     context->GetTaskExecutor()->PostTask(
-        [inspector = shared_from_this(), context, pageUrl, treeNode]() {
+        [inspector = shared_from_this(), context, pageUrl, pageName, treeNode]() {
             auto& jsonRoot = inspector->collector_->GetJson();
             jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
             auto scale = context->GetViewScale();
@@ -486,7 +503,7 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
             jsonRoot->Put(INSPECTOR_ABILITY, AceApplicationInfo::GetInstance().GetAbilityName().c_str());
             jsonRoot->Put(INSPECTOR_BUNDLE, AceApplicationInfo::GetInstance().GetPackageName().c_str());
             jsonRoot->Put(INSPECTOR_PAGE_URL, pageUrl.c_str());
-            jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
+            jsonRoot->Put(INSPECTOR_NAV_DST_NAME, pageName.c_str());
             auto jsonNodeArray = JsonUtil::CreateArray(true);
             inspector->size_ = 1;
             for (auto& subTreeNode : treeNode->children) {
@@ -497,8 +514,7 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
             }
             jsonRoot->Put(INSPECTOR_CHILDREN_COUNT, inspector->size_);
             inspector->collector_->DecreaseTaskNum();
-        },
-        TaskExecutor::TaskType::BACKGROUND, "GetSimplifiedInspector");
+        }, TaskExecutor::TaskType::BACKGROUND, "GetSimplifiedInspector");
 }
 
 void SimplifiedInspector::GetInspectorTreeNode(
