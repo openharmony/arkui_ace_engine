@@ -79,17 +79,6 @@ void DragControllerFuncWrapper::CreatePreviewNode(RefPtr<FrameNode>& imageNode, 
 
     UpdatePreviewPositionAndScale(imageNode, frameOffset, 1.0f);
     UpdatePreviewAttr(imageNode, asyncCtxData.dragPreviewOption);
-    imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    imageNode->MarkModifyDone();
-    imageNode->SetLayoutDirtyMarked(true);
-    imageNode->SetActive(true);
-    auto context = imageNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(imageNode);
-    }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushSyncGeometryNodeTasks();
 }
 
 OffsetF DragControllerFuncWrapper::GetOriginNodeOffset(
@@ -544,6 +533,11 @@ void DragControllerFuncWrapper::DoDragStartAnimation(
     dragDropManager->SetDragFwkShow(false);
     dragDropManager->ResetPullMoveReceivedForCurrentDrag();
 
+    auto dragAnimationPointerEvent =
+        DragPointerEvent(asyncCtxData.dragPointerEvent.windowX, asyncCtxData.dragPointerEvent.windowY,
+            asyncCtxData.dragPointerEvent.displayX, asyncCtxData.dragPointerEvent.displayY,
+            asyncCtxData.dragPointerEvent.globalDisplayX, asyncCtxData.dragPointerEvent.globalDisplayY);
+    dragDropManager->SetDragAnimationPointerEvent(dragAnimationPointerEvent, nullptr);
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(dragDropManager->GetDragPreviewInfo().imageNode);
 
     Point point = { asyncCtxData.dragPointerEvent.windowX, asyncCtxData.dragPointerEvent.windowY };

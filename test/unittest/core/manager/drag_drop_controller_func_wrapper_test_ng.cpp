@@ -565,7 +565,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0013, Tes
      * @tc.steps: step2. Prepare darg data and asyncCtxData.
      */
     bool hasTouchPoint = true;
-    DragPointerEvent dragPointerEvent(100, 100);
+    DragPointerEvent dragPointerEvent(100, 100, 100, 100, 100, 100);
     NG::DragPreviewOption previewOption;
     previewOption.options.opacity = 0.3f;
     DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
@@ -595,6 +595,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0013, Tes
     EXPECT_FALSE(dragDropManager->IsPullMoveReceivedForCurrentDrag());
     EXPECT_EQ(dragDropManager->GetCurrentAnimationCnt(), 0);
     EXPECT_EQ(dragDropManager->GetAllAnimationCnt(), 0);
+    EXPECT_EQ(dragDropManager->GetDragAnimationPointerEvent().windowX, 100);
     EXPECT_FALSE(dragDropManager->IsStartAnimationFInished());
 }
 
