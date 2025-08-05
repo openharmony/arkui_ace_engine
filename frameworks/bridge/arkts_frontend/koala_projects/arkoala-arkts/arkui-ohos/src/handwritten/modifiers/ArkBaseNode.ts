@@ -44,11 +44,16 @@ import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture
 import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
+import { ArkUIAniModule } from 'arkui.ani';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
     constructParam(...param: Object[]): this {
         return this;
+    }
+    private markDirty(): void {
+        ArkUIAniModule._FrameNode_MarkDirtyNode(this.getPeer().getPeerPtr());
+        return;
     }
     initialize(...args: Object[]): this {
         return this;
@@ -677,12 +682,14 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     width(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().width0Attribute(value as Length);
+            this.markDirty();
         }
         return this;
     }
     height(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().height0Attribute(value as Length);
+            this.markDirty();
         }
         return this;
     }
