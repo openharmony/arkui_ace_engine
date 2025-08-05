@@ -1396,6 +1396,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     param2->SetIsShow(false);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
+    param2->SetShowInSubWindow(true);
+    ViewAbstract::BindPopup(param2, targetNode2, customNode);
     EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 }
 
