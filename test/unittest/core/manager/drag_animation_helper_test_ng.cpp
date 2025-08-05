@@ -747,4 +747,43 @@ HWTEST_F(DragAnimationHelperTestNg, GetPreviewMenuAnimationRate001, TestSize.Lev
     auto getsize = DragAnimationHelper::GetPreviewMenuAnimationRate();
     EXPECT_EQ(getsize, -1);
 }
+
+
+/**
+ * @tc.name: MountPixelMap001
+ * @tc.desc: Test MountPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, MountPixelMap001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create DragEventActuator.
+    */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+    * @tc.steps: step2. Get OverlayManager.
+    */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+    * @tc.steps: step3. Trigger MountPixelMap.
+    */
+    PreparedInfoForDrag data;
+    auto imageNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(imageNode, nullptr);
+    data.imageNode = imageNode;
+    data.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    DragAnimationHelper::MountPixelMap(overlayManager, gestureEventHub, data, true);
+    EXPECT_EQ(overlayManager->hasDragPixelMap_, true);
+}
 } // namespace OHOS::Ace::NG
