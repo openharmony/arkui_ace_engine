@@ -40,6 +40,9 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
         auto localY = static_cast<float>(localPoint.GetY());
         hoverInfo.SetLocalLocation(Offset(localX, localY));
     }
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
