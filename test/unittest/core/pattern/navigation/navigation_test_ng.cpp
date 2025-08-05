@@ -888,6 +888,7 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
      * @tc.steps: step2.add page A
      */
     auto* viewStack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(viewStack, nullptr);
     // navDestination node
     int32_t nodeId = viewStack->ClaimNodeId();
     auto frameNode = NavDestinationGroupNode::GetOrCreateGroupNode(
