@@ -1317,4 +1317,32 @@ HWTEST_F(WaterFlowTestNg, FooterScrollBarTest001, TestSize.Level1) {
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
     EXPECT_TRUE(pattern_->IsScrollable());
 }
+
+/**
+ * @tc.name: EstimateTotalHeightReachEnd001
+ * @tc.desc: Test EstimateTotalHeight when itemEnd is true and repeatDifference is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateTotalHeightReachEnd001, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    ASSERT_NE(info, nullptr);
+
+    // Scroll to bottom to reach end
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+
+    // Verify we've reached the end
+    EXPECT_TRUE(info->itemEnd_);
+    EXPECT_EQ(info->repeatDifference_, 0);
+
+    // Test the branch: should return maxHeight_ directly
+    float estimatedHeight = info->EstimateTotalHeight();
+    EXPECT_EQ(estimatedHeight, info->maxHeight_);
+}
 } // namespace OHOS::Ace::NG
