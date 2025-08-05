@@ -1513,5 +1513,46 @@ HWTEST_F(ListItemGroupPatternTestNg, GetNextFocusNode001, TestSize.Level1)
     auto result = res.Upgrade();
     EXPECT_EQ(result, nullptr);
 }
+
+/**
+ * @tc.name: AdjustMountTreeSequence001
+ * @tc.desc: Test ListItemGroupPattern AdjustMountTreeSequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, AdjustMountTreeSequence001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation. (footer, listItem)
+     */
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE);
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 0, listItemGroupPattern);
+    ASSERT_NE(curFrame, nullptr);
+    for (int32_t i = 0; i < GROUP_ITEM_NUMBER; i++) {
+        auto childFrame =
+            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, i + 1, AceType::MakeRefPtr<ListItemPattern>(nullptr));
+        ASSERT_NE(childFrame, nullptr);
+        curFrame->AddChild(childFrame);
+    }
+    /**
+     * @tc.steps: step2. Set first child as footer_. Footer is after list items.
+     */
+    listItemGroupPattern->footer_ = curFrame->GetLastChild();
+    listItemGroupPattern->footerIndex_ = 1;
+    listItemGroupPattern->itemStartIndex_ = 0;
+    listItemGroupPattern->AdjustMountTreeSequence(1);
+    ASSERT_NE(curFrame->GetFirstChild(), nullptr);
+    EXPECT_EQ(curFrame->GetFirstChild()->GetId(), 1);
+
+    /**
+     * @tc.steps: step3. Set last child as footer_. Footer is before list items.
+     */
+    listItemGroupPattern->footer_ = curFrame->GetFirstChild();
+    listItemGroupPattern->footerIndex_ = -1;
+    listItemGroupPattern->itemStartIndex_ = 0;
+    listItemGroupPattern->AdjustMountTreeSequence(1);
+    ASSERT_NE(curFrame->GetLastChild(), nullptr);
+    EXPECT_EQ(curFrame->GetLastChild()->GetId(), 1);
+}
 } // namespace OHOS::Ace::NG
 
