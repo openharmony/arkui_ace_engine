@@ -125,7 +125,7 @@ Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
-    auto uiContext = PeerUtils::CreatePeer<UIContextPeer>();
+    Ark_UIContext uiContext = nullptr;
     return FrameNodePeer::Create(uiContext);
 }
 } // CanvasRenderingContext2DAccessor

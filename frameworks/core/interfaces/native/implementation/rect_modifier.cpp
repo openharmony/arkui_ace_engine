@@ -151,7 +151,7 @@ void SetRectOptionsImpl(Ark_NativePointer node,
 
     if (!opt->radiusWidth || !opt->radiusHeight) {
         size_t length = std::min(opt->cornerRadius.size(), static_cast<size_t>(MAX_RADIUS_ITEM_COUNT));
-        for (int32_t i = 0; i < length; ++i) {
+        for (size_t  i = 0; i < length; ++i) {
             const RectRadius radiusItem = opt->cornerRadius[i];
             const Dimension rx = radiusItem.radiusWidth.value_or(DEFAULT_RADIUS);
             const Dimension ry = radiusItem.radiusHeight.value_or(DEFAULT_RADIUS);
