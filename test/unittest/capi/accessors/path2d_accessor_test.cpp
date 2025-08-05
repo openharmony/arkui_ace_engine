@@ -25,16 +25,33 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-std::vector<double> NUMBER_TEST_PLAN = {
-    100, 10.25, 2.35, 5.42, 12.34, 56.73
-};
+const std::string EXTENDED_PATH = "M0 0 L600 0";
+const std::string DEFAULT_STRING_PATH = "";
+const auto DEFAULT_UNIT = Ace::CanvasUnit::DEFAULT;
+const auto DEFAULT_ARK_UNIT = Ark_LengthMetricsUnit::ARK_LENGTH_METRICS_UNIT_DEFAULT;
+const std::string EXP_PATH = "CMDS:M0 0 L600 0";
+const std::string EXP_TRANSFORM = "TRANSFORM:100.000000,2.350000,5.420000,10.250000,12.340000,56.730000";
 
-class MockCanvasPath : public CanvasPath2D {
-public:
-    MockCanvasPath() = default;
-    ~MockCanvasPath() override = default;
-    MOCK_METHOD(void, AddPath, (const RefPtr<CanvasPath2D>&));
-    MOCK_METHOD(void, SetTransform, (double, double, double, double, double, double));
+std::vector<double> numberTestPlan = { 100, 10.25, 2.35, 5.42, 12.34, 56.73 };
+std::vector<std ::string> addPathTestPlan = {
+    EXP_PATH + " " + EXP_TRANSFORM + " ",
+    EXP_PATH + " " + EXP_TRANSFORM + " " + EXP_PATH + " " + EXP_TRANSFORM + " ",
+    EXP_PATH + " " + EXP_TRANSFORM + " " + EXP_PATH + " " + EXP_TRANSFORM + " " + EXP_PATH + " " + EXP_TRANSFORM + " ",
+};
+std::vector<std::tuple<std::string, std::string>> pathTestPlan = {
+    { "M0 0 L600 0", "CMDS:M0 0 L600 0 " },
+    { "M0 0 L100 0", "CMDS:M0 0 L100 0 " },
+    { "", "CMDS: " },
+};
+std::vector<std::tuple<Ark_LengthMetricsUnit, Ace::CanvasUnit>> unitTestPlan = {
+    { ARK_LENGTH_METRICS_UNIT_DEFAULT, Ace::CanvasUnit::DEFAULT },
+    { ARK_LENGTH_METRICS_UNIT_PX, Ace::CanvasUnit::PX },
+    { static_cast<Ark_LengthMetricsUnit>(-1), Ace::CanvasUnit::DEFAULT },
+};
+std::vector<std::tuple<Ark_String, std::string>> pathStringTestPlan = {
+    { Converter::ArkValue<Ark_String>("M0 0 L600 0 "), "CMDS:M0 0 L600 0  " },
+    { Converter::ArkValue<Ark_String>("M0 0 L100 0 "), "CMDS:M0 0 L100 0  " },
+    { Converter::ArkValue<Ark_String>(""), "" },
 };
 } // namespace
 
@@ -44,24 +61,181 @@ class Path2DAccessorTest
 public:
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
-        mockPath_ = new MockCanvasPath();
-        mockPathKeeper_ = AceType::Claim(mockPath_);
+        ASSERT_NO_FATAL_FAILURE(AccessorTestBase0::SetUp());
+        mockPathKeeper_ = AceType::MakeRefPtr<CanvasPath2D>();
         ASSERT_NE(mockPathKeeper_, nullptr);
-        RefPtr<CanvasPath2D> pathKeeper = mockPathKeeper_;
-        peer_->SetCanvasPath2d(pathKeeper);
-        ASSERT_NE(mockPath_, nullptr);
+        peer_->SetCanvasPath2d(mockPathKeeper_);
     }
 
     void TearDown() override
     {
         AccessorTestBaseParent::TearDown();
         mockPathKeeper_ = nullptr;
-        mockPath_ = nullptr;
     }
-    MockCanvasPath* mockPath_ = nullptr;
-    RefPtr<MockCanvasPath> mockPathKeeper_ = nullptr;
+    RefPtr<CanvasPath2D> mockPathKeeper_ = nullptr;
 };
+
+/**
+ * @tc.name: construct0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct0Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct1, nullptr);
+    peer_ = accessor_->construct0();
+    ASSERT_NE(peer_, nullptr);
+    auto canvasPath = peer_->GetCanvasPath2d();
+    auto unit = peer_->GetUnit();
+    ASSERT_NE(canvasPath, nullptr);
+    EXPECT_EQ(canvasPath->ToString(), DEFAULT_STRING_PATH);
+    EXPECT_EQ(unit, DEFAULT_UNIT);
+}
+
+/**
+ * @tc.name: construct1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct1Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct2, nullptr);
+    for (const auto& [actual, expected] : unitTestPlan) {
+        peer_ = accessor_->construct1(actual);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), DEFAULT_STRING_PATH);
+        EXPECT_EQ(unit, expected);
+    }
+}
+
+/**
+ * @tc.name: construct2Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct2Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct1, nullptr);
+    for (const auto& [actual, expected] : pathTestPlan) {
+        auto path = Referenced::MakeRefPtr<CanvasPath2D>(actual);
+        auto peer = Referenced::MakeRefPtr<Path2DPeer>();
+        ASSERT_NE(peer, nullptr);
+        peer->SetCanvasPath2d(path);
+        auto arkPeer = Referenced::RawPtr(peer);
+        ASSERT_NE(arkPeer, nullptr);
+        peer_ = accessor_->construct2(arkPeer);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), expected);
+        EXPECT_EQ(unit, DEFAULT_UNIT);
+    }
+}
+
+/**
+ * @tc.name: construct3UnitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct3UnitTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct3, nullptr);
+    for (const auto& [actual, expected] : unitTestPlan) {
+        peer_ = accessor_->construct3(nullptr, actual);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), DEFAULT_STRING_PATH);
+        EXPECT_EQ(unit, expected);
+    }
+}
+
+/**
+ * @tc.name: construct3PathTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct3PathTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct3, nullptr);
+    for (const auto& [actual, expected] : pathTestPlan) {
+        auto path = Referenced::MakeRefPtr<CanvasPath2D>(actual);
+        auto peer = Referenced::MakeRefPtr<Path2DPeer>();
+        ASSERT_NE(peer, nullptr);
+        peer->SetCanvasPath2d(path);
+        auto arkPeer = Referenced::RawPtr(peer);
+        ASSERT_NE(arkPeer, nullptr);
+        peer_ = accessor_->construct3(arkPeer, DEFAULT_ARK_UNIT);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), expected);
+        EXPECT_EQ(unit, DEFAULT_UNIT);
+    }
+}
+
+/**
+ * @tc.name: construct4Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct4Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct4, nullptr);
+    for (const auto& [actual, expected] : pathStringTestPlan) {
+        peer_ = accessor_->construct4(&actual);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), expected);
+        EXPECT_EQ(unit, DEFAULT_UNIT);
+    }
+}
+
+/**
+ * @tc.name: construct5UnitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct5UnitTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct5, nullptr);
+    for (const auto& [actual, expected] : unitTestPlan) {
+        peer_ = accessor_->construct5(nullptr, actual);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), DEFAULT_STRING_PATH);
+        EXPECT_EQ(unit, expected);
+    }
+}
+
+/**
+ * @tc.name: construct5DescriptionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(Path2DAccessorTest, construct5DescriptionTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct5, nullptr);
+    for (const auto& [actual, expected] : pathStringTestPlan) {
+        peer_ = accessor_->construct5(&actual, DEFAULT_ARK_UNIT);
+        ASSERT_NE(peer_, nullptr);
+        auto canvasPath = peer_->GetCanvasPath2d();
+        auto unit = peer_->GetUnit();
+        ASSERT_NE(canvasPath, nullptr);
+        EXPECT_EQ(canvasPath->ToString(), expected);
+        EXPECT_EQ(unit, DEFAULT_UNIT);
+    }
+}
 
 /**
  * @tc.name: addPathTest
@@ -71,25 +245,23 @@ public:
 HWTEST_F(Path2DAccessorTest, addPathTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addPath, nullptr);
+    auto path = Referenced::MakeRefPtr<CanvasPath2D>(EXTENDED_PATH);
     auto peerPathImpl = Referenced::MakeRefPtr<Path2DPeer>();
+    peerPathImpl->SetCanvasPath2d(path);
     auto arkPath = Referenced::RawPtr(peerPathImpl);
-    RefPtr<CanvasPath2D> pathKeeper = mockPathKeeper_;
-    peerPathImpl->SetCanvasPath2d(pathKeeper);
     auto peerMatrix = PeerUtils::CreatePeer<Matrix2DPeer>();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peerMatrix);
-    peerMatrix->SetScaleX(NUMBER_TEST_PLAN[0]);
-    peerMatrix->SetScaleY(NUMBER_TEST_PLAN[1]);
-    peerMatrix->SetRotateX(NUMBER_TEST_PLAN[2]);
-    peerMatrix->SetRotateY(NUMBER_TEST_PLAN[3]);
-    peerMatrix->SetTranslateX(NUMBER_TEST_PLAN[4]);
-    peerMatrix->SetTranslateY(NUMBER_TEST_PLAN[5]);
-    auto tr = peerMatrix->GetTransform();
-    EXPECT_CALL(*mockPath_, AddPath(peerPathImpl->GetCanvasPath2d())).Times(3);
-    EXPECT_CALL(*mockPath_, SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY))
-        .Times(3);
+    peerMatrix->SetScaleX(numberTestPlan[0]);
+    peerMatrix->SetScaleY(numberTestPlan[1]);
+    peerMatrix->SetRotateX(numberTestPlan[2]);
+    peerMatrix->SetRotateY(numberTestPlan[3]);
+    peerMatrix->SetTranslateX(numberTestPlan[4]);
+    peerMatrix->SetTranslateY(numberTestPlan[5]);
     accessor_->addPath(peer_, arkPath, &optMatrix);
+    EXPECT_EQ(mockPathKeeper_->ToString(), addPathTestPlan[0]);
     accessor_->addPath(peer_, arkPath, &optMatrix);
+    EXPECT_EQ(mockPathKeeper_->ToString(), addPathTestPlan[1]);
     accessor_->addPath(peer_, arkPath, &optMatrix);
-    pathKeeper->DecRefCount();
+    EXPECT_EQ(mockPathKeeper_->ToString(), addPathTestPlan[2]);
 }
 } // namespace OHOS::Ace::NG
