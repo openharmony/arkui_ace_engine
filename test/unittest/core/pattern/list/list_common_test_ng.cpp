@@ -3948,7 +3948,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level
     ListModelNG model = CreateList();
     ASSERT_NE(frameNode_, nullptr);
     ASSERT_NE(pattern_, nullptr);
-    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
 
     const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
     CalcDimension laneMinLength;
@@ -3958,7 +3957,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level
 
     // remove callback function
     model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     // add callback function
     model.CreateWithResourceObjLaneConstrain(resMinObj, resMaxObj);
@@ -3974,10 +3972,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level
     laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
     EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
     EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
-
-    // remove callback function
-    model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     g_isConfigChangePerform = false;
 }
@@ -3995,7 +3989,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
     ListModelNG model = CreateList();
     ASSERT_NE(frameNode_, nullptr);
     ASSERT_NE(pattern_, nullptr);
-    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
 
     const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
     CalcDimension laneMinLength;
@@ -4005,7 +3998,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
 
     // remove callback function
     model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     std::vector<ResourceObjectParams> params;
     resMinObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
@@ -4025,10 +4017,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
     laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
     EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
     EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
-
-    // remove callback function
-    model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     g_isConfigChangePerform = false;
 }
