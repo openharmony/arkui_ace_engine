@@ -229,8 +229,7 @@ export class Application {
             this.uiContext = uiContext;
             this.manager!.contextData = uiData;
             this.manager!.isDebugMode = uiContext.isDebugMode_;
-            let instanceId = uiContext.getInstanceId();
-            this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
+            this.manager!.setThreadChecker(() => UIContextUtil.checkCurrentThread());
             /** @memo */
             let builder: UserViewBuilder
             if (this.entryPoint) {
