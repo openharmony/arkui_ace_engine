@@ -5192,7 +5192,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
     auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
     if (sheetOptions) {
         BindSheetUtil::ParseLifecycleCallbacks(cbs, sheetOptions.value());
-        BindSheetUtil::ParseFuntionalCallbacks(cbs, sheetOptions.value());
+        BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
                 sheetStyle.sheetTitle = OptConvert<std::string>(value.title);

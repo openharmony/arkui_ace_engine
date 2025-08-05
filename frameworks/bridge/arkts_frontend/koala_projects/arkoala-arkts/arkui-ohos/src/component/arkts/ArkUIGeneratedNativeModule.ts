@@ -3995,9 +3995,9 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getWindowWidthBreakpoint(instanceId: number): number
     @ani.unsafe.Quick
     native static _UIContext_getWindowHeightBreakpoint(instanceId: number): number
-    native static _UIContext_openBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _UIContext_updateBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _UIContext_closeBindSheet(ptr: KPointer, bindSheetContent: KPointer): void
+    native static _UIContext_openBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _UIContext_updateBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _UIContext_closeBindSheet(bindSheetContent: KPointer): void
     @ani.unsafe.Quick
     native static _PromptAction_openPopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
