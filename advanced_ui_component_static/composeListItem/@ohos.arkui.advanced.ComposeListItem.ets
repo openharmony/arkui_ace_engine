@@ -70,6 +70,7 @@ export class OperateItem {
   public checkbox?: OperateCheck;
   public radio?: OperateCheck;
   public image?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public text?: ResourceStr;
   public arrow?: OperateIcon;
 }
@@ -77,6 +78,7 @@ export class OperateItem {
 export class ContentItem {
   public iconStyle?: IconType;
   public icon?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public primaryText?: ResourceStr;
   public secondaryText?: ResourceStr;
   public description?: ResourceStr;
@@ -84,6 +86,7 @@ export class ContentItem {
 
 export class OperateIcon {
   public value?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public action?: () => void;
   public accessibilityText?: ResourceStr;
   public accessibilityDescription?: ResourceStr;
@@ -204,9 +207,11 @@ class Util {
 
 class EnvironmentCallbackEntry implements EnvironmentCallback {
   ComposeListItem: ComposeListItem;
+
   constructor(ComposeListItem: ComposeListItem) {
     this.ComposeListItem = ComposeListItem;
   }
+
   onConfigurationUpdated(config: Configuration) {
     if (config === undefined || !this.ComposeListItem.isFollowingSystemFontScale) {
       this.ComposeListItem.fontSizeScale = 1;
@@ -222,6 +227,7 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
         `ComposeListItem environmentCallback error: ${code}, ${message}`);
     }
   }
+
   onMemoryLevel(level: AbilityConstant.MemoryLevel) {
 
   }
@@ -231,6 +237,7 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 struct ContentItemStruct {
   @PropRef @Watch('onPropChange') iconStyle: IconType | null = null;
   @PropRef @Watch('onPropChange') icon: ResourceStr | null = null;
+  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @PropRef @Watch('onPropChange') primaryText: ResourceStr | null = null;
   @PropRef @Watch('onPropChange') secondaryText: ResourceStr | null = null;
   @PropRef @Watch('onPropChange') description: ResourceStr | null = null;
@@ -263,7 +270,7 @@ struct ContentItemStruct {
   }
 
   onPropChange(PropChange?: string): void {
-    if (this.icon == null && this.iconStyle == null) {
+    if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
       this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
     } else {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
@@ -319,15 +326,54 @@ struct ContentItemStruct {
   createIcon() {
     const defaultIconStyle = this.iconStyle ?? IconType.BADGE;
     if (ICON_SIZE_MAP.has(defaultIconStyle as IconType)) {
-      Image(this.icon as ResourceStr)
-        .objectFit(ImageFit.Contain)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ICONLIKE_SIZE)
-        .borderRadius($r('sys.float.composeListItem_Image_Radius'))
-        .focusable(false)
-        .draggable(false)
-        .fillColor(this.getContentItemIconFillColor())
-        .flexShrink(0)
+      if (this.symbolStyle != null) {
+        SymbolGlyph()
+          .fontColor([this.getContentItemIconFillColor()])
+          .attributeModifier(this.symbolStyle as SymbolGlyphModifier)
+          .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle as IconType)}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+          .focusable(false)
+          .draggable(false)
+          .flexShrink(0)
+      } else if (this.icon != null) {
+        if (Util.isSymbolResource(this.icon)) {
+          SymbolGlyph(this.icon as Resource)
+            .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle as IconType)}vp`)
+            .fontColor([this.getContentItemIconFillColor()])
+            .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+            .focusable(false)
+            .draggable(false)
+            .flexShrink(0)
+        } else {
+          if ((this.iconStyle as IconType) <= IconType.PREVIEW) {
+            Image(this.icon as Resource)
+              .objectFit(ImageFit.Contain)
+              .width(ICON_SIZE_MAP.get(this.iconStyle as IconType))
+              .height(ICON_SIZE_MAP.get(this.iconStyle as IconType))
+              .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor(this.getContentItemIconFillColor())
+              .flexShrink(0)
+          } else {
+            Image(this.icon as Resource)
+              .objectFit(ImageFit.Contain)
+              .constraintSize({
+                minWidth: SPECIAL_ICON_SIZE,
+                maxWidth: ICON_SIZE_MAP.get(this.iconStyle as IconType),
+                minHeight: SPECIAL_ICON_SIZE,
+                maxHeight: ICON_SIZE_MAP.get(this.iconStyle as IconType)
+              })
+              .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor(this.getContentItemIconFillColor())
+              .flexShrink(0)
+          }
+        }
+      }
     }
   }
 
@@ -454,6 +500,7 @@ export struct OperateItemStruct {
   @PropRef @Watch('onPropChange') checkBox: OperateCheck | null = null;
   @PropRef @Watch('onPropChange') radio: OperateCheck | null = null;
   @PropRef @Watch('onPropChange') image: ResourceStr | null = null;
+  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @PropRef @Watch('onPropChange') text: ResourceStr | null = null;
   @State switchState: boolean = false;
   @State radioState: boolean = false;
@@ -507,8 +554,13 @@ export struct OperateItemStruct {
     if (this.checkBox != null) {
       this.checkBoxState = this.checkBox?.isCheck ? true : false
     }
+    if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
+      ((this.icon != null) || (this.icon == null && this.arrow != null))) {
+      this.rowSpace = SPECICAL_ROW_SPACE;
+    } else {
+      this.rowSpace = DEFAULT_ROW_SPACE;
+    }
   }
-
 
   aboutToAppear(): void {
     this.onPropChange();
@@ -577,18 +629,34 @@ export struct OperateItemStruct {
   @Builder
   createIcon(param: CreateIconParam) {
     Button({ type: ButtonType.Normal } as ButtonOptions) {
-      Image(param.icon?.value as ResourceStr)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ICONLIKE_SIZE)
-        .focusable(true)
-        .fillColor(this.iconColor)
-        .draggable(false)
+      if (param.icon?.symbolStyle) {
+        SymbolGlyph()
+          .fontColor([this.iconColor])
+          .attributeModifier(param.icon?.symbolStyle)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .focusable(true)
+          .draggable(false)
+      } else {
+        if (Util.isSymbolResource(param.icon?.value)) {
+          SymbolGlyph(param.icon?.value as Resource)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+            .fontColor([this.iconColor])
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(param.icon?.value as ResourceStr)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ICONLIKE_SIZE)
+            .focusable(true)
+            .fillColor(this.iconColor)
+            .draggable(false)
+        }
+      }
     }
     .shadow(undefined)
     .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
-    .labelStyle({
-      maxLines: TEXT_MAX_LINE
-    })
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -632,6 +700,7 @@ export struct OperateItemStruct {
   @Builder
   createSymbol() {
     SymbolGlyph()
+      .attributeModifier(this.symbolStyle as SymbolGlyphModifier)
       .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
       .effectStrategy(SymbolEffectStrategy.NONE)
       .symbolEffect(new SymbolEffect(), false)
@@ -662,13 +731,32 @@ export struct OperateItemStruct {
   @Builder
   createArrow() {
     Button({ type: ButtonType.Normal } as ButtonOptions) {
-      Image(this.arrow?.value as ResourceStr)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ARROW_WIDTH)
-        .focusable(true)
-        .fillColor(IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor)
-        .draggable(false)
-        .matchTextDirection(true)
+      if (this.arrow?.symbolStyle) {
+        SymbolGlyph()
+          .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
+          .attributeModifier(this.arrow?.symbolStyle)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .focusable(true)
+          .draggable(false)
+      } else {
+        if (Util.isSymbolResource(this.arrow?.value)) {
+          SymbolGlyph(this.arrow?.value as Resource)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+            .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(this.arrow?.value as ResourceStr)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ARROW_WIDTH)
+            .focusable(true)
+            .fillColor(IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor)
+            .draggable(false)
+            .matchTextDirection(true)
+        }
+      }
     }
     .shadow(undefined)
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) } as LocalizedMargin)
@@ -787,7 +875,7 @@ export struct OperateItemStruct {
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
         .backgroundColor(Color.Transparent)
         .onChange((isCheck: boolean) => {
-          this.switchState = !isCheck;
+          this.switchState = isCheck;
           if (this.toggle?.onChange) {
             this.toggle?.onChange?.(isCheck);
           }
@@ -832,20 +920,31 @@ export struct OperateItemStruct {
             .constraintSize({
               maxWidth: this.flexTextWidth
             })
-          if (Util.isSymbolResource(this.arrow?.value)) {
-            SymbolGlyph(this.arrow?.value as Resource)
-              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+          if (this.arrow?.symbolStyle) {
+            SymbolGlyph()
               .fontColor([$r('sys.color.ohos_id_color_fourth')])
+              .attributeModifier(this.arrow?.symbolStyle)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
               .draggable(false)
           } else {
-            Image(this.arrow?.value as ResourceStr)
-              .height(OPERATEITEM_ICONLIKE_SIZE)
-              .width(OPERATEITEM_ARROW_WIDTH)
-              .fillColor($r('sys.color.ohos_id_color_fourth'))
-              .focusable(false)
-              .draggable(false)
-              .matchTextDirection(true)
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+                .fontColor([$r('sys.color.ohos_id_color_fourth')])
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value as ResourceStr)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor($r('sys.color.ohos_id_color_fourth'))
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
           }
         }
         .onSizeChange((newValue: SizeOptions) => {
@@ -876,10 +975,10 @@ export struct OperateItemStruct {
               maxWidth: this.rowTextWidth
             })
             .margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH } as Margin)
-          if (null) {
+          if (this.arrow?.symbolStyle) {
             SymbolGlyph()
-              .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') :
-              this.iconColor])
+              .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
+              .attributeModifier(this.arrow?.symbolStyle)
               .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(new SymbolEffect(), false)
@@ -963,6 +1062,8 @@ export struct OperateItemStruct {
     Flex(this.getFlexOptions()) {
       if (this.button != null) {
         this.createButton();
+      } else if (this.symbolStyle != null) {
+        this.createSymbol();
       } else if (this.image != null) {
         this.createImage()
       } else if (this.icon != null && this.text != null) {
@@ -1074,14 +1175,14 @@ export struct ComposeListItem {
   @State textArrowLeftSafeOffset: number = 0;
   isFollowingSystemFontScale: boolean = this.getUIContext().isFollowingSystemFontScale();
   maxFontScale: number = this.getUIContext().getMaxFontScale();
-  private callbackId: number = 0 ;
+  private callbackId: number = 0;
   @State accessibilityTextBuilder: string = '';
   @State isFocus: boolean = false;
   @State @Watch('onWrapChange') isWrapText: boolean = false;
-  @State listScale: ScaleOptions = { x: 1, y: 1, z: 0 } as ScaleOptions;
-  private operateItemStructRef:OperateItemStructController = new OperateItemStructController();
+  @State listScale: ScaleOptions = { x: 1, y: 1,z: 0 } as ScaleOptions;
+  private operateItemStructRef: OperateItemStructController = new OperateItemStructController();
   envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
-  applicationContext:ApplicationContext = new ApplicationContext()
+  applicationContext: ApplicationContext = new ApplicationContext()
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -1099,6 +1200,7 @@ export struct ComposeListItem {
     this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
+        this.operateItem?.symbolStyle !== undefined ||
         this.operateItem?.icon !== undefined ||
         this.operateItem?.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
@@ -1110,9 +1212,10 @@ export struct ComposeListItem {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT;
       } else {
+        const systemIconLineHeight =
+          LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
         this.itemHeight = (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ?
-        ItemHeight.SECOND_HEIGHT :
-        ItemHeight.SECOND_HEIGHT;
+        ItemHeight.SECOND_HEIGHT as number: systemIconLineHeight as number;
       }
     } else if (this.contentItem?.description === undefined) {
       let iconStyle: IconType = (this.contentItem?.iconStyle as IconType);
@@ -1143,11 +1246,11 @@ export struct ComposeListItem {
     this.onPropChange();
     try {
       let context: UIContext = this.getUIContext();
-      if(context.getHostContext() !==undefined) {
-        let hostContext : common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
+      if (context.getHostContext() !== undefined) {
+        let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
         this.applicationContext = hostContext.getApplicationContext();
         try {
-          this.callbackId = this.applicationContext.on('environment', this.envCallback );
+          this.callbackId = this.applicationContext.on('environment', this.envCallback);
         } catch (paramError) {
           hilog.error(0x3900, 'Ace',
             `ComposeListItem Faild to get environment param error `);
@@ -1170,8 +1273,8 @@ export struct ComposeListItem {
       if (context.getHostContext() !== undefined) {
         this.applicationContext.off('environment', this.callbackId as Int,
           (err: BusinessError<void> | null): void => {
-          hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
-        })
+            hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
+          })
       }
     }
     this.callbackId = 0;
@@ -1191,6 +1294,8 @@ export struct ComposeListItem {
       if (this.operateItem?.subIcon) {
         return RIGHT_ICON_SUB_ICON_WIDTH;
       }
+      return RIGHT_ONLY_IMAGE_WIDTH;
+    } else if (this.operateItem?.symbolStyle) {
       return RIGHT_ONLY_IMAGE_WIDTH;
     } else if (this.operateItem?.image) {
       return RIGHT_ONLY_IMAGE_WIDTH;
@@ -1214,6 +1319,8 @@ export struct ComposeListItem {
     }
     if (this.operateItem?.button) {
       return FlexDirection.Column;
+    } else if (this.operateItem?.symbolStyle) {
+      return FlexDirection.Row;
     } else if (this.operateItem?.image) {
       return FlexDirection.Row;
     } else if (this.operateItem?.icon && this.operateItem?.text) {
@@ -1239,12 +1346,11 @@ export struct ComposeListItem {
         top: $r('sys.float.padding_level12'),
         bottom: $r('sys.float.padding_level12'),
       } as Padding;
-    } else if (this.fontSizeScale >= Decimal.div(FontSizeScaleLevel.LEVEL3, 100).toNumber()) {
+    } else if (this.fontSizeScale >= Decimal.div(FontSizeScaleLevel.LEVEL2, 100).toNumber()) {
       this.containerPadding = {
         top: $r('sys.float.padding_level10'),
         bottom: $r('sys.float.padding_level10'),
       } as Padding;
-      ;
     } else if (this.fontSizeScale >= Decimal.div(FontSizeScaleLevel.LEVEL1, 100).toNumber()) {
       this.containerPadding = {
         top: $r('sys.float.padding_level8'),
@@ -1334,6 +1440,7 @@ export struct ComposeListItem {
         if (this.contentItem !== null) {
           ContentItemStruct({
             icon: this.contentItem?.icon,
+            symbolStyle: this.contentItem?.symbolStyle,
             iconStyle: this.contentItem?.iconStyle,
             primaryText: this.contentItem?.primaryText,
             secondaryText: this.contentItem?.secondaryText,
@@ -1355,6 +1462,7 @@ export struct ComposeListItem {
             checkBox: this.operateItem?.checkbox,
             radio: this.operateItem?.radio,
             image: this.operateItem?.image,
+            symbolStyle: this.operateItem?.symbolStyle,
             text: this.operateItem?.text,
             arrow: this.operateItem?.arrow,
             parentCanFocus: this.canFocus,
@@ -1370,7 +1478,6 @@ export struct ComposeListItem {
           })
         }
       }
-      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })
