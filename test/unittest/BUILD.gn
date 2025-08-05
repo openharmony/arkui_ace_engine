@@ -91,8 +91,6 @@ config("ace_coverage_config") {
   }
 }
 
-ace_engine_feature_enable_digital_crown_test = true
-
 # ace unittest config
 config("ace_unittest_config") {
   visibility = [ "./../../*" ]
@@ -163,11 +161,6 @@ config("ace_unittest_config") {
   }
 
   if (ace_engine_feature_enable_digital_crown) {
-    defines += [ "SUPPORT_DIGITAL_CROWN" ]
-  }
-
-  if (defined(ace_engine_feature_enable_digital_crown_test) &&
-      ace_engine_feature_enable_digital_crown_test) {
     defines += [ "SUPPORT_DIGITAL_CROWN" ]
   }
 
