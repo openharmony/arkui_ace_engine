@@ -179,6 +179,9 @@ static CurvesObj* unwrapp(ani_env *env, ani_object object)
 static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_double fraction)
 {
     auto curveObject = unwrapp(env, object);
+    if (!curveObject) {
+        return 0.0;
+    }
     auto curveString = curveObject->curveString;
     float time = static_cast<float>(fraction);
     time = std::clamp(time, 0.0f, 1.0f);
