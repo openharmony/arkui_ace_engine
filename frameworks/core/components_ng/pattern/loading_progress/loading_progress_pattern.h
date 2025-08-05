@@ -121,7 +121,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-#if defined(ACE_STATIC)
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
@@ -129,7 +128,6 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
-#endif
     void OnModifyDone() override;
     void OnWindowHide() override;
     void OnWindowShow() override;
