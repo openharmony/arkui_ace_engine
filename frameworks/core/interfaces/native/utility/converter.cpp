@@ -2086,15 +2086,21 @@ DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
     if (auto dim = OptConvert<Dimension>(src.width); dim) {
-        Validator::ValidateNonNegative(dim);
-        if (dim) {
-            dst.SetWidth(*dim);
+        if (dim.has_value()) {
+            if (dim.value().IsNegative()) {
+                dst.SetWidth(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
+            } else {
+                dst.SetWidth(*dim);
+            }
         }
     }
     if (auto dim = OptConvert<Dimension>(src.height); dim) {
-        Validator::ValidateNonNegative(dim);
-        if (dim) {
-            dst.SetHeight(*dim);
+        if (dim.has_value()) {
+            if (dim.value().IsNegative()) {
+                dst.SetHeight(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
+            } else {
+                dst.SetHeight(*dim);
+            }
         }
     }
     auto offset = dst.GetOffset();
