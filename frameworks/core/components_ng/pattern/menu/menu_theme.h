@@ -41,6 +41,7 @@ constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
 constexpr int32_t SUB_MENU_SHOW_DELAY_DURATION = 300;
 constexpr int32_t SUB_MENU_HIDE_DELAY_DURATION = 500;
 constexpr uint32_t MENU_MASK_COLOR = 0x33182431;
+constexpr uint32_t MENU_OUTLINE_COLOR = 0x19FFFFFF;
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -134,6 +135,7 @@ public:
                 pattern->GetAttr<int>("sub_menu_hide_delay_duration", SUB_MENU_HIDE_DELAY_DURATION);
             theme->menuHapticFeedback_ =
                 pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
+            theme->menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -419,6 +421,11 @@ public:
         return stackExpandIconId_;
     }
 
+    Color GetMenuOutlineColor() const
+    {
+        return menuOutlineColor_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -478,6 +485,7 @@ private:
     std::string menuHapticFeedback_;
     uint32_t embeddedExpandIconId_ = 0;
     uint32_t stackExpandIconId_ = 0;
+    Color menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
 };
 
 } // namespace OHOS::Ace::NG

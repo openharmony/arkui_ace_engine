@@ -1497,6 +1497,8 @@ HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<MenuTheme>();
     theme->doubleBorderEnable_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    theme->menuOutlineColor_ = Color::RED;
+    EXPECT_EQ(theme->GetMenuOutlineColor(), Color::RED);
     menuParam.enableArrow = false;
     /**
      * @tc.steps: step1. create menu wrapper node
