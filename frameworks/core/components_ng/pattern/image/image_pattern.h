@@ -461,6 +461,8 @@ private:
     void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
     bool SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap);
+    std::string HandleSrcForMemoryName(std::string url);
+    std::string MaskUrl(std::string url);
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);

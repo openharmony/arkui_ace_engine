@@ -2644,6 +2644,44 @@ HWTEST_F(ImagePatternTestNg, TestImageJsonImageWidth_Height01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: MaskUrl001
+ * @tc.desc: Test MaskUrl for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, MaskUrl001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator(2);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+
+    std::string result = imagePattern->MaskUrl(URL_LENGTH_EQUAL_35);
+    EXPECT_EQ(result, RESULT_FOR_URL_LENGTH_EQUAL_35);
+}
+
+/**
+ * @tc.name: MaskUrl002
+ * @tc.desc: Test MaskUrl for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, MaskUrl002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator(2);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+
+    std::string result = imagePattern->MaskUrl(URL_LENGTH_LESS_THAN_30);
+    EXPECT_EQ(result, RESULT_FOR_URL_LENGTH_LESS_THAN_30);
+}
+
+/**
  * @tc.name: ClearReloadFlagsAfterLoad001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
