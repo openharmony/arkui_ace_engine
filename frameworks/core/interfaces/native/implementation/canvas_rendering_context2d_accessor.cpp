@@ -129,8 +129,7 @@ void SetWidthImpl(Ark_CanvasRenderingContext2D peer,
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
-    auto uiContext = PeerUtils::CreatePeer<UIContextPeer>();
-    return FrameNodePeer::Create(uiContext);
+    return FrameNodePeer::Create(static_cast<Ark_UIContext>(nullptr));
 }
 void SetCanvasImpl(Ark_CanvasRenderingContext2D peer,
                    Ark_FrameNode canvas)

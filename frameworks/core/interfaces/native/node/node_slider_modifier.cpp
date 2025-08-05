@@ -897,7 +897,6 @@ const ArkUISliderModifier* GetSliderModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISliderModifier modifier = {
         .setShowTips = SliderModifier::SetShowTips,
-        .setShowTipsPtr = SliderModifier::SetShowTipsPtr,
         .resetShowTips = SliderModifier::ResetShowTips,
         .setSliderStepSize = SliderModifier::SetSliderStepSize,
         .resetSliderStepSize = SliderModifier::ResetSliderStepSize,
@@ -906,21 +905,16 @@ const ArkUISliderModifier* GetSliderModifier()
         .setTrackBorderRadius = SliderModifier::SetTrackBorderRadius,
         .resetTrackBorderRadius = SliderModifier::ResetTrackBorderRadius,
         .setStepColor = SliderModifier::SetStepColor,
-        .setStepColorPtr = SliderModifier::SetStepColorPtr,
         .resetStepColor = SliderModifier::ResetStepColor,
         .setBlockBorderColor = SliderModifier::SetBlockBorderColor,
-        .setBlockBorderColorPtr = SliderModifier::SetBlockBorderColorPtr,
         .resetBlockBorderColor = SliderModifier::ResetBlockBorderColor,
         .setBlockBorderWidth = SliderModifier::SetBlockBorderWidth,
         .resetBlockBorderWidth = SliderModifier::ResetBlockBorderWidth,
         .setBlockColor = SliderModifier::SetBlockColor,
-        .setBlockColorPtr = SliderModifier::SetBlockColorPtr,
         .resetBlockColor = SliderModifier::ResetBlockColor,
         .setTrackBackgroundColor = SliderModifier::SetTrackBackgroundColor,
-        .setTrackBackgroundColorPtr = SliderModifier::SetTrackBackgroundColorPtr,
         .resetTrackBackgroundColor = SliderModifier::ResetTrackBackgroundColor,
         .setSelectColor = SliderModifier::SetSelectColor,
-        .setSelectColorPtr = SliderModifier::SetSelectColorPtr,
         .resetSelectColor = SliderModifier::ResetSelectColor,
         .setShowSteps = SliderModifier::SetShowSteps,
         .resetShowSteps = SliderModifier::ResetShowSteps,
@@ -982,6 +976,12 @@ const ArkUISliderModifier* GetSliderModifier()
         .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
         .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
         .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
+        .setShowTipsPtr = SliderModifier::SetShowTipsPtr,
+        .setStepColorPtr = SliderModifier::SetStepColorPtr,
+        .setBlockBorderColorPtr = SliderModifier::SetBlockBorderColorPtr,
+        .setBlockColorPtr = SliderModifier::SetBlockColorPtr,
+        .setTrackBackgroundColorPtr = SliderModifier::SetTrackBackgroundColorPtr,
+        .setSelectColorPtr = SliderModifier::SetSelectColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

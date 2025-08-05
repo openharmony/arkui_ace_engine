@@ -62,7 +62,7 @@ public:
     void SetOnWillAppear(Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetOnWillDisappear(Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
-    void SetLevelMode(Opt_LevelMode levelMode);
+    void SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode);
     void SetLevelUniqueId(Opt_Number levelUniqueId);
     void SetImersiveMode(Opt_ImmersiveMode immersiveMode);
     void SetLevelOrder(Opt_LevelOrder levelOrder);
