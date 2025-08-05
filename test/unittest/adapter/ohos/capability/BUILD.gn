@@ -14,7 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("html_convert_test") {
-  module_out_path = adapter_test_output_path
+  module_name = "Component-Text"
+  module_output = ""
+  module_out_path = "ace_engine/${module_name}/${module_output}"
   include_dirs = [ "$ace_root/adapter/ohos/capability/html" ]
   sources = [
     "$ace_root/adapter/ohos/capability/html/html_to_span.cpp",
