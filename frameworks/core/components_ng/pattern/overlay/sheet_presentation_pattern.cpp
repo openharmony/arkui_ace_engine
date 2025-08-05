@@ -1290,6 +1290,7 @@ void SheetPresentationPattern::UpdateTitleTextColor()
     auto mainTitleProp = mainTitleText->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(mainTitleProp);
     mainTitleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
+    mainTitleText->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -1302,6 +1303,7 @@ void SheetPresentationPattern::UpdateTitleTextColor()
         auto subTitleProp = subTitleText->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(subTitleProp);
         subTitleProp->UpdateTextColor(sheetTheme->GetSubtitleTextFontColor());
+        subTitleText->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -1452,7 +1454,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     }
 }
 
-void SheetPresentationPattern::OnColorConfigurationUpdate()
+void SheetPresentationPattern::UpdateSheetCloseIcon()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1460,8 +1462,6 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-
-    UpdateTitleTextColor();
     auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(sheetCloseIcon);
     auto renderContext = sheetCloseIcon->GetRenderContext();
@@ -1470,7 +1470,6 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     sheetCloseIcon->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto iconNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
     CHECK_NULL_VOID(iconNode);
-
     // when api >= 12, use symbol format image, else use image format.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {
@@ -1482,7 +1481,33 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(imagePaintProperty);
         imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
     }
-    iconNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::UpdateSheetBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.backgroundColor.has_value()) {
+        return;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::OnColorConfigurationUpdate()
+{
+    UpdateTitleTextColor();
+    UpdateSheetCloseIcon();
+    UpdateSheetBackgroundColor();
 }
 
 float SheetPresentationPattern::GetWrapperHeight()
@@ -4005,7 +4030,7 @@ void SheetPresentationPattern::RegisterBgColorRes(
     }
 }
 
-void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj)
+void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode)
 {
     CHECK_NULL_VOID(sheetNode);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -4020,16 +4045,21 @@ void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetN
         NG::SheetStyle currSheetStyle = sheetStyle;
         NG::BorderRadiusProperty radius;
         radius.multiValued = false;
+        auto radiusResObj = sheetStyle.GetRadiusResObj();
+        // Return directly when the developer does not set the resource type.
+        if (!sheetStyle.radius->multiValued && !radiusResObj) {
+            return;
+        }
         if (sheetStyle.radius->multiValued) {
             // When multiValued is true, the value is set in multiple directions.
             // In this case, invoke ReloadResources to re-parse.
             radius = sheetStyle.radius.value();
             radius.ReloadResources();
-        } else if (resObj) {
+        } else if (radiusResObj) {
             // When multiValued is false and resource object is not empty, same value in all directions.
             // In this case, parse the sheet radius using the resource object.
             CalcDimension radiusSingle;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusSingle);
+            ResourceParseUtils::ParseResDimensionVpNG(radiusResObj, radiusSingle);
             radius.SetRadius(radiusSingle);
         }
         currSheetStyle.radius = radius;
@@ -4040,29 +4070,31 @@ void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetN
         pattern->ClipSheetNode();
         sheetNode->MarkModifyDone();
     };
-    resObj = resObj ? resObj : AceType::MakeRefPtr<ResourceObject>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("sheetPage.radius", resObj, std::move(updateFunc));
 }
 
-void SheetPresentationPattern::UpdateBorderWidthOrColor(const RefPtr<ResourceObject>& resObj,
-    const WeakPtr<FrameNode>& sheetNodeWK)
+void SheetPresentationPattern::UpdateBorderWidth(const RefPtr<FrameNode>& sheetNode)
 {
-    auto sheetNode = sheetNodeWK.Upgrade();
-    CHECK_NULL_VOID(sheetNode);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     NG::BorderWidthProperty borderWidth;
+    auto widthResObj = sheetStyle.GetBorderWidthResObj();
+    // Return directly when the developer does not set the resource type.
+    if (!sheetStyle.borderWidth->multiValued && !widthResObj) {
+        return;
+    }
     if (sheetStyle.borderWidth->multiValued) {
         // When multiValued is true, the value is set in multiple directions.
         // In this case, invoke ReloadResources of border width to re-parse.
         borderWidth = sheetStyle.borderWidth.value();
         borderWidth.ReloadResources();
-    } else if (resObj) {
+    } else if (widthResObj) {
         // When multiValued is false and resource object is not empty, same value in all directions.
         // In this case, parse the sheet border width using the resource object.
         CalcDimension borderWidthSingle;
-        ResourceParseUtils::ParseResDimensionVpNG(resObj, borderWidthSingle);
+        ResourceParseUtils::ParseResDimensionVpNG(widthResObj, borderWidthSingle);
         borderWidth = NG::BorderWidthProperty({ borderWidthSingle, borderWidthSingle,
             borderWidthSingle, borderWidthSingle, std::nullopt, std::nullopt});
     }
@@ -4077,14 +4109,21 @@ void SheetPresentationPattern::UpdateBorderWidthOrColor(const RefPtr<ResourceObj
     auto renderContext = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBorderWidth(borderWidth);
+    sheetNode->->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
 
+void SheetPresentationPattern::UpdateBorderColor(const RefPtr<FrameNode>& sheetNode)
+{
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto colorResObj = sheetStyle.GetBorderColorResObj();
+    if (!sheetStyle.borderColor.has_value() || !sheetStyle.borderWidth->borderColor && !colorResObj) {
+        return;
+    }
     // re-parse border color when needed
     NG::BorderColorProperty borderColor;
-    auto colorResObj = sheetStyle.GetBorderColorResObj();
-    if (!sheetStyle.borderColor.has_value()) {
-        sheetNode->MarkModifyDone();
-        return;
-    } else if (sheetStyle.borderColor->multiValued) {
+    if (sheetStyle.borderColor->multiValued) {
         // When multiValued is true, the value is set in multiple directions.
         // In this case, invoke ReloadResources of border Color to re-parse.
         borderColor = sheetStyle.borderColor.value();
@@ -4097,14 +4136,16 @@ void SheetPresentationPattern::UpdateBorderWidthOrColor(const RefPtr<ResourceObj
         borderColor.SetColor(borderColorSingle);
     }
     // Update sheet style and border color when border color changes.
+    NG::SheetStyle currSheetStyle = sheetStyle;
     currSheetStyle.borderColor = borderColor;
     layoutProperty->UpdateSheetStyle(currSheetStyle);
+    auto renderContext = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBorderColor(borderColor);
-    sheetNode->MarkModifyDone();
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode,
-    RefPtr<ResourceObject>& resObjWidth)
+void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode)
 {
     CHECK_NULL_VOID(sheetNode);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -4113,10 +4154,14 @@ void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameN
         (const RefPtr<ResourceObject>& resObjWidth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateBorderWidthOrColor(resObjWidth, sheetNodeWK);
+        auto sheetNode = sheetNodeWK.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        pattern->UpdateBorderWidth(sheetNode);
+        pattern->UpdateBorderColor(sheetNode);
+        sheetNode->MarkModifyDone();
     };
-    resObjWidth = resObjWidth ? resObjWidth : AceType::MakeRefPtr<ResourceObject>();
-    pattern->AddResObj("sheetPage.border", resObjWidth, std::move(updateFunc));
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    pattern->AddResObj("sheetPage.border", resObj, std::move(updateFunc));
 }
 
 void SheetPresentationPattern::HandleMultiDetentKeyboardAvoid()
@@ -4500,12 +4545,10 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
         RegisterBgColorRes(sheetNode, resObj);
     }
     if (sheetStyle.borderWidth.has_value()) {
-        auto resObjWidth = sheetStyle.GetBorderWidthResObj();
-        RegisterBorderWidthOrColorRes(sheetNode, resObjWidth);
+        RegisterBorderWidthOrColorRes(sheetNode);
     }
     if (sheetStyle.radius.has_value()) {
-        auto resObj = sheetStyle.GetRadiusResObj();
-        RegisterRadiusRes(sheetNode, resObj);
+        RegisterRadiusRes(sheetNode);
     }
     if (sheetStyle.shadow.has_value()) {
         RegisterShadowRes(sheetNode);
