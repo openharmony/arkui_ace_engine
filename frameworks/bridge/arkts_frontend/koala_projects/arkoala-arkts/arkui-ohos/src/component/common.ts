@@ -11031,7 +11031,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (BackgroundOptions)
+            const options_casted = options as (BackgroundOptions | undefined)
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }
