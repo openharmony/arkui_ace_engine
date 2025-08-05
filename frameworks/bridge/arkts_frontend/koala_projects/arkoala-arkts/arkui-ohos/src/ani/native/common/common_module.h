@@ -73,6 +73,7 @@ void* GetMouseEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
 void* GetAxisEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long axisEventPeer);
 void* GetClickEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long clickEventPeer);
 void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long hoverEventPeer);
+void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

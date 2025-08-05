@@ -578,6 +578,13 @@ void* GetHoverEventPointer(ani_long nativePtr)
     return reinterpret_cast<void*>(peer->GetEventInfo());
 }
 
+void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -626,6 +633,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getAxisEventPointer = OHOS::Ace::NG::GetAxisEventPointer,
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
     };
     return &impl;
 }

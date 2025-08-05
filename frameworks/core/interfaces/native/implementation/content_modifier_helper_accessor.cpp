@@ -80,7 +80,7 @@ void ContentModifierCheckBoxImpl(Ark_NativePointer node,
             checkboxConfig.selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
             checkboxConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
             checkboxConfig.triggerChange =
-                CallbackKeeper::DefineBooleanCallback<Callback_Boolean_Void>([weakNode](bool change) {
+                CallbackKeeper::DefineBooleanCallback<Callback_Boolean_Void>([weakNode](Ark_Boolean change) {
                     auto checkboxNode = weakNode.Upgrade();
                     CHECK_NULL_VOID(checkboxNode);
                     CheckBoxModelNG::SetChangeValue(AceType::RawPtr(checkboxNode), change);
