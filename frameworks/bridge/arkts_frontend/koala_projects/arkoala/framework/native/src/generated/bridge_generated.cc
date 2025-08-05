@@ -40365,6 +40365,14 @@ void impl_CustomDialogController_close(Ark_NativePointer thisPtr) {
         GetAccessors()->getCustomDialogControllerAccessor()->close(self);
 }
 KOALA_INTEROP_DIRECT_V1(CustomDialogController_close, Ark_NativePointer)
+KInteropReturnBuffer impl_CustomDialogController_getExternalOptions(Ark_NativePointer thisPtr) {
+        Ark_CustomDialogController self = reinterpret_cast<Ark_CustomDialogController>(thisPtr);
+        const auto &retValue = GetAccessors()->getCustomDialogControllerAccessor()->getExternalOptions(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCustomDialogControllerExternalOptions(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(CustomDialogController_getExternalOptions, KInteropReturnBuffer, Ark_NativePointer)
 void impl_CustomDialogController_setOwnerView(Ark_NativePointer thisPtr, Ark_NativePointer nodePtr) {
         Ark_CustomDialogController self = reinterpret_cast<Ark_CustomDialogController>(thisPtr);
         Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(nodePtr);

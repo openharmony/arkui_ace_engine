@@ -105,7 +105,7 @@ import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal,
 import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
+import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../customDialogController"
 import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, Position as GraphicsPosition, SizeT } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
@@ -24371,6 +24371,18 @@ export class Deserializer extends DeserializerBase {
         }
         const focusable_result : boolean | undefined = focusable_buf
         let value : CustomDialogControllerOptions = ({builder: builder_result, cancel: cancel_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, customStyle: customStyle_result, gridCount: gridCount_result, maskColor: maskColor_result, maskRect: maskRect_result, openAnimation: openAnimation_result, closeAnimation: closeAnimation_result, showInSubWindow: showInSubWindow_result, backgroundColor: backgroundColor_result, cornerRadius: cornerRadius_result, isModal: isModal_result, onWillDismiss: onWillDismiss_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, keyboardAvoidMode: keyboardAvoidMode_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, keyboardAvoidDistance: keyboardAvoidDistance_result, levelMode: levelMode_result, levelUniqueId: levelUniqueId_result, immersiveMode: immersiveMode_result, levelOrder: levelOrder_result, focusable: focusable_result} as CustomDialogControllerOptions)
+        return value
+    }
+    readCustomDialogControllerExternalOptions(): CustomDialogControllerExternalOptions {
+        let valueDeserializer : Deserializer = this
+        const customStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let customStyle_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (customStyle_buf_runtimeType))
+        {
+            customStyle_buf = valueDeserializer.readBoolean()
+        }
+        const customStyle_result : boolean | undefined = customStyle_buf
+        let value : CustomDialogControllerExternalOptions = ({customStyle: customStyle_result} as CustomDialogControllerExternalOptions)
         return value
     }
     readCustomPopupOptions(): CustomPopupOptions {
