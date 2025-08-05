@@ -130,6 +130,8 @@ public:
         return true;
     }
 
+    void AddBaseNode(const RefPtr<UINode>& newNode);
+
 private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnMountToParentDone() override;

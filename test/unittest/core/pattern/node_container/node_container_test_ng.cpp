@@ -1183,4 +1183,37 @@ HWTEST_F(NodeContainerTestNg, HandleTextureExport002, TestSize.Level1)
     auto surfaceIdNull = elementRegister->GetSurfaceIdByEmbedNode(nullptr);
     EXPECT_EQ(surfaceIdNull, 0U);
 }
+
+/**
+ * @tc.name: AddBaseNode001
+ * @tc.desc: Test the add base node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, AddBaseNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    ASSERT_TRUE(pattern);
+    auto frameNodeRef = FrameNode::CreateFrameNode("testAddBaseNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_TRUE(frameNodeRef);
+    auto frameNodeChild = FrameNode::CreateFrameNode("testAddBaseNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_TRUE(frameNodeChild);
+    frameNode->AddChild(frameNodeChild);
+
+    /**
+     * @tc.steps: step2. call AddBaseNode.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    pattern->AddBaseNode(nullptr);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
+    pattern->AddBaseNode(frameNodeRef);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
+}
 } // namespace OHOS::Ace::NG
