@@ -302,9 +302,10 @@ static ani_object OpenCustomDialog(ani_env* env, ani_object builderOptions, ani_
     ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialog enter.");
-    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     OHOS::Ace::DialogProperties dialogProps;
-    if (!GetCustomBuilder(env, builderOptions, dialogProps.customBuilder, asyncContext->destroyCallback)) {
+    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
+    bool destroyResult = GetDestroyCallback(env, builderOptions, dialogProps.destroyCallback);
+    if (!builderResult || !destroyResult) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
         return nullptr;
     }
@@ -316,6 +317,7 @@ static ani_object OpenCustomDialog(ani_env* env, ani_object builderOptions, ani_
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     dialogProps.isUserCreatedDialog = true;
 
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
@@ -462,13 +464,11 @@ static ani_object PresentCustomDialog(ani_env* env, ani_object builderOptions, a
     ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
-    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     OHOS::Ace::DialogProperties dialogProps;
-    bool builderResult = GetCustomBuilder(
-        env, builderOptions, dialogProps.customBuilder, asyncContext->destroyCallback);
-    bool builderWithIdResult = GetCustomBuilderWithId(
-        env, builderOptions, dialogProps.customBuilderWithId, asyncContext->destroyCallback);
-    if (!builderResult && !builderWithIdResult) {
+    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
+    bool destroyResult = GetDestroyCallback(env, builderOptions, dialogProps.destroyCallback);
+    bool builderWithIdResult = GetCustomBuilderWithId(env, builderOptions, dialogProps.customBuilderWithId);
+    if ((!builderResult && !builderWithIdResult) || !destroyResult) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
         return nullptr;
     }
@@ -478,6 +478,7 @@ static ani_object PresentCustomDialog(ani_env* env, ani_object builderOptions, a
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     dialogProps.isUserCreatedDialog = true;
 
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result;
