@@ -36,11 +36,7 @@ group("ace_packages") {
     "$ace_root/interfaces/native:ace_packages_ndk",
   ]
 
-  if (use_linux) {
-    deps += [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani_linux" ]
-  } else {
-    deps += [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani" ]
-  }
+  deps += [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani" ]
 
   if (is_asan) {
     deps -= [ "$ace_root/build:libace" ]

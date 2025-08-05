@@ -610,7 +610,7 @@ ArkUI_Uint32 GetColorValueByNumber(ArkUI_Uint32 src)
     return color.GetValue();
 }
 
-void SendThemeToNative(ani_env* env, const Array_ResourceColor& colorArray, ani_int id)
+void SendThemeToNative(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_int id)
 {
     auto colors = AniThemeColors();
     colors.SetColors(colorArray);
@@ -624,7 +624,7 @@ void SendThemeToNative(ani_env* env, const Array_ResourceColor& colorArray, ani_
     }
 }
 
-void SetDefaultTheme(ani_env* env, const Array_ResourceColor& colorArray, ani_boolean isDark)
+void SetDefaultTheme(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_boolean isDark)
 {
     auto isDarkValue = static_cast<bool>(isDark);
     std::vector<uint32_t> colors;

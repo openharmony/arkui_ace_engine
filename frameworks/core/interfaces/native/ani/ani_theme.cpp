@@ -28,7 +28,7 @@ std::map<int32_t, AniTheme> AniThemeScope::aniThemes = {};
 
 Color AniThemeColors::ConvertAniValueToColor(AniThemeColorIdentifier identifier) const
 {
-    auto value = colors_.array[static_cast<int32_t>(identifier)];
+    auto value = colors_[static_cast<int32_t>(identifier)];
     const auto color = Converter::OptConvert<Color>(value);
     if (!color.has_value()) {
         LOGW("Invalid ani value when convert to color");

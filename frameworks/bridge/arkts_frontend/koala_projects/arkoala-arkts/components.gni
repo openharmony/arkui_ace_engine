@@ -397,6 +397,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/theme/system/ArkSystemShapes.ets",
   "arkui-preprocessed/arkui/handwritten/theme/system/ArkSystemTheme.ets",
   "arkui-preprocessed/arkui/handwritten/theme/system/ArkSystemTypography.ets",
+  "arkui-preprocessed/arkui/handwritten/utils/SerializeUtils.ets",
   "arkui-preprocessed/arkui/index.ets",
   "arkui-preprocessed/arkui/ohos.arkui.modifier.ets",
   "arkui-preprocessed/arkui/ohos.arkui.node.ets",

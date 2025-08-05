@@ -22,9 +22,11 @@
 
 #include "ani.h"
 #include "load.h"
+#include "log/log.h"
 
 #include "base/utils/utils.h"
-#include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/color.h"
+#include "core/interfaces/ani/ani_api.h"
+#include "arkoala/framework/native/src/resource_color_helper.h"
 #include "pixel_map_taihe_ani.h"
 #include "utils/ani_utils.h"
 
@@ -675,7 +677,7 @@ void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, an
     if (!modifier) {
         return;
     }
-    Array_ResourceColor colors = GetResourceColorArray(thisArray, thisLength);
+    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
     modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
 }
 
@@ -685,7 +687,7 @@ void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_
     if (!modifier) {
         return;
     }
-    Array_ResourceColor colorArray = GetResourceColorArray(thisArray, thisLength);
+    std::vector<Ark_ResourceColor> colorArray = GetResourceColorArray(thisArray, thisLength);
     modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
 }
 
