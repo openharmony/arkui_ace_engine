@@ -64,7 +64,7 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->SetOnWillAppear(value->onWillAppear, peer);
     peer->SetOnWillDisappear(value->onWillDisappear, peer);
     peer->SetKeyboardAvoidDistance(value->keyboardAvoidDistance);
-    peer->SetLevelMode(value->levelMode);
+    peer->SetLevelMode(value->showInSubWindow, value->levelMode);
     peer->SetLevelUniqueId(value->levelUniqueId);
     peer->SetImersiveMode(value->immersiveMode);
     peer->SetLevelOrder(value->levelOrder);
