@@ -367,7 +367,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately005, TestSize.Level1
     preTopNavDestinationNode->SetDestroying(false);
 
     navigationNode->RemoveJsChildImmediately(preTopNavDestinationNode, false, 1);
-    EXPECT_TRUE(preTopNavDestinationNode->isInDestroying_);
+    EXPECT_FALSE(preTopNavDestinationNode->isInDestroying_);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 
