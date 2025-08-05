@@ -21,7 +21,7 @@
 
 #include "base/utils/device_config.h"
 
-struct Array_ResourceColor;
+struct Ark_ResourceColor;
 typedef struct __ani_env ani_env;
 
 namespace OHOS::Ace::NG {
@@ -29,7 +29,7 @@ class AniThemeModule final {
 public:
     static void UpdateColorMode(int32_t colorMode);
     static void RestoreColorMode();
-    static void ConvertToColorArray(const Array_ResourceColor& colorArray, std::vector<uint32_t>& colors);
+    static void ConvertToColorArray(const std::vector<Ark_ResourceColor>& colorArray, std::vector<uint32_t>& colors);
 
 private:
     static ColorMode MapAniColorModeToColorMode(int32_t aniColorMode);

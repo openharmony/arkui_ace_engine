@@ -23,6 +23,7 @@
 
 #include "ui/properties/color.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::NG {
 enum class AniThemeColorIdentifier : int32_t {
@@ -83,7 +84,7 @@ public:
     AniThemeColors() = default;
     virtual ~AniThemeColors() = default;
 
-    void SetColors(const Array_ResourceColor& colors)
+    void SetColors(const std::vector<Ark_ResourceColor>& colors)
     {
         colors_ = colors;
     }
@@ -303,7 +304,7 @@ public:
 private:
     Color ConvertAniValueToColor(AniThemeColorIdentifier identifier) const;
 
-    Array_ResourceColor colors_;
+    std::vector<Ark_ResourceColor> colors_;
 };
 
 class AniTheme {

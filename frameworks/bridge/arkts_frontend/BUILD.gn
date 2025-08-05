@@ -142,7 +142,7 @@ ohos_shared_library("ArkoalaNative_ark") {
   ]
 
   sources = [
-    "koala_projects/arkoala/framework/native/src/color.cc",
+    "koala_projects/arkoala/framework/native/src/resource_color_helper.cc",
     "koala_projects/arkoala/framework/native/src/events.cc",
     "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
     "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",

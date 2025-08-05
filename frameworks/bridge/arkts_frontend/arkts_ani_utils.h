@@ -94,11 +94,6 @@ public:
      * Get std::string from std/core/String.
      */
     static std::string ANIStringToStdString(ani_env* env, ani_string ani_str);
-
-    /**
-     * Call JSON.stringify to generate the json string of ani_object.
-     */
-    static std::string JsonStringify(ani_env* env, ani_object src);
 };
 } // namespace OHOS::Ace
 

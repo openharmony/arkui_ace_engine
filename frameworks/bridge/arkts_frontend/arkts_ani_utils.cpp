@@ -156,29 +156,4 @@ std::string ArktsAniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str
     std::string content = std::string(utf8_buffer);
     return content;
 }
-
-std::string ArktsAniUtils::JsonStringify(ani_env* env, ani_object src)
-{
-    ani_status status;
-    ani_class json;
-    status = env->FindClass("Lescompat/JSON;", &json);
-    if (status != ANI_OK) {
-        ani_error aniError;
-        env->GetUnhandledError(&aniError);
-        env->ResetError();
-        LOGW("Find JSON failed, status: %{public}d", status);
-        return "";
-    }
-    ani_ref result;
-    status =
-        env->Class_CallStaticMethodByName_Ref(json, "stringify", "Lstd/core/Object;:Lstd/core/String;", &result, src);
-    if (status != ANI_OK) {
-        ani_error aniError;
-        env->GetUnhandledError(&aniError);
-        env->ResetError();
-        LOGW("Call JSON.stringify failed, status: %{public}d", status);
-        return "";
-    }
-    return ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(result));
-}
 } // namespace OHOS::Ace

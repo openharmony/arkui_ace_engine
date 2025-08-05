@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef _COLOR_H
-#define _COLOR_H
+#ifndef FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_KOALA_PROJECTS_ARKOALA_FRAMEWORK_NATIVE_SRC_RESOURCE_COLOR_HELPER_H
+#define FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_KOALA_PROJECTS_ARKOALA_FRAMEWORK_NATIVE_SRC_RESOURCE_COLOR_HELPER_H
 
 #include <vector>
 
 #include "generated/arkoala_api_generated.h"
 #include "ui/base/macros.h"
 
-Array_ResourceColor ACE_FORCE_EXPORT GetResourceColorArray(int64_t thisArray, int32_t thisLength);
+class Deserializer;
+
+namespace OHOS::Ace {
+std::vector<Ark_ResourceColor> ACE_FORCE_EXPORT GetResourceColorArray(int64_t thisArray, int32_t thisLength);
+Ark_ResourceColor ACE_FORCE_EXPORT DeserializerResourceColor(Deserializer& deserializer);
+} // namespace OHOS::Ace
 
 #endif

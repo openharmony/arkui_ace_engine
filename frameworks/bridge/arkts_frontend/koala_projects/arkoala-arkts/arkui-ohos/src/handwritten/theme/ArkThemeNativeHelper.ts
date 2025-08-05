@@ -25,38 +25,13 @@ import { KPointer, runtimeType, RuntimeType } from '@koalaui/interop';
 import { Serializer } from 'arkui/component';
 import { TypeChecker } from '#components';
 import { Resource } from 'global.resource';
+import { SerializeUtils } from '../utils/SerializeUtils';
 
 export class ArkThemeNativeHelper {
-    static writeColorArray(thisSerializer: Serializer, colorArray: ResourceColor[]) {
-        thisSerializer.writeInt32(colorArray.length as int32);
-        for (let i = 0; i < colorArray.length; i++) {
-            let color_type : int32 = runtimeType(colorArray[i]);
-            if (TypeChecker.isColor(colorArray[i])) {
-                thisSerializer.writeInt8(0 as int32)
-                const color_0  = colorArray[i] as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-            }
-            else if (RuntimeType.NUMBER == color_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const color_1  = colorArray[i] as number
-                thisSerializer.writeNumber(color_1)
-            }
-            else if (RuntimeType.STRING == color_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const color_2  = colorArray[i] as string
-                thisSerializer.writeString(color_2)
-            }
-            else if (RuntimeType.OBJECT == color_type) {
-                thisSerializer.writeInt8(3 as int32)
-                const color_3  = colorArray[i] as Resource
-                thisSerializer.writeResource(color_3)
-            }
-        }
-    }
     static sendThemeToNative(theme: Theme, elmtId: int32): void {
         const thisSerializer : Serializer = Serializer.hold();
         const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
-        ArkThemeNativeHelper.writeColorArray(thisSerializer, colorArray);
+        SerializeUtils.writeColorArray(thisSerializer, colorArray);
         ArkUIAniModule._SendThemeToNative(thisSerializer.asBuffer(), thisSerializer.length(), elmtId);
         thisSerializer.release();
     }
@@ -71,7 +46,7 @@ export class ArkThemeNativeHelper {
     }
     static setDefaultTheme_serialize(colorArray: ResourceColor[], isDark: boolean): void {
         const thisSerializer : Serializer = Serializer.hold();
-        ArkThemeNativeHelper.writeColorArray(thisSerializer, colorArray);
+        SerializeUtils.writeColorArray(thisSerializer, colorArray);
         ArkUIAniModule._SetDefaultTheme(thisSerializer.asBuffer(), thisSerializer.length(), isDark);
         thisSerializer.release();
     }

@@ -82,12 +82,12 @@ ColorMode AniThemeModule::MapAniColorModeToColorMode(int32_t aniColorMode)
 }
 
 void AniThemeModule::ConvertToColorArray(
-    const Array_ResourceColor& colorArray, std::vector<uint32_t>& colors)
+    const std::vector<Ark_ResourceColor>& colorArray, std::vector<uint32_t>& colors)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-    for (int i = 0; i < colorArray.length; i++) {
+    for (int i = 0; i < colorArray.size(); i++) {
         // type ResourceColor = number | string | Resource
-        auto value = colorArray.array[i];
+        auto value = colorArray[i];
         Color color;
         bool isColorAvailable = false;
         const auto convColor = Converter::OptConvert<Color>(value);
