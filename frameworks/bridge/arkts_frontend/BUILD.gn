@@ -21,14 +21,11 @@ template("arkts_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
     if (build_ohos_sdk) {
-        deps = [
-          "koala_mirror/ui2abc:ui2abc",
-        ]
+      deps = [ "koala_mirror/ui2abc:ui2abc" ]
     } else {
-        deps = [
-          "koala_mirror/arkoala-arkts:arkoala"
-        ]
+      deps = [ "koala_mirror/arkoala-arkts:arkoala" ]
     }
+    deps += [ "$ace_root/build:libace_compatible" ]
 
     sources = [
       "ani_context_module.cpp",
@@ -58,9 +55,7 @@ template("arkts_frontend_loader") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
-    sources = [
-      "arkts_frontend_loader.cpp",
-    ]
+    sources = [ "arkts_frontend_loader.cpp" ]
   }
 }
 
