@@ -242,6 +242,7 @@ void WindowPattern::OnAttachToFrameNode()
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
+    CHECK_EQUAL_VOID(AddPersistentImage(surfaceNode, host), true);
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
@@ -249,6 +250,21 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
     attachToFrameNodeFlag_ = true;
+}
+
+bool WindowPattern::AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const RefPtr<NG::FrameNode>& host)
+{
+    int32_t imageFit = 0;
+    if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit) == false) {
+        return false;
+    }
+    CreateSnapshotWindow();
+    AddChild(host, snapshotWindow_, snapshotWindowName_);
+    surfaceNode->SetIsNotifyUIBufferAvailable(false);
+    surfaceNode->SetBufferAvailableCallback(callback_);
+    return true;
 }
 
 void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
