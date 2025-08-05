@@ -34,6 +34,8 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
+    } else {
+        LOGE("Column: the space value is illegal due to space is less than zero");
     }
 }
 

@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT BlankComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(BlankComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(BlankComposedElement, InspectorComposedElement);
 
 public:
     explicit BlankComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

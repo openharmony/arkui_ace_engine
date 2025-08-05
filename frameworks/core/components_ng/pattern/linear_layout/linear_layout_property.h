@@ -121,6 +121,8 @@ public:
                 flexAlign = iter->second;
             }
             UpdateCrossAxisAlign(flexAlign);
+        } else {
+            LOGE("UITree |ERROR| invalid %{public}s", alignItems.c_str());
         }
         UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(json->GetString("justifyContent")));
 
