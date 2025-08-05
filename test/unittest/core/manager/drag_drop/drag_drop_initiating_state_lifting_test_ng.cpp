@@ -797,4 +797,80 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
     liftingState->SetTextAnimation();
     EXPECT_EQ(pattern->showSelect_, true);
 }
+
+/**
+ * @tc.name: CheckDoShowPreviewTestNG001
+ * @tc.desc: Test CheckDoShowPreview function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, CheckDoShowPreviewTestNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+    ASSERT_NE(liftingState, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    dragDropManager->isDragNodeNeedClean_ = true;
+    EXPECT_FALSE(liftingState->CheckDoShowPreview(frameNode));
+}
+
+/**
+ * @tc.name: CheckStatusForPanActionBeginTestNG001
+ * @tc.desc: Test CheckStatusForPanActionBegin function expect IsDragNodeNeedClean.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, CheckStatusForPanActionBeginTestNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+    ASSERT_NE(state, nullptr);
+    auto liftingState = AceType::DynamicCast<DragDropInitiatingStateBase>(state);
+    ASSERT_NE(liftingState, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    dragDropManager->isDragNodeNeedClean_ = true;
+    GestureEvent info;
+    EXPECT_FALSE(liftingState->CheckStatusForPanActionBegin(frameNode, info));
+}
 } // namespace OHOS::Ace::NG

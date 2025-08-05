@@ -2113,4 +2113,21 @@ HWTEST_F(DragEventTestNg, DragEventTryTriggerThumbnailCallbackTest001, TestSize.
     dragEventActuator->TryTriggerThumbnailCallback();
     EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
 }
+
+/**
+ * @tc.name: SetDragNodeNeedClean
+ * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    overlayManager->SetDragNodeNeedClean();
+    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
+}
 } // namespace OHOS::Ace::NG
