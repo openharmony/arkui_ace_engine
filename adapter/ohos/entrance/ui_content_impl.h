@@ -128,7 +128,7 @@ public:
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
-    void RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline);
+    void RegisterGetCurrentPageName();
     void SaveGetCurrentInstanceId();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -136,7 +136,7 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
-    void RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline);
+    void RegisterExeAppAIFunction();
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 
@@ -424,9 +424,9 @@ public:
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
-    void SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline);
-    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
-    void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
+    void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
+    void InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
     bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
         const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId) override;

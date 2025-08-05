@@ -2724,7 +2724,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     // setLogFunc of current app
     AddAlarmLogFunc(pipeline);
-    InitUISessionManagerCallbacks(pipeline);
+    if (pipeline) {
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        if (taskExecutor) {
+            InitUISessionManagerCallbacks(taskExecutor);
+        }
+    }
     UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
@@ -5718,21 +5723,19 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
         TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
-void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
+void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandCallback = [weakContext = WeakPtr(pipeline)](int32_t value) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
+    auto sendCommandCallback = [weakTaskExecutor = taskExecutor](int32_t value) {
         KeyEvent keyEvent;
         keyEvent.action = KeyAction::DOWN;
         keyEvent.code = static_cast<KeyCode>(value);
         keyEvent.pressedCodes = { keyEvent.code };
 
-        auto taskExecutor = pipeline->GetTaskExecutor();
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), keyEvent]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [keyEvent]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->OnNonPointerEvent(keyEvent);
             },
@@ -5741,22 +5744,16 @@ void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
-void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     // set get inspector tree function for ui session manager
-    auto callback = [weakContext = WeakPtr(pipeline)](bool onlyNeedVisible) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        if (pipeline == nullptr) {
-            pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        }
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), onlyNeedVisible]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [onlyNeedVisible]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                ContainerScope scope(pipeline->GetInstanceId());
                 if (onlyNeedVisible) {
                     pipeline->GetInspectorTree(true);
                 } else {
@@ -5768,14 +5765,12 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
-    auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), isRegister]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [isRegister]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->NotifyAllWebPattern(isRegister);
             },
@@ -5783,24 +5778,22 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
-    SetupGetPixelMapCallback(pipeline);
-    RegisterGetCurrentPageName(pipeline);
-    InitSendCommandFunctionsCallbacks(pipeline);
-    sendCommandCallbackInner(pipeline);
+    SetupGetPixelMapCallback(taskExecutor);
+    RegisterGetCurrentPageName();
+    InitSendCommandFunctionsCallbacks(taskExecutor);
+    sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
-    RegisterExeAppAIFunction(pipeline);
+    RegisterExeAppAIFunction();
 }
 
-void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto getPixelMapCallback = [weakTaskExecutor = taskExecutor]() {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline)]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->GetAllPixelMap();
             },
@@ -5822,25 +5815,20 @@ void UIContentImpl::SaveGetCurrentInstanceId()
     });
 }
 
-void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
+void UIContentImpl::RegisterGetCurrentPageName()
 {
-    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+    auto getPageNameCallback = []() -> std::string {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, "");
         return pipeline->GetCurrentPageNameCallback();
     };
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
-void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandAsync = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        if (!pipeline) {
-            LOGI("Pipeline context is null");
-            return 10;
-        }
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto sendCommandAsync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         if (!taskExecutor) {
             LOGI("Task executor is null");
             return 11;
@@ -5860,10 +5848,8 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipel
         return result;
     };
     UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
-    auto sendCommand = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [id, command]() {
@@ -6104,12 +6090,12 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
-void UIContentImpl::RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline)
+void UIContentImpl::RegisterExeAppAIFunction()
 {
-    auto exeAppAIFunctionCallback = [weakContext = WeakPtr(pipeline)](
+    auto exeAppAIFunctionCallback = [](
         const std::string& funcName, const std::string& params) -> uint32_t {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, AI_CALL_ENV_INVALID);
         return pipeline->ExeAppAIFunctionCallback(funcName, params);
     };
