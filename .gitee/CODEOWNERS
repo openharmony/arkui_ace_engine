@@ -3055,7 +3055,6 @@ interfaces/native/node/textpicker_option.cpp @arkui_image
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
-interfaces/native/implementation/overlay_accessor.cpp @arkuievent
 
 [ANI Interfaces]
 interfaces/ets/ani/overlayManager/ @arkuipopupwindow
@@ -3145,6 +3144,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/customDialogController.ts @arkuipopupwindow
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.overlayManager.ts @arkuipopupwindow
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.promptAction.ts @arkuipopupwindow
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @arkuievent
 frameworks/core/interfaces/native/implementation/action_sheet_accessor.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/implementation/alert_dialog_accessor.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/implementation/custom_dialog_controller_accessor.cpp @arkuipopupwindow
@@ -3172,6 +3172,20 @@ frameworks/core/interfaces/native/implementation/text_picker_value_ops_accessor.
 frameworks/core/interfaces/native/implementation/time_picker_dialog_accessor.cpp @arkui_image
 frameworks/core/interfaces/native/implementation/time_picker_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/implementation/time_picker_selected_ops_accessor.cpp @arkui_image
+
+frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/drag_event_peer.h @arkuievent
+frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/ani/drag_ani_modifier.h @arkuievent
+frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.h @arkuievent
+frameworks/core/interfaces/native/ani/drag_controller_utils.cpp @arkuievent
+frameworks/core/interfaces/native/ani/drag_controller_utils.h @arkuievent
+frameworks/core/interfaces/native/ani/drag_preview.h @arkuievent
+frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @arkuievent
 
 [Test source]
 test/mock/core/event/ @arkuievent

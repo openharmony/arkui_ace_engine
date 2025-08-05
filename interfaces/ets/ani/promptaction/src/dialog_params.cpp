@@ -848,19 +848,26 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
     }
 
     ani_ref globalRef;
-    env->GlobalReference_Create(resultRef, &globalRef);
+    status = env->GlobalReference_Create(resultRef, &globalRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
     result = [env, globalRef](const int32_t reason, const int32_t instanceId) {
         TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "Dissmiss dialog enter. reason: %{public}d, instanceId: %{public}d", reason, instanceId);
-        if (globalRef) {
-            ani_object dismissDialogAction = OHOS::Ace::Ani::ANICreateDismissDialogAction(env, reason, instanceId);
-            ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
-            ani_fn_object func = static_cast<ani_fn_object>(globalRef);
-            ani_ref fnReturnVal {};
-            ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
-            if (status != ANI_OK) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "Dissmiss dialog fail. status: %{public}d", status);
-            }
+        if (!globalRef) {
+            return;
+        }
+
+        ani_object dismissDialogAction = OHOS::Ace::Ani::ANICreateDismissDialogAction(env, reason, instanceId);
+        ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
+        ani_fn_object func = static_cast<ani_fn_object>(globalRef);
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
+        env->GlobalReference_Delete(globalRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "Dissmiss dialog fail. status: %{public}d", status);
         }
     };
     return true;
@@ -987,79 +994,66 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     return true;
 }
 
-std::function<void()> GetCustomBuilder(ani_env *env, ani_long builder)
+bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& builderCallback,
+    std::function<void()>& destroyCallback)
 {
-    auto result = [env, builder]() {
-        if (builder) {
-            auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
-            CHECK_NULL_VOID(builderNode);
-            auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
-            CHECK_NULL_VOID(uiNode);
-            OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
-        }
-    };
-    return result;
-}
-
-bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& builderResult,
-    std::function<void()>& destroyResult)
-{
-    ani_ref builderFuncRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderFunc", &builderFuncRef);
-    if (status != ANI_OK) {
+    int64_t builderValue;
+    if (!GetInt64Param(env, object, "builder", builderValue)) {
         return false;
     }
 
     ani_ref destroyFuncRef;
-    status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
     if (status != ANI_OK) {
         return false;
     }
 
-    if (IsUndefinedObject(env, builderFuncRef) || IsUndefinedObject(env, destroyFuncRef)) {
+    if (IsUndefinedObject(env, destroyFuncRef)) {
         return false;
     }
 
-    ani_ref globalBuilderRef;
-    env->GlobalReference_Create(builderFuncRef, &globalBuilderRef);
     ani_ref globalDestroyRef;
-    env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
-    builderResult = [env, globalBuilderRef]() {
-        if (!globalBuilderRef) {
+    status = env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    builderCallback = [env, builderValue]() {
+        if (!builderValue) {
             return;
         }
 
-        ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
-        std::vector<ani_ref> args;
-        ani_ref fnReturnVal {};
-        ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
-        if (status != ANI_OK) {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
-            return;
-        }
-
-        ani_object builderObj = static_cast<ani_object>(fnReturnVal);
-        ani_long builder;
-        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", nullptr, &builder);
-        if (status != ANI_OK) {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CallMethodByName_Long fail. status: %{public}d", status);
-            return;
-        }
-
+        ani_long builder = static_cast<ani_long>(builderValue);
         auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
         CHECK_NULL_VOID(builderNode);
         auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
         CHECK_NULL_VOID(uiNode);
         OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
     };
+
+    destroyCallback = [env, globalDestroyRef, builderValue]() {
+        if (!builderValue) {
+            return;
+        }
+
+        ani_fn_object func = static_cast<ani_fn_object>(globalDestroyRef);
+        ani_object builderObj = CreateANILongObject(env, builderValue);
+        ani_ref builderRef = static_cast<ani_ref>(builderObj);
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, 1, &builderRef, &fnReturnVal);
+        env->GlobalReference_Delete(globalDestroyRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+        }
+    };
     return true;
 }
 
 bool GetCustomBuilderWithId(ani_env *env, ani_object object,
-    std::function<void(const int32_t dialogId)>& builderResult, std::function<void()>& destroyResult)
+    std::function<void(const int32_t dialogId)>& builderCallback, std::function<void()>& destroyCallback)
 {
     ani_ref builderFuncRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderWithIdFunc", &builderFuncRef);
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderWithId", &builderFuncRef);
     if (status != ANI_OK) {
         return false;
     }
@@ -1075,10 +1069,18 @@ bool GetCustomBuilderWithId(ani_env *env, ani_object object,
     }
 
     ani_ref globalBuilderRef;
-    env->GlobalReference_Create(builderFuncRef, &globalBuilderRef);
+    status = env->GlobalReference_Create(builderFuncRef, &globalBuilderRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
     ani_ref globalDestroyRef;
-    env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
-    builderResult = [env, globalBuilderRef](const int32_t dialogId) {
+    status = env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    builderCallback = [env, globalBuilderRef, globalDestroyRef, &destroyCallback](const int32_t dialogId) {
         if (!globalBuilderRef) {
             return;
         }
@@ -1088,6 +1090,7 @@ bool GetCustomBuilderWithId(ani_env *env, ani_object object,
         ani_ref dialogIdRef = static_cast<ani_ref>(dialogIdObj);
         ani_ref fnReturnVal {};
         ani_status status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
+        env->GlobalReference_Delete(globalBuilderRef);
         if (status != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
             return;
@@ -1106,6 +1109,22 @@ bool GetCustomBuilderWithId(ani_env *env, ani_object object,
         auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
         CHECK_NULL_VOID(uiNode);
         OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+
+        destroyCallback = [env, globalDestroyRef, builder]() {
+            if (!globalDestroyRef) {
+                return;
+            }
+
+            ani_fn_object func = static_cast<ani_fn_object>(globalDestroyRef);
+            ani_object builderObj = CreateANILongObject(env, static_cast<int64_t>(builder));
+            ani_ref builderRef = static_cast<ani_ref>(builderObj);
+            ani_ref fnReturnVal {};
+            ani_status status = env->FunctionalObject_Call(func, 1, &builderRef, &fnReturnVal);
+            env->GlobalReference_Delete(globalDestroyRef);
+            if (status != ANI_OK) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            }
+        };
     };
     return true;
 }

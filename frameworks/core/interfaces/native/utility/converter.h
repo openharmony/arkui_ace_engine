@@ -655,6 +655,7 @@ namespace Converter {
     template<> std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src);
     template<> std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+    template<> std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& src);
     template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src);
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
