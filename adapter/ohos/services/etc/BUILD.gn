@@ -27,3 +27,10 @@ ohos_prebuilt_etc("ohos.timepicker.ogg") {
   subsystem_name = "arkui"
   module_install_dir = "etc/arkui"
 }
+
+ohos_prebuilt_etc("ace_engine_param") {
+  source = "./ace_engine.para"
+  part_name = "ace_engine"
+  subsystem_name = "arkui"
+  module_install_dir = "etc/param"
+}
