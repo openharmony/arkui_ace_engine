@@ -547,6 +547,5 @@ HWTEST_F(ScrollableTestNg, HandleExtScroll008, TestSize.Level1)
     };
     scrollablePattern->HandleExtScroll();
     EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, true);
-    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG
