@@ -221,7 +221,9 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+    auto property = wrapper_->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (property->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
         auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
         overscrollOffsetBeforeJump_ =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
