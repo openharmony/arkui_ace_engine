@@ -146,7 +146,114 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
+ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
+  module_out_path = pattern_test_output_path
+  testonly = true
+  defines = [
+    "OHOS_STANDARD_SYSTEM",
+    "ENABLE_DRAG_FRAMEWORK",
+    "WEB_SUPPORTED",
+  ]
+  if (ace_engine_feature_enable_upgrade_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
+
+  include_dirs = [
+    "$ace_root/interfaces/inner_api/ui_session",
+    "$ace_root/adapter/ohos/capability/html",
+  ]
+
+  sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/web/richtext_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/touch_event_listener.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/transitional_node_info.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_event_report.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_content_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_context_select_overlay.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_data_detector_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_select_overlay.cpp",
+    "mock_rosen_render_surface.cpp",
+    "mock_web_delegate.cpp",
+    "web_accessibility_event_report_test.cpp",
+  ]
+
+  deps = [
+    "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+
+  sources += [
+    "$ace_root/adapter/ohos/capability/html/html_to_span.cpp",
+
+    # mock
+    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:view_data",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:app_manager",
+    "ability_runtime:runtime",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "app_file_service:fileuri_native",
+    "bounds_checking_function:libsec_static",
+    "cJSON:cjson",
+    "cJSON:cjson_static",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "form_fwk:form_manager",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "libxml2:libxml2",
+    "napi:ace_napi",
+    "samgr:samgr_proxy",
+    "webview:libnweb",
+    "window_manager:libpip_ndk",
+    "window_manager:libwm",
+  ]
+
+  if (defined(global_parts_info.inputmethod_imf)) {
+    external_deps += [ "imf:inputmethod_client" ]
+  }
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}
+
 group("web_pattern_unit_test") {
   testonly = true
   deps = [ ":web_pattern_unit_test_ohos" ]
+  deps += [ ":web_accessibility_event_report_unit_test_ohos" ]
 }
