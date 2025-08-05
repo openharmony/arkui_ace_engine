@@ -1609,8 +1609,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         const arrLen = this.onLazyLoadingFunc_ ? this.totalCount() : this.arr_.length;
         // trigger MarkNeedSyncRenderTree, MarkNeedFrameFlushDirty in CPP side
-        RepeatVirtualScroll2Native.requestContainerReLayout(
-            this.repeatElmtId_, arrLen, this.totalCount(), changeIndex);
+        RepeatVirtualScroll2Native.requestContainerReLayout(this.repeatElmtId_, arrLen, this.totalCount(), changeIndex);
     }
 
     private onPurge(): void {
