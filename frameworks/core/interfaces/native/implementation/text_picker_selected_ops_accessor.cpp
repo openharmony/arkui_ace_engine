@@ -62,7 +62,7 @@ void ApplyTextPickerSelected(FrameNode* frameNode, const Ark_Union_Number_Array_
             TextPickerModelStatic::SetHasSelectAttr(frameNode, true);
             ProcessCascadeSelected(options, 0, indexes);
             uint32_t maxCount = TextPickerModelStatic::GetMaxCount(frameNode);
-            auto indexesSize = static_cast<int32_t>(indexes.size());
+            uint32_t indexesSize = static_cast<uint32_t>(indexes.size());
             if (LessNotEqual(indexesSize, maxCount)) {
                 auto diff = maxCount - indexesSize;
                 for (uint32_t i = 0; i < diff; i++) {
