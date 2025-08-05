@@ -733,6 +733,7 @@ private:
     void OnAttachToFrameNode() override;
     int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
     void RegisterOnTouch();
