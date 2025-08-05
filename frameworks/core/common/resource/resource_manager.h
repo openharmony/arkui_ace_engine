@@ -135,14 +135,19 @@ public:
         return nullptr;
     }
 
-    void UpdateResourceConfig(const ResourceConfiguration& config, bool themeFlag = false)
+    void UpdateResourceConfig(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
+        const ResourceConfiguration& config, bool themeFlag = false)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
+        auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+        auto iter = resourceAdapters_.find(key);
+        if (iter != resourceAdapters_.end()) {
             iter->second->UpdateConfig(config, themeFlag);
         }
-        for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
-            iter->cacheObj->UpdateConfig(config, themeFlag);
+        auto cacheAdapter =
+            CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+        if (cacheAdapter != nullptr) {
+            cacheAdapter->UpdateConfig(config, themeFlag);
         }
     }
 
@@ -166,14 +171,19 @@ public:
         TAG_LOGI(AceLogTag::ACE_RESOURCE, "The cache of Resource has been released!");
     }
 
-    void UpdateColorMode(ColorMode colorMode)
+    void UpdateColorMode(
+        const std::string& bundleName, const std::string& moduleName, int32_t instanceId, ColorMode colorMode)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
+        auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+        auto iter = resourceAdapters_.find(key);
+        if (iter != resourceAdapters_.end()) {
             iter->second->UpdateColorMode(colorMode);
         }
-        for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
-            iter->cacheObj->UpdateColorMode(colorMode);
+        auto cacheAdapter =
+            CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+        if (cacheAdapter != nullptr) {
+            cacheAdapter->UpdateColorMode(colorMode);
         }
     }
 

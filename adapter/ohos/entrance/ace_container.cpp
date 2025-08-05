@@ -3504,7 +3504,8 @@ void AceContainer::UpdateConfiguration(
     if (!abilityLevel) {
         themeManager->UpdateConfig(resConfig);
         if (SystemProperties::GetResourceDecoupling()) {
-            ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+            ResourceManager::GetInstance().UpdateResourceConfig(
+                GetBundleName(), GetModuleName(), instanceId_, resConfig, !parsedConfig.themeTag.empty());
         }
     }
     themeManager->LoadResourceThemes();
@@ -4400,7 +4401,8 @@ void AceContainer::UpdateResourceOrientation(int32_t orientation)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetOrientation(newOrientation);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }
     SetResourceConfiguration(resConfig);
 }
@@ -4411,7 +4413,8 @@ void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
     resConfig.SetDensity(density);
     SetResourceConfiguration(resConfig);
     if (SystemProperties::GetResourceDecoupling() && (isUpdateResConfig || !IsSceneBoardWindow())) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }
 }
 

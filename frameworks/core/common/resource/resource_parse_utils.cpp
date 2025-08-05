@@ -431,17 +431,20 @@ bool ResourceParseUtils::ParseResColorWithColorMode(const RefPtr<ResourceObject>
     const ColorMode& colorMode)
 {
     CHECK_NULL_RETURN(resObj, false);
-
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
     if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
-        resObj->SetInstanceId(Container::CurrentIdSafely());
+        resObj->SetInstanceId(container->GetInstanceId());
     }
     auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     CHECK_NULL_RETURN(resourceWrapper, false);
     auto resourceAdapter = resourceWrapper->GetResourceAdapter();
-    auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : Container::CurrentColorMode();
-    ResourceManager::GetInstance().UpdateColorMode(colorMode);
+    auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : container->GetColorMode();
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorMode);
     bool state = ParseResColor(resObj, result);
-    ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
     return state;
 }
 
