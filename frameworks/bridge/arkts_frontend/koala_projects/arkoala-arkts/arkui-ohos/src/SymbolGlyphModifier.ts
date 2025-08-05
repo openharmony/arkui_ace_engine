@@ -16,15 +16,21 @@
 import { int32 } from '@koalaui/common'
 import { AttributeModifier } from 'arkui/component/common';
 import { SymbolGlyphAttribute } from 'arkui/component/symbolglyph';
-import { RuntimeType, runtimeType } from "@koalaui/interop";
+import { KPointer, RuntimeType, runtimeType } from "@koalaui/interop";
 
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
+import { applyUIAttributes } from './handwritten/modifiers/ArkCommonModifier';
 import { PeerNode } from './PeerNode';
 import { ArkSymbolGlyphPeer, SymbolEffect, SymbolEffectStrategy, SymbolRenderingStrategy } from './component/symbolglyph';
 import { FontWeight } from './component/enums';
 import { ResourceColor } from "./component/units";
 import { Resource } from 'global.resource';
 
+class ArkSymbolGlyphPeerCustom extends ArkSymbolGlyphPeer {
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+}
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute, AttributeModifier<SymbolGlyphAttribute> {
     constructor(src?: Resource) {
         super()
@@ -61,6 +67,17 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _symbolEffect0_value?: SymbolEffect | undefined
     _symbolEffect1_value?: boolean | number | undefined
 
+    public static applySymbolGlyphModifierToNode(modifier: SymbolGlyphModifier, nodePtr: KPointer): void {
+        const peerId = PeerNode.nextId()
+        const node = new ArkSymbolGlyphPeerCustom(nodePtr, peerId, "SymbolGlyph")
+        const node_casted = node as PeerNode
+        let currentState = node_casted.getStateStyleMutable()
+        if (currentState === undefined) {
+            currentState = node_casted.getOrCreateStateStyleMutable()!
+        }
+        applyUIAttributes(modifier, modifier, currentState.value)
+        modifier.applyModifierPatch(node_casted)
+    }
     public setSymbolGlyphOptions(value: Resource | undefined): this {
         if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
             this._setSymbolGlyphOptions0_value !== value || !Type.of(value).isPrimitive()) {

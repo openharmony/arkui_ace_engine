@@ -37,6 +37,7 @@
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "rich_editor/rich_editor_module.h"
+#include "search/search_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
@@ -595,6 +596,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_StyledString_GetPixelMap",
             "J:L@ohos/multimedia/image/image/PixelMap;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::GetPixelMap)
+        },
+        ani_native_function {
+            "_Search_SetSearchIcon_Symbol",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetSearchIconSymbol)
         },
         ani_native_function {
             "_ImageSpan_Set_PixelMap",
