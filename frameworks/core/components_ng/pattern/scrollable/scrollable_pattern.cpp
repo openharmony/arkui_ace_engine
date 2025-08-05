@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -937,11 +938,20 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    // call OnDetachFromFrameNodeMultiThread() by multi thread
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     CHECK_NULL_VOID(frameNode);
     UnRegister2DragDropManager(frameNode);
     auto context = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(frameNode->GetId());
+}
+
+void ScrollablePattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    // call OnDetachFromMainTreeMultiThread() by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void ScrollablePattern::OnWindowHide()
@@ -1784,6 +1794,7 @@ void ScrollablePattern::PauseAnimation(std::shared_ptr<AnimationUtils::Animation
 void ScrollablePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
@@ -3657,6 +3668,9 @@ void ScrollablePattern::HandleClickEvent()
 
 void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
+    auto host = GetHost();
+    // call ScrollPageMultiThread by multi thread
+    FREE_NODE_CHECK(host, ScrollPage, reverse, smooth, scrollType);
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
@@ -4328,6 +4342,8 @@ void ScrollablePattern::SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& 
 void ScrollablePattern::OnAttachToMainTree()
 {
     auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     CHECK_NULL_VOID(host);
     auto scrollBarProxy = scrollBarProxy_;
     CHECK_NULL_VOID(scrollBarProxy);

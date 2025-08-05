@@ -164,6 +164,8 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment,
         std::optional<float> extraOffset = std::nullopt);
+    static void SetScrollToIndexMultiThread(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment,
+        std::optional<float> extraOffset = std::nullopt);
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
@@ -182,6 +184,8 @@ public:
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
     static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
     static void ScrollToItemInGroup(
+        FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
+    static void ScrollToItemInGroupMultiThread(
         FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
     static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);

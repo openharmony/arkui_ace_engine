@@ -599,7 +599,6 @@ HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
      * @tc.steps: step3. refresh sets accessibilityLevel
      * @tc.expected: progress node and loadingText node have accessibilityLevel.
      */
-    
     refreshAccessibilityProperty->SetAccessibilityLevel("no");
     EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
     EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");

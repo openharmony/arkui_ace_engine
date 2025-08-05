@@ -143,6 +143,9 @@ private:
     float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     float GetFollowRatio();
     void HandleCustomBuilderDragUpdateStage();
     void SetAccessibilityAction();
