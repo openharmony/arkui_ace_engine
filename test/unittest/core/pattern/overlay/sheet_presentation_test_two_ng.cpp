@@ -22,6 +22,7 @@
 #define protected public
 
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -30,10 +31,10 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2533,7 +2534,10 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     style.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-    
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. create sheet property and style.
      * @tc.expected: layoutProperty and LayoutAlgorithm are not nullptr.
@@ -2549,7 +2553,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->sheetMaxHeight_ = 2420;
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
     layoutProperty->propSheetStyle_ = style;
 
     /**
@@ -2557,7 +2560,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
      */
     sheetNode->Measure(sheetNode->GetLayoutConstraint());
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     manager->keyboardInset_ = KEYBOARD_INSET;
     pipeline->isHalfFoldHoverStatus_ = true;
@@ -2572,8 +2574,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
     std::vector<Rect> rects;
-    Rect rect;
-    rect.SetRect(0, 1064, 2294, 171);
+    Rect rect(0, 1064, 2294, 171);
     rects.insert(rects.end(), rect);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);

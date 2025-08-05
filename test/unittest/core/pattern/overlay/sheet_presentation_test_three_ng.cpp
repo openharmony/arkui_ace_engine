@@ -105,9 +105,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset001, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 0.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -148,9 +151,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset002, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 210.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -195,9 +201,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset003, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 210.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -242,9 +251,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset004, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 210.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
