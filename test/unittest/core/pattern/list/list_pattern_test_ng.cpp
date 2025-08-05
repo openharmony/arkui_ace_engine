@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "list_test_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -29,9 +30,7 @@ constexpr int DEFAULT_FOOTER_VALUE = 3;
 using namespace testing;
 using namespace testing::ext;
 
-class ListPatternTestNg : public TestNG {
-public:
-};
+class ListPatternTestNg : public ListTestNg {};
 
 /**
  * @tc.name: GetNextLineFocusIndex001
