@@ -70,7 +70,7 @@ std::optional<Converter::PickerValueType> ProcessBindableValue(FrameNode* frameN
             };
             TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 
@@ -107,7 +107,7 @@ std::optional<Converter::PickerSelectedType> ProcessBindableSelected(FrameNode* 
             };
             TextPickerModelStatic::SetOnSelectedChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 

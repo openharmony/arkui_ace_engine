@@ -94,21 +94,13 @@ void SetFontStyleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Ace::FontStyle>(value);
     SpanModelStatic::SetItalicFontStyle(frameNode, convValue);
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<FontWeight>(value);
-    SpanModelStatic::SetFontWeight(frameNode, convValue);
-}
 void SetFontWeightImpl(Ark_NativePointer node,
                        const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SpanModelNG::SetFontWeight(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<FontWeight>(value);
+    SpanModelStatic::SetFontWeight(frameNode, convValue);
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
                        const Opt_Union_String_Resource* value)
@@ -134,22 +126,14 @@ void SetDecorationImpl(Ark_NativePointer node,
     auto style = optValue ? Converter::OptConvert<TextDecorationStyle>(optValue->style) : std::nullopt;
     SpanModelStatic::SetTextDecorationStyle(frameNode, style);
 }
-void LetterSpacingImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String* value)
+void SetLetterSpacingImpl(Ark_NativePointer node,
+                          const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonPercent(convValue);
     SpanModelStatic::SetLetterSpacing(frameNode, convValue);
-}
-void SetLetterSpacingImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SpanModelNG::SetLetterSpacing(frameNode, convValue);
 }
 void SetTextCaseImpl(Ark_NativePointer node,
                      const Opt_TextCase* value)

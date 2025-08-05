@@ -45,7 +45,7 @@ std::optional<Dimension> ProcessBindableNavBarWidth(FrameNode* frameNode, const 
             result = Converter::OptConvert<Dimension>(src.value);
             // Need to provide callback
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace
@@ -374,7 +374,8 @@ void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
         auto fromContext = Converter::ArkValue<Ark_NavContentInfo>(from);
         auto toContext = Converter::ArkValue<Ark_NavContentInfo>(to);
         auto navOperation = static_cast<Ark_NavigationOperation>(operation);
-        auto resultOpt = callback.InvokeWithOptConvertResult<NG::NavigationTransition, Opt_NavigationAnimatedTransition, Callback_Opt_NavigationAnimatedTransition_Void>(fromContext, toContext, navOperation);
+        auto resultOpt = callback.InvokeWithOptConvertResult<NG::NavigationTransition, Opt_NavigationAnimatedTransition,
+            Callback_Opt_NavigationAnimatedTransition_Void>(fromContext, toContext, navOperation);
         return resultOpt.value_or(transition);
     };
     NavigationModelStatic::SetIsCustomAnimation(frameNode, true);

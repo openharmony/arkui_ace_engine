@@ -110,7 +110,7 @@ std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Unio
             };
             ListItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

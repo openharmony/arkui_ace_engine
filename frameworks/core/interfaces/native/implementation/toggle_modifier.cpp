@@ -40,7 +40,7 @@ std::optional<bool> ProcessBindableIsOn(FrameNode* frameNode, const Opt_Union_Bo
             };
             ToggleModelStatic::OnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

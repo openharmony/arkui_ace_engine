@@ -55,7 +55,7 @@ std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
         [](const Ark_Bindable_Global_Resource_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace
@@ -285,12 +285,12 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    auto onTextSelectionChange = [arkCallback = CallbackHelper(*optValue)](int32_t selectionStart, int32_t selectionEnd) {
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](int32_t selectionStart, int32_t selectionEnd) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
         auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
         arkCallback.Invoke(arkSelectionStart, arkSelectionEnd);
     };
-    TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onEvent));
 }
 void SetOnContentScrollImpl(Ark_NativePointer node,
                             const Opt_Callback_Number_Number_Void* value)
@@ -786,7 +786,7 @@ void SetShowCounterImpl(Ark_NativePointer node,
                         const Opt_Boolean* value,
                         const Opt_InputCounterOptions* options)
 {
-   auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto showCounter = Converter::OptConvertPtr<bool>(value);
     if (!showCounter) {

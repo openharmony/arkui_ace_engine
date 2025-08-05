@@ -68,7 +68,7 @@ std::optional<bool> ProcessBindableRefreshing(FrameNode* frameNode, const Ark_Un
             };
             RefreshModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

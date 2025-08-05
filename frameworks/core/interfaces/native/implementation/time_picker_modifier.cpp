@@ -46,7 +46,7 @@ std::optional<PickerTime> ProcessBindableSelected(FrameNode* frameNode, const Op
             };
             TimePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

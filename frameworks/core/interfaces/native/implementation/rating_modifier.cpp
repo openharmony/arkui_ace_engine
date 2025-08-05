@@ -45,7 +45,7 @@ std::optional<float> ProcessBindableRating(FrameNode* frameNode, const Opt_Union
             };
             RatingModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

@@ -62,7 +62,7 @@ std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Op
             };
             DatePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

@@ -47,7 +47,7 @@ std::optional<Converter::PickerValueType> ProcessBindableValue(
             result = Converter::OptConvert<Converter::PickerValueType>(src.value);
             // Implement callback functionality
         },
-        []{});
+        [] {});
     return result;
 }
 
@@ -70,7 +70,7 @@ std::optional<Converter::PickerSelectedType> ProcessBindableSelected(
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             // Implement callback functionality
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

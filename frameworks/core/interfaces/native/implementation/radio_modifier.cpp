@@ -40,7 +40,7 @@ std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union
             };
             RadioModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

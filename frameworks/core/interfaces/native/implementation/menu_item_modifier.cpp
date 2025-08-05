@@ -38,7 +38,7 @@ std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Unio
             };
             MenuItemModelStatic::SetSelectedChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

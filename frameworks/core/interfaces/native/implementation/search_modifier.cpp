@@ -58,7 +58,7 @@ std::optional<std::string> ProcessBindableValue(FrameNode* frameNode, const Opt_
             };
             SearchModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

@@ -69,7 +69,7 @@ std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
         [](const Ark_Bindable_Global_Resource_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

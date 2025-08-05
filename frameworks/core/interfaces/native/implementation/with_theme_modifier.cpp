@@ -32,8 +32,6 @@ void SetWithThemeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //WithThemeModelNG::SetWithThemeOptions(frameNode, convValue);
 }
 } // WithThemeInterfaceModifier
 const GENERATED_ArkUIWithThemeModifier* GetWithThemeModifier()

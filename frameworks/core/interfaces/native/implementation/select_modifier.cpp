@@ -191,7 +191,7 @@ std::optional<std::string> ProcessBindableValue(FrameNode* frameNode,
         [](const Ark_Bindable_Global_Resource_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
-        []{});
+        [] {});
     return result;
 }
 std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
@@ -217,7 +217,7 @@ std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
         [](const Ark_Bindable_Global_Resource_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

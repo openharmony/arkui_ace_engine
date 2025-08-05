@@ -39,7 +39,7 @@ namespace  {
     const auto ATTRIBUTE_IMAGES_TOP_NAME = "top";
     const auto ATTRIBUTE_IMAGES_TOP_TEST_VALUE = "100.00vp";
     const auto ATTRIBUTE_IMAGES_WIDTH_NAME = "width";
-    const auto ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE = "0.00auto"; // TODO: Need to check
+    const auto ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE = "0.00auto"; // Need to check value on ArkUI
     const auto ATTRIBUTE_IMAGES_HEIGHT_NAME = "height";
     const auto ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE = "100.00px";
     const auto ATTRIBUTE_IMAGES_DURATION_NAME = "duration";

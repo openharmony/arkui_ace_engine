@@ -166,7 +166,7 @@ std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode, const Opt_Union_
                 arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
             };
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

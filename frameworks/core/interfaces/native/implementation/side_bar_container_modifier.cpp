@@ -63,7 +63,7 @@ std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_U
             };
             SideBarContainerModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 
@@ -78,7 +78,7 @@ std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const
             result = Converter::OptConvert<Dimension>(src.value);
             // Need to provide callback
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

@@ -39,7 +39,7 @@ std::optional<bool> ProcessBindableSelect(FrameNode* frameNode, const Opt_Union_
             };
             CheckBoxModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

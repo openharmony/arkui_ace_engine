@@ -39,7 +39,7 @@ std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_
             };
             SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

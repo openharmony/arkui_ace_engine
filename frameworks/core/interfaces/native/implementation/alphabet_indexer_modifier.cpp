@@ -69,7 +69,7 @@ int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_Number_Bin
             };
             IndexerModelStatic::SetCreatChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

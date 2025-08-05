@@ -43,7 +43,7 @@ std::optional<bool> ProcessBindableSelectAll(FrameNode* frameNode, const Opt_Uni
             };
             CheckBoxGroupModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace

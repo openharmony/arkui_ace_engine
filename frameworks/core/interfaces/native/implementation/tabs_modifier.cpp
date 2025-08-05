@@ -45,7 +45,7 @@ std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Unio
             };
             TabsModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        []{});
+        [] {});
     return result;
 }
 } // namespace
