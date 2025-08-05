@@ -2237,4 +2237,135 @@ HWTEST_F(MenuLayout1TestNg, MarkChildForDelayedMeasurement03, TestSize.Level1)
     EXPECT_EQ(algorithm->layoutPolicyChildren_.size(), 3);
     delete(wrapper);
 }
+
+/**
+ * @tc.name: MarkChildForDelayedMeasurement04
+ * @tc.desc: Test MultiMenu  MarkChildForDelayedMeasurement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MarkChildForDelayedMeasurement04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu.
+     */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    /**
+     * @tc.steps: step2. Create menuitem and do not set width LayoutPolicy to Match.
+     */
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+        layoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+        menuItem->SetLayoutProperty(layoutProperty);
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProperty);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    /**
+     * @tc.steps: step3. expect layoutPolicyChildren_ equals number of menuitem.
+     */
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    algorithm->MeasureAdaptiveLayoutChildren(wrapper, childLayoutConstraint);
+    EXPECT_EQ(algorithm->layoutPolicyChildren_.size(), 3);
+    delete (wrapper);
+}
+
+/**
+ * @tc.name: GetMaxWidthTest01
+ * @tc.desc: Test MultiMenu  GetMaxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, GetMaxWidthTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu.
+     */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    /**
+     * @tc.steps: step2. Create menuitem and do not set width LayoutPolicy.
+     */
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(50.0f * (i + 1), MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    /**
+     * @tc.steps: step3. expect maxWidth equals to max width of menuitem.
+     */
+    auto maxWidth = algorithm->GetChildrenMaxWidth(wrapper, childLayoutConstraint);
+    EXPECT_FLOAT_EQ(maxWidth, 150.0f);
+    delete (wrapper);
+}
+
+/**
+ * @tc.name: GetMaxWidthTest02
+ * @tc.desc: Test MultiMenu  GetMaxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, GetMaxWidthTest02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu.
+     */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    /**
+     * @tc.steps: step2. Create menuitem and set width LayoutPolicy to MATCH_PARENT.
+     */
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        menuItem->SetLayoutProperty(layoutProperty);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    /**
+     * @tc.steps: step3. expect maxWidth equals to 0.0f if width LayoutPolicy to MATCH_PARENT.
+     */
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    auto maxWidth = algorithm->GetChildrenMaxWidth(wrapper, childLayoutConstraint);
+    EXPECT_FLOAT_EQ(maxWidth, 0.0f);
+    delete (wrapper);
+}
 } // namespace OHOS::Ace::NG

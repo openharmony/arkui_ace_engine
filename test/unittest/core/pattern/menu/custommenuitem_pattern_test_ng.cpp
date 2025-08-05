@@ -522,4 +522,61 @@ HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithmMeasure002, T
     EXPECT_FLOAT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 200.f);
     EXPECT_FLOAT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height(), 100.f);
 }
+
+/**
+ * @tc.name: CustomMenuItemLayoutAlgorithmMeasure003
+ * @tc.desc: Test CustomMenuItemLayoutAlgorithm Measure with different child layout policies
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithmMeasure003, TestSize.Level1)
+{
+    // create host FrameNode and Pattern; 100 means hostNode's id is 100
+    auto hostNode = FrameNode::CreateFrameNode("custom_menu_item", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    // create LayoutProperty and LayoutWrapper
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutConstraintF layoutConstraintF;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraintF);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(hostNode, geometryNode, layoutProperty);
+
+    // Mock Pattern : IsEnableChildrenMatchParent
+    class MockPattern : public Pattern {
+    public:
+        bool enableMatchParent = false;
+        bool IsEnableChildrenMatchParent() override { return enableMatchParent; }
+    };
+    auto mockPattern = AceType::MakeRefPtr<MockPattern>();
+    hostNode->pattern_ = mockPattern;
+
+    // create childNode1: layoutPolicy = NO_MATCH; 101 means childNode1's id is 101
+    auto childNode1 = FrameNode::CreateFrameNode("child1", 101, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty1 = AceType::MakeRefPtr<LayoutProperty>();
+    childNode1->layoutProperty_ = childLayoutProperty1;
+    auto childWrapper1 = AceType::MakeRefPtr<LayoutWrapperNode>(childNode1,
+        AceType::MakeRefPtr<GeometryNode>(), childLayoutProperty1);
+    layoutWrapper.AppendChild(childWrapper1);
+
+    // create childNode2: layoutPolicy = MATCH_PARENT; 102 means childNode2's id is 102
+    auto childNode2 = FrameNode::CreateFrameNode("child2", 102, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty2 = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutPolicyProperty policy2;
+    policy2.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    policy2.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    childLayoutProperty2->layoutPolicy_ = policy2;
+    childNode2->layoutProperty_ = childLayoutProperty2;
+    auto childWrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(childNode2,
+        AceType::MakeRefPtr<GeometryNode>(), childLayoutProperty2);
+    layoutWrapper.AppendChild(childWrapper2);
+
+    // create CustomMenuItemLayoutAlgorithm
+    auto layoutAlgorithm = AceType::MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
+    // 1. test enableMatchParent = false
+    mockPattern->enableMatchParent = false;
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_FALSE(std::isinf(layoutConstraintF.maxSize.Width()));
+    EXPECT_FALSE(std::isinf(layoutConstraintF.maxSize.Height()));
+    EXPECT_EQ(layoutAlgorithm->layoutPolicyChildren_.size(), 0);
+}
 } // namespace OHOS::Ace::NG
