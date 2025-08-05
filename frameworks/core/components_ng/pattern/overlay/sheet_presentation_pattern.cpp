@@ -4109,7 +4109,7 @@ void SheetPresentationPattern::UpdateBorderWidth(const RefPtr<FrameNode>& sheetN
     auto renderContext = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBorderWidth(borderWidth);
-    sheetNode->->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SheetPresentationPattern::UpdateBorderColor(const RefPtr<FrameNode>& sheetNode)
@@ -4118,7 +4118,7 @@ void SheetPresentationPattern::UpdateBorderColor(const RefPtr<FrameNode>& sheetN
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto colorResObj = sheetStyle.GetBorderColorResObj();
-    if (!sheetStyle.borderColor.has_value() || !sheetStyle.borderWidth->borderColor && !colorResObj) {
+    if (!sheetStyle.borderColor.has_value() || (!sheetStyle.borderColor->multiValued && !colorResObj)) {
         return;
     }
     // re-parse border color when needed
