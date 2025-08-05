@@ -17,10 +17,13 @@
 #define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LIST_MODULE
 
 #include "ani.h"
+#include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::Ani {
 void SetListChildrenMainSize(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object childrenSize);
+void SetChildrenMainSize(
+    ani_env* env, const ani_object& obj, const ArkUIAniListModifier* modifier, ArkUINodeHandle node);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LIST_MODULE
