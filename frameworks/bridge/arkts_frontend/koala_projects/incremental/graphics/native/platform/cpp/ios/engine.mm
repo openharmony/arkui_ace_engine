@@ -193,8 +193,8 @@ void IosEngine::addTouchesEvent(NSSet<UITouch*>* touches, int kind, UIView* view
         auto pointerEventSim = std::make_unique<Event>(Kind::TAP, countFinger);
         pointerEventSim->arg3 = 1;
         pointerEventSim->target = 0;
-        memcpy(pointerEventSim->args1, pointerEvent->args1, countFinger * 4);
-        memcpy(pointerEventSim->args2, pointerEvent->args2, countFinger * 4);
+        memcpy_s(pointerEventSim->args1, sizeof(pointerEventSim->args1), pointerEvent->args1, countFinger * 4);
+        memcpy_s(pointerEventSim->args2, sizeof(pointerEventSim->args2), pointerEvent->args2, countFinger * 4);
         _pendingEvents.emplace_back(std::forward<std::unique_ptr<Event>>(pointerEventSim));
         multitouchDown = true;
     }
