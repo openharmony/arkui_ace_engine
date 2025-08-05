@@ -37,8 +37,8 @@ export class ArkColumnSplitNode extends ArkBaseNode implements ColumnSplitAttrib
         return this;
     }
 
-    divider(value: ColumnSplitDividerStyle | undefined): this {
-        const value_casted = value as (ColumnSplitDividerStyle | undefined);
+    divider(value: ColumnSplitDividerStyle | null | undefined): this {
+        const value_casted = value as (ColumnSplitDividerStyle | null | undefined);
         this.getPeer()?.dividerAttribute(value_casted);
         return this;
     }
