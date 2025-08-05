@@ -1364,9 +1364,8 @@ HWTEST_F(RichEditorSelectionTestNg, GetAdjustedSelectionInfo001, TestSize.Level1
 
     SelectionInfo textSelectInfo;
     textSelectInfo.SetResultObjectList(resultObjectList);
-    richEditorPattern->GetAdjustedSelectionInfo(textSelectInfo);
-
-    ASSERT_EQ(resultObjectList.empty(), false);
+    auto adjustedInfo = richEditorPattern->GetAdjustedSelectionInfo(textSelectInfo);
+    EXPECT_FALSE(adjustedInfo.GetSelection().resultObjects.empty());
 }
 
 /**
