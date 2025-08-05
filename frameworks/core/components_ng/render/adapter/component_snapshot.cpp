@@ -799,6 +799,10 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetWithRange_startKey=%s_startId=%d_startRsId=%s_"
+        "endKey=%s_endId=%d_endRsId=%s", GetRangeIDStr(startID).c_str(), startNode->GetId(),
+        std::to_string(rsStartNode->GetId()).c_str(), GetRangeIDStr(endID).c_str(), endNode->GetId(),
+        std::to_string(rsEndNode->GetId()).c_str());
 
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     auto isSystem = rsInterface.TakeUICaptureInRange(rsStartNode, rsEndNode, isStartRect,
