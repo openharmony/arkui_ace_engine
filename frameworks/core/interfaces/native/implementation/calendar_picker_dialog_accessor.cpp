@@ -77,6 +77,17 @@ CalendarSettingData BuildSettingData(const Ark_CalendarDialogOptions options)
     if (selectedDateOpt) {
         settingData.selectedDate = *selectedDateOpt;
     }
+    auto startDate = Converter::OptConvert<PickerDate>(options.start).value_or(PickerDate());
+    auto endDate = Converter::OptConvert<PickerDate>(options.end).value_or(PickerDate());
+    if (endDate.GetYear() > 0 && startDate.ToDays() > endDate.ToDays()) {
+        startDate = PickerDate();
+        endDate = PickerDate();
+    }
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+    settingData.disabledDateRange =
+        Converter::Convert<std::vector<std::pair<PickerDate, PickerDate>>>(options.disabledDateRange.value);
+    PickerDate::SortAndMergeDisabledDateRange(settingData.disabledDateRange);
     settingData.dayRadius = Converter::OptConvert<Dimension>(options.hintRadius);
     return settingData;
 }

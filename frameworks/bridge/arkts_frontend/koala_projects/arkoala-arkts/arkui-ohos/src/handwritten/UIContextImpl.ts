@@ -35,6 +35,9 @@ import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
+import {TimePickerDialog, TimePickerDialogOptions} from "arkui/component/timePicker"
+import {DatePickerDialog, DatePickerDialogOptions} from "arkui/component/datePicker"
+import {TextPickerDialog, TextPickerDialogOptions} from "arkui/component/textPicker"
 import inspector from "@ohos/arkui/inspector"
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
@@ -595,6 +598,16 @@ export class RouterImpl extends Router {
         return result;
     }
 
+    public getPreState(): ComputableState<IncrementalNode> | undefined {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getPreState();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
@@ -825,10 +838,14 @@ export class PromptActionImpl extends PromptAction {
     //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let builderOptions: promptAction.DialogBuilderOptions = {};
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
         }, options.builder, this.instanceId_);
-        let builderPtr = peerNode.peer.ptr;
+        builderOptions.builder = peerNode.peer.ptr;
+        builderOptions.destroyFunc = (ptr: KPointer): void => {
+            destroyUiDetachedRoot(ptr, this.instanceId_);
+        };
 
         let optionsInternal: promptAction.DialogOptionsInternal = {};
         const transition = options?.transition?.getPeer?.();
@@ -847,7 +864,7 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
-        const retval = promptAction.openCustomDialog(builderPtr, options, optionsInternal);
+        const retval = promptAction.openCustomDialog(builderOptions, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -917,14 +934,12 @@ export class PromptActionImpl extends PromptAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let builderOptions: promptAction.DialogBuilderOptions = {};
         if (builder instanceof CustomBuilder) {
-            builderOptions.builderFunc = (): KPointer => {
-                const peerNode = createUiDetachedRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, builder as CustomBuilder, this.instanceId_);
-                return peerNode.peer.ptr;
-            };
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, builder as CustomBuilder, this.instanceId_);
+            builderOptions.builder = peerNode.peer.ptr;
         } else {
-            builderOptions.builderWithIdFunc = (dialogId: number): KPointer => {
+            builderOptions.builderWithId = (dialogId: number): KPointer => {
                 const peerNode = createUiDetachedRootT<number>((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, builder as CustomBuilderT<number>, dialogId, this.instanceId_);
@@ -1644,6 +1659,24 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        TimePickerDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        DatePickerDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        TextPickerDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
@@ -1740,5 +1773,13 @@ export class UIContextImpl extends UIContext {
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         thisSerializer.release()
         return retval;
+    }
+    
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        return inspector.getFilteredInspectorTree(filters);
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+        return inspector.getFilteredInspectorTreeById(id, depth, filters);
     }
 }

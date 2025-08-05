@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "animation_ani_modifier.h"
 
-#include "ace_ani_global_reference.h"
 #include "ani_animatable_arithmetic.h"
-#include "ani_utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/string_utils.h"
@@ -27,7 +27,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,35 +42,6 @@ struct CurvesObj {
     OHOS::Ace::RefPtr<OHOS::Ace::Curve> curve;
 };
 
-AnimatableExtendPropertyType GetPropertyType(ani_env* env, ani_object property)
-{
-    ani_class doubleClass {};
-    ani_boolean isDouble = ANI_FALSE;
-    ani_status status = ANI_OK;
-    if ((status = env->FindClass("std.core.Double", &doubleClass)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "cannot find double class, errorCode:%{public}d", status);
-        return AnimatableExtendPropertyType::UNKNOWN;
-    }
-    if ((status = env->Object_InstanceOf(property, doubleClass, &isDouble)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "Object_InstanceOf double error, errorCode:%{public}d", status);
-        return AnimatableExtendPropertyType::UNKNOWN;
-    }
-    if (isDouble) {
-        return AnimatableExtendPropertyType::NUMBER;
-    }
-    ani_class arithmeticClass {};
-    ani_boolean isArithmetic = ANI_FALSE;
-    if ((status = env->FindClass("C{arkui.component.common.AnimatableArithmetic}", &arithmeticClass)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "cannot find AnimatableArithmetic class, errorCode:%{public}d", status);
-        return AnimatableExtendPropertyType::UNKNOWN;
-    }
-    if ((status = env->Object_InstanceOf(property, arithmeticClass, &isArithmetic)) != ANI_OK) {
-        TAG_LOGW(
-            AceLogTag::ACE_ANIMATION, "Object_InstanceOf AnimatableArithmetic error, errorCode:%{public}d", status);
-        return AnimatableExtendPropertyType::UNKNOWN;
-    }
-    return isArithmetic ? AnimatableExtendPropertyType::ARITHMETIC : AnimatableExtendPropertyType::UNKNOWN;
-}
 RefPtr<PagePattern> GetCurrentPage()
 {
     const auto& pageNode = ViewStackProcessor::GetInstance()->GetPageNode();
@@ -86,478 +56,255 @@ RefPtr<PageTransitionEffect> GetCurrentEffect()
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetTopTransition();
 }
-// Parse curve, support Curve enum and valid string format.
-RefPtr<Curve> ParseCurveObject(ani_env* env, ani_ref curveRef)
+RefPtr<Curve> ParseCurveObject(const ArkUIAniUnionCurveStringICurve& object)
 {
-    ani_boolean isUndefined;
-    ani_status status;
-    if (env->Reference_IsUndefined(curveRef, &isUndefined) == ANI_OK) {
-        if (isUndefined) {
+    switch (object.selector) {
+        case 0: {
+            auto curve = Framework::CreateCurve(object.value0, false);
+            // if curve is invalid, may return null.
+            return curve;
+        }
+        case 1: {
+            std::string curveString(object.value1);
+            auto curve = Framework::CreateCurve(curveString, false);
+            // if curve is invalid, may return null.
+            return curve;
+        }
+        case 2: {
+            auto curveObjPtr = reinterpret_cast<CurvesObj*>(object.value2);
+            return curveObjPtr ? curveObjPtr->curve : nullptr;
+        }
+        default: {
             return nullptr;
         }
     }
-    ani_object curveObject = static_cast<ani_object>(curveRef);
-    ani_class stringClass {};
-    if ((status = env->FindClass("std.core.String", &stringClass)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "GetString class error, status:%{public}d", status);
-        return nullptr;
-    }
-    ani_boolean isString = ANI_FALSE;
-    if ((status = env->Object_InstanceOf(curveObject, stringClass, &isString)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "InstanceOfString error, status:%{public}d", status);
-        return nullptr;
-    }
-    if (isString) {
-        auto curveString = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(curveObject));
-        auto curve = Framework::CreateCurve(curveString, false);
-        // if curve is invalid, may return null.
-        return curve;
-    }
-    // for ICurve
-    ani_long iCurve = 0L;
-    if ((status = env->Object_GetFieldByName_Long(curveObject, "nativeContext", &iCurve)) == ANI_OK) {
-        auto curveObjPtr = reinterpret_cast<CurvesObj*>(iCurve);
-        return curveObjPtr ? curveObjPtr->curve : nullptr;
-    }
-    // for Curve enum
-    ani_enum curveEnum {};
-    if ((status = env->FindEnum("@ohos.curves.curves.Curve", &curveEnum)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "GetCurve enum class error, status:%{public}d", status);
-        return nullptr;
-    }
-    ani_boolean isCurveEnum = ANI_FALSE;
-    if ((status = env->Object_InstanceOf(curveObject, curveEnum, &isCurveEnum)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "InstanceOfCurve error, status:%{public}d", status);
-        return nullptr;
-    }
-    if (isCurveEnum) {
-        ani_enum_item curveEnumItem = static_cast<ani_enum_item>(curveObject);
-        ani_int curveValue;
-        if (env->EnumItem_GetValue_Int(curveEnumItem, &curveValue) == ANI_OK) {
-            auto curve = Framework::CreateCurve(static_cast<int32_t>(curveValue), false);
-            return curve;
-        }
-    }
-    return nullptr;
 }
-bool ParseRouteType(ani_env* env, ani_ref routeTypeRef, RouteType& type)
+
+PageTransitionOption ParseTransitionOption(const ArkUIAniPageTransitionOption& options)
 {
-    ani_boolean isUndefined;
-    ani_status status;
-    if ((status = env->Reference_IsUndefined(routeTypeRef, &isUndefined)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "reference is undefined error, status:%{public}d", status);
-        return false;
+    PageTransitionOption result;
+    result.routeType = static_cast<RouteType>(options.routeType);
+    result.duration = options.duration;
+    result.delay = options.delay;
+    RefPtr<Curve> curve = ParseCurveObject(options.curve);
+    if (curve) {
+        result.curve = curve;
+    } else {
+        result.curve = Curves::LINEAR;
     }
-    if (isUndefined) {
-        return false;
-    }
-    ani_enum_item typeEnum = static_cast<ani_enum_item>(routeTypeRef);
-    ani_int routeTypeValue;
-    if ((status = env->EnumItem_GetValue_Int(typeEnum, &routeTypeValue)) == ANI_OK) {
-        if (routeTypeValue >= static_cast<int32_t>(RouteType::NONE) &&
-            routeTypeValue <= static_cast<int32_t>(RouteType::POP)) {
-            type = static_cast<RouteType>(routeTypeValue);
-            return true;
-        }
-    }
-    return false;
+    return result;
 }
-PageTransitionOption ParseTransitionOption(ani_env* env, ani_object options)
+
+bool ParseDimensionVp(const ArkUIAniNumberString& value, CalcDimension& result)
 {
-    PageTransitionOption option;
-    const int32_t defaultDuration = 1000;
-    option.duration = defaultDuration;
-    option.curve = Curves::LINEAR;
-    ani_boolean isUndefined;
-    ani_status status;
-    if ((status = env->Reference_IsUndefined(options, &isUndefined)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "ParseTransitionOption isUndefined error, status:%{public}d", status);
-        return option;
+    if (value.selector == 0) {
+        result = CalcDimension(value.value0, DimensionUnit::VP);
+        return true;
     }
-    if (isUndefined) {
-        return option;
-    }
-    ani_ref durationRef;
-    if ((status = env->Object_GetPropertyByName_Ref(options, "duration", &durationRef)) == ANI_OK) {
-        double duration = defaultDuration;
-        if (AniUtils::GetOptionalDouble(env, durationRef, duration)) {
-            option.duration = static_cast<int32_t>(duration);
-            if (option.duration < 0) {
-                option.duration = defaultDuration;
-            }
-        }
-    } else {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "GetDuration error, status:%{public}d", status);
-    }
-    ani_ref delayRef = 0;
-    if ((status = env->Object_GetPropertyByName_Ref(options, "delay", &delayRef)) == ANI_OK) {
-        double delay = 0.0;
-        if (AniUtils::GetOptionalDouble(env, delayRef, delay)) {
-            option.delay = static_cast<int32_t>(delay);
-        }
-    } else {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "GetDelay error, status:%{public}d", status);
-    }
-    ani_ref routeTypeRef = nullptr;
-    if ((status = env->Object_GetPropertyByName_Ref(options, "type", &routeTypeRef)) == ANI_OK) {
-        RouteType routeType;
-        if (ParseRouteType(env, routeTypeRef, routeType)) {
-            option.routeType = routeType;
-        }
-    } else {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "GetRouteType error, status:%{public}d", status);
-    }
-    ani_ref curveRef = nullptr;
-    if ((status = env->Object_GetPropertyByName_Ref(options, "curve", &curveRef)) == ANI_OK) {
-        RefPtr<Curve> curve = ParseCurveObject(env, curveRef);
-        if (curve) {
-            option.curve = curve;
-        }
-    } else {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "GetCurve error, status:%{public}d", status);
-    }
-    return option;
-}
-bool GetRouteTypeEnum(ani_env* env, RouteType type, ani_enum_item& item)
-{
-    const static std::unordered_map<RouteType, std::string> mpRouteType = {
-        { RouteType::NONE, "None" },
-        { RouteType::PUSH, "Push" },
-        { RouteType::POP, "Pop" },
-    };
-    auto iter = mpRouteType.find(type);
-    if (iter == mpRouteType.end()) {
-        return false;
-    }
-    ani_enum enumType;
-    ani_status status;
-    if ((status = env->FindEnum("arkui.component.pageTransition.RouteType", &enumType)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "find routeType class error, status:%{public}d", status);
-        return false;
-    }
-    if ((status = env->Enum_GetEnumItemByName(enumType, iter->second.c_str(), &item)) != ANI_OK) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "find routeType %{public}s error, status:%{public}d", iter->second.c_str(),
-            status);
-        return false;
-    }
-    return true;
-}
-// Parse dimension, support number and string. Not support resource.
-bool ParseDimensionVp(ani_env* env, ani_ref value, CalcDimension& result)
-{
-    ani_status status;
-    ani_boolean isUndefined;
-    if (env->Reference_IsUndefined(value, &isUndefined) == ANI_OK) {
-        if (isUndefined) {
-            return false;
-        }
-    }
-    ani_object valueObj = static_cast<ani_object>(value);
-    ani_class doubleClass {};
-    ani_boolean isDouble;
-    if (env->FindClass("std.core.Double", &doubleClass) != ANI_OK) {
-        return false;
-    }
-    if (env->Object_InstanceOf(valueObj, doubleClass, &isDouble) != ANI_OK) {
-        return false;
-    }
-    if (isDouble) {
-        ani_double doubleValue;
-        if (env->Object_CallMethodByName_Double(valueObj, "unboxed", ":d", &doubleValue) == ANI_OK) {
-            result = CalcDimension(doubleValue, DimensionUnit::VP);
-            return true;
-        }
-        return false;
-    }
-    ani_class stringClass {};
-    ani_boolean isString;
-    if (env->FindClass("std.core.String", &stringClass) != ANI_OK) {
-        return false;
-    }
-    if (env->Object_InstanceOf(valueObj, stringClass, &isString) != ANI_OK) {
-        return false;
-    }
-    if (isString) {
-        auto stdStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(valueObj));
-        result = StringUtils::StringToCalcDimension(stdStr, false, DimensionUnit::VP);
+    if (value.selector == 1) {
+        std::string stringValue(value.value1);
+        // notice: not consider the string is invalid string, to keep same with ArkTS1.1
+        result = StringUtils::StringToCalcDimension(stringValue, false, DimensionUnit::VP);
         return true;
     }
     return false;
 }
 
+using FloatUpdateFunction = std::function<bool(float)>;
+using ArithmeticUpdateFunction = std::function<bool(ani_object)>;
+using AniRouteUpdateFunction = std::function<void(ArkUIAniRouteType, float)>;
+
 } // namespace
 
-static bool HasAnimatableProperty(ani_env* env, ArkUINodeHandle node, ani_string name)
+static bool HasAnimatableProperty(ArkUINodeHandle node, const char* name)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
-    auto propertyName = AniUtils::ANIStringToStdString(env, name);
+    std::string propertyName(name);
     return frameNode->HasAnimatableProperty(propertyName);
 }
 
-static void UpdateAnimatableProperty(ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property)
+static void UpdateAnimatableFloat(ArkUINodeHandle node, const char* propertyName, float property)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto propertyNameStr = AniUtils::ANIStringToStdString(env, propertyName);
-    auto propertyType = GetPropertyType(env, property);
-    if (propertyType == AnimatableExtendPropertyType::NUMBER) {
-        ani_double valueAniDouble = 0.0;
-        if (env->Object_CallMethodByName_Double(property, "unboxed", ":d", &valueAniDouble) != ANI_OK) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "unbox double failed when UpdateAnimatableProperty");
-            return;
-        }
-        frameNode->UpdateAnimatablePropertyFloat(propertyNameStr, static_cast<float>(valueAniDouble));
-    } else if (propertyType == AnimatableExtendPropertyType::ARITHMETIC) {
-        auto arithmeticImpl = AceType::MakeRefPtr<AniAnimatableArithmetic>(property, env);
-        RefPtr<CustomAnimatableArithmetic> arithmetic =
-            AceType::DynamicCast<CustomAnimatableArithmetic>(arithmeticImpl);
-        frameNode->UpdateAnimatableArithmeticProperty(propertyNameStr, arithmetic);
-    }
+    std::string propertyNameStr(propertyName);
+    frameNode->UpdateAnimatablePropertyFloat(propertyNameStr, property);
 }
 
-static std::function<void(const RefPtr<CustomAnimatableArithmetic>&)> GetAnimatableArithmeticCallback(
-    ani_env* env, const WeakPtr<FrameNode>& node, const RefPtr<AceAniGlobalReference>& globalCallback)
-{
-    return [env, globalCallback, id = Container::CurrentIdSafelyWithCheck(), weakNode = node](
-               const RefPtr<CustomAnimatableArithmetic>& value) {
-        ContainerScope scope(id);
-        RefPtr<AniAnimatableArithmetic> impl = AceType::DynamicCast<AniAnimatableArithmetic>(value);
-        CHECK_NULL_VOID(impl);
-        auto valueAni = impl->GetObject();
-        ani_ref valueAniRef = static_cast<ani_ref>(valueAni);
-        auto frameNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        ani_ref result;
-        ani_fn_object callback = static_cast<ani_fn_object>(globalCallback->GetValue());
-        ani_status status = ANI_OK;
-        PipelineContext::SetCallBackNode(weakNode);
-        if ((status = env->FunctionalObject_Call(callback, 1, &valueAniRef, &result)) != ANI_OK) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "call animatable arithmetic callback error, status:%{public}d", status);
-            return;
-        }
-        frameNode->MarkDirtyNode();
-    };
-}
-
-static std::function<void(float)> GetAnimatableNumberCallback(
-    ani_env* env, const WeakPtr<FrameNode>& node, const RefPtr<AceAniGlobalReference>& globalCallback)
-{
-    return [env, globalCallback, id = Container::CurrentIdSafelyWithCheck(), weakNode = node](float value) {
-        ContainerScope scope(id);
-        auto frameNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        ani_ref result;
-        ani_object valueObject = AniUtils::CreateDouble(env, value);
-        ani_ref valueRef = static_cast<ani_ref>(valueObject);
-        ani_fn_object callback = static_cast<ani_fn_object>(globalCallback->GetValue());
-        ani_status status = ANI_OK;
-        PipelineContext::SetCallBackNode(weakNode);
-        if ((status = env->FunctionalObject_Call(callback, 1, &valueRef, &result)) != ANI_OK) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "call animatable number callback error, status:%{public}d", status);
-            return;
-        }
-        frameNode->MarkDirtyNode();
-    };
-}
-
-static void CreateAnimatableProperty(
-    ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback)
+static void CreateAnimatableFloat(ArkUINodeHandle node, const char* propertyName, float property, void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto propertyNameStr = AniUtils::ANIStringToStdString(env, propertyName);
-    auto globalCallback = AceType::MakeRefPtr<AceAniGlobalReference>(env, callback);
-    auto propertyType = GetPropertyType(env, property);
-    if (propertyType == AnimatableExtendPropertyType::NUMBER) {
-        ani_double valueAniDouble = 0.0;
-        if (env->Object_CallMethodByName_Double(property, "unboxed", ":d", &valueAniDouble) != ANI_OK) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "unbox double failed when CreateAnimatableProperty");
-            return;
+    CHECK_NULL_VOID(callback);
+    std::string propertyNameStr(propertyName);
+    auto updateCallback = [callbackFunc = *(reinterpret_cast<FloatUpdateFunction*>(callback)),
+                              id = Container::CurrentIdSafelyWithCheck(),
+                              weakNode = AceType::WeakClaim(frameNode)](float value) {
+        ContainerScope scope(id);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        PipelineContext::SetCallBackNode(weakNode);
+        if (callbackFunc && callbackFunc(value)) {
+            frameNode->MarkDirtyNode();
         }
-        auto updateCallback { GetAnimatableNumberCallback(env, AceType::WeakClaim(frameNode), globalCallback) };
-        frameNode->CreateAnimatablePropertyFloat(propertyNameStr, static_cast<float>(valueAniDouble), updateCallback);
-    } else if (propertyType == AnimatableExtendPropertyType::ARITHMETIC) {
-        auto arithmeticImpl = AceType::MakeRefPtr<AniAnimatableArithmetic>(property, env);
-        RefPtr<CustomAnimatableArithmetic> arithmetic =
-            AceType::DynamicCast<CustomAnimatableArithmetic>(arithmeticImpl);
-        auto updateCallback { GetAnimatableArithmeticCallback(env, AceType::WeakClaim(frameNode), globalCallback) };
-        frameNode->CreateAnimatableArithmeticProperty(propertyNameStr, arithmetic, updateCallback);
-    }
+    };
+    frameNode->CreateAnimatablePropertyFloat(propertyNameStr, property, updateCallback);
 }
 
-static void CreatePageTransitionEnter(ani_env* env, ani_object options)
+static void UpdateAnimatableArithmetic(
+    ArkUINodeHandle node, const char* propertyName, ArkUIAniAnimatableArithmeticObject object)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string propertyNameStr(propertyName);
+    auto arithmeticImpl = AceType::MakeRefPtr<AniAnimatableArithmetic>(object.property, object.env);
+    RefPtr<CustomAnimatableArithmetic> arithmetic = AceType::DynamicCast<CustomAnimatableArithmetic>(arithmeticImpl);
+    frameNode->UpdateAnimatableArithmeticProperty(propertyNameStr, arithmetic);
+}
+
+static void CreateAnimatableArithmetic(
+    ArkUINodeHandle node, const char* propertyName, ArkUIAniAnimatableArithmeticObject object, void* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    std::string propertyNameStr(propertyName);
+    auto arithmeticImpl = AceType::MakeRefPtr<AniAnimatableArithmetic>(object.property, object.env);
+    RefPtr<CustomAnimatableArithmetic> arithmetic = AceType::DynamicCast<CustomAnimatableArithmetic>(arithmeticImpl);
+    std::function<void(const RefPtr<CustomAnimatableArithmetic>&)> updateCallback =
+        [callbackFunc = *(reinterpret_cast<ArithmeticUpdateFunction*>(callback)),
+            id = Container::CurrentIdSafelyWithCheck(),
+            weakNode = AceType::WeakClaim(frameNode)](const RefPtr<CustomAnimatableArithmetic>& value) {
+            ContainerScope scope(id);
+            RefPtr<AniAnimatableArithmetic> impl = AceType::DynamicCast<AniAnimatableArithmetic>(value);
+            CHECK_NULL_VOID(impl);
+            auto frameNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto valueAni = impl->GetObject();
+            PipelineContext::SetCallBackNode(weakNode);
+            if (callbackFunc && callbackFunc(valueAni)) {
+                frameNode->MarkDirtyNode();
+            }
+        };
+    frameNode->CreateAnimatableArithmeticProperty(propertyNameStr, arithmetic, updateCallback);
+}
+
+static void InitAnimatableArithmeticClass(const ArkUIAniAnimatableArithmeticFuncs* funcs)
+{
+    CHECK_NULL_VOID(funcs);
+    AniAnimatableArithmetic::InitFuncs(*funcs);
+}
+
+static void CreatePageTransitionEnter(const ArkUIAniPageTransitionOption* options)
 {
     auto pagePattern = GetCurrentPage();
     CHECK_NULL_VOID(pagePattern);
-    auto pageTransitionOption = ParseTransitionOption(env, options);
+    CHECK_NULL_VOID(options);
+    auto pageTransitionOption = ParseTransitionOption(*options);
     auto transition = AceType::MakeRefPtr<PageTransitionEffect>(PageTransitionType::ENTER, pageTransitionOption);
     pagePattern->AddPageTransition(transition);
 }
 
-static void PageTransitionSetOnEnter(ani_env* env, ani_fn_object callback)
+static void PageTransitionSetOnEnter(void* callback)
 {
     auto effect = GetCurrentEffect();
     CHECK_NULL_VOID(effect);
-    auto globalCallback = AceType::MakeRefPtr<AceAniGlobalReference>(env, callback);
-    auto handler = [env, globalCallback, id = Container::CurrentIdSafelyWithCheck()](
-                       RouteType type, const float& value) {
-        ACE_SCORING_EVENT("PageTransition.onEnter");
-        ContainerScope scope(id);
-        ani_fn_object callback = static_cast<ani_fn_object>(globalCallback->GetValue());
-        ani_status status = ANI_OK;
-        ani_enum_item typeEnum;
-        bool getEnumResult = GetRouteTypeEnum(env, type, typeEnum);
-        if (!getEnumResult) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "onEnter failed. GetRouteTypeEnum error");
-            return;
-        }
-        ani_object valueRef = AniUtils::CreateDouble(env, value);
-        ani_ref valueArr[2] = { static_cast<ani_ref>(typeEnum), static_cast<ani_ref>(valueRef) };
-        ani_ref result;
-        if ((status = env->FunctionalObject_Call(callback, 2, valueArr, &result)) != ANI_OK) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "call onEnter function error, status:%{public}d", status);
-            return;
-        }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onEnter");
-    };
+    CHECK_NULL_VOID(callback);
+    std::function<void(RouteType, const float&)> handler =
+        [callbackFunc = *(reinterpret_cast<AniRouteUpdateFunction*>(callback)),
+            id = Container::CurrentIdSafelyWithCheck()](RouteType type, const float& value) {
+            ACE_SCORING_EVENT("PageTransition.onEnter");
+            ContainerScope scope(id);
+            if (callbackFunc) {
+                callbackFunc(static_cast<ArkUIAniRouteType>(type), value);
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onEnter");
+        };
     effect->SetUserCallback(std::move(handler));
 }
 
-static void CreatePageTransitionExit(ani_env* env, ani_object options)
+static void CreatePageTransitionExit(const ArkUIAniPageTransitionOption* options)
 {
     auto pagePattern = GetCurrentPage();
     CHECK_NULL_VOID(pagePattern);
-    auto pageTransitionOption = ParseTransitionOption(env, options);
+    CHECK_NULL_VOID(options);
+    auto pageTransitionOption = ParseTransitionOption(*options);
     auto transition = AceType::MakeRefPtr<PageTransitionEffect>(PageTransitionType::EXIT, pageTransitionOption);
     pagePattern->AddPageTransition(transition);
 }
 
-static void PageTransitionSetOnExit(ani_env* env, ani_fn_object callback)
+static void PageTransitionSetOnExit(void* callback)
 {
     auto effect = GetCurrentEffect();
     CHECK_NULL_VOID(effect);
-    auto globalCallback = AceType::MakeRefPtr<AceAniGlobalReference>(env, callback);
-    auto handler = [env, globalCallback, id = Container::CurrentIdSafelyWithCheck()](
-                       RouteType type, const float& value) {
-        ACE_SCORING_EVENT("PageTransition.onExit");
-        ContainerScope scope(id);
-        ani_fn_object callback = static_cast<ani_fn_object>(globalCallback->GetValue());
-        ani_status status = ANI_OK;
-        ani_enum_item typeEnum;
-        bool getEnumResult = GetRouteTypeEnum(env, type, typeEnum);
-        if (!getEnumResult) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "onExit failed. GetRouteTypeEnum error");
-            return;
-        }
-        ani_object valueRef = AniUtils::CreateDouble(env, value);
-        ani_ref valueArr[2] = { static_cast<ani_ref>(typeEnum), static_cast<ani_ref>(valueRef) };
-        ani_ref result;
-        if ((status = env->FunctionalObject_Call(callback, 2, valueArr, &result)) != ANI_OK) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "call onExit function error, status:%{public}d", status);
-            return;
-        }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onExit");
-    };
+    CHECK_NULL_VOID(callback);
+    std::function<void(RouteType, const float&)> handler =
+        [callbackFunc = *(reinterpret_cast<AniRouteUpdateFunction*>(callback)),
+            id = Container::CurrentIdSafelyWithCheck()](RouteType type, const float& value) {
+            ACE_SCORING_EVENT("PageTransition.onExit");
+            ContainerScope scope(id);
+            if (callbackFunc) {
+                callbackFunc(static_cast<ArkUIAniRouteType>(type), value);
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onExit");
+        };
     effect->SetUserCallback(std::move(handler));
 }
 
-static void PageTransitionSetSlide(ani_env* env, ani_object slide)
+static void PageTransitionSetSlide(ArkUIAniSlideEffect slide)
 {
     auto effect = GetCurrentEffect();
     CHECK_NULL_VOID(effect);
-    ani_status status;
-    ani_enum_item slideItem = static_cast<ani_enum_item>(slide);
-    ani_int slideValue;
-    if ((status = env->EnumItem_GetValue_Int(slideItem, &slideValue)) != ANI_OK) {
-        return;
-    }
-    if (slideValue >= static_cast<int32_t>(SlideEffect::LEFT) && slideValue <= static_cast<int32_t>(SlideEffect::END)) {
-        effect->SetSlideEffect(static_cast<SlideEffect>(slideValue));
-    }
+    effect->SetSlideEffect(static_cast<SlideEffect>(slide));
 }
 
-static void PageTransitionSetTranslate(ani_env* env, ani_object options)
+static void PageTransitionSetTranslate(const ArkUIAniTranslateOptions* options)
 {
     auto effect = GetCurrentEffect();
     CHECK_NULL_VOID(effect);
-    ani_ref xRef;
-    ani_ref yRef;
-    ani_ref zRef;
+    CHECK_NULL_VOID(options);
     TranslateOptions translateOptions;
     CalcDimension length;
-    if (env->Object_GetPropertyByName_Ref(options, "x", &xRef) == ANI_OK) {
-        if (ParseDimensionVp(env, xRef, length)) {
-            translateOptions.x = length;
-        }
+    if (ParseDimensionVp(options->x, length)) {
+        translateOptions.x = length;
     }
-    if (env->Object_GetPropertyByName_Ref(options, "y", &yRef) == ANI_OK) {
-        if (ParseDimensionVp(env, yRef, length)) {
-            translateOptions.y = length;
-        }
+    if (ParseDimensionVp(options->y, length)) {
+        translateOptions.y = length;
     }
-    if (env->Object_GetPropertyByName_Ref(options, "z", &zRef) == ANI_OK) {
-        if (ParseDimensionVp(env, zRef, length)) {
-            translateOptions.z = length;
-        }
+    if (ParseDimensionVp(options->z, length)) {
+        translateOptions.z = length;
     }
     effect->SetTranslateEffect(translateOptions);
 }
 
-static void PageTransitionSetScale(ani_env* env, ani_object options)
+static void PageTransitionSetScale(const ArkUIAniScaleOptions* options)
 {
     auto effect = GetCurrentEffect();
     CHECK_NULL_VOID(effect);
-    double scaleX = 1.0;
-    double scaleY = 1.0;
-    double scaleZ = 1.0;
-    ani_ref scaleXRef;
-    ani_ref scaleYRef;
-    ani_ref scaleZRef;
-    double tmp = 0.0;
-    if (env->Object_GetPropertyByName_Ref(options, "x", &scaleXRef) == ANI_OK) {
-        if (AniUtils::GetOptionalDouble(env, scaleXRef, tmp)) {
-            scaleX = tmp;
-        }
-    }
-    if (env->Object_GetPropertyByName_Ref(options, "y", &scaleYRef) == ANI_OK) {
-        if (AniUtils::GetOptionalDouble(env, scaleYRef, tmp)) {
-            scaleY = tmp;
-        }
-    }
-    if (env->Object_GetPropertyByName_Ref(options, "z", &scaleZRef) == ANI_OK) {
-        if (AniUtils::GetOptionalDouble(env, scaleZRef, tmp)) {
-            scaleZ = tmp;
-        }
-    }
+    CHECK_NULL_VOID(options);
     // default centerX, centerY 50% 50%;
     CalcDimension centerX = 0.5_pct;
     CalcDimension centerY = 0.5_pct;
     CalcDimension length;
-    ani_ref centerXRef;
-    ani_ref centerYRef;
-    if (env->Object_GetPropertyByName_Ref(options, "centerX", &centerXRef) == ANI_OK) {
-        if (ParseDimensionVp(env, centerXRef, length)) {
-            centerX = length;
-        }
+    if (ParseDimensionVp(options->centerX, length)) {
+        centerX = length;
     }
-    if (env->Object_GetPropertyByName_Ref(options, "centerY", &centerYRef) == ANI_OK) {
-        if (ParseDimensionVp(env, centerYRef, length)) {
-            centerY = length;
-        }
+    if (ParseDimensionVp(options->centerY, length)) {
+        centerY = length;
     }
-    NG::ScaleOptions scaleOptions(
-        static_cast<float>(scaleX), static_cast<float>(scaleY), static_cast<float>(scaleZ), centerX, centerY);
+    NG::ScaleOptions scaleOptions(static_cast<float>(options->x), static_cast<float>(options->y),
+        static_cast<float>(options->z), centerX, centerY);
     effect->SetScaleEffect(scaleOptions);
 }
 
-static void PageTransitionSetOpacity(ani_env* env, ani_double opacity)
+static void PageTransitionSetOpacity(float opacity)
 {
     auto effect = GetCurrentEffect();
     CHECK_NULL_VOID(effect);
-    float opacityValue = static_cast<float>(opacity);
+    float opacityValue = opacity;
     if (LessNotEqual(opacityValue, 0.0)) {
-        opacityValue = 1.0;
+        opacityValue = 1.0f;
     }
     effect->SetOpacityEffect(opacityValue);
 }
@@ -566,8 +313,11 @@ const ArkUIAniAnimationModifier* GetAnimationAniModifier()
 {
     static const ArkUIAniAnimationModifier impl = {
         .hasAnimatableProperty = OHOS::Ace::NG::HasAnimatableProperty,
-        .updateAnimatableProperty = OHOS::Ace::NG::UpdateAnimatableProperty,
-        .createAnimatableProperty = OHOS::Ace::NG::CreateAnimatableProperty,
+        .updateAnimatableFloat = OHOS::Ace::NG::UpdateAnimatableFloat,
+        .createAnimatableFloat = OHOS::Ace::NG::CreateAnimatableFloat,
+        .updateAnimatableArithmetic = OHOS::Ace::NG::UpdateAnimatableArithmetic,
+        .createAnimatableArithmetic = OHOS::Ace::NG::CreateAnimatableArithmetic,
+        .initAnimatableArithmeticClass = OHOS::Ace::NG::InitAnimatableArithmeticClass,
         .createPageTransitionEnter = OHOS::Ace::NG::CreatePageTransitionEnter,
         .pageTransitionSetOnEnter = OHOS::Ace::NG::PageTransitionSetOnEnter,
         .createPageTransitionExit = OHOS::Ace::NG::CreatePageTransitionExit,

@@ -85,7 +85,7 @@ export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute 
     pointLight_value?: PointLightStyle | undefined
     public pointLight(value: PointLightStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAttribute {
     getPeer(): ArkFlexPeer {

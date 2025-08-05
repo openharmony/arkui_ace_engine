@@ -283,7 +283,7 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
     public edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
         if (this.checkPriority("edgeAlign")) {
             const alignType_casted = alignType as (CalendarAlign | undefined)
-            const offset_casted = offset as (Offset)
+            const offset_casted = offset as (Offset | undefined)
             this.getPeer()?.edgeAlign0Attribute(alignType_casted, offset_casted)
             return this
         }

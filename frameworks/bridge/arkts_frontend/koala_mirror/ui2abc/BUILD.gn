@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
 koala_root = ".."
@@ -22,7 +23,6 @@ host_arch = "${host_os}-${host_cpu}"
 libarkts_root = "./libarkts"
 
 build_root = "//build"
-toolchain_linux = "$build_root/toolchain/linux:clang_x64"
 
 npm_cmd("fast_arktsc_build") {
     outputs = [
@@ -65,9 +65,9 @@ action("ui2abc_panda_sdk") {
         "$target_out_dir/panda-sdk"
     ]
 
-    external_deps = [
-        "ets_frontend:libes2panda_public(${toolchain_linux})",
-    ]
+    external_deps = [ets2abc_build_deps]
+    external_deps += [static_linker_build_deps]
+    external_deps += [ "ets_frontend:libes2panda_public(${host_toolchain})" ]
 
     args = [
         "--config", rebase_path("gn/sdk_config.json"),

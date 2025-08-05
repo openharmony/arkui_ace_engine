@@ -17,11 +17,11 @@ import { int32 } from "./types"
 
 const OBSERVABLE_TARGET = "target"
 
-export function getObservableTarget(proxy: Object): Object {
+export function getObservableTarget(proxyObj: Object): Object {
     try {
-        return (Reflect.get(proxy, OBSERVABLE_TARGET) ?? proxy) as Object
+        return (proxy.Proxy.tryGetTarget(proxyObj) ?? proxyObj) as Object
     } catch (error) {
-        return proxy
+        return proxyObj
     }
 }
 

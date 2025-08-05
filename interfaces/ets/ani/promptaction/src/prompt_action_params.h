@@ -37,6 +37,7 @@ struct PromptActionAsyncContext {
     ani_resolver deferred = nullptr;
     ani_fn_object callback = nullptr;
     int32_t instanceId = -1;
+    std::function<void()> destroyCallback;
 };
 
 enum PromptActionColor {

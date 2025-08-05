@@ -19,6 +19,8 @@
     export native function getInspectorByKey(id: string): string;
     export native function sendEventByKey(id: string, action: number, params: string): boolean;
     export native function getInspectorTree(): Object;
+    export native function getFilteredInspectorTree(filters?: Array<string>): string;
+    export native function getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string;
     
     export default interface ComponentObserver
     {

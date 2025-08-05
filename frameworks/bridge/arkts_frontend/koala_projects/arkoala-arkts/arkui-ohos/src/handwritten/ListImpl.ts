@@ -16,6 +16,8 @@
 import { ChildrenMainSize } from "../component/common"
 import { ArkUIAniModule } from "arkui.ani"
 import { ArkListComponent, ArkListItemGroupComponent } from "../component"
+import { ArkListNode } from "./modifiers/ArkListNode"
+import { ArkListItemGroupNode } from "./modifiers/ArkListItemGroupNode"
 
 export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
     if (value !== undefined) {
@@ -25,6 +27,19 @@ export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: Chil
 
 export function hookListItemGroupChildrenMainSizeImpl(
     node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
+    if (value !== undefined) {
+        ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
+    }
+}
+
+export function hookListNodeChildrenMainSizeImpl(node: ArkListNode, value: ChildrenMainSize | undefined): void {
+    if (value !== undefined) {
+        ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
+    }
+}
+
+export function hookListItemGroupNodeChildrenMainSizeImpl(
+    node: ArkListItemGroupNode, value: ChildrenMainSize | undefined): void {
     if (value !== undefined) {
         ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
     }

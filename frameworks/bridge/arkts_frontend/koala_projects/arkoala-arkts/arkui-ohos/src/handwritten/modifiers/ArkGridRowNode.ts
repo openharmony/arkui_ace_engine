@@ -15,24 +15,41 @@
 
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { GridRowAttribute, ArkGridRowPeer, ItemAlign } from '../../component';
+import { GridRowAttribute, ArkGridRowPeer, ItemAlign, GridRowOptions } from '../../component';
 
 export class ArkGridRowNode extends ArkBaseNode implements GridRowAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('gridrow constructParam enter');
+        if (param.length > 1) {
+            throw new Error('more than 1 parameters');
+        }
+        let option_casted: GridRowOptions | undefined = undefined;
+        if (param.length === 1) {
+            option_casted = param[0] as (GridRowOptions | undefined);
+        }
+        this.getPeer()?.setGridRowOptionsAttribute(option_casted);
         return this;
     }
 
     getPeer(): ArkGridRowPeer {
         return this.peer as ArkGridRowPeer;
     }
+    
+    initialize(option?: GridRowOptions): this {
+        const option_casted = option as (GridRowOptions | undefined);
+        this.getPeer()?.setGridRowOptionsAttribute(option_casted);
+        return this;
+    }
 
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
+        const value_casted = value as (((breakpoints: string) => void) | undefined);
+        this.getPeer()?.onBreakpointChangeAttribute(value_casted);
         return this;
     }
 
     alignItems(value: ItemAlign | undefined): this {
+        const value_casted = value as (ItemAlign | undefined);
+        this.getPeer()?.alignItemsAttribute(value_casted);
         return this;
     }
-}
+}

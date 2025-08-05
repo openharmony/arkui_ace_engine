@@ -21,6 +21,7 @@ import { IConsumeDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
+import { uiUtils } from '../base/uiUtilsImpl';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
     sourceProvide_: IProvideDecoratedVariable<T> | null;
@@ -47,7 +48,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     public set(newValue: T): void {
         const oldValue = this.sourceProvide_!.get();
         if (oldValue !== newValue) {
-            const value = UIUtils.makeObserved(newValue);
+            const value = uiUtils.makeObserved(newValue);
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(value);
             this.sourceProvide_!.set(value);

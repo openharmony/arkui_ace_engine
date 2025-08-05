@@ -20,6 +20,7 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "inspector_util.h"
  
 namespace {
 const char LAYOUT_TYPE[] = "layout";
@@ -166,30 +167,6 @@ static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
     return reinterpret_cast<ComponentObserver *>(nativeAddr);
 }
 
-ani_status ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str, std::string& str)
-{
-    ani_size strSize;
-    ani_status status = env->String_GetUTF8Size(ani_str, &strSize);
-    if (status != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani String_GetUTF8Size failed %{public}d.", status);
-        return status;
-    }
-   
-    std::vector<char> buffer(strSize + 1); // +1 for null terminator
-    char* utf8Buffer = buffer.data();
-
-    ani_size bytes_written = 0;
-    status = env->String_GetUTF8(ani_str, utf8Buffer, buffer.size(), &bytes_written);
-    if (status != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani String_GetUTF8 failed %{public}d.", status);
-        return status;
-    }
-    
-    utf8Buffer[bytes_written] = '\0';
-    str = std::string(utf8Buffer);
-    return status;
-}
-
 static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
@@ -271,6 +248,55 @@ static ani_object AniGetInspectorTree(ani_env *env)
         return nullptr;
     }
     return aniResult;
+}
+
+static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filters)
+{
+    bool isLayoutInspector = false;
+    const NG::InspectorFilter& inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
+    ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
+    bool needThrow = false;
+    auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
+    if (needThrow) {
+        AniThrow(env, "get inspector failed");
+        return nullptr;
+    }
+    ani_string result;
+    if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
+    }
+    return result;
+}
+ 
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array_ref filters)
+{
+    if (depth < 0) {
+        AniThrow(env, "invalid filter depth");
+        return nullptr;
+    }
+    bool isLayoutInspector = false;
+    NG::InspectorFilter inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
+    std::string idStr;
+    if (ANI_OK != ANIUtils_ANIStringToStdString(env, id, idStr)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
+    }
+    inspectorFilter.SetFilterID(idStr);
+    inspectorFilter.SetFilterDepth(depth);
+    ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
+    bool needThrow = false;
+    auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
+    if (needThrow) {
+        AniThrow(env, "get inspector failed");
+        return nullptr;
+    }
+    ani_string result;
+    if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
+    }
+    return result;
 }
 
 static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
@@ -375,6 +401,10 @@ bool ANI_ConstructorForAni(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
         ani_native_function {"getInspectorTree", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
+        ani_native_function {"getFilteredInspectorTree", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTree)},
+        ani_native_function {"getFilteredInspectorTreeById", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTreeById)},
     };
     
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {

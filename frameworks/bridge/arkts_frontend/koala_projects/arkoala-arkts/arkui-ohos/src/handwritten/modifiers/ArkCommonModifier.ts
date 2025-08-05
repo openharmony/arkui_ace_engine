@@ -2030,6 +2030,7 @@ export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModi
             attributeUpdater.attribute = receiver as Object as T;
             attributeUpdater.updateConstructorParams = (...params: FixedArray<Object>) => {
                 func(receiver, ...params);
+                receiver.applyAttributesFinish();
                 return receiver as Object as T;
             };
         }

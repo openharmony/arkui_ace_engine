@@ -13,25 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ACE_ANI_GLOBAL_REFERENCE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ACE_ANI_GLOBAL_REFERENCE_H
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_ANI_GLOBAL_REFERENCE_H
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_ANI_GLOBAL_REFERENCE_H
+
+#include <memory>
 
 #include "ani.h"
-#include "interfaces/inner_api/ace_kit/include/ui/base/ace_type.h"
+#include "log/log.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace::Ani {
 // class for holding and releasing a global reference of ani.
-class AceAniGlobalReference : public AceType {
-    DECLARE_ACE_TYPE(AceAniGlobalReference, AceType);
-
+class AniGlobalReference : public std::enable_shared_from_this<AniGlobalReference> {
 public:
-    AceAniGlobalReference(ani_env* env, ani_ref ref) : env_(env), ref_(nullptr)
+    AniGlobalReference(const AniGlobalReference&) = delete;
+    AniGlobalReference(AniGlobalReference&&) = delete;
+    AniGlobalReference& operator=(const AniGlobalReference&) = delete;
+    AniGlobalReference& operator=(AniGlobalReference&&) = delete;
+    explicit AniGlobalReference(ani_env* env, ani_ref ref): env_(env)
     {
         if (env_) {
             env_->GlobalReference_Create(ref, &ref_);
         }
     }
-    ~AceAniGlobalReference() override
+    virtual ~AniGlobalReference()
     {
         if (env_ && ref_) {
             env_->GlobalReference_Delete(ref_);
@@ -47,6 +51,6 @@ private:
     ani_env* env_;
     ani_ref ref_;
 };
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Ani
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ACE_ANI_GLOBAL_REFERENCE_H
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_ANI_GLOBAL_REFERENCE_H

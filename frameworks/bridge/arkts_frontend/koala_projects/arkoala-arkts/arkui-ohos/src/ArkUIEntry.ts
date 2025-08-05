@@ -181,7 +181,6 @@ function registerSyncCallbackProcessor() {
 export class Application {
     private manager: StateManager | undefined = undefined
     private uiContext: UIContextImpl | undefined = undefined
-    private timer: MutableState<int64> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
     private exitApp: boolean = false
@@ -232,7 +231,6 @@ export class Application {
             this.manager!.isDebugMode = uiContext.isDebugMode_;
             let instanceId = uiContext.getInstanceId();
             this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
-            this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
             let builder: UserViewBuilder
             if (this.entryPoint) {
@@ -305,20 +303,24 @@ export class Application {
         // NativeModule._NativeLog("ARKTS: updateState")
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
+        let preState = uiContextRouter.getPreState();
         ObserveSingleton.instance.updateDirty();
-        this.updateStates(this.manager!, rootState)
+        this.updateStates(this.manager!, rootState, preState);
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             ObserveSingleton.instance.updateDirty();
-            this.updateStates(this.manager!, rootState)
+            this.updateStates(this.manager!, rootState, preState);
         }
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;
+        if (preState) {
+            preState!.value;
+        }
         // Call callbacks and sync
         callScheduledCallbacks();
     }
 
-    updateStates(manager: StateManager, root: ComputableState<IncrementalNode>) {
+    updateStates(manager: StateManager, root: ComputableState<IncrementalNode>, pre: ComputableState<IncrementalNode> | undefined) {
         if (this.instanceId < 0) {
             InteropNativeModule._NativeLog(
                 `ArkTS updateStates failed due to instanceId: ${this.instanceId} is illegal`)
@@ -348,6 +350,9 @@ export class Application {
                 // Compute new tree state
                 try {
                     root.value
+                    if (pre) {
+                        pre!.value;
+                    }
                     for (const detachedRoot of detachedRoots.values()) {
                         detachedRoot.compute()
                     }
@@ -376,7 +381,6 @@ export class Application {
             drawCurrentCrash(this.currentCrash!)
         } else {
             try {
-                this.timer!.value = Date.now() as int64
                 this.loopIteration2(arg0, arg1) // loop iteration without callbacks execution
                 if (this.enableDumpTree) {
                     dumpTree(this.rootState!.value)

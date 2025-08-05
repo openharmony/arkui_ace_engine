@@ -41,7 +41,9 @@ std::shared_ptr<ResourceAdapter> ResourceAdapter::CreateResourceAdapter(
     const std::string bundleName, const std::string moduleName)
 {
     auto context = AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_RETURN(context, nullptr);
     auto currentContext = context->CreateModuleContext(bundleName, moduleName);
+    CHECK_NULL_RETURN(currentContext, nullptr);
     auto manager = currentContext->GetResourceManager();
     return std::make_shared<ResourceAdapterImpl>(manager);
 }
@@ -57,4 +59,4 @@ void ResourceAdapterImpl::GetMediaData(uint32_t resId, size_t& len, std::unique_
 }
 } // namespace Drawable
 } // namespace Ace
-} // namespace OHOS
+} // namespace OHOS

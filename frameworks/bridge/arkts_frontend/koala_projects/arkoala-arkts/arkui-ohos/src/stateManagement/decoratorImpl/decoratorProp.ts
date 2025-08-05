@@ -28,6 +28,7 @@ import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { WatchFunc } from './decoratorWatch';
+import { uiUtils } from '../base/uiUtilsImpl';
 /**
 * implementation of V1 @Prop
 *
@@ -98,7 +99,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            if (this.__localValue.set(UIUtils.makeObserved(newValue) as T)) {
+            if (this.__localValue.set(uiUtils.makeObserved(newValue) as T)) {
                 if (this.setProxyValue) {
                     this.setProxyValue!(newValue);
                 }
@@ -116,7 +117,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
 
             this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {
-                if (this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue)) as T)) {
+                if (this.__localValue.set(uiUtils.makeObserved(deepCopy<T>(newValue)) as T)) {
                     this.execWatchFuncs();
                 }
             });
@@ -129,7 +130,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.__soruceValue.setSilently(newValue);
-            this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue)) as T);
+            this.__localValue.set(uiUtils.makeObserved(deepCopy<T>(newValue)) as T);
             this.execWatchFuncs();
         }
     }

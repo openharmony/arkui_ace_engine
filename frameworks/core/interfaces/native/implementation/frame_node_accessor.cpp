@@ -610,6 +610,13 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
 {
     static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = {
         { "List", GENERATED_ARKUI_LIST },
+        { "ListItem", GENERATED_ARKUI_LIST_ITEM },
+        { "ListItemGroup", GENERATED_ARKUI_LIST_ITEM_GROUP },
+        { "Scroll", GENERATED_ARKUI_SCROLL },
+        { "WaterFlow", GENERATED_ARKUI_WATER_FLOW },
+        { "FlowItem", GENERATED_ARKUI_FLOW_ITEM },
+        { "Grid", GENERATED_ARKUI_GRID },
+        { "GridItem", GENERATED_ARKUI_GRID_ITEM },
         { "Column", GENERATED_ARKUI_COLUMN },
         { "Row", GENERATED_ARKUI_ROW },
         { "Stack", GENERATED_ARKUI_STACK },

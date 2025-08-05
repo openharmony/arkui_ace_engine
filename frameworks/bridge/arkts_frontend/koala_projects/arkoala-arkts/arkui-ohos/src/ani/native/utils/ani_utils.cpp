@@ -37,6 +37,25 @@ ani_object AniUtils::CreateDouble(ani_env *env, double value)
     return personInfoObj;
 }
 
+ani_object AniUtils::CreateLong(ani_env *env, ani_long value)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    static const char *className = "Lstd/core/Long;";
+    ani_class long_cls;
+    if (ANI_OK != env->FindClass(className, &long_cls)) {
+        return nullptr;
+    }
+    ani_method longCtor;
+    if (ANI_OK != env->Class_FindMethod(long_cls, "<ctor>", "J:V", &longCtor)) {
+        return nullptr;
+    }
+    ani_object longObj;
+    if (ANI_OK != env->Object_New(long_cls, longCtor, &longObj, value)) {
+        return nullptr;
+    }
+    return longObj;
+}
+
 bool AniUtils::CheckType(ani_env *env, ani_object obj, const std::string& type)
 {
     CHECK_NULL_RETURN(env, false);
@@ -273,6 +292,21 @@ bool AniUtils::GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const 
         HILOGE("Get %{public}s Enum fail. status = %{public}d", enumName, status);
         return false;
     }
+    return true;
+}
+
+bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK) {
+        return false;
+    }
+    ani_double aniResult;
+    if (env->Object_CallMethodByName_Double(static_cast<ani_object>(value), "unboxed", ":d", &aniResult) != ANI_OK) {
+        return false;
+    }
+    result = static_cast<double>(aniResult);
     return true;
 }
 }

@@ -188,9 +188,6 @@ export class Serializer extends SerializerBase {
         if (Serializer.multithread) {
             return
         }
-        if (Serializer.poolTop != -1) {
-            throw new Error("Serializer pool is being used. Check if you had released serializers before")
-        }
         Serializer.multithread = true
         Serializer.pool = undefined;
     }
@@ -17841,7 +17838,7 @@ export class Serializer extends SerializerBase {
         value_screenId_type = runtimeType(value_screenId)
         valueSerializer.writeInt8(value_screenId_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_screenId_type)) {
-            const value_screenId_value  = value_screenId!
+            const value_screenId_value  = value_screenId! as number
             valueSerializer.writeNumber(value_screenId_value)
         }
     }
@@ -23192,7 +23189,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_start_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_start_type)) {
             const value_start_value  = value_start!
-            valueSerializer.writeNumber(value_start_value)
+            valueSerializer.writeInt32(value_start_value)
         }
         const value_length  = value.length
         let value_length_type : int32 = RuntimeType.UNDEFINED
@@ -23200,7 +23197,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_length_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_length_type)) {
             const value_length_value  = value_length!
-            valueSerializer.writeNumber(value_length_value)
+            valueSerializer.writeInt32(value_length_value)
         }
         const value_styledKey  = value.styledKey
         valueSerializer.writeInt32(TypeChecker.StyledStringKey_ToNumeric(value_styledKey))

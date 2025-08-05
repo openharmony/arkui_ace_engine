@@ -44,6 +44,17 @@ void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptio
     if (selected) {
         options.selectedDate = selected.value();
     }
+    auto startDate = Converter::OptConvert<PickerDate>(src.start).value_or(PickerDate());
+    auto endDate = Converter::OptConvert<PickerDate>(src.end).value_or(PickerDate());
+    if (endDate.GetYear() > 0 && startDate.ToDays() > endDate.ToDays()) {
+        startDate = PickerDate();
+        endDate = PickerDate();
+    }
+    options.startDate = startDate;
+    options.endDate = endDate;
+    options.disabledDateRange =
+        Converter::Convert<std::vector<std::pair<PickerDate, PickerDate>>>(src.disabledDateRange.value);
+    PickerDate::SortAndMergeDisabledDateRange(options.disabledDateRange);
     dst = options;
 }
 

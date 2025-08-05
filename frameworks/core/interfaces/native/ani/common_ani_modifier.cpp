@@ -61,7 +61,17 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    return OHOS::Ace::Framework::AniContextModule::GetAniContext(key);
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+        return nullptr;
+    }
+    return frontend->GetHostContext(key);
 }
 
 void SyncInstanceId(ArkUI_Int32 instanceId)
@@ -125,13 +135,8 @@ ani_ref GetSharedLocalStorage()
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not get current frontend.");
         return nullptr;
     }
-    auto arkTsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
-    if (arkTsFrontend == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not convert to arkts frontend.");
-        return nullptr;
-    }
     int32_t currentInstance = Container::CurrentIdSafely();
-    auto storage = arkTsFrontend->GetShared(currentInstance);
+    auto storage = frontend->GetSharedStorage(currentInstance);
     if (storage) {
         return storage;
     }
@@ -483,24 +488,24 @@ void* TransferScrollableTargetInfoPointer(ani_long nativePtr)
     return reinterpret_cast<void*>(nativePointer);
 }
 
-ani_long TransferDragEventPointer(ani_long ptr)
+void* CreateDragEventAccessor(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
     auto weak = OHOS::Ace::AceType::WeakClaim(reinterpret_cast<OHOS::Ace::DragEvent*>(ptr));
     auto dragEvent = weak.Upgrade();
     CHECK_NULL_RETURN(dragEvent, 0);
     auto peer = DragEventPeer::Create(dragEvent);
-    return reinterpret_cast<ani_long>(peer);
+    return reinterpret_cast<void*>(peer);
 }
 
-ani_long GetDragEventPointer(ani_long ptr)
+void* GetDragEventPointer(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
     auto peer = reinterpret_cast<DragEventPeer*>(ptr);
     CHECK_NULL_RETURN(peer, 0);
     auto dragInfo = peer->dragInfo;
     CHECK_NULL_RETURN(dragInfo, 0);
-    return reinterpret_cast<ani_long>(AceType::RawPtr(dragInfo));
+    return reinterpret_cast<void*>(AceType::RawPtr(dragInfo));
 }
 
 void* TransferTouchEventPointer(ani_long nativePtr)
@@ -609,7 +614,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .scrollableTargetInfoAccessorWithId = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithId,
         .scrollableTargetInfoAccessorWithPointer = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithPointer,
         .transferScrollableTargetInfoPointer = OHOS::Ace::NG::TransferScrollableTargetInfoPointer,
-        .transferDragEventPointer = OHOS::Ace::NG::TransferDragEventPointer,
+        .createDragEventAccessor = OHOS::Ace::NG::CreateDragEventAccessor,
         .getDragEventPointer = OHOS::Ace::NG::GetDragEventPointer,
         .transferTouchEventPointer = OHOS::Ace::NG::TransferTouchEventPointer,
         .transferMouseEventPointer = OHOS::Ace::NG::TransferMouseEventPointer,

@@ -25,6 +25,7 @@ namespace OHOS::Ace::Ani {
 class AniUtils {
 public:
     static ani_object CreateDouble(ani_env *env, double value);
+    static ani_object CreateLong(ani_env *env, ani_long value);
     static bool CheckType(ani_env *env, ani_object obj, const std::string& type);
     static bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value);
     static bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name);
@@ -40,6 +41,10 @@ public:
     static bool GetBigIntValue(ani_env* env, ani_object object, int64_t& longValue);
     static bool GetEnumItem(
         [[maybe_unused]] ani_env* env, ani_size index, const char* enumName, ani_enum_item& enumItem);
+    // Get double value from ani_ref.
+    // The return value means the parse result. True means success.
+    // If the ref is undefined, it will return false.
+    static bool GetOptionalDouble(ani_env* env, ani_ref value, double& result);
 };
 } // namespace OHOS::Ace::Ani
 

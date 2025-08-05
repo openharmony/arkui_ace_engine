@@ -53,8 +53,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelStatic::CreateFrameNode(
-        id, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    auto frameNode = XComponentModelStatic::CreateFrameNode(id, false);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -73,7 +72,6 @@ void SetXComponentOptions0Impl(Ark_NativePointer node,
     auto id = Converter::Convert<std::string>(value->id);
     XComponentModelNG::SetXComponentId(frameNode, id);
 
-    LOGE("XComponentInterfaceModifier::SetXComponentOptions0Impl - wrong input type");
     auto typeStr = Converter::Convert<std::string>(value->type);
     XComponentModelNG::SetXComponentType(frameNode, ConvertToXComponentType(typeStr));
 
@@ -132,7 +130,7 @@ void SetXComponentOptions3Impl(Ark_NativePointer node,
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
-                const Opt_OnNativeLoadCallback* value)
+                const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -143,9 +141,7 @@ void OnLoadImpl(Ark_NativePointer node,
     }
     auto onLoad =
         [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
-            Opt_Object loadedObj;
-            loadedObj.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-            arkCallback.InvokeSync(loadedObj);
+            arkCallback.InvokeSync();
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
     XComponentModelNG::SetOnLoad(frameNode, std::move(onLoad));
@@ -173,14 +169,6 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        XComponentModelNG::EnableAnalyzer(frameNode, false);
-        return;
-    }
-    XComponentModelNG::EnableAnalyzer(frameNode, *convValue);
-#endif // XCOMPONENT_SUPPORTED
 }
 void EnableSecureImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)

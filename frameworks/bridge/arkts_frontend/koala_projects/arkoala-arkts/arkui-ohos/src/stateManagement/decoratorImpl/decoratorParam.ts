@@ -19,6 +19,7 @@ import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { IParamDecoratedVariable } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
+import { uiUtils } from '../base/uiUtilsImpl';
 export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T) {
@@ -37,7 +38,7 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implement
             return;
         }
         StateUpdateLoop.add(() => {
-            this.backing_.set(UIUtils.makeObserved(newValue) as T);
+            this.backing_.set(uiUtils.makeObserved(newValue, true) as T);
         });
     }
 }

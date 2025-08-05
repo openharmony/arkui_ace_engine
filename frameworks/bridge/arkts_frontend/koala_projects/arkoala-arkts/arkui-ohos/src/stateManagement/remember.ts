@@ -13,9 +13,58 @@
  * limitations under the License.
  */
 
-import { memoize } from "@koalaui/runtime";
+import {
+    __context,
+    memoize,
+    MutableState,
+    rememberDisposable,
+    StateManagerImpl,
+    StateContext,
+    GlobalStateManager,
+    Dependencies,
+} from '@koalaui/runtime';
+import { MemoState } from './memorize/state';
+
+export class CascadeMemoState<Value> implements MemoState<Value> {
+    private manager: StateManagerImpl | undefined = undefined;
+    private _value: Value;
+    public dependencies: Dependencies | undefined = undefined;
+
+    constructor(manager: StateContext) {
+        this.dependencies = new Dependencies();
+        this.manager = manager as StateManagerImpl;
+    }
+
+    get value(): Value {
+        const manager = GlobalStateManager.instance as StateManagerImpl;
+        this.manager?.scheduleCallback(() => {
+            this.dependencies?.register(manager?.current);
+        });
+        return this._value;
+    }
+
+    set value(value: Value) {
+        this._value = value;
+        this.dependencies?.updateDependencies(true);
+    }
+
+    dispose(): void {
+        this.dependencies = undefined;
+    }
+}
 
 /** @memo */
-export function rememberVar<T>(factory: () => T): T {
-    return memoize(factory);
+export function memorizeUpdatedState<T>(factory: () => T): MemoState<T> {
+    return memoize<CascadeMemoState<T>>(() => {
+        const receiver = rememberDisposable<CascadeMemoState<T>>(
+            () => {
+                return new CascadeMemoState<T>(__context());
+            },
+            (state: CascadeMemoState<T> | undefined) => {
+                state?.dispose();
+            }
+        );
+        receiver.value = factory();
+        return receiver;
+    });
 }

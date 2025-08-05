@@ -18,9 +18,16 @@ group("advanced_ui_component_static") {
   deps = []
   if (!ace_engine_feature_wearable) {
     deps += [
+      "selecttitlebar:selectTitleBar",
+      "progressbutton:progressButton",
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
+      "composeListItem:composeListItem",
       "subheader:subHeader",
+      "editabletitlebar:editableTitleBar",
+      "exceptionprompt:exceptionPrompt",
+      "tabtitlebar:tabTitleBar",
+      "composetitlebar:composeTitleBar",
     ]
   }
 }

@@ -229,9 +229,9 @@ declare namespace promptAction {
     }
 
     export interface DialogBuilderOptions {
-        builderFunc?: (() => KPointer);
-        builderWithIdFunc?: ((dialogId: number) => KPointer);
+        builder?: KPointer;
         destroyFunc?: ((ptr: KPointer) => void);
+        builderWithId?: ((dialogId: number) => KPointer);
     }
 
     export class DialogController extends CommonController {}
@@ -274,7 +274,7 @@ declare namespace promptAction {
     export function openCustomDialog1(content: KPointer, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export function openCustomDialog(builder: KPointer, options: CustomDialogOptions,
+    export function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export function updateCustomDialog(content: KPointer, options: BaseDialogOptions): Promise<void>;

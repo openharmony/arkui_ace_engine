@@ -31009,14 +31009,14 @@ void impl_XComponentAttribute_onLoad(Ark_NativePointer thisPtr, KSerializerBuffe
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnNativeLoadCallback value_value_buf = {};
+        Opt_VoidCallback value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Object event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnNativeLoadCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Object event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnNativeLoadCallback))))};
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_VoidCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_VoidCallback))))};
         }
-        Opt_OnNativeLoadCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getXComponentModifier()->setOnLoad(self, (const Opt_OnNativeLoadCallback*)&value_value);
+        Opt_VoidCallback value_value = value_value_buf;
+        GetNodeModifiers()->getXComponentModifier()->setOnLoad(self, static_cast<Opt_VoidCallback*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(XComponentAttribute_onLoad, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_XComponentAttribute_onDestroy(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

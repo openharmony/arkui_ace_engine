@@ -19606,8 +19606,8 @@ typedef struct Opt_StyledStringValue {
     Ark_StyledStringValue value;
 } Opt_StyledStringValue;
 typedef struct Ark_StyleOptions {
-    Opt_Number start;
-    Opt_Number length;
+    Opt_Int32 start;
+    Opt_Int32 length;
     Ark_StyledStringKey styledKey;
     Ark_StyledStringValue styledValue;
 } Ark_StyleOptions;
@@ -24176,7 +24176,7 @@ typedef struct GENERATED_ArkUIXComponentModifier {
     void (*setXComponentOptions3)(Ark_NativePointer node,
                                   const Ark_NativeXComponentParameters* params);
     void (*setOnLoad)(Ark_NativePointer node,
-                      const Opt_OnNativeLoadCallback* value);
+                      const Opt_VoidCallback* value);
     void (*setOnDestroy)(Ark_NativePointer node,
                          const Opt_VoidCallback* value);
     void (*setEnableAnalyzer)(Ark_NativePointer node,

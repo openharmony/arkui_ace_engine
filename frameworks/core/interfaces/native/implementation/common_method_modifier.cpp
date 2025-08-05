@@ -32,6 +32,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/pattern/select/select_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -2090,12 +2091,15 @@ void MarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
 }
-void BackgroundColor0Impl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
+void BackgroundColor0Impl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
+        SelectModelStatic::SetBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    } else {
+        ViewAbstractModelStatic::SetBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    }
 }
 void BackgroundColor1Impl(Ark_NativePointer node,
                           const Opt_ResourceColor* value)

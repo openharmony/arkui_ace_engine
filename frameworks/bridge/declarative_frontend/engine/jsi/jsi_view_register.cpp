@@ -1255,6 +1255,10 @@ panda::Local<panda::JSValueRef> GetScrollableTargetInfoPointer(panda::JsiRuntime
     }
     JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
     auto jsScrollableTargetInfo = Referenced::Claim(object->Unwrap<JSScrollableTargetInfo>());
+    if (!jsScrollableTargetInfo) {
+        LOGE("GetScrollableTargetInfoPointer JSScrollableTargetInfo is null");
+        return panda::NumberRef::Undefined(vm);
+    }
     auto ptr = jsScrollableTargetInfo->GetPatternPointer();
     CHECK_NULL_RETURN(ptr, panda::NumberRef::Undefined(vm));
     return panda::NumberRef::New(vm, ptr);
@@ -1270,6 +1274,10 @@ panda::Local<panda::JSValueRef> GetDragEventPointer(panda::JsiRuntimeCallInfo* r
     }
     JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
     auto jsDragEvent = Referenced::Claim(object->Unwrap<JsDragEvent>());
+    if (!jsDragEvent) {
+        LOGE("GetDragEventPointer jsDragEvent is null");
+        return panda::NumberRef::Undefined(vm);
+    }
     auto ptr = jsDragEvent->GetDragEventPointer();
     CHECK_NULL_RETURN(ptr, panda::NumberRef::Undefined(vm));
     return panda::NumberRef::New(vm, ptr);

@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
-#include <ani.h>
-
 #include "auto_fill_manager.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "if_system_ability_manager.h"
@@ -53,7 +51,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/js_frontend.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
@@ -357,14 +355,6 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
         AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
-
-void ReleaseStorageReference(void* sharedRuntime, void* storage)
-{
-    if (sharedRuntime && storage) {
-        auto* env = reinterpret_cast<ani_env*>(sharedRuntime);
-        env->GlobalReference_Delete(reinterpret_cast<ani_object>(storage));
-    }
-}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -662,7 +652,12 @@ void AceContainer::InitializeFrontend()
         }
     } else if (type_ == FrontendType::ARK_TS) {
         LOGI("Init ARK_TS Frontend");
-        frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+        auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(sharedRuntime_);
+        if (arktsFrontend == nullptr) {
+            LOGE("Create arktsFrontend failed.");
+            return;
+        }
+        frontend_ = arktsFrontend;
     } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         // initialize after AttachView
         LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");
@@ -2465,18 +2460,13 @@ void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS:
         auto sp = frontend.Upgrade();
         auto contextRef = contextWeak.lock();
         if (!sp || !contextRef) {
-            ReleaseStorageReference(sharedRuntime, storage);
-            return;
-        }
-        auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(sp);
-        if (!arktsFrontend) {
-            ReleaseStorageReference(sharedRuntime, storage);
+            ArktsFrontendLoader::GetInstance().DeleteAniReference(sharedRuntime, storage);
             return;
         }
         if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<ani_ref>()) {
-            arktsFrontend->SetAniContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
+            sp->SetHostContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
         }
-        arktsFrontend->RegisterLocalStorage(id, storage);
+        sp->RegisterLocalStorage(id, storage);
     }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
 
@@ -2867,6 +2857,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
         }
         frontend_->AttachPipelineContext(pipelineContext_);
+        if ((type_ == FrontendType::STATIC_HYBRID_DYNAMIC || type_ == FrontendType::DYNAMIC_HYBRID_STATIC) &&
+            subFrontend_) {
+            subFrontend_->AttachPipelineContext(pipelineContext_);
+        }
     } else if (frontend_->GetType() == FrontendType::DECLARATIVE_JS) {
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);

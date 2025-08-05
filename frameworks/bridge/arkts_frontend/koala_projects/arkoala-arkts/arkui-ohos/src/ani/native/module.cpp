@@ -562,6 +562,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragPreviewAnimate)
         },
         ani_native_function {
+            "_DragController_cleanDragAction",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANICleanDragAction)
+        },
+        ani_native_function {
+            "_DragController_cleanDragPreview",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANICleanDragPreview)
+        },
+        ani_native_function {
             "_DragController_setDragEventStrictReportingEnabled",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionSetDragEventStrictReportingEnabled)
@@ -682,9 +692,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLanguageCode)
         },
         ani_native_function {
-            "_XComponent_SetSurfaceCallback",
-            "JLarkui/component/xcomponent/XComponentControllerCallbackInternal;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
+            "_XComponent_SetXComponentOptions",
+            "JLarkui/component/xcomponent/XComponentOptionsInternal;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentOptions)
+        },
+        ani_native_function {
+            "_XComponent_SetXComponentParameters",
+            "JLarkui/component/xcomponent/XComponentParametersInternal;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentParameters)
+        },
+        ani_native_function {
+            "_XComponent_SetNativeXComponentParameters",
+            "JI:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetNativeXComponentParameters)
         },
         ani_native_function {
             "_RemoveComponent_FromFrameNode",

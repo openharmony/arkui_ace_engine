@@ -394,10 +394,10 @@ export interface FullscreenInfo {
     fullscreen: boolean;
 }
 export interface PreparedInfo {
-    duration: number;
+    duration: int32;
 }
 export interface PlaybackInfo {
-    time: number;
+    time: int32;
 }
 export interface PosterOptions {
     showFirstFrame?: boolean;

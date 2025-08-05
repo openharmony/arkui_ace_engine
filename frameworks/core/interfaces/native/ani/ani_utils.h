@@ -26,10 +26,6 @@ class AniUtils {
 public:
     static std::string ANIStringToStdString(ani_env* env, ani_string aniStr);
     static ani_object CreateDouble(ani_env* env, double value);
-    // Get double value from ani_ref.
-    // The return value means the parse result. True means success.
-    // If the ref is undefined, it will return false.
-    static bool GetOptionalDouble(ani_env* env, ani_ref value, double& result);
 };
 } // namespace OHOS::Ace::NG
 

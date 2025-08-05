@@ -19,6 +19,7 @@ import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveWrappedBase } from './observeWrappedBase';
 import { UIUtils } from '../utils';
+import { uiUtils } from './uiUtilsImpl';
 final class CONSTANT {
     public static readonly OB_ARRAY_ANY_KEY = '__OB_ANY_INDEX';
     public static readonly OB_LENGTH = '__OB_LENGTH';
@@ -34,10 +35,12 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     private ____V1RenderId: RenderIdType = 0;
+    private allowDeep_: boolean;
 
-    constructor(src: Array<T>) {
+    constructor(src: Array<T>, allowDeep: boolean = false) {
         super();
         this.store_ = src;
+        this.allowDeep_ = allowDeep;
         this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
     }
 
@@ -62,17 +65,17 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     }
 
     public shouldAddRef(): boolean {
-        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
-    override get length(): number {
+    override get length(): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }
         return this.store_.length;
     }
 
-    override set length(newLen: number) {
+    override set length(newLen: int) {
         const len = this.store_.length;
         if (len !== newLen) {
             this.store_.length;
@@ -103,7 +106,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
         }
-        return UIUtils.makeObserved(this.store_[idx]);
+        return uiUtils.makeObserved(this.store_[idx], this.allowDeep_);
     }
 
     // [] operator
@@ -289,6 +292,12 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
 
         return ret;
     }
+
+    public push(...val: T[]): number {
+        return this.pushArray(...val);
+    }
+
+    overload push { push, pushOne, pushArray }
 
     /**
      * Adds the specified elements to the end of an array and returns the new length of the array.

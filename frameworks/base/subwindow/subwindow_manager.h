@@ -85,7 +85,7 @@ public:
 
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
-    int32_t GetParentContainerId(int32_t containerId);
+    ACE_FORCE_EXPORT int32_t GetParentContainerId(int32_t containerId);
     int32_t GetSubContainerId(int32_t parentContainerId);
     const std::vector<int32_t> GetAllSubContainerId(int32_t parentContainerId);
 

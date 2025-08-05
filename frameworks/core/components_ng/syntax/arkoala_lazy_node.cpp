@@ -14,10 +14,14 @@
  */
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
+
 namespace OHOS::Ace::NG {
 void ArkoalaLazyNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+        "nodeId: %{public}d: DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
+        GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     struct Range {
         int32_t start;
         int32_t end;
@@ -50,9 +54,14 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
 RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     const auto indexCasted = static_cast<int32_t>(index);
-    auto item = GetFrameNode(indexCasted);
-    if (item || !needBuild) {
-        return item;
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+        "nodeId: %{public}d: GetFrameChildByIndex(%{public}d, %{public}d, %{public}d, %{public}d)",
+        GetId(), indexCasted, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache),
+        static_cast<int32_t>(addToRenderTree));
+
+    auto item = GetChildByIndex(indexCasted);
+    if (!item && !needBuild) {
+        return nullptr;
     }
     if (createItem_) {
         item = createItem_(indexCasted);
@@ -67,13 +76,18 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
         item->SetActive(true);
     }
 
-    return item;
+    return item->GetFrameChildByIndex(0, needBuild);
+}
+
+RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
+{
+    auto item = items_.Get(index);
+    return item ? item->Upgrade() : nullptr;
 }
 
 RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
 {
-    auto item = items_.Get(index);
-    return item ? item->Upgrade() : nullptr;
+    return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false, false));
 }
 
 void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)

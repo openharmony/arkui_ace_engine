@@ -37,6 +37,9 @@ import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
+import {TimePickerDialog, TimePickerDialogOptions} from "arkui/component/timePicker"
+import {DatePickerDialog, DatePickerDialogOptions} from "arkui/component/datePicker"
+import {TextPickerDialog, TextPickerDialogOptions} from "arkui/component/textPicker"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
@@ -140,6 +143,10 @@ export class Router {
 
     public getStateRoot(): ComputableState<IncrementalNode> {
         throw Error("getStateRoot not implemented in Router!");
+    }
+
+    public getPreState(): ComputableState<IncrementalNode> | undefined {
+        throw Error("getPreState not implemented in Router!");
     }
 
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
@@ -564,6 +571,18 @@ export class UIContext {
     public showActionSheet(options: ActionSheetOptions): void {
         throw Error("showActionSheet not implemented in UIContext!")
     }
+
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        throw Error("showTimePickerDialog not implemented in UIContext!")
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        throw Error("showDatePickerDialog not implemented in UIContext!")
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        throw Error("showTextPickerDialog not implemented in UIContext!")
+    }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
@@ -616,6 +635,14 @@ export class UIContext {
 
     public closeBindSheet(content: ComponentContent) : Promise<void> {
         throw Error("closeBindSheet not implemented in UIContext!")
+    }
+    
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTree not implemented in UIContext!")
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {

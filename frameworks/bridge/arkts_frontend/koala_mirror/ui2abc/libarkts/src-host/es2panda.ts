@@ -21,7 +21,7 @@ import { Command } from "commander"
 import { filterSource, isNumber, throwError } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
 import { Options, Config, Context, createETSModuleFromContext, proceedToState, ProgramTransformer, dumpProgramInfo, dumpArkTsConfigInfo, collectDependencies } from "@koalaui/libarkts"
-import { ProgramInfo, compileWithCache } from "@koalaui/libarkts"
+import { ProgramInfo, compileWithCache, listPrograms } from "@koalaui/libarkts"
 
 interface CommandLineOptions {
     files: string[]
@@ -266,6 +266,18 @@ function invokeWithPlugins(
 
     compilerContext.destroy()
     compilerConfig.destroy()
+}
+
+function dumpCompilationInfo() {
+    if (global.arktsconfig) {
+        dumpArkTsConfigInfo(global.arktsconfig)
+    } else {
+        console.log("No arktsconfig")
+    }
+    const programs = listPrograms(global.compilerContext.program)
+    const programsForCodegeneration = programs.filter(it => it.isGenAbcForExternal)
+    console.log(`Programs for codegeneration        : ${programsForCodegeneration.length}`)
+    console.log(`External programs passed to plugins: ${programs.length - programsForCodegeneration.length - 1}`) // -1 for "empty" main program
 }
 
 function invokeSimultaneous(

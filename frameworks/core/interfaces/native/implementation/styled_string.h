@@ -31,8 +31,8 @@ namespace OHOS::Ace::NG::Converter {
     inline RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
     {
         return Convert<RefPtr<SpanBase>>(Ark_StyleOptions {
-            .start = ArkValue<Opt_Number>(src.start),
-            .length = ArkValue<Opt_Number>(src.length),
+            .start = ArkValue<Opt_Int32>(src.start),
+            .length = ArkValue<Opt_Int32>(src.length),
             .styledKey = src.styledKey,
             .styledValue = src.styledValue,
         });

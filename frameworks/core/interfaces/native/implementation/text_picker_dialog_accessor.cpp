@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -20,172 +21,92 @@
 #include "test/unittest/capi/stubs/mock_text_picker_dialog_view.h"
 #else
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #endif
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
-void BuildDialogPropertiesCallbacks(const Ark_TextPickerDialogOptions options, DialogProperties& dialogProps)
-{
-    auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
-    if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidAppear = onDidAppear;
-    }
-    auto didDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidDisappear);
-    if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidDisappear = onDidDisappear;
-    }
-    auto willAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillAppear);
-    if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillAppear = onWillAppear;
-    }
-    auto willDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillDisappear);
-    if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillDisappear = onWillDisappear;
-    }
-}
-DialogProperties BuildDialogProperties(const Ark_TextPickerDialogOptions options)
-{
-    DialogProperties dialogProps;
-    auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
-    if (alignment) {
-        dialogProps.alignment = alignment.value();
-    }
-    auto offset = Converter::OptConvert<DimensionOffset>(options.offset);
-    if (offset) {
-        dialogProps.offset = offset.value();
-    }
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
-    dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
-    dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
-    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
-    if (enableHoverMode) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
-    }
-    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
-    if (hoverModeArea) {
-        dialogProps.hoverModeArea = hoverModeArea.value();
-    }
-    dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    BuildDialogPropertiesCallbacks(options, dialogProps);
-    return dialogProps;
-}
-void BuildCascadeSelection(std::vector<NG::TextCascadePickerOptions>& opts,
-    TextPickerSettingData& settingData, std::vector<uint32_t> selectedIndexes,
-    std::vector<std::string> selectedValues)
-{
-    if (static_cast<int32_t>(selectedIndexes.size()) > 0) {
-        auto tmpOpts = opts;
-        for (int i = 0; i < static_cast<int32_t>(selectedIndexes.size()); i++) {
-            if (static_cast<int32_t>(tmpOpts.size()) == 0) {
-                break;
-            }
-            auto index = selectedIndexes.at(i);
-            if (index >= static_cast<int32_t>(tmpOpts.size()) || index < 0) {
-                index = 0;
-            }
-            settingData.selectedValues.push_back(index);
-            settingData.values.push_back(tmpOpts.at(index).rangeResult.at(0));
-            tmpOpts = tmpOpts.at(index).children;
-        }
-    } else if (static_cast<int32_t>(selectedValues.size()) > 0) {
-        auto tmpOpts = opts;
-        for (int i = 0; i < static_cast<int32_t>(selectedValues.size()); i++) {
-            if (static_cast<int32_t>(tmpOpts.size()) == 0) {
-                break;
-            }
-            auto valueStr = selectedValues.at(i);
-            auto index = 0;
 
-            auto checkValidValue = (std::find_if(tmpOpts.begin(), tmpOpts.end(),
-                [valueStr](TextCascadePickerOptions item) { return item.rangeResult[0] == valueStr; }));
-            if (checkValidValue != tmpOpts.end()) {
-                index = static_cast<uint32_t>(std::distance(tmpOpts.begin(), checkValidValue));
-            }
-            if (index >= static_cast<int32_t>(tmpOpts.size()) || index < 0) {
-                index = 0;
-            }
-            settingData.selectedValues.push_back(index);
-            settingData.values.push_back(tmpOpts.at(index).rangeResult.at(0));
-            tmpOpts = tmpOpts.at(index).children;
-        }
-    }
-}
-void CreateRangeWithSelection(const Ark_TextPickerDialogOptions options, TextPickerSettingData& settingData)
+uint32_t CalculateKind(bool fromRangeContent, const std::vector<NG::RangeContent>& range)
 {
-    std::vector<uint32_t> selectedIndexes;
-    auto pickerSelectedOpt = Converter::OptConvert<Converter::PickerSelectedType>(options.selected);
-    if (pickerSelectedOpt) {
-        auto selectedValue = pickerSelectedOpt.value();
-        if (auto selected = std::get_if<uint32_t>(&selectedValue); selected) {
-            selectedIndexes.push_back(*selected);
-        } else {
-            selectedIndexes = std::get<std::vector<uint32_t>>(selectedValue);
+    uint32_t kind = 0;
+    if (!fromRangeContent) {
+        kind = NG::TEXT;
+    } else {
+        kind |= NG::ICON;
+        for (const auto& rangeContent : range) {
+            if (!rangeContent.text_.empty()) {
+                kind |= NG::TEXT;
+                break;
+            }
         }
     }
-    std::vector<std::string> selectedValues;
-    auto pickerValueOpt = Converter::OptConvert<Converter::PickerValueType>(options.value);
+    return kind;
+}
+
+void ParseTextPickerOptions(const Ark_TextPickerDialogOptions& arkOptions, TextPickerSettingData& settingData)
+{
+    bool hasSelected = false;
+    bool isCascade = false;
+    // parse value
+    auto pickerValueOpt = Converter::OptConvert<Converter::PickerValueType>(arkOptions.value);
     if (pickerValueOpt) {
         auto pickerValue = pickerValueOpt.value();
         if (auto value = std::get_if<std::string>(&pickerValue); value) {
-            selectedValues.push_back(*value);
+            settingData.values.emplace_back(*value);
         } else {
-            selectedValues = std::get<std::vector<std::string>>(pickerValue);
+            settingData.values = std::move(std::get<std::vector<std::string>>(pickerValue));
         }
     }
-
-    auto pickerRangeOpt = Converter::OptConvert<PickerRangeType>(options.range);
+    // parse selected
+    auto pickerSelectedOpt = Converter::OptConvert<Converter::PickerSelectedType>(arkOptions.selected);
+    if (pickerSelectedOpt) {
+        auto pickerSelected = pickerSelectedOpt.value();
+        if (auto selected = std::get_if<uint32_t>(&pickerSelected); selected) {
+            settingData.selected = *selected;
+            settingData.selectedValues.emplace_back(settingData.selected);
+        } else {
+            settingData.selectedValues = std::move(std::get<std::vector<uint32_t>>(pickerSelected));
+        }
+        hasSelected = true;
+    }
+    // parse range
+    auto pickerRangeOpt = Converter::OptConvert<PickerRangeType>(arkOptions.range);
     if (pickerRangeOpt) {
         auto pickerRange = pickerRangeOpt.value();
         auto rangeVector = std::get_if<std::pair<bool, std::vector<NG::RangeContent>>>(&pickerRange);
-        auto optionsVector = std::get_if<std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>(&pickerRange);
-
-        if (rangeVector && (static_cast<int32_t>(rangeVector->second.size()) > 0)) {
-            auto range = rangeVector->second;
-            settingData.rangeVector = range;
-
-            auto selectedIndex = static_cast<int32_t>(selectedIndexes.size()) > 0 ? selectedIndexes.at(0) : 0;
-            if (selectedIndex >= static_cast<int32_t>(range.size()) || selectedIndex < 0) {
-                selectedIndex = 0;
-            }
-            settingData.selected = selectedIndex;
-            settingData.selectedValues.push_back(selectedIndex);
-        } else if (optionsVector && (static_cast<int32_t>(optionsVector->second.size()) > 0)) {
-            auto opts = optionsVector->second;
-            settingData.options = opts;
-            BuildCascadeSelection(opts, settingData, selectedIndexes, selectedValues);
+        if (rangeVector) {
+            auto fromRangeContent = rangeVector->first;
+            settingData.rangeVector = rangeVector->second;
+            settingData.columnKind = CalculateKind(fromRangeContent, settingData.rangeVector);
+        } else {
+            auto options = std::get<std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>(pickerRange);
+            settingData.options = std::move(options.second);
+            isCascade = options.first;
         }
     }
+    // TextCascadePickerOptionsAttr
+    settingData.attr.isCascade = isCascade;
+    settingData.attr.isHasSelectAttr = hasSelected;
 }
-TextPickerSettingData BuildPickerSettingData(const Ark_TextPickerDialogOptions options)
+
+TextPickerSettingData BuildTextPickerSettingData(const Ark_TextPickerDialogOptions options)
 {
     TextPickerSettingData settingData;
-    CreateRangeWithSelection(options, settingData);
+    ParseTextPickerOptions(options, settingData);
 
     auto height = Converter::OptConvert<Dimension>(options.defaultPickerItemHeight);
     if (height) {
         settingData.height = height.value();
     }
-
     auto canLoop = Converter::OptConvert<bool>(options.canLoop);
     if (canLoop) {
         settingData.canLoop = canLoop.value();
     }
-
+    // crownSensitivity
+    // text style
     auto disappearTextStyle = Converter::OptConvert<PickerTextStyle>(options.disappearTextStyle);
     if (disappearTextStyle) {
         settingData.properties.disappearTextStyle_ = disappearTextStyle.value();
@@ -198,21 +119,24 @@ TextPickerSettingData BuildPickerSettingData(const Ark_TextPickerDialogOptions o
     if (selectedTextStyle) {
         settingData.properties.selectedTextStyle_ = selectedTextStyle.value();
     }
+    auto defaultTextStyle = Converter::OptConvert<PickerTextStyle>(options.defaultTextStyle);
+    if (defaultTextStyle) {
+        settingData.properties.defaultTextStyle_ = defaultTextStyle.value();
+    }
+
+    // disableTextStyleAnimation
+    auto disableTextStyleAnimation = Converter::OptConvert<bool>(options.disableTextStyleAnimation);
+    if (disableTextStyleAnimation) {
+        settingData.isDisableTextStyleAnimation = disableTextStyleAnimation.value();
+    }
+    auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
+    if (enableHapticFeedback) {
+        settingData.isEnableHapticFeedback = enableHapticFeedback.value();
+    }
+
     return settingData;
 }
-std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions options)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);
-    if (acceptButtonInfo.has_value()) {
-        buttonInfos.push_back(acceptButtonInfo.value());
-    }
-    auto cancelButtonInfo = Converter::OptConvert<ButtonInfo>(options.cancelButtonStyle);
-    if (cancelButtonInfo.has_value()) {
-        buttonInfos.push_back(cancelButtonInfo.value());
-    }
-    return buttonInfos;
-}
+
 DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 {
     return [arkCallback = CallbackHelper(callback)](const std::string& info) -> void {
@@ -260,6 +184,121 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
         arkCallback.Invoke(textPickerRes);
     };
 }
+
+TextPickerDialog BuildTextPickerDialog(const Ark_TextPickerDialogOptions options, const TextPickerSettingData setting)
+{
+    TextPickerDialog pickerDialog;
+
+    // height & isDefaultHeight
+    pickerDialog.height =  setting.height;
+    // selectedValue getRangeVector
+    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
+    if (enableHoverMode) {
+        pickerDialog.enableHoverMode = enableHoverMode.value();
+    }
+    auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
+    if (alignment) {
+        pickerDialog.alignment = alignment.value();
+    }
+    auto offset = Converter::OptConvert<DimensionOffset>(options.offset);
+    if (offset) {
+        pickerDialog.offset = offset.value();
+    }
+    pickerDialog.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    pickerDialog.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    pickerDialog.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
+        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    //  blurStyleOption, effectOption...
+    pickerDialog.shadow = Converter::OptConvert<Shadow>(options.shadow);
+    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    if (hoverModeArea) {
+        pickerDialog.hoverModeArea = hoverModeArea.value();
+    }
+    return pickerDialog;
+}
+
+TextPickerDialogEvent BuildTextPickerDialogEvents(const Ark_TextPickerDialogOptions options)
+{
+    TextPickerDialogEvent dialogEvent;
+    auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
+    if (didAppearCallbackOpt) {
+        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidAppear = onDidAppear;
+    }
+    auto didDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidDisappear);
+    if (didDisappearCallbackOpt) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidDisappear = onDidDisappear;
+    }
+    auto willAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillAppear);
+    if (willAppearCallbackOpt) {
+        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillAppear = onWillAppear;
+    }
+    auto willDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillDisappear);
+    if (willDisappearCallbackOpt) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillDisappear = onWillDisappear;
+    }
+    return dialogEvent;
+}
+
+TextPickerInteractiveEvent BuildSelectInteractiveEvents(const Ark_TextPickerDialogOptions arkOptions)
+{
+    TextPickerInteractiveEvent events;
+    // onCancel
+    auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(arkOptions.onCancel);
+    if (cancelCallbackOpt) {
+        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+    }
+    // onAccept
+    auto acceptCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onAccept);
+    if (acceptCallbackOpt) {
+        events.acceptEvent = BuildTextEvent(*acceptCallbackOpt);
+    }
+    // onChange
+    auto changeCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onChange);
+    if (changeCallbackOpt) {
+        events.changeEvent = BuildTextEvent(*changeCallbackOpt);
+    }
+    // onScrollStop
+    auto scrollStopCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onScrollStop);
+    if (scrollStopCallbackOpt) {
+        events.scrollStopEvent = BuildTextEvent(*scrollStopCallbackOpt);
+    }
+    // onEnterSelectedAreaEvent
+    auto enterSelectedAreaCallbackOpt =
+        Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onEnterSelectedArea);
+    if (enterSelectedAreaCallbackOpt) {
+        events.enterSelectedAreaEvent = BuildTextEvent(*enterSelectedAreaCallbackOpt);
+    }
+    return events;
+}
+
+std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions options)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);
+    if (acceptButtonInfo.has_value()) {
+        buttonInfos.push_back(acceptButtonInfo.value());
+    }
+    auto cancelButtonInfo = Converter::OptConvert<ButtonInfo>(options.cancelButtonStyle);
+    if (cancelButtonInfo.has_value()) {
+        buttonInfos.push_back(cancelButtonInfo.value());
+    }
+    return buttonInfos;
+}
+
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -267,35 +306,21 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();
-    DialogProperties dialogProps = BuildDialogProperties(arkOptions);
-    TextPickerSettingData settingData = BuildPickerSettingData(arkOptions);
+
+    TextPickerSettingData settingData = BuildTextPickerSettingData(arkOptions);
+    auto interEvents = BuildSelectInteractiveEvents(arkOptions);
+    auto textPickerDialog = BuildTextPickerDialog(arkOptions, settingData);
+    auto dialogEvents = BuildTextPickerDialogEvents(arkOptions);
     std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(arkOptions);
-
-    std::map<std::string, DialogTextEvent> dialogEvent;
-    auto acceptCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onAccept);
-    if (acceptCallbackOpt) {
-        dialogEvent["acceptId"] = BuildTextEvent(*acceptCallbackOpt);
-    }
-    auto changeCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onChange);
-    if (changeCallbackOpt) {
-        dialogEvent["changeId"] = BuildTextEvent(*changeCallbackOpt);
-    }
-
-    std::map<std::string, DialogGestureEvent> dialogCancelEvent;
-    auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(arkOptions.onCancel);
-    if (cancelCallbackOpt) {
-        auto onCancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)](const GestureEvent& info) -> void {
-            arkCallback.Invoke();
-        };
-        dialogCancelEvent["cancelId"] = onCancelFunc;
-    }
-#ifndef ARKUI_CAPI_UNITTEST
-    TextPickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-#else
-    MockTextPickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-#endif
+    // WARING: don't use, only adapter backend function interface.
+    RefPtr<AceType> pickerText = nullptr;
+    TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
+        std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent), std::move(interEvents.changeEvent),
+        std::move(interEvents.scrollStopEvent), std::move(interEvents.enterSelectedAreaEvent),
+        textPickerDialog, dialogEvents, buttonInfos);
 }
 } // TextPickerDialogAccessor
+
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
@@ -303,5 +328,4 @@ const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
     };
     return &TextPickerDialogAccessorImpl;
 }
-
 }
