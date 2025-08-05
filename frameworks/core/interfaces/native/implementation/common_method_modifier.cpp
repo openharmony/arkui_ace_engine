@@ -1192,11 +1192,11 @@ std::map<AlignDirection, AlignRule> Convert(const Ark_LocalizedAlignRuleOptions&
     std::map<AlignDirection, AlignRule> rulesMap;
     auto rule = OptConvert<AlignRule>(src.start);
     if (rule.has_value()) {
-        rulesMap[AlignDirection::START] = rule.value();
+        rulesMap[AlignDirection::LEFT] = rule.value();
     }
     rule = OptConvert<AlignRule>(src.end);
     if (rule.has_value()) {
-        rulesMap[AlignDirection::END] = rule.value();
+        rulesMap[AlignDirection::RIGHT] = rule.value();
     }
     rule = OptConvert<AlignRule>(src.middle);
     if (rule.has_value()) {
@@ -3614,17 +3614,16 @@ void PositionImpl(Ark_NativePointer node,
             break;
         }
         case CASE_1: {
-#ifdef WRONG_GEN
             auto result = Converter::ConvertOrDefault(optValue->value1, EdgesParam());
             ViewAbstractModelStatic::SetPositionEdges(frameNode, result);
-#endif
             break;
         }
-        case CASE_2:
-            LOGE("ARKOALA: LocalizedEdges is not fully support.");
+        case CASE_2: {
+            auto result = Converter::ConvertOrDefault(optValue->value2, EdgesParam());
             ViewAbstractModelStatic::SetPositionLocalizedEdges(frameNode, true);
+            ViewAbstractModelStatic::SetPositionEdges(frameNode, result);
             break;
-
+        }
         default:
             LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
             return;
@@ -3648,12 +3647,12 @@ void MarkAnchorImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::ResetMarkAnchorStart(frameNode);
 }
+
 void OffsetImpl(Ark_NativePointer node,
                 const Opt_Union_Position_Edges_LocalizedEdges* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef WRONG_GEN
     auto varOpt = Converter::OptConvertPtr<OffsetOrEdgesParam>(value);
     CHECK_NULL_VOID(varOpt);
     if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
@@ -3664,7 +3663,6 @@ void OffsetImpl(Ark_NativePointer node,
     } else {
         LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
     }
-#endif
 }
 void EnabledImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
