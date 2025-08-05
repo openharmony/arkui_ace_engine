@@ -71,9 +71,13 @@ void SheetContentCoverLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layoutWr
     auto inset = context->GetSafeAreaWithoutProcess();
     NG::CalcLength safeAreaPaddingTop(inset.top_.Length());
     NG::CalcLength safeAreaPaddingBottom(inset.bottom_.Length());
+    NG::CalcLength safeAreaPaddingLeft(inset.left_.Length());
+    NG::CalcLength safeAreaPaddingRight(inset.right_.Length());
     PaddingProperty safeAreaPadding;
     safeAreaPadding.top = safeAreaPaddingTop;
     safeAreaPadding.bottom = safeAreaPaddingBottom;
+    safeAreaPadding.left = safeAreaPaddingLeft;
+    safeAreaPadding.right = safeAreaPaddingRight;
     scrollLayoutProperty->UpdateSafeAreaPadding(safeAreaPadding);
 
     scrollWrapper->Measure(constraint);
