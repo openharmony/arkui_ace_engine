@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT IndexerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(IndexerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(IndexerComposedElement, InspectorComposedElement);
 
 public:
     explicit IndexerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

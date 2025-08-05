@@ -116,7 +116,7 @@ ArkUINativeModuleValue GridRowBridge::SetBreakpoints(ArkUIRuntimeCallInfo* runti
     int32_t size = 0;
     if (!secondArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getGridRowModifier()->setBreakpoints(
-            nativeNode, reference, pointValues.data(), pointStr.data(), -1);
+            nativeNode, reference, pointValues.data(), pointStr.data(), size);
         return panda::JSValueRef::Undefined(vm);
     }
     auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);

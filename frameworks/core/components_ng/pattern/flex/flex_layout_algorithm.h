@@ -117,8 +117,8 @@ private:
     void FinalMeasureInWeightMode();
     void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
     void SecondMeasureInGrowOrShrink();
-    void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
-        FlexItemProperties& flexItemProperties);
+    void PopOutOfDispayMagicNodesInPriorityMode(
+        const std::list<MagicLayoutNode>& childList, FlexItemProperties& flexItemProperties);
     void CalcMainExpand(
         const ExpandEdges& mainExpand, ExpandEdges& sae, bool isHorizontal, bool isExpandConstraintNeeded);
     bool CheckReCalcMainExpand(const FlexAlign& crossAlign);

@@ -260,7 +260,7 @@ void CustomNode::DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo)
         DumpLog::GetInstance().AddDesc("decorator:" + decoratorItem->GetValue("decorator")->ToString() + \
                                        " propertyName:" + decoratorItem->GetValue("propertyName")->ToString() + \
                                        " value:" + decoratorItem->GetValue("value")->ToString());
-        DumpLog::GetInstance().AddDesc("stateVariable id: " + decoratorItem->GetValue("id")->ToString());
+        DumpLog::GetInstance().AddDesc("state Variable id: " + decoratorItem->GetValue("id")->ToString());
         DumpLog::GetInstance().AddDesc("inRenderingElementId: " + \
                                         decoratorItem->GetValue("inRenderingElementId")->ToString());
         DumpLog::GetInstance().AddDesc("dependentElementIds: " + \
