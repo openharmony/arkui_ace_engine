@@ -32768,8 +32768,7 @@ void impl_UIContext_setDynamicDimming(Ark_NativePointer thisPtr, const KStringPt
         GetAccessors()->getUIContextAccessor()->setDynamicDimming(self, (const Ark_String*) (&id), (const Ark_Number*) (&value));
 }
 KOALA_INTEROP_V3(UIContext_setDynamicDimming, Ark_NativePointer, KStringPtr, KInteropNumber)
-void impl_UIContext_openBindSheet(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer bindSheetContent, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
+void impl_UIContext_openBindSheet(KVMContext vmContext, Ark_NativePointer bindSheetContent, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto sheetOptions_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_SheetOptions sheetOptions_value_buf = {};
@@ -32787,13 +32786,20 @@ void impl_UIContext_openBindSheet(KVMContext vmContext, Ark_NativePointer thisPt
             targetId_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
         }
         Opt_Number targetId_value = targetId_value_buf;;
-        GetAccessors()->getUIContextAccessor()->openBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_ComponentContent>(bindSheetContent), (const Opt_SheetOptions*)&sheetOptions_value, (const Opt_Number*)&targetId_value);
+        GetAccessors()->getUIContextAccessor()->openBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), bindSheetContent, (const Opt_SheetOptions*)&sheetOptions_value, (const Opt_Number*)&targetId_value);
 }
-KOALA_INTEROP_CTX_V4(UIContext_openBindSheet, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_UIContext_updateBindSheet(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer bindSheetContent, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
+KOALA_INTEROP_CTX_V3(UIContext_openBindSheet, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIContext_updateBindSheet(KVMContext vmContext, Ark_NativePointer bindSheetContent, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_SheetOptions sheetOptions_value = thisDeserializer.readSheetOptions();;
+        const auto sheetOptions_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SheetOptions sheetOptions_value_buf = {};
+        sheetOptions_value_buf.tag = sheetOptions_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (sheetOptions_value_buf_runtimeType))
+        {
+            sheetOptions_value_buf.value = thisDeserializer.readSheetOptions();
+        }
+        Opt_SheetOptions sheetOptions_value = sheetOptions_value_buf;;
+
         const auto partialUpdate_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Boolean partialUpdate_value_buf = {};
         partialUpdate_value_buf.tag = partialUpdate_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -32802,14 +32808,13 @@ void impl_UIContext_updateBindSheet(KVMContext vmContext, Ark_NativePointer this
             partialUpdate_value_buf.value = thisDeserializer.readBoolean();
         }
         Opt_Boolean partialUpdate_value = partialUpdate_value_buf;;
-        GetAccessors()->getUIContextAccessor()->updateBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_ComponentContent>(bindSheetContent), (const Ark_SheetOptions*)&sheetOptions_value, (const Opt_Boolean*)&partialUpdate_value);
+        GetAccessors()->getUIContextAccessor()->updateBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), bindSheetContent, (const Opt_SheetOptions*)&sheetOptions_value, (const Opt_Boolean*)&partialUpdate_value);
 }
-KOALA_INTEROP_CTX_V4(UIContext_updateBindSheet, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_UIContext_closeBindSheet(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer bindSheetContent) {
-        Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
-        GetAccessors()->getUIContextAccessor()->closeBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_ComponentContent>(bindSheetContent));
+KOALA_INTEROP_CTX_V3(UIContext_updateBindSheet, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIContext_closeBindSheet(KVMContext vmContext, Ark_NativePointer bindSheetContent) {
+        GetAccessors()->getUIContextAccessor()->closeBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), bindSheetContent);
 }
-KOALA_INTEROP_CTX_V2(UIContext_closeBindSheet, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_CTX_V1(UIContext_closeBindSheet, Ark_NativePointer)
 void impl_PromptAction_openPopup(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

@@ -24657,18 +24657,15 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                               const Ark_String* id,
                               const Ark_Number* value);
     void (*openBindSheet)(Ark_VMContext vmContext,
-                          Ark_UIContext peer,
-                          Ark_ComponentContent bindSheetContent,
+                          Ark_NativePointer bindSheetContent,
                           const Opt_SheetOptions* sheetOptions,
                           const Opt_Number* targetId);
     void (*updateBindSheet)(Ark_VMContext vmContext,
-                            Ark_UIContext peer,
-                            Ark_ComponentContent bindSheetContent,
-                            const Ark_SheetOptions* sheetOptions,
+                            Ark_NativePointer bindSheetContent,
+                            const Opt_SheetOptions* sheetOptions,
                             const Opt_Boolean* partialUpdate);
     void (*closeBindSheet)(Ark_VMContext vmContext,
-                           Ark_UIContext peer,
-                           Ark_ComponentContent bindSheetContent);
+                           Ark_NativePointer bindSheetContent);
     void (*clearResourceCache)(Ark_VMContext vmContext,
                                Ark_UIContext peer);
     Ark_Boolean (*isFollowingSystemFontScale)(Ark_UIContext peer);

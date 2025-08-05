@@ -46,7 +46,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback, SheetOptions } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 import { ComputableState, IncrementalNode } from '@koalaui/runtime'
@@ -623,6 +623,18 @@ export class UIContext {
 
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
+    }
+
+    public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {
+        throw Error("openBindSheet not implemented in UIContext!")
+    }
+
+    public updateBindSheet(content: ComponentContent, options?: SheetOptions, partialUpdate?: boolean) : Promise<void> {
+        throw Error("updateBindSheet not implemented in UIContext!")
+    }
+
+    public closeBindSheet(content: ComponentContent) : Promise<void> {
+        throw Error("closeBindSheet not implemented in UIContext!")
     }
     
     public getFilteredInspectorTree(filters?: Array<string>): string {
