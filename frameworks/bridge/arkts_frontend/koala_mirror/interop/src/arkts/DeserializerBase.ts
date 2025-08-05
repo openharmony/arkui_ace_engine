@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float32, int32, int64, float32FromBits, uint8 } from "@koalaui/common"
+import { float32, int32, int64 } from "@koalaui/common"
 import { pointer, KUint8ArrayPtr, KSerializerBuffer, nullptr } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
@@ -21,7 +21,7 @@ import { Tags, CallbackResource } from "./SerializerBase";
 import { ResourceHolder, Disposable } from "./ResourceManager"
 
 export class DeserializerBase implements Disposable {
-    private position : int64 = 0
+    private _position : int64 = 0
     private _buffer: KSerializerBuffer
     private readonly _isOwnBuffer: boolean;
     private readonly _length: int32
@@ -45,7 +45,7 @@ export class DeserializerBase implements Disposable {
             const newBuffer = InteropNativeModule._Malloc(length)
             this._isOwnBuffer = true
             for (let i = 0; i < length; i++) {
-                unsafeMemory.writeInt8(newBuffer + i, buffer[i] as byte)
+                unsafeMemory.writeInt8(newBuffer + i, buffer[i].toByte())
             }
             this._buffer = newBuffer
         } else {
@@ -54,7 +54,7 @@ export class DeserializerBase implements Disposable {
 
         const newBuffer =  this._buffer;
         this._length = length
-        this.position = newBuffer
+        this._position = newBuffer
         this._end = newBuffer + length;
     }
 
@@ -62,7 +62,7 @@ export class DeserializerBase implements Disposable {
         if (this._isOwnBuffer) {
             InteropNativeModule._Free(this._buffer)
             this._buffer = 0
-            this.position = 0
+            this._position = 0
         }
     }
 
@@ -70,60 +70,64 @@ export class DeserializerBase implements Disposable {
         return this._buffer
     }
 
+    final currentPosition(): int64 {
+        return this._position
+    }
+
     final resetCurrentPosition(): void {
-        this.position = this._buffer
+        this._position = this._buffer
     }
 
     final readInt8(): int32 {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 1
 
         if (newPos > this._end) {
             throw new Error(`value size(1) is less than remaining buffer length`)
         }
 
-        this.position = newPos
+        this._position = newPos
         return unsafeMemory.readInt8(pos)
     }
 
     final readInt32(): int32 {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 4
 
         if (newPos > this._end) {
             throw new Error(`value size(4) is less than remaining buffer length`)
         }
 
-        this.position = newPos
+        this._position = newPos
         return unsafeMemory.readInt32(pos)
     }
 
     final readPointer(): pointer {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 8
 
         if (newPos > this._end) {
             throw new Error(`value size(8) is less than remaining buffer length`)
         }
 
-        this.position = newPos
+        this._position = newPos
         return unsafeMemory.readInt64(pos)
     }
 
     final readInt64(): int64 {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 8
 
         if (newPos > this._end) {
             throw new Error(`value size(8) is less than remaining buffer length`)
         }
 
-        this.position = newPos
+        this._position = newPos
         return unsafeMemory.readInt64(pos)
     }
 
     final readFloat32(): float32 {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 4
 
         if (newPos > this._end) {
@@ -131,12 +135,12 @@ export class DeserializerBase implements Disposable {
         }
 
 
-        this.position = newPos
+        this._position = newPos
         return unsafeMemory.readFloat32(pos)
     }
 
     final readFloat64(): double {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 8
 
         if (newPos > this._end) {
@@ -144,12 +148,12 @@ export class DeserializerBase implements Disposable {
         }
 
 
-        this.position = newPos
+        this._position = newPos
         return unsafeMemory.readFloat64(pos)
     }
 
     final readBoolean(): boolean {
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + 1
 
         if (newPos > this._end) {
@@ -157,37 +161,32 @@ export class DeserializerBase implements Disposable {
         }
 
 
-        this.position = newPos
+        this._position = newPos
         const value = unsafeMemory.readInt8(pos);
-        if (value == 5)
+        if (value == Tags.UNDEFINED)
             return false;
 
         return value == 1
     }
 
-    final readFunction(): int32 {
-        // Improve: not exactly correct.
-        return this.readInt32()
-    }
-
     final readCallbackResource(): CallbackResource {
-        return ({
+        return {
             resourceId: this.readInt32(),
             hold: this.readPointer(),
             release: this.readPointer(),
-        } as CallbackResource)
+        }
     }
 
     final readString(): string {
         const encodedLength = this.readInt32();
-        const pos = this.position
+        const pos = this._position
         const newPos = pos + encodedLength
 
         if (newPos > this._end) {
             throw new Error(`value size(${encodedLength}) is less than remaining buffer length`)
         }
 
-        this.position = newPos
+        this._position = newPos
         // NOTE: skip null-terminated byte
         return unsafeMemory.readString(pos, encodedLength - 1)
     }
@@ -206,14 +205,14 @@ export class DeserializerBase implements Disposable {
     }
 
     final readNumber(): number | undefined {
-        const pos = this.position
-        const tag = this.readInt8() as int
+        const pos = this._position
+        const tag = this.readInt8().toInt()
         switch (tag) {
-            case Tags.UNDEFINED as int:
+            case Tags.UNDEFINED.valueOf():
                 return undefined;
-            case Tags.INT32  as int:
+            case Tags.INT32.valueOf():
                 return this.readInt32()
-            case Tags.FLOAT32  as int:
+            case Tags.FLOAT32.valueOf():
                 return this.readFloat32()
             default:
                 throw new Error(`Unknown number tag: ${tag}`)

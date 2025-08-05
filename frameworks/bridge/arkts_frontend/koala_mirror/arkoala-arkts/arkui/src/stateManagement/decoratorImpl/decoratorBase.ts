@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { WatchFunc } from './decoratorWatch';
-import { IDecoratedV1Variable } from '../decorator';
+import { IDecoratedV1Variable, IDecoratedV2Variable } from '../decorator';
 import { WatchFuncType, ISubscribedWatches, WatchIdType } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { OBSERVE } from '../decorator';
@@ -191,5 +191,14 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
         };
         watchThis.setFunc(watchFunc);
         this._watchFuncs.set(watchThis.id(), watchThis);
+    }
+}
+
+export abstract class DecoratedV2VariableBase extends DecoratedVariableBase implements IDecoratedV2Variable {
+    constructor(decorator: string, owningComponent: ExtendableComponent | null, varName: string) {
+        super(decorator, owningComponent, varName);
+    }
+    public info(): string {
+        return this.varName;
     }
 }

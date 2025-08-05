@@ -17,10 +17,6 @@ import { BlockStatement, Statement } from "../../generated"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 
-export function createBlockStatement(statements: readonly Statement[]): BlockStatement {
-    return BlockStatement.createBlockStatement(statements)
-}
-
 export function updateBlockStatement(original: BlockStatement, statements: readonly Statement[]): BlockStatement {
     if (isSameNativeObject(statements, original.statements)) {
         return original

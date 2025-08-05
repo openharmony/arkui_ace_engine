@@ -55,6 +55,10 @@ export class PeerNode extends IncrementalNode {
         return this.id
     }
 
+    setUserId(id: string) {
+        PeerNode.peerNodeUserIdMap.set(id, this)
+    }
+
     onReuse(): void {
         if (!this._reusable) {
             return
@@ -109,6 +113,7 @@ export class PeerNode extends IncrementalNode {
     }
 
     private static peerNodeMap = new Map<number, PeerNode>()
+    private static peerNodeUserIdMap = new Map<string, PeerNode>()
 
     // peerNodeRawTail needs for perf optimizations. Insert into array much faster
     private static peerNodeRawTail = new Array<PeerNode>()
@@ -124,6 +129,9 @@ export class PeerNode extends IncrementalNode {
         PeerNode.peerNodeRawTail = []
     }
 
+    static findPeerByUserId(id: string): PeerNode | undefined {
+        return PeerNode.peerNodeUserIdMap.get(id)
+    }
     static findPeerByNativeId(id: number): PeerNode | undefined {
         PeerNode.updatePeerNodeMap()
         return PeerNode.peerNodeMap.get(id)
@@ -169,7 +177,7 @@ export class PeerNode extends IncrementalNode {
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
-            if (child.isKind(PeerNodeType) && !child.disposed) {
+            if (child.isKind(PeerNodeType) && !child.disposing && !child.disposed) {
                 const peer = child as PeerNode
                 peer.onRecycle()
                 this.peer.removeChild(peer.peer.ptr)
@@ -185,7 +193,9 @@ export class PeerNode extends IncrementalNode {
         let parent = this.parent
         if (parent != undefined && parent.isKind(PeerNodeType)) {
             const node = parent as PeerNode
-            if (!node.disposed) node.peer.removeChild(this.peer.ptr)
+            if (!node.disposing && !node.disposed) {
+                node.peer.removeChild(this.peer.ptr)
+            }
         }
         this.peer.close()
         PeerNode.updatePeerNodeMap()

@@ -16,9 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, KInt, KBoolean, KStringPtr, wrapCallback } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -26,79 +25,79 @@ import { ComponentBuilder } from "@koalaui/builderLambda"
 export class common2D_Color_serializer {
     public static write(buffer: SerializerBase, value: common2D.Color): void {
         let valueSerializer : SerializerBase = buffer
-        const value_alpha  = value.alpha
-        valueSerializer.writeNumber(value_alpha)
-        const value_red  = value.red
-        valueSerializer.writeNumber(value_red)
-        const value_green  = value.green
-        valueSerializer.writeNumber(value_green)
-        const value_blue  = value.blue
-        valueSerializer.writeNumber(value_blue)
+        const valueHolderForAlpha  = value.alpha
+        valueSerializer.writeNumber(valueHolderForAlpha)
+        const valueHolderForRed  = value.red
+        valueSerializer.writeNumber(valueHolderForRed)
+        const valueHolderForGreen  = value.green
+        valueSerializer.writeNumber(valueHolderForGreen)
+        const valueHolderForBlue  = value.blue
+        valueSerializer.writeNumber(valueHolderForBlue)
     }
     public static read(buffer: DeserializerBase): common2D.Color {
         let valueDeserializer : DeserializerBase = buffer
-        const alpha_result : number = (valueDeserializer.readNumber() as number)
-        const red_result : number = (valueDeserializer.readNumber() as number)
-        const green_result : number = (valueDeserializer.readNumber() as number)
-        const blue_result : number = (valueDeserializer.readNumber() as number)
-        let value : common2D.Color = ({alpha: alpha_result, red: red_result, green: green_result, blue: blue_result} as common2D.Color)
+        const alphaTmpResult : number = (valueDeserializer.readNumber() as number)
+        const redTmpResult : number = (valueDeserializer.readNumber() as number)
+        const greenTmpResult : number = (valueDeserializer.readNumber() as number)
+        const blueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : common2D.Color = ({alpha: alphaTmpResult, red: redTmpResult, green: greenTmpResult, blue: blueTmpResult} as common2D.Color)
         return value
     }
 }
 export class common2D_Point_serializer {
     public static write(buffer: SerializerBase, value: common2D.Point): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): common2D.Point {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : common2D.Point = ({x: x_result, y: y_result} as common2D.Point)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : common2D.Point = ({x: xTmpResult, y: yTmpResult} as common2D.Point)
         return value
     }
 }
 export class common2D_Point3d_serializer {
     public static write(buffer: SerializerBase, value: common2D.Point3d): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
-        const value_z  = value.z
-        valueSerializer.writeNumber(value_z)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
     }
     public static read(buffer: DeserializerBase): common2D.Point3d {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        const z_result : number = (valueDeserializer.readNumber() as number)
-        let value : common2D.Point3d = ({x: x_result, y: y_result, z: z_result} as common2D.Point3d)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : common2D.Point3d = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as common2D.Point3d)
         return value
     }
 }
 export class common2D_Rect_serializer {
     public static write(buffer: SerializerBase, value: common2D.Rect): void {
         let valueSerializer : SerializerBase = buffer
-        const value_left  = value.left
-        valueSerializer.writeNumber(value_left)
-        const value_top  = value.top
-        valueSerializer.writeNumber(value_top)
-        const value_right  = value.right
-        valueSerializer.writeNumber(value_right)
-        const value_bottom  = value.bottom
-        valueSerializer.writeNumber(value_bottom)
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeNumber(valueHolderForLeft)
+        const valueHolderForTop  = value.top
+        valueSerializer.writeNumber(valueHolderForTop)
+        const valueHolderForRight  = value.right
+        valueSerializer.writeNumber(valueHolderForRight)
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeNumber(valueHolderForBottom)
     }
     public static read(buffer: DeserializerBase): common2D.Rect {
         let valueDeserializer : DeserializerBase = buffer
-        const left_result : number = (valueDeserializer.readNumber() as number)
-        const top_result : number = (valueDeserializer.readNumber() as number)
-        const right_result : number = (valueDeserializer.readNumber() as number)
-        const bottom_result : number = (valueDeserializer.readNumber() as number)
-        let value : common2D.Rect = ({left: left_result, top: top_result, right: right_result, bottom: bottom_result} as common2D.Rect)
+        const leftTmpResult : number = (valueDeserializer.readNumber() as number)
+        const topTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const bottomTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : common2D.Rect = ({left: leftTmpResult, top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult} as common2D.Rect)
         return value
     }
 }
@@ -119,7 +118,7 @@ export namespace common2D {
         x: number;
         y: number;
     }
-    export interface Point3d extends Point {
+    export interface Point3d extends common2D.Point {
         z: number;
     }
 }

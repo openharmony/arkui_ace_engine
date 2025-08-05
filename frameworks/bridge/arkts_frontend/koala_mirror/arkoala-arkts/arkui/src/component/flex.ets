@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -30,6 +30,7 @@ import { ComponentBuilder } from "@koalaui/builderLambda"
 import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from "./enums"
 import { LengthMetrics, LengthMetrics_serializer } from "./../generated/arkui.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkFlexPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -37,30 +38,30 @@ export class ArkFlexPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFlexPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Flex_construct(peerId, flags)
-        const _peer  = new ArkFlexPeer(_peerPtr, peerId, "Flex", flags)
+        const _peer  = new ArkFlexPeer(_peerPtr, peerId, 'Flex', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setFlexOptionsAttribute(value?: FlexOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            FlexOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            FlexOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._FlexInterface_setFlexOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPointLightAttribute(value: PointLightStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PointLightStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PointLightStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._FlexAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -95,11 +96,6 @@ export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute 
     public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: FlexAttribute): void {
-        super.apply(target)
-        if (this.pointLight_value !== undefined)
-            target.pointLight(this.pointLight_value!)
-    }
 }
 
 export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAttribute {
@@ -123,7 +119,6 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
         return this
     }
     public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -131,26 +126,6 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
         super.applyAttributesFinish()
     }
 }
-export function withFlexStyle(receiver: FlexAttribute, modifier: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkFlexStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Flex")
-// export function Flex(
-//     value?: FlexOptions,
-//     @memo
-//     content_?: () => void,
-// ): FlexAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Flex(
@@ -166,26 +141,64 @@ export function Flex(
     NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (_: ArkFlexPeer): void => {
         receiver.setFlexOptions(value)
         style?.(receiver)
-        withFlexStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkFlexSet extends ArkCommonMethodSet implements FlexAttribute {
+export class FlexModifier extends CommonMethodModifier implements FlexAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _pointLight_flag?: boolean
-    _pointLight0_value?: PointLightStyle | undefined
-    applyModifierPatch(component: FlexAttribute): void {
-        if (this._pointLight_flag)
-            component.pointLight((this._pointLight0_value as PointLightStyle | undefined))
+    _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pointLight_0_0value?: PointLightStyle | undefined
+    applyModifierPatch(peer: ArkFlexPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pointLight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPointLightAttribute((this._pointLight_0_0value as PointLightStyle | undefined));
+                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pointLight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPointLightAttribute((undefined as PointLightStyle | undefined));
+                }
+            }
+        }
     }
-    public pointLight(value: PointLightStyle | undefined): this {
-        this._pointLight_flag = true
-        this._pointLight0_value = value
+    mergeModifier(modifier: FlexModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pointLight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pointLight(modifier._pointLight_0_0value);
+                    break;
+                }
+                default: {
+                    this.pointLight((undefined as PointLightStyle | undefined));
+                }
+            }
+        }
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        if (((this._pointLight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pointLight_0_0value = value
+        } else
+        {
+            this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -195,140 +208,132 @@ export class ArkFlexSet extends ArkCommonMethodSet implements FlexAttribute {
 export class FlexSpaceOptions_serializer {
     public static write(buffer: SerializerBase, value: FlexSpaceOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_main  = value.main
-        let value_main_type : int32 = RuntimeType.UNDEFINED
-        value_main_type = runtimeType(value_main)
-        valueSerializer.writeInt8((value_main_type).toChar())
-        if ((value_main_type) != (RuntimeType.UNDEFINED)) {
-            const value_main_value  = value_main!
-            LengthMetrics_serializer.write(valueSerializer, value_main_value)
+        const valueHolderForMain  = value.main
+        if (valueHolderForMain !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMainTmpValue  = valueHolderForMain!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForMainTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_cross  = value.cross
-        let value_cross_type : int32 = RuntimeType.UNDEFINED
-        value_cross_type = runtimeType(value_cross)
-        valueSerializer.writeInt8((value_cross_type).toChar())
-        if ((value_cross_type) != (RuntimeType.UNDEFINED)) {
-            const value_cross_value  = value_cross!
-            LengthMetrics_serializer.write(valueSerializer, value_cross_value)
+        const valueHolderForCross  = value.cross
+        if (valueHolderForCross !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCrossTmpValue  = valueHolderForCross!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForCrossTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FlexSpaceOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const main_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let main_buf : LengthMetrics | undefined
-        if ((main_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            main_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const mainTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mainTmpBuf : LengthMetrics | undefined
+        if ((mainTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            mainTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const main_result : LengthMetrics | undefined = main_buf
-        const cross_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let cross_buf : LengthMetrics | undefined
-        if ((cross_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            cross_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const mainTmpResult : LengthMetrics | undefined = mainTmpBuf
+        const crossTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let crossTmpBuf : LengthMetrics | undefined
+        if ((crossTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            crossTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const cross_result : LengthMetrics | undefined = cross_buf
-        let value : FlexSpaceOptions = ({main: main_result, cross: cross_result} as FlexSpaceOptions)
+        const crossTmpResult : LengthMetrics | undefined = crossTmpBuf
+        let value : FlexSpaceOptions = ({main: mainTmpResult, cross: crossTmpResult} as FlexSpaceOptions)
         return value
     }
 }
 export class FlexOptions_serializer {
     public static write(buffer: SerializerBase, value: FlexOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_direction  = value.direction
-        let value_direction_type : int32 = RuntimeType.UNDEFINED
-        value_direction_type = runtimeType(value_direction)
-        valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
-            const value_direction_value  = (value_direction as FlexDirection)
-            valueSerializer.writeInt32(TypeChecker.FlexDirection_ToNumeric(value_direction_value))
+        const valueHolderForDirection  = value.direction
+        if (valueHolderForDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as FlexDirection)
+            valueSerializer.writeInt32(TypeChecker.FlexDirection_ToNumeric(valueHolderForDirectionTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_wrap  = value.wrap
-        let value_wrap_type : int32 = RuntimeType.UNDEFINED
-        value_wrap_type = runtimeType(value_wrap)
-        valueSerializer.writeInt8((value_wrap_type).toChar())
-        if ((value_wrap_type) != (RuntimeType.UNDEFINED)) {
-            const value_wrap_value  = (value_wrap as FlexWrap)
-            valueSerializer.writeInt32(TypeChecker.FlexWrap_ToNumeric(value_wrap_value))
+        const valueHolderForWrap  = value.wrap
+        if (valueHolderForWrap !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWrapTmpValue  = (valueHolderForWrap as FlexWrap)
+            valueSerializer.writeInt32(TypeChecker.FlexWrap_ToNumeric(valueHolderForWrapTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_justifyContent  = value.justifyContent
-        let value_justifyContent_type : int32 = RuntimeType.UNDEFINED
-        value_justifyContent_type = runtimeType(value_justifyContent)
-        valueSerializer.writeInt8((value_justifyContent_type).toChar())
-        if ((value_justifyContent_type) != (RuntimeType.UNDEFINED)) {
-            const value_justifyContent_value  = (value_justifyContent as FlexAlign)
-            valueSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(value_justifyContent_value))
+        const valueHolderForJustifyContent  = value.justifyContent
+        if (valueHolderForJustifyContent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForJustifyContentTmpValue  = (valueHolderForJustifyContent as FlexAlign)
+            valueSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(valueHolderForJustifyContentTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_alignItems  = value.alignItems
-        let value_alignItems_type : int32 = RuntimeType.UNDEFINED
-        value_alignItems_type = runtimeType(value_alignItems)
-        valueSerializer.writeInt8((value_alignItems_type).toChar())
-        if ((value_alignItems_type) != (RuntimeType.UNDEFINED)) {
-            const value_alignItems_value  = (value_alignItems as ItemAlign)
-            valueSerializer.writeInt32(TypeChecker.ItemAlign_ToNumeric(value_alignItems_value))
+        const valueHolderForAlignItems  = value.alignItems
+        if (valueHolderForAlignItems !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAlignItemsTmpValue  = (valueHolderForAlignItems as ItemAlign)
+            valueSerializer.writeInt32(TypeChecker.ItemAlign_ToNumeric(valueHolderForAlignItemsTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_alignContent  = value.alignContent
-        let value_alignContent_type : int32 = RuntimeType.UNDEFINED
-        value_alignContent_type = runtimeType(value_alignContent)
-        valueSerializer.writeInt8((value_alignContent_type).toChar())
-        if ((value_alignContent_type) != (RuntimeType.UNDEFINED)) {
-            const value_alignContent_value  = (value_alignContent as FlexAlign)
-            valueSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(value_alignContent_value))
+        const valueHolderForAlignContent  = value.alignContent
+        if (valueHolderForAlignContent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAlignContentTmpValue  = (valueHolderForAlignContent as FlexAlign)
+            valueSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(valueHolderForAlignContentTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_space  = value.space
-        let value_space_type : int32 = RuntimeType.UNDEFINED
-        value_space_type = runtimeType(value_space)
-        valueSerializer.writeInt8((value_space_type).toChar())
-        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
-            const value_space_value  = value_space!
-            FlexSpaceOptions_serializer.write(valueSerializer, value_space_value)
+        const valueHolderForSpace  = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue  = valueHolderForSpace!
+            FlexSpaceOptions_serializer.write(valueSerializer, valueHolderForSpaceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FlexOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let direction_buf : FlexDirection | undefined
-        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            direction_buf = TypeChecker.FlexDirection_FromNumeric(valueDeserializer.readInt32())
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let directionTmpBuf : FlexDirection | undefined
+        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            directionTmpBuf = TypeChecker.FlexDirection_FromNumeric(valueDeserializer.readInt32())
         }
-        const direction_result : FlexDirection | undefined = direction_buf
-        const wrap_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let wrap_buf : FlexWrap | undefined
-        if ((wrap_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            wrap_buf = TypeChecker.FlexWrap_FromNumeric(valueDeserializer.readInt32())
+        const directionTmpResult : FlexDirection | undefined = directionTmpBuf
+        const wrapTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let wrapTmpBuf : FlexWrap | undefined
+        if ((wrapTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            wrapTmpBuf = TypeChecker.FlexWrap_FromNumeric(valueDeserializer.readInt32())
         }
-        const wrap_result : FlexWrap | undefined = wrap_buf
-        const justifyContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let justifyContent_buf : FlexAlign | undefined
-        if ((justifyContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            justifyContent_buf = TypeChecker.FlexAlign_FromNumeric(valueDeserializer.readInt32())
+        const wrapTmpResult : FlexWrap | undefined = wrapTmpBuf
+        const justifyContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let justifyContentTmpBuf : FlexAlign | undefined
+        if ((justifyContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            justifyContentTmpBuf = TypeChecker.FlexAlign_FromNumeric(valueDeserializer.readInt32())
         }
-        const justifyContent_result : FlexAlign | undefined = justifyContent_buf
-        const alignItems_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let alignItems_buf : ItemAlign | undefined
-        if ((alignItems_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            alignItems_buf = TypeChecker.ItemAlign_FromNumeric(valueDeserializer.readInt32())
+        const justifyContentTmpResult : FlexAlign | undefined = justifyContentTmpBuf
+        const alignItemsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let alignItemsTmpBuf : ItemAlign | undefined
+        if ((alignItemsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            alignItemsTmpBuf = TypeChecker.ItemAlign_FromNumeric(valueDeserializer.readInt32())
         }
-        const alignItems_result : ItemAlign | undefined = alignItems_buf
-        const alignContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let alignContent_buf : FlexAlign | undefined
-        if ((alignContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            alignContent_buf = TypeChecker.FlexAlign_FromNumeric(valueDeserializer.readInt32())
+        const alignItemsTmpResult : ItemAlign | undefined = alignItemsTmpBuf
+        const alignContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let alignContentTmpBuf : FlexAlign | undefined
+        if ((alignContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            alignContentTmpBuf = TypeChecker.FlexAlign_FromNumeric(valueDeserializer.readInt32())
         }
-        const alignContent_result : FlexAlign | undefined = alignContent_buf
-        const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let space_buf : FlexSpaceOptions | undefined
-        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            space_buf = FlexSpaceOptions_serializer.read(valueDeserializer)
+        const alignContentTmpResult : FlexAlign | undefined = alignContentTmpBuf
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spaceTmpBuf : FlexSpaceOptions | undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spaceTmpBuf = FlexSpaceOptions_serializer.read(valueDeserializer)
         }
-        const space_result : FlexSpaceOptions | undefined = space_buf
-        let value : FlexOptions = ({direction: direction_result, wrap: wrap_result, justifyContent: justifyContent_result, alignItems: alignItems_result, alignContent: alignContent_result, space: space_result} as FlexOptions)
+        const spaceTmpResult : FlexSpaceOptions | undefined = spaceTmpBuf
+        let value : FlexOptions = ({direction: directionTmpResult, wrap: wrapTmpResult, justifyContent: justifyContentTmpResult, alignItems: alignItemsTmpResult, alignContent: alignContentTmpResult, space: spaceTmpResult} as FlexOptions)
         return value
     }
 }

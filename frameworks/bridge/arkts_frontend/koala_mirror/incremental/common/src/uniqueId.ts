@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/compat"
+import { float64toInt32, int32 } from "@koalaui/compat"
 import { createSha1 } from "./sha1";
 
 export class UniqueId {
@@ -53,7 +53,7 @@ export class UniqueId {
         if (data instanceof Uint32Array) {
             return this.addU32Array(data)
         }
-        return this.addI32(data as int32)
+        return this.addI32(float64toInt32(data))
     }
 
     public compute(): string {

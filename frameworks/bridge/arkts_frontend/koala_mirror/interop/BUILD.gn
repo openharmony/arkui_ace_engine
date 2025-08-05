@@ -36,7 +36,7 @@ npm_cmd("interop.abc") {
         "$target_out_dir/interop.abc"
     ]
     project_path = rebase_path(".")
-    run_tasks = [ "build:interop" ]
+    run_tasks = [ "build" ]
 
     deps = [
         "$koala_root/ui2abc:ui2abc"
@@ -50,6 +50,6 @@ npm_cmd("interop.abc") {
 
 group("interop") {
     deps = [
-        "$interop_root:interop.abc"
+      "$interop_root:interop.abc"
     ]
 }

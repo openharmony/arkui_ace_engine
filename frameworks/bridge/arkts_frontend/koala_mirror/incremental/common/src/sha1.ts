@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import { CustomTextDecoder } from "@koalaui/compat"
+import { CustomTextDecoder, float64toInt32 } from "@koalaui/compat"
 import { int32 } from "@koalaui/compat"
 
 const K = [
-    (0x5a827999 | 0) as int32,
-    (0x6ed9eba1 | 0) as int32,
-    (0x8f1bbcdc | 0) as int32,
-    (0xca62c1d6 | 0) as int32,
+    0x5a827999 | 0,
+    0x6ed9eba1 | 0,
+    0x8f1bbcdc | 0,
+    0xca62c1d6 | 0,
 ]
 
 const inputBytes = 64
@@ -37,11 +37,11 @@ export function createSha1(): SHA1Hash {
 }
 
 export class SHA1Hash {
-    private A = (0x67452301 | 0) as int32
-    private B = (0xefcdab89 | 0) as int32
-    private C = (0x98badcfe | 0) as int32
-    private D = (0x10325476 | 0) as int32
-    private E = (0xc3d2e1f0 | 0) as int32
+    private A = 0x67452301 | 0
+    private B = 0xefcdab89 | 0
+    private C = 0x98badcfe | 0
+    private D = 0x10325476 | 0
+    private E = 0xc3d2e1f0 | 0
     private readonly _byte: Uint8Array
     private readonly _word: Int32Array
     private _size = 0
@@ -80,25 +80,25 @@ export class SHA1Hash {
         // es2panda to segfault.
         let BYTES_PER_ELEMENT = 4
         if (data instanceof Int32Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = float64toInt32(data.byteOffset)
+            length = float64toInt32(data.byteLength)
             buffer = data.buffer
         } else if (data instanceof Uint32Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = float64toInt32(data.byteOffset)
+            length = float64toInt32(data.byteLength)
             buffer = data.buffer
         } else if (data instanceof Float32Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = float64toInt32(data.byteOffset)
+            length = float64toInt32(data.byteLength)
             buffer = data.buffer
         } else if (data instanceof Uint8Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = float64toInt32(data.byteOffset)
+            length = float64toInt32(data.byteLength)
             buffer = data.buffer
             BYTES_PER_ELEMENT = 1
         }
 
-        let blocks: int32 = ((length / inputBytes) | 0) as int32
+        let blocks: int32 = (length / inputBytes) | 0
         let offset: int32 = 0
 
         // longer than 1 block
@@ -127,7 +127,7 @@ export class SHA1Hash {
         const _byte = this._byte
         const _word = this._word
         const length = data.length
-        offset = ((offset ?? 0) | 0) as int32
+        offset = (offset ?? 0) | 0
 
         while (offset < length) {
             const start = this._size % inputBytes
@@ -203,19 +203,19 @@ export class SHA1Hash {
         let D = this.D
         let E = this.E
         let i = 0
-        offset = ((offset ??  0) | 0) as int32
+        offset = (offset ??  0) | 0
 
         while (i < inputWords) {
-            W[i++] = swap32(data[offset!++] as int32)
+            W[i++] = swap32(float64toInt32(data[offset!++]))
         }
 
         for (i = inputWords; i < workWords; i++) {
-            W[i] = rotate1((W[i - 3] as int32) ^ (W[i - 8] as int32) ^ (W[i - 14] as int32) ^ (W[i - 16] as int32))
+            W[i] = rotate1(float64toInt32(W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16]))
         }
 
         for (i = 0; i < workWords; i++) {
             const S = (i / 20) | 0
-            const T = ((rotate5(A) + ft(S, B, C, D) + E + W[i] + K[S]) as int32) | 0
+            const T = float64toInt32((rotate5(A) + ft(S, B, C, D) + E + W[i] + K[S]) | 0)
             E = D
             D = C
             C = rotate30(B)
@@ -259,10 +259,10 @@ export class SHA1Hash {
 
         // input size
         const bits64: int32 = this._size * 8
-        const low32: int32 = ((bits64 & 0xffffffff) as int32 >>> 0) as int32
-        const high32: int32 = ((bits64 - low32) as int32 / 0x100000000) as int32
-        if (high32) _word[highIndex] = swap32(high32) as int32
-        if (low32) _word[lowIndex] = swap32(low32) as int32
+        const low32: int32 = float64toInt32((bits64 & 0xffffffff) >>> 0)
+        const high32: int32 = float64toInt32((bits64 - low32) / 0x100000000)
+        if (high32) _word[highIndex] = swap32(high32)
+        if (low32) _word[lowIndex] = swap32(low32)
 
         this._int32(_word)
 

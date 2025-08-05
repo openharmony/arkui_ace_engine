@@ -17,33 +17,31 @@ import * as arkts from "@koalaui/libarkts"
 import checkedTransformer from "./MemoTransformer"
 import parsedTransformer from "./ParserTransformer"
 
-interface PluginContext {
-    getArkTSProgram(): arkts.Program
-}
-
-export function init() {
+export function init(parsedJson?: Object, checkedJson?: Object) {
     let pluginContext = new arkts.PluginContextImpl()
+    const parsedHooks = new arkts.DumpingHooks(arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED, "memo")
+    const checkedHooks = new arkts.DumpingHooks(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED, "memo")
     return {
         name: "memo",
-        parsed(this: PluginContext) {
-            console.log("[memo-plugin] Run parsed stage plugin")
-            const transform = parsedTransformer()
+        parsed(hooks: arkts.RunTransformerHooks = parsedHooks) {
+            console.log("[memo-plugin] Run parsed state plugin")
+            const transform = parsedTransformer(parsedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
-                arkts.runTransformer(prog, state, false, transform, pluginContext)
+                arkts.runTransformer(prog, state, transform, pluginContext, hooks)
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
-        checked(this: PluginContext) {
-            console.log("[memo-plugin] Run checked stage plugin")
-            const transform = checkedTransformer()
+        checked(hooks: arkts.RunTransformerHooks = checkedHooks) {
+            console.log("[memo-plugin] Run checked state plugin")
+            const transform = checkedTransformer(checkedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
-                arkts.runTransformer(prog, state, false, transform, pluginContext)
+                arkts.runTransformer(prog, state, transform, pluginContext, hooks)
                 arkts.recheckSubtree(prog.ast)
             } catch(e) {
                 console.trace(e)

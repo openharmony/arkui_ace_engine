@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CustomTextDecoder, float32, int32, int64 } from "@koalaui/common"
+import { CustomTextDecoder, float32, float64, int32, int64 } from "@koalaui/common"
 import { Tags, CallbackResource } from "./SerializerBase";
 import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer";
@@ -112,6 +112,13 @@ export class DeserializerBase {
         this.checkCapacity(4)
         const value = this.view.getFloat32(this.position, true)
         this.position += 4
+        return value
+    }
+
+    readFloat64(): float64 {
+        this.checkCapacity(8)
+        const value = this.view.getFloat64(this.position, true)
+        this.position += 8
         return value
     }
 

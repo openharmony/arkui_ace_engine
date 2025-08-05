@@ -1,5 +1,5 @@
 
-function main(): void {}
+function main() {}
 
 
 function someFunc(value: (SomeClass | undefined)): void {

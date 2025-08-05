@@ -56,9 +56,7 @@ export function doTest(kind: TestKind, id: string, name: string, content?: () =>
         stack.push(test)
         if (kind != TestKind.SKIP) content?.()
     } catch (error) {
-        const stack = error instanceof Error
-            ? errorAsString(error)
-            : JSON.stringify(error)
+        const stack = errorAsString(error)
         test.error = stack // mark test as failed with error's stacktrace
         const array = stack.replaceAll("Error:", "Assert:").split("\n")
         const length = array.length

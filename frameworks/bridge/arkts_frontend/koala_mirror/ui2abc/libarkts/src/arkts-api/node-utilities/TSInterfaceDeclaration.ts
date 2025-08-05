@@ -32,18 +32,15 @@ export function createTSInterfaceDeclaration(
     isExternal: boolean,
     modifierFlags?: Es2pandaModifierFlags,
 ): TSInterfaceDeclaration {
-    const res = TSInterfaceDeclaration.createTSInterfaceDeclaration(
+    return TSInterfaceDeclaration.createTSInterfaceDeclaration(
         _extends,
         id,
         typeParams,
         body,
         isStatic,
-        isExternal
+        isExternal,
+        modifierFlags,
     )
-    if (modifierFlags) {
-        res.modifierFlags = modifierFlags
-    }
-    return res
 }
 
 export function updateTSInterfaceDeclaration(

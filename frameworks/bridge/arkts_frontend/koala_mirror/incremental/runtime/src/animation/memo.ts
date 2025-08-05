@@ -77,7 +77,7 @@ export function rememberNumberTransition(on: boolean, duration: uint32, easing: 
 /** @memo */
 export function rememberTransition<Value>(on: boolean, duration: uint32, easing: EasingCurve, compute: AnimationRange<Value>, initial: boolean = on): AnimatedState<Value> {
     const state = rememberAnimatedState<Value>((): TimeAnimation<Value> => transition<Value>(duration, easing, compute, initial ? 1 : 0), on)
-    RunEffect(!on, (paused: boolean): void => { state.setPaused(paused) })
+    RunEffect(!on, (paused: boolean): void => { state.paused = paused })
     return state
 }
 

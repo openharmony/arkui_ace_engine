@@ -4,15 +4,13 @@ cd ../..
 npm run prepare
 npm run compile
 npm run panda:sdk:install --prefix incremental/tools/panda
-npm run build:incremental:components --prefix incremental/runtime
-npm run compile:all --prefix incremental/harness
+npm run compile --prefix incremental/harness
 npm run build:harness --prefix incremental/harness
 npm run compile --prefix incremental/compiler-plugin
 
 npm run compile --prefix ui2abc/libarkts # npm run clean --prefix ui2abc/libarkts
 npm run compile --prefix ui2abc/annotate
 npm run compile --prefix ui2abc/memo-plugin
-npm run build:incremental:inc:ui2abc --prefix incremental/runtime
 
 # 1.1 OR you could use this command
 npm run compile:deps --prefix ui2abc/tests-memo

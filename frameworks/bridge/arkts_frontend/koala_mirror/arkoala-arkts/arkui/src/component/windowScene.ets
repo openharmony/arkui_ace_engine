@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Position_serializer, Position, Length } from "./units"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { Resource } from "./../generated/resource"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
@@ -30,6 +30,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -37,7 +38,7 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkWindowScenePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._WindowScene_construct(peerId, flags)
-        const _peer  = new ArkWindowScenePeer(_peerPtr, peerId, "WindowScene", flags)
+        const _peer  = new ArkWindowScenePeer(_peerPtr, peerId, 'WindowScene', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -46,19 +47,19 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     }
     setAttractionEffectAttribute(destination: Position | undefined, fraction: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let destination_type : int32 = RuntimeType.UNDEFINED
-        destination_type = runtimeType(destination)
-        thisSerializer.writeInt8((destination_type).toChar())
-        if ((destination_type) != (RuntimeType.UNDEFINED)) {
-            const destination_value  = destination!
-            Position_serializer.write(thisSerializer, destination_value)
+        if (destination !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const destinationTmpValue  = destination!
+            Position_serializer.write(thisSerializer, destinationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let fraction_type : int32 = RuntimeType.UNDEFINED
-        fraction_type = runtimeType(fraction)
-        thisSerializer.writeInt8((fraction_type).toChar())
-        if ((fraction_type) != (RuntimeType.UNDEFINED)) {
-            const fraction_value  = fraction!
-            thisSerializer.writeNumber(fraction_value)
+        if (fraction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fractionTmpValue  = fraction!
+            thisSerializer.writeNumber(fractionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WindowSceneAttribute_setAttractionEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -79,9 +80,6 @@ export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowS
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: WindowSceneAttribute): void {
-        super.apply(target)
     }
 }
 
@@ -107,7 +105,6 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -115,26 +112,6 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         super.applyAttributesFinish()
     }
 }
-export function withWindowSceneStyle(receiver: WindowSceneAttribute, modifier: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkWindowSceneStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("WindowScene")
-// export function WindowScene(
-//     persistentId: number,
-//     @memo
-//     content_?: () => void,
-// ): WindowSceneAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function WindowScene(
@@ -150,28 +127,66 @@ export function WindowScene(
     NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (_: ArkWindowScenePeer): void => {
         receiver.setWindowSceneOptions(persistentId)
         style?.(receiver)
-        withWindowSceneStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkWindowSceneSet extends ArkCommonMethodSet implements WindowSceneAttribute {
+export class WindowSceneModifier extends CommonMethodModifier implements WindowSceneAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _attractionEffect_flag?: boolean
-    _attractionEffect0_value?: Position | undefined
-    _attractionEffect1_value?: number | undefined
-    applyModifierPatch(component: WindowSceneAttribute): void {
-        if (this._attractionEffect_flag)
-            component.attractionEffect((this._attractionEffect0_value as Position | undefined), (this._attractionEffect1_value as number | undefined))
+    _attractionEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _attractionEffect_0_0value?: Position | undefined
+    _attractionEffect_0_1value?: number | undefined
+    applyModifierPatch(peer: ArkWindowScenePeer): void {
+        super.applyModifierPatch(peer)
+        if (this._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._attractionEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAttractionEffectAttribute((this._attractionEffect_0_0value as Position | undefined), (this._attractionEffect_0_1value as number | undefined));
+                    this._attractionEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._attractionEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._attractionEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAttractionEffectAttribute((undefined as Position | undefined), (undefined as number | undefined));
+                }
+            }
+        }
     }
-    public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
-        this._attractionEffect_flag = true
-        this._attractionEffect0_value = destination
-        this._attractionEffect1_value = fraction
+    mergeModifier(modifier: WindowSceneModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._attractionEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.attractionEffect(modifier._attractionEffect_0_0value, modifier._attractionEffect_0_1value);
+                    break;
+                }
+                default: {
+                    this.attractionEffect((undefined as Position | undefined), (undefined as number | undefined));
+                }
+            }
+        }
+    }
+    attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
+        if (((this._attractionEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._attractionEffect_0_1value) !== (fraction)))
+        {
+            this._attractionEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._attractionEffect_0_0value = destination
+            this._attractionEffect_0_1value = fraction
+        } else
+        {
+            this._attractionEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {

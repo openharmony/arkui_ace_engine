@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { asArray, int32, uint32 } from "@koalaui/common"
 import {
     GlobalStateManager,
@@ -23,10 +22,10 @@ import {
     mutableState,
     testRoot,
     testTick,
-} from "../../src"
+} from "../../ets"
 
 function assertResultArray<T>(actual: Array<T>, ...expected: T[]) {
-    Assert.deepEqual(actual, asArray(expected))
+    assert.deepEqual(actual, asArray(expected))
 }
 
 suite("State management basics", () => {
@@ -186,15 +185,15 @@ suite("State management basics", () => {
 
         const root = testRoot(ui)
 
-        Assert.equal(peekNode, "head")
+        assert.equal(peekNode, "head")
 
         testTick(root)
 
-        Assert.equal(peekNode, "tail")
+        assert.equal(peekNode, "tail")
 
         testTick(root)
 
-        Assert.equal(peekNode, "head")
+        assert.equal(peekNode, "head")
     })
 
     test("mutable state dereference doesn't affect nested scopes", () => {
@@ -218,15 +217,15 @@ suite("State management basics", () => {
         }
         const root = testRoot(ui)
 
-        Assert.equal(peekNode, "head")
+        assert.equal(peekNode, "head")
 
         testTick(root)
 
-        Assert.equal(peekNode, "head")
+        assert.equal(peekNode, "head")
 
         testTick(root)
 
-        Assert.equal(peekNode, "head")
+        assert.equal(peekNode, "head")
     })
     */
 
@@ -241,7 +240,7 @@ suite("State management basics", () => {
         /** @memo */
         (x: boolean): void => {
             peekX = x
-            TestNode.attach((node: TestNode) => {
+            TestNode.attach((node: TestNode): void => {
                 if (x) {
                     node.content = "head"
                 } else {
@@ -260,38 +259,38 @@ suite("State management basics", () => {
 
         const root = testRoot(ui)
 
-        Assert.equal<boolean | undefined>(peekY, true)
-        Assert.equal<boolean | undefined>(peekX, true)
-        Assert.equal(peekNode, "head")
+        assert.equal<boolean | undefined>(peekY, true)
+        assert.equal<boolean | undefined>(peekX, true)
+        assert.equal(peekNode, "head")
         y.value = !y.value
 
         testTick(root)
 
-        Assert.equal<boolean | undefined>(peekY, false)
-        Assert.equal<boolean | undefined>(peekX, false)
-        Assert.equal(peekNode, "tail")
+        assert.equal<boolean | undefined>(peekY, false)
+        assert.equal<boolean | undefined>(peekX, false)
+        assert.equal(peekNode, "tail")
         y.value = !y.value
 
         testTick(root)
 
-        Assert.equal<boolean | undefined>(peekY, true)
-        Assert.equal<boolean | undefined>(peekX, true)
-        Assert.equal(peekNode, "head")
+        assert.equal<boolean | undefined>(peekY, true)
+        assert.equal<boolean | undefined>(peekX, true)
+        assert.equal(peekNode, "head")
     })
 
     test("Value seen immediately if not in @memo", () => {
         const x = mutableState(true)
-        Assert.equal(x.value, true)
+        assert.equal(x.value, true)
         x.value = !x.value
-        Assert.equal(x.value, false)
+        assert.equal(x.value, false)
     })
 
     test("Value seen later if in @memo", () => {
         GlobalStateManager.instance.frozen = true
         const x = mutableState(true)
-        Assert.equal(x.value, true)
+        assert.equal(x.value, true)
         x.value = !x.value
-        Assert.equal(x.value, true)
+        assert.equal(x.value, true)
         GlobalStateManager.instance.frozen = false
     })
 
@@ -310,7 +309,7 @@ suite("State management basics", () => {
                 /** @memo */
                 content?: () => void
             ) {
-                NodeAttach<TestNode>((): TestNode => new fooNode(), (_: TestNode) => {
+                NodeAttach<TestNode>((): TestNode => new fooNode(), (_: TestNode): void => {
                     result.push(s.value)
                     content?.()
                 })

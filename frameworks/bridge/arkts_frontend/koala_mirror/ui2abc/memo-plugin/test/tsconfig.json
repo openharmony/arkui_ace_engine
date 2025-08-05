@@ -10,5 +10,5 @@
             "@koalaui/harness": ["../../../incremental/harness/src/typescript"]
         }
     },
-    "include": []
+    "include": ["./rewrite.test.ts"]
 }

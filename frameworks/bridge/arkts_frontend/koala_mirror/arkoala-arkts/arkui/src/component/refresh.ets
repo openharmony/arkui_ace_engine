@@ -16,12 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier, Bindable_Boolean_serializer } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -32,6 +32,7 @@ import { Resource, Resource_serializer } from "./../generated/resource"
 import { CustomBuilder } from "./builder"
 import { ComponentContent, ComponentContent_serializer } from "./../generated/arkui.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -39,7 +40,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRefreshPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Refresh_construct(peerId, flags)
-        const _peer  = new ArkRefreshPeer(_peerPtr, peerId, "Refresh", flags)
+        const _peer  = new ArkRefreshPeer(_peerPtr, peerId, 'Refresh', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -51,80 +52,74 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
     }
     setOnStateChangeAttribute(value: ((state: RefreshStatus) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RefreshAttribute_setOnStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnRefreshingAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RefreshAttribute_setOnRefreshing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRefreshOffsetAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RefreshAttribute_setRefreshOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPullToRefreshAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullToRefresh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnOffsetChangeAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RefreshAttribute_setOnOffsetChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPullDownRatioAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullDownRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_refreshingAttribute(callback_: ((refreshing: boolean) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._RefreshAttribute_set_onChangeEvent_refreshing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -141,7 +136,7 @@ export enum RefreshStatus {
     Done = 4
 }
 export interface RefreshOptions {
-    refreshing: boolean;
+    refreshing: boolean | Bindable<boolean>;
     promptText?: ResourceStr;
     builder?: CustomBuilder;
     refreshingContent?: ComponentContent;
@@ -164,9 +159,6 @@ export interface RefreshAttribute extends CommonMethod {
     }
     pullDownRatio(value: number | undefined): this {
         throw new Error("Unimplemented method pullDownRatio")
-    }
-    _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_refreshing")
     }
     attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -198,26 +190,8 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     public pullDownRatio(value: number | undefined): this {
         return this
     }
-    public _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: RefreshAttribute): void {
-        super.apply(target)
-        if (this.onStateChange_value !== undefined)
-            target.onStateChange(this.onStateChange_value!)
-        if (this.onRefreshing_value !== undefined)
-            target.onRefreshing(this.onRefreshing_value!)
-        if (this.refreshOffset_value !== undefined)
-            target.refreshOffset(this.refreshOffset_value!)
-        if (this.pullToRefresh_value !== undefined)
-            target.pullToRefresh(this.pullToRefresh_value!)
-        if (this.onOffsetChange_value !== undefined)
-            target.onOffsetChange(this.onOffsetChange_value!)
-        if (this.pullDownRatio_value !== undefined)
-            target.pullDownRatio(this.pullDownRatio_value!)
     }
 }
 
@@ -281,16 +255,7 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         }
         return this
     }
-    public _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
-        if (this.checkPriority("_onChangeEvent_refreshing")) {
-            const callback__casted = callback_ as (((refreshing: boolean) => void))
-            this.getPeer()?.set_onChangeEvent_refreshingAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -298,26 +263,6 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         super.applyAttributesFinish()
     }
 }
-export function withRefreshStyle(receiver: RefreshAttribute, modifier: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkRefreshStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Refresh")
-// export function Refresh(
-//     value: RefreshOptions,
-//     @memo
-//     content_?: () => void,
-// ): RefreshAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Refresh(
@@ -333,76 +278,285 @@ export function Refresh(
     NodeAttach<ArkRefreshPeer>((): ArkRefreshPeer => ArkRefreshPeer.create(receiver), (_: ArkRefreshPeer): void => {
         receiver.setRefreshOptions(value)
         style?.(receiver)
-        withRefreshStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkRefreshSet extends ArkCommonMethodSet implements RefreshAttribute {
+export class RefreshModifier extends CommonMethodModifier implements RefreshAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _onStateChange_flag?: boolean
-    _onStateChange0_value?: ((state: RefreshStatus) => void) | undefined
-    _onRefreshing_flag?: boolean
-    _onRefreshing0_value?: (() => void) | undefined
-    _refreshOffset_flag?: boolean
-    _refreshOffset0_value?: number | undefined
-    _pullToRefresh_flag?: boolean
-    _pullToRefresh0_value?: boolean | undefined
-    _onOffsetChange_flag?: boolean
-    _onOffsetChange0_value?: ((value0: number) => void) | undefined
-    _pullDownRatio_flag?: boolean
-    _pullDownRatio0_value?: number | undefined
-    __onChangeEvent_refreshing_flag?: boolean
-    __onChangeEvent_refreshing0_value?: ((refreshing: boolean) => void)
-    applyModifierPatch(component: RefreshAttribute): void {
-        if (this._onStateChange_flag)
-            component.onStateChange((this._onStateChange0_value as ((state: RefreshStatus) => void) | undefined))
-        if (this._onRefreshing_flag)
-            component.onRefreshing((this._onRefreshing0_value as (() => void) | undefined))
-        if (this._refreshOffset_flag)
-            component.refreshOffset((this._refreshOffset0_value as number | undefined))
-        if (this._pullToRefresh_flag)
-            component.pullToRefresh((this._pullToRefresh0_value as boolean | undefined))
-        if (this._onOffsetChange_flag)
-            component.onOffsetChange((this._onOffsetChange0_value as ((value0: number) => void) | undefined))
-        if (this._pullDownRatio_flag)
-            component.pullDownRatio((this._pullDownRatio0_value as number | undefined))
+    _onStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onStateChange_0_0value?: ((state: RefreshStatus) => void) | undefined
+    _onRefreshing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onRefreshing_0_0value?: (() => void) | undefined
+    _refreshOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _refreshOffset_0_0value?: number | undefined
+    _pullToRefresh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pullToRefresh_0_0value?: boolean | undefined
+    _onOffsetChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onOffsetChange_0_0value?: ((value0: number) => void) | undefined
+    _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pullDownRatio_0_0value?: number | undefined
+    applyModifierPatch(peer: ArkRefreshPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._onStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onStateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnStateChangeAttribute((this._onStateChange_0_0value as ((state: RefreshStatus) => void) | undefined));
+                    this._onStateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onStateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onStateChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnStateChangeAttribute((undefined as ((state: RefreshStatus) => void) | undefined));
+                }
+            }
+        }
+        if (this._onRefreshing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onRefreshing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnRefreshingAttribute((this._onRefreshing_0_0value as (() => void) | undefined));
+                    this._onRefreshing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onRefreshing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onRefreshing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnRefreshingAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._refreshOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._refreshOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRefreshOffsetAttribute((this._refreshOffset_0_0value as number | undefined));
+                    this._refreshOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._refreshOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._refreshOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRefreshOffsetAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._pullToRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pullToRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPullToRefreshAttribute((this._pullToRefresh_0_0value as boolean | undefined));
+                    this._pullToRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pullToRefresh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pullToRefresh_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPullToRefreshAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onOffsetChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onOffsetChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnOffsetChangeAttribute((this._onOffsetChange_0_0value as ((value0: number) => void) | undefined));
+                    this._onOffsetChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onOffsetChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onOffsetChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnOffsetChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._pullDownRatio_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pullDownRatio_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPullDownRatioAttribute((this._pullDownRatio_0_0value as number | undefined));
+                    this._pullDownRatio_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pullDownRatio_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pullDownRatio_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPullDownRatioAttribute((undefined as number | undefined));
+                }
+            }
+        }
     }
-    public onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
-        this._onStateChange_flag = true
-        this._onStateChange0_value = value
+    mergeModifier(modifier: RefreshModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._onStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onStateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onStateChange(modifier._onStateChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onStateChange((undefined as ((state: RefreshStatus) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onRefreshing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onRefreshing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onRefreshing(modifier._onRefreshing_0_0value);
+                    break;
+                }
+                default: {
+                    this.onRefreshing((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._refreshOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._refreshOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.refreshOffset(modifier._refreshOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.refreshOffset((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._pullToRefresh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pullToRefresh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pullToRefresh(modifier._pullToRefresh_0_0value);
+                    break;
+                }
+                default: {
+                    this.pullToRefresh((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onOffsetChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onOffsetChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onOffsetChange(modifier._onOffsetChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onOffsetChange((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._pullDownRatio_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pullDownRatio_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pullDownRatio(modifier._pullDownRatio_0_0value);
+                    break;
+                }
+                default: {
+                    this.pullDownRatio((undefined as number | undefined));
+                }
+            }
+        }
+    }
+    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
+        if (((this._onStateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onStateChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onStateChange_0_0value = value
+        } else
+        {
+            this._onStateChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onRefreshing(value: (() => void) | undefined): this {
-        this._onRefreshing_flag = true
-        this._onRefreshing0_value = value
+    onRefreshing(value: (() => void) | undefined): this {
+        if (((this._onRefreshing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onRefreshing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onRefreshing_0_0value = value
+        } else
+        {
+            this._onRefreshing_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public refreshOffset(value: number | undefined): this {
-        this._refreshOffset_flag = true
-        this._refreshOffset0_value = value
+    refreshOffset(value: number | undefined): this {
+        if (((this._refreshOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._refreshOffset_0_0value) !== (value)))
+        {
+            this._refreshOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._refreshOffset_0_0value = value
+        } else
+        {
+            this._refreshOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pullToRefresh(value: boolean | undefined): this {
-        this._pullToRefresh_flag = true
-        this._pullToRefresh0_value = value
+    pullToRefresh(value: boolean | undefined): this {
+        if (((this._pullToRefresh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullToRefresh_0_0value) !== (value)))
+        {
+            this._pullToRefresh_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pullToRefresh_0_0value = value
+        } else
+        {
+            this._pullToRefresh_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onOffsetChange(value: ((value0: number) => void) | undefined): this {
-        this._onOffsetChange_flag = true
-        this._onOffsetChange0_value = value
+    onOffsetChange(value: ((value0: number) => void) | undefined): this {
+        if (((this._onOffsetChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onOffsetChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onOffsetChange_0_0value = value
+        } else
+        {
+            this._onOffsetChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pullDownRatio(value: number | undefined): this {
-        this._pullDownRatio_flag = true
-        this._pullDownRatio0_value = value
+    pullDownRatio(value: number | undefined): this {
+        if (((this._pullDownRatio_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pullDownRatio_0_0value) !== (value)))
+        {
+            this._pullDownRatio_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pullDownRatio_0_0value = value
+        } else
+        {
+            this._pullDownRatio_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
-    }
-    public _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -411,90 +565,100 @@ export class ArkRefreshSet extends ArkCommonMethodSet implements RefreshAttribut
 export class RefreshOptions_serializer {
     public static write(buffer: SerializerBase, value: RefreshOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_refreshing  = value.refreshing
-        valueSerializer.writeBoolean(value_refreshing)
-        const value_promptText  = value.promptText
-        let value_promptText_type : int32 = RuntimeType.UNDEFINED
-        value_promptText_type = runtimeType(value_promptText)
-        valueSerializer.writeInt8((value_promptText_type).toChar())
-        if ((value_promptText_type) != (RuntimeType.UNDEFINED)) {
-            const value_promptText_value  = value_promptText!
-            let value_promptText_value_type : int32 = RuntimeType.UNDEFINED
-            value_promptText_value_type = runtimeType(value_promptText_value)
-            if (RuntimeType.STRING == value_promptText_value_type) {
+        const valueHolderForRefreshing  = value.refreshing
+        if (valueHolderForRefreshing instanceof boolean) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForRefreshingForIdx0  = valueHolderForRefreshing as boolean
+            valueSerializer.writeBoolean(valueHolderForRefreshingForIdx0)
+        } else if (valueHolderForRefreshing instanceof Bindable<boolean>) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForRefreshingForIdx1  = valueHolderForRefreshing as Bindable<boolean>
+            Bindable_Boolean_serializer.write(valueSerializer, valueHolderForRefreshingForIdx1)
+        }
+        const valueHolderForPromptText  = value.promptText
+        if (valueHolderForPromptText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPromptTextTmpValue  = valueHolderForPromptText!
+            if (valueHolderForPromptTextTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_promptText_value_0  = value_promptText_value as string
-                valueSerializer.writeString(value_promptText_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_promptText_value_type) {
+                const valueHolderForPromptTextTmpValueForIdx0  = valueHolderForPromptTextTmpValue as string
+                valueSerializer.writeString(valueHolderForPromptTextTmpValueForIdx0)
+            } else if (valueHolderForPromptTextTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_promptText_value_1  = value_promptText_value as Resource
-                Resource_serializer.write(valueSerializer, value_promptText_value_1)
+                const valueHolderForPromptTextTmpValueForIdx1  = valueHolderForPromptTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForPromptTextTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_builder  = value.builder
-        let value_builder_type : int32 = RuntimeType.UNDEFINED
-        value_builder_type = runtimeType(value_builder)
-        valueSerializer.writeInt8((value_builder_type).toChar())
-        if ((value_builder_type) != (RuntimeType.UNDEFINED)) {
-            const value_builder_value  = value_builder!
-            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_value))
+        const valueHolderForBuilder  = value.builder
+        if (valueHolderForBuilder !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBuilderTmpValue  = valueHolderForBuilder!
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForBuilderTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_refreshingContent  = value.refreshingContent
-        let value_refreshingContent_type : int32 = RuntimeType.UNDEFINED
-        value_refreshingContent_type = runtimeType(value_refreshingContent)
-        valueSerializer.writeInt8((value_refreshingContent_type).toChar())
-        if ((value_refreshingContent_type) != (RuntimeType.UNDEFINED)) {
-            const value_refreshingContent_value  = value_refreshingContent!
-            ComponentContent_serializer.write(valueSerializer, value_refreshingContent_value)
+        const valueHolderForRefreshingContent  = value.refreshingContent
+        if (valueHolderForRefreshingContent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRefreshingContentTmpValue  = valueHolderForRefreshingContent!
+            ComponentContent_serializer.write(valueSerializer, valueHolderForRefreshingContentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): RefreshOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const refreshing_result : boolean = valueDeserializer.readBoolean()
-        const promptText_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let promptText_buf : ResourceStr | undefined
-        if ((promptText_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const promptText_buf__selector : int32 = valueDeserializer.readInt8()
-            let promptText_buf_ : string | Resource | undefined
-            if (promptText_buf__selector == (0).toChar()) {
-                promptText_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (promptText_buf__selector == (1).toChar()) {
-                promptText_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for promptText_buf_ has to be chosen through deserialisation.")
-            }
-            promptText_buf = (promptText_buf_ as string | Resource)
+        const refreshingTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let refreshingTmpBuf : boolean | Bindable<boolean> | undefined
+        if (refreshingTmpBufUnionSelector == (0).toChar()) {
+            refreshingTmpBuf = valueDeserializer.readBoolean()
+        } else if (refreshingTmpBufUnionSelector == (1).toChar()) {
+            refreshingTmpBuf = Bindable_Boolean_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for refreshingTmpBuf has to be chosen through deserialisation.")
         }
-        const promptText_result : ResourceStr | undefined = promptText_buf
-        const builder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let builder_buf : CustomBuilder | undefined
-        if ((builder_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const builder_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const builder_buf__call : KPointer = valueDeserializer.readPointer()
-            const builder_buf__callSync : KPointer = valueDeserializer.readPointer()
-            builder_buf = ():void => { 
-    const builder_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    builder_buf__argsSerializer.writeInt32(builder_buf__resource.resourceId);
-    builder_buf__argsSerializer.writePointer(builder_buf__call);
-    builder_buf__argsSerializer.writePointer(builder_buf__callSync);
-    InteropNativeModule._CallCallback(737226752, builder_buf__argsSerializer.asBuffer(), builder_buf__argsSerializer.length());
-    builder_buf__argsSerializer.release();
-    return; }
+        const refreshingTmpResult : boolean | Bindable<boolean> = (refreshingTmpBuf as boolean | Bindable<boolean>)
+        const promptTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let promptTextTmpBuf : ResourceStr | undefined
+        if ((promptTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const promptTextTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let promptTextTmpBuf_ : string | Resource | undefined
+            if (promptTextTmpBuf_UnionSelector == (0).toChar()) {
+                promptTextTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (promptTextTmpBuf_UnionSelector == (1).toChar()) {
+                promptTextTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for promptTextTmpBuf_ has to be chosen through deserialisation.")
+            }
+            promptTextTmpBuf = (promptTextTmpBuf_ as string | Resource)
         }
-        const builder_result : CustomBuilder | undefined = builder_buf
-        const refreshingContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let refreshingContent_buf : ComponentContent | undefined
-        if ((refreshingContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            refreshingContent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
+        const promptTextTmpResult : ResourceStr | undefined = promptTextTmpBuf
+        const builderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let builderTmpBuf : CustomBuilder | undefined
+        if ((builderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const builderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const builderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const builderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            builderTmpBuf = ():void => {
+                const builderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
+                builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
+                builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallback(737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
+                builderTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const refreshingContent_result : ComponentContent | undefined = refreshingContent_buf
-        let value : RefreshOptions = ({refreshing: refreshing_result, promptText: promptText_result, builder: builder_result, refreshingContent: refreshingContent_result} as RefreshOptions)
+        const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
+        const refreshingContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let refreshingContentTmpBuf : ComponentContent | undefined
+        if ((refreshingContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            refreshingContentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
+        }
+        const refreshingContentTmpResult : ComponentContent | undefined = refreshingContentTmpBuf
+        let value : RefreshOptions = ({refreshing: refreshingTmpResult, promptText: promptTextTmpResult, builder: builderTmpResult, refreshingContent: refreshingContentTmpResult} as RefreshOptions)
         return value
     }
 }

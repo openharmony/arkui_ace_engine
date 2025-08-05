@@ -19,13 +19,14 @@
         "webpack": "^5.93.0",
         "webpack-cli": "^5.1.4",
         "copy-webpack-plugin": "^12.0.2"
-        
+
     },
     "scripts": {
         "compile:prepare": "cd node_modules/typescript && ts-patch install",
         "all:clean": "npm run clean --ws --if-present -s",
-        "all:clean:unmemoized": "npm run clean:unmemoized --ws --if-present -s",
-        "compile": "npm run compile:prepare && npm run compile -w ./compat && npm run compile -w ./common && npm run compile -w ./harness && npm run compile -w ./runtime && npm run compile -w ./demo-playground && npm run compile -w ./compiler-plugin"
+        "compile": "npm run compile:prepare && npm run compile -w ./compat && npm run compile -w ./common && npm run compile -w ./harness && npm run compile -w ./runtime && npm run compile -w ./demo-playground && npm run compile -w ./compiler-plugin",
+        "link": "./tools/panda/arkts/arklink --output runtime/build/incremental.abc -- ./compat/build/compat.abc ./common/build/common.abc ./runtime/build/runtime.abc",
+        "build": "npm run build --prefix compat && npm run build --prefix common && npm run build --prefix runtime && npm run link"
     },
     "dependencies": {
         "@koalaui/build-common": "file:./build-common",

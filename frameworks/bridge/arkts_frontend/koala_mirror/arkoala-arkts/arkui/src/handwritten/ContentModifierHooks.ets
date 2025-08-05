@@ -31,27 +31,7 @@ import { ArkToggleComponent, ToggleConfiguration } from "../generated"
 import { CustomBuilder } from "../generated"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { KPointer } from "@koalaui/interop"
-
-export class WrappedBuilder<Args> {
-    constructor(
-        // @memo
-        builder: (args: Args) => void) {
-        this.builder = builder;
-    }
-    // @memo
-    builder: ((args: Args) => void);
-}
-
-export function wrapBuilder<Args>(
-    // @memo
-    builder: (args: Args) => void
-): WrappedBuilder<Args> {
-    return new WrappedBuilder<Args>(builder);
-}
-
-export interface ContentModifier<T> {
-  applyContent(): WrappedBuilder<Array<T>>
-}
+import { ContentModifier } from "./component/common"
 
 function memoWrapper<Args>(
     // @memo
@@ -71,7 +51,7 @@ export function hookButtonContentModifier(
     }
     const buttonBuilder = (parentNode: KPointer, config: ButtonConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierButton(receiver.getPeer().peer.ptr, value!, buttonBuilder)
@@ -87,7 +67,7 @@ export function hookCheckBoxContentModifier(
     }
     const checkboxBuilder = (parentNode: KPointer, config: CheckBoxConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierCheckBox(receiver.getPeer().peer.ptr, value!, checkboxBuilder)
@@ -103,7 +83,7 @@ export function hookDataPanelContentModifier(
     }
     const dataPanelBuilder = (parentNode: KPointer, config: DataPanelConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierDataPanel(receiver.getPeer().peer.ptr, value!, dataPanelBuilder)
@@ -119,7 +99,7 @@ export function hookGaugeContentModifier(
     }
     const gaugeBuilder = (parentNode: KPointer, config: GaugeConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierGauge(receiver.getPeer().peer.ptr, value!, gaugeBuilder)
@@ -135,7 +115,7 @@ export function hookLoadingProgressContentModifier(
     }
     const loadingProgressBuilder = (parentNode: KPointer, config: LoadingProgressConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierLoadingProgress(receiver.getPeer().peer.ptr, value!, loadingProgressBuilder)
@@ -151,7 +131,7 @@ export function hookProgressContentModifier(
     }
     const progressBuilder = (parentNode: KPointer, config: ProgressConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierProgress(receiver.getPeer().peer.ptr, value!, progressBuilder)
@@ -167,7 +147,7 @@ export function hookRadioContentModifier(
     }
     const radioBuilder = (parentNode: KPointer, config: RadioConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierRadio(receiver.getPeer().peer.ptr, value!, radioBuilder)
@@ -183,7 +163,7 @@ export function hookRatingContentModifier(
     }
     const ratingBuilder = (parentNode: KPointer, config: RatingConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierRating(receiver.getPeer().peer.ptr, value!, ratingBuilder)
@@ -199,7 +179,7 @@ export function hookSelectContentModifier(
     }
     const menuItemBuilder = (parentNode: KPointer, config: MenuItemConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierMenuItem(receiver.getPeer().peer.ptr, value!, menuItemBuilder)
@@ -215,7 +195,7 @@ export function hookSliderContentModifier(
     }
     const sliderBuilder = (parentNode: KPointer, config: SliderConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierSlider(receiver.getPeer().peer.ptr, value!, sliderBuilder)
@@ -231,7 +211,7 @@ export function hookTextClockContentModifier(
     }
     const textClockBuilder = (parentNode: KPointer, config: TextClockConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierTextClock(receiver.getPeer().peer.ptr, value!, textClockBuilder)
@@ -247,7 +227,7 @@ export function hookTextTimerContentModifier(
     }
     const textTimerBuilder = (parentNode: KPointer, config: TextTimerConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierTextTimer(receiver.getPeer().peer.ptr, value!, textTimerBuilder)
@@ -263,7 +243,7 @@ export function hookToggleContentModifier(
     }
     const toggleBuilder = (parentNode: KPointer, config: ToggleConfiguration): KPointer => {
         return CallbackTransformer.transformToPeerFromCustomBuilder(
-            memoWrapper(wrappedBuilder!.builder, [config]))
+            memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
         ContentModifierHelper.contentModifierToggle(receiver.getPeer().peer.ptr, value!, toggleBuilder)

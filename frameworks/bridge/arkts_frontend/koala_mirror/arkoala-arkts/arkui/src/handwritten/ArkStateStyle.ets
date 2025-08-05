@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { CommonMethod, ArkCommonMethodSet, ArkCommonMethodComponent, StateStyles } from '../generated'
+import { CommonMethod, ArkCommonMethodComponent, StateStyles } from '../generated'
 
 interface MockState {
     value: number
@@ -37,23 +37,20 @@ export function hookStateStyleImpl(node: ArkCommonMethodComponent, stateStyle: S
     const UI_STATE_DISABLED = 1 << 2;
     const UI_STATE_SELECTED = 1 << 3;
 
-    let cm = new ArkCommonMethodSet();
-
     if (currentState.value === UI_STATE_NORMAL) {
-        stateStyle?.normal?.(cm)
+        stateStyle?.normal?.(node)
     }
     if (currentState.value & UI_STATE_PRESSED) {
-        stateStyle?.clicked?.(cm)
-        stateStyle?.pressed?.(cm)
+        stateStyle?.clicked?.(node)
+        stateStyle?.pressed?.(node)
     }
     if (currentState.value & UI_STATE_FOCUSED) {
-        stateStyle?.focused?.(cm)
+        stateStyle?.focused?.(node)
     }
     if (currentState.value & UI_STATE_DISABLED) {
-        stateStyle?.disabled?.(cm)
+        stateStyle?.disabled?.(node)
     }
     if (currentState.value & UI_STATE_SELECTED) {
-        stateStyle?.selected?.(cm)
+        stateStyle?.selected?.(node)
     }
-    cm.applyModifierPatch(node)
 }

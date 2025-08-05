@@ -16,9 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, registerCallback, wrapCallback, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { common2D_Point_serializer, common2D } from "./ohos.graphics.common2D"
@@ -39,79 +38,76 @@ export class matrix4_Matrix4Transit_serializer {
 export class matrix4_PolyToPolyOptions_serializer {
     public static write(buffer: SerializerBase, value: matrix4.PolyToPolyOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_src  = value.src
-        valueSerializer.writeInt32((value_src.length).toInt())
-        for (let value_src_counter_i = 0; value_src_counter_i < value_src.length; value_src_counter_i++) {
-            const value_src_element : common2D.Point = value_src[value_src_counter_i]
-            common2D_Point_serializer.write(valueSerializer, value_src_element)
+        const valueHolderForSrc  = value.src
+        valueSerializer.writeInt32((valueHolderForSrc.length).toInt())
+        for (let valueHolderForSrcCounterI = 0; valueHolderForSrcCounterI < valueHolderForSrc.length; valueHolderForSrcCounterI++) {
+            const valueHolderForSrcTmpElement : common2D.Point = valueHolderForSrc[valueHolderForSrcCounterI]
+            common2D_Point_serializer.write(valueSerializer, valueHolderForSrcTmpElement)
         }
-        const value_srcIndex  = value.srcIndex
-        let value_srcIndex_type : int32 = RuntimeType.UNDEFINED
-        value_srcIndex_type = runtimeType(value_srcIndex)
-        valueSerializer.writeInt8((value_srcIndex_type).toChar())
-        if ((value_srcIndex_type) != (RuntimeType.UNDEFINED)) {
-            const value_srcIndex_value  = value_srcIndex!
-            valueSerializer.writeNumber(value_srcIndex_value)
+        const valueHolderForSrcIndex  = value.srcIndex
+        if (valueHolderForSrcIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSrcIndexTmpValue  = valueHolderForSrcIndex!
+            valueSerializer.writeNumber(valueHolderForSrcIndexTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_dst  = value.dst
-        valueSerializer.writeInt32((value_dst.length).toInt())
-        for (let value_dst_counter_i = 0; value_dst_counter_i < value_dst.length; value_dst_counter_i++) {
-            const value_dst_element : common2D.Point = value_dst[value_dst_counter_i]
-            common2D_Point_serializer.write(valueSerializer, value_dst_element)
+        const valueHolderForDst  = value.dst
+        valueSerializer.writeInt32((valueHolderForDst.length).toInt())
+        for (let valueHolderForDstCounterI = 0; valueHolderForDstCounterI < valueHolderForDst.length; valueHolderForDstCounterI++) {
+            const valueHolderForDstTmpElement : common2D.Point = valueHolderForDst[valueHolderForDstCounterI]
+            common2D_Point_serializer.write(valueSerializer, valueHolderForDstTmpElement)
         }
-        const value_dstIndex  = value.dstIndex
-        let value_dstIndex_type : int32 = RuntimeType.UNDEFINED
-        value_dstIndex_type = runtimeType(value_dstIndex)
-        valueSerializer.writeInt8((value_dstIndex_type).toChar())
-        if ((value_dstIndex_type) != (RuntimeType.UNDEFINED)) {
-            const value_dstIndex_value  = value_dstIndex!
-            valueSerializer.writeNumber(value_dstIndex_value)
+        const valueHolderForDstIndex  = value.dstIndex
+        if (valueHolderForDstIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDstIndexTmpValue  = valueHolderForDstIndex!
+            valueSerializer.writeNumber(valueHolderForDstIndexTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_pointCount  = value.pointCount
-        let value_pointCount_type : int32 = RuntimeType.UNDEFINED
-        value_pointCount_type = runtimeType(value_pointCount)
-        valueSerializer.writeInt8((value_pointCount_type).toChar())
-        if ((value_pointCount_type) != (RuntimeType.UNDEFINED)) {
-            const value_pointCount_value  = value_pointCount!
-            valueSerializer.writeNumber(value_pointCount_value)
+        const valueHolderForPointCount  = value.pointCount
+        if (valueHolderForPointCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPointCountTmpValue  = valueHolderForPointCount!
+            valueSerializer.writeNumber(valueHolderForPointCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): matrix4.PolyToPolyOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const src_buf_length : int32 = valueDeserializer.readInt32()
-        let src_buf : Array<common2D.Point> = new Array<common2D.Point>(src_buf_length)
-        for (let src_buf_i = 0; src_buf_i < src_buf_length; src_buf_i++) {
-            src_buf[src_buf_i] = common2D_Point_serializer.read(valueDeserializer)
+        const srcTmpBufLength : int32 = valueDeserializer.readInt32()
+        let srcTmpBuf : Array<common2D.Point> = new Array<common2D.Point>(srcTmpBufLength)
+        for (let srcTmpBufBufCounterI = 0; srcTmpBufBufCounterI < srcTmpBufLength; srcTmpBufBufCounterI++) {
+            srcTmpBuf[srcTmpBufBufCounterI] = common2D_Point_serializer.read(valueDeserializer)
         }
-        const src_result : Array<common2D.Point> = src_buf
-        const srcIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let srcIndex_buf : number | undefined
-        if ((srcIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            srcIndex_buf = (valueDeserializer.readNumber() as number)
+        const srcTmpResult : Array<common2D.Point> = srcTmpBuf
+        const srcIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let srcIndexTmpBuf : number | undefined
+        if ((srcIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            srcIndexTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const srcIndex_result : number | undefined = srcIndex_buf
-        const dst_buf_length : int32 = valueDeserializer.readInt32()
-        let dst_buf : Array<common2D.Point> = new Array<common2D.Point>(dst_buf_length)
-        for (let dst_buf_i = 0; dst_buf_i < dst_buf_length; dst_buf_i++) {
-            dst_buf[dst_buf_i] = common2D_Point_serializer.read(valueDeserializer)
+        const srcIndexTmpResult : number | undefined = srcIndexTmpBuf
+        const dstTmpBufLength : int32 = valueDeserializer.readInt32()
+        let dstTmpBuf : Array<common2D.Point> = new Array<common2D.Point>(dstTmpBufLength)
+        for (let dstTmpBufBufCounterI = 0; dstTmpBufBufCounterI < dstTmpBufLength; dstTmpBufBufCounterI++) {
+            dstTmpBuf[dstTmpBufBufCounterI] = common2D_Point_serializer.read(valueDeserializer)
         }
-        const dst_result : Array<common2D.Point> = dst_buf
-        const dstIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let dstIndex_buf : number | undefined
-        if ((dstIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            dstIndex_buf = (valueDeserializer.readNumber() as number)
+        const dstTmpResult : Array<common2D.Point> = dstTmpBuf
+        const dstIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let dstIndexTmpBuf : number | undefined
+        if ((dstIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            dstIndexTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const dstIndex_result : number | undefined = dstIndex_buf
-        const pointCount_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pointCount_buf : number | undefined
-        if ((pointCount_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            pointCount_buf = (valueDeserializer.readNumber() as number)
+        const dstIndexTmpResult : number | undefined = dstIndexTmpBuf
+        const pointCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let pointCountTmpBuf : number | undefined
+        if ((pointCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            pointCountTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const pointCount_result : number | undefined = pointCount_buf
-        let value : matrix4.PolyToPolyOptions = ({src: src_result, srcIndex: srcIndex_result, dst: dst_result, dstIndex: dstIndex_result, pointCount: pointCount_result} as matrix4.PolyToPolyOptions)
+        const pointCountTmpResult : number | undefined = pointCountTmpBuf
+        let value : matrix4.PolyToPolyOptions = ({src: srcTmpResult, srcIndex: srcIndexTmpResult, dst: dstTmpResult, dstIndex: dstIndexTmpResult, pointCount: pointCountTmpResult} as matrix4.PolyToPolyOptions)
         return value
     }
 }
@@ -127,7 +123,7 @@ export namespace matrix4 {
         transformPoint(options: [ number, number ]): [ number, number ]
         setPolyToPoly(options: PolyToPolyOptions): Matrix4Transit
     }
-    export class Matrix4TransitInternal implements MaterializedBase,matrix4.Matrix4Transit {
+    export class Matrix4TransitInternal implements MaterializedBase,Matrix4Transit {
         peer?: Finalizable | undefined = undefined
         public getPeer(): Finalizable | undefined {
             return this.peer
@@ -236,9 +232,9 @@ export namespace matrix4 {
             const retval  = ArkUIGeneratedNativeModule._matrix4_Matrix4Transit_transformPoint(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
             thisSerializer.release()
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_value0 : number = (retvalDeserializer.readNumber() as number)
-            const buffer_value1 : number = (retvalDeserializer.readNumber() as number)
-            const returnResult : [ number, number ] = ([buffer_value0, buffer_value1] as [ number, number ])
+            const bufferValue0 : number = (retvalDeserializer.readNumber() as number)
+            const bufferValue1 : number = (retvalDeserializer.readNumber() as number)
+            const returnResult : [ number, number ] = ([bufferValue0, bufferValue1] as [ number, number ])
             return returnResult
         }
         private setPolyToPoly_serialize(options: PolyToPolyOptions): Matrix4Transit {

@@ -16,8 +16,8 @@
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 
 export class C {
-    @memo protected foo(): () => void {
-        return () => {}
+    @memo protected foo(): (): void => void {
+        return (): void => {}
     }
 }
 

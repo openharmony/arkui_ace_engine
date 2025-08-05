@@ -16,19 +16,20 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { DotIndicator_serializer, DigitIndicator_serializer, DotIndicator, DigitIndicator } from "./swiper"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class IndicatorComponentControllerInternal {
     public static fromPtr(ptr: KPointer): IndicatorComponentController {
         return new IndicatorComponentController(ptr)
@@ -74,12 +75,12 @@ export class IndicatorComponentController implements MaterializedBase {
     }
     private changeIndex_serialize(index: number, useAnimation?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let useAnimation_type : int32 = RuntimeType.UNDEFINED
-        useAnimation_type = runtimeType(useAnimation)
-        thisSerializer.writeInt8((useAnimation_type).toChar())
-        if ((useAnimation_type) != (RuntimeType.UNDEFINED)) {
-            const useAnimation_value  = useAnimation!
-            thisSerializer.writeBoolean(useAnimation_value)
+        if (useAnimation !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const useAnimationTmpValue  = useAnimation!
+            thisSerializer.writeBoolean(useAnimationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentController_changeIndex(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -92,101 +93,98 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkIndicatorComponentPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._IndicatorComponent_construct(peerId, flags)
-        const _peer  = new ArkIndicatorComponentPeer(_peerPtr, peerId, "IndicatorComponent", flags)
+        const _peer  = new ArkIndicatorComponentPeer(_peerPtr, peerId, 'IndicatorComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setIndicatorComponentOptionsAttribute(controller?: IndicatorComponentController): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let controller_type : int32 = RuntimeType.UNDEFINED
-        controller_type = runtimeType(controller)
-        thisSerializer.writeInt8((controller_type).toChar())
-        if ((controller_type) != (RuntimeType.UNDEFINED)) {
-            const controller_value  = controller!
-            IndicatorComponentController_serializer.write(thisSerializer, controller_value)
+        if (controller !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const controllerTmpValue  = controller!
+            IndicatorComponentController_serializer.write(thisSerializer, controllerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentInterface_setIndicatorComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setInitialIndexAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setInitialIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCountAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStyleAttribute(value: DotIndicator | DigitIndicator | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isDotIndicator(value_value))) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof DotIndicator) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as DotIndicator
-                DotIndicator_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isDigitIndicator(value_value))) {
+                const valueTmpValueForIdx0  = valueTmpValue as DotIndicator
+                DotIndicator_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof DigitIndicator) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as DigitIndicator
-                DigitIndicator_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as DigitIndicator
+                DigitIndicator_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLoopAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setVerticalAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setVertical(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnChangeAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._IndicatorComponentAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -243,21 +241,6 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: IndicatorComponentAttribute): void {
-        super.apply(target)
-        if (this.initialIndex_value !== undefined)
-            target.initialIndex(this.initialIndex_value!)
-        if (this.count_value !== undefined)
-            target.count(this.count_value!)
-        if (this.style_value !== undefined)
-            target.style(this.style_value!)
-        if (this.loop_value !== undefined)
-            target.loop(this.loop_value!)
-        if (this.vertical_value !== undefined)
-            target.vertical(this.vertical_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
     }
 }
 
@@ -322,7 +305,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -330,26 +312,6 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         super.applyAttributesFinish()
     }
 }
-export function withIndicatorComponentStyle(receiver: IndicatorComponentAttribute, modifier: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkIndicatorComponentStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("IndicatorComponent")
-// export function IndicatorComponent(
-//     controller?: IndicatorComponentController,
-//     @memo
-//     content_?: () => void,
-// ): IndicatorComponentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function IndicatorComponent(
@@ -365,71 +327,284 @@ export function IndicatorComponent(
     NodeAttach<ArkIndicatorComponentPeer>((): ArkIndicatorComponentPeer => ArkIndicatorComponentPeer.create(receiver), (_: ArkIndicatorComponentPeer): void => {
         receiver.setIndicatorComponentOptions(controller)
         style?.(receiver)
-        withIndicatorComponentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkIndicatorComponentSet extends ArkCommonMethodSet implements IndicatorComponentAttribute {
+export class IndicatorComponentModifier extends CommonMethodModifier implements IndicatorComponentAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _initialIndex_flag?: boolean
-    _initialIndex0_value?: number | undefined
-    _count_flag?: boolean
-    _count0_value?: number | undefined
-    _style_flag?: boolean
-    _style0_value?: DotIndicator | DigitIndicator | undefined
-    _loop_flag?: boolean
-    _loop0_value?: boolean | undefined
-    _vertical_flag?: boolean
-    _vertical0_value?: boolean | undefined
-    _onChange_flag?: boolean
-    _onChange0_value?: ((value0: number) => void) | undefined
-    applyModifierPatch(component: IndicatorComponentAttribute): void {
-        if (this._initialIndex_flag)
-            component.initialIndex((this._initialIndex0_value as number | undefined))
-        if (this._count_flag)
-            component.count((this._count0_value as number | undefined))
-        if (this._style_flag)
-            component.style((this._style0_value as DotIndicator | DigitIndicator | undefined))
-        if (this._loop_flag)
-            component.loop((this._loop0_value as boolean | undefined))
-        if (this._vertical_flag)
-            component.vertical((this._vertical0_value as boolean | undefined))
-        if (this._onChange_flag)
-            component.onChange((this._onChange0_value as ((value0: number) => void) | undefined))
+    _initialIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _initialIndex_0_0value?: number | undefined
+    _count_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _count_0_0value?: number | undefined
+    _style_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _style_0_0value?: DotIndicator | DigitIndicator | undefined
+    _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _loop_0_0value?: boolean | undefined
+    _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _vertical_0_0value?: boolean | undefined
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onChange_0_0value?: ((value0: number) => void) | undefined
+    applyModifierPatch(peer: ArkIndicatorComponentPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._initialIndex_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._initialIndex_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setInitialIndexAttribute((this._initialIndex_0_0value as number | undefined));
+                    this._initialIndex_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._initialIndex_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._initialIndex_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setInitialIndexAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._count_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._count_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCountAttribute((this._count_0_0value as number | undefined));
+                    this._count_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._count_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._count_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCountAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._style_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._style_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStyleAttribute((this._style_0_0value as DotIndicator | DigitIndicator | undefined));
+                    this._style_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._style_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._style_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStyleAttribute((undefined as DotIndicator | DigitIndicator | undefined));
+                }
+            }
+        }
+        if (this._loop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._loop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLoopAttribute((this._loop_0_0value as boolean | undefined));
+                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._loop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLoopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setVerticalAttribute((this._vertical_0_0value as boolean | undefined));
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setVerticalAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: number) => void) | undefined));
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
     }
-    public initialIndex(value: number | undefined): this {
-        this._initialIndex_flag = true
-        this._initialIndex0_value = value
+    mergeModifier(modifier: IndicatorComponentModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._initialIndex_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._initialIndex_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.initialIndex(modifier._initialIndex_0_0value);
+                    break;
+                }
+                default: {
+                    this.initialIndex((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._count_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._count_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.count(modifier._count_0_0value);
+                    break;
+                }
+                default: {
+                    this.count((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._style_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._style_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.style(modifier._style_0_0value);
+                    break;
+                }
+                default: {
+                    this.style((undefined as DotIndicator | DigitIndicator | undefined));
+                }
+            }
+        }
+        if (modifier._loop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._loop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.loop(modifier._loop_0_0value);
+                    break;
+                }
+                default: {
+                    this.loop((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.vertical(modifier._vertical_0_0value);
+                    break;
+                }
+                default: {
+                    this.vertical((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onChange(modifier._onChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+    }
+    initialIndex(value: number | undefined): this {
+        if (((this._initialIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._initialIndex_0_0value) !== (value)))
+        {
+            this._initialIndex_0_flag = AttributeUpdaterFlag.UPDATE
+            this._initialIndex_0_0value = value
+        } else
+        {
+            this._initialIndex_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public count(value: number | undefined): this {
-        this._count_flag = true
-        this._count0_value = value
+    count(value: number | undefined): this {
+        if (((this._count_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._count_0_0value) !== (value)))
+        {
+            this._count_0_flag = AttributeUpdaterFlag.UPDATE
+            this._count_0_0value = value
+        } else
+        {
+            this._count_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public style(value: DotIndicator | DigitIndicator | undefined): this {
-        this._style_flag = true
-        this._style0_value = value
+    style(value: DotIndicator | DigitIndicator | undefined): this {
+        if (((this._style_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._style_0_flag = AttributeUpdaterFlag.UPDATE
+            this._style_0_0value = value
+        } else
+        {
+            this._style_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public loop(value: boolean | undefined): this {
-        this._loop_flag = true
-        this._loop0_value = value
+    loop(value: boolean | undefined): this {
+        if (((this._loop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._loop_0_0value) !== (value)))
+        {
+            this._loop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._loop_0_0value = value
+        } else
+        {
+            this._loop_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public vertical(value: boolean | undefined): this {
-        this._vertical_flag = true
-        this._vertical0_value = value
+    vertical(value: boolean | undefined): this {
+        if (((this._vertical_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._vertical_0_0value) !== (value)))
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
+            this._vertical_0_0value = value
+        } else
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
-        this._onChange_flag = true
-        this._onChange0_value = value
+    onChange(value: ((value0: number) => void) | undefined): this {
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onChange_0_0value = value
+        } else
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

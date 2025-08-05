@@ -23,12 +23,9 @@ export function createETSParameterExpression(
     initExpr?: Expression,
     annotations?: readonly AnnotationUsage[]
 ): ETSParameterExpression {
-    const res = ETSParameterExpression.createETSParameterExpression(identOrSpread, isOptional)
+    const res = ETSParameterExpression.createETSParameterExpression(identOrSpread, isOptional, annotations)
     if (initExpr) {
         res.setInitializer(initExpr)
-    }
-    if (annotations) {
-        res.setAnnotations(annotations)
     }
     return res
 }

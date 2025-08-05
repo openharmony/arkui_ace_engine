@@ -16,12 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
@@ -29,6 +29,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkCounterPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -36,7 +37,7 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCounterPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Counter_construct(peerId, flags)
-        const _peer  = new ArkCounterPeer(_peerPtr, peerId, "Counter", flags)
+        const _peer  = new ArkCounterPeer(_peerPtr, peerId, 'Counter', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -45,48 +46,48 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
     }
     setOnIncAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CounterAttribute_setOnInc(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDecAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CounterAttribute_setOnDec(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableDecAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CounterAttribute_setEnableDec(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableIncAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CounterAttribute_setEnableInc(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -129,17 +130,6 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: CounterAttribute): void {
-        super.apply(target)
-        if (this.onInc_value !== undefined)
-            target.onInc(this.onInc_value!)
-        if (this.onDec_value !== undefined)
-            target.onDec(this.onDec_value!)
-        if (this.enableDec_value !== undefined)
-            target.enableDec(this.enableDec_value!)
-        if (this.enableInc_value !== undefined)
-            target.enableInc(this.enableInc_value!)
     }
 }
 
@@ -187,7 +177,6 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -195,26 +184,6 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         super.applyAttributesFinish()
     }
 }
-export function withCounterStyle(receiver: CounterAttribute, modifier: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkCounterStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Counter")
-// export function Counter(
-//     
-//     @memo
-//     content_?: () => void,
-// ): CounterAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Counter(
@@ -230,53 +199,196 @@ export function Counter(
     NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (_: ArkCounterPeer): void => {
         receiver.setCounterOptions()
         style?.(receiver)
-        withCounterStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkCounterSet extends ArkCommonMethodSet implements CounterAttribute {
+export class CounterModifier extends CommonMethodModifier implements CounterAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _onInc_flag?: boolean
-    _onInc0_value?: VoidCallback | undefined
-    _onDec_flag?: boolean
-    _onDec0_value?: VoidCallback | undefined
-    _enableDec_flag?: boolean
-    _enableDec0_value?: boolean | undefined
-    _enableInc_flag?: boolean
-    _enableInc0_value?: boolean | undefined
-    applyModifierPatch(component: CounterAttribute): void {
-        if (this._onInc_flag)
-            component.onInc((this._onInc0_value as VoidCallback | undefined))
-        if (this._onDec_flag)
-            component.onDec((this._onDec0_value as VoidCallback | undefined))
-        if (this._enableDec_flag)
-            component.enableDec((this._enableDec0_value as boolean | undefined))
-        if (this._enableInc_flag)
-            component.enableInc((this._enableInc0_value as boolean | undefined))
+    _onInc_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onInc_0_0value?: VoidCallback | undefined
+    _onDec_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDec_0_0value?: VoidCallback | undefined
+    _enableDec_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableDec_0_0value?: boolean | undefined
+    _enableInc_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableInc_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkCounterPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onInc_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnIncAttribute((this._onInc_0_0value as VoidCallback | undefined));
+                    this._onInc_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onInc_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onInc_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnIncAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onDec_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDec_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDecAttribute((this._onDec_0_0value as VoidCallback | undefined));
+                    this._onDec_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDec_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDec_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDecAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._enableDec_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableDec_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableDecAttribute((this._enableDec_0_0value as boolean | undefined));
+                    this._enableDec_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableDec_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableDec_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableDecAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableInc_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableInc_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableIncAttribute((this._enableInc_0_0value as boolean | undefined));
+                    this._enableInc_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableInc_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableInc_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableIncAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public onInc(value: VoidCallback | undefined): this {
-        this._onInc_flag = true
-        this._onInc0_value = value
+    mergeModifier(modifier: CounterModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onInc_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onInc(modifier._onInc_0_0value);
+                    break;
+                }
+                default: {
+                    this.onInc((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDec_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDec_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDec(modifier._onDec_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDec((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._enableDec_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableDec_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableDec(modifier._enableDec_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableDec((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableInc_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableInc_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableInc(modifier._enableInc_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableInc((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    onInc(value: VoidCallback | undefined): this {
+        if (((this._onInc_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onInc_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onInc_0_0value = value
+        } else
+        {
+            this._onInc_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onDec(value: VoidCallback | undefined): this {
-        this._onDec_flag = true
-        this._onDec0_value = value
+    onDec(value: VoidCallback | undefined): this {
+        if (((this._onDec_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDec_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDec_0_0value = value
+        } else
+        {
+            this._onDec_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableDec(value: boolean | undefined): this {
-        this._enableDec_flag = true
-        this._enableDec0_value = value
+    enableDec(value: boolean | undefined): this {
+        if (((this._enableDec_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDec_0_0value) !== (value)))
+        {
+            this._enableDec_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableDec_0_0value = value
+        } else
+        {
+            this._enableDec_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableInc(value: boolean | undefined): this {
-        this._enableInc_flag = true
-        this._enableInc0_value = value
+    enableInc(value: boolean | undefined): this {
+        if (((this._enableInc_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableInc_0_0value) !== (value)))
+        {
+            this._enableInc_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableInc_0_0value = value
+        } else
+        {
+            this._enableInc_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {

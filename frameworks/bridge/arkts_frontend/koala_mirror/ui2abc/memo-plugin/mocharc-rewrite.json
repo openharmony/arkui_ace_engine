@@ -1,0 +1,9 @@
+{
+    "ui": "tdd",
+    "spec": "./test/rewrite.test.ts",
+    "extension": ["ts"],
+    "timeout": 10000,
+    "require": [
+        "../../incremental/test-utils/scripts/register"
+    ]
+}

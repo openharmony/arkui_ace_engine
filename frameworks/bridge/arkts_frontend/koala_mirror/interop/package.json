@@ -11,8 +11,7 @@
         "build/lib/src/**/*.js",
         "build/lib/src/**/*.d.ts",
         "src/**/*",
-        "index.ts",
-        "oh-package.json5"
+        "index.ts"
     ],
     "main": "./build/lib/src/interop/index.js",
     "exports": {
@@ -43,9 +42,7 @@
         "clean": "rimraf dist build types",
         "compile": "ets-tsc -b .",
         "compile:release": "ets-tsc -b .",
-        "build:interop": "npm run build:interop:inc",
-        "build:interop:inc": "fast-arktsc --config ./arktsconfig.json --compiler ../incremental/tools/panda/arkts/arktsc --link-name ./build/interop.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
-        "clean:interop": "npm run clean",
+        "build": "node ../ui2abc/fast-arktsc --config ./ui2abcconfig.json --compiler ../incremental/tools/panda/arkts/ui2abc --link-name ./build/interop.abc --simultaneous && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
         "lint": "eslint src test components",
         "test:wasm:coverage": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' nyc mocha",
         "test:wasm": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' mocha",
@@ -63,6 +60,8 @@
         "compile:native-hzvm-host": "npm run configure:native-hzvm-host && meson compile -C build-hzvm-host && meson install -C build-hzvm-host",
         "configure:native-panda-host": "meson setup -D vm_kind=panda build-panda-host",
         "compile:native-panda-host": "npm run configure:native-panda-host && meson compile -C build-panda-host && meson install -C build-panda-host",
+        "configure:native-kotlin-host": "meson setup -D vm_kind=kotlin build-kotlin-host",
+        "compile:native-kotlin-host": "npm run configure:native-kotlin-host && meson compile -C build-kotlin-host && meson install -C build-kotlin-host",
         "configure:native-panda-linux-x64": "node ./scripts/configure.mjs panda-linux-x64",
         "compile:native-panda-linux-x64": "npm run configure:native-panda-linux-x64 && meson compile -C build-panda-linux-x64 && meson install -C build-panda-linux-x64",
         "configure:native-panda-linux-arm64": "node ./scripts/configure.mjs panda-linux-arm64",
@@ -92,13 +91,13 @@
         "configure:native-panda-with-hzvm-ohos-arm32": "npm run configure:native-panda-ohos-arm32 && node ./scripts/configure.mjs hzvm-ohos-arm32-vmloader",
         "compile:native-panda-with-hzvm-ohos-arm32": "npm run configure:native-panda-with-hzvm-ohos-arm32 && npm run compile:native-panda-ohos-arm32 && meson compile -C build-hzvm-ohos-arm32-vmloader && meson install -C build-hzvm-ohos-arm32-vmloader",
         "compile:kotlin:cinterop": "cd src/cpp/kotlin && cinterop -def cinterop-interop_native_module.def -pkg cinterop.interop_native_module -compiler-option -I. -o ../../../build/kotlin-interop/cinterop.interop_native_module",
-        "compile:kotlin:kt": "konanc ./src/kotlin/InteropNativeModule.kt ./src/kotlin/InteropTypes.kt -l ./build/kotlin-interop/cinterop.interop_native_module.klib -p library -o ./build/kotlin-interop/interop",
+        "compile:kotlin:kt": "konanc ./src/kotlin/*.kt -l ./build/kotlin-interop/cinterop.interop_native_module.klib -p library -o ./build/kotlin-interop/interop",
         "compile:kotlin:interop": "rm -rf build/kotlin-interop && npm run compile:kotlin:cinterop && npm run compile:kotlin:kt"
     },
     "keywords": [],
     "dependencies": {
         "@types/node": "^18.0.0",
-        "@koalaui/common": "file:../incremental/common"
+        "@koalaui/common": "1.7.6+devel"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",
@@ -108,7 +107,7 @@
         "eslint": "^8.13.0",
         "eslint-plugin-unused-imports": "^2.0.0",
         "source-map-support": "^0.5.21",
-        "@koalaui/ets-tsc": "4.9.5-r6",
-        "@koalaui/fast-arktsc": "file:../ui2abc/fast-arktsc"
+        "@koalaui/ets-tsc": "4.9.5-r5",
+        "@koalaui/fast-arktsc": "1.5.15"
     }
 }

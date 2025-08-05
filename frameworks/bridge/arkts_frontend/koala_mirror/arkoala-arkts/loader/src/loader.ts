@@ -219,6 +219,9 @@ class Application {
         } else {
             throw new Error(`Cannot start VM: ${result}`)
         }
+        if (this.rootPointer == nullptr) {
+            throw new Error(`FAIL: _StartApplication returned nullptr`)
+        }
     }
 
     start(loopIterations?: int32): Promise<AppControl> {

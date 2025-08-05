@@ -19,18 +19,18 @@ import { ExternalSource } from "./peers/ExternalSource"
 import { programGetExternalSources } from "./node-utilities/Program"
 import { KNativePointer } from "@koalaui/interop"
 import { global } from "./static/global"
+import { RunTransformerHooks } from "../plugin-utils"
 
 export interface CompilationOptions {
-    readonly isMainProgram: boolean,
-    readonly stage: Es2pandaContextState,
-    readonly restart: boolean,
+    readonly isProgramForCodegeneration: boolean,
+    readonly state: Es2pandaContextState,
 }
 
 export interface PluginContext {
     setParameter<V>(name: string, value: V): void
     parameter<V>(name: string) : V | undefined
-
 }
+
 export class PluginContextImpl implements PluginContext {
     map = new Map<String, Object|undefined>()
     parameter<V>(name: string): V|undefined {
@@ -60,3 +60,12 @@ export function listPrograms(program: Program, filter: (name: string) => boolean
         })
     ]
 }
+
+export interface PluginEntry {
+    name?: string
+    parsed?: (hooks?: RunTransformerHooks) => void
+    checked?: (hooks?: RunTransformerHooks) => void
+    clean?: (hooks?: RunTransformerHooks) => void
+}
+
+export type PluginInitializer = (parsedJson?: Object, checkedJson?: Object) => PluginEntry

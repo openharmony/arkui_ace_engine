@@ -244,40 +244,6 @@ template <> struct InteropTypeConverter<KInteropNumber> {
   static void release(EtsEnv *env, InteropType value, KInteropNumber converted) {}
 };
 
-template<>
-struct InteropTypeConverter<KLength> {
-  using InteropType = ets_object;
-  static KLength convertFrom(EtsEnv* env, InteropType value) {
-    const static ets_class double_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/Double")));
-    const static ets_class int_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/Int")));
-    const static ets_class string_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/String")));
-    const static ets_class resource_class = reinterpret_cast<ets_class>(
-      env->NewGlobalRef(env->FindClass("@ohos/arkui/generated/resource/Resource")));
-
-    if (env->IsInstanceOf(value, double_class)) {
-      const static ets_method double_p = env->Getp_method(double_class, "unboxed", ":D");
-      return KLength{ 1, (KFloat)env->CallDoubleMethod(value, double_p), 1, 0 };
-    } else if (env->IsInstanceOf(value, int_class)) {
-      const static ets_method int_p = env->Getp_method(int_class, "unboxed", ":I");
-      return KLength{ 1, (KFloat)env->CallIntMethod(value, int_p), 1, 0 };
-    } else if (env->IsInstanceOf(value, string_class)) {
-      KStringPtr ptr = InteropTypeConverter<KStringPtr>::convertFrom(env, reinterpret_cast<ets_string>(value));
-      KLength length { 0 };
-      parseKLength(ptr, &length);
-      length.type = 2;
-      length.resource = 0;
-      return length;
-    } else if (env->IsInstanceOf(value, resource_class)) {
-      const static ets_method resource_p = env->Getp_method(resource_class, "<get>id", ":D");
-      return KLength{ 3, 0, 1, (KInt)env->CallDoubleMethod(value, resource_p) };
-    } else {
-      return KLength( { 0, 0, 0, 0});
-    }
-  }
-  static InteropType convertTo(EtsEnv* env, KLength value) = delete;
-  static void release(EtsEnv* env, InteropType value, const KLength& converted) {}
-};
-
 template <typename Type>
 inline typename InteropTypeConverter<Type>::InteropType makeResult(EtsEnv* env, Type value) {
   return InteropTypeConverter<Type>::convertTo(env, value);

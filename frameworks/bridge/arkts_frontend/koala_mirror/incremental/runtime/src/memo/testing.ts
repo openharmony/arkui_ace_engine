@@ -44,7 +44,7 @@ export class TestNode extends IncrementalNode {
     static attach(
         /** @memo */
         content: (node: TestNode) => void
-    ) {
+    ): void {
         NodeAttach(():TestNode => new TestNode(), content)
     }
 

@@ -16,18 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkFormLinkPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -35,7 +36,7 @@ export class ArkFormLinkPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFormLinkPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._FormLink_construct(peerId, flags)
-        const _peer  = new ArkFormLinkPeer(_peerPtr, peerId, "FormLink", flags)
+        const _peer  = new ArkFormLinkPeer(_peerPtr, peerId, 'FormLink', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -64,9 +65,6 @@ export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAt
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: FormLinkAttribute): void {
-        super.apply(target)
-    }
 }
 
 export class ArkFormLinkComponent extends ArkCommonMethodComponent implements FormLinkAttribute {
@@ -82,7 +80,6 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
         return this
     }
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -90,26 +87,6 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
         super.applyAttributesFinish()
     }
 }
-export function withFormLinkStyle(receiver: FormLinkAttribute, modifier: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkFormLinkStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("FormLink")
-// export function FormLink(
-//     options: FormLinkOptions,
-//     @memo
-//     content_?: () => void,
-// ): FormLinkAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function FormLink(
@@ -125,18 +102,21 @@ export function FormLink(
     NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (_: ArkFormLinkPeer): void => {
         receiver.setFormLinkOptions(options)
         style?.(receiver)
-        withFormLinkStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkFormLinkSet extends ArkCommonMethodSet implements FormLinkAttribute {
+export class FormLinkModifier extends CommonMethodModifier implements FormLinkAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: FormLinkAttribute): void {
+    applyModifierPatch(peer: ArkFormLinkPeer): void {
+        super.applyModifierPatch(peer)
+    }
+    mergeModifier(modifier: FormLinkModifier): void {
+        super.mergeModifier(modifier)
     }
     public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -145,88 +125,83 @@ export class ArkFormLinkSet extends ArkCommonMethodSet implements FormLinkAttrib
 export class FormLinkOptions_serializer {
     public static write(buffer: SerializerBase, value: FormLinkOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_action  = value.action
-        valueSerializer.writeString(value_action)
-        const value_moduleName  = value.moduleName
-        let value_moduleName_type : int32 = RuntimeType.UNDEFINED
-        value_moduleName_type = runtimeType(value_moduleName)
-        valueSerializer.writeInt8((value_moduleName_type).toChar())
-        if ((value_moduleName_type) != (RuntimeType.UNDEFINED)) {
-            const value_moduleName_value  = value_moduleName!
-            valueSerializer.writeString(value_moduleName_value)
+        const valueHolderForAction  = value.action
+        valueSerializer.writeString(valueHolderForAction)
+        const valueHolderForModuleName  = value.moduleName
+        if (valueHolderForModuleName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModuleNameTmpValue  = valueHolderForModuleName!
+            valueSerializer.writeString(valueHolderForModuleNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_bundleName  = value.bundleName
-        let value_bundleName_type : int32 = RuntimeType.UNDEFINED
-        value_bundleName_type = runtimeType(value_bundleName)
-        valueSerializer.writeInt8((value_bundleName_type).toChar())
-        if ((value_bundleName_type) != (RuntimeType.UNDEFINED)) {
-            const value_bundleName_value  = value_bundleName!
-            valueSerializer.writeString(value_bundleName_value)
+        const valueHolderForBundleName  = value.bundleName
+        if (valueHolderForBundleName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBundleNameTmpValue  = valueHolderForBundleName!
+            valueSerializer.writeString(valueHolderForBundleNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_abilityName  = value.abilityName
-        let value_abilityName_type : int32 = RuntimeType.UNDEFINED
-        value_abilityName_type = runtimeType(value_abilityName)
-        valueSerializer.writeInt8((value_abilityName_type).toChar())
-        if ((value_abilityName_type) != (RuntimeType.UNDEFINED)) {
-            const value_abilityName_value  = value_abilityName!
-            valueSerializer.writeString(value_abilityName_value)
+        const valueHolderForAbilityName  = value.abilityName
+        if (valueHolderForAbilityName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAbilityNameTmpValue  = valueHolderForAbilityName!
+            valueSerializer.writeString(valueHolderForAbilityNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_uri  = value.uri
-        let value_uri_type : int32 = RuntimeType.UNDEFINED
-        value_uri_type = runtimeType(value_uri)
-        valueSerializer.writeInt8((value_uri_type).toChar())
-        if ((value_uri_type) != (RuntimeType.UNDEFINED)) {
-            const value_uri_value  = value_uri!
-            valueSerializer.writeString(value_uri_value)
+        const valueHolderForUri  = value.uri
+        if (valueHolderForUri !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUriTmpValue  = valueHolderForUri!
+            valueSerializer.writeString(valueHolderForUriTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_params  = value.params
-        let value_params_type : int32 = RuntimeType.UNDEFINED
-        value_params_type = runtimeType(value_params)
-        valueSerializer.writeInt8((value_params_type).toChar())
-        if ((value_params_type) != (RuntimeType.UNDEFINED)) {
-            const value_params_value  = value_params!
-            valueSerializer.holdAndWriteObject(value_params_value)
+        const valueHolderForParams  = value.params
+        if (valueHolderForParams !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParamsTmpValue  = valueHolderForParams!
+            valueSerializer.holdAndWriteObject(valueHolderForParamsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FormLinkOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const action_result : string = (valueDeserializer.readString() as string)
-        const moduleName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let moduleName_buf : string | undefined
-        if ((moduleName_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            moduleName_buf = (valueDeserializer.readString() as string)
+        const actionTmpResult : string = (valueDeserializer.readString() as string)
+        const moduleNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let moduleNameTmpBuf : string | undefined
+        if ((moduleNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            moduleNameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const moduleName_result : string | undefined = moduleName_buf
-        const bundleName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let bundleName_buf : string | undefined
-        if ((bundleName_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            bundleName_buf = (valueDeserializer.readString() as string)
+        const moduleNameTmpResult : string | undefined = moduleNameTmpBuf
+        const bundleNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let bundleNameTmpBuf : string | undefined
+        if ((bundleNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            bundleNameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const bundleName_result : string | undefined = bundleName_buf
-        const abilityName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let abilityName_buf : string | undefined
-        if ((abilityName_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            abilityName_buf = (valueDeserializer.readString() as string)
+        const bundleNameTmpResult : string | undefined = bundleNameTmpBuf
+        const abilityNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let abilityNameTmpBuf : string | undefined
+        if ((abilityNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            abilityNameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const abilityName_result : string | undefined = abilityName_buf
-        const uri_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let uri_buf : string | undefined
-        if ((uri_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            uri_buf = (valueDeserializer.readString() as string)
+        const abilityNameTmpResult : string | undefined = abilityNameTmpBuf
+        const uriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let uriTmpBuf : string | undefined
+        if ((uriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            uriTmpBuf = (valueDeserializer.readString() as string)
         }
-        const uri_result : string | undefined = uri_buf
-        const params_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let params_buf : Object | undefined
-        if ((params_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            params_buf = (valueDeserializer.readObject() as object)
+        const uriTmpResult : string | undefined = uriTmpBuf
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paramsTmpBuf : Object | undefined
+        if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paramsTmpBuf = (valueDeserializer.readObject() as object)
         }
-        const params_result : Object | undefined = params_buf
-        let value : FormLinkOptions = ({action: action_result, moduleName: moduleName_result, bundleName: bundleName_result, abilityName: abilityName_result, uri: uri_result, params: params_result} as FormLinkOptions)
+        const paramsTmpResult : Object | undefined = paramsTmpBuf
+        let value : FormLinkOptions = ({action: actionTmpResult, moduleName: moduleNameTmpResult, bundleName: bundleNameTmpResult, abilityName: abilityNameTmpResult, uri: uriTmpResult, params: paramsTmpResult} as FormLinkOptions)
         return value
     }
 }

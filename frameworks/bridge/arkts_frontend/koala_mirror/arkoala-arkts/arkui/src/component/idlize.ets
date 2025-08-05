@@ -16,15 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ResourceStr, ConstraintSizeOptions } from "./units"
-import { Color, FontStyle, FontWeight, TextOverflow, TextCase } from "./enums"
+import { Color } from "./enums"
 import { ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
@@ -40,17 +39,20 @@ import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
 import { image } from "./../generated/ohos.multimedia.image"
+import { FontOptions_serializer, FontInfo_serializer, FontOptions, FontInfo } from "./../generated/ohos.font"
+import { MeasureOptions_serializer, MeasureOptions } from "./../generated/ohos.measure"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { Frame_serializer, Frame, Size, Size_serializer } from "./../generated/arkui.Graphics"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { curves, curves_ICurve_serializer } from "./../generated/ohos.curves"
 import { CustomDialogController } from "./customDialogController"
 import { CustomBuilder } from "./builder"
-import { text } from "./../generated/ohos.graphics.text"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 import { GlobalScope } from "./../generated/GlobalScope"
 export class AnimationExtender {
     private static SetClipRect_serialize(node: KPointer, x: float, y: float, width: float, height: float): void {
@@ -145,22 +147,18 @@ export class BaseShape implements MaterializedBase {
     }
     private width_serialize(width: Length): BaseShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let width_type : int32 = RuntimeType.UNDEFINED
-        width_type = runtimeType(width)
-        if (RuntimeType.STRING == width_type) {
+        if (width instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const width_0  = width as string
-            thisSerializer.writeString(width_0)
-        }
-        else if (RuntimeType.NUMBER == width_type) {
+            const widthForIdx0  = width as string
+            thisSerializer.writeString(widthForIdx0)
+        } else if (width instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const width_1  = width as number
-            thisSerializer.writeNumber(width_1)
-        }
-        else if (RuntimeType.OBJECT == width_type) {
+            const widthForIdx1  = width as number
+            thisSerializer.writeNumber(widthForIdx1)
+        } else if (width instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const width_2  = width as Resource
-            Resource_serializer.write(thisSerializer, width_2)
+            const widthForIdx2  = width as Resource
+            Resource_serializer.write(thisSerializer, widthForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._BaseShape_width(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -169,22 +167,18 @@ export class BaseShape implements MaterializedBase {
     }
     private height_serialize(height: Length): BaseShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let height_type : int32 = RuntimeType.UNDEFINED
-        height_type = runtimeType(height)
-        if (RuntimeType.STRING == height_type) {
+        if (height instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const height_0  = height as string
-            thisSerializer.writeString(height_0)
-        }
-        else if (RuntimeType.NUMBER == height_type) {
+            const heightForIdx0  = height as string
+            thisSerializer.writeString(heightForIdx0)
+        } else if (height instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const height_1  = height as number
-            thisSerializer.writeNumber(height_1)
-        }
-        else if (RuntimeType.OBJECT == height_type) {
+            const heightForIdx1  = height as number
+            thisSerializer.writeNumber(heightForIdx1)
+        } else if (height instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const height_2  = height as Resource
-            Resource_serializer.write(thisSerializer, height_2)
+            const heightForIdx2  = height as Resource
+            Resource_serializer.write(thisSerializer, heightForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._BaseShape_height(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -325,27 +319,22 @@ export class CommonShape implements MaterializedBase {
     }
     private fill_serialize(color: ResourceColor): CommonShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
-        color_type = runtimeType(color)
-        if (TypeChecker.isColor(color)) {
+        if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
-            const color_0  = color as Color
-            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        }
-        else if (RuntimeType.NUMBER == color_type) {
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(colorForIdx0))
+        } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const color_1  = color as number
-            thisSerializer.writeNumber(color_1)
-        }
-        else if (RuntimeType.STRING == color_type) {
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
-            const color_2  = color as string
-            thisSerializer.writeString(color_2)
-        }
-        else if (RuntimeType.OBJECT == color_type) {
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
             thisSerializer.writeInt8((3).toChar())
-            const color_3  = color as Resource
-            Resource_serializer.write(thisSerializer, color_3)
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         const retval  = ArkUIGeneratedNativeModule._CommonShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -369,12 +358,18 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierButton(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierButton_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierButton(node)
+    }
     private static contentModifierCheckBox_serialize(node: KPointer, contentModifier: ContentModifier<CheckBoxConfiguration>, builder: ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         thisSerializer.holdAndWriteCallback(builder)
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierCheckBox(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static resetContentModifierCheckBox_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierCheckBox(node)
     }
     private static contentModifierDataPanel_serialize(node: KPointer, contentModifier: ContentModifier<DataPanelConfiguration>, builder: ((parentNode: KPointer,config: DataPanelConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -383,12 +378,18 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierDataPanel(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierDataPanel_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierDataPanel(node)
+    }
     private static contentModifierGauge_serialize(node: KPointer, contentModifier: ContentModifier<GaugeConfiguration>, builder: ((parentNode: KPointer,config: GaugeConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         thisSerializer.holdAndWriteCallback(builder)
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierGauge(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static resetContentModifierGauge_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierGauge(node)
     }
     private static contentModifierLoadingProgress_serialize(node: KPointer, contentModifier: ContentModifier<LoadingProgressConfiguration>, builder: ((parentNode: KPointer,config: LoadingProgressConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -397,12 +398,18 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierLoadingProgress(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierLoadingProgress_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierLoadingProgress(node)
+    }
     private static contentModifierProgress_serialize(node: KPointer, contentModifier: ContentModifier<ProgressConfiguration>, builder: ((parentNode: KPointer,config: ProgressConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         thisSerializer.holdAndWriteCallback(builder)
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierProgress(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static resetContentModifierProgress_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierProgress(node)
     }
     private static contentModifierRadio_serialize(node: KPointer, contentModifier: ContentModifier<RadioConfiguration>, builder: ((parentNode: KPointer,config: RadioConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -411,12 +418,18 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierRadio(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierRadio_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierRadio(node)
+    }
     private static contentModifierRating_serialize(node: KPointer, contentModifier: ContentModifier<RatingConfiguration>, builder: ((parentNode: KPointer,config: RatingConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         thisSerializer.holdAndWriteCallback(builder)
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierRating(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static resetContentModifierRating_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierRating(node)
     }
     private static contentModifierMenuItem_serialize(node: KPointer, contentModifier: ContentModifier<MenuItemConfiguration>, builder: ((parentNode: KPointer,config: MenuItemConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -425,12 +438,18 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierMenuItem(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierMenuItem_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierMenuItem(node)
+    }
     private static contentModifierSlider_serialize(node: KPointer, contentModifier: ContentModifier<SliderConfiguration>, builder: ((parentNode: KPointer,config: SliderConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         thisSerializer.holdAndWriteCallback(builder)
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierSlider(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static resetContentModifierSlider_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierSlider(node)
     }
     private static contentModifierTextClock_serialize(node: KPointer, contentModifier: ContentModifier<TextClockConfiguration>, builder: ((parentNode: KPointer,config: TextClockConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -439,12 +458,18 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierTextClock(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierTextClock_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierTextClock(node)
+    }
     private static contentModifierTextTimer_serialize(node: KPointer, contentModifier: ContentModifier<TextTimerConfiguration>, builder: ((parentNode: KPointer,config: TextTimerConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         thisSerializer.holdAndWriteCallback(builder)
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierTextTimer(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static resetContentModifierTextTimer_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierTextTimer(node)
     }
     private static contentModifierToggle_serialize(node: KPointer, contentModifier: ContentModifier<ToggleConfiguration>, builder: ((parentNode: KPointer,config: ToggleConfiguration) => KPointer)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -453,11 +478,19 @@ export class ContentModifierHelper {
         ArkUIGeneratedNativeModule._ContentModifierHelper_contentModifierToggle(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static resetContentModifierToggle_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._ContentModifierHelper_resetContentModifierToggle(node)
+    }
     public static contentModifierButton(node: KPointer, contentModifier: ContentModifier<ButtonConfiguration>, builder: ((parentNode: KPointer,config: ButtonConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<ButtonConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: ButtonConfiguration) => KPointer))
         ContentModifierHelper.contentModifierButton_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierButton(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierButton_serialize(node_casted)
         return
     }
     public static contentModifierCheckBox(node: KPointer, contentModifier: ContentModifier<CheckBoxConfiguration>, builder: ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer)): void {
@@ -467,11 +500,21 @@ export class ContentModifierHelper {
         ContentModifierHelper.contentModifierCheckBox_serialize(node_casted, contentModifier_casted, builder_casted)
         return
     }
+    public static resetContentModifierCheckBox(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierCheckBox_serialize(node_casted)
+        return
+    }
     public static contentModifierDataPanel(node: KPointer, contentModifier: ContentModifier<DataPanelConfiguration>, builder: ((parentNode: KPointer,config: DataPanelConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<DataPanelConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: DataPanelConfiguration) => KPointer))
         ContentModifierHelper.contentModifierDataPanel_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierDataPanel(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierDataPanel_serialize(node_casted)
         return
     }
     public static contentModifierGauge(node: KPointer, contentModifier: ContentModifier<GaugeConfiguration>, builder: ((parentNode: KPointer,config: GaugeConfiguration) => KPointer)): void {
@@ -481,11 +524,21 @@ export class ContentModifierHelper {
         ContentModifierHelper.contentModifierGauge_serialize(node_casted, contentModifier_casted, builder_casted)
         return
     }
+    public static resetContentModifierGauge(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierGauge_serialize(node_casted)
+        return
+    }
     public static contentModifierLoadingProgress(node: KPointer, contentModifier: ContentModifier<LoadingProgressConfiguration>, builder: ((parentNode: KPointer,config: LoadingProgressConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<LoadingProgressConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: LoadingProgressConfiguration) => KPointer))
         ContentModifierHelper.contentModifierLoadingProgress_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierLoadingProgress(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierLoadingProgress_serialize(node_casted)
         return
     }
     public static contentModifierProgress(node: KPointer, contentModifier: ContentModifier<ProgressConfiguration>, builder: ((parentNode: KPointer,config: ProgressConfiguration) => KPointer)): void {
@@ -495,11 +548,21 @@ export class ContentModifierHelper {
         ContentModifierHelper.contentModifierProgress_serialize(node_casted, contentModifier_casted, builder_casted)
         return
     }
+    public static resetContentModifierProgress(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierProgress_serialize(node_casted)
+        return
+    }
     public static contentModifierRadio(node: KPointer, contentModifier: ContentModifier<RadioConfiguration>, builder: ((parentNode: KPointer,config: RadioConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<RadioConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: RadioConfiguration) => KPointer))
         ContentModifierHelper.contentModifierRadio_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierRadio(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierRadio_serialize(node_casted)
         return
     }
     public static contentModifierRating(node: KPointer, contentModifier: ContentModifier<RatingConfiguration>, builder: ((parentNode: KPointer,config: RatingConfiguration) => KPointer)): void {
@@ -509,11 +572,21 @@ export class ContentModifierHelper {
         ContentModifierHelper.contentModifierRating_serialize(node_casted, contentModifier_casted, builder_casted)
         return
     }
+    public static resetContentModifierRating(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierRating_serialize(node_casted)
+        return
+    }
     public static contentModifierMenuItem(node: KPointer, contentModifier: ContentModifier<MenuItemConfiguration>, builder: ((parentNode: KPointer,config: MenuItemConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<MenuItemConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: MenuItemConfiguration) => KPointer))
         ContentModifierHelper.contentModifierMenuItem_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierMenuItem(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierMenuItem_serialize(node_casted)
         return
     }
     public static contentModifierSlider(node: KPointer, contentModifier: ContentModifier<SliderConfiguration>, builder: ((parentNode: KPointer,config: SliderConfiguration) => KPointer)): void {
@@ -523,11 +596,21 @@ export class ContentModifierHelper {
         ContentModifierHelper.contentModifierSlider_serialize(node_casted, contentModifier_casted, builder_casted)
         return
     }
+    public static resetContentModifierSlider(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierSlider_serialize(node_casted)
+        return
+    }
     public static contentModifierTextClock(node: KPointer, contentModifier: ContentModifier<TextClockConfiguration>, builder: ((parentNode: KPointer,config: TextClockConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<TextClockConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: TextClockConfiguration) => KPointer))
         ContentModifierHelper.contentModifierTextClock_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierTextClock(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierTextClock_serialize(node_casted)
         return
     }
     public static contentModifierTextTimer(node: KPointer, contentModifier: ContentModifier<TextTimerConfiguration>, builder: ((parentNode: KPointer,config: TextTimerConfiguration) => KPointer)): void {
@@ -537,11 +620,21 @@ export class ContentModifierHelper {
         ContentModifierHelper.contentModifierTextTimer_serialize(node_casted, contentModifier_casted, builder_casted)
         return
     }
+    public static resetContentModifierTextTimer(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierTextTimer_serialize(node_casted)
+        return
+    }
     public static contentModifierToggle(node: KPointer, contentModifier: ContentModifier<ToggleConfiguration>, builder: ((parentNode: KPointer,config: ToggleConfiguration) => KPointer)): void {
         const node_casted = node as (KPointer)
         const contentModifier_casted = contentModifier as (ContentModifier<ToggleConfiguration>)
         const builder_casted = builder as (((parentNode: KPointer,config: ToggleConfiguration) => KPointer))
         ContentModifierHelper.contentModifierToggle_serialize(node_casted, contentModifier_casted, builder_casted)
+        return
+    }
+    public static resetContentModifierToggle(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        ContentModifierHelper.resetContentModifierToggle_serialize(node_casted)
         return
     }
 }
@@ -579,12 +672,12 @@ export class GlobalScope_ohos_arkui_componentSnapshot {
     private static get_serialize(id: string, callback: ((result: image.PixelMap) => void), options?: SnapshotOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback)
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            SnapshotOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SnapshotOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_componentSnapshot_get(id, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -600,12 +693,12 @@ export class GlobalScope_ohos_arkui_componentSnapshot {
 export class GlobalScope_ohos_arkui_performanceMonitor {
     private static begin_serialize(scene: string, startInputType: PerfMonitorActionType, note?: string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let note_type : int32 = RuntimeType.UNDEFINED
-        note_type = runtimeType(note)
-        thisSerializer.writeInt8((note_type).toChar())
-        if ((note_type) != (RuntimeType.UNDEFINED)) {
-            const note_value  = note!
-            thisSerializer.writeString(note_value)
+        if (note !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const noteTmpValue  = note!
+            thisSerializer.writeString(noteTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_begin(scene, TypeChecker.PerfMonitorActionType_ToNumeric(startInputType), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -646,10 +739,10 @@ export class GlobalScope_ohos_font {
     private static getSystemFontList_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getSystemFontList()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<string> = new Array<string>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
         return returnResult
@@ -785,10 +878,10 @@ export class NavExtender {
     private static getIdByName_serialize(pathStack: NavPathStack, name: string): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_getIdByName(toPeerPtr(pathStack), name)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<string> = new Array<string>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
         return returnResult
@@ -934,12 +1027,12 @@ export class RestrictedWorker implements MaterializedBase {
     }
     static construct(scriptURL: string, options?: WorkerOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            WorkerOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            WorkerOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._RestrictedWorker_construct(scriptURL, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1055,9 +1148,9 @@ export class RestrictedWorker implements MaterializedBase {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(message)
         thisSerializer.writeInt32((transfer.length).toInt())
-        for (let transfer_counter_i = 0; transfer_counter_i < transfer.length; transfer_counter_i++) {
-            const transfer_element : NativeBuffer = transfer[transfer_counter_i]
-            thisSerializer.writeBuffer(transfer_element)
+        for (let transferCounterI = 0; transferCounterI < transfer.length; transferCounterI++) {
+            const transferTmpElement : NativeBuffer = transfer[transferCounterI]
+            thisSerializer.writeBuffer(transferTmpElement)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_postMessage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1065,12 +1158,12 @@ export class RestrictedWorker implements MaterializedBase {
     private postMessage1_serialize(message: Object, options?: PostMessageOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(message)
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            PostMessageOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PostMessageOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_postMessage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1078,16 +1171,16 @@ export class RestrictedWorker implements MaterializedBase {
     private postMessageWithSharedSendable_serialize(message: Object, transfer?: Array<NativeBuffer>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(message)
-        let transfer_type : int32 = RuntimeType.UNDEFINED
-        transfer_type = runtimeType(transfer)
-        thisSerializer.writeInt8((transfer_type).toChar())
-        if ((transfer_type) != (RuntimeType.UNDEFINED)) {
-            const transfer_value  = transfer!
-            thisSerializer.writeInt32((transfer_value.length).toInt())
-            for (let transfer_value_counter_i = 0; transfer_value_counter_i < transfer_value.length; transfer_value_counter_i++) {
-                const transfer_value_element : NativeBuffer = transfer_value[transfer_value_counter_i]
-                thisSerializer.writeBuffer(transfer_value_element)
+        if (transfer !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const transferTmpValue  = transfer!
+            thisSerializer.writeInt32((transferTmpValue.length).toInt())
+            for (let transferTmpValueCounterI = 0; transferTmpValueCounterI < transferTmpValue.length; transferTmpValueCounterI++) {
+                const transferTmpValueTmpElement : NativeBuffer = transferTmpValue[transferTmpValueCounterI]
+                thisSerializer.writeBuffer(transferTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_postMessageWithSharedSendable(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1106,12 +1199,12 @@ export class RestrictedWorker implements MaterializedBase {
     }
     private off_serialize(Type: string, listener?: WorkerEventListener): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let listener_type : int32 = RuntimeType.UNDEFINED
-        listener_type = runtimeType(listener)
-        thisSerializer.writeInt8((listener_type).toChar())
-        if ((listener_type) != (RuntimeType.UNDEFINED)) {
-            const listener_value  = listener!
-            WorkerEventListener_serializer.write(thisSerializer, listener_value)
+        if (listener !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const listenerTmpValue  = listener!
+            WorkerEventListener_serializer.write(thisSerializer, listenerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_off(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1134,12 +1227,12 @@ export class RestrictedWorker implements MaterializedBase {
     }
     private removeEventListener_serialize(Type: string, callback_?: WorkerEventListener): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let callback__type : int32 = RuntimeType.UNDEFINED
-        callback__type = runtimeType(callback_)
-        thisSerializer.writeInt8((callback__type).toChar())
-        if ((callback__type) != (RuntimeType.UNDEFINED)) {
-            const callback__value  = callback_!
-            WorkerEventListener_serializer.write(thisSerializer, callback__value)
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            WorkerEventListener_serializer.write(thisSerializer, callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_removeEventListener(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1155,12 +1248,12 @@ export class RestrictedWorker implements MaterializedBase {
     }
     private unregisterGlobalCallObject_serialize(instanceName?: string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let instanceName_type : int32 = RuntimeType.UNDEFINED
-        instanceName_type = runtimeType(instanceName)
-        thisSerializer.writeInt8((instanceName_type).toChar())
-        if ((instanceName_type) != (RuntimeType.UNDEFINED)) {
-            const instanceName_value  = instanceName!
-            thisSerializer.writeString(instanceName_value)
+        if (instanceName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const instanceNameTmpValue  = instanceName!
+            thisSerializer.writeString(instanceNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_unregisterGlobalCallObject(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1170,32 +1263,32 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onexit_Callback | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (code: number):void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    buffer__argsSerializer.writeNumber(code);
-    InteropNativeModule._CallCallback(-2095497263, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (code: number):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                buffer_BufArgsSerializer.writeNumber(code);
+                InteropNativeModule._CallCallback(-2095497263, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : RestrictedWorker_onexit_Callback | undefined = buffer
         return returnResult
     }
     private setOnexit_serialize(onexit: RestrictedWorker_onexit_Callback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let onexit_type : int32 = RuntimeType.UNDEFINED
-        onexit_type = runtimeType(onexit)
-        thisSerializer.writeInt8((onexit_type).toChar())
-        if ((onexit_type) != (RuntimeType.UNDEFINED)) {
-            const onexit_value  = onexit!
-            thisSerializer.holdAndWriteCallback(onexit_value)
+        if (onexit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onexitTmpValue  = onexit!
+            thisSerializer.holdAndWriteCallback(onexitTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_setOnexit(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1205,32 +1298,32 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onerror_Callback | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (ev: ErrorEvent):void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    ErrorEvent_serializer.write(buffer__argsSerializer, ev);
-    InteropNativeModule._CallCallback(-1213708823, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (ev: ErrorEvent):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                ErrorEvent_serializer.write(buffer_BufArgsSerializer, ev);
+                InteropNativeModule._CallCallback(-1213708823, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : RestrictedWorker_onerror_Callback | undefined = buffer
         return returnResult
     }
     private setOnerror_serialize(onerror: RestrictedWorker_onerror_Callback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let onerror_type : int32 = RuntimeType.UNDEFINED
-        onerror_type = runtimeType(onerror)
-        thisSerializer.writeInt8((onerror_type).toChar())
-        if ((onerror_type) != (RuntimeType.UNDEFINED)) {
-            const onerror_value  = onerror!
-            thisSerializer.holdAndWriteCallback(onerror_value)
+        if (onerror !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onerrorTmpValue  = onerror!
+            thisSerializer.holdAndWriteCallback(onerrorTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_setOnerror(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1240,32 +1333,32 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onmessage_Callback | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (event: MessageEvents):void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    MessageEvents_serializer.write(buffer__argsSerializer, event);
-    InteropNativeModule._CallCallback(1614214490, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (event: MessageEvents):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                MessageEvents_serializer.write(buffer_BufArgsSerializer, event);
+                InteropNativeModule._CallCallback(1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
         return returnResult
     }
     private setOnmessage_serialize(onmessage: RestrictedWorker_onmessage_Callback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let onmessage_type : int32 = RuntimeType.UNDEFINED
-        onmessage_type = runtimeType(onmessage)
-        thisSerializer.writeInt8((onmessage_type).toChar())
-        if ((onmessage_type) != (RuntimeType.UNDEFINED)) {
-            const onmessage_value  = onmessage!
-            thisSerializer.holdAndWriteCallback(onmessage_value)
+        if (onmessage !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onmessageTmpValue  = onmessage!
+            thisSerializer.holdAndWriteCallback(onmessageTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_setOnmessage(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1275,32 +1368,32 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onmessage_Callback | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (event: MessageEvents):void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    MessageEvents_serializer.write(buffer__argsSerializer, event);
-    InteropNativeModule._CallCallback(1614214490, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (event: MessageEvents):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                MessageEvents_serializer.write(buffer_BufArgsSerializer, event);
+                InteropNativeModule._CallCallback(1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
         return returnResult
     }
     private setOnmessageerror_serialize(onmessageerror: RestrictedWorker_onmessage_Callback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let onmessageerror_type : int32 = RuntimeType.UNDEFINED
-        onmessageerror_type = runtimeType(onmessageerror)
-        thisSerializer.writeInt8((onmessageerror_type).toChar())
-        if ((onmessageerror_type) != (RuntimeType.UNDEFINED)) {
-            const onmessageerror_value  = onmessageerror!
-            thisSerializer.holdAndWriteCallback(onmessageerror_value)
+        if (onmessageerror !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onmessageerrorTmpValue  = onmessageerror!
+            thisSerializer.holdAndWriteCallback(onmessageerrorTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_setOnmessageerror(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1331,23 +1424,20 @@ export class Scene implements MaterializedBase {
     }
     private static load_serialize(uri?: ResourceStr): Promise<Scene> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let uri_type : int32 = RuntimeType.UNDEFINED
-        uri_type = runtimeType(uri)
-        thisSerializer.writeInt8((uri_type).toChar())
-        if ((uri_type) != (RuntimeType.UNDEFINED)) {
-            const uri_value  = uri!
-            let uri_value_type : int32 = RuntimeType.UNDEFINED
-            uri_value_type = runtimeType(uri_value)
-            if (RuntimeType.STRING == uri_value_type) {
+        if (uri !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const uriTmpValue  = uri!
+            if (uriTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const uri_value_0  = uri_value as string
-                thisSerializer.writeString(uri_value_0)
-            }
-            else if (RuntimeType.OBJECT == uri_value_type) {
+                const uriTmpValueForIdx0  = uriTmpValue as string
+                thisSerializer.writeString(uriTmpValueForIdx0)
+            } else if (uriTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const uri_value_1  = uri_value as Resource
-                Resource_serializer.write(thisSerializer, uri_value_1)
+                const uriTmpValueForIdx1  = uriTmpValue as Resource
+                Resource_serializer.write(thisSerializer, uriTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromise<Scene>()[0]
         ArkUIGeneratedNativeModule._Scene_load(thisSerializer.asBuffer(), thisSerializer.length())
@@ -1364,6 +1454,17 @@ export class Scene implements MaterializedBase {
     }
     private destroy_serialize(): void {
         ArkUIGeneratedNativeModule._Scene_destroy(this.peer!.ptr)
+    }
+}
+export class ScreenshotService {
+    private static requestScreenshot_serialize(target: string, name: string): boolean {
+        const retval  = ArkUIGeneratedNativeModule._ScreenshotService_requestScreenshot(target, name)
+        return retval
+    }
+    public static requestScreenshot(target: string, name: string): boolean {
+        const target_casted = target as (string)
+        const name_casted = name as (string)
+        return ScreenshotService.requestScreenshot_serialize(target_casted, name_casted)
     }
 }
 export class StateStylesOps {
@@ -1397,9 +1498,9 @@ export class SystemOps {
     private static getResourceId_serialize(bundleName: string, moduleName: string, params: Array<string>): int32 {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((params.length).toInt())
-        for (let params_counter_i = 0; params_counter_i < params.length; params_counter_i++) {
-            const params_element : string = params[params_counter_i]
-            thisSerializer.writeString(params_element)
+        for (let paramsCounterI = 0; paramsCounterI < params.length; paramsCounterI++) {
+            const paramsTmpElement : string = params[paramsCounterI]
+            thisSerializer.writeString(paramsTmpElement)
         }
         const retval  = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleName, moduleName, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1421,10 +1522,10 @@ export class SystemOps {
         const retval  = ArkUIGeneratedNativeModule._SystemOps_colorMetricsResourceColor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<number> = new Array<number>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
         }
         const returnResult : Array<number> = buffer
         return returnResult
@@ -1486,7 +1587,7 @@ export class ArkRootPeer extends PeerNode {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRootPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Root_construct(peerId, flags)
-        const _peer  = new ArkRootPeer(_peerPtr, peerId, "Root", flags)
+        const _peer  = new ArkRootPeer(_peerPtr, peerId, 'Root', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -1498,7 +1599,7 @@ export class ArkComponentRootPeer extends PeerNode {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkComponentRootPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._ComponentRoot_construct(peerId, flags)
-        const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, "ComponentRoot", flags)
+        const _peer  = new ArkComponentRootPeer(_peerPtr, peerId, 'ComponentRoot', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -1510,7 +1611,7 @@ export class ArkCustomLayoutRootPeer extends PeerNode {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCustomLayoutRootPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._CustomLayoutRoot_construct(peerId, flags)
-        const _peer  = new ArkCustomLayoutRootPeer(_peerPtr, peerId, "CustomLayoutRoot", flags)
+        const _peer  = new ArkCustomLayoutRootPeer(_peerPtr, peerId, 'CustomLayoutRoot', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -1705,39 +1806,6 @@ export enum PerfMonitorSourceType {
     PERF_JOYSTICK_EVENT = 3,
     PERF_KEY_EVENT = 4
 }
-export interface FontOptions {
-    familyName: string | Resource;
-    familySrc: string | Resource;
-}
-export interface MeasureOptions {
-    textContent: string | Resource;
-    constraintWidth?: number | string | Resource;
-    fontSize?: number | string | Resource;
-    fontStyle?: number | FontStyle;
-    fontWeight?: number | string | FontWeight;
-    fontFamily?: string | Resource;
-    letterSpacing?: number | string;
-    textAlign?: text.TextAlign;
-    overflow?: number | TextOverflow;
-    maxLines?: number;
-    lineHeight?: number | string | Resource;
-    baselineOffset?: number | string;
-    textCase?: number | TextCase;
-    textIndent?: number | string;
-    wordBreak?: text.WordBreak;
-}
-export interface FontInfo {
-    path: string;
-    postScriptName: string;
-    fullName: string;
-    family: string;
-    subfamily: string;
-    weight: number;
-    width: number;
-    italic: boolean;
-    monoSpace: boolean;
-    symbolic: boolean;
-}
 export interface IndicatorStyle {
     height?: Length;
     width?: Length;
@@ -1763,8 +1831,6 @@ export class ArkRootStyle implements Root {
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: Root): void {
-    }
 }
 export interface ComponentRoot {
     attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
@@ -1774,8 +1840,6 @@ export interface ComponentRoot {
 export class ArkComponentRootStyle implements ComponentRoot {
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: ComponentRoot): void {
     }
 }
 export type Callback_onMeasureSize_SizeResult = (selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions) => SizeResult;
@@ -1803,12 +1867,6 @@ export class ArkCustomLayoutRootStyle implements CustomLayoutRoot {
     public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: CustomLayoutRoot): void {
-        if (this.subscribeOnMeasureSize_value !== undefined)
-            target.subscribeOnMeasureSize(this.subscribeOnMeasureSize_value!)
-        if (this.subscribeOnPlaceChildren_value !== undefined)
-            target.subscribeOnPlaceChildren(this.subscribeOnPlaceChildren_value!)
-    }
 }
 export interface TransformationMatrix {
     matrix4x4: Array<number>;
@@ -1817,50 +1875,24 @@ export class ArkRootComponent extends ComponentBase implements Root {
     getPeer(): ArkRootPeer {
         return (this.peer as ArkRootPeer)
     }
-    _modifier?: AttributeModifier<Root> | undefined
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
-        this._modifier = value
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
-    }
-}
-export function withRootStyle(receiver: Root, modifier: AttributeModifier<Root> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkRootStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<Root>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<Root>).applyNormalAttribute(style)
-        style.apply(receiver)
     }
 }
 export class ArkComponentRootComponent extends ComponentBase implements ComponentRoot {
     getPeer(): ArkComponentRootPeer {
         return (this.peer as ArkComponentRootPeer)
     }
-    _modifier?: AttributeModifier<ComponentRoot> | undefined
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
-        this._modifier = value
         return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
-    }
-}
-export function withComponentRootStyle(receiver: ComponentRoot, modifier: AttributeModifier<ComponentRoot> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkComponentRootStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<ComponentRoot>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<ComponentRoot>).applyNormalAttribute(style)
-        style.apply(receiver)
     }
 }
 export class ArkCustomLayoutRootComponent extends ComponentBase implements CustomLayoutRoot {
@@ -1883,9 +1915,7 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
         }
         return this
     }
-    _modifier?: AttributeModifier<CustomLayoutRoot> | undefined
     public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
-        this._modifier = value
         return this
     }
     public applyAttributesFinish(): void {
@@ -1893,63 +1923,50 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
         super.applyAttributesFinish()
     }
 }
-export function withCustomLayoutRootStyle(receiver: CustomLayoutRoot, modifier: AttributeModifier<CustomLayoutRoot> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkCustomLayoutRootStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CustomLayoutRoot>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CustomLayoutRoot>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-export class ArkRootSet implements Root {
+export class RootModifier implements Root {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: Root): void {
+    applyModifierPatch(peer: ArkRootPeer): void {
+    }
+    mergeModifier(modifier: RootModifier): void {
     }
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
         throw new Error("Not implemented")
     }
 }
-export class ArkComponentRootSet implements ComponentRoot {
+export class ComponentRootModifier implements ComponentRoot {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: ComponentRoot): void {
+    applyModifierPatch(peer: ArkComponentRootPeer): void {
+    }
+    mergeModifier(modifier: ComponentRootModifier): void {
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
         throw new Error("Not implemented")
     }
 }
-export class ArkCustomLayoutRootSet implements CustomLayoutRoot {
+export class CustomLayoutRootModifier implements CustomLayoutRoot {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _subscribeOnMeasureSize_flag?: boolean
-    _subscribeOnMeasureSize0_value?: Callback_onMeasureSize_SizeResult
-    _subscribeOnPlaceChildren_flag?: boolean
-    _subscribeOnPlaceChildren0_value?: Callback_onPlaceChildren_Void
-    applyModifierPatch(component: CustomLayoutRoot): void {
-        if (this._subscribeOnMeasureSize_flag)
-            component.subscribeOnMeasureSize((this._subscribeOnMeasureSize0_value as Callback_onMeasureSize_SizeResult))
-        if (this._subscribeOnPlaceChildren_flag)
-            component.subscribeOnPlaceChildren((this._subscribeOnPlaceChildren0_value as Callback_onPlaceChildren_Void))
+    _subscribeOnMeasureSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _subscribeOnMeasureSize_0_0value?: Callback_onMeasureSize_SizeResult
+    _subscribeOnPlaceChildren_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _subscribeOnPlaceChildren_0_0value?: Callback_onPlaceChildren_Void
+    applyModifierPatch(peer: ArkCustomLayoutRootPeer): void {
     }
-    public subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
-        this._subscribeOnMeasureSize_flag = true
-        this._subscribeOnMeasureSize0_value = value
-        return this
+    mergeModifier(modifier: CustomLayoutRootModifier): void {
     }
-    public subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
-        this._subscribeOnPlaceChildren_flag = true
-        this._subscribeOnPlaceChildren0_value = value
-        return this
+    subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
+        throw new Error("Not implemented")
+    }
+    subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
+        throw new Error("Not implemented")
     }
     public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
         throw new Error("Not implemented")
@@ -1994,69 +2011,69 @@ export class CommonShape_serializer {
 export class Offset_componentutils_serializer {
     public static write(buffer: SerializerBase, value: Offset_componentutils): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): Offset_componentutils {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : Offset_componentutils = ({x: x_result, y: y_result} as Offset_componentutils)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Offset_componentutils = ({x: xTmpResult, y: yTmpResult} as Offset_componentutils)
         return value
     }
 }
 export class RotateResult_serializer {
     public static write(buffer: SerializerBase, value: RotateResult): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
-        const value_z  = value.z
-        valueSerializer.writeNumber(value_z)
-        const value_centerX  = value.centerX
-        valueSerializer.writeNumber(value_centerX)
-        const value_centerY  = value.centerY
-        valueSerializer.writeNumber(value_centerY)
-        const value_angle  = value.angle
-        valueSerializer.writeNumber(value_angle)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
+        const valueHolderForCenterX  = value.centerX
+        valueSerializer.writeNumber(valueHolderForCenterX)
+        const valueHolderForCenterY  = value.centerY
+        valueSerializer.writeNumber(valueHolderForCenterY)
+        const valueHolderForAngle  = value.angle
+        valueSerializer.writeNumber(valueHolderForAngle)
     }
     public static read(buffer: DeserializerBase): RotateResult {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        const z_result : number = (valueDeserializer.readNumber() as number)
-        const centerX_result : number = (valueDeserializer.readNumber() as number)
-        const centerY_result : number = (valueDeserializer.readNumber() as number)
-        const angle_result : number = (valueDeserializer.readNumber() as number)
-        let value : RotateResult = ({x: x_result, y: y_result, z: z_result, centerX: centerX_result, centerY: centerY_result, angle: angle_result} as RotateResult)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const angleTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : RotateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult, angle: angleTmpResult} as RotateResult)
         return value
     }
 }
 export class ScaleResult_serializer {
     public static write(buffer: SerializerBase, value: ScaleResult): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
-        const value_z  = value.z
-        valueSerializer.writeNumber(value_z)
-        const value_centerX  = value.centerX
-        valueSerializer.writeNumber(value_centerX)
-        const value_centerY  = value.centerY
-        valueSerializer.writeNumber(value_centerY)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
+        const valueHolderForCenterX  = value.centerX
+        valueSerializer.writeNumber(valueHolderForCenterX)
+        const valueHolderForCenterY  = value.centerY
+        valueSerializer.writeNumber(valueHolderForCenterY)
     }
     public static read(buffer: DeserializerBase): ScaleResult {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        const z_result : number = (valueDeserializer.readNumber() as number)
-        const centerX_result : number = (valueDeserializer.readNumber() as number)
-        const centerY_result : number = (valueDeserializer.readNumber() as number)
-        let value : ScaleResult = ({x: x_result, y: y_result, z: z_result, centerX: centerX_result, centerY: centerY_result} as ScaleResult)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ScaleResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult} as ScaleResult)
         return value
     }
 }
@@ -2074,19 +2091,19 @@ export class Scene_serializer {
 export class TranslateResult_serializer {
     public static write(buffer: SerializerBase, value: TranslateResult): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
-        const value_z  = value.z
-        valueSerializer.writeNumber(value_z)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
     }
     public static read(buffer: DeserializerBase): TranslateResult {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        const z_result : number = (valueDeserializer.readNumber() as number)
-        let value : TranslateResult = ({x: x_result, y: y_result, z: z_result} as TranslateResult)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : TranslateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateResult)
         return value
     }
 }
@@ -2100,1059 +2117,424 @@ export class WorkerEventListener_serializer {
 export class BuilderNodeOptions_serializer {
     public static write(buffer: SerializerBase, value: BuilderNodeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_selfIdealSize  = value.selfIdealSize
-        let value_selfIdealSize_type : int32 = RuntimeType.UNDEFINED
-        value_selfIdealSize_type = runtimeType(value_selfIdealSize)
-        valueSerializer.writeInt8((value_selfIdealSize_type).toChar())
-        if ((value_selfIdealSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_selfIdealSize_value  = value_selfIdealSize!
-            Size_serializer.write(valueSerializer, value_selfIdealSize_value)
+        const valueHolderForSelfIdealSize  = value.selfIdealSize
+        if (valueHolderForSelfIdealSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSelfIdealSizeTmpValue  = valueHolderForSelfIdealSize!
+            Size_serializer.write(valueSerializer, valueHolderForSelfIdealSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_type  = value.type
-        let value_type_type : int32 = RuntimeType.UNDEFINED
-        value_type_type = runtimeType(value_type)
-        valueSerializer.writeInt8((value_type_type).toChar())
-        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
-            const value_type_value  = value_type!
-            valueSerializer.writeNumber(value_type_value)
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = valueHolderForType!
+            valueSerializer.writeNumber(valueHolderForTypeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_surfaceId  = value.surfaceId
-        let value_surfaceId_type : int32 = RuntimeType.UNDEFINED
-        value_surfaceId_type = runtimeType(value_surfaceId)
-        valueSerializer.writeInt8((value_surfaceId_type).toChar())
-        if ((value_surfaceId_type) != (RuntimeType.UNDEFINED)) {
-            const value_surfaceId_value  = value_surfaceId!
-            valueSerializer.writeString(value_surfaceId_value)
+        const valueHolderForSurfaceId  = value.surfaceId
+        if (valueHolderForSurfaceId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSurfaceIdTmpValue  = valueHolderForSurfaceId!
+            valueSerializer.writeString(valueHolderForSurfaceIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): BuilderNodeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const selfIdealSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selfIdealSize_buf : Size | undefined
-        if ((selfIdealSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            selfIdealSize_buf = Size_serializer.read(valueDeserializer)
+        const selfIdealSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let selfIdealSizeTmpBuf : Size | undefined
+        if ((selfIdealSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            selfIdealSizeTmpBuf = Size_serializer.read(valueDeserializer)
         }
-        const selfIdealSize_result : Size | undefined = selfIdealSize_buf
-        const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let type_buf : number | undefined
-        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            type_buf = (valueDeserializer.readNumber() as number)
+        const selfIdealSizeTmpResult : Size | undefined = selfIdealSizeTmpBuf
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : number | undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const type_result : number | undefined = type_buf
-        const surfaceId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let surfaceId_buf : string | undefined
-        if ((surfaceId_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            surfaceId_buf = (valueDeserializer.readString() as string)
+        const typeTmpResult : number | undefined = typeTmpBuf
+        const surfaceIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let surfaceIdTmpBuf : string | undefined
+        if ((surfaceIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            surfaceIdTmpBuf = (valueDeserializer.readString() as string)
         }
-        const surfaceId_result : string | undefined = surfaceId_buf
-        let value : BuilderNodeOptions = ({selfIdealSize: selfIdealSize_result, type: type_result, surfaceId: surfaceId_result} as BuilderNodeOptions)
+        const surfaceIdTmpResult : string | undefined = surfaceIdTmpBuf
+        let value : BuilderNodeOptions = ({selfIdealSize: selfIdealSizeTmpResult, type: typeTmpResult, surfaceId: surfaceIdTmpResult} as BuilderNodeOptions)
         return value
     }
 }
 export class DoubleAnimationParam_serializer {
     public static write(buffer: SerializerBase, value: DoubleAnimationParam): void {
         let valueSerializer : SerializerBase = buffer
-        const value_propertyName  = value.propertyName
-        valueSerializer.writeString(value_propertyName)
-        const value_startValue  = value.startValue
-        valueSerializer.writeFloat32(value_startValue)
-        const value_endValue  = value.endValue
-        valueSerializer.writeFloat32(value_endValue)
-        const value_duration  = value.duration
-        valueSerializer.writeInt32(value_duration)
-        const value_delay  = value.delay
-        valueSerializer.writeInt32(value_delay)
-        const value_curve  = value.curve
-        let value_curve_type : int32 = RuntimeType.UNDEFINED
-        value_curve_type = runtimeType(value_curve)
-        if (TypeChecker.iscurves_Curve(value_curve)) {
+        const valueHolderForPropertyName  = value.propertyName
+        valueSerializer.writeString(valueHolderForPropertyName)
+        const valueHolderForStartValue  = value.startValue
+        valueSerializer.writeFloat32(valueHolderForStartValue)
+        const valueHolderForEndValue  = value.endValue
+        valueSerializer.writeFloat32(valueHolderForEndValue)
+        const valueHolderForDuration  = value.duration
+        valueSerializer.writeInt32(valueHolderForDuration)
+        const valueHolderForDelay  = value.delay
+        valueSerializer.writeInt32(valueHolderForDelay)
+        const valueHolderForCurve  = value.curve
+        if (valueHolderForCurve instanceof curves.Curve) {
             valueSerializer.writeInt8((0).toChar())
-            const value_curve_0  = value_curve as curves.Curve
-            valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_curve_0))
-        }
-        else if (RuntimeType.STRING == value_curve_type) {
+            const valueHolderForCurveForIdx0  = valueHolderForCurve as curves.Curve
+            valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(valueHolderForCurveForIdx0))
+        } else if (valueHolderForCurve instanceof string) {
             valueSerializer.writeInt8((1).toChar())
-            const value_curve_1  = value_curve as string
-            valueSerializer.writeString(value_curve_1)
-        }
-        else if (RuntimeType.OBJECT == value_curve_type) {
+            const valueHolderForCurveForIdx1  = valueHolderForCurve as string
+            valueSerializer.writeString(valueHolderForCurveForIdx1)
+        } else if (valueHolderForCurve instanceof curves.ICurve) {
             valueSerializer.writeInt8((2).toChar())
-            const value_curve_2  = value_curve as curves.ICurve
-            curves_ICurve_serializer.write(valueSerializer, value_curve_2)
+            const valueHolderForCurveForIdx2  = valueHolderForCurve as curves.ICurve
+            curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveForIdx2)
         }
-        const value_onProgress  = value.onProgress
-        let value_onProgress_type : int32 = RuntimeType.UNDEFINED
-        value_onProgress_type = runtimeType(value_onProgress)
-        valueSerializer.writeInt8((value_onProgress_type).toChar())
-        if ((value_onProgress_type) != (RuntimeType.UNDEFINED)) {
-            const value_onProgress_value  = value_onProgress!
-            valueSerializer.holdAndWriteCallback(value_onProgress_value)
+        const valueHolderForOnProgress  = value.onProgress
+        if (valueHolderForOnProgress !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnProgressTmpValue  = valueHolderForOnProgress!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnProgressTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_onFinish  = value.onFinish
-        let value_onFinish_type : int32 = RuntimeType.UNDEFINED
-        value_onFinish_type = runtimeType(value_onFinish)
-        valueSerializer.writeInt8((value_onFinish_type).toChar())
-        if ((value_onFinish_type) != (RuntimeType.UNDEFINED)) {
-            const value_onFinish_value  = value_onFinish!
-            valueSerializer.holdAndWriteCallback(value_onFinish_value)
+        const valueHolderForOnFinish  = value.onFinish
+        if (valueHolderForOnFinish !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnFinishTmpValue  = valueHolderForOnFinish!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnFinishTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DoubleAnimationParam {
         let valueDeserializer : DeserializerBase = buffer
-        const propertyName_result : string = (valueDeserializer.readString() as string)
-        const startValue_result : float = valueDeserializer.readFloat32()
-        const endValue_result : float = valueDeserializer.readFloat32()
-        const duration_result : int32 = valueDeserializer.readInt32()
-        const delay_result : int32 = valueDeserializer.readInt32()
-        const curve_buf_selector : int32 = valueDeserializer.readInt8()
-        let curve_buf : curves.Curve | string | curves.ICurve | undefined
-        if (curve_buf_selector == (0).toChar()) {
-            curve_buf = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
+        const propertyNameTmpResult : string = (valueDeserializer.readString() as string)
+        const startValueTmpResult : float = valueDeserializer.readFloat32()
+        const endValueTmpResult : float = valueDeserializer.readFloat32()
+        const durationTmpResult : int32 = valueDeserializer.readInt32()
+        const delayTmpResult : int32 = valueDeserializer.readInt32()
+        const curveTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined
+        if (curveTmpBufUnionSelector == (0).toChar()) {
+            curveTmpBuf = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
+        } else if (curveTmpBufUnionSelector == (1).toChar()) {
+            curveTmpBuf = (valueDeserializer.readString() as string)
+        } else if (curveTmpBufUnionSelector == (2).toChar()) {
+            curveTmpBuf = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+        } else {
+            throw new Error("One of the branches for curveTmpBuf has to be chosen through deserialisation.")
         }
-        else if (curve_buf_selector == (1).toChar()) {
-            curve_buf = (valueDeserializer.readString() as string)
+        const curveTmpResult : curves.Curve | string | curves.ICurve = (curveTmpBuf as curves.Curve | string | curves.ICurve)
+        const onProgressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onProgressTmpBuf : Callback_Extender_OnProgress | undefined
+        if ((onProgressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onProgressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onProgressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onProgressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onProgressTmpBuf = (value: float):void => {
+                const onProgressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onProgressTmpBuf_BufArgsSerializer.writeInt32(onProgressTmpBuf_BufResource.resourceId);
+                onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCall);
+                onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCallSync);
+                onProgressTmpBuf_BufArgsSerializer.writeFloat32(value);
+                InteropNativeModule._CallCallback(1264236374, onProgressTmpBuf_BufArgsSerializer.asBuffer(), onProgressTmpBuf_BufArgsSerializer.length());
+                onProgressTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        else if (curve_buf_selector == (2).toChar()) {
-            curve_buf = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+        const onProgressTmpResult : Callback_Extender_OnProgress | undefined = onProgressTmpBuf
+        const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onFinishTmpBuf : Callback_Extender_OnFinish | undefined
+        if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onFinishTmpBuf = ():void => {
+                const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallback(-733525640, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                onFinishTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        else {
-            throw new Error("One of the branches for curve_buf has to be chosen through deserialisation.")
-        }
-        const curve_result : curves.Curve | string | curves.ICurve = (curve_buf as curves.Curve | string | curves.ICurve)
-        const onProgress_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onProgress_buf : Callback_Extender_OnProgress | undefined
-        if ((onProgress_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onProgress_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onProgress_buf__call : KPointer = valueDeserializer.readPointer()
-            const onProgress_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onProgress_buf = (value: float):void => { 
-    const onProgress_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onProgress_buf__argsSerializer.writeInt32(onProgress_buf__resource.resourceId);
-    onProgress_buf__argsSerializer.writePointer(onProgress_buf__call);
-    onProgress_buf__argsSerializer.writePointer(onProgress_buf__callSync);
-    onProgress_buf__argsSerializer.writeFloat32(value);
-    InteropNativeModule._CallCallback(1264236374, onProgress_buf__argsSerializer.asBuffer(), onProgress_buf__argsSerializer.length());
-    onProgress_buf__argsSerializer.release();
-    return; }
-        }
-        const onProgress_result : Callback_Extender_OnProgress | undefined = onProgress_buf
-        const onFinish_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onFinish_buf : Callback_Extender_OnFinish | undefined
-        if ((onFinish_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onFinish_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onFinish_buf__call : KPointer = valueDeserializer.readPointer()
-            const onFinish_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onFinish_buf = ():void => { 
-    const onFinish_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onFinish_buf__argsSerializer.writeInt32(onFinish_buf__resource.resourceId);
-    onFinish_buf__argsSerializer.writePointer(onFinish_buf__call);
-    onFinish_buf__argsSerializer.writePointer(onFinish_buf__callSync);
-    InteropNativeModule._CallCallback(-733525640, onFinish_buf__argsSerializer.asBuffer(), onFinish_buf__argsSerializer.length());
-    onFinish_buf__argsSerializer.release();
-    return; }
-        }
-        const onFinish_result : Callback_Extender_OnFinish | undefined = onFinish_buf
-        let value : DoubleAnimationParam = ({propertyName: propertyName_result, startValue: startValue_result, endValue: endValue_result, duration: duration_result, delay: delay_result, curve: curve_result, onProgress: onProgress_result, onFinish: onFinish_result} as DoubleAnimationParam)
+        const onFinishTmpResult : Callback_Extender_OnFinish | undefined = onFinishTmpBuf
+        let value : DoubleAnimationParam = ({propertyName: propertyNameTmpResult, startValue: startValueTmpResult, endValue: endValueTmpResult, duration: durationTmpResult, delay: delayTmpResult, curve: curveTmpResult, onProgress: onProgressTmpResult, onFinish: onFinishTmpResult} as DoubleAnimationParam)
         return value
     }
 }
 export class ErrorEvent_serializer {
     public static write(buffer: SerializerBase, value: ErrorEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        valueSerializer.writeString(value_type)
-        const value_timeStamp  = value.timeStamp
-        valueSerializer.writeInt64(value_timeStamp)
-        const value_message  = value.message
-        valueSerializer.writeString(value_message)
-        const value_filename  = value.filename
-        valueSerializer.writeString(value_filename)
-        const value_lineno  = value.lineno
-        valueSerializer.writeNumber(value_lineno)
-        const value_colno  = value.colno
-        valueSerializer.writeNumber(value_colno)
-        const value_error  = value.error
-        valueSerializer.holdAndWriteObject(value_error)
+        const valueHolderForType  = value.type
+        valueSerializer.writeString(valueHolderForType)
+        const valueHolderForTimeStamp  = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
+        const valueHolderForMessage  = value.message
+        valueSerializer.writeString(valueHolderForMessage)
+        const valueHolderForFilename  = value.filename
+        valueSerializer.writeString(valueHolderForFilename)
+        const valueHolderForLineno  = value.lineno
+        valueSerializer.writeNumber(valueHolderForLineno)
+        const valueHolderForColno  = value.colno
+        valueSerializer.writeNumber(valueHolderForColno)
+        const valueHolderForError  = value.error
+        valueSerializer.holdAndWriteObject(valueHolderForError)
     }
     public static read(buffer: DeserializerBase): ErrorEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const type_result : string = (valueDeserializer.readString() as string)
-        const timeStamp_result : int64 = valueDeserializer.readInt64()
-        const message_result : string = (valueDeserializer.readString() as string)
-        const filename_result : string = (valueDeserializer.readString() as string)
-        const lineno_result : number = (valueDeserializer.readNumber() as number)
-        const colno_result : number = (valueDeserializer.readNumber() as number)
-        const error_result : Object = (valueDeserializer.readObject() as object)
-        let value : ErrorEvent = ({type: type_result, timeStamp: timeStamp_result, message: message_result, filename: filename_result, lineno: lineno_result, colno: colno_result, error: error_result} as ErrorEvent)
+        const typeTmpResult : string = (valueDeserializer.readString() as string)
+        const timeStampTmpResult : int64 = valueDeserializer.readInt64()
+        const messageTmpResult : string = (valueDeserializer.readString() as string)
+        const filenameTmpResult : string = (valueDeserializer.readString() as string)
+        const linenoTmpResult : number = (valueDeserializer.readNumber() as number)
+        const colnoTmpResult : number = (valueDeserializer.readNumber() as number)
+        const errorTmpResult : Object = (valueDeserializer.readObject() as object)
+        let value : ErrorEvent = ({type: typeTmpResult, timeStamp: timeStampTmpResult, message: messageTmpResult, filename: filenameTmpResult, lineno: linenoTmpResult, colno: colnoTmpResult, error: errorTmpResult} as ErrorEvent)
         return value
     }
 }
 export class Event_serializer {
     public static write(buffer: SerializerBase, value: Event): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        valueSerializer.writeString(value_type)
-        const value_timeStamp  = value.timeStamp
-        valueSerializer.writeInt64(value_timeStamp)
+        const valueHolderForType  = value.type
+        valueSerializer.writeString(valueHolderForType)
+        const valueHolderForTimeStamp  = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
     }
     public static read(buffer: DeserializerBase): Event {
         let valueDeserializer : DeserializerBase = buffer
-        const type_result : string = (valueDeserializer.readString() as string)
-        const timeStamp_result : int64 = valueDeserializer.readInt64()
-        let value : Event = ({type: type_result, timeStamp: timeStamp_result} as Event)
-        return value
-    }
-}
-export class FontInfo_serializer {
-    public static write(buffer: SerializerBase, value: FontInfo): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_path  = value.path
-        valueSerializer.writeString(value_path)
-        const value_postScriptName  = value.postScriptName
-        valueSerializer.writeString(value_postScriptName)
-        const value_fullName  = value.fullName
-        valueSerializer.writeString(value_fullName)
-        const value_family  = value.family
-        valueSerializer.writeString(value_family)
-        const value_subfamily  = value.subfamily
-        valueSerializer.writeString(value_subfamily)
-        const value_weight  = value.weight
-        valueSerializer.writeNumber(value_weight)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_italic  = value.italic
-        valueSerializer.writeBoolean(value_italic)
-        const value_monoSpace  = value.monoSpace
-        valueSerializer.writeBoolean(value_monoSpace)
-        const value_symbolic  = value.symbolic
-        valueSerializer.writeBoolean(value_symbolic)
-    }
-    public static read(buffer: DeserializerBase): FontInfo {
-        let valueDeserializer : DeserializerBase = buffer
-        const path_result : string = (valueDeserializer.readString() as string)
-        const postScriptName_result : string = (valueDeserializer.readString() as string)
-        const fullName_result : string = (valueDeserializer.readString() as string)
-        const family_result : string = (valueDeserializer.readString() as string)
-        const subfamily_result : string = (valueDeserializer.readString() as string)
-        const weight_result : number = (valueDeserializer.readNumber() as number)
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const italic_result : boolean = valueDeserializer.readBoolean()
-        const monoSpace_result : boolean = valueDeserializer.readBoolean()
-        const symbolic_result : boolean = valueDeserializer.readBoolean()
-        let value : FontInfo = ({path: path_result, postScriptName: postScriptName_result, fullName: fullName_result, family: family_result, subfamily: subfamily_result, weight: weight_result, width: width_result, italic: italic_result, monoSpace: monoSpace_result, symbolic: symbolic_result} as FontInfo)
+        const typeTmpResult : string = (valueDeserializer.readString() as string)
+        const timeStampTmpResult : int64 = valueDeserializer.readInt64()
+        let value : Event = ({type: typeTmpResult, timeStamp: timeStampTmpResult} as Event)
         return value
     }
 }
 export class MessageEvents_serializer {
     public static write(buffer: SerializerBase, value: MessageEvents): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        valueSerializer.writeString(value_type)
-        const value_timeStamp  = value.timeStamp
-        valueSerializer.writeInt64(value_timeStamp)
-        const value_data  = value.data
-        valueSerializer.holdAndWriteObject(value_data)
+        const valueHolderForType  = value.type
+        valueSerializer.writeString(valueHolderForType)
+        const valueHolderForTimeStamp  = value.timeStamp
+        valueSerializer.writeInt64(valueHolderForTimeStamp)
+        const valueHolderForData  = value.data
+        valueSerializer.holdAndWriteObject(valueHolderForData)
     }
     public static read(buffer: DeserializerBase): MessageEvents {
         let valueDeserializer : DeserializerBase = buffer
-        const type_result : string = (valueDeserializer.readString() as string)
-        const timeStamp_result : int64 = valueDeserializer.readInt64()
-        const data_result : object = (valueDeserializer.readObject() as object)
-        let value : MessageEvents = ({type: type_result, timeStamp: timeStamp_result, data: data_result} as MessageEvents)
+        const typeTmpResult : string = (valueDeserializer.readString() as string)
+        const timeStampTmpResult : int64 = valueDeserializer.readInt64()
+        const dataTmpResult : object = (valueDeserializer.readObject() as object)
+        let value : MessageEvents = ({type: typeTmpResult, timeStamp: timeStampTmpResult, data: dataTmpResult} as MessageEvents)
         return value
     }
 }
 export class PostMessageOptions_serializer {
     public static write(buffer: SerializerBase, value: PostMessageOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_transfer  = value.transfer
-        let value_transfer_type : int32 = RuntimeType.UNDEFINED
-        value_transfer_type = runtimeType(value_transfer)
-        valueSerializer.writeInt8((value_transfer_type).toChar())
-        if ((value_transfer_type) != (RuntimeType.UNDEFINED)) {
-            const value_transfer_value  = value_transfer!
-            valueSerializer.writeInt32((value_transfer_value.length).toInt())
-            for (let value_transfer_value_counter_i = 0; value_transfer_value_counter_i < value_transfer_value.length; value_transfer_value_counter_i++) {
-                const value_transfer_value_element : Object = value_transfer_value[value_transfer_value_counter_i]
-                valueSerializer.holdAndWriteObject(value_transfer_value_element)
+        const valueHolderForTransfer  = value.transfer
+        if (valueHolderForTransfer !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTransferTmpValue  = valueHolderForTransfer!
+            valueSerializer.writeInt32((valueHolderForTransferTmpValue.length).toInt())
+            for (let valueHolderForTransferTmpValueCounterI = 0; valueHolderForTransferTmpValueCounterI < valueHolderForTransferTmpValue.length; valueHolderForTransferTmpValueCounterI++) {
+                const valueHolderForTransferTmpValueTmpElement : Object = valueHolderForTransferTmpValue[valueHolderForTransferTmpValueCounterI]
+                valueSerializer.holdAndWriteObject(valueHolderForTransferTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PostMessageOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const transfer_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transfer_buf : Array<Object> | undefined
-        if ((transfer_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const transfer_buf__length : int32 = valueDeserializer.readInt32()
-            let transfer_buf_ : Array<Object> = new Array<Object>(transfer_buf__length)
-            for (let transfer_buf__i = 0; transfer_buf__i < transfer_buf__length; transfer_buf__i++) {
-                transfer_buf_[transfer_buf__i] = (valueDeserializer.readObject() as object)
+        const transferTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transferTmpBuf : Array<Object> | undefined
+        if ((transferTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const transferTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let transferTmpBuf_ : Array<Object> = new Array<Object>(transferTmpBuf_Length)
+            for (let transferTmpBuf_BufCounterI = 0; transferTmpBuf_BufCounterI < transferTmpBuf_Length; transferTmpBuf_BufCounterI++) {
+                transferTmpBuf_[transferTmpBuf_BufCounterI] = (valueDeserializer.readObject() as object)
             }
-            transfer_buf = transfer_buf_
+            transferTmpBuf = transferTmpBuf_
         }
-        const transfer_result : Array<Object> | undefined = transfer_buf
-        let value : PostMessageOptions = ({transfer: transfer_result} as PostMessageOptions)
+        const transferTmpResult : Array<Object> | undefined = transferTmpBuf
+        let value : PostMessageOptions = ({transfer: transferTmpResult} as PostMessageOptions)
         return value
     }
 }
 export class SnapshotOptions_serializer {
     public static write(buffer: SerializerBase, value: SnapshotOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_scale  = value.scale
-        let value_scale_type : int32 = RuntimeType.UNDEFINED
-        value_scale_type = runtimeType(value_scale)
-        valueSerializer.writeInt8((value_scale_type).toChar())
-        if ((value_scale_type) != (RuntimeType.UNDEFINED)) {
-            const value_scale_value  = value_scale!
-            valueSerializer.writeNumber(value_scale_value)
+        const valueHolderForScale  = value.scale
+        if (valueHolderForScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScaleTmpValue  = valueHolderForScale!
+            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_waitUntilRenderFinished  = value.waitUntilRenderFinished
-        let value_waitUntilRenderFinished_type : int32 = RuntimeType.UNDEFINED
-        value_waitUntilRenderFinished_type = runtimeType(value_waitUntilRenderFinished)
-        valueSerializer.writeInt8((value_waitUntilRenderFinished_type).toChar())
-        if ((value_waitUntilRenderFinished_type) != (RuntimeType.UNDEFINED)) {
-            const value_waitUntilRenderFinished_value  = value_waitUntilRenderFinished!
-            valueSerializer.writeBoolean(value_waitUntilRenderFinished_value)
+        const valueHolderForWaitUntilRenderFinished  = value.waitUntilRenderFinished
+        if (valueHolderForWaitUntilRenderFinished !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWaitUntilRenderFinishedTmpValue  = valueHolderForWaitUntilRenderFinished!
+            valueSerializer.writeBoolean(valueHolderForWaitUntilRenderFinishedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SnapshotOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const scale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scale_buf : number | undefined
-        if ((scale_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            scale_buf = (valueDeserializer.readNumber() as number)
+        const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let scaleTmpBuf : number | undefined
+        if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scaleTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const scale_result : number | undefined = scale_buf
-        const waitUntilRenderFinished_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let waitUntilRenderFinished_buf : boolean | undefined
-        if ((waitUntilRenderFinished_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            waitUntilRenderFinished_buf = valueDeserializer.readBoolean()
+        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const waitUntilRenderFinishedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let waitUntilRenderFinishedTmpBuf : boolean | undefined
+        if ((waitUntilRenderFinishedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            waitUntilRenderFinishedTmpBuf = valueDeserializer.readBoolean()
         }
-        const waitUntilRenderFinished_result : boolean | undefined = waitUntilRenderFinished_buf
-        let value : SnapshotOptions = ({scale: scale_result, waitUntilRenderFinished: waitUntilRenderFinished_result} as SnapshotOptions)
+        const waitUntilRenderFinishedTmpResult : boolean | undefined = waitUntilRenderFinishedTmpBuf
+        let value : SnapshotOptions = ({scale: scaleTmpResult, waitUntilRenderFinished: waitUntilRenderFinishedTmpResult} as SnapshotOptions)
         return value
     }
 }
 export class WorkerOptions_serializer {
     public static write(buffer: SerializerBase, value: WorkerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        let value_type_type : int32 = RuntimeType.UNDEFINED
-        value_type_type = runtimeType(value_type)
-        valueSerializer.writeInt8((value_type_type).toChar())
-        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
-            const value_type_value  = value_type!
-            valueSerializer.writeString(value_type_value)
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = valueHolderForType!
+            valueSerializer.writeString(valueHolderForTypeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_name  = value.name
-        let value_name_type : int32 = RuntimeType.UNDEFINED
-        value_name_type = runtimeType(value_name)
-        valueSerializer.writeInt8((value_name_type).toChar())
-        if ((value_name_type) != (RuntimeType.UNDEFINED)) {
-            const value_name_value  = value_name!
-            valueSerializer.writeString(value_name_value)
+        const valueHolderForName  = value.name
+        if (valueHolderForName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNameTmpValue  = valueHolderForName!
+            valueSerializer.writeString(valueHolderForNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_shared  = value.shared
-        let value_shared_type : int32 = RuntimeType.UNDEFINED
-        value_shared_type = runtimeType(value_shared)
-        valueSerializer.writeInt8((value_shared_type).toChar())
-        if ((value_shared_type) != (RuntimeType.UNDEFINED)) {
-            const value_shared_value  = value_shared!
-            valueSerializer.writeBoolean(value_shared_value)
+        const valueHolderForShared  = value.shared
+        if (valueHolderForShared !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSharedTmpValue  = valueHolderForShared!
+            valueSerializer.writeBoolean(valueHolderForSharedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): WorkerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let type_buf : string | undefined
-        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            type_buf = (valueDeserializer.readString() as string)
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : string | undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = (valueDeserializer.readString() as string)
         }
-        const type_result : string | undefined = type_buf
-        const name_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let name_buf : string | undefined
-        if ((name_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            name_buf = (valueDeserializer.readString() as string)
+        const typeTmpResult : string | undefined = typeTmpBuf
+        const nameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let nameTmpBuf : string | undefined
+        if ((nameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            nameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const name_result : string | undefined = name_buf
-        const shared_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let shared_buf : boolean | undefined
-        if ((shared_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            shared_buf = valueDeserializer.readBoolean()
+        const nameTmpResult : string | undefined = nameTmpBuf
+        const sharedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sharedTmpBuf : boolean | undefined
+        if ((sharedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sharedTmpBuf = valueDeserializer.readBoolean()
         }
-        const shared_result : boolean | undefined = shared_buf
-        let value : WorkerOptions = ({type: type_result, name: name_result, shared: shared_result} as WorkerOptions)
+        const sharedTmpResult : boolean | undefined = sharedTmpBuf
+        let value : WorkerOptions = ({type: typeTmpResult, name: nameTmpResult, shared: sharedTmpResult} as WorkerOptions)
         return value
     }
 }
 export class ComponentInfo_serializer {
     public static write(buffer: SerializerBase, value: ComponentInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_size  = value.size
-        Size_serializer.write(valueSerializer, value_size)
-        const value_localOffset  = value.localOffset
-        Offset_componentutils_serializer.write(valueSerializer, value_localOffset)
-        const value_windowOffset  = value.windowOffset
-        Offset_componentutils_serializer.write(valueSerializer, value_windowOffset)
-        const value_screenOffset  = value.screenOffset
-        Offset_componentutils_serializer.write(valueSerializer, value_screenOffset)
-        const value_translate  = value.translate
-        TranslateResult_serializer.write(valueSerializer, value_translate)
-        const value_scale  = value.scale
-        ScaleResult_serializer.write(valueSerializer, value_scale)
-        const value_rotate  = value.rotate
-        RotateResult_serializer.write(valueSerializer, value_rotate)
-        const value_transform  = value.transform
-        const value_transform_0  = value_transform[0]
-        valueSerializer.writeNumber(value_transform_0)
-        const value_transform_1  = value_transform[1]
-        valueSerializer.writeNumber(value_transform_1)
-        const value_transform_2  = value_transform[2]
-        valueSerializer.writeNumber(value_transform_2)
-        const value_transform_3  = value_transform[3]
-        valueSerializer.writeNumber(value_transform_3)
-        const value_transform_4  = value_transform[4]
-        valueSerializer.writeNumber(value_transform_4)
-        const value_transform_5  = value_transform[5]
-        valueSerializer.writeNumber(value_transform_5)
-        const value_transform_6  = value_transform[6]
-        valueSerializer.writeNumber(value_transform_6)
-        const value_transform_7  = value_transform[7]
-        valueSerializer.writeNumber(value_transform_7)
-        const value_transform_8  = value_transform[8]
-        valueSerializer.writeNumber(value_transform_8)
-        const value_transform_9  = value_transform[9]
-        valueSerializer.writeNumber(value_transform_9)
-        const value_transform_10  = value_transform[10]
-        valueSerializer.writeNumber(value_transform_10)
-        const value_transform_11  = value_transform[11]
-        valueSerializer.writeNumber(value_transform_11)
-        const value_transform_12  = value_transform[12]
-        valueSerializer.writeNumber(value_transform_12)
-        const value_transform_13  = value_transform[13]
-        valueSerializer.writeNumber(value_transform_13)
-        const value_transform_14  = value_transform[14]
-        valueSerializer.writeNumber(value_transform_14)
-        const value_transform_15  = value_transform[15]
-        valueSerializer.writeNumber(value_transform_15)
+        const valueHolderForSize  = value.size
+        Size_serializer.write(valueSerializer, valueHolderForSize)
+        const valueHolderForLocalOffset  = value.localOffset
+        Offset_componentutils_serializer.write(valueSerializer, valueHolderForLocalOffset)
+        const valueHolderForWindowOffset  = value.windowOffset
+        Offset_componentutils_serializer.write(valueSerializer, valueHolderForWindowOffset)
+        const valueHolderForScreenOffset  = value.screenOffset
+        Offset_componentutils_serializer.write(valueSerializer, valueHolderForScreenOffset)
+        const valueHolderForTranslate  = value.translate
+        TranslateResult_serializer.write(valueSerializer, valueHolderForTranslate)
+        const valueHolderForScale  = value.scale
+        ScaleResult_serializer.write(valueSerializer, valueHolderForScale)
+        const valueHolderForRotate  = value.rotate
+        RotateResult_serializer.write(valueSerializer, valueHolderForRotate)
+        const valueHolderForTransform  = value.transform
+        const valueHolderForTransform_0  = valueHolderForTransform[0]
+        valueSerializer.writeNumber(valueHolderForTransform_0)
+        const valueHolderForTransform_1  = valueHolderForTransform[1]
+        valueSerializer.writeNumber(valueHolderForTransform_1)
+        const valueHolderForTransform_2  = valueHolderForTransform[2]
+        valueSerializer.writeNumber(valueHolderForTransform_2)
+        const valueHolderForTransform_3  = valueHolderForTransform[3]
+        valueSerializer.writeNumber(valueHolderForTransform_3)
+        const valueHolderForTransform_4  = valueHolderForTransform[4]
+        valueSerializer.writeNumber(valueHolderForTransform_4)
+        const valueHolderForTransform_5  = valueHolderForTransform[5]
+        valueSerializer.writeNumber(valueHolderForTransform_5)
+        const valueHolderForTransform_6  = valueHolderForTransform[6]
+        valueSerializer.writeNumber(valueHolderForTransform_6)
+        const valueHolderForTransform_7  = valueHolderForTransform[7]
+        valueSerializer.writeNumber(valueHolderForTransform_7)
+        const valueHolderForTransform_8  = valueHolderForTransform[8]
+        valueSerializer.writeNumber(valueHolderForTransform_8)
+        const valueHolderForTransform_9  = valueHolderForTransform[9]
+        valueSerializer.writeNumber(valueHolderForTransform_9)
+        const valueHolderForTransform_10  = valueHolderForTransform[10]
+        valueSerializer.writeNumber(valueHolderForTransform_10)
+        const valueHolderForTransform_11  = valueHolderForTransform[11]
+        valueSerializer.writeNumber(valueHolderForTransform_11)
+        const valueHolderForTransform_12  = valueHolderForTransform[12]
+        valueSerializer.writeNumber(valueHolderForTransform_12)
+        const valueHolderForTransform_13  = valueHolderForTransform[13]
+        valueSerializer.writeNumber(valueHolderForTransform_13)
+        const valueHolderForTransform_14  = valueHolderForTransform[14]
+        valueSerializer.writeNumber(valueHolderForTransform_14)
+        const valueHolderForTransform_15  = valueHolderForTransform[15]
+        valueSerializer.writeNumber(valueHolderForTransform_15)
     }
     public static read(buffer: DeserializerBase): ComponentInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const size_result : Size = Size_serializer.read(valueDeserializer)
-        const localOffset_result : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
-        const windowOffset_result : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
-        const screenOffset_result : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
-        const translate_result : TranslateResult = TranslateResult_serializer.read(valueDeserializer)
-        const scale_result : ScaleResult = ScaleResult_serializer.read(valueDeserializer)
-        const rotate_result : RotateResult = RotateResult_serializer.read(valueDeserializer)
-        const transform_buf_value0 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value1 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value2 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value3 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value4 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value5 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value6 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value7 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value8 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value9 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value10 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value11 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value12 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value13 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value14 : number = (valueDeserializer.readNumber() as number)
-        const transform_buf_value15 : number = (valueDeserializer.readNumber() as number)
-        const transform_result : Matrix4Result = ([transform_buf_value0, transform_buf_value1, transform_buf_value2, transform_buf_value3, transform_buf_value4, transform_buf_value5, transform_buf_value6, transform_buf_value7, transform_buf_value8, transform_buf_value9, transform_buf_value10, transform_buf_value11, transform_buf_value12, transform_buf_value13, transform_buf_value14, transform_buf_value15] as Matrix4Result)
-        let value : ComponentInfo = ({size: size_result, localOffset: localOffset_result, windowOffset: windowOffset_result, screenOffset: screenOffset_result, translate: translate_result, scale: scale_result, rotate: rotate_result, transform: transform_result} as ComponentInfo)
-        return value
-    }
-}
-export class FontOptions_serializer {
-    public static write(buffer: SerializerBase, value: FontOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_familyName  = value.familyName
-        let value_familyName_type : int32 = RuntimeType.UNDEFINED
-        value_familyName_type = runtimeType(value_familyName)
-        if (RuntimeType.STRING == value_familyName_type) {
-            valueSerializer.writeInt8((0).toChar())
-            const value_familyName_0  = value_familyName as string
-            valueSerializer.writeString(value_familyName_0)
-        }
-        else if (RuntimeType.OBJECT == value_familyName_type) {
-            valueSerializer.writeInt8((1).toChar())
-            const value_familyName_1  = value_familyName as Resource
-            Resource_serializer.write(valueSerializer, value_familyName_1)
-        }
-        const value_familySrc  = value.familySrc
-        let value_familySrc_type : int32 = RuntimeType.UNDEFINED
-        value_familySrc_type = runtimeType(value_familySrc)
-        if (RuntimeType.STRING == value_familySrc_type) {
-            valueSerializer.writeInt8((0).toChar())
-            const value_familySrc_0  = value_familySrc as string
-            valueSerializer.writeString(value_familySrc_0)
-        }
-        else if (RuntimeType.OBJECT == value_familySrc_type) {
-            valueSerializer.writeInt8((1).toChar())
-            const value_familySrc_1  = value_familySrc as Resource
-            Resource_serializer.write(valueSerializer, value_familySrc_1)
-        }
-    }
-    public static read(buffer: DeserializerBase): FontOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const familyName_buf_selector : int32 = valueDeserializer.readInt8()
-        let familyName_buf : string | Resource | undefined
-        if (familyName_buf_selector == (0).toChar()) {
-            familyName_buf = (valueDeserializer.readString() as string)
-        }
-        else if (familyName_buf_selector == (1).toChar()) {
-            familyName_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for familyName_buf has to be chosen through deserialisation.")
-        }
-        const familyName_result : string | Resource = (familyName_buf as string | Resource)
-        const familySrc_buf_selector : int32 = valueDeserializer.readInt8()
-        let familySrc_buf : string | Resource | undefined
-        if (familySrc_buf_selector == (0).toChar()) {
-            familySrc_buf = (valueDeserializer.readString() as string)
-        }
-        else if (familySrc_buf_selector == (1).toChar()) {
-            familySrc_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for familySrc_buf has to be chosen through deserialisation.")
-        }
-        const familySrc_result : string | Resource = (familySrc_buf as string | Resource)
-        let value : FontOptions = ({familyName: familyName_result, familySrc: familySrc_result} as FontOptions)
-        return value
-    }
-}
-export class MeasureOptions_serializer {
-    public static write(buffer: SerializerBase, value: MeasureOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_textContent  = value.textContent
-        let value_textContent_type : int32 = RuntimeType.UNDEFINED
-        value_textContent_type = runtimeType(value_textContent)
-        if (RuntimeType.STRING == value_textContent_type) {
-            valueSerializer.writeInt8((0).toChar())
-            const value_textContent_0  = value_textContent as string
-            valueSerializer.writeString(value_textContent_0)
-        }
-        else if (RuntimeType.OBJECT == value_textContent_type) {
-            valueSerializer.writeInt8((1).toChar())
-            const value_textContent_1  = value_textContent as Resource
-            Resource_serializer.write(valueSerializer, value_textContent_1)
-        }
-        const value_constraintWidth  = value.constraintWidth
-        let value_constraintWidth_type : int32 = RuntimeType.UNDEFINED
-        value_constraintWidth_type = runtimeType(value_constraintWidth)
-        valueSerializer.writeInt8((value_constraintWidth_type).toChar())
-        if ((value_constraintWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_constraintWidth_value  = value_constraintWidth!
-            let value_constraintWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_constraintWidth_value_type = runtimeType(value_constraintWidth_value)
-            if (RuntimeType.NUMBER == value_constraintWidth_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_constraintWidth_value_0  = value_constraintWidth_value as number
-                valueSerializer.writeNumber(value_constraintWidth_value_0)
-            }
-            else if (RuntimeType.STRING == value_constraintWidth_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_constraintWidth_value_1  = value_constraintWidth_value as string
-                valueSerializer.writeString(value_constraintWidth_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_constraintWidth_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_constraintWidth_value_2  = value_constraintWidth_value as Resource
-                Resource_serializer.write(valueSerializer, value_constraintWidth_value_2)
-            }
-        }
-        const value_fontSize  = value.fontSize
-        let value_fontSize_type : int32 = RuntimeType.UNDEFINED
-        value_fontSize_type = runtimeType(value_fontSize)
-        valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontSize_value  = value_fontSize!
-            let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_fontSize_value_type = runtimeType(value_fontSize_value)
-            if (RuntimeType.NUMBER == value_fontSize_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_fontSize_value_0  = value_fontSize_value as number
-                valueSerializer.writeNumber(value_fontSize_value_0)
-            }
-            else if (RuntimeType.STRING == value_fontSize_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_fontSize_value_1  = value_fontSize_value as string
-                valueSerializer.writeString(value_fontSize_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_fontSize_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_fontSize_value_2  = value_fontSize_value as Resource
-                Resource_serializer.write(valueSerializer, value_fontSize_value_2)
-            }
-        }
-        const value_fontStyle  = value.fontStyle
-        let value_fontStyle_type : int32 = RuntimeType.UNDEFINED
-        value_fontStyle_type = runtimeType(value_fontStyle)
-        valueSerializer.writeInt8((value_fontStyle_type).toChar())
-        if ((value_fontStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontStyle_value  = value_fontStyle!
-            let value_fontStyle_value_type : int32 = RuntimeType.UNDEFINED
-            value_fontStyle_value_type = runtimeType(value_fontStyle_value)
-            if (RuntimeType.NUMBER == value_fontStyle_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_fontStyle_value_0  = value_fontStyle_value as number
-                valueSerializer.writeNumber(value_fontStyle_value_0)
-            }
-            else if (TypeChecker.isFontStyle(value_fontStyle_value)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_fontStyle_value_1  = value_fontStyle_value as FontStyle
-                valueSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_fontStyle_value_1))
-            }
-        }
-        const value_fontWeight  = value.fontWeight
-        let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
-        value_fontWeight_type = runtimeType(value_fontWeight)
-        valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontWeight_value  = value_fontWeight!
-            let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_fontWeight_value_type = runtimeType(value_fontWeight_value)
-            if (RuntimeType.NUMBER == value_fontWeight_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_fontWeight_value_0  = value_fontWeight_value as number
-                valueSerializer.writeNumber(value_fontWeight_value_0)
-            }
-            else if (RuntimeType.STRING == value_fontWeight_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_fontWeight_value_1  = value_fontWeight_value as string
-                valueSerializer.writeString(value_fontWeight_value_1)
-            }
-            else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_fontWeight_value_2  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_fontWeight_value_2))
-            }
-        }
-        const value_fontFamily  = value.fontFamily
-        let value_fontFamily_type : int32 = RuntimeType.UNDEFINED
-        value_fontFamily_type = runtimeType(value_fontFamily)
-        valueSerializer.writeInt8((value_fontFamily_type).toChar())
-        if ((value_fontFamily_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontFamily_value  = value_fontFamily!
-            let value_fontFamily_value_type : int32 = RuntimeType.UNDEFINED
-            value_fontFamily_value_type = runtimeType(value_fontFamily_value)
-            if (RuntimeType.STRING == value_fontFamily_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_fontFamily_value_0  = value_fontFamily_value as string
-                valueSerializer.writeString(value_fontFamily_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_fontFamily_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_fontFamily_value_1  = value_fontFamily_value as Resource
-                Resource_serializer.write(valueSerializer, value_fontFamily_value_1)
-            }
-        }
-        const value_letterSpacing  = value.letterSpacing
-        let value_letterSpacing_type : int32 = RuntimeType.UNDEFINED
-        value_letterSpacing_type = runtimeType(value_letterSpacing)
-        valueSerializer.writeInt8((value_letterSpacing_type).toChar())
-        if ((value_letterSpacing_type) != (RuntimeType.UNDEFINED)) {
-            const value_letterSpacing_value  = value_letterSpacing!
-            let value_letterSpacing_value_type : int32 = RuntimeType.UNDEFINED
-            value_letterSpacing_value_type = runtimeType(value_letterSpacing_value)
-            if (RuntimeType.NUMBER == value_letterSpacing_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_letterSpacing_value_0  = value_letterSpacing_value as number
-                valueSerializer.writeNumber(value_letterSpacing_value_0)
-            }
-            else if (RuntimeType.STRING == value_letterSpacing_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_letterSpacing_value_1  = value_letterSpacing_value as string
-                valueSerializer.writeString(value_letterSpacing_value_1)
-            }
-        }
-        const value_textAlign  = value.textAlign
-        let value_textAlign_type : int32 = RuntimeType.UNDEFINED
-        value_textAlign_type = runtimeType(value_textAlign)
-        valueSerializer.writeInt8((value_textAlign_type).toChar())
-        if ((value_textAlign_type) != (RuntimeType.UNDEFINED)) {
-            const value_textAlign_value  = (value_textAlign as text.TextAlign)
-            valueSerializer.writeInt32(TypeChecker.text_TextAlign_ToNumeric(value_textAlign_value))
-        }
-        const value_overflow  = value.overflow
-        let value_overflow_type : int32 = RuntimeType.UNDEFINED
-        value_overflow_type = runtimeType(value_overflow)
-        valueSerializer.writeInt8((value_overflow_type).toChar())
-        if ((value_overflow_type) != (RuntimeType.UNDEFINED)) {
-            const value_overflow_value  = value_overflow!
-            let value_overflow_value_type : int32 = RuntimeType.UNDEFINED
-            value_overflow_value_type = runtimeType(value_overflow_value)
-            if (RuntimeType.NUMBER == value_overflow_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_overflow_value_0  = value_overflow_value as number
-                valueSerializer.writeNumber(value_overflow_value_0)
-            }
-            else if (TypeChecker.isTextOverflow(value_overflow_value)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_overflow_value_1  = value_overflow_value as TextOverflow
-                valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(value_overflow_value_1))
-            }
-        }
-        const value_maxLines  = value.maxLines
-        let value_maxLines_type : int32 = RuntimeType.UNDEFINED
-        value_maxLines_type = runtimeType(value_maxLines)
-        valueSerializer.writeInt8((value_maxLines_type).toChar())
-        if ((value_maxLines_type) != (RuntimeType.UNDEFINED)) {
-            const value_maxLines_value  = value_maxLines!
-            valueSerializer.writeNumber(value_maxLines_value)
-        }
-        const value_lineHeight  = value.lineHeight
-        let value_lineHeight_type : int32 = RuntimeType.UNDEFINED
-        value_lineHeight_type = runtimeType(value_lineHeight)
-        valueSerializer.writeInt8((value_lineHeight_type).toChar())
-        if ((value_lineHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_lineHeight_value  = value_lineHeight!
-            let value_lineHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_lineHeight_value_type = runtimeType(value_lineHeight_value)
-            if (RuntimeType.NUMBER == value_lineHeight_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_lineHeight_value_0  = value_lineHeight_value as number
-                valueSerializer.writeNumber(value_lineHeight_value_0)
-            }
-            else if (RuntimeType.STRING == value_lineHeight_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_lineHeight_value_1  = value_lineHeight_value as string
-                valueSerializer.writeString(value_lineHeight_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_lineHeight_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_lineHeight_value_2  = value_lineHeight_value as Resource
-                Resource_serializer.write(valueSerializer, value_lineHeight_value_2)
-            }
-        }
-        const value_baselineOffset  = value.baselineOffset
-        let value_baselineOffset_type : int32 = RuntimeType.UNDEFINED
-        value_baselineOffset_type = runtimeType(value_baselineOffset)
-        valueSerializer.writeInt8((value_baselineOffset_type).toChar())
-        if ((value_baselineOffset_type) != (RuntimeType.UNDEFINED)) {
-            const value_baselineOffset_value  = value_baselineOffset!
-            let value_baselineOffset_value_type : int32 = RuntimeType.UNDEFINED
-            value_baselineOffset_value_type = runtimeType(value_baselineOffset_value)
-            if (RuntimeType.NUMBER == value_baselineOffset_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_baselineOffset_value_0  = value_baselineOffset_value as number
-                valueSerializer.writeNumber(value_baselineOffset_value_0)
-            }
-            else if (RuntimeType.STRING == value_baselineOffset_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_baselineOffset_value_1  = value_baselineOffset_value as string
-                valueSerializer.writeString(value_baselineOffset_value_1)
-            }
-        }
-        const value_textCase  = value.textCase
-        let value_textCase_type : int32 = RuntimeType.UNDEFINED
-        value_textCase_type = runtimeType(value_textCase)
-        valueSerializer.writeInt8((value_textCase_type).toChar())
-        if ((value_textCase_type) != (RuntimeType.UNDEFINED)) {
-            const value_textCase_value  = value_textCase!
-            let value_textCase_value_type : int32 = RuntimeType.UNDEFINED
-            value_textCase_value_type = runtimeType(value_textCase_value)
-            if (RuntimeType.NUMBER == value_textCase_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_textCase_value_0  = value_textCase_value as number
-                valueSerializer.writeNumber(value_textCase_value_0)
-            }
-            else if (TypeChecker.isTextCase(value_textCase_value)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_textCase_value_1  = value_textCase_value as TextCase
-                valueSerializer.writeInt32(TypeChecker.TextCase_ToNumeric(value_textCase_value_1))
-            }
-        }
-        const value_textIndent  = value.textIndent
-        let value_textIndent_type : int32 = RuntimeType.UNDEFINED
-        value_textIndent_type = runtimeType(value_textIndent)
-        valueSerializer.writeInt8((value_textIndent_type).toChar())
-        if ((value_textIndent_type) != (RuntimeType.UNDEFINED)) {
-            const value_textIndent_value  = value_textIndent!
-            let value_textIndent_value_type : int32 = RuntimeType.UNDEFINED
-            value_textIndent_value_type = runtimeType(value_textIndent_value)
-            if (RuntimeType.NUMBER == value_textIndent_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_textIndent_value_0  = value_textIndent_value as number
-                valueSerializer.writeNumber(value_textIndent_value_0)
-            }
-            else if (RuntimeType.STRING == value_textIndent_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_textIndent_value_1  = value_textIndent_value as string
-                valueSerializer.writeString(value_textIndent_value_1)
-            }
-        }
-        const value_wordBreak  = value.wordBreak
-        let value_wordBreak_type : int32 = RuntimeType.UNDEFINED
-        value_wordBreak_type = runtimeType(value_wordBreak)
-        valueSerializer.writeInt8((value_wordBreak_type).toChar())
-        if ((value_wordBreak_type) != (RuntimeType.UNDEFINED)) {
-            const value_wordBreak_value  = (value_wordBreak as text.WordBreak)
-            valueSerializer.writeInt32(TypeChecker.text_WordBreak_ToNumeric(value_wordBreak_value))
-        }
-    }
-    public static read(buffer: DeserializerBase): MeasureOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const textContent_buf_selector : int32 = valueDeserializer.readInt8()
-        let textContent_buf : string | Resource | undefined
-        if (textContent_buf_selector == (0).toChar()) {
-            textContent_buf = (valueDeserializer.readString() as string)
-        }
-        else if (textContent_buf_selector == (1).toChar()) {
-            textContent_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for textContent_buf has to be chosen through deserialisation.")
-        }
-        const textContent_result : string | Resource = (textContent_buf as string | Resource)
-        const constraintWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let constraintWidth_buf : number | string | Resource | undefined
-        if ((constraintWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const constraintWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let constraintWidth_buf_ : number | string | Resource | undefined
-            if (constraintWidth_buf__selector == (0).toChar()) {
-                constraintWidth_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (constraintWidth_buf__selector == (1).toChar()) {
-                constraintWidth_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (constraintWidth_buf__selector == (2).toChar()) {
-                constraintWidth_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for constraintWidth_buf_ has to be chosen through deserialisation.")
-            }
-            constraintWidth_buf = (constraintWidth_buf_ as number | string | Resource)
-        }
-        const constraintWidth_result : number | string | Resource | undefined = constraintWidth_buf
-        const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSize_buf : number | string | Resource | undefined
-        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let fontSize_buf_ : number | string | Resource | undefined
-            if (fontSize_buf__selector == (0).toChar()) {
-                fontSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (fontSize_buf__selector == (1).toChar()) {
-                fontSize_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (fontSize_buf__selector == (2).toChar()) {
-                fontSize_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for fontSize_buf_ has to be chosen through deserialisation.")
-            }
-            fontSize_buf = (fontSize_buf_ as number | string | Resource)
-        }
-        const fontSize_result : number | string | Resource | undefined = fontSize_buf
-        const fontStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontStyle_buf : number | FontStyle | undefined
-        if ((fontStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontStyle_buf__selector : int32 = valueDeserializer.readInt8()
-            let fontStyle_buf_ : number | FontStyle | undefined
-            if (fontStyle_buf__selector == (0).toChar()) {
-                fontStyle_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (fontStyle_buf__selector == (1).toChar()) {
-                fontStyle_buf_ = TypeChecker.FontStyle_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for fontStyle_buf_ has to be chosen through deserialisation.")
-            }
-            fontStyle_buf = (fontStyle_buf_ as number | FontStyle)
-        }
-        const fontStyle_result : number | FontStyle | undefined = fontStyle_buf
-        const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeight_buf : number | string | FontWeight | undefined
-        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let fontWeight_buf_ : number | string | FontWeight | undefined
-            if (fontWeight_buf__selector == (0).toChar()) {
-                fontWeight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (fontWeight_buf__selector == (1).toChar()) {
-                fontWeight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (fontWeight_buf__selector == (2).toChar()) {
-                fontWeight_buf_ = TypeChecker.FontWeight_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for fontWeight_buf_ has to be chosen through deserialisation.")
-            }
-            fontWeight_buf = (fontWeight_buf_ as number | string | FontWeight)
-        }
-        const fontWeight_result : number | string | FontWeight | undefined = fontWeight_buf
-        const fontFamily_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontFamily_buf : string | Resource | undefined
-        if ((fontFamily_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontFamily_buf__selector : int32 = valueDeserializer.readInt8()
-            let fontFamily_buf_ : string | Resource | undefined
-            if (fontFamily_buf__selector == (0).toChar()) {
-                fontFamily_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (fontFamily_buf__selector == (1).toChar()) {
-                fontFamily_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for fontFamily_buf_ has to be chosen through deserialisation.")
-            }
-            fontFamily_buf = (fontFamily_buf_ as string | Resource)
-        }
-        const fontFamily_result : string | Resource | undefined = fontFamily_buf
-        const letterSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let letterSpacing_buf : number | string | undefined
-        if ((letterSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const letterSpacing_buf__selector : int32 = valueDeserializer.readInt8()
-            let letterSpacing_buf_ : number | string | undefined
-            if (letterSpacing_buf__selector == (0).toChar()) {
-                letterSpacing_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (letterSpacing_buf__selector == (1).toChar()) {
-                letterSpacing_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for letterSpacing_buf_ has to be chosen through deserialisation.")
-            }
-            letterSpacing_buf = (letterSpacing_buf_ as number | string)
-        }
-        const letterSpacing_result : number | string | undefined = letterSpacing_buf
-        const textAlign_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textAlign_buf : text.TextAlign | undefined
-        if ((textAlign_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            textAlign_buf = TypeChecker.text_TextAlign_FromNumeric(valueDeserializer.readInt32())
-        }
-        const textAlign_result : text.TextAlign | undefined = textAlign_buf
-        const overflow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let overflow_buf : number | TextOverflow | undefined
-        if ((overflow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const overflow_buf__selector : int32 = valueDeserializer.readInt8()
-            let overflow_buf_ : number | TextOverflow | undefined
-            if (overflow_buf__selector == (0).toChar()) {
-                overflow_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (overflow_buf__selector == (1).toChar()) {
-                overflow_buf_ = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for overflow_buf_ has to be chosen through deserialisation.")
-            }
-            overflow_buf = (overflow_buf_ as number | TextOverflow)
-        }
-        const overflow_result : number | TextOverflow | undefined = overflow_buf
-        const maxLines_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLines_buf : number | undefined
-        if ((maxLines_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            maxLines_buf = (valueDeserializer.readNumber() as number)
-        }
-        const maxLines_result : number | undefined = maxLines_buf
-        const lineHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lineHeight_buf : number | string | Resource | undefined
-        if ((lineHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const lineHeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let lineHeight_buf_ : number | string | Resource | undefined
-            if (lineHeight_buf__selector == (0).toChar()) {
-                lineHeight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (lineHeight_buf__selector == (1).toChar()) {
-                lineHeight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (lineHeight_buf__selector == (2).toChar()) {
-                lineHeight_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for lineHeight_buf_ has to be chosen through deserialisation.")
-            }
-            lineHeight_buf = (lineHeight_buf_ as number | string | Resource)
-        }
-        const lineHeight_result : number | string | Resource | undefined = lineHeight_buf
-        const baselineOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let baselineOffset_buf : number | string | undefined
-        if ((baselineOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const baselineOffset_buf__selector : int32 = valueDeserializer.readInt8()
-            let baselineOffset_buf_ : number | string | undefined
-            if (baselineOffset_buf__selector == (0).toChar()) {
-                baselineOffset_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (baselineOffset_buf__selector == (1).toChar()) {
-                baselineOffset_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for baselineOffset_buf_ has to be chosen through deserialisation.")
-            }
-            baselineOffset_buf = (baselineOffset_buf_ as number | string)
-        }
-        const baselineOffset_result : number | string | undefined = baselineOffset_buf
-        const textCase_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textCase_buf : number | TextCase | undefined
-        if ((textCase_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const textCase_buf__selector : int32 = valueDeserializer.readInt8()
-            let textCase_buf_ : number | TextCase | undefined
-            if (textCase_buf__selector == (0).toChar()) {
-                textCase_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (textCase_buf__selector == (1).toChar()) {
-                textCase_buf_ = TypeChecker.TextCase_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for textCase_buf_ has to be chosen through deserialisation.")
-            }
-            textCase_buf = (textCase_buf_ as number | TextCase)
-        }
-        const textCase_result : number | TextCase | undefined = textCase_buf
-        const textIndent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textIndent_buf : number | string | undefined
-        if ((textIndent_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const textIndent_buf__selector : int32 = valueDeserializer.readInt8()
-            let textIndent_buf_ : number | string | undefined
-            if (textIndent_buf__selector == (0).toChar()) {
-                textIndent_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (textIndent_buf__selector == (1).toChar()) {
-                textIndent_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for textIndent_buf_ has to be chosen through deserialisation.")
-            }
-            textIndent_buf = (textIndent_buf_ as number | string)
-        }
-        const textIndent_result : number | string | undefined = textIndent_buf
-        const wordBreak_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let wordBreak_buf : text.WordBreak | undefined
-        if ((wordBreak_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            wordBreak_buf = TypeChecker.text_WordBreak_FromNumeric(valueDeserializer.readInt32())
-        }
-        const wordBreak_result : text.WordBreak | undefined = wordBreak_buf
-        let value : MeasureOptions = ({textContent: textContent_result, constraintWidth: constraintWidth_result, fontSize: fontSize_result, fontStyle: fontStyle_result, fontWeight: fontWeight_result, fontFamily: fontFamily_result, letterSpacing: letterSpacing_result, textAlign: textAlign_result, overflow: overflow_result, maxLines: maxLines_result, lineHeight: lineHeight_result, baselineOffset: baselineOffset_result, textCase: textCase_result, textIndent: textIndent_result, wordBreak: wordBreak_result} as MeasureOptions)
+        const sizeTmpResult : Size = Size_serializer.read(valueDeserializer)
+        const localOffsetTmpResult : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
+        const windowOffsetTmpResult : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
+        const screenOffsetTmpResult : Offset_componentutils = Offset_componentutils_serializer.read(valueDeserializer)
+        const translateTmpResult : TranslateResult = TranslateResult_serializer.read(valueDeserializer)
+        const scaleTmpResult : ScaleResult = ScaleResult_serializer.read(valueDeserializer)
+        const rotateTmpResult : RotateResult = RotateResult_serializer.read(valueDeserializer)
+        const transformTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue2 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue3 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue4 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue5 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue6 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue7 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue8 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue9 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue10 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue11 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue12 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue13 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue14 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpBufValue15 : number = (valueDeserializer.readNumber() as number)
+        const transformTmpResult : Matrix4Result = ([transformTmpBufValue0, transformTmpBufValue1, transformTmpBufValue2, transformTmpBufValue3, transformTmpBufValue4, transformTmpBufValue5, transformTmpBufValue6, transformTmpBufValue7, transformTmpBufValue8, transformTmpBufValue9, transformTmpBufValue10, transformTmpBufValue11, transformTmpBufValue12, transformTmpBufValue13, transformTmpBufValue14, transformTmpBufValue15] as Matrix4Result)
+        let value : ComponentInfo = ({size: sizeTmpResult, localOffset: localOffsetTmpResult, windowOffset: windowOffsetTmpResult, screenOffset: screenOffsetTmpResult, translate: translateTmpResult, scale: scaleTmpResult, rotate: rotateTmpResult, transform: transformTmpResult} as ComponentInfo)
         return value
     }
 }

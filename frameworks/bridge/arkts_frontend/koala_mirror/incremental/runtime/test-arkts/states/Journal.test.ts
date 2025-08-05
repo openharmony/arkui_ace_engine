@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
-import { Changes, Journal } from "../../src/states/Journal"
+import { assert, suite, test } from "@koalaui/harness"
+import { Changes, Journal } from "../../ets/states/Journal"
 
 function assertChange<Value>(changes: Changes | undefined, state: Object, expected: Value) {
     const change = changes?.getChange<Value>(state)
-    Assert.isDefined(change)
-    Assert.equal(change?.value, expected)
+    assert.isDefined(change)
+    assert.equal(change?.value, expected)
 }
 
 function assertNoChange(changes: Changes | undefined, state: Object) {
     const change = changes?.getChange<string>(state)
-    Assert.isUndefined(change)
+    assert.isUndefined(change)
 }
 
 function assertNoChanges(journal: Journal) {
-    Assert.isUndefined(journal.getChanges())
+    assert.isUndefined(journal.getChanges())
 }
 
 suite("Journal tests", () => {
@@ -92,7 +91,7 @@ suite("Journal tests", () => {
         journal.addChange(state, "value3")
         journal.addChange(state, "value4")
         const changes = journal.getChanges()
-        Assert.isDefined(changes)
+        assert.isDefined(changes)
         changes?.clear()
         assertChange(journal, state, "value4")
         assertNoChanges(journal)

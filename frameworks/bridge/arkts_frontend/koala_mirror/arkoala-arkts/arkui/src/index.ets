@@ -16,7 +16,6 @@ export * from "./generated"
 export * from "./handwritten"
 export * from "./annotations"
 
-export * from "./ArkStructBase"
 export * from "./ArkState"
 export * from "./ArkStateProperties"
 export * from "./NativeLog"

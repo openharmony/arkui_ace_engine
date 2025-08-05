@@ -51,13 +51,15 @@ suite(util.basename(__filename), () => {
                                     false,
                                     false
                                 ),
-
                                 [
                                     arkts.factory.createStringLiteral(
                                         'AAA'
                                     )
                                 ],
-                                        undefined,
+                                undefined,
+                                false,
+                                false,
+                                undefined,
                             )
                         )
                     ]
@@ -91,6 +93,9 @@ suite(util.basename(__filename), () => {
                             'foo'
                         ),
                         [],
+                        undefined,
+                        false,
+                        false,
                         undefined,
                     )
                 )
@@ -141,13 +146,15 @@ suite(util.basename(__filename), () => {
                                     false,
                                     false
                                 ),
-
                                 [
                                     arkts.factory.createIdentifier(
                                         'x'
                                     )
                                 ],
-                                        undefined,
+                                undefined,
+                                false,
+                                false,
+                                undefined,
                             )
                         ),
                         arkts.factory.createExpressionStatement(
@@ -163,13 +170,15 @@ suite(util.basename(__filename), () => {
                                     false,
                                     false
                                 ),
-
                                 [
                                     arkts.factory.createIdentifier(
                                         'y'
                                     )
                                 ],
-                                        undefined,
+                                undefined,
+                                false,
+                                false,
+                                undefined,
                             )
                         )
                     ]
@@ -233,6 +242,9 @@ suite(util.basename(__filename), () => {
                                 0
                             )
                         ],
+                        undefined,
+                        false,
+                        false,
                         undefined,
                     )
                 )

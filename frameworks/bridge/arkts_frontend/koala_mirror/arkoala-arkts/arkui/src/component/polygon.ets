@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonShapeMethodSet, ArkCommonMethodSet } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonShapeMethodModifier, CommonMethodModifier } from "./common"
 import { ShapePoint } from "./line"
 import { Length } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
@@ -31,6 +31,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,69 +39,61 @@ export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkPolygonPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Polygon_construct(peerId, flags)
-        const _peer  = new ArkPolygonPeer(_peerPtr, peerId, "Polygon", flags)
+        const _peer  = new ArkPolygonPeer(_peerPtr, peerId, 'Polygon', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setPolygonOptionsAttribute(options?: PolygonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            PolygonOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PolygonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PolygonInterface_setPolygonOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPointsAttribute(value: Array<ShapePoint> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : ShapePoint = value_value[value_value_counter_i]
-                const value_value_element_0  = value_value_element[0]
-                let value_value_element_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_element_0_type = runtimeType(value_value_element_0)
-                if (RuntimeType.STRING == value_value_element_0_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : ShapePoint = valueTmpValue[valueTmpValueCounterI]
+                const valueTmpValueTmpElement_0  = valueTmpValueTmpElement[0]
+                if (valueTmpValueTmpElement_0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_element_0_0  = value_value_element_0 as string
-                    thisSerializer.writeString(value_value_element_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_element_0_type) {
+                    const valueTmpValueTmpElement_0ForIdx0  = valueTmpValueTmpElement_0 as string
+                    thisSerializer.writeString(valueTmpValueTmpElement_0ForIdx0)
+                } else if (valueTmpValueTmpElement_0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_element_0_1  = value_value_element_0 as number
-                    thisSerializer.writeNumber(value_value_element_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_element_0_type) {
+                    const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as number
+                    thisSerializer.writeNumber(valueTmpValueTmpElement_0ForIdx1)
+                } else if (valueTmpValueTmpElement_0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_element_0_2  = value_value_element_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_element_0_2)
+                    const valueTmpValueTmpElement_0ForIdx2  = valueTmpValueTmpElement_0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_0ForIdx2)
                 }
-                const value_value_element_1  = value_value_element[1]
-                let value_value_element_1_type : int32 = RuntimeType.UNDEFINED
-                value_value_element_1_type = runtimeType(value_value_element_1)
-                if (RuntimeType.STRING == value_value_element_1_type) {
+                const valueTmpValueTmpElement_1  = valueTmpValueTmpElement[1]
+                if (valueTmpValueTmpElement_1 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_element_1_0  = value_value_element_1 as string
-                    thisSerializer.writeString(value_value_element_1_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_element_1_type) {
+                    const valueTmpValueTmpElement_1ForIdx0  = valueTmpValueTmpElement_1 as string
+                    thisSerializer.writeString(valueTmpValueTmpElement_1ForIdx0)
+                } else if (valueTmpValueTmpElement_1 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_element_1_1  = value_value_element_1 as number
-                    thisSerializer.writeNumber(value_value_element_1_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_element_1_type) {
+                    const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as number
+                    thisSerializer.writeNumber(valueTmpValueTmpElement_1ForIdx1)
+                } else if (valueTmpValueTmpElement_1 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_element_1_2  = value_value_element_1 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_element_1_2)
+                    const valueTmpValueTmpElement_1ForIdx2  = valueTmpValueTmpElement_1 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_1ForIdx2)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PolygonAttribute_setPoints(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -125,11 +118,6 @@ export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements Polygo
     public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: PolygonAttribute): void {
-        super.apply(target)
-        if (this.points_value !== undefined)
-            target.points(this.points_value!)
-    }
 }
 
 export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implements PolygonAttribute {
@@ -153,7 +141,6 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -161,26 +148,6 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         super.applyAttributesFinish()
     }
 }
-export function withPolygonStyle(receiver: PolygonAttribute, modifier: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkPolygonStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Polygon")
-// export function Polygon(
-//     options?: PolygonOptions,
-//     @memo
-//     content_?: () => void,
-// ): PolygonAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Polygon(
@@ -196,26 +163,64 @@ export function Polygon(
     NodeAttach<ArkPolygonPeer>((): ArkPolygonPeer => ArkPolygonPeer.create(receiver), (_: ArkPolygonPeer): void => {
         receiver.setPolygonOptions(options)
         style?.(receiver)
-        withPolygonStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkPolygonSet extends ArkCommonShapeMethodSet implements PolygonAttribute {
+export class PolygonModifier extends CommonShapeMethodModifier implements PolygonAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _points_flag?: boolean
-    _points0_value?: Array<ShapePoint> | undefined
-    applyModifierPatch(component: PolygonAttribute): void {
-        if (this._points_flag)
-            component.points((this._points0_value as Array<ShapePoint> | undefined))
+    _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _points_0_0value?: Array<ShapePoint> | undefined
+    applyModifierPatch(peer: ArkPolygonPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._points_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPointsAttribute((this._points_0_0value as Array<ShapePoint> | undefined));
+                    this._points_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._points_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._points_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPointsAttribute((undefined as Array<ShapePoint> | undefined));
+                }
+            }
+        }
     }
-    public points(value: Array<ShapePoint> | undefined): this {
-        this._points_flag = true
-        this._points0_value = value
+    mergeModifier(modifier: PolygonModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._points_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.points(modifier._points_0_0value);
+                    break;
+                }
+                default: {
+                    this.points((undefined as Array<ShapePoint> | undefined));
+                }
+            }
+        }
+    }
+    points(value: Array<ShapePoint> | undefined): this {
+        if (((this._points_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._points_0_flag = AttributeUpdaterFlag.UPDATE
+            this._points_0_0value = value
+        } else
+        {
+            this._points_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {

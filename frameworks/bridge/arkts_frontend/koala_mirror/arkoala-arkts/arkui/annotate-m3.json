@@ -1,9 +1,0 @@
-{
-	"inputDir": "./src",
-	"outputDir": "./src",
-	"include": [
-        "./src/handwritten/**/*.ts", "./src/*.ts", "./src/peers/**/*.ts"
-    ],
-	"exclude": [],
-	"fileExtension": ".ets"
-}

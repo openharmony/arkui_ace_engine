@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Assert as assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { TreeNode } from "../../src/tree/TreeNode"
 
 class StringNode extends TreeNode {

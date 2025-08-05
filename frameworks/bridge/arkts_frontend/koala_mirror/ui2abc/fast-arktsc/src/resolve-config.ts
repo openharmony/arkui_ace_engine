@@ -21,7 +21,7 @@ export const SPLITTER = "=".repeat(80)
 export const BANNER = "[fast-arktsc]"
 export const PLUGIN_DEPENDENCIES = "dependencies"
 export const PLUGIN_NAME = "name"
-export const LAST_STAGE = "_proceed_to_binary"
+export const LAST_STATE = "_proceed_to_binary"
 
 export function relativeOrDot(from: string, to: string) {
     const result = path.relative(from, to)
@@ -85,15 +85,15 @@ function resolvePath(name: string, dependency?: string, config?: any) {
     }
     const pluginsArray = Array.from(plugins) as any[]
     for (var i = 0; i < pluginsArray.length; i++) {
-        if (`${pluginsArray[i].name}-${pluginsArray[i].stage}` == name) {
+        if (`${pluginsArray[i].name}-${pluginsArray[i].state}` == name) {
             if (i == 0) {
                 return undefined
             }
-            return path.resolve(path.dirname(dependency), config.compilerOptions.outDir ?? ".", `${pluginsArray[i - 1].name}-${pluginsArray[i - 1].stage}` )
+            return path.resolve(path.dirname(dependency), config.compilerOptions.outDir ?? ".", `${pluginsArray[i - 1].name}-${pluginsArray[i - 1].state}` )
         }
     }
-    if (name == LAST_STAGE) {
-        return path.resolve(path.dirname(dependency), config.compilerOptions.outDir ?? ".", `${pluginsArray[pluginsArray.length - 1].name}-${pluginsArray[pluginsArray.length - 1].stage}` )
+    if (name == LAST_STATE) {
+        return path.resolve(path.dirname(dependency), config.compilerOptions.outDir ?? ".", `${pluginsArray[pluginsArray.length - 1].name}-${pluginsArray[pluginsArray.length - 1].state}` )
     }
     return undefined
 }
@@ -112,8 +112,8 @@ function resolvePaths(name: string, paths: Map<string, string>, dependencies: Ma
  * @param configPath path to ui2abc configuration file
  * @returns path to first es2panda configuration file and intermediate build directories
  */
-export function resolveConfig(configPath: string, restartStages: boolean): [string, string[]] {
-    section()
+export function resolveConfig(configPath: string, restartStates: boolean): [string, string[]] {
+    if (restartStates) section()
 
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
     const compilerOptions = config.compilerOptions ?? { }
@@ -122,12 +122,12 @@ export function resolveConfig(configPath: string, restartStages: boolean): [stri
     const outDir = path.resolve(getConfigFullDirname(), compilerOptions?.outDir ?? ".")
     const packageRoot = path.resolve(configDirname, baseUrl)
     const paths = filterPathSectionToMap(packageRoot, "paths", compilerOptions.paths ?? { })
-    const pluginNames = (compilerOptions.plugins ?? []).map((plugin: any) => `${plugin.name}-${plugin.stage}`)
+    const pluginNames = (compilerOptions.plugins ?? []).map((plugin: any) => `${plugin.name}-${plugin.state}`)
     const dependencies = filterPathSectionToMap(configDirname, PLUGIN_DEPENDENCIES, config[PLUGIN_DEPENDENCIES] ?? { })
     const dependencyConfigs = getDependencyConfigs(configDirname, dependencies)
 
-    const stages = restartStages ? pluginNames.length + 1 : 1 // the last stage is a binary generation
-    log(`stages: ${stages}`)
+    const states = restartStates ? pluginNames.length + 1 : 1 // the last state is a binary generation
+    if (restartStates) log(`states: ${states}`)
 
     const computedPlugins = Array.from(compilerOptions.plugins ?? []).map((it: any, i) => {
         if (!it.transform) {
@@ -144,14 +144,14 @@ export function resolveConfig(configPath: string, restartStages: boolean): [stri
 
     const outDirs = []
 
-    for (var i = 0; i < stages; i++) {
-        const name = i == pluginNames.length ? LAST_STAGE : pluginNames[i]
-        log(`  stage #${i + 1}: ${name}`)
+    for (var i = 0; i < states; i++) {
+        const name = i == pluginNames.length ? LAST_STATE : pluginNames[i]
+        if (restartStates) log(`  state #${i + 1}: ${name}`)
         const resolvedPaths = resolvePaths(name, paths, dependencies, dependencyConfigs)
-        log(`  paths:`)
+        if (restartStates) log(`  paths:`)
         for (const [k, v] of resolvedPaths) {
             const res = relativeOrDot(packageRoot, v)
-            log(`    ${k}: ${k.endsWith('*') && !res.endsWith('*') ? `${res}/*` : res}`)
+            if (restartStates) log(`    ${k}: ${k.endsWith('*') && !res.endsWith('*') ? `${res}/*` : res}`)
         }
 
         for (const [k, v] of resolvedPaths) {
@@ -234,17 +234,17 @@ export function resolveConfig(configPath: string, restartStages: boolean): [stri
         }
 
         const emitPath = path.resolve(outDir ?? `.`, `arktsconfig-${name}.json`)
-        log(`  config emitted to ${emitPath}`)
+        log(`config emitted to ${emitPath}`)
         fs.mkdirSync(path.dirname(emitPath), { recursive: true })
         fs.writeFileSync(emitPath, JSON.stringify(arktsconfig, null, 2))
 
-        const intermediateOutDir = path.resolve(getConfigFullDirname(), outDir ?? `.`, name == LAST_STAGE ? `.` : name)
+        const intermediateOutDir = path.resolve(getConfigFullDirname(), outDir ?? `.`, name == LAST_STATE ? `.` : name)
         fs.mkdirSync(intermediateOutDir, { recursive: true })
         outDirs.push(intermediateOutDir)
     }
 
     return [
-        path.resolve(getConfigFullDirname(), outDir ?? `.`, `arktsconfig-${pluginNames.length == 0 ? LAST_STAGE : pluginNames[0]}.json`),
+        path.resolve(getConfigFullDirname(), outDir ?? `.`, `arktsconfig-${pluginNames.length == 0 ? LAST_STATE : pluginNames[0]}.json`),
         outDirs
     ]
 }

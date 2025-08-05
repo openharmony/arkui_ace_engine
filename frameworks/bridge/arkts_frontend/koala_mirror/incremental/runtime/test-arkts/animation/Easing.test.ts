@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
-import { float64, int32 } from "@koalaui/common"
-import { Easing, EasingCurve, EasingStepJump } from "../../src/animation/Easing"
+import { assert, suite, test } from "@koalaui/harness"
+import { float64toInt32, int32 } from "@koalaui/common"
+import { Easing, EasingCurve, EasingStepJump } from "../../ets/animation/Easing"
 
 function assertEasing(easing: EasingCurve, ...expected: int32[]) {
-    const last = expected.length - 1
-    for (let i = 0; i <= last; i++) {
-        Assert.equal(
-            Math.round(100 * easing((i as float64) / last)) as int32,
-            expected[i] as int32,
-            `i=${i}: expected=${expected[i]} - ${i / last} => ${easing(i / last)} => ${Math.round(100 * easing(i / last))}`
+    const last: number = expected.length - 1
+    for (let i: number = 0; i <= last; i++) {
+        const before = i / last
+        const after = easing(before)
+        const actual = float64toInt32(Math.round(100 * after))
+        assert.equal(
+            actual,
+            expected[i],
+            `i=${i}: expected=${expected[i]} - ${before} => ${after} => ${actual}`
         )
     }
 }

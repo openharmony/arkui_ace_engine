@@ -14,10 +14,10 @@
  */
 
 import {
+    AnnotationUsage,
     ClassDefinition,
     Expression,
     Identifier,
-    isMethodDefinition,
     MethodDefinition,
     TSClassImplements,
     TSTypeParameterDeclaration,
@@ -27,7 +27,6 @@ import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 import { AstNode } from "../peers/AstNode"
 import { Es2pandaClassDefinitionModifiers, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
-import { throwError } from "../../utils"
 
 export function updateClassDefinition(
     original: ClassDefinition,
@@ -39,11 +38,9 @@ export function updateClassDefinition(
     superClass: Expression | undefined,
     body: readonly AstNode[],
     modifiers: Es2pandaClassDefinitionModifiers,
-    flags: Es2pandaModifierFlags
+    flags: Es2pandaModifierFlags,
+    annotations?: readonly AnnotationUsage[]
 ): ClassDefinition {
-    if (original.ctor !== undefined && !isMethodDefinition(original.ctor)) {
-        throwError(`class definition constructor is not method definition: ${ctor?.dump()}`)
-    }
     if (isSameNativeObject(ident, original.ident)
         && (isSameNativeObject(typeParams, original.typeParams))
         && (isSameNativeObject(superTypeParams, original.superTypeParams))
@@ -53,6 +50,7 @@ export function updateClassDefinition(
         && (isSameNativeObject(body, original.body))
         && (isSameNativeObject(modifiers, original.modifiers))
         && (isSameNativeObject(flags, original.modifierFlags))
+        && (isSameNativeObject(annotations, original.annotations))
     ) {
         return original
     }
@@ -66,8 +64,9 @@ export function updateClassDefinition(
             superClass,
             body,
             modifiers,
-            flags
-        ).setAnnotations(original.annotations),
+            flags,
+            annotations,
+        ),
         original
     )
 }
