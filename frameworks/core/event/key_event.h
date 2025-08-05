@@ -594,6 +594,7 @@ struct KeyEvent final : public NonPointerEvent {
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
     std::optional<bool> activeMark;
+    int32_t targetDisplayId = 0;
 
     std::string ToString() const
     {
@@ -629,6 +630,7 @@ public:
         numLock_ = event.numLock;
         capsLock_ = event.enableCapsLock;
         scrollLock_ = event.scrollLock;
+        targetDisplayId_ = event.targetDisplayId;
     };
     ~KeyEventInfo() override = default;
 

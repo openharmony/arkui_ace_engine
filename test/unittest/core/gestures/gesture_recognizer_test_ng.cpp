@@ -139,6 +139,39 @@ HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.L
 }
 
 /**
+ * @tc.name: TriggerGestureJudgeCallbackTest002
+ * @tc.desc: Test Recognizer function: TriggerGestureJudgeCallbackTest002
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.expected: step2. result equals CONTINUE.
+     */
+    rotationRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    rotationRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
+    rotationRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    auto result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(rotationRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+    rotationRecognizerPtr->inputEventType_ = InputEventType::TOUCH_PAD;
+    result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
  * @tc.name: TransformTest001
  * @tc.desc: Test Transform in Default Condition
  */
