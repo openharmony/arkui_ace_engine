@@ -268,6 +268,7 @@ void OnFullscreenChangeImpl(Ark_NativePointer node,
     }
     auto onFullscreenChange = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
+        CHECK_NULL_VOID(data);
         auto fullscreen = data->GetValue("fullscreen")->GetBool();
         Ark_FullscreenInfo event = {
             .fullscreen = Converter::ArkValue<Ark_Boolean>(fullscreen)
@@ -288,6 +289,7 @@ void OnPreparedImpl(Ark_NativePointer node,
     }
     auto onPrepared = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
+        CHECK_NULL_VOID(data);
         auto duration = data->GetValue("duration")->GetDouble();
         Ark_PreparedInfo event = {
             .duration = Converter::ArkValue<Ark_Number>(static_cast<float>(duration))

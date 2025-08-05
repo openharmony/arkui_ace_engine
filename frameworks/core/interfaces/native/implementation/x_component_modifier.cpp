@@ -73,7 +73,6 @@ void SetXComponentOptions0Impl(Ark_NativePointer node,
     auto id = Converter::Convert<std::string>(value->id);
     XComponentModelNG::SetXComponentId(frameNode, id);
 
-    LOGE("XComponentInterfaceModifier::SetXComponentOptions0Impl - wrong input type");
     auto typeStr = Converter::Convert<std::string>(value->type);
     XComponentModelNG::SetXComponentType(frameNode, ConvertToXComponentType(typeStr));
 

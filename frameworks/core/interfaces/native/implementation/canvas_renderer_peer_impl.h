@@ -226,7 +226,7 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    void ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params, bool isImage);
+    void ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params);
     Dimension GetDimensionValue(const std::string& str);
     Dimension GetDimensionValue(const Dimension& dimension);
     Ace::Pattern GetPattern(unsigned int id);

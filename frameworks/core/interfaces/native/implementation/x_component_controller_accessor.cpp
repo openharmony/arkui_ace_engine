@@ -16,11 +16,12 @@
 #include "core/components_ng/base/frame_node.h"
 #ifdef XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#endif //XCOMPONENT_SUPPORTED
+#endif // XCOMPONENT_SUPPORTED
+#include "arkoala_api_generated.h"
+
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerAccessor {
@@ -49,6 +50,7 @@ Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     auto surfaceId = peerImpl->controller->GetSurfaceId();
     arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId, Converter::FC);
@@ -60,6 +62,7 @@ Ark_Object GetXComponentContextImpl(Ark_XComponentController peer)
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     LOGE("XComponentControllerAccessor::GetXComponentContextImpl - return context object need to be supported");
 #endif //XCOMPONENT_SUPPORTED
@@ -72,6 +75,7 @@ void SetXComponentSurfaceSizeImpl(Ark_XComponentController peer,
     //This API is deprecated since API version 12. Should be used SetXComponentSurfaceRectImpl instead.
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(value);
     uint32_t surfaceWidth = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceWidth));
@@ -85,6 +89,7 @@ void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(rect);
     auto offsetX = Converter::OptConvert<float>(rect->offsetX);
@@ -112,6 +117,7 @@ Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     float offsetX = 0.0f;
     float offsetY = 0.0f;
@@ -132,6 +138,7 @@ void SetXComponentSurfaceRotationImpl(Ark_XComponentController peer,
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(rotationOptions);
     auto lock = Converter::OptConvert<bool>(rotationOptions->lock);
@@ -144,6 +151,7 @@ Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentContro
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     bool lock = peerImpl->controller->GetSurfaceRotation();
     rotationOptions.lock = Converter::ArkValue<Opt_Boolean>(lock);
@@ -188,6 +196,7 @@ void StopImageAnalyzerImpl(Ark_XComponentController peer)
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
@@ -198,6 +207,7 @@ void SetOnSurfaceCreatedCallbackImpl(Ark_XComponentController peer,
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(onSurfaceCreatedCallback);
     peerImpl->SetOnSurfaceCreatedEvent(*onSurfaceCreatedCallback);
@@ -209,6 +219,7 @@ void SetOnSurfaceChangedCallbackImpl(Ark_XComponentController peer,
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(onSurfaceChangedCallback);
     peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChangedCallback);
@@ -220,6 +231,7 @@ void SetOnSurfaceDestroyedCallbackImpl(Ark_XComponentController peer,
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
     CHECK_NULL_VOID(onSurfaceDestroyedCallback);
     peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyedCallback);
