@@ -40,7 +40,9 @@ export class Dependencies {
 
     /** @param dependency - a dependency to invalidate */
     register(dependency?: Dependency): void {
-        if (dependency === undefined || dependency == this.latest || dependency.obsolete) return
+        if (dependency === undefined || dependency == this.latest || dependency.obsolete) {
+            return
+        }
         let dependencies = this.dependencies
         if (dependencies) {
             dependencies.add(dependency)
@@ -58,7 +60,9 @@ export class Dependencies {
 
     /** Invalidates all dependencies and removes obsolete ones. */
     updateDependencies(invalidate: boolean): void {
-        if (++this.frame < SKIP_FRAMES && !invalidate) return
+        if (++this.frame < SKIP_FRAMES && !invalidate) {
+            return
+        }
         this.frame = 0
         const dependencies = this.dependencies
         if (dependencies) {
@@ -66,7 +70,9 @@ export class Dependencies {
             const it = dependencies.values()
             while (true) {
                 const result = it.next()
-                if (result.done) break
+                if (result.done) {
+                    break
+                }
                 const dependency = result.value as Dependency
                 if (!updateDependency(invalidate, dependency)) {
                     if (disposed) {
@@ -78,7 +84,9 @@ export class Dependencies {
             }
             if (disposed) {
                 let index = disposed.length
-                while (0 < index--) dependencies.delete(disposed[index])
+                while (0 < index--) {
+                    dependencies.delete(disposed[index])
+                }
             }
         } else {
             const latest = this.latest
@@ -90,7 +98,11 @@ export class Dependencies {
 }
 
 function updateDependency(invalidate: boolean, dependency: Dependency): boolean {
-    if (dependency.obsolete) return false
-    if (invalidate) dependency.invalidate()
+    if (dependency.obsolete) {
+        return false
+    }
+    if (invalidate) {
+        dependency.invalidate()
+    }
     return true
 }

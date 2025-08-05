@@ -93,7 +93,9 @@ export function testRoot(
 
 /** @internal */
 export function testUpdate(withCallbacks: boolean = true, manager: StateManager = GlobalStateManager.instance): uint32 {
-    if (withCallbacks) manager.callCallbacks()
+    if (withCallbacks) {
+        manager.callCallbacks()
+    }
     manager.syncChanges()
     return manager.updateSnapshot()
 }

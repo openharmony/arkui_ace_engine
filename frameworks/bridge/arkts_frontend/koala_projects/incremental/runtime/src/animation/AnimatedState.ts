@@ -39,7 +39,11 @@ export interface AnimatedState<Value> extends State<Value> {
  * @param timeProvider - custom time provider for testing purposes
  * @returns animated state with the specified animation
  */
-export function animatedState<V>(animation: TimeAnimation<V>, startNow: boolean = false, timeProvider?: () => int64): AnimatedState<V> {
+export function animatedState<V>(
+    animation: TimeAnimation<V>,
+    startNow: boolean = false,
+    timeProvider?: () => int64
+): AnimatedState<V> {
     return new AnimatedStateImpl<V>(animation, startNow, timeProvider)
 }
 
@@ -62,7 +66,10 @@ export interface MutableAnimatedState<Value> extends MutableState<Value> {
  * @param animationProvider - factory producing a new animation from the current value and the target one
  * @returns a mutable state that automatically animates the value as it changes
  */
-export function mutableAnimatedState<Value>(initial: Value, animationProvider: ImplicitAnimationProvider<Value>): MutableAnimatedState<Value> {
+export function mutableAnimatedState<Value>(
+    initial: Value,
+    animationProvider: ImplicitAnimationProvider<Value>
+): MutableAnimatedState<Value> {
     return new MutableAnimatedStateImpl<Value>(initial, animationProvider)
 }
 
@@ -92,7 +99,10 @@ export interface StateAnimator<Parameter, Value> {
  * @param animationProvider - factory producing a new animation when parameter changed
  * @returns state animator with the animation created for given parameter
  */
-export function stateAnimator<P, V>(parameter: P, animationProvider: ParametrizedAnimationProvider<P, V>): StateAnimator<P, V> {
+export function stateAnimator<P, V>(
+    parameter: P,
+    animationProvider: ParametrizedAnimationProvider<P, V>
+): StateAnimator<P, V> {
     return new StateAnimatorImpl<P, V>(parameter, animationProvider)
 }
 
@@ -150,9 +160,13 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
     }
 
     set animation(animation: TimeAnimation<Value>) {
-        if (this.myAnimation === animation) return // nothing to change
+        if (this.myAnimation === animation) {
+            return // nothing to change
+        }
         this.myAnimation = animation
-        if (!this.paused) animation.onStart(this.timeProvider())
+        if (!this.paused) {
+            animation.onStart(this.timeProvider())
+        }
     }
 
     constructor(myAnimation: TimeAnimation<Value>, startNow: boolean, timeProvider?: () => int64) {
@@ -162,7 +176,9 @@ class AnimatedStateImpl<Value> implements Disposable, AnimatedState<Value> {
         } else {
             this.timeProvider = (): int64 => {
                 const timer = getAnimationTimer(manager)
-                if (timer) return timer.value
+                if (timer) {
+                    return timer.value
+                }
                 console.log("global animation timer is not specified yet")
                 return 0
             }
@@ -262,7 +278,9 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     set parameter(parameter: P) {
-        if (refEqual(this.parameterState.value, parameter)) return // nothing to change
+        if (refEqual(this.parameterState.value, parameter)) {
+            return // nothing to change
+        }
         this.parameterState.value = parameter
         this.animatedState.animation = this.animationProvider(parameter, this.animatedState.value)
     }

@@ -223,7 +223,11 @@ export class Matrix44 {
             -(options.pivotZ ?? (0.0).toFloat()),
         ))
 
-        const vec = new Point3(options.x ?? (0.0).toFloat(), options.y ?? (0.0).toFloat(), options.z ?? (0.0).toFloat()).normalize()
+        const vec = new Point3(
+          options.x ?? (0.0).toFloat(),
+          options.y ?? (0.0).toFloat(),
+          options.z ?? (0.0).toFloat()
+        ).normalize();
         const rads = (options.angle ?? (0.0).toFloat()) * Math.PI / 180
         let c = Math.cos(rads)
         let s = Math.sin(rads)
