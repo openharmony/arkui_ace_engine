@@ -1806,6 +1806,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    textPickerDialog.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     if (hoverModeAreaValue->IsNumber()) {
         auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
