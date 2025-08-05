@@ -14,11 +14,16 @@
  */
 
 import { KPointer } from "@koalaui/interop"
-import { NavigationTitleOptions, NavigationMenuOptions, NavigationMenuItem, NavPathStack, ToolbarItem, CustomBuilder, ResourceStr, NavigationToolbarOptions, NavigationCommonTitle, NavigationCustomTitle } from "../component"
+import { NavigationTitleOptions, NavigationMenuOptions, NavigationMenuItem, NavPathStack, ToolbarItem, CustomBuilder, ResourceStr, NavigationToolbarOptions, NavigationCommonTitle, NavigationCustomTitle, NavigationAttribute } from "../component"
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { NavigationHandWrittenImpl } from "./NavigationHandWrittenImpl"
+import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from 'arkui/component/common';
+import { applyAttributeModifierBase, applyCommonModifier } from "./modifiers/ArkCommonModifier";
+import { CommonModifier } from '../CommonModifier';
+import { NavigationModifier } from "../NavigationModifier"
+import { ArkNavigationComponent } from 'arkui/component/navigation'
 
 export function hookNavigationTitleImpl(node: KPointer, value: ResourceStr | CustomBuilder | NavigationCommonTitle |
     NavigationCustomTitle | undefined, options?: NavigationTitleOptions) {
@@ -46,4 +51,36 @@ export function hookNavigationToolbarConfigurationImpl(node: KPointer, value: Ar
 
 export function hookNavigationSetNavigationOptionsImpl(node: KPointer, value: NavPathStack) {
     NavigationHandWrittenImpl.SetNavigationOptionsImpl(node, value)
+}
+
+export function hookNavigationAttributeModifier(component: ArkNavigationComponent, modifier: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): NavigationModifier => {
+        let isNavigationModifier: boolean = modifier instanceof NavigationModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new NavigationModifier();
+        if (isNavigationModifier) {
+            let navigationModifier = modifier as object as NavigationModifier;
+            initModifier.mergeModifier(navigationModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkNavigationComponent => {
+        let componentNew: ArkNavigationComponent = new ArkNavigationComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<NavigationAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }

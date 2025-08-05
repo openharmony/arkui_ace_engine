@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback, Bindable, AttributeModifier } from "./common"
 import { Length, Dimension, ResourceStr, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { PixelMap } from "#external"
 import { Resource } from "global.resource"
@@ -42,7 +42,8 @@ import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PathStackUtils } from "../handwritten/ArkNavPathStack"
 import { setNeedCreate } from "../ArkComponentRoot"
 import { ArkStackComponent, ArkStackPeer } from "./stack"
-import { NavigationOpsHandWritten, hookNavigationBackButtonIconImpl, hookNavigationHideTitleBarImpl, hookNavigationMenusImpl, hookNavigationTitleImpl, hookNavigationSetNavigationOptionsImpl, hookNavigationToolbarConfigurationImpl} from "./../handwritten"
+import { NavigationOpsHandWritten, hookNavigationBackButtonIconImpl, hookNavigationHideTitleBarImpl, hookNavigationMenusImpl, hookNavigationTitleImpl, hookNavigationSetNavigationOptionsImpl, hookNavigationToolbarConfigurationImpl, hookNavigationAttributeModifier} from "./../handwritten"
+import { NavigationModifier } from "../NavigationModifier"
 
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
@@ -693,6 +694,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
 }
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
+    _attributeSet?: NavigationModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -1423,6 +1425,7 @@ export interface NavigationAttribute extends CommonMethod {
     title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this
     toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
+    attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod>| undefined): this
 }
 export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
     navBarWidth_value?: Length | Bindable<Length> | undefined
@@ -1531,6 +1534,9 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
         return this
     }
     public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod>| undefined): this {
         return this
     }
 }
@@ -1855,6 +1861,10 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
 
     public isNeedSync(): boolean {
         return this._needSync
+    }
+    public attributeModifier(modifier: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookNavigationAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */
