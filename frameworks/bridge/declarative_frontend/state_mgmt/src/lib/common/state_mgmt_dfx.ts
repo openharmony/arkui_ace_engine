@@ -47,7 +47,7 @@ class stateMgmtDFX {
     }
   }
 
-  private static HandlerStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>, stateInfo: DumpInfo) {
+  private static HandlerStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>, stateInfo: DumpInfo): void {
     const decoratorInfo: string = ObserveV2.getObserve().getDecoratorInfo(target, attrName);
     let val;
     let id;

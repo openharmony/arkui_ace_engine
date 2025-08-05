@@ -234,7 +234,7 @@ class SubscribableHandler {
 
           // do same as V2 proxy, call to autoProxyObject:
           // Array, Set, Map length functions fireChange(object, OB_LENGTH)
-          if (typeof result === "object" && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
+          if (typeof result === 'object' && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
             ObserveV2.getObserve().addRefV2Compatibility(result, ObserveV2.OB_LENGTH);
           }
         }
@@ -248,7 +248,7 @@ class SubscribableHandler {
 
           // do same as V2 proxy, call to autoProxyObject:
           // Array, Set, Map length functions fireChange(object, OB_LENGTH)
-          if (typeof result === "object" && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
+          if (typeof result === 'object' && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
             ObserveV2.getObserve().addRefV2Compatibility(result, ObserveV2.OB_LENGTH);
           }
         }
@@ -522,7 +522,7 @@ class SubscribableMapSetHandler extends SubscribableHandler {
           
           // do same as V2 proxy, call to autoProxyObject:
           // Array, Set, Map length functions fireChange(object, OB_LENGTH)
-          if (typeof item === "object" && (Array.isArray(item) || item instanceof Set || item instanceof Map)) {
+          if (typeof item === 'object' && (Array.isArray(item) || item instanceof Set || item instanceof Map)) {
             ObserveV2.getObserve().addRefV2Compatibility(item, ObserveV2.OB_LENGTH);
           }
           return item;
@@ -693,7 +693,7 @@ class SubscribableArrayHandler extends SubscribableHandler {
 
       // do same as V2 proxy, call to autoProxyObject:
       // Array, Set, Map length functions fireChange(object, OB_LENGTH)
-      if (typeof ret === "object" && (Array.isArray(ret) || ret instanceof Set || ret instanceof Map)) {
+      if (typeof ret === 'object' && (Array.isArray(ret) || ret instanceof Set || ret instanceof Map)) {
         ObserveV2.getObserve().addRefV2Compatibility(ret, ObserveV2.OB_LENGTH);
       }
 
@@ -988,7 +988,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (!rawObj || typeof rawObj !== 'object') {
       return;
     }
-    stateMgmtConsole.debug(`enableV2CompatibleInternal object of class '${obj?.constructor?.name}'`)
+    stateMgmtConsole.debug(`enableV2CompatibleInternal object of class '${obj?.constructor?.name}'`);
     // Mark the object as visited to prevent circular references in future calls
     visitedObjects.add(obj);
 
@@ -1008,7 +1008,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
   // return is given object V1 proxies and V2 compatibility has been enabled on it
   public static isEnableV2CompatibleInternal(obj: Object): boolean {
-    return ObservedObject.IsObservedObject(obj) && (obj[SubscribableHandler.ENABLE_V2_COMPATIBLE] == true);
+    return ObservedObject.IsObservedObject(obj) && (obj[SubscribableHandler.ENABLE_V2_COMPATIBLE] === true);
   }
 
 
@@ -1053,7 +1053,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
   // return is given object V1 proxies
   public static isMakeV1Observed(obj: Object): boolean {
-    return (obj[SubscribableHandler.MAKE_V1_OBSERVED] == true);
+    return (obj[SubscribableHandler.MAKE_V1_OBSERVED] === true);
   }
 
   /**
