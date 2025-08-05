@@ -159,6 +159,9 @@ public:
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
     virtual void SendExeAppAIFunctionResult(uint32_t result) {};
 protected:
+    UiSessionManager() = default;
+    virtual ~UiSessionManager() = default;
+
     static std::mutex mutex_;
     static std::shared_mutex reportObjectMutex_;
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
