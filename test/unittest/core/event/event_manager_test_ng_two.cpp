@@ -849,6 +849,36 @@ HWTEST_F(EventManagerTestNg, TryResampleTouchEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetResamplePointerEvent001
+ * @tc.desc: Test GetResamplePointerEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetResamplePointerEvent001, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+    TouchEvent touchEvent1;
+    TouchEvent touchEvent2;
+
+    uint64_t resampleTime1 = 0.5 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds1(resampleTime1);
+    TimeStamp ts1(nanoseconds1);
+    touchEvent1.time = ts1;
+    uint64_t resampleTime2 = 3 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds2(resampleTime2);
+    TimeStamp ts2(nanoseconds2);
+    touchEvent2.time = ts2;
+    events.push_back(touchEvent1);
+    events.push_back(touchEvent2);
+    TouchEvent resample;
+    uint64_t resampleTime = 4 * 1000 * 1000;
+
+    ResamplePoint slope;
+    SystemProperties::debugEnabled_ = true;
+    bool ret = ResampleAlgo::GetResamplePointerEvent(events, resampleTime, resample, slope);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: GetResampleTouchEvent005
  * @tc.desc: Test GetResampleTouchEvent function.
  * @tc.type: FUNC

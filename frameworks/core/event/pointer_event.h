@@ -106,9 +106,9 @@ struct DragPointerEvent final : public PointerEvent {
     Point GetPoint() const
     {
         if (!x && !y) {
-            return Point(windowX, windowY, displayX, displayY);
+            return Point(windowX, windowY, displayX, displayY, globalDisplayX, globalDisplayY);
         } else {
-            return Point(x, y, x, y);
+            return Point(x, y, x, y, globalDisplayX, globalDisplayY);
         }
     }
 
