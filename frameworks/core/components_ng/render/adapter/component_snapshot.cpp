@@ -180,7 +180,8 @@ bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& opti
     if (layoutDirection == TextDirection::AUTO || layoutDirection == TextDirection::INHERIT) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
-    bool isRegionMirror = NG::SnapshotRegionMode::LOCALIZED && layoutDirection == TextDirection::RTL;
+    bool isRegionMirror = options.regionMode == NG::SnapshotRegionMode::LOCALIZED &&
+        layoutDirection == TextDirection::RTL;
 
     specifiedAreaRect = Rosen::Drawing::Rect(
         isRegionMirror ? nodeWidth - snapshotRegion.end : snapshotRegion.start,
