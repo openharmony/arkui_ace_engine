@@ -35,4 +35,8 @@ export {
     extension_ETSModuleGetNamespaceFlag,
     extension_MethodDefinitionOnUpdate,
     extension_MethodDefinitionSetChildrenParentPtr,
+    extension_ScriptFunctionGetSignaturePointer,
+    extension_ScriptFunctionSetSignaturePointer,
+    extension_ScriptFunctionGetPreferredReturnTypePointer,
+    extension_ScriptFunctionSetPreferredReturnTypePointer,
 } from "./arkts-api/utilities/extensions"

@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { asArray } from "@koalaui/common"
 import {
     State,
@@ -23,14 +22,14 @@ import {
     contextLocalValue,
     mutableState,
     testTick,
-} from "../../src"
+} from "../../ets"
 
 const collector = new Array<string>()
 
 function testExpected(root: State<TestNode>, ...expected: string[]) {
     collector.length = 0
     testTick<TestNode>(root)
-    Assert.deepEqual(collector, asArray(expected))
+    assert.deepEqual(collector, asArray(expected))
     if (expected.length > 0) testExpected(root)
 }
 
@@ -38,22 +37,22 @@ suite("contextLocal tests", () => {
 
     test("contextLocalScope ensures name is not changed", () => {
         const state = mutableState<string>("first")
-        const root = TestNode.create((node) => {
-            contextLocalScope<string>(state.value, "value", () => {
+        const root = TestNode.create((node): void => {
+            contextLocalScope<string>(state.value, "value", (): void => {
                 collector.push(contextLocalValue<string>(state.value))
             })
         })
         testExpected(root, "value")
         state.value = "second"
-        Assert.throws(() => { testTick<TestNode>(root) })
+        assert.throws(() => { testTick<TestNode>(root) })
     })
 
     test("contextLocalScope propagates state immediately", () => {
         const state = mutableState<string>("first")
-        const root = TestNode.create((node) => {
+        const root = TestNode.create((node): void => {
             const str = state.value
             collector.push("ui:" + str)
-            contextLocalScope<string>("parameter", state.value, () => {
+            contextLocalScope<string>("parameter", state.value, (): void => {
                 collector.push("state:" + contextLocalValue<string>("parameter"))
             })
         })

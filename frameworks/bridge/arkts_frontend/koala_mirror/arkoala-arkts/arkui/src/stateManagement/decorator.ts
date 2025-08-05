@@ -29,6 +29,8 @@ export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
     registerWatchToSource(me: IDecoratedV1Variable<T>): void;
 }
 
+export interface IDecoratedV2Variable extends IDecoratedVariable {}
+
 export interface IDecoratedImmutableVariable<T> {
     get(): T;
 }
@@ -43,6 +45,19 @@ export interface IDecoratedUpdatableVariable<T> {
 }
 
 export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
+export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IParamDecoratedVariable<T>
+    extends IDecoratedImmutableVariable<T>,
+        IDecoratedUpdatableVariable<T>,
+        IDecoratedV2Variable {}
+
+export interface IParamOnceDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IProviderDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IConsumerDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
 
 export interface IPropDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
@@ -94,7 +109,7 @@ export interface IMutableKeyedStateMeta {
 export interface IObserve {
     renderingComponent: number;
     renderingId: RenderIdType | undefined;
-    shouldAddRef(iObjectsRenderId: RenderIdType | undefined): boolean;
+    shouldAddRef(iObjectsRenderId: RenderIdType): boolean;
 }
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
@@ -110,6 +125,21 @@ export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl(
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
+    makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T>;
+    makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T>;
+    makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T>;
+    makeProvider<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IProviderDecoratedVariable<T>;
+    makeConsumer<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IConsumerDecoratedVariable<T>;
     makeState<T>(
         owningView: ExtendableComponent,
         varName: string,
@@ -186,8 +216,8 @@ export interface IStateMgmtFactory {
         ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T>;
-    makeComputed<T>(computeFunction: () => T, varName: string): IComputedDecoratedVariable<T>;
-    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void): IMonitorDecoratedVariable;
+    makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
+    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -210,11 +240,11 @@ export interface IMonitor {
     value<T>(path?: string): IMonitorValue<T> | undefined;
 }
 
-export interface IMonitorDecoratedVariable { }
+export interface IMonitorDecoratedVariable {}
 
 export interface IMonitorPathInfo {
-    readonly path: string;
-    readonly lambda: () => NullishType;
+    path: string;
+    valueCallback: MonitorValueCallback;
 }
 
 export interface IMonitorValue<T> {
@@ -222,3 +252,7 @@ export interface IMonitorValue<T> {
     now: T;
     readonly path: string;
 }
+
+export type MonitorValueCallback = () => Any;
+export type MonitorCallback = (m: IMonitor) => void;
+export type ComputeCallback<T> = () => T;

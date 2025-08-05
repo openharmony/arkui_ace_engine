@@ -17,10 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { Edges_serializer, BorderRadiuses_serializer, Edges, Dimension, BorderRadiuses, Length } from "./../component/units"
-import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, runtimeType, RuntimeType, MaterializedBase, registerCallback, wrapCallback, KPointer, toPeerPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, runtimeType, RuntimeType, MaterializedBase, KPointer, toPeerPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
 import { AnimateParam_serializer, AnimateParam, FinishCallbackType, ExpectedFrameRateRange } from "./../component/common"
-import { ExtendableComponent_serializer, ExtendableComponent, LifeCycle, ExtendableComponentInternal } from "./../component/extendableComponent"
 import { ComponentInfo_serializer, ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./../component/idlize"
 import { uiEffect_BrightnessBlenderParam_serializer, uiEffect_BrightnessBlender_serializer, uiEffect } from "./ohos.graphics.uiEffect"
 import { text_FontDescriptor_serializer, text } from "./ohos.graphics.text"
@@ -28,8 +27,6 @@ import { font_UIFontConfig_serializer, font } from "./ohos.font"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { BorderStyle, PlayMode } from "./../component/enums"
 import { curves } from "./ohos.curves"
-import { CompatibleInitCallback, CompatibleComponentInfo, CompatibleUpdateCallback } from "./../component/interop"
-import { UIContext } from "./ohos.arkui.UIContext"
 import { Size } from "./arkui.Graphics"
 import { pointer } from "./ohos.multimodalInput.pointer"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -97,14 +94,14 @@ export class GlobalScope {
     static $r_serialize(value: string, params: Array<Object | undefined>): Resource {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((params.length).toInt())
-        for (let params_counter_i = 0; params_counter_i < params.length; params_counter_i++) {
-            const params_element : Object | undefined = params[params_counter_i]
-            let params_element_type : int32 = RuntimeType.UNDEFINED
-            params_element_type = runtimeType(params_element)
-            thisSerializer.writeInt8((params_element_type).toChar())
-            if ((params_element_type) != (RuntimeType.UNDEFINED)) {
-                const params_element_value  = params_element!
-                thisSerializer.holdAndWriteObject(params_element_value)
+        for (let paramsCounterI = 0; paramsCounterI < params.length; paramsCounterI++) {
+            const paramsTmpElement : Object | undefined = params[paramsCounterI]
+            if (paramsTmpElement !== undefined) {
+                thisSerializer.writeInt8(RuntimeType.OBJECT)
+                const paramsTmpElementTmpValue  = paramsTmpElement!
+                thisSerializer.holdAndWriteObject(paramsTmpElementTmpValue)
+            } else {
+                thisSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
         }
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_$r(value, thisSerializer.asBuffer(), thisSerializer.length())
@@ -172,75 +169,6 @@ export class GlobalScope {
     }
     static setAppBgColor_serialize(value: string): void {
         ArkUIGeneratedNativeModule._GlobalScope_setAppBgColor(value)
-    }
-    public static compatibleComponent(init: CompatibleInitCallback, update: CompatibleUpdateCallback, component: ExtendableComponent | undefined): void {
-        const init_casted = init as (CompatibleInitCallback)
-        const update_casted = update as (CompatibleUpdateCallback)
-        const component_casted = component as (ExtendableComponent | undefined)
-        GlobalScope.compatibleComponent_serialize(init_casted, update_casted, component_casted)
-        return
-    }
-    static compatibleComponent_serialize(init: CompatibleInitCallback, update: CompatibleUpdateCallback, component: ExtendableComponent | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(init)
-        thisSerializer.holdAndWriteCallback(update)
-        let component_type : int32 = RuntimeType.UNDEFINED
-        component_type = runtimeType(component)
-        thisSerializer.writeInt8((component_type).toChar())
-        if ((component_type) != (RuntimeType.UNDEFINED)) {
-            const component_value  = component!
-            ExtendableComponent_serializer.write(thisSerializer, component_value)
-        }
-        ArkUIGeneratedNativeModule._GlobalScope_compatibleComponent(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static bindCompatibleProvideCallback(component: ExtendableComponent, createCompatibleState: object, setCallback: object, compatibleComponent: object | undefined): void {
-        const component_casted = component as (ExtendableComponent)
-        const createCompatibleState_casted = createCompatibleState as (object)
-        const setCallback_casted = setCallback as (object)
-        const compatibleComponent_casted = compatibleComponent as (object | undefined)
-        GlobalScope.bindCompatibleProvideCallback_serialize(component_casted, createCompatibleState_casted, setCallback_casted, compatibleComponent_casted)
-        return
-    }
-    static bindCompatibleProvideCallback_serialize(component: ExtendableComponent, createCompatibleState: object, setCallback: object, compatibleComponent: object | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject("object", createCompatibleState)
-        thisSerializer.writeCustomObject("object", setCallback)
-        let compatibleComponent_type : int32 = RuntimeType.UNDEFINED
-        compatibleComponent_type = runtimeType(compatibleComponent)
-        thisSerializer.writeInt8((compatibleComponent_type).toChar())
-        if ((compatibleComponent_type) != (RuntimeType.UNDEFINED)) {
-            const compatibleComponent_value  = compatibleComponent!
-            thisSerializer.writeCustomObject("object", compatibleComponent_value)
-        }
-        ArkUIGeneratedNativeModule._GlobalScope_bindCompatibleProvideCallback(toPeerPtr(component), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static getCompatibleState<T>(state: object, createCompatibleState: object): object {
-        const state_casted = state as (object)
-        const createCompatibleState_casted = createCompatibleState as (object)
-        return GlobalScope.getCompatibleState_serialize(state_casted, createCompatibleState_casted)
-    }
-    static getCompatibleState_serialize<T>(state: object, createCompatibleState: object): object {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject("object", state)
-        thisSerializer.writeCustomObject("object", createCompatibleState)
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_getCompatibleState(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
-    }
-    public static compatibleWrappedBuilder(builder: object, args: object): void {
-        const builder_casted = builder as (object)
-        const args_casted = args as (object)
-        GlobalScope.compatibleWrappedBuilder_serialize(builder_casted, args_casted)
-        return
-    }
-    static compatibleWrappedBuilder_serialize(builder: object, args: object): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject("object", builder)
-        thisSerializer.writeCustomObject("object", args)
-        ArkUIGeneratedNativeModule._GlobalScope_compatibleWrappedBuilder(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     public static getRectangleById(id: string): ComponentInfo {
         const id_casted = id as (string)
@@ -357,5 +285,149 @@ export class GlobalScope {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : font.UIFontConfig = font_UIFontConfig_serializer.read(retvalDeserializer)
         return returnResult
+    }
+    public static curves_initCurve(curve: curves.Curve | undefined): curves.ICurve {
+        const curve_casted = curve as (curves.Curve | undefined)
+        return GlobalScope.curves_initCurve_serialize(curve_casted)
+    }
+    static curves_initCurve_serialize(curve: curves.Curve | undefined): curves.ICurve {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (curve !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const curveTmpValue  = (curve as curves.Curve)
+            thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(curveTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_initCurve(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_stepsCurve(count: number, end: boolean): curves.ICurve {
+        const count_casted = count as (number)
+        const end_casted = end as (boolean)
+        return GlobalScope.curves_stepsCurve_serialize(count_casted, end_casted)
+    }
+    static curves_stepsCurve_serialize(count: number, end: boolean): curves.ICurve {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_stepsCurve(count, end ? 1 : 0)
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_customCurve(interpolate: ((fraction: number) => number)): curves.ICurve {
+        const interpolate_casted = interpolate as (((fraction: number) => number))
+        return GlobalScope.curves_customCurve_serialize(interpolate_casted)
+    }
+    static curves_customCurve_serialize(interpolate: ((fraction: number) => number)): curves.ICurve {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(interpolate)
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_customCurve(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_cubicBezierCurve(x1: number, y1: number, x2: number, y2: number): curves.ICurve {
+        const x1_casted = x1 as (number)
+        const y1_casted = y1 as (number)
+        const x2_casted = x2 as (number)
+        const y2_casted = y2 as (number)
+        return GlobalScope.curves_cubicBezierCurve_serialize(x1_casted, y1_casted, x2_casted, y2_casted)
+    }
+    static curves_cubicBezierCurve_serialize(x1: number, y1: number, x2: number, y2: number): curves.ICurve {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_cubicBezierCurve(x1, y1, x2, y2)
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_springCurve(velocity: number, mass: number, stiffness: number, damping: number): curves.ICurve {
+        const velocity_casted = velocity as (number)
+        const mass_casted = mass as (number)
+        const stiffness_casted = stiffness as (number)
+        const damping_casted = damping as (number)
+        return GlobalScope.curves_springCurve_serialize(velocity_casted, mass_casted, stiffness_casted, damping_casted)
+    }
+    static curves_springCurve_serialize(velocity: number, mass: number, stiffness: number, damping: number): curves.ICurve {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_springCurve(velocity, mass, stiffness, damping)
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_springMotion(response: number | undefined, dampingFraction: number | undefined, overlapDuration: number | undefined): curves.ICurve {
+        const response_casted = response as (number | undefined)
+        const dampingFraction_casted = dampingFraction as (number | undefined)
+        const overlapDuration_casted = overlapDuration as (number | undefined)
+        return GlobalScope.curves_springMotion_serialize(response_casted, dampingFraction_casted, overlapDuration_casted)
+    }
+    static curves_springMotion_serialize(response: number | undefined, dampingFraction: number | undefined, overlapDuration: number | undefined): curves.ICurve {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (response !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const responseTmpValue  = response!
+            thisSerializer.writeNumber(responseTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (dampingFraction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const dampingFractionTmpValue  = dampingFraction!
+            thisSerializer.writeNumber(dampingFractionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (overlapDuration !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const overlapDurationTmpValue  = overlapDuration!
+            thisSerializer.writeNumber(overlapDurationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_springMotion(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_responsiveSpringMotion(response: number | undefined, dampingFraction: number | undefined, overlapDuration: number | undefined): curves.ICurve {
+        const response_casted = response as (number | undefined)
+        const dampingFraction_casted = dampingFraction as (number | undefined)
+        const overlapDuration_casted = overlapDuration as (number | undefined)
+        return GlobalScope.curves_responsiveSpringMotion_serialize(response_casted, dampingFraction_casted, overlapDuration_casted)
+    }
+    static curves_responsiveSpringMotion_serialize(response: number | undefined, dampingFraction: number | undefined, overlapDuration: number | undefined): curves.ICurve {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (response !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const responseTmpValue  = response!
+            thisSerializer.writeNumber(responseTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (dampingFraction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const dampingFractionTmpValue  = dampingFraction!
+            thisSerializer.writeNumber(dampingFractionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (overlapDuration !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const overlapDurationTmpValue  = overlapDuration!
+            thisSerializer.writeNumber(overlapDurationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_responsiveSpringMotion(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static curves_interpolatingSpring(velocity: number, mass: number, stiffness: number, damping: number): curves.ICurve {
+        const velocity_casted = velocity as (number)
+        const mass_casted = mass as (number)
+        const stiffness_casted = stiffness as (number)
+        const damping_casted = damping as (number)
+        return GlobalScope.curves_interpolatingSpring_serialize(velocity_casted, mass_casted, stiffness_casted, damping_casted)
+    }
+    static curves_interpolatingSpring_serialize(velocity: number, mass: number, stiffness: number, damping: number): curves.ICurve {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_interpolatingSpring(velocity, mass, stiffness, damping)
+        const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
     }
 }

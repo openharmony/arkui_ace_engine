@@ -63,14 +63,15 @@ def run(args, dir = None):
         ret = subprocess.run(["npm"] + args, capture_output=True, env=os.environ, text=True, check=True)
         with open(koala_log, "a+") as f:
             f.write("\n")
-            f.write("install log:\n" + ret.stdout)
+            f.write(f"npm args: {args}; project: {project_path}:\n" + ret.stdout)
             f.close()
     except subprocess.CalledProcessError as e:
         with open(koala_log, "a+") as f:
             f.write("\n")
-            f.write("error message: "+ e.stderr + "\n")
+            f.write("Error: " + e.stderr + "\n")
             f.close()
-        print(f"Error: npm failed, errors logged to {koala_log}")
+        print(f"Error: npm failure logged to {koala_log}")
+        print(open(koala_log, "r").read())
         raise
 
 def install(dir = None):

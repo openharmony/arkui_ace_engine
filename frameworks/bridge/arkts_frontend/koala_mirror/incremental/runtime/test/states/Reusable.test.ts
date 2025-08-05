@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Assert as assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { TestNode, ReusableTestNode, testUpdate, memoEntry, __id } from "../../src"
 import { createStateManager, IncrementalScope } from "../../src/states/State"
 import { assertNode } from "./State.test"

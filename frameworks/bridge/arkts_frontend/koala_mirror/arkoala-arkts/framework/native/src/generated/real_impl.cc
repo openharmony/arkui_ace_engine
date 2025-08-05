@@ -409,7 +409,7 @@ Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 f
 
     if (needGroupedLog(2)) {
         std::string _logData;
-        _logData.append("  Ark_NodeHandle peer" + std::to_string((uintptr_t)result) + " = GetBasicNodeApi()->createNode(GENERATED_Ark_NodeType("
+        _logData.append("  Ark_NodeHandle peer" + std::to_string(reinterpret_cast<uintptr_t>(result)) + " = GetBasicNodeApi()->createNode(GENERATED_Ark_NodeType("
             + std::to_string(type) + "), " + std::to_string(id) + ", " + std::to_string(flags) + ");\n");
         appendGroupedLog(2, _logData);
     }
@@ -483,10 +483,10 @@ Ark_Float32 GetDesignWidthScale(Ark_Int32 deviceId) {
 }
 
 Ark_NodeHandle GetNodeByViewStack() {
-    Ark_NodeHandle result = (Ark_NodeHandle) 234;
+    Ark_NodeHandle result = reinterpret_cast<Ark_NodeHandle>(234);
     if (needGroupedLog(2)) {
         std::string _logData;
-        _logData.append("  Ark_NodeHandle peer" + std::to_string((uintptr_t)result) + " = GetBasicNodeApi()->getNodeByViewStack();\n");
+        _logData.append("  Ark_NodeHandle peer" + std::to_string(reinterpret_cast<uintptr_t>(result)) + " = GetBasicNodeApi()->getNodeByViewStack();\n");
         appendGroupedLog(2, _logData);
     }
     if (!needGroupedLog(1)) {
@@ -500,7 +500,7 @@ Ark_NodeHandle GetNodeByViewStack() {
 void DisposeNode(Ark_NodeHandle node) {
     if (needGroupedLog(2)) {
         std::string _logData;
-        _logData.append("  GetBasicNodeApi()->disposeNode(peer" + std::to_string((uintptr_t)node) + ");\n");
+        _logData.append("  GetBasicNodeApi()->disposeNode(peer" + std::to_string(reinterpret_cast<uintptr_t>(node)) + ");\n");
         appendGroupedLog(2, _logData);
     }
     if (needGroupedLog(1)) {
@@ -517,7 +517,7 @@ void DumpTreeNode(Ark_NodeHandle node) {
 
     if (needGroupedLog(2)) {
         std::string _logData;
-        _logData.append("  GetBasicNodeApi()->dumpTreeNode(peer" + std::to_string((uintptr_t)node) + ");\n");
+        _logData.append("  GetBasicNodeApi()->dumpTreeNode(peer" + std::to_string(reinterpret_cast<uintptr_t>(node)) + ");\n");
         appendGroupedLog(2, _logData);
     }
 
@@ -662,7 +662,7 @@ void ApplyModifierFinish(Ark_NodeHandle node) {
 
     if (needGroupedLog(2)) {
         std::string _logData;
-        _logData.append("  GetBasicNodeApi()->applyModifierFinish(peer" + std::to_string((uintptr_t)node) + ");\n");
+        _logData.append("  GetBasicNodeApi()->applyModifierFinish(peer" + std::to_string(reinterpret_cast<uintptr_t>(node)) + ");\n");
         appendGroupedLog(2, _logData);
     }
 
@@ -679,7 +679,7 @@ void MarkDirty(Ark_NodeHandle node, Ark_UInt32 flag) {
 
     if (needGroupedLog(2)) {
         std::string _logData;
-        _logData.append("  GetBasicNodeApi()->markDirty(peer" + std::to_string((uintptr_t)node) + ", " + std::to_string(flag) + ");\n");
+        _logData.append("  GetBasicNodeApi()->markDirty(peer" + std::to_string(reinterpret_cast<uintptr_t>(node)) + ", " + std::to_string(flag) + ");\n");
         appendGroupedLog(2, _logData);
     }
 
@@ -700,7 +700,7 @@ Ark_Boolean IsBuilderNode(Ark_NodeHandle node) {
     if (needGroupedLog(2)) {
         std::string _logData;
         _logData.append("  Ark_Boolean res" + std::to_string(res_num++) + " = GetBasicNodeApi()->isBuilderNode(peer"
-            + std::to_string((uintptr_t)node) + ");\n");
+            + std::to_string(reinterpret_cast<uintptr_t>(node)) + ");\n");
         appendGroupedLog(2, _logData);
     }
 
@@ -752,7 +752,7 @@ Ark_Int32 MeasureNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32*
 }
 
 Ark_Int32 LayoutNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32 (*data)[2]) {
-    return AsNode(node)->layout(vmContext, (Ark_Float32*)data);
+    return AsNode(node)->layout(vmContext, reinterpret_cast<Ark_Float32*>(data));
 }
 
 Ark_Int32 DrawNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32* data) {
@@ -810,7 +810,7 @@ Ark_Int32 IndexerChecker(Ark_VMContext vmContext, Ark_NodeHandle nodePtr) {
 void SetRangeUpdater(Ark_NodeHandle nodePtr, Ark_Int32 updaterId) {}
 void SetLazyItemIndexer(Ark_VMContext vmContext, Ark_NodeHandle nodePtr, Ark_Int32 indexerId) {}
 Ark_PipelineContext GetPipelineContext(Ark_NodeHandle node) {
-    return (Ark_PipelineContext)42;
+    return reinterpret_cast<Ark_PipelineContext>(42);
 }
 void SetVsyncCallback(Ark_PipelineContext pipelineContext, Ark_VsyncCallback callback) {
     using namespace std::chrono_literals;
@@ -889,6 +889,69 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CommonMethodModifier
 
+    namespace EnvironmentBackendAccessor {
+    Ark_Boolean IsAccessibilityEnabledImpl()
+    {
+        if (needGroupedLog(1))
+        {
+            string out("isAccessibilityEnabled() \n");
+            out.append("[return false] \n");
+            appendGroupedLog(1, out);
+        }
+        return false;
+    }
+    Ark_Int32 GetColorModeImpl()
+    {
+        if (needGroupedLog(1))
+        {
+            string out("getColorMode() \n");
+            out.append("[return 1] \n");
+            appendGroupedLog(1, out);
+        }
+        return 1;
+    }
+    Ark_Float32 GetFontScaleImpl()
+    {
+        if (needGroupedLog(1))
+        {
+            string out("getFontScale() \n");
+            out.append("[return 1.0] \n");
+            appendGroupedLog(1, out);
+        }
+        return 1.0;
+    }
+    Ark_Float32 GetFontWeightScaleImpl()
+    {
+        if (needGroupedLog(1))
+        {
+            string out("getFontWeightScale() \n");
+            out.append("[return 1.0] \n");
+            appendGroupedLog(1, out);
+        }
+        return 1.0;
+    }
+    Ark_String GetLayoutDirectionImpl()
+    {
+        if (needGroupedLog(1))
+        {
+            string out("getLayoutDirection() \n");
+            out.append("[return \"LTR\"] \n");
+            appendGroupedLog(1, out);
+        }
+        return { "LTR", 3 };
+    }
+    Ark_String GetLanguageCodeImpl()
+    {
+        if (needGroupedLog(1))
+        {
+            string out("getLanguageCode() \n");
+            out.append("[return \"en\"] \n");
+            appendGroupedLog(1, out);
+        }
+        return { "en", 2 };
+    }
+    } // EnvironmentBackendAccessor
+
     namespace EventEmulatorAccessor {
     void EmitClickEventImpl(Ark_NativePointer node,
                             Ark_ClickEvent event)
@@ -897,6 +960,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         frameNode->callClickEvent(event);
     }
     } // EventEmulatorAccessor
+    namespace ScreenshotServiceAccessor {
+        Ark_Boolean RequestScreenshotImpl(const Ark_String* target, const Ark_String* name)
+        {
+            bool xxx = strcmp(name->chars, "XXX") == 0;
+            bool yyy = strcmp(name->chars, "YYY") == 0;
+            if (xxx || yyy) {
+                if (!needGroupedLog(1)) {
+                    return strcmp(name->chars, "XXX") == 0;
+                }
+                std::string out("requestScreenshot() \n");
+                out.append("[return true] \n");
+                appendGroupedLog(1, out);
+                return strcmp(name->chars, "XXX") == 0;
+            }
+            // golden image comparison
+            TGAInfo infoGolden;
+            ReadImageTGA(baseGoldenPath + std::string("golden-base"), infoGolden);
+            if (strcmp(name->chars, "golden-compare") == 0) {
+                return CompareTwoTGA(std::string("golden-base"), infoGolden, infoGolden);
+            }
+            if (strcmp(name->chars, "golden-diff") == 0) {
+                TGAInfo infoTarget;
+                CopyTGAHeaders(infoGolden, infoTarget);
+                StubTGA(baseBuildPath + std::string("golden-base-snapshot"), infoTarget);
+                return CompareTwoTGA(std::string("golden-base"), infoGolden, infoTarget);
+            }
+            return false;
+        }
+    } // ScreenshotServiceAccessor
     namespace RenderServiceNodeAccessor {
         Ark_Int32 GetNodeIdImpl(const Ark_String* nodeId)
         {
@@ -977,113 +1069,109 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // AlphabetIndexerInterfaceModifier
     namespace AlphabetIndexerAttributeModifier {
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
     {
     }
-    void SelectedColorImpl(Ark_NativePointer node,
+    void SetSelectedColorImpl(Ark_NativePointer node,
+                              const Opt_ResourceColor* value)
+    {
+    }
+    void SetPopupColorImpl(Ark_NativePointer node,
                            const Opt_ResourceColor* value)
     {
     }
-    void PopupColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+    void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
-    {
-    }
-    void PopupBackgroundImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
-    {
-    }
-    void PopupSelectedColorImpl(Ark_NativePointer node,
+    void SetPopupBackgroundImpl(Ark_NativePointer node,
                                 const Opt_ResourceColor* value)
     {
     }
-    void PopupUnselectedColorImpl(Ark_NativePointer node,
-                                  const Opt_ResourceColor* value)
+    void SetPopupSelectedColorImpl(Ark_NativePointer node,
+                                   const Opt_ResourceColor* value)
     {
     }
-    void PopupItemBackgroundColorImpl(Ark_NativePointer node,
-                                      const Opt_ResourceColor* value)
+    void SetPopupUnselectedColorImpl(Ark_NativePointer node,
+                                     const Opt_ResourceColor* value)
     {
     }
-    void UsingPopupImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetPopupItemBackgroundColorImpl(Ark_NativePointer node,
+                                         const Opt_ResourceColor* value)
     {
     }
-    void SelectedFontImpl(Ark_NativePointer node,
+    void SetUsingPopupImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+    {
+    }
+    void SetSelectedFontImpl(Ark_NativePointer node,
+                             const Opt_Font* value)
+    {
+    }
+    void SetPopupFontImpl(Ark_NativePointer node,
                           const Opt_Font* value)
     {
     }
-    void PopupFontImpl(Ark_NativePointer node,
-                       const Opt_Font* value)
+    void SetPopupItemFontImpl(Ark_NativePointer node,
+                              const Opt_Font* value)
     {
     }
-    void PopupItemFontImpl(Ark_NativePointer node,
-                           const Opt_Font* value)
+    void SetItemSizeImpl(Ark_NativePointer node,
+                         const Opt_Union_String_Number* value)
     {
     }
-    void ItemSizeImpl(Ark_NativePointer node,
-                      const Opt_Union_String_Number* value)
+    void SetFontImpl(Ark_NativePointer node,
+                     const Opt_Font* value)
     {
     }
-    void FontImpl(Ark_NativePointer node,
-                  const Opt_Font* value)
+    void SetOnSelectImpl(Ark_NativePointer node,
+                         const Opt_OnAlphabetIndexerSelectCallback* value)
     {
     }
-    void OnSelectImpl(Ark_NativePointer node,
-                      const Opt_OnAlphabetIndexerSelectCallback* value)
+    void SetOnRequestPopupDataImpl(Ark_NativePointer node,
+                                   const Opt_OnAlphabetIndexerRequestPopupDataCallback* value)
     {
     }
-    void OnRequestPopupDataImpl(Ark_NativePointer node,
-                                const Opt_OnAlphabetIndexerRequestPopupDataCallback* value)
+    void SetOnPopupSelectImpl(Ark_NativePointer node,
+                              const Opt_OnAlphabetIndexerPopupSelectCallback* value)
     {
     }
-    void OnPopupSelectImpl(Ark_NativePointer node,
-                           const Opt_OnAlphabetIndexerPopupSelectCallback* value)
+    void SetSelectedImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Bindable* value)
     {
     }
-    void SelectedImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetPopupPositionImpl(Ark_NativePointer node,
+                              const Opt_Position* value)
     {
     }
-    void PopupPositionImpl(Ark_NativePointer node,
-                           const Opt_Position* value)
+    void SetAutoCollapseImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
     {
     }
-    void AutoCollapseImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
+                                      const Opt_Number* value)
     {
     }
-    void PopupItemBorderRadiusImpl(Ark_NativePointer node,
-                                   const Opt_Number* value)
+    void SetItemBorderRadiusImpl(Ark_NativePointer node,
+                                 const Opt_Number* value)
     {
     }
-    void ItemBorderRadiusImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+    void SetPopupBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                         const Opt_BlurStyle* value)
     {
     }
-    void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                      const Opt_BlurStyle* value)
+    void SetPopupTitleBackgroundImpl(Ark_NativePointer node,
+                                     const Opt_ResourceColor* value)
     {
     }
-    void PopupTitleBackgroundImpl(Ark_NativePointer node,
-                                  const Opt_ResourceColor* value)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
-    {
-    }
-    void AlignStyleImpl(Ark_NativePointer node,
-                        const Opt_IndexerAlign* value,
-                        const Opt_Length* offset)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Opt_Number_Void* callback_)
+    void SetAlignStyleImpl(Ark_NativePointer node,
+                           const Opt_IndexerAlign* value,
+                           const Opt_Length* offset)
     {
     }
     } // AlphabetIndexerAttributeModifier
@@ -1101,60 +1189,60 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // AnimatorInterfaceModifier
     namespace AnimatorAttributeModifier {
-    void StateImpl(Ark_NativePointer node,
-                   const Opt_AnimationStatus* value)
+    void SetStateImpl(Ark_NativePointer node,
+                      const Opt_AnimationStatus* value)
     {
     }
-    void DurationImpl(Ark_NativePointer node,
+    void SetDurationImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
+    {
+    }
+    void SetCurveImpl(Ark_NativePointer node,
+                      const Opt_curves_Curve* value)
+    {
+    }
+    void SetDelayImpl(Ark_NativePointer node,
                       const Opt_Number* value)
     {
     }
-    void CurveImpl(Ark_NativePointer node,
-                   const Opt_curves_Curve* value)
+    void SetFillModeImpl(Ark_NativePointer node,
+                         const Opt_FillMode* value)
     {
     }
-    void DelayImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+    void SetIterationsImpl(Ark_NativePointer node,
+                           const Opt_Number* value)
     {
     }
-    void FillModeImpl(Ark_NativePointer node,
-                      const Opt_FillMode* value)
+    void SetPlayModeImpl(Ark_NativePointer node,
+                         const Opt_PlayMode* value)
     {
     }
-    void IterationsImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
+    void SetMotionImpl(Ark_NativePointer node,
+                       const Opt_Union_SpringMotion_FrictionMotion_ScrollMotion* value)
     {
     }
-    void PlayModeImpl(Ark_NativePointer node,
-                      const Opt_PlayMode* value)
+    void SetOnStartImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void MotionImpl(Ark_NativePointer node,
-                    const Opt_Union_SpringMotion_FrictionMotion_ScrollMotion* value)
+    void SetOnPauseImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void OnStartImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnRepeatImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnPauseImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnCancelImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnRepeatImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnFinishImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnCancelImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
-    {
-    }
-    void OnFinishImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
-    {
-    }
-    void OnFrameImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Void* value)
+    void SetOnFrameImpl(Ark_NativePointer node,
+                        const Opt_Callback_Number_Void* value)
     {
     }
     } // AnimatorAttributeModifier
@@ -1181,12 +1269,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void TextBackgroundStyleImpl(Ark_NativePointer node,
-                                 const Opt_TextBackgroundStyle* value)
+    void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                    const Opt_TextBackgroundStyle* value)
     {
     }
-    void BaselineOffsetImpl(Ark_NativePointer node,
-                            const Opt_LengthMetrics* value)
+    void SetBaselineOffsetImpl(Ark_NativePointer node,
+                               const Opt_LengthMetrics* value)
     {
     }
     } // BaseSpanModifier
@@ -1204,8 +1292,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // BlankInterfaceModifier
     namespace BlankAttributeModifier {
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
     {
     }
     } // BlankAttributeModifier
@@ -1217,74 +1305,63 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ButtonModifier
     namespace ButtonInterfaceModifier {
-    void SetButtonOptions0Impl(Ark_NativePointer node)
-    {
-    }
-    void SetButtonOptions1Impl(Ark_NativePointer node,
-                               const Ark_ButtonOptions* options)
-    {
-    }
-    void SetButtonOptions2Impl(Ark_NativePointer node,
-                               const Ark_ResourceStr* label,
-                               const Opt_ButtonOptions* options)
+    void SetButtonOptionsImpl(Ark_NativePointer node,
+                              const Ark_Union_ButtonOptions_ResourceStr* label,
+                              const Opt_ButtonOptions* options)
     {
     }
     } // ButtonInterfaceModifier
     namespace ButtonAttributeModifier {
-    void TypeImpl(Ark_NativePointer node,
-                  const Opt_ButtonType* value)
+    void SetTypeImpl(Ark_NativePointer node,
+                     const Opt_ButtonType* value)
     {
     }
-    void StateEffectImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetStateEffectImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void ButtonStyleImpl(Ark_NativePointer node,
-                         const Opt_ButtonStyleMode* value)
+    void SetButtonStyleImpl(Ark_NativePointer node,
+                            const Opt_ButtonStyleMode* value)
     {
     }
-    void ControlSizeImpl(Ark_NativePointer node,
-                         const Opt_ControlSize* value)
+    void SetControlSizeImpl(Ark_NativePointer node,
+                            const Opt_ControlSize* value)
     {
     }
-    void RoleImpl(Ark_NativePointer node,
-                  const Opt_ButtonRole* value)
+    void SetRoleImpl(Ark_NativePointer node,
+                     const Opt_ButtonRole* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_Union_String_Resource* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_Union_String_Resource* value)
     {
     }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetLabelStyleImpl(Ark_NativePointer node,
+                           const Opt_ButtonLabelStyle* value)
     {
     }
-    void LabelStyleImpl(Ark_NativePointer node,
-                        const Opt_ButtonLabelStyle* value)
+    void SetMinFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
-    {
-    }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMaxFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
     } // ButtonAttributeModifier
@@ -1302,21 +1379,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CalendarPickerInterfaceModifier
     namespace CalendarPickerAttributeModifier {
-    void TextStyleImpl(Ark_NativePointer node,
-                       const Opt_PickerTextStyle* value)
+    void SetTextStyleImpl(Ark_NativePointer node,
+                          const Opt_PickerTextStyle* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Date_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Date_Void* value)
     {
     }
-    void MarkTodayImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetMarkTodayImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void EdgeAlignImpl(Ark_NativePointer node,
-                       const Opt_CalendarAlign* alignType,
-                       const Opt_Offset* offset)
+    void SetEdgeAlignImpl(Ark_NativePointer node,
+                          const Opt_CalendarAlign* alignType,
+                          const Opt_Offset* offset)
     {
     }
     } // CalendarPickerAttributeModifier
@@ -1339,12 +1416,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CanvasInterfaceModifier
     namespace CanvasAttributeModifier {
-    void OnReadyImpl(Ark_NativePointer node,
-                     const Opt_VoidCallback* value)
+    void SetOnReadyImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* value)
     {
     }
-    void EnableAnalyzerImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetEnableAnalyzerImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
     {
     }
     } // CanvasAttributeModifier
@@ -1362,36 +1439,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CheckboxInterfaceModifier
     namespace CheckboxAttributeModifier {
-    void SelectImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+    void SetSelectImpl(Ark_NativePointer node,
+                       const Opt_Union_Boolean_Bindable* value)
     {
     }
-    void SelectedColorImpl(Ark_NativePointer node,
-                           const Opt_ResourceColor* value)
+    void SetSelectedColorImpl(Ark_NativePointer node,
+                              const Opt_ResourceColor* value)
     {
     }
-    void ShapeImpl(Ark_NativePointer node,
-                   const Opt_CheckBoxShape* value)
+    void SetShapeImpl(Ark_NativePointer node,
+                      const Opt_CheckBoxShape* value)
     {
     }
-    void UnselectedColorImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
+    void SetUnselectedColorImpl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
     {
     }
-    void MarkImpl(Ark_NativePointer node,
-                  const Opt_MarkStyle* value)
+    void SetMarkImpl(Ark_NativePointer node,
+                     const Opt_MarkStyle* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnCheckboxChangeCallback* value)
-    {
-    }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
-    {
-    }
-    void _onChangeEvent_selectImpl(Ark_NativePointer node,
-                                   const Callback_Opt_Boolean_Void* callback_)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnCheckboxChangeCallback* value)
     {
     }
     } // CheckboxAttributeModifier
@@ -1409,32 +1478,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CheckboxGroupInterfaceModifier
     namespace CheckboxGroupAttributeModifier {
-    void SelectAllImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetSelectAllImpl(Ark_NativePointer node,
+                          const Opt_Union_Boolean_Bindable* value)
     {
     }
-    void SelectedColorImpl(Ark_NativePointer node,
-                           const Opt_ResourceColor* value)
+    void SetSelectedColorImpl(Ark_NativePointer node,
+                              const Opt_ResourceColor* value)
     {
     }
-    void UnselectedColorImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
+    void SetUnselectedColorImpl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
     {
     }
-    void MarkImpl(Ark_NativePointer node,
-                  const Opt_MarkStyle* value)
+    void SetMarkImpl(Ark_NativePointer node,
+                     const Opt_MarkStyle* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnCheckboxGroupChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnCheckboxGroupChangeCallback* value)
     {
     }
-    void CheckboxShapeImpl(Ark_NativePointer node,
-                           const Opt_CheckBoxShape* value)
-    {
-    }
-    void _onChangeEvent_selectAllImpl(Ark_NativePointer node,
-                                      const Callback_Opt_Boolean_Void* callback_)
+    void SetCheckboxShapeImpl(Ark_NativePointer node,
+                              const Opt_CheckBoxShape* value)
     {
     }
     } // CheckboxGroupAttributeModifier
@@ -1465,20 +1530,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ColumnInterfaceModifier
     namespace ColumnAttributeModifier {
-    void AlignItemsImpl(Ark_NativePointer node,
-                        const Opt_HorizontalAlign* value)
+    void SetAlignItemsImpl(Ark_NativePointer node,
+                           const Opt_HorizontalAlign* value)
     {
     }
-    void JustifyContentImpl(Ark_NativePointer node,
-                            const Opt_FlexAlign* value)
+    void SetJustifyContentImpl(Ark_NativePointer node,
+                               const Opt_FlexAlign* value)
     {
     }
-    void PointLightImpl(Ark_NativePointer node,
-                        const Opt_PointLightStyle* value)
+    void SetPointLightImpl(Ark_NativePointer node,
+                           const Opt_PointLightStyle* value)
     {
     }
-    void ReverseImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+    void SetReverseImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
     {
     }
     } // ColumnAttributeModifier
@@ -1495,12 +1560,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ColumnSplitInterfaceModifier
     namespace ColumnSplitAttributeModifier {
-    void ResizeableImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetResizeableImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_ColumnSplitDividerStyle* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_ColumnSplitDividerStyle* value)
     {
     }
     } // ColumnSplitAttributeModifier
@@ -1510,857 +1575,857 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void WidthImpl(Ark_NativePointer node,
-                   const Opt_Union_Length_LayoutPolicy* value)
+    void SetWidthImpl(Ark_NativePointer node,
+                      const Opt_Union_Length_LayoutPolicy* value)
     {
     }
-    void HeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Length_LayoutPolicy* value)
+    void SetHeightImpl(Ark_NativePointer node,
+                       const Opt_Union_Length_LayoutPolicy* value)
     {
     }
-    void DrawModifierImpl(Ark_NativePointer node,
-                          const Opt_DrawModifier* value)
+    void SetDrawModifierImpl(Ark_NativePointer node,
+                             const Opt_DrawModifier* value)
     {
     }
-    void ResponseRegionImpl(Ark_NativePointer node,
-                            const Opt_Union_Array_Rectangle_Rectangle* value)
+    void SetResponseRegionImpl(Ark_NativePointer node,
+                               const Opt_Union_Array_Rectangle_Rectangle* value)
     {
     }
-    void MouseResponseRegionImpl(Ark_NativePointer node,
-                                 const Opt_Union_Array_Rectangle_Rectangle* value)
+    void SetMouseResponseRegionImpl(Ark_NativePointer node,
+                                    const Opt_Union_Array_Rectangle_Rectangle* value)
     {
     }
-    void SizeImpl(Ark_NativePointer node,
-                  const Opt_SizeOptions* value)
+    void SetSizeImpl(Ark_NativePointer node,
+                     const Opt_SizeOptions* value)
     {
     }
-    void ConstraintSizeImpl(Ark_NativePointer node,
-                            const Opt_ConstraintSizeOptions* value)
+    void SetConstraintSizeImpl(Ark_NativePointer node,
+                               const Opt_ConstraintSizeOptions* value)
     {
     }
-    void HitTestBehaviorImpl(Ark_NativePointer node,
-                             const Opt_HitTestMode* value)
+    void SetHitTestBehaviorImpl(Ark_NativePointer node,
+                                const Opt_HitTestMode* value)
     {
     }
-    void OnChildTouchTestImpl(Ark_NativePointer node,
-                              const Opt_Callback_Array_TouchTestInfo_TouchResult* value)
+    void SetOnChildTouchTestImpl(Ark_NativePointer node,
+                                 const Opt_Callback_Array_TouchTestInfo_TouchResult* value)
     {
     }
-    void LayoutWeightImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+    void SetLayoutWeightImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_String* value)
     {
     }
-    void ChainWeightImpl(Ark_NativePointer node,
-                         const Opt_ChainWeightOptions* value)
+    void SetChainWeightImpl(Ark_NativePointer node,
+                            const Opt_ChainWeightOptions* value)
     {
     }
-    void PaddingImpl(Ark_NativePointer node,
-                     const Opt_Union_Padding_Length_LocalizedPadding* value)
+    void SetPaddingImpl(Ark_NativePointer node,
+                        const Opt_Union_Padding_Length_LocalizedPadding* value)
     {
     }
-    void SafeAreaPaddingImpl(Ark_NativePointer node,
-                             const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
+    void SetSafeAreaPaddingImpl(Ark_NativePointer node,
+                                const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
     {
     }
-    void MarginImpl(Ark_NativePointer node,
-                    const Opt_Union_Margin_Length_LocalizedMargin* value)
+    void SetMarginImpl(Ark_NativePointer node,
+                       const Opt_Union_Margin_Length_LocalizedMargin* value)
     {
     }
-    void BackgroundColorImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
+    void SetBackgroundColorImpl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
     {
     }
-    void PixelRoundImpl(Ark_NativePointer node,
-                        const Opt_PixelRoundPolicy* value)
+    void SetPixelRoundImpl(Ark_NativePointer node,
+                           const Opt_PixelRoundPolicy* value)
     {
     }
-    void BackgroundImageSizeImpl(Ark_NativePointer node,
-                                 const Opt_Union_SizeOptions_ImageSize* value)
+    void SetBackgroundImageSizeImpl(Ark_NativePointer node,
+                                    const Opt_Union_SizeOptions_ImageSize* value)
     {
     }
-    void BackgroundImagePositionImpl(Ark_NativePointer node,
-                                     const Opt_Union_Position_Alignment* value)
+    void SetBackgroundImagePositionImpl(Ark_NativePointer node,
+                                        const Opt_Union_Position_Alignment* value)
     {
     }
-    void BackgroundEffect0Impl(Ark_NativePointer node,
-                               const Opt_BackgroundEffectOptions* value)
+    void SetBackgroundEffect0Impl(Ark_NativePointer node,
+                                  const Opt_BackgroundEffectOptions* value)
     {
     }
-    void BackgroundImageResizableImpl(Ark_NativePointer node,
-                                      const Opt_ResizableOptions* value)
+    void SetBackgroundImageResizableImpl(Ark_NativePointer node,
+                                         const Opt_ResizableOptions* value)
     {
     }
-    void ForegroundEffectImpl(Ark_NativePointer node,
-                              const Opt_ForegroundEffectOptions* value)
+    void SetForegroundEffectImpl(Ark_NativePointer node,
+                                 const Opt_ForegroundEffectOptions* value)
     {
     }
-    void VisualEffectImpl(Ark_NativePointer node,
-                          const Opt_uiEffect_VisualEffect* value)
+    void SetVisualEffectImpl(Ark_NativePointer node,
+                             const Opt_uiEffect_VisualEffect* value)
     {
     }
-    void BackgroundFilterImpl(Ark_NativePointer node,
-                              const Opt_uiEffect_Filter* value)
+    void SetBackgroundFilterImpl(Ark_NativePointer node,
+                                 const Opt_uiEffect_Filter* value)
     {
     }
-    void ForegroundFilterImpl(Ark_NativePointer node,
-                              const Opt_uiEffect_Filter* value)
+    void SetForegroundFilterImpl(Ark_NativePointer node,
+                                 const Opt_uiEffect_Filter* value)
     {
     }
-    void CompositingFilterImpl(Ark_NativePointer node,
-                               const Opt_uiEffect_Filter* value)
+    void SetCompositingFilterImpl(Ark_NativePointer node,
+                                  const Opt_uiEffect_Filter* value)
     {
     }
-    void OpacityImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_Resource* value)
+    void SetOpacityImpl(Ark_NativePointer node,
+                        const Opt_Union_Number_Resource* value)
     {
     }
-    void BorderImpl(Ark_NativePointer node,
-                    const Opt_BorderOptions* value)
+    void SetBorderImpl(Ark_NativePointer node,
+                       const Opt_BorderOptions* value)
     {
     }
-    void BorderStyleImpl(Ark_NativePointer node,
-                         const Opt_Union_BorderStyle_EdgeStyles* value)
+    void SetBorderStyleImpl(Ark_NativePointer node,
+                            const Opt_Union_BorderStyle_EdgeStyles* value)
     {
     }
-    void BorderWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
+    void SetBorderWidthImpl(Ark_NativePointer node,
+                            const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
     {
     }
-    void BorderColorImpl(Ark_NativePointer node,
-                         const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+    void SetBorderColorImpl(Ark_NativePointer node,
+                            const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
     {
     }
-    void BorderRadiusImpl(Ark_NativePointer node,
-                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
+    void SetBorderRadiusImpl(Ark_NativePointer node,
+                             const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
     {
     }
-    void BorderImageImpl(Ark_NativePointer node,
-                         const Opt_BorderImageOption* value)
+    void SetBorderImageImpl(Ark_NativePointer node,
+                            const Opt_BorderImageOption* value)
     {
     }
-    void OutlineImpl(Ark_NativePointer node,
-                     const Opt_OutlineOptions* value)
+    void SetOutlineImpl(Ark_NativePointer node,
+                        const Opt_OutlineOptions* value)
     {
     }
-    void OutlineStyleImpl(Ark_NativePointer node,
-                          const Opt_Union_OutlineStyle_EdgeOutlineStyles* value)
+    void SetOutlineStyleImpl(Ark_NativePointer node,
+                             const Opt_Union_OutlineStyle_EdgeOutlineStyles* value)
     {
     }
-    void OutlineWidthImpl(Ark_NativePointer node,
-                          const Opt_Union_Dimension_EdgeOutlineWidths* value)
+    void SetOutlineWidthImpl(Ark_NativePointer node,
+                             const Opt_Union_Dimension_EdgeOutlineWidths* value)
     {
     }
-    void OutlineColorImpl(Ark_NativePointer node,
-                          const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+    void SetOutlineColorImpl(Ark_NativePointer node,
+                             const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
     {
     }
-    void OutlineRadiusImpl(Ark_NativePointer node,
-                           const Opt_Union_Dimension_OutlineRadiuses* value)
+    void SetOutlineRadiusImpl(Ark_NativePointer node,
+                              const Opt_Union_Dimension_OutlineRadiuses* value)
     {
     }
-    void ForegroundColorImpl(Ark_NativePointer node,
-                             const Opt_Union_ResourceColor_ColoringStrategy* value)
+    void SetForegroundColorImpl(Ark_NativePointer node,
+                                const Opt_Union_ResourceColor_ColoringStrategy* value)
     {
     }
-    void OnClick0Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* value)
+    void SetOnClick0Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* value)
     {
     }
-    void OnHoverImpl(Ark_NativePointer node,
-                     const Opt_Callback_Boolean_HoverEvent_Void* value)
+    void SetOnHoverImpl(Ark_NativePointer node,
+                        const Opt_Callback_Boolean_HoverEvent_Void* value)
     {
     }
-    void OnHoverMoveImpl(Ark_NativePointer node,
-                         const Opt_Callback_HoverEvent_Void* value)
+    void SetOnHoverMoveImpl(Ark_NativePointer node,
+                            const Opt_Callback_HoverEvent_Void* value)
     {
     }
-    void OnAccessibilityHoverImpl(Ark_NativePointer node,
-                                  const Opt_AccessibilityCallback* value)
+    void SetOnAccessibilityHoverImpl(Ark_NativePointer node,
+                                     const Opt_AccessibilityCallback* value)
     {
     }
-    void HoverEffectImpl(Ark_NativePointer node,
-                         const Opt_HoverEffect* value)
+    void SetHoverEffectImpl(Ark_NativePointer node,
+                            const Opt_HoverEffect* value)
     {
     }
-    void OnMouseImpl(Ark_NativePointer node,
-                     const Opt_Callback_MouseEvent_Void* value)
+    void SetOnMouseImpl(Ark_NativePointer node,
+                        const Opt_Callback_MouseEvent_Void* value)
     {
     }
-    void OnTouchImpl(Ark_NativePointer node,
-                     const Opt_Callback_TouchEvent_Void* value)
+    void SetOnTouchImpl(Ark_NativePointer node,
+                        const Opt_Callback_TouchEvent_Void* value)
     {
     }
-    void OnKeyEventImpl(Ark_NativePointer node,
-                        const Opt_Callback_KeyEvent_Void* value)
+    void SetOnKeyEventImpl(Ark_NativePointer node,
+                           const Opt_Callback_KeyEvent_Void* value)
     {
     }
-    void OnDigitalCrownImpl(Ark_NativePointer node,
-                            const Opt_Callback_CrownEvent_Void* value)
+    void SetOnDigitalCrownImpl(Ark_NativePointer node,
+                               const Opt_Callback_CrownEvent_Void* value)
     {
     }
-    void OnKeyPreImeImpl(Ark_NativePointer node,
-                         const Opt_Callback_KeyEvent_Boolean* value)
+    void SetOnKeyPreImeImpl(Ark_NativePointer node,
+                            const Opt_Callback_KeyEvent_Boolean* value)
     {
     }
-    void OnKeyEventDispatchImpl(Ark_NativePointer node,
-                                const Opt_Callback_KeyEvent_Boolean* value)
+    void SetOnKeyEventDispatchImpl(Ark_NativePointer node,
+                                   const Opt_Callback_KeyEvent_Boolean* value)
     {
     }
-    void OnFocusAxisEventImpl(Ark_NativePointer node,
-                              const Opt_Callback_FocusAxisEvent_Void* value)
+    void SetOnFocusAxisEventImpl(Ark_NativePointer node,
+                                 const Opt_Callback_FocusAxisEvent_Void* value)
     {
     }
-    void OnAxisEventImpl(Ark_NativePointer node,
-                         const Opt_Callback_AxisEvent_Void* value)
+    void SetOnAxisEventImpl(Ark_NativePointer node,
+                            const Opt_Callback_AxisEvent_Void* value)
     {
     }
-    void FocusableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-    {
-    }
-    void NextFocusImpl(Ark_NativePointer node,
-                       const Opt_FocusMovement* value)
-    {
-    }
-    void TabStopImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
-    {
-    }
-    void OnFocusImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
-    {
-    }
-    void OnBlurImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
-    {
-    }
-    void TabIndexImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
-    {
-    }
-    void DefaultFocusImpl(Ark_NativePointer node,
+    void SetFocusableImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
     {
     }
-    void GroupDefaultFocusImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
+    void SetNextFocusImpl(Ark_NativePointer node,
+                          const Opt_FocusMovement* value)
     {
     }
-    void FocusOnTouchImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
-    {
-    }
-    void FocusBoxImpl(Ark_NativePointer node,
-                      const Opt_FocusBoxStyle* value)
-    {
-    }
-    void AnimationImpl(Ark_NativePointer node,
-                       const Opt_AnimateParam* value)
-    {
-    }
-    void Transition0Impl(Ark_NativePointer node,
-                         const Opt_TransitionEffect* value)
-    {
-    }
-    void MotionBlurImpl(Ark_NativePointer node,
-                        const Opt_MotionBlurOptions* value)
-    {
-    }
-    void BrightnessImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
-    {
-    }
-    void ContrastImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
-    {
-    }
-    void GrayscaleImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
-    {
-    }
-    void ColorBlendImpl(Ark_NativePointer node,
-                        const Opt_Union_Color_String_Resource* value)
-    {
-    }
-    void SaturateImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
-    {
-    }
-    void SepiaImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
-    {
-    }
-    void InvertImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_InvertOptions* value)
-    {
-    }
-    void HueRotateImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String* value)
-    {
-    }
-    void UseShadowBatchingImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
-    {
-    }
-    void UseEffect0Impl(Ark_NativePointer node,
+    void SetTabStopImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
     {
     }
-    void RenderGroupImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetOnFocusImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void FreezeImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+    void SetOnBlurImpl(Ark_NativePointer node,
+                       const Opt_Callback_Void* value)
     {
     }
-    void TranslateImpl(Ark_NativePointer node,
-                       const Opt_TranslateOptions* value)
-    {
-    }
-    void ScaleImpl(Ark_NativePointer node,
-                   const Opt_ScaleOptions* value)
-    {
-    }
-    void RotateImpl(Ark_NativePointer node,
-                    const Opt_RotateOptions* value)
-    {
-    }
-    void TransformImpl(Ark_NativePointer node,
-                       const Opt_Object* value)
-    {
-    }
-    void OnAppearImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
-    {
-    }
-    void OnDisAppearImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
-    {
-    }
-    void OnAttachImpl(Ark_NativePointer node,
-                      const Opt_VoidCallback* value)
-    {
-    }
-    void OnDetachImpl(Ark_NativePointer node,
-                      const Opt_VoidCallback* value)
-    {
-    }
-    void OnAreaChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_Area_Area_Void* value)
-    {
-    }
-    void VisibilityImpl(Ark_NativePointer node,
-                        const Opt_Visibility* value)
-    {
-    }
-    void FlexGrowImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
-    {
-    }
-    void FlexShrinkImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
-    {
-    }
-    void FlexBasisImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String* value)
-    {
-    }
-    void AlignSelfImpl(Ark_NativePointer node,
-                       const Opt_ItemAlign* value)
-    {
-    }
-    void DisplayPriorityImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
-    {
-    }
-    void ZIndexImpl(Ark_NativePointer node,
-                    const Opt_Number* value)
-    {
-    }
-    void DirectionImpl(Ark_NativePointer node,
-                       const Opt_Direction* value)
-    {
-    }
-    void AlignImpl(Ark_NativePointer node,
-                   const Opt_Alignment* value)
-    {
-    }
-    void PositionImpl(Ark_NativePointer node,
-                      const Opt_Union_Position_Edges_LocalizedEdges* value)
-    {
-    }
-    void MarkAnchorImpl(Ark_NativePointer node,
-                        const Opt_Union_Position_LocalizedPosition* value)
-    {
-    }
-    void OffsetImpl(Ark_NativePointer node,
-                    const Opt_Union_Position_Edges_LocalizedEdges* value)
-    {
-    }
-    void EnabledImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
-    {
-    }
-    void AlignRules0Impl(Ark_NativePointer node,
-                         const Opt_AlignRuleOption* value)
-    {
-    }
-    void AlignRules1Impl(Ark_NativePointer node,
-                         const Opt_LocalizedAlignRuleOptions* value)
-    {
-    }
-    void AspectRatioImpl(Ark_NativePointer node,
+    void SetTabIndexImpl(Ark_NativePointer node,
                          const Opt_Number* value)
     {
     }
-    void ClickEffectImpl(Ark_NativePointer node,
-                         const Opt_ClickEffect* value)
+    void SetDefaultFocusImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
     {
     }
-    void OnDragStartImpl(Ark_NativePointer node,
-                         const Opt_Type_CommonMethod_onDragStart* value)
-    {
-    }
-    void OnDragEnterImpl(Ark_NativePointer node,
-                         const Opt_Callback_DragEvent_Opt_String_Void* value)
-    {
-    }
-    void OnDragMoveImpl(Ark_NativePointer node,
-                        const Opt_Callback_DragEvent_Opt_String_Void* value)
-    {
-    }
-    void OnDragLeaveImpl(Ark_NativePointer node,
-                         const Opt_Callback_DragEvent_Opt_String_Void* value)
-    {
-    }
-    void OnDrop0Impl(Ark_NativePointer node,
-                     const Opt_Callback_DragEvent_Opt_String_Void* value)
-    {
-    }
-    void OnDragEndImpl(Ark_NativePointer node,
-                       const Opt_Callback_DragEvent_Opt_String_Void* value)
-    {
-    }
-    void AllowDropImpl(Ark_NativePointer node,
-                       const Opt_Array_uniformTypeDescriptor_UniformDataType* value)
-    {
-    }
-    void DraggableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-    {
-    }
-    void DragPreview0Impl(Ark_NativePointer node,
-                          const Opt_Union_CustomBuilder_DragItemInfo_String* value)
-    {
-    }
-    void OnPreDragImpl(Ark_NativePointer node,
-                       const Opt_Callback_PreDragStatus_Void* value)
-    {
-    }
-    void LinearGradientImpl(Ark_NativePointer node,
-                            const Opt_LinearGradientOptions* value)
-    {
-    }
-    void SweepGradientImpl(Ark_NativePointer node,
-                           const Opt_SweepGradientOptions* value)
-    {
-    }
-    void RadialGradientImpl(Ark_NativePointer node,
-                            const Opt_RadialGradientOptions* value)
-    {
-    }
-    void MotionPathImpl(Ark_NativePointer node,
-                        const Opt_MotionPathOptions* value)
-    {
-    }
-    void ShadowImpl(Ark_NativePointer node,
-                    const Opt_Union_ShadowOptions_ShadowStyle* value)
-    {
-    }
-    void ClipImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
-    {
-    }
-    void ClipShapeImpl(Ark_NativePointer node,
-                       const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
-    {
-    }
-    void MaskImpl(Ark_NativePointer node,
-                  const Opt_ProgressMask* value)
-    {
-    }
-    void MaskShapeImpl(Ark_NativePointer node,
-                       const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
-    {
-    }
-    void KeyImpl(Ark_NativePointer node,
-                 const Opt_String* value)
-    {
-    }
-    void IdImpl(Ark_NativePointer node,
-                const Opt_String* value)
-    {
-    }
-    void GeometryTransition0Impl(Ark_NativePointer node,
-                                 const Opt_String* value)
-    {
-    }
-    void RestoreIdImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
-    {
-    }
-    void SphericalEffectImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
-    {
-    }
-    void LightUpEffectImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
-    {
-    }
-    void PixelStretchEffectImpl(Ark_NativePointer node,
-                                const Opt_PixelStretchEffectOptions* value)
-    {
-    }
-    void AccessibilityGroup0Impl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
-    {
-    }
-    void AccessibilityText0Impl(Ark_NativePointer node,
-                                const Opt_String* value)
-    {
-    }
-    void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
-                                      const Opt_String* value)
-    {
-    }
-    void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
-    {
-    }
-    void AccessibilityUseSamePageImpl(Ark_NativePointer node,
-                                      const Opt_AccessibilitySamePageMode* value)
-    {
-    }
-    void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
-                                            const Opt_Boolean* value)
-    {
-    }
-    void AccessibilityText1Impl(Ark_NativePointer node,
-                                const Opt_Resource* value)
-    {
-    }
-    void AccessibilityRoleImpl(Ark_NativePointer node,
-                               const Opt_AccessibilityRoleType* value)
-    {
-    }
-    void OnAccessibilityFocusImpl(Ark_NativePointer node,
-                                  const Opt_AccessibilityFocusCallback* value)
-    {
-    }
-    void AccessibilityTextHintImpl(Ark_NativePointer node,
-                                   const Opt_String* value)
-    {
-    }
-    void AccessibilityDescription0Impl(Ark_NativePointer node,
-                                       const Opt_String* value)
-    {
-    }
-    void AccessibilityDescription1Impl(Ark_NativePointer node,
-                                       const Opt_Resource* value)
-    {
-    }
-    void AccessibilityLevelImpl(Ark_NativePointer node,
-                                const Opt_String* value)
-    {
-    }
-    void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
-                                      const Opt_CustomNodeBuilder* value)
-    {
-    }
-    void AccessibilityCheckedImpl(Ark_NativePointer node,
+    void SetGroupDefaultFocusImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
     }
-    void AccessibilitySelectedImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
+    void SetFocusOnTouchImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
     {
     }
-    void ObscuredImpl(Ark_NativePointer node,
-                      const Opt_Array_ObscuredReasons* value)
+    void SetFocusBoxImpl(Ark_NativePointer node,
+                         const Opt_FocusBoxStyle* value)
     {
     }
-    void ReuseIdImpl(Ark_NativePointer node,
-                     const Opt_String* value)
+    void SetAnimationImpl(Ark_NativePointer node,
+                          const Opt_AnimateParam* value)
     {
     }
-    void ReuseImpl(Ark_NativePointer node,
-                   const Opt_ReuseOptions* value)
+    void SetTransition0Impl(Ark_NativePointer node,
+                            const Opt_TransitionEffect* value)
     {
     }
-    void RenderFitImpl(Ark_NativePointer node,
-                       const Opt_RenderFit* value)
+    void SetMotionBlurImpl(Ark_NativePointer node,
+                           const Opt_MotionBlurOptions* value)
     {
     }
-    void GestureModifierImpl(Ark_NativePointer node,
-                             const Opt_GestureModifier* value)
+    void SetBrightnessImpl(Ark_NativePointer node,
+                           const Opt_Number* value)
     {
     }
-    void BackgroundBrightnessImpl(Ark_NativePointer node,
-                                  const Opt_BackgroundBrightnessOptions* value)
+    void SetContrastImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void OnGestureJudgeBeginImpl(Ark_NativePointer node,
-                                 const Opt_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult* value)
+    void SetGrayscaleImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
     {
     }
-    void OnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
-                                            const Opt_GestureRecognizerJudgeBeginCallback* value)
+    void SetColorBlendImpl(Ark_NativePointer node,
+                           const Opt_Union_Color_String_Resource* value)
     {
     }
-    void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
-                                                 const Opt_ShouldBuiltInRecognizerParallelWithCallback* value)
+    void SetSaturateImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void MonopolizeEventsImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetSepiaImpl(Ark_NativePointer node,
+                      const Opt_Number* value)
     {
     }
-    void OnTouchInterceptImpl(Ark_NativePointer node,
-                              const Opt_Callback_TouchEvent_HitTestMode* value)
+    void SetInvertImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_InvertOptions* value)
     {
     }
-    void OnSizeChangeImpl(Ark_NativePointer node,
-                          const Opt_SizeChangeCallback* value)
+    void SetHueRotateImpl(Ark_NativePointer node,
+                          const Opt_Union_Number_String* value)
     {
     }
-    void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
-                                         const Opt_FocusDrawLevel* value)
+    void SetUseShadowBatchingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
     {
     }
-    void CustomPropertyImpl(Ark_NativePointer node,
-                            const Opt_String* name,
-                            const Opt_Object* value)
+    void SetUseEffect0Impl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void ExpandSafeAreaImpl(Ark_NativePointer node,
-                            const Opt_Array_SafeAreaType* types,
-                            const Opt_Array_SafeAreaEdge* edges)
+    void SetRenderGroupImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void BackgroundImpl(Ark_NativePointer node,
-                        const Opt_CustomNodeBuilder* builder,
-                        const Opt_BackgroundOptions* options)
+    void SetFreezeImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
     {
     }
-    void BackgroundImage0Impl(Ark_NativePointer node,
-                              const Opt_Union_ResourceStr_PixelMap* src,
-                              const Opt_ImageRepeat* repeat)
+    void SetTranslateImpl(Ark_NativePointer node,
+                          const Opt_TranslateOptions* value)
     {
     }
-    void BackgroundImage1Impl(Ark_NativePointer node,
-                              const Opt_Union_ResourceStr_PixelMap* src,
-                              const Opt_BackgroundImageOptions* options)
+    void SetScaleImpl(Ark_NativePointer node,
+                      const Opt_ScaleOptions* value)
     {
     }
-    void BackgroundBlurStyleImpl(Ark_NativePointer node,
-                                 const Opt_BlurStyle* style,
-                                 const Opt_BackgroundBlurStyleOptions* options,
-                                 const Opt_SystemAdaptiveOptions* sysOptions)
+    void SetRotateImpl(Ark_NativePointer node,
+                       const Opt_RotateOptions* value)
     {
     }
-    void BackgroundEffect1Impl(Ark_NativePointer node,
-                               const Opt_BackgroundEffectOptions* options,
-                               const Opt_SystemAdaptiveOptions* sysOptions)
+    void SetTransformImpl(Ark_NativePointer node,
+                          const Opt_Object* value)
     {
     }
-    void ForegroundBlurStyleImpl(Ark_NativePointer node,
-                                 const Opt_BlurStyle* style,
-                                 const Opt_ForegroundBlurStyleOptions* options,
-                                 const Opt_SystemAdaptiveOptions* sysOptions)
+    void SetOnAppearImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnClick1Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* event,
-                      const Opt_Number* distanceThreshold)
+    void SetOnDisAppearImpl(Ark_NativePointer node,
+                            const Opt_Callback_Void* value)
     {
     }
-    void FocusScopeIdImpl(Ark_NativePointer node,
-                          const Opt_String* id,
-                          const Opt_Boolean* isGroup,
-                          const Opt_Boolean* arrowStepOut)
+    void SetOnAttachImpl(Ark_NativePointer node,
+                         const Opt_VoidCallback* value)
     {
     }
-    void FocusScopePriorityImpl(Ark_NativePointer node,
-                                const Opt_String* scopeId,
-                                const Opt_FocusPriority* priority)
+    void SetOnDetachImpl(Ark_NativePointer node,
+                         const Opt_VoidCallback* value)
     {
     }
-    void Transition1Impl(Ark_NativePointer node,
-                         const Opt_TransitionEffect* effect,
-                         const Opt_TransitionFinishCallback* onFinish)
+    void SetOnAreaChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_Area_Area_Void* value)
     {
     }
-    void GestureImpl(Ark_NativePointer node,
-                     const Opt_GestureType* gesture,
-                     const Opt_GestureMask* mask)
+    void SetVisibilityImpl(Ark_NativePointer node,
+                           const Opt_Visibility* value)
     {
     }
-    void PriorityGestureImpl(Ark_NativePointer node,
-                             const Opt_GestureType* gesture,
-                             const Opt_GestureMask* mask)
+    void SetFlexGrowImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void ParallelGestureImpl(Ark_NativePointer node,
-                             const Opt_GestureType* gesture,
-                             const Opt_GestureMask* mask)
+    void SetFlexShrinkImpl(Ark_NativePointer node,
+                           const Opt_Number* value)
     {
     }
-    void BlurImpl(Ark_NativePointer node,
-                  const Opt_Number* blurRadius,
-                  const Opt_BlurOptions* options,
-                  const Opt_SystemAdaptiveOptions* sysOptions)
+    void SetFlexBasisImpl(Ark_NativePointer node,
+                          const Opt_Union_Number_String* value)
     {
     }
-    void LinearGradientBlurImpl(Ark_NativePointer node,
-                                const Opt_Number* value,
-                                const Opt_LinearGradientBlurOptions* options)
+    void SetAlignSelfImpl(Ark_NativePointer node,
+                          const Opt_ItemAlign* value)
     {
     }
-    void SystemBarEffectImpl(Ark_NativePointer node)
+    void SetDisplayPriorityImpl(Ark_NativePointer node,
+                                const Opt_Number* value)
     {
     }
-    void UseEffect1Impl(Ark_NativePointer node,
-                        const Opt_Boolean* useEffect,
-                        const Opt_EffectType* effectType)
+    void SetZIndexImpl(Ark_NativePointer node,
+                       const Opt_Number* value)
     {
     }
-    void BackdropBlurImpl(Ark_NativePointer node,
-                          const Opt_Number* radius,
-                          const Opt_BlurOptions* options,
-                          const Opt_SystemAdaptiveOptions* sysOptions)
+    void SetDirectionImpl(Ark_NativePointer node,
+                          const Opt_Direction* value)
     {
     }
-    void SharedTransitionImpl(Ark_NativePointer node,
-                              const Opt_String* id,
-                              const Opt_sharedTransitionOptions* options)
+    void SetAlignImpl(Ark_NativePointer node,
+                      const Opt_Alignment* value)
     {
     }
-    void ChainModeImpl(Ark_NativePointer node,
-                       const Opt_Axis* direction,
-                       const Opt_ChainStyle* style)
+    void SetPositionImpl(Ark_NativePointer node,
+                         const Opt_Union_Position_Edges_LocalizedEdges* value)
     {
     }
-    void OnDrop1Impl(Ark_NativePointer node,
-                     const Opt_OnDragEventCallback* eventCallback,
-                     const Opt_DropOptions* dropOptions)
+    void SetMarkAnchorImpl(Ark_NativePointer node,
+                           const Opt_Union_Position_LocalizedPosition* value)
     {
     }
-    void DragPreview1Impl(Ark_NativePointer node,
-                          const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
-                          const Opt_PreviewConfiguration* config)
+    void SetOffsetImpl(Ark_NativePointer node,
+                       const Opt_Union_Position_Edges_LocalizedEdges* value)
     {
     }
-    void DragPreviewOptionsImpl(Ark_NativePointer node,
-                                const Opt_DragPreviewOptions* value,
-                                const Opt_DragInteractionOptions* options)
+    void SetEnabledImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
     {
     }
-    void OverlayImpl(Ark_NativePointer node,
-                     const Opt_Union_String_CustomBuilder_ComponentContent* value,
-                     const Opt_OverlayOptions* options)
+    void SetAlignRules0Impl(Ark_NativePointer node,
+                            const Opt_AlignRuleOption* value)
     {
     }
-    void BlendModeImpl(Ark_NativePointer node,
-                       const Opt_BlendMode* value,
-                       const Opt_BlendApplyType* type)
+    void SetAlignRules1Impl(Ark_NativePointer node,
+                            const Opt_LocalizedAlignRuleOptions* value)
     {
     }
-    void AdvancedBlendModeImpl(Ark_NativePointer node,
-                               const Opt_Union_BlendMode_Blender* effect,
-                               const Opt_BlendApplyType* type)
+    void SetAspectRatioImpl(Ark_NativePointer node,
+                            const Opt_Number* value)
     {
     }
-    void GeometryTransition1Impl(Ark_NativePointer node,
+    void SetClickEffectImpl(Ark_NativePointer node,
+                            const Opt_ClickEffect* value)
+    {
+    }
+    void SetOnDragStartImpl(Ark_NativePointer node,
+                            const Opt_Type_CommonMethod_onDragStart* value)
+    {
+    }
+    void SetOnDragEnterImpl(Ark_NativePointer node,
+                            const Opt_Callback_DragEvent_Opt_String_Void* value)
+    {
+    }
+    void SetOnDragMoveImpl(Ark_NativePointer node,
+                           const Opt_Callback_DragEvent_Opt_String_Void* value)
+    {
+    }
+    void SetOnDragLeaveImpl(Ark_NativePointer node,
+                            const Opt_Callback_DragEvent_Opt_String_Void* value)
+    {
+    }
+    void SetOnDrop0Impl(Ark_NativePointer node,
+                        const Opt_Callback_DragEvent_Opt_String_Void* value)
+    {
+    }
+    void SetOnDragEndImpl(Ark_NativePointer node,
+                          const Opt_Callback_DragEvent_Opt_String_Void* value)
+    {
+    }
+    void SetAllowDropImpl(Ark_NativePointer node,
+                          const Opt_Array_uniformTypeDescriptor_UniformDataType* value)
+    {
+    }
+    void SetDraggableImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+    {
+    }
+    void SetDragPreview0Impl(Ark_NativePointer node,
+                             const Opt_Union_CustomBuilder_DragItemInfo_String* value)
+    {
+    }
+    void SetOnPreDragImpl(Ark_NativePointer node,
+                          const Opt_Callback_PreDragStatus_Void* value)
+    {
+    }
+    void SetLinearGradientImpl(Ark_NativePointer node,
+                               const Opt_LinearGradientOptions* value)
+    {
+    }
+    void SetSweepGradientImpl(Ark_NativePointer node,
+                              const Opt_SweepGradientOptions* value)
+    {
+    }
+    void SetRadialGradientImpl(Ark_NativePointer node,
+                               const Opt_RadialGradientOptions* value)
+    {
+    }
+    void SetMotionPathImpl(Ark_NativePointer node,
+                           const Opt_MotionPathOptions* value)
+    {
+    }
+    void SetShadowImpl(Ark_NativePointer node,
+                       const Opt_Union_ShadowOptions_ShadowStyle* value)
+    {
+    }
+    void SetClipImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+    {
+    }
+    void SetClipShapeImpl(Ark_NativePointer node,
+                          const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+    {
+    }
+    void SetMaskImpl(Ark_NativePointer node,
+                     const Opt_ProgressMask* value)
+    {
+    }
+    void SetMaskShapeImpl(Ark_NativePointer node,
+                          const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+    {
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+    }
+    void SetGeometryTransition0Impl(Ark_NativePointer node,
+                                    const Opt_String* value)
+    {
+    }
+    void SetRestoreIdImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
+    {
+    }
+    void SetSphericalEffectImpl(Ark_NativePointer node,
+                                const Opt_Number* value)
+    {
+    }
+    void SetLightUpEffectImpl(Ark_NativePointer node,
+                              const Opt_Number* value)
+    {
+    }
+    void SetPixelStretchEffectImpl(Ark_NativePointer node,
+                                   const Opt_PixelStretchEffectOptions* value)
+    {
+    }
+    void SetAccessibilityGroup0Impl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
+    {
+    }
+    void SetAccessibilityText0Impl(Ark_NativePointer node,
+                                   const Opt_String* value)
+    {
+    }
+    void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
+                                         const Opt_String* value)
+    {
+    }
+    void SetAccessibilityDefaultFocusImpl(Ark_NativePointer node,
+                                          const Opt_Boolean* value)
+    {
+    }
+    void SetAccessibilityUseSamePageImpl(Ark_NativePointer node,
+                                         const Opt_AccessibilitySamePageMode* value)
+    {
+    }
+    void SetAccessibilityScrollTriggerableImpl(Ark_NativePointer node,
+                                               const Opt_Boolean* value)
+    {
+    }
+    void SetAccessibilityText1Impl(Ark_NativePointer node,
+                                   const Opt_Resource* value)
+    {
+    }
+    void SetAccessibilityRoleImpl(Ark_NativePointer node,
+                                  const Opt_AccessibilityRoleType* value)
+    {
+    }
+    void SetOnAccessibilityFocusImpl(Ark_NativePointer node,
+                                     const Opt_AccessibilityFocusCallback* value)
+    {
+    }
+    void SetAccessibilityTextHintImpl(Ark_NativePointer node,
+                                      const Opt_String* value)
+    {
+    }
+    void SetAccessibilityDescription0Impl(Ark_NativePointer node,
+                                          const Opt_String* value)
+    {
+    }
+    void SetAccessibilityDescription1Impl(Ark_NativePointer node,
+                                          const Opt_Resource* value)
+    {
+    }
+    void SetAccessibilityLevelImpl(Ark_NativePointer node,
+                                   const Opt_String* value)
+    {
+    }
+    void SetAccessibilityVirtualNodeImpl(Ark_NativePointer node,
+                                         const Opt_CustomNodeBuilder* value)
+    {
+    }
+    void SetAccessibilityCheckedImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+    }
+    void SetAccessibilitySelectedImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
+    void SetObscuredImpl(Ark_NativePointer node,
+                         const Opt_Array_ObscuredReasons* value)
+    {
+    }
+    void SetReuseIdImpl(Ark_NativePointer node,
+                        const Opt_String* value)
+    {
+    }
+    void SetReuseImpl(Ark_NativePointer node,
+                      const Opt_ReuseOptions* value)
+    {
+    }
+    void SetRenderFitImpl(Ark_NativePointer node,
+                          const Opt_RenderFit* value)
+    {
+    }
+    void SetGestureModifierImpl(Ark_NativePointer node,
+                                const Opt_GestureModifier* value)
+    {
+    }
+    void SetBackgroundBrightnessImpl(Ark_NativePointer node,
+                                     const Opt_BackgroundBrightnessOptions* value)
+    {
+    }
+    void SetOnGestureJudgeBeginImpl(Ark_NativePointer node,
+                                    const Opt_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult* value)
+    {
+    }
+    void SetOnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
+                                               const Opt_GestureRecognizerJudgeBeginCallback* value)
+    {
+    }
+    void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
+                                                    const Opt_ShouldBuiltInRecognizerParallelWithCallback* value)
+    {
+    }
+    void SetMonopolizeEventsImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+    {
+    }
+    void SetOnTouchInterceptImpl(Ark_NativePointer node,
+                                 const Opt_Callback_TouchEvent_HitTestMode* value)
+    {
+    }
+    void SetOnSizeChangeImpl(Ark_NativePointer node,
+                             const Opt_SizeChangeCallback* value)
+    {
+    }
+    void SetAccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
+                                            const Opt_FocusDrawLevel* value)
+    {
+    }
+    void SetCustomPropertyImpl(Ark_NativePointer node,
+                               const Ark_String* name,
+                               const Opt_Object* value)
+    {
+    }
+    void SetExpandSafeAreaImpl(Ark_NativePointer node,
+                               const Opt_Array_SafeAreaType* types,
+                               const Opt_Array_SafeAreaEdge* edges)
+    {
+    }
+    void SetBackgroundImpl(Ark_NativePointer node,
+                           const Opt_CustomNodeBuilder* builder,
+                           const Opt_BackgroundOptions* options)
+    {
+    }
+    void SetBackgroundImage0Impl(Ark_NativePointer node,
+                                 const Opt_Union_ResourceStr_PixelMap* src,
+                                 const Opt_ImageRepeat* repeat)
+    {
+    }
+    void SetBackgroundImage1Impl(Ark_NativePointer node,
+                                 const Opt_Union_ResourceStr_PixelMap* src,
+                                 const Opt_BackgroundImageOptions* options)
+    {
+    }
+    void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                    const Opt_BlurStyle* style,
+                                    const Opt_BackgroundBlurStyleOptions* options,
+                                    const Opt_SystemAdaptiveOptions* sysOptions)
+    {
+    }
+    void SetBackgroundEffect1Impl(Ark_NativePointer node,
+                                  const Opt_BackgroundEffectOptions* options,
+                                  const Opt_SystemAdaptiveOptions* sysOptions)
+    {
+    }
+    void SetForegroundBlurStyleImpl(Ark_NativePointer node,
+                                    const Opt_BlurStyle* style,
+                                    const Opt_ForegroundBlurStyleOptions* options,
+                                    const Opt_SystemAdaptiveOptions* sysOptions)
+    {
+    }
+    void SetOnClick1Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* event,
+                         const Opt_Number* distanceThreshold)
+    {
+    }
+    void SetFocusScopeIdImpl(Ark_NativePointer node,
+                             const Opt_String* id,
+                             const Opt_Boolean* isGroup,
+                             const Opt_Boolean* arrowStepOut)
+    {
+    }
+    void SetFocusScopePriorityImpl(Ark_NativePointer node,
+                                   const Opt_String* scopeId,
+                                   const Opt_FocusPriority* priority)
+    {
+    }
+    void SetTransition1Impl(Ark_NativePointer node,
+                            const Opt_TransitionEffect* effect,
+                            const Opt_TransitionFinishCallback* onFinish)
+    {
+    }
+    void SetGestureImpl(Ark_NativePointer node,
+                        const Opt_GestureType* gesture,
+                        const Opt_GestureMask* mask)
+    {
+    }
+    void SetPriorityGestureImpl(Ark_NativePointer node,
+                                const Opt_GestureType* gesture,
+                                const Opt_GestureMask* mask)
+    {
+    }
+    void SetParallelGestureImpl(Ark_NativePointer node,
+                                const Opt_GestureType* gesture,
+                                const Opt_GestureMask* mask)
+    {
+    }
+    void SetBlurImpl(Ark_NativePointer node,
+                     const Opt_Number* blurRadius,
+                     const Opt_BlurOptions* options,
+                     const Opt_SystemAdaptiveOptions* sysOptions)
+    {
+    }
+    void SetLinearGradientBlurImpl(Ark_NativePointer node,
+                                   const Opt_Number* value,
+                                   const Opt_LinearGradientBlurOptions* options)
+    {
+    }
+    void SetSystemBarEffectImpl(Ark_NativePointer node)
+    {
+    }
+    void SetUseEffect1Impl(Ark_NativePointer node,
+                           const Opt_Boolean* useEffect,
+                           const Opt_EffectType* effectType)
+    {
+    }
+    void SetBackdropBlurImpl(Ark_NativePointer node,
+                             const Opt_Number* radius,
+                             const Opt_BlurOptions* options,
+                             const Opt_SystemAdaptiveOptions* sysOptions)
+    {
+    }
+    void SetSharedTransitionImpl(Ark_NativePointer node,
                                  const Opt_String* id,
-                                 const Opt_GeometryTransitionOptions* options)
+                                 const Opt_sharedTransitionOptions* options)
     {
     }
-    void BindTipsImpl(Ark_NativePointer node,
-                      const Opt_TipsMessageType* message,
-                      const Opt_TipsOptions* options)
+    void SetChainModeImpl(Ark_NativePointer node,
+                          const Opt_Axis* direction,
+                          const Opt_ChainStyle* style)
     {
     }
-    void BindPopupImpl(Ark_NativePointer node,
-                       const Opt_Boolean* show,
-                       const Opt_Union_PopupOptions_CustomPopupOptions* popup)
+    void SetOnDrop1Impl(Ark_NativePointer node,
+                        const Opt_OnDragEventCallback* eventCallback,
+                        const Opt_DropOptions* dropOptions)
     {
     }
-    void BindMenu0Impl(Ark_NativePointer node,
-                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
-                       const Opt_MenuOptions* options)
+    void SetDragPreview1Impl(Ark_NativePointer node,
+                             const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                             const Opt_PreviewConfiguration* config)
     {
     }
-    void BindMenu1Impl(Ark_NativePointer node,
-                       const Opt_Boolean* isShow,
-                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
-                       const Opt_MenuOptions* options)
+    void SetDragPreviewOptionsImpl(Ark_NativePointer node,
+                                   const Opt_DragPreviewOptions* value,
+                                   const Opt_DragInteractionOptions* options)
     {
     }
-    void BindContextMenu0Impl(Ark_NativePointer node,
-                              const Opt_CustomNodeBuilder* content,
-                              const Opt_ResponseType* responseType,
-                              const Opt_ContextMenuOptions* options)
+    void SetOverlayImpl(Ark_NativePointer node,
+                        const Opt_Union_String_CustomBuilder_ComponentContent* value,
+                        const Opt_OverlayOptions* options)
     {
     }
-    void BindContextMenu1Impl(Ark_NativePointer node,
-                              const Opt_Boolean* isShown,
-                              const Opt_CustomNodeBuilder* content,
-                              const Opt_ContextMenuOptions* options)
+    void SetBlendModeImpl(Ark_NativePointer node,
+                          const Opt_BlendMode* value,
+                          const Opt_BlendApplyType* type)
     {
     }
-    void BindContentCover0Impl(Ark_NativePointer node,
-                               const Opt_Boolean* isShow,
-                               const Opt_CustomNodeBuilder* builder,
-                               const Opt_ModalTransition* type)
+    void SetAdvancedBlendModeImpl(Ark_NativePointer node,
+                                  const Ark_Union_BlendMode_Blender* effect,
+                                  const Opt_BlendApplyType* type)
     {
     }
-    void BindContentCover1Impl(Ark_NativePointer node,
-                               const Opt_Boolean* isShow,
-                               const Opt_CustomNodeBuilder* builder,
-                               const Opt_ContentCoverOptions* options)
+    void SetGeometryTransition1Impl(Ark_NativePointer node,
+                                    const Opt_String* id,
+                                    const Opt_GeometryTransitionOptions* options)
     {
     }
-    void BindSheetImpl(Ark_NativePointer node,
-                       const Opt_Boolean* isShow,
-                       const Opt_CustomNodeBuilder* builder,
-                       const Opt_SheetOptions* options)
+    void SetBindTipsImpl(Ark_NativePointer node,
+                         const Opt_TipsMessageType* message,
+                         const Opt_TipsOptions* options)
     {
     }
-    void OnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                 const Opt_Array_Number* ratios,
-                                 const Opt_VisibleAreaChangeCallback* event)
+    void SetBindPopupImpl(Ark_NativePointer node,
+                          const Opt_Boolean* show,
+                          const Opt_Union_PopupOptions_CustomPopupOptions* popup)
     {
     }
-    void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
-                                            const Opt_VisibleAreaEventOptions* options,
-                                            const Opt_VisibleAreaChangeCallback* event)
+    void SetBindMenu0Impl(Ark_NativePointer node,
+                          const Opt_Union_Array_MenuElement_CustomBuilder* content,
+                          const Opt_MenuOptions* options)
     {
     }
-    void KeyboardShortcutImpl(Ark_NativePointer node,
-                              const Opt_Union_String_FunctionKey* value,
-                              const Opt_Array_ModifierKey* keys,
-                              const Opt_Callback_Void* action)
+    void SetBindMenu1Impl(Ark_NativePointer node,
+                          const Opt_Boolean* isShow,
+                          const Opt_Union_Array_MenuElement_CustomBuilder* content,
+                          const Opt_MenuOptions* options)
     {
     }
-    void AccessibilityGroup1Impl(Ark_NativePointer node,
-                                 const Opt_Boolean* isGroup,
-                                 const Opt_AccessibilityOptions* accessibilityOptions)
+    void SetBindContextMenu0Impl(Ark_NativePointer node,
+                                 const Opt_CustomNodeBuilder* content,
+                                 const Opt_ResponseType* responseType,
+                                 const Opt_ContextMenuOptions* options)
     {
     }
-    void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
-                                            const Opt_GestureRecognizerJudgeBeginCallback* callback_,
-                                            const Opt_Boolean* exposeInnerGesture)
+    void SetBindContextMenu1Impl(Ark_NativePointer node,
+                                 const Opt_Boolean* isShown,
+                                 const Opt_CustomNodeBuilder* content,
+                                 const Opt_ContextMenuOptions* options)
+    {
+    }
+    void SetBindContentCover0Impl(Ark_NativePointer node,
+                                  const Opt_Union_Boolean_Bindable* isShow,
+                                  const Opt_CustomNodeBuilder* builder,
+                                  const Opt_ModalTransition* type)
+    {
+    }
+    void SetBindContentCover1Impl(Ark_NativePointer node,
+                                  const Opt_Union_Boolean_Bindable* isShow,
+                                  const Opt_CustomNodeBuilder* builder,
+                                  const Opt_ContentCoverOptions* options)
+    {
+    }
+    void SetBindSheetImpl(Ark_NativePointer node,
+                          const Opt_Union_Boolean_Bindable* isShow,
+                          const Opt_CustomNodeBuilder* builder,
+                          const Opt_SheetOptions* options)
+    {
+    }
+    void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
+                                    const Opt_Array_Number* ratios,
+                                    const Opt_VisibleAreaChangeCallback* event)
+    {
+    }
+    void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
+                                               const Opt_VisibleAreaEventOptions* options,
+                                               const Opt_VisibleAreaChangeCallback* event)
+    {
+    }
+    void SetKeyboardShortcutImpl(Ark_NativePointer node,
+                                 const Opt_Union_String_FunctionKey* value,
+                                 const Opt_Array_ModifierKey* keys,
+                                 const Opt_Callback_Void* action)
+    {
+    }
+    void SetAccessibilityGroup1Impl(Ark_NativePointer node,
+                                    const Opt_Boolean* isGroup,
+                                    const Opt_AccessibilityOptions* accessibilityOptions)
+    {
+    }
+    void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
+                                               const Opt_GestureRecognizerJudgeBeginCallback* callback_,
+                                               const Opt_Boolean* exposeInnerGesture)
     {
     }
     } // CommonMethodModifier
@@ -2370,48 +2435,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void StrokeImpl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+    void SetStrokeImpl(Ark_NativePointer node,
+                       const Opt_ResourceColor* value)
     {
     }
-    void FillImpl(Ark_NativePointer node,
-                  const Opt_ResourceColor* value)
+    void SetFillImpl(Ark_NativePointer node,
+                     const Opt_ResourceColor* value)
     {
     }
-    void StrokeDashOffsetImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+    void SetStrokeDashOffsetImpl(Ark_NativePointer node,
+                                 const Opt_Union_Number_String* value)
     {
     }
-    void StrokeLineCapImpl(Ark_NativePointer node,
-                           const Opt_LineCapStyle* value)
+    void SetStrokeLineCapImpl(Ark_NativePointer node,
+                              const Opt_LineCapStyle* value)
     {
     }
-    void StrokeLineJoinImpl(Ark_NativePointer node,
-                            const Opt_LineJoinStyle* value)
+    void SetStrokeLineJoinImpl(Ark_NativePointer node,
+                               const Opt_LineJoinStyle* value)
     {
     }
-    void StrokeMiterLimitImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+    void SetStrokeMiterLimitImpl(Ark_NativePointer node,
+                                 const Opt_Union_Number_String* value)
     {
     }
-    void StrokeOpacityImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+    void SetStrokeOpacityImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String_Resource* value)
     {
     }
-    void FillOpacityImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetFillOpacityImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void StrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
     {
     }
-    void AntiAliasImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetAntiAliasImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void StrokeDashArrayImpl(Ark_NativePointer node,
-                             const Opt_Array_Length* value)
+    void SetStrokeDashArrayImpl(Ark_NativePointer node,
+                                const Opt_Array_Length* value)
     {
     }
     } // CommonShapeMethodModifier
@@ -2435,8 +2500,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ContainerSpanInterfaceModifier
     namespace ContainerSpanAttributeModifier {
-    void TextBackgroundStyleImpl(Ark_NativePointer node,
-                                 const Opt_TextBackgroundStyle* value)
+    void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                    const Opt_TextBackgroundStyle* value)
     {
     }
     } // ContainerSpanAttributeModifier
@@ -2453,20 +2518,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CounterInterfaceModifier
     namespace CounterAttributeModifier {
-    void OnIncImpl(Ark_NativePointer node,
-                   const Opt_VoidCallback* value)
+    void SetOnIncImpl(Ark_NativePointer node,
+                      const Opt_VoidCallback* value)
     {
     }
-    void OnDecImpl(Ark_NativePointer node,
-                   const Opt_VoidCallback* value)
+    void SetOnDecImpl(Ark_NativePointer node,
+                      const Opt_VoidCallback* value)
     {
     }
-    void EnableDecImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetEnableDecImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void EnableIncImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetEnableIncImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
     } // CounterAttributeModifier
@@ -2476,12 +2541,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void SubscribeOnMeasureSizeImpl(Ark_NativePointer node,
-                                    const Callback_onMeasureSize_SizeResult* value)
+    void SetSubscribeOnMeasureSizeImpl(Ark_NativePointer node,
+                                       const Callback_onMeasureSize_SizeResult* value)
     {
     }
-    void SubscribeOnPlaceChildrenImpl(Ark_NativePointer node,
-                                      const Callback_onPlaceChildren_Void* value)
+    void SetSubscribeOnPlaceChildrenImpl(Ark_NativePointer node,
+                                         const Callback_onPlaceChildren_Void* value)
     {
     }
     } // CustomLayoutRootModifier
@@ -2499,28 +2564,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // DataPanelInterfaceModifier
     namespace DataPanelAttributeModifier {
-    void CloseEffectImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetCloseEffectImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void ValueColorsImpl(Ark_NativePointer node,
-                         const Opt_Array_Union_ResourceColor_LinearGradient* value)
+    void SetValueColorsImpl(Ark_NativePointer node,
+                            const Opt_Array_Union_ResourceColor_LinearGradient* value)
     {
     }
-    void TrackBackgroundColorImpl(Ark_NativePointer node,
-                                  const Opt_ResourceColor* value)
+    void SetTrackBackgroundColorImpl(Ark_NativePointer node,
+                                     const Opt_ResourceColor* value)
     {
     }
-    void StrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
     {
     }
-    void TrackShadowImpl(Ark_NativePointer node,
-                         const Opt_DataPanelShadowOptions* value)
-    {
-    }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_DataPanelShadowOptions* value)
     {
     }
     } // DataPanelAttributeModifier
@@ -2538,36 +2599,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // DatePickerInterfaceModifier
     namespace DatePickerAttributeModifier {
-    void LunarImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
+    void SetLunarImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
     {
     }
-    void DisappearTextStyleImpl(Ark_NativePointer node,
-                                const Opt_PickerTextStyle* value)
+    void SetDisappearTextStyleImpl(Ark_NativePointer node,
+                                   const Opt_PickerTextStyle* value)
     {
     }
-    void TextStyleImpl(Ark_NativePointer node,
-                       const Opt_PickerTextStyle* value)
+    void SetTextStyleImpl(Ark_NativePointer node,
+                          const Opt_PickerTextStyle* value)
     {
     }
-    void SelectedTextStyleImpl(Ark_NativePointer node,
-                               const Opt_PickerTextStyle* value)
+    void SetSelectedTextStyleImpl(Ark_NativePointer node,
+                                  const Opt_PickerTextStyle* value)
     {
     }
-    void OnDateChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_Date_Void* value)
+    void SetOnDateChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_Date_Void* value)
     {
     }
-    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                     const Opt_CrownSensitivity* value)
+    void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                        const Opt_CrownSensitivity* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Date_Void* callback_)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
     } // DatePickerAttributeModifier
@@ -2584,20 +2641,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // DividerInterfaceModifier
     namespace DividerAttributeModifier {
-    void VerticalImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetVerticalImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
     {
     }
-    void StrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String* value)
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String* value)
     {
     }
-    void LineCapImpl(Ark_NativePointer node,
-                     const Opt_LineCapStyle* value)
+    void SetLineCapImpl(Ark_NativePointer node,
+                        const Opt_LineCapStyle* value)
     {
     }
     } // DividerAttributeModifier
@@ -2641,12 +2698,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // EmbeddedComponentInterfaceModifier
     namespace EmbeddedComponentAttributeModifier {
-    void OnTerminatedImpl(Ark_NativePointer node,
-                          const Opt_Callback_TerminationInfo_Void* value)
+    void SetOnTerminatedImpl(Ark_NativePointer node,
+                             const Opt_Callback_TerminationInfo_Void* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_ErrorCallback* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_ErrorCallback* value)
     {
     }
     } // EmbeddedComponentAttributeModifier
@@ -2664,8 +2721,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // FlexInterfaceModifier
     namespace FlexAttributeModifier {
-    void PointLightImpl(Ark_NativePointer node,
-                        const Opt_PointLightStyle* value)
+    void SetPointLightImpl(Ark_NativePointer node,
+                           const Opt_PointLightStyle* value)
     {
     }
     } // FlexAttributeModifier
@@ -2695,24 +2752,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // FolderStackInterfaceModifier
     namespace FolderStackAttributeModifier {
-    void AlignContentImpl(Ark_NativePointer node,
-                          const Opt_Alignment* value)
+    void SetAlignContentImpl(Ark_NativePointer node,
+                             const Opt_Alignment* value)
     {
     }
-    void OnFolderStateChangeImpl(Ark_NativePointer node,
-                                 const Opt_OnFoldStatusChangeCallback* value)
+    void SetOnFolderStateChangeImpl(Ark_NativePointer node,
+                                    const Opt_OnFoldStatusChangeCallback* value)
     {
     }
-    void OnHoverStatusChangeImpl(Ark_NativePointer node,
-                                 const Opt_OnHoverStatusChangeCallback* value)
+    void SetOnHoverStatusChangeImpl(Ark_NativePointer node,
+                                    const Opt_OnHoverStatusChangeCallback* value)
     {
     }
-    void EnableAnimationImpl(Ark_NativePointer node,
+    void SetEnableAnimationImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+    }
+    void SetAutoHalfFoldImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
-    {
-    }
-    void AutoHalfFoldImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
     {
     }
     } // FolderStackAttributeModifier
@@ -2730,48 +2787,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // FormComponentInterfaceModifier
     namespace FormComponentAttributeModifier {
-    void SizeImpl(Ark_NativePointer node,
-                  const Opt_FormSize* value)
+    void SetSizeImpl(Ark_NativePointer node,
+                     const Opt_FormSize* value)
     {
     }
-    void ModuleNameImpl(Ark_NativePointer node,
-                        const Opt_String* value)
+    void SetModuleNameImpl(Ark_NativePointer node,
+                           const Opt_String* value)
     {
     }
-    void DimensionImpl(Ark_NativePointer node,
-                       const Opt_FormDimension* value)
+    void SetDimensionImpl(Ark_NativePointer node,
+                          const Opt_FormDimension* value)
     {
     }
-    void AllowUpdateImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetAllowUpdateImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void VisibilityImpl(Ark_NativePointer node,
-                        const Opt_Visibility* value)
+    void SetVisibilityImpl(Ark_NativePointer node,
+                           const Opt_Visibility* value)
     {
     }
-    void OnAcquiredImpl(Ark_NativePointer node,
-                        const Opt_Callback_FormCallbackInfo_Void* value)
+    void SetOnAcquiredImpl(Ark_NativePointer node,
+                           const Opt_Callback_FormCallbackInfo_Void* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_Callback_ErrorInformation_Void* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_Callback_ErrorInformation_Void* value)
     {
     }
-    void OnRouterImpl(Ark_NativePointer node,
-                      const Opt_Callback_Object_Void* value)
+    void SetOnRouterImpl(Ark_NativePointer node,
+                         const Opt_Callback_Object_Void* value)
     {
     }
-    void OnUninstallImpl(Ark_NativePointer node,
+    void SetOnUninstallImpl(Ark_NativePointer node,
+                            const Opt_Callback_FormCallbackInfo_Void* value)
+    {
+    }
+    void SetOnLoadImpl(Ark_NativePointer node,
+                       const Opt_VoidCallback* value)
+    {
+    }
+    void SetOnUpdateImpl(Ark_NativePointer node,
                          const Opt_Callback_FormCallbackInfo_Void* value)
-    {
-    }
-    void OnLoadImpl(Ark_NativePointer node,
-                    const Opt_VoidCallback* value)
-    {
-    }
-    void OnUpdateImpl(Ark_NativePointer node,
-                      const Opt_Callback_FormCallbackInfo_Void* value)
     {
     }
     } // FormComponentAttributeModifier
@@ -2802,44 +2859,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GaugeInterfaceModifier
     namespace GaugeAttributeModifier {
-    void ValueImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
-    {
-    }
-    void StartAngleImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
-    {
-    }
-    void EndAngleImpl(Ark_NativePointer node,
+    void SetValueImpl(Ark_NativePointer node,
                       const Opt_Number* value)
     {
     }
-    void ColorsImpl(Ark_NativePointer node,
-                    const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
+    void SetStartAngleImpl(Ark_NativePointer node,
+                           const Opt_Number* value)
     {
     }
-    void StrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+    void SetEndAngleImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void DescriptionImpl(Ark_NativePointer node,
-                         const Opt_CustomNodeBuilder* value)
+    void SetColorsImpl(Ark_NativePointer node,
+                       const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
     {
     }
-    void TrackShadowImpl(Ark_NativePointer node,
-                         const Opt_GaugeShadowOptions* value)
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
     {
     }
-    void IndicatorImpl(Ark_NativePointer node,
-                       const Opt_GaugeIndicatorOptions* value)
+    void SetDescriptionImpl(Ark_NativePointer node,
+                            const Opt_CustomNodeBuilder* value)
     {
     }
-    void PrivacySensitiveImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_GaugeShadowOptions* value)
     {
     }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetIndicatorImpl(Ark_NativePointer node,
+                          const Opt_GaugeIndicatorOptions* value)
+    {
+    }
+    void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
     {
     }
     } // GaugeAttributeModifier
@@ -2858,101 +2911,101 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GridInterfaceModifier
     namespace GridAttributeModifier {
-    void ColumnsTemplateImpl(Ark_NativePointer node,
+    void SetColumnsTemplateImpl(Ark_NativePointer node,
+                                const Opt_String* value)
+    {
+    }
+    void SetRowsTemplateImpl(Ark_NativePointer node,
                              const Opt_String* value)
     {
     }
-    void RowsTemplateImpl(Ark_NativePointer node,
-                          const Opt_String* value)
+    void SetColumnsGapImpl(Ark_NativePointer node,
+                           const Opt_Length* value)
     {
     }
-    void ColumnsGapImpl(Ark_NativePointer node,
+    void SetRowsGapImpl(Ark_NativePointer node,
                         const Opt_Length* value)
     {
     }
-    void RowsGapImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+    void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
+                                  const Opt_Callback_Number_Number_ComputedBarAttribute* value)
     {
     }
-    void OnScrollBarUpdateImpl(Ark_NativePointer node,
-                               const Opt_Callback_Number_Number_ComputedBarAttribute* value)
+    void SetOnScrollIndexImpl(Ark_NativePointer node,
+                              const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void OnScrollIndexImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Number_Void* value)
+    void SetCachedCount0Impl(Ark_NativePointer node,
+                             const Opt_Number* value)
     {
     }
-    void CachedCount0Impl(Ark_NativePointer node,
-                          const Opt_Number* value)
+    void SetEditModeImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void EditModeImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetMultiSelectableImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
     {
     }
-    void MultiSelectableImpl(Ark_NativePointer node,
-                             const Opt_Boolean* value)
+    void SetMaxCountImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void MaxCountImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetMinCountImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void MinCountImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetCellLengthImpl(Ark_NativePointer node,
+                           const Opt_Number* value)
     {
     }
-    void CellLengthImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
+    void SetLayoutDirectionImpl(Ark_NativePointer node,
+                                const Opt_GridDirection* value)
     {
     }
-    void LayoutDirectionImpl(Ark_NativePointer node,
-                             const Opt_GridDirection* value)
+    void SetSupportAnimationImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
     {
     }
-    void SupportAnimationImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetOnItemDragStartImpl(Ark_NativePointer node,
+                                const Opt_OnItemDragStartCallback* value)
     {
     }
-    void OnItemDragStartImpl(Ark_NativePointer node,
-                             const Opt_OnItemDragStartCallback* value)
+    void SetOnItemDragEnterImpl(Ark_NativePointer node,
+                                const Opt_Callback_ItemDragInfo_Void* value)
     {
     }
-    void OnItemDragEnterImpl(Ark_NativePointer node,
-                             const Opt_Callback_ItemDragInfo_Void* value)
+    void SetOnItemDragMoveImpl(Ark_NativePointer node,
+                               const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
     {
     }
-    void OnItemDragMoveImpl(Ark_NativePointer node,
-                            const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
+    void SetOnItemDragLeaveImpl(Ark_NativePointer node,
+                                const Opt_Callback_ItemDragInfo_Number_Void* value)
     {
     }
-    void OnItemDragLeaveImpl(Ark_NativePointer node,
-                             const Opt_Callback_ItemDragInfo_Number_Void* value)
+    void SetOnItemDropImpl(Ark_NativePointer node,
+                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
     {
     }
-    void OnItemDropImpl(Ark_NativePointer node,
-                        const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
+    void SetAlignItemsImpl(Ark_NativePointer node,
+                           const Opt_GridItemAlignment* value)
     {
     }
-    void AlignItemsImpl(Ark_NativePointer node,
-                        const Opt_GridItemAlignment* value)
+    void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
+                                   const Opt_OnScrollFrameBeginCallback* value)
     {
     }
-    void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_OnScrollFrameBeginCallback* value)
+    void SetOnWillScrollImpl(Ark_NativePointer node,
+                             const Opt_OnWillScrollCallback* value)
     {
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                          const Opt_OnWillScrollCallback* value)
+    void SetOnDidScrollImpl(Ark_NativePointer node,
+                            const Opt_OnScrollCallback* value)
     {
     }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
-    {
-    }
-    void CachedCount1Impl(Ark_NativePointer node,
-                          const Opt_Number* count,
-                          const Opt_Boolean* show)
+    void SetCachedCount1Impl(Ark_NativePointer node,
+                             const Opt_Number* count,
+                             const Opt_Boolean* show)
     {
     }
     } // GridAttributeModifier
@@ -2970,16 +3023,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GridColInterfaceModifier
     namespace GridColAttributeModifier {
-    void SpanImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_GridColColumnOption* value)
+    void SetSpanImpl(Ark_NativePointer node,
+                     const Opt_Union_Number_GridColColumnOption* value)
     {
     }
-    void GridColOffsetImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_GridColColumnOption* value)
+    void SetGridColOffsetImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_GridColColumnOption* value)
     {
     }
-    void OrderImpl(Ark_NativePointer node,
-                   const Opt_Union_Number_GridColColumnOption* value)
+    void SetOrderImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_GridColColumnOption* value)
     {
     }
     } // GridColAttributeModifier
@@ -2997,36 +3050,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GridItemInterfaceModifier
     namespace GridItemAttributeModifier {
-    void RowStartImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
-    {
-    }
-    void RowEndImpl(Ark_NativePointer node,
-                    const Opt_Number* value)
-    {
-    }
-    void ColumnStartImpl(Ark_NativePointer node,
+    void SetRowStartImpl(Ark_NativePointer node,
                          const Opt_Number* value)
     {
     }
-    void ColumnEndImpl(Ark_NativePointer node,
+    void SetRowEndImpl(Ark_NativePointer node,
                        const Opt_Number* value)
     {
     }
-    void SelectableImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetColumnStartImpl(Ark_NativePointer node,
+                            const Opt_Number* value)
     {
     }
-    void SelectedImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetColumnEndImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
     {
     }
-    void OnSelectImpl(Ark_NativePointer node,
-                      const Opt_Callback_Boolean_Void* value)
+    void SetSelectableImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Opt_Boolean_Void* callback_)
+    void SetSelectedImpl(Ark_NativePointer node,
+                         const Opt_Union_Boolean_Bindable* value)
+    {
+    }
+    void SetOnSelectImpl(Ark_NativePointer node,
+                         const Opt_Callback_Boolean_Void* value)
     {
     }
     } // GridItemAttributeModifier
@@ -3044,12 +3093,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GridRowInterfaceModifier
     namespace GridRowAttributeModifier {
-    void OnBreakpointChangeImpl(Ark_NativePointer node,
-                                const Opt_Callback_String_Void* value)
+    void SetOnBreakpointChangeImpl(Ark_NativePointer node,
+                                   const Opt_Callback_String_Void* value)
     {
     }
-    void AlignItemsImpl(Ark_NativePointer node,
-                        const Opt_ItemAlign* value)
+    void SetAlignItemsImpl(Ark_NativePointer node,
+                           const Opt_ItemAlign* value)
     {
     }
     } // GridRowAttributeModifier
@@ -3068,8 +3117,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // HyperlinkInterfaceModifier
     namespace HyperlinkAttributeModifier {
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_Union_Color_Number_String_Resource* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_Union_Color_Number_String_Resource* value)
     {
     }
     } // HyperlinkAttributeModifier
@@ -3092,112 +3141,112 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ImageInterfaceModifier
     namespace ImageAttributeModifier {
-    void AltImpl(Ark_NativePointer node,
-                 const Opt_Union_String_Resource_PixelMap* value)
+    void SetAltImpl(Ark_NativePointer node,
+                    const Opt_Union_String_Resource_PixelMap* value)
     {
     }
-    void MatchTextDirectionImpl(Ark_NativePointer node,
+    void SetMatchTextDirectionImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+    {
+    }
+    void SetFitOriginalSizeImpl(Ark_NativePointer node,
                                 const Opt_Boolean* value)
     {
     }
-    void FitOriginalSizeImpl(Ark_NativePointer node,
-                             const Opt_Boolean* value)
+    void SetFillColorImpl(Ark_NativePointer node,
+                          const Opt_Union_ResourceColor_ColorContent_ColorMetrics* value)
     {
     }
-    void FillColorImpl(Ark_NativePointer node,
-                       const Opt_Union_ResourceColor_ColorContent_ColorMetrics* value)
+    void SetObjectFitImpl(Ark_NativePointer node,
+                          const Opt_ImageFit* value)
     {
     }
-    void ObjectFitImpl(Ark_NativePointer node,
-                       const Opt_ImageFit* value)
+    void SetImageMatrixImpl(Ark_NativePointer node,
+                            const Opt_matrix4_Matrix4Transit* value)
     {
     }
-    void ImageMatrixImpl(Ark_NativePointer node,
-                         const Opt_matrix4_Matrix4Transit* value)
+    void SetObjectRepeatImpl(Ark_NativePointer node,
+                             const Opt_ImageRepeat* value)
     {
     }
-    void ObjectRepeatImpl(Ark_NativePointer node,
-                          const Opt_ImageRepeat* value)
+    void SetAutoResizeImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void AutoResizeImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetRenderModeImpl(Ark_NativePointer node,
+                           const Opt_ImageRenderMode* value)
     {
     }
-    void RenderModeImpl(Ark_NativePointer node,
-                        const Opt_ImageRenderMode* value)
+    void SetDynamicRangeModeImpl(Ark_NativePointer node,
+                                 const Opt_DynamicRangeMode* value)
     {
     }
-    void DynamicRangeModeImpl(Ark_NativePointer node,
-                              const Opt_DynamicRangeMode* value)
+    void SetInterpolationImpl(Ark_NativePointer node,
+                              const Opt_ImageInterpolation* value)
     {
     }
-    void InterpolationImpl(Ark_NativePointer node,
-                           const Opt_ImageInterpolation* value)
+    void SetSourceSizeImpl(Ark_NativePointer node,
+                           const Opt_ImageSourceSize* value)
     {
     }
-    void SourceSizeImpl(Ark_NativePointer node,
-                        const Opt_ImageSourceSize* value)
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void SyncLoadImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetColorFilterImpl(Ark_NativePointer node,
+                            const Opt_Union_ColorFilter_DrawingColorFilter* value)
     {
     }
-    void ColorFilterImpl(Ark_NativePointer node,
-                         const Opt_Union_ColorFilter_DrawingColorFilter* value)
+    void SetCopyOptionImpl(Ark_NativePointer node,
+                           const Opt_CopyOptions* value)
     {
     }
-    void CopyOptionImpl(Ark_NativePointer node,
-                        const Opt_CopyOptions* value)
+    void SetDraggableImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void DraggableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetPointLightImpl(Ark_NativePointer node,
+                           const Opt_PointLightStyle* value)
     {
     }
-    void PointLightImpl(Ark_NativePointer node,
-                        const Opt_PointLightStyle* value)
+    void SetEdgeAntialiasingImpl(Ark_NativePointer node,
+                                 const Opt_Number* value)
     {
     }
-    void EdgeAntialiasingImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+    void SetOnCompleteImpl(Ark_NativePointer node,
+                           const Opt_ImageOnCompleteCallback* value)
     {
     }
-    void OnCompleteImpl(Ark_NativePointer node,
-                        const Opt_ImageOnCompleteCallback* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_ImageErrorCallback* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_ImageErrorCallback* value)
+    void SetOnFinishImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnFinishImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetEnableAnalyzerImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
     {
     }
-    void EnableAnalyzerImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetAnalyzerConfigImpl(Ark_NativePointer node,
+                               const Opt_ImageAnalyzerConfig* value)
     {
     }
-    void AnalyzerConfigImpl(Ark_NativePointer node,
-                            const Opt_ImageAnalyzerConfig* value)
+    void SetResizableImpl(Ark_NativePointer node,
+                          const Opt_ResizableOptions* value)
     {
     }
-    void ResizableImpl(Ark_NativePointer node,
-                       const Opt_ResizableOptions* value)
+    void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
     {
     }
-    void PrivacySensitiveImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetEnhancedImageQualityImpl(Ark_NativePointer node,
+                                     const Opt_image_ResolutionQuality* value)
     {
     }
-    void EnhancedImageQualityImpl(Ark_NativePointer node,
-                                  const Opt_image_ResolutionQuality* value)
-    {
-    }
-    void OrientationImpl(Ark_NativePointer node,
-                         const Opt_ImageRotateOrientation* value)
+    void SetOrientationImpl(Ark_NativePointer node,
+                            const Opt_ImageRotateOrientation* value)
     {
     }
     } // ImageAttributeModifier
@@ -3214,56 +3263,56 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ImageAnimatorInterfaceModifier
     namespace ImageAnimatorAttributeModifier {
-    void ImagesImpl(Ark_NativePointer node,
-                    const Opt_Array_ImageFrameInfo* value)
+    void SetImagesImpl(Ark_NativePointer node,
+                       const Opt_Array_ImageFrameInfo* value)
     {
     }
-    void StateImpl(Ark_NativePointer node,
-                   const Opt_AnimationStatus* value)
+    void SetStateImpl(Ark_NativePointer node,
+                      const Opt_AnimationStatus* value)
     {
     }
-    void DurationImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetDurationImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void ReverseImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+    void SetReverseImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
     {
     }
-    void FixedSizeImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetFixedSizeImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void FillModeImpl(Ark_NativePointer node,
-                      const Opt_FillMode* value)
+    void SetFillModeImpl(Ark_NativePointer node,
+                         const Opt_FillMode* value)
     {
     }
-    void IterationsImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
+    void SetIterationsImpl(Ark_NativePointer node,
+                           const Opt_Number* value)
     {
     }
-    void MonitorInvisibleAreaImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetMonitorInvisibleAreaImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void OnStartImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnStartImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void OnPauseImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnPauseImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void OnRepeatImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnRepeatImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnCancelImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnCancelImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnFinishImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnFinishImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
     } // ImageAnimatorAttributeModifier
@@ -3281,28 +3330,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ImageSpanInterfaceModifier
     namespace ImageSpanAttributeModifier {
-    void VerticalAlignImpl(Ark_NativePointer node,
-                           const Opt_ImageSpanAlignment* value)
+    void SetVerticalAlignImpl(Ark_NativePointer node,
+                              const Opt_ImageSpanAlignment* value)
     {
     }
-    void ColorFilterImpl(Ark_NativePointer node,
-                         const Opt_Union_ColorFilter_DrawingColorFilter* value)
+    void SetColorFilterImpl(Ark_NativePointer node,
+                            const Opt_Union_ColorFilter_DrawingColorFilter* value)
     {
     }
-    void ObjectFitImpl(Ark_NativePointer node,
-                       const Opt_ImageFit* value)
+    void SetObjectFitImpl(Ark_NativePointer node,
+                          const Opt_ImageFit* value)
     {
     }
-    void OnCompleteImpl(Ark_NativePointer node,
-                        const Opt_ImageCompleteCallback* value)
+    void SetOnCompleteImpl(Ark_NativePointer node,
+                           const Opt_ImageCompleteCallback* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_ImageErrorCallback* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_ImageErrorCallback* value)
     {
     }
-    void AltImpl(Ark_NativePointer node,
-                 const Opt_image_PixelMap* value)
+    void SetAltImpl(Ark_NativePointer node,
+                    const Opt_image_PixelMap* value)
     {
     }
     } // ImageSpanAttributeModifier
@@ -3320,28 +3369,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // IndicatorComponentInterfaceModifier
     namespace IndicatorComponentAttributeModifier {
-    void InitialIndexImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+    void SetInitialIndexImpl(Ark_NativePointer node,
+                             const Opt_Number* value)
     {
     }
-    void CountImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+    void SetCountImpl(Ark_NativePointer node,
+                      const Opt_Number* value)
     {
     }
-    void StyleImpl(Ark_NativePointer node,
-                   const Opt_Union_DotIndicator_DigitIndicator* value)
+    void SetStyleImpl(Ark_NativePointer node,
+                      const Opt_Union_DotIndicator_DigitIndicator* value)
     {
     }
-    void LoopImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+    void SetLoopImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
     {
     }
-    void VerticalImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetVerticalImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Number_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Number_Void* value)
     {
     }
     } // IndicatorComponentAttributeModifier
@@ -3359,12 +3408,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LineInterfaceModifier
     namespace LineAttributeModifier {
-    void StartPointImpl(Ark_NativePointer node,
-                        const Opt_ShapePoint* value)
+    void SetStartPointImpl(Ark_NativePointer node,
+                           const Opt_ShapePoint* value)
     {
     }
-    void EndPointImpl(Ark_NativePointer node,
-                      const Opt_ShapePoint* value)
+    void SetEndPointImpl(Ark_NativePointer node,
+                         const Opt_ShapePoint* value)
     {
     }
     } // LineAttributeModifier
@@ -3383,16 +3432,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LinearIndicatorInterfaceModifier
     namespace LinearIndicatorAttributeModifier {
-    void IndicatorStyleImpl(Ark_NativePointer node,
-                            const Opt_LinearIndicatorStyle* value)
+    void SetIndicatorStyleImpl(Ark_NativePointer node,
+                               const Opt_LinearIndicatorStyle* value)
     {
     }
-    void IndicatorLoopImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetIndicatorLoopImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnLinearIndicatorChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnLinearIndicatorChangeCallback* value)
     {
     }
     } // LinearIndicatorAttributeModifier
@@ -3410,114 +3459,114 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ListInterfaceModifier
     namespace ListAttributeModifier {
-    void AlignListItemImpl(Ark_NativePointer node,
-                           const Opt_ListItemAlign* value)
+    void SetAlignListItemImpl(Ark_NativePointer node,
+                              const Opt_ListItemAlign* value)
     {
     }
-    void ListDirectionImpl(Ark_NativePointer node,
-                           const Opt_Axis* value)
+    void SetListDirectionImpl(Ark_NativePointer node,
+                              const Opt_Axis* value)
     {
     }
-    void ContentStartOffsetImpl(Ark_NativePointer node,
-                                const Opt_Number* value)
+    void SetContentStartOffsetImpl(Ark_NativePointer node,
+                                   const Opt_Number* value)
     {
     }
-    void ContentEndOffsetImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+    void SetContentEndOffsetImpl(Ark_NativePointer node,
+                                 const Opt_Number* value)
     {
     }
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_ListDividerOptions* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_ListDividerOptions* value)
     {
     }
-    void MultiSelectableImpl(Ark_NativePointer node,
+    void SetMultiSelectableImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+    }
+    void SetCachedCount0Impl(Ark_NativePointer node,
+                             const Opt_Number* value)
+    {
+    }
+    void SetChainAnimationImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
+    void SetChainAnimationOptionsImpl(Ark_NativePointer node,
+                                      const Opt_ChainAnimationOptions* value)
+    {
+    }
+    void SetStickyImpl(Ark_NativePointer node,
+                       const Opt_StickyStyle* value)
+    {
+    }
+    void SetScrollSnapAlignImpl(Ark_NativePointer node,
+                                const Opt_ScrollSnapAlign* value)
+    {
+    }
+    void SetChildrenMainSizeImpl(Ark_NativePointer node,
+                                 const Opt_ChildrenMainSize* value)
+    {
+    }
+    void SetMaintainVisibleContentPositionImpl(Ark_NativePointer node,
+                                               const Opt_Boolean* value)
+    {
+    }
+    void SetStackFromEndImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
     {
     }
-    void CachedCount0Impl(Ark_NativePointer node,
-                          const Opt_Number* value)
+    void SetOnScrollIndexImpl(Ark_NativePointer node,
+                              const Opt_Callback_Number_Number_Number_Void* value)
     {
     }
-    void ChainAnimationImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetOnScrollVisibleContentChangeImpl(Ark_NativePointer node,
+                                             const Opt_OnScrollVisibleContentChangeCallback* value)
     {
     }
-    void ChainAnimationOptionsImpl(Ark_NativePointer node,
-                                   const Opt_ChainAnimationOptions* value)
+    void SetOnItemMoveImpl(Ark_NativePointer node,
+                           const Opt_Callback_Number_Number_Boolean* value)
     {
     }
-    void StickyImpl(Ark_NativePointer node,
-                    const Opt_StickyStyle* value)
+    void SetOnItemDragStartImpl(Ark_NativePointer node,
+                                const Opt_OnItemDragStartCallback* value)
     {
     }
-    void ScrollSnapAlignImpl(Ark_NativePointer node,
-                             const Opt_ScrollSnapAlign* value)
+    void SetOnItemDragEnterImpl(Ark_NativePointer node,
+                                const Opt_Callback_ItemDragInfo_Void* value)
     {
     }
-    void ChildrenMainSizeImpl(Ark_NativePointer node,
-                              const Opt_ChildrenMainSize* value)
+    void SetOnItemDragMoveImpl(Ark_NativePointer node,
+                               const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
     {
     }
-    void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
-                                            const Opt_Boolean* value)
+    void SetOnItemDragLeaveImpl(Ark_NativePointer node,
+                                const Opt_Callback_ItemDragInfo_Number_Void* value)
     {
     }
-    void StackFromEndImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetOnItemDropImpl(Ark_NativePointer node,
+                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
     {
     }
-    void OnScrollIndexImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Number_Number_Void* value)
+    void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
+                                   const Opt_OnScrollFrameBeginCallback* value)
     {
     }
-    void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
-                                          const Opt_OnScrollVisibleContentChangeCallback* value)
+    void SetOnWillScrollImpl(Ark_NativePointer node,
+                             const Opt_OnWillScrollCallback* value)
     {
     }
-    void OnItemMoveImpl(Ark_NativePointer node,
-                        const Opt_Callback_Number_Number_Boolean* value)
+    void SetOnDidScrollImpl(Ark_NativePointer node,
+                            const Opt_OnScrollCallback* value)
     {
     }
-    void OnItemDragStartImpl(Ark_NativePointer node,
-                             const Opt_OnItemDragStartCallback* value)
+    void SetLanesImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_LengthConstrain* value,
+                      const Opt_Dimension* gutter)
     {
     }
-    void OnItemDragEnterImpl(Ark_NativePointer node,
-                             const Opt_Callback_ItemDragInfo_Void* value)
-    {
-    }
-    void OnItemDragMoveImpl(Ark_NativePointer node,
-                            const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
-    {
-    }
-    void OnItemDragLeaveImpl(Ark_NativePointer node,
-                             const Opt_Callback_ItemDragInfo_Number_Void* value)
-    {
-    }
-    void OnItemDropImpl(Ark_NativePointer node,
-                        const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
-    {
-    }
-    void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_OnScrollFrameBeginCallback* value)
-    {
-    }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                          const Opt_OnWillScrollCallback* value)
-    {
-    }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
-    {
-    }
-    void LanesImpl(Ark_NativePointer node,
-                   const Opt_Union_Number_LengthConstrain* value,
-                   const Opt_Dimension* gutter)
-    {
-    }
-    void CachedCount1Impl(Ark_NativePointer node,
-                          const Opt_Number* count,
-                          const Opt_Boolean* show)
+    void SetCachedCount1Impl(Ark_NativePointer node,
+                             const Opt_Number* count,
+                             const Opt_Boolean* show)
     {
     }
     } // ListAttributeModifier
@@ -3535,24 +3584,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ListItemInterfaceModifier
     namespace ListItemAttributeModifier {
-    void SelectableImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetSelectableImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void SelectedImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetSelectedImpl(Ark_NativePointer node,
+                         const Opt_Union_Boolean_Bindable* value)
     {
     }
-    void SwipeActionImpl(Ark_NativePointer node,
-                         const Opt_SwipeActionOptions* value)
+    void SetSwipeActionImpl(Ark_NativePointer node,
+                            const Opt_SwipeActionOptions* value)
     {
     }
-    void OnSelectImpl(Ark_NativePointer node,
-                      const Opt_Callback_Boolean_Void* value)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Opt_Boolean_Void* callback_)
+    void SetOnSelectImpl(Ark_NativePointer node,
+                         const Opt_Callback_Boolean_Void* value)
     {
     }
     } // ListItemAttributeModifier
@@ -3570,12 +3615,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ListItemGroupInterfaceModifier
     namespace ListItemGroupAttributeModifier {
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_ListDividerOptions* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_ListDividerOptions* value)
     {
     }
-    void ChildrenMainSizeImpl(Ark_NativePointer node,
-                              const Opt_ChildrenMainSize* value)
+    void SetChildrenMainSizeImpl(Ark_NativePointer node,
+                                 const Opt_ChildrenMainSize* value)
     {
     }
     } // ListItemGroupAttributeModifier
@@ -3592,16 +3637,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LoadingProgressInterfaceModifier
     namespace LoadingProgressAttributeModifier {
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
     {
     }
-    void EnableLoadingImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
-    {
-    }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetEnableLoadingImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
     } // LoadingProgressAttributeModifier
@@ -3619,40 +3660,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // MarqueeInterfaceModifier
     namespace MarqueeAttributeModifier {
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void AllowScaleImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetAllowScaleImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_Union_String_Resource* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_Union_String_Resource* value)
     {
     }
-    void MarqueeUpdateStrategyImpl(Ark_NativePointer node,
-                                   const Opt_MarqueeUpdateStrategy* value)
+    void SetMarqueeUpdateStrategyImpl(Ark_NativePointer node,
+                                      const Opt_MarqueeUpdateStrategy* value)
     {
     }
-    void OnStartImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnStartImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void OnBounceImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnBounceImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnFinishImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnFinishImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
     } // MarqueeAttributeModifier
@@ -3682,28 +3723,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // MenuInterfaceModifier
     namespace MenuAttributeModifier {
-    void FontImpl(Ark_NativePointer node,
-                  const Opt_Font* value)
+    void SetFontImpl(Ark_NativePointer node,
+                     const Opt_Font* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void RadiusImpl(Ark_NativePointer node,
-                    const Opt_Union_Dimension_BorderRadiuses* value)
+    void SetRadiusImpl(Ark_NativePointer node,
+                       const Opt_Union_Dimension_BorderRadiuses* value)
     {
     }
-    void MenuItemDividerImpl(Ark_NativePointer node,
-                             const Opt_DividerStyleOptions* value)
+    void SetMenuItemDividerImpl(Ark_NativePointer node,
+                                const Opt_DividerStyleOptions* value)
     {
     }
-    void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                                  const Opt_DividerStyleOptions* value)
+    void SetMenuItemGroupDividerImpl(Ark_NativePointer node,
+                                     const Opt_DividerStyleOptions* value)
     {
     }
-    void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                                  const Opt_SubMenuExpandingMode* value)
+    void SetSubMenuExpandingModeImpl(Ark_NativePointer node,
+                                     const Opt_SubMenuExpandingMode* value)
     {
     }
     } // MenuAttributeModifier
@@ -3721,36 +3762,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // MenuItemInterfaceModifier
     namespace MenuItemAttributeModifier {
-    void SelectedImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetSelectedImpl(Ark_NativePointer node,
+                         const Opt_Union_Boolean_Bindable* value)
     {
     }
-    void SelectIconImpl(Ark_NativePointer node,
-                        const Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
+    void SetSelectIconImpl(Ark_NativePointer node,
+                           const Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Boolean_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Boolean_Void* value)
     {
     }
-    void ContentFontImpl(Ark_NativePointer node,
-                         const Opt_Font* value)
+    void SetContentFontImpl(Ark_NativePointer node,
+                            const Opt_Font* value)
     {
     }
-    void ContentFontColorImpl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
+    void SetContentFontColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
     {
     }
-    void LabelFontImpl(Ark_NativePointer node,
-                       const Opt_Font* value)
+    void SetLabelFontImpl(Ark_NativePointer node,
+                          const Opt_Font* value)
     {
     }
-    void LabelFontColorImpl(Ark_NativePointer node,
-                            const Opt_ResourceColor* value)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Opt_Boolean_Void* callback_)
+    void SetLabelFontColorImpl(Ark_NativePointer node,
+                               const Opt_ResourceColor* value)
     {
     }
     } // MenuItemAttributeModifier
@@ -3780,144 +3817,144 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // NavDestinationInterfaceModifier
     namespace NavDestinationAttributeModifier {
-    void HideTitleBar0Impl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetHideTitleBar0Impl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void HideBackButtonImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetHideBackButtonImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
     {
     }
-    void OnShownImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnShownImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void OnHiddenImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnHiddenImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnBackPressedImpl(Ark_NativePointer node,
-                           const Opt_Callback_Boolean* value)
+    void SetOnBackPressedImpl(Ark_NativePointer node,
+                              const Opt_Callback_Boolean* value)
     {
     }
-    void OnResultImpl(Ark_NativePointer node,
-                      const Opt_Callback_Opt_Object_Void* value)
+    void SetOnResultImpl(Ark_NativePointer node,
+                         const Opt_Callback_Union_Object_Undefined_Void* value)
     {
     }
-    void ModeImpl(Ark_NativePointer node,
-                  const Opt_NavDestinationMode* value)
+    void SetModeImpl(Ark_NativePointer node,
+                     const Opt_NavDestinationMode* value)
     {
     }
-    void BackButtonIcon0Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value)
+    void SetBackButtonIcon0Impl(Ark_NativePointer node,
+                                const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value)
     {
     }
-    void Menus0Impl(Ark_NativePointer node,
-                    const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
+    void SetMenus0Impl(Ark_NativePointer node,
+                       const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
     {
     }
-    void OnReadyImpl(Ark_NativePointer node,
-                     const Opt_Callback_NavDestinationContext_Void* value)
+    void SetOnReadyImpl(Ark_NativePointer node,
+                        const Opt_Callback_NavDestinationContext_Void* value)
     {
     }
-    void OnWillAppearImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
-    {
-    }
-    void OnWillDisappearImpl(Ark_NativePointer node,
+    void SetOnWillAppearImpl(Ark_NativePointer node,
                              const Opt_Callback_Void* value)
     {
     }
-    void OnWillShowImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+    void SetOnWillDisappearImpl(Ark_NativePointer node,
+                                const Opt_Callback_Void* value)
     {
     }
-    void OnWillHideImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+    void SetOnWillShowImpl(Ark_NativePointer node,
+                           const Opt_Callback_Void* value)
     {
     }
-    void SystemBarStyleImpl(Ark_NativePointer node,
-                            const Opt_window_SystemBarStyle* value)
+    void SetOnWillHideImpl(Ark_NativePointer node,
+                           const Opt_Callback_Void* value)
     {
     }
-    void RecoverableImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetSystemBarStyleImpl(Ark_NativePointer node,
+                               const Opt_window_SystemBarStyle* value)
     {
     }
-    void SystemTransitionImpl(Ark_NativePointer node,
-                              const Opt_NavigationSystemTransitionType* value)
+    void SetRecoverableImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void BindToScrollableImpl(Ark_NativePointer node,
-                              const Opt_Array_Scroller* value)
+    void SetSystemTransitionImpl(Ark_NativePointer node,
+                                 const Opt_NavigationSystemTransitionType* value)
     {
     }
-    void BindToNestedScrollableImpl(Ark_NativePointer node,
-                                    const Opt_Array_NestedScrollInfo* value)
+    void SetBindToScrollableImpl(Ark_NativePointer node,
+                                 const Opt_Array_Scroller* value)
     {
     }
-    void OnActiveImpl(Ark_NativePointer node,
-                      const Opt_Callback_NavDestinationActiveReason_Void* value)
+    void SetBindToNestedScrollableImpl(Ark_NativePointer node,
+                                       const Opt_Array_NestedScrollInfo* value)
     {
     }
-    void OnInactiveImpl(Ark_NativePointer node,
-                        const Opt_Callback_NavDestinationActiveReason_Void* value)
+    void SetOnActiveImpl(Ark_NativePointer node,
+                         const Opt_Callback_NavDestinationActiveReason_Void* value)
     {
     }
-    void CustomTransitionImpl(Ark_NativePointer node,
-                              const Opt_NavDestinationTransitionDelegate* value)
+    void SetOnInactiveImpl(Ark_NativePointer node,
+                           const Opt_Callback_NavDestinationActiveReason_Void* value)
     {
     }
-    void OnNewParamImpl(Ark_NativePointer node,
-                        const Opt_Callback_Opt_Object_Void* value)
+    void SetCustomTransitionImpl(Ark_NativePointer node,
+                                 const Opt_NavDestinationTransitionDelegate* value)
     {
     }
-    void PreferredOrientationImpl(Ark_NativePointer node,
-                                  const Opt_CustomObject* value)
+    void SetOnNewParamImpl(Ark_NativePointer node,
+                           const Opt_Callback_Union_Object_Undefined_Void* value)
     {
     }
-    void EnableNavigationIndicatorImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
+    void SetPreferredOrientationImpl(Ark_NativePointer node,
+                                     const Opt_CustomObject* value)
     {
     }
-    void TitleImpl(Ark_NativePointer node,
-                   const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
-                   const Opt_NavigationTitleOptions* options)
+    void SetEnableNavigationIndicatorImpl(Ark_NativePointer node,
+                                          const Opt_Boolean* value)
     {
     }
-    void HideTitleBar1Impl(Ark_NativePointer node,
-                           const Opt_Boolean* hide,
-                           const Opt_Boolean* animated)
+    void SetTitleImpl(Ark_NativePointer node,
+                      const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
+                      const Opt_NavigationTitleOptions* options)
     {
     }
-    void BackButtonIcon1Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
-                             const Opt_ResourceStr* accessibilityText)
+    void SetHideTitleBar1Impl(Ark_NativePointer node,
+                              const Opt_Boolean* hide,
+                              const Opt_Boolean* animated)
     {
     }
-    void Menus1Impl(Ark_NativePointer node,
-                    const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                    const Opt_NavigationMenuOptions* options)
+    void SetBackButtonIcon1Impl(Ark_NativePointer node,
+                                const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
+                                const Opt_ResourceStr* accessibilityText)
     {
     }
-    void ToolbarConfigurationImpl(Ark_NativePointer node,
-                                  const Opt_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
-                                  const Opt_NavigationToolbarOptions* options)
+    void SetMenus1Impl(Ark_NativePointer node,
+                       const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
+                       const Opt_NavigationMenuOptions* options)
     {
     }
-    void HideToolBarImpl(Ark_NativePointer node,
-                         const Opt_Boolean* hide,
-                         const Opt_Boolean* animated)
+    void SetToolbarConfigurationImpl(Ark_NativePointer node,
+                                     const Opt_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
+                                     const Opt_NavigationToolbarOptions* options)
     {
     }
-    void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
-                                  const Opt_Array_LayoutSafeAreaType* types,
-                                  const Opt_Array_LayoutSafeAreaEdge* edges)
+    void SetHideToolBarImpl(Ark_NativePointer node,
+                            const Opt_Boolean* hide,
+                            const Opt_Boolean* animated)
     {
     }
-    void EnableStatusBarImpl(Ark_NativePointer node,
-                             const Opt_Boolean* enabled,
-                             const Opt_Boolean* animated)
+    void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                                     const Opt_Array_LayoutSafeAreaType* types,
+                                     const Opt_Array_LayoutSafeAreaEdge* edges)
+    {
+    }
+    void SetEnableStatusBarImpl(Ark_NativePointer node,
+                                const Opt_Boolean* enabled,
+                                const Opt_Boolean* animated)
     {
     }
     } // NavDestinationAttributeModifier
@@ -3938,127 +3975,127 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // NavigationInterfaceModifier
     namespace NavigationAttributeModifier {
-    void NavBarWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+    void SetNavBarWidthImpl(Ark_NativePointer node,
+                            const Opt_Union_Length_Bindable* value)
     {
     }
-    void NavBarPositionImpl(Ark_NativePointer node,
-                            const Opt_NavBarPosition* value)
+    void SetNavBarPositionImpl(Ark_NativePointer node,
+                               const Opt_NavBarPosition* value)
     {
     }
-    void NavBarWidthRangeImpl(Ark_NativePointer node,
-                              const Opt_Tuple_Dimension_Dimension* value)
+    void SetNavBarWidthRangeImpl(Ark_NativePointer node,
+                                 const Opt_Tuple_Dimension_Dimension* value)
     {
     }
-    void MinContentWidthImpl(Ark_NativePointer node,
-                             const Opt_Dimension* value)
+    void SetMinContentWidthImpl(Ark_NativePointer node,
+                                const Opt_Dimension* value)
     {
     }
-    void ModeImpl(Ark_NativePointer node,
-                  const Opt_NavigationMode* value)
+    void SetModeImpl(Ark_NativePointer node,
+                     const Opt_NavigationMode* value)
     {
     }
-    void BackButtonIcon0Impl(Ark_NativePointer node,
-                             const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
+    void SetBackButtonIcon0Impl(Ark_NativePointer node,
+                                const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
     {
     }
-    void HideNavBarImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
-    {
-    }
-    void HideTitleBar0Impl(Ark_NativePointer node,
+    void SetHideNavBarImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
     {
     }
-    void HideBackButtonImpl(Ark_NativePointer node,
+    void SetHideTitleBar0Impl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+    {
+    }
+    void SetHideBackButtonImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
+    void SetTitleModeImpl(Ark_NativePointer node,
+                          const Opt_NavigationTitleMode* value)
+    {
+    }
+    void SetMenus0Impl(Ark_NativePointer node,
+                       const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
+    {
+    }
+    void SetHideToolBar0Impl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
+    {
+    }
+    void SetEnableToolBarAdaptationImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
+    {
+    }
+    void SetOnTitleModeChangeImpl(Ark_NativePointer node,
+                                  const Opt_Callback_NavigationTitleMode_Void* value)
+    {
+    }
+    void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
+                                    const Opt_Callback_Boolean_Void* value)
+    {
+    }
+    void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
+                                       const Opt_Callback_NavigationMode_Void* value)
+    {
+    }
+    void SetNavDestinationImpl(Ark_NativePointer node,
+                               const Opt_PageMapBuilder* value)
+    {
+    }
+    void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
+                                           const Opt_Type_NavigationAttribute_customNavContentTransition* value)
+    {
+    }
+    void SetSystemBarStyleImpl(Ark_NativePointer node,
+                               const Opt_window_SystemBarStyle* value)
+    {
+    }
+    void SetRecoverableImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)
     {
     }
-    void TitleModeImpl(Ark_NativePointer node,
-                       const Opt_NavigationTitleMode* value)
+    void SetEnableDragBarImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void Menus0Impl(Ark_NativePointer node,
-                    const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
+    void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
+                                          const Opt_Boolean* value)
     {
     }
-    void HideToolBar0Impl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetBackButtonIcon1Impl(Ark_NativePointer node,
+                                const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
+                                const Opt_ResourceStr* accessibilityText)
     {
     }
-    void EnableToolBarAdaptationImpl(Ark_NativePointer node,
-                                     const Opt_Boolean* value)
+    void SetTitleImpl(Ark_NativePointer node,
+                      const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
+                      const Opt_NavigationTitleOptions* options)
     {
     }
-    void OnTitleModeChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_NavigationTitleMode_Void* value)
+    void SetHideTitleBar1Impl(Ark_NativePointer node,
+                              const Opt_Boolean* hide,
+                              const Opt_Boolean* animated)
     {
     }
-    void OnNavBarStateChangeImpl(Ark_NativePointer node,
-                                 const Opt_Callback_Boolean_Void* value)
+    void SetMenus1Impl(Ark_NativePointer node,
+                       const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
+                       const Opt_NavigationMenuOptions* options)
     {
     }
-    void OnNavigationModeChangeImpl(Ark_NativePointer node,
-                                    const Opt_Callback_NavigationMode_Void* value)
+    void SetToolbarConfigurationImpl(Ark_NativePointer node,
+                                     const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
+                                     const Opt_NavigationToolbarOptions* options)
     {
     }
-    void NavDestinationImpl(Ark_NativePointer node,
-                            const Opt_PageMapBuilder* value)
+    void SetHideToolBar1Impl(Ark_NativePointer node,
+                             const Opt_Boolean* hide,
+                             const Opt_Boolean* animated)
     {
     }
-    void CustomNavContentTransitionImpl(Ark_NativePointer node,
-                                        const Opt_Type_NavigationAttribute_customNavContentTransition* value)
-    {
-    }
-    void SystemBarStyleImpl(Ark_NativePointer node,
-                            const Opt_window_SystemBarStyle* value)
-    {
-    }
-    void RecoverableImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
-    {
-    }
-    void EnableDragBarImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
-    {
-    }
-    void EnableModeChangeAnimationImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
-    {
-    }
-    void BackButtonIcon1Impl(Ark_NativePointer node,
-                             const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
-                             const Opt_ResourceStr* accessibilityText)
-    {
-    }
-    void TitleImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
-                   const Opt_NavigationTitleOptions* options)
-    {
-    }
-    void HideTitleBar1Impl(Ark_NativePointer node,
-                           const Opt_Boolean* hide,
-                           const Opt_Boolean* animated)
-    {
-    }
-    void Menus1Impl(Ark_NativePointer node,
-                    const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                    const Opt_NavigationMenuOptions* options)
-    {
-    }
-    void ToolbarConfigurationImpl(Ark_NativePointer node,
-                                  const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
-                                  const Opt_NavigationToolbarOptions* options)
-    {
-    }
-    void HideToolBar1Impl(Ark_NativePointer node,
-                          const Opt_Boolean* hide,
-                          const Opt_Boolean* animated)
-    {
-    }
-    void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
-                                  const Opt_Array_LayoutSafeAreaType* types,
-                                  const Opt_Array_LayoutSafeAreaEdge* edges)
+    void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
+                                     const Opt_Array_LayoutSafeAreaType* types,
+                                     const Opt_Array_LayoutSafeAreaEdge* edges)
     {
     }
     } // NavigationAttributeModifier
@@ -4102,56 +4139,56 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PatternLockInterfaceModifier
     namespace PatternLockAttributeModifier {
-    void SideLengthImpl(Ark_NativePointer node,
-                        const Opt_Length* value)
+    void SetSideLengthImpl(Ark_NativePointer node,
+                           const Opt_Length* value)
     {
     }
-    void CircleRadiusImpl(Ark_NativePointer node,
-                          const Opt_Length* value)
+    void SetCircleRadiusImpl(Ark_NativePointer node,
+                             const Opt_Length* value)
     {
     }
-    void BackgroundColorImpl(Ark_NativePointer node,
+    void SetBackgroundColorImpl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
+    {
+    }
+    void SetRegularColorImpl(Ark_NativePointer node,
                              const Opt_ResourceColor* value)
     {
     }
-    void RegularColorImpl(Ark_NativePointer node,
+    void SetSelectedColorImpl(Ark_NativePointer node,
+                              const Opt_ResourceColor* value)
+    {
+    }
+    void SetActiveColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
+    {
+    }
+    void SetPathColorImpl(Ark_NativePointer node,
                           const Opt_ResourceColor* value)
     {
     }
-    void SelectedColorImpl(Ark_NativePointer node,
-                           const Opt_ResourceColor* value)
+    void SetPathStrokeWidthImpl(Ark_NativePointer node,
+                                const Opt_Union_Number_String* value)
     {
     }
-    void ActiveColorImpl(Ark_NativePointer node,
-                         const Opt_ResourceColor* value)
+    void SetOnPatternCompleteImpl(Ark_NativePointer node,
+                                  const Opt_Callback_Array_Number_Void* value)
     {
     }
-    void PathColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetAutoResetImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void PathStrokeWidthImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_String* value)
+    void SetOnDotConnectImpl(Ark_NativePointer node,
+                             const Opt_Callback_Number_Void* value)
     {
     }
-    void OnPatternCompleteImpl(Ark_NativePointer node,
-                               const Opt_Callback_Array_Number_Void* value)
+    void SetActivateCircleStyleImpl(Ark_NativePointer node,
+                                    const Opt_CircleStyleOptions* value)
     {
     }
-    void AutoResetImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-    {
-    }
-    void OnDotConnectImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Void* value)
-    {
-    }
-    void ActivateCircleStyleImpl(Ark_NativePointer node,
-                                 const Opt_CircleStyleOptions* value)
-    {
-    }
-    void SkipUnselectedPointImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
+    void SetSkipUnselectedPointImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
     {
     }
     } // PatternLockAttributeModifier
@@ -4169,12 +4206,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PluginComponentInterfaceModifier
     namespace PluginComponentAttributeModifier {
-    void OnCompleteImpl(Ark_NativePointer node,
-                        const Opt_VoidCallback* value)
+    void SetOnCompleteImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_PluginErrorCallback* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_PluginErrorCallback* value)
     {
     }
     } // PluginComponentAttributeModifier
@@ -4192,8 +4229,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PolygonInterfaceModifier
     namespace PolygonAttributeModifier {
-    void PointsImpl(Ark_NativePointer node,
-                    const Opt_Array_ShapePoint* value)
+    void SetPointsImpl(Ark_NativePointer node,
+                       const Opt_Array_ShapePoint* value)
     {
     }
     } // PolygonAttributeModifier
@@ -4211,8 +4248,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PolylineInterfaceModifier
     namespace PolylineAttributeModifier {
-    void PointsImpl(Ark_NativePointer node,
-                    const Opt_Array_ShapePoint* value)
+    void SetPointsImpl(Ark_NativePointer node,
+                       const Opt_Array_ShapePoint* value)
     {
     }
     } // PolylineAttributeModifier
@@ -4230,24 +4267,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ProgressInterfaceModifier
     namespace ProgressAttributeModifier {
-    void ValueImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+    void SetValueImpl(Ark_NativePointer node,
+                      const Opt_Number* value)
     {
     }
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceColor_LinearGradient* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_Union_ResourceColor_LinearGradient* value)
     {
     }
-    void StyleImpl(Ark_NativePointer node,
-                   const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
+    void SetStyleImpl(Ark_NativePointer node,
+                      const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
     {
     }
-    void PrivacySensitiveImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
-    {
-    }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
     {
     }
     } // ProgressAttributeModifier
@@ -4265,16 +4298,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // QRCodeInterfaceModifier
     namespace QRCodeAttributeModifier {
-    void ColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+    void SetColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
     {
     }
-    void BackgroundColorImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
+    void SetBackgroundColorImpl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
     {
     }
-    void ContentOpacityImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_Resource* value)
+    void SetContentOpacityImpl(Ark_NativePointer node,
+                               const Opt_Union_Number_Resource* value)
     {
     }
     } // QRCodeAttributeModifier
@@ -4292,24 +4325,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RadioInterfaceModifier
     namespace RadioAttributeModifier {
-    void CheckedImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+    void SetCheckedImpl(Ark_NativePointer node,
+                        const Opt_Union_Boolean_Bindable* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnRadioChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnRadioChangeCallback* value)
     {
     }
-    void RadioStyleImpl(Ark_NativePointer node,
-                        const Opt_RadioStyle* value)
-    {
-    }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
-    {
-    }
-    void _onChangeEvent_checkedImpl(Ark_NativePointer node,
-                                    const Callback_Opt_Boolean_Void* callback_)
+    void SetRadioStyleImpl(Ark_NativePointer node,
+                           const Opt_RadioStyle* value)
     {
     }
     } // RadioAttributeModifier
@@ -4327,28 +4352,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RatingInterfaceModifier
     namespace RatingAttributeModifier {
-    void StarsImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
-    {
-    }
-    void StepSizeImpl(Ark_NativePointer node,
+    void SetStarsImpl(Ark_NativePointer node,
                       const Opt_Number* value)
     {
     }
-    void StarStyleImpl(Ark_NativePointer node,
-                       const Opt_StarStyleOptions* value)
+    void SetStepSizeImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnRatingChangeCallback* value)
+    void SetStarStyleImpl(Ark_NativePointer node,
+                          const Opt_StarStyleOptions* value)
     {
     }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
-    {
-    }
-    void _onChangeEvent_ratingImpl(Ark_NativePointer node,
-                                   const Callback_Opt_Number_Void* callback_)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnRatingChangeCallback* value)
     {
     }
     } // RatingAttributeModifier
@@ -4366,8 +4383,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RectInterfaceModifier
     namespace RectAttributeModifier {
-    void RadiusImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_String_Array_Union_Number_String* value)
+    void SetRadiusImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_String_Array_Union_Number_String* value)
     {
     }
     } // RectAttributeModifier
@@ -4385,32 +4402,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RefreshInterfaceModifier
     namespace RefreshAttributeModifier {
-    void OnStateChangeImpl(Ark_NativePointer node,
-                           const Opt_Callback_RefreshStatus_Void* value)
+    void SetOnStateChangeImpl(Ark_NativePointer node,
+                              const Opt_Callback_RefreshStatus_Void* value)
     {
     }
-    void OnRefreshingImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
+    void SetOnRefreshingImpl(Ark_NativePointer node,
+                             const Opt_Callback_Void* value)
     {
     }
-    void RefreshOffsetImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+    void SetRefreshOffsetImpl(Ark_NativePointer node,
+                              const Opt_Number* value)
     {
     }
-    void PullToRefreshImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetPullToRefreshImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void OnOffsetChangeImpl(Ark_NativePointer node,
-                            const Opt_Callback_Number_Void* value)
+    void SetOnOffsetChangeImpl(Ark_NativePointer node,
+                               const Opt_Callback_Number_Void* value)
     {
     }
-    void PullDownRatioImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
-    {
-    }
-    void _onChangeEvent_refreshingImpl(Ark_NativePointer node,
-                                       const Callback_Boolean_Void* callback_)
+    void SetPullDownRatioImpl(Ark_NativePointer node,
+                              const Opt_Number* value)
     {
     }
     } // RefreshAttributeModifier
@@ -4427,12 +4440,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RelativeContainerInterfaceModifier
     namespace RelativeContainerAttributeModifier {
-    void GuideLineImpl(Ark_NativePointer node,
-                       const Opt_Array_GuideLineStyle* value)
+    void SetGuideLineImpl(Ark_NativePointer node,
+                          const Opt_Array_GuideLineStyle* value)
     {
     }
-    void BarrierImpl(Ark_NativePointer node,
-                     const Opt_Array_BarrierStyle* value)
+    void SetBarrierImpl(Ark_NativePointer node,
+                        const Opt_Array_BarrierStyle* value)
     {
     }
     } // RelativeContainerAttributeModifier
@@ -4467,141 +4480,141 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RichEditorInterfaceModifier
     namespace RichEditorAttributeModifier {
-    void OnReadyImpl(Ark_NativePointer node,
-                     const Opt_VoidCallback* value)
+    void SetOnReadyImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* value)
     {
     }
-    void OnSelectImpl(Ark_NativePointer node,
-                      const Opt_Callback_RichEditorSelection_Void* value)
+    void SetOnSelectImpl(Ark_NativePointer node,
+                         const Opt_Callback_RichEditorSelection_Void* value)
     {
     }
-    void OnSelectionChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_RichEditorRange_Void* value)
+    void SetOnSelectionChangeImpl(Ark_NativePointer node,
+                                  const Opt_Callback_RichEditorRange_Void* value)
     {
     }
-    void AboutToIMEInputImpl(Ark_NativePointer node,
-                             const Opt_Callback_RichEditorInsertValue_Boolean* value)
+    void SetAboutToIMEInputImpl(Ark_NativePointer node,
+                                const Opt_Callback_RichEditorInsertValue_Boolean* value)
     {
     }
-    void OnIMEInputCompleteImpl(Ark_NativePointer node,
-                                const Opt_Callback_RichEditorTextSpanResult_Void* value)
+    void SetOnIMEInputCompleteImpl(Ark_NativePointer node,
+                                   const Opt_Callback_RichEditorTextSpanResult_Void* value)
     {
     }
-    void OnDidIMEInputImpl(Ark_NativePointer node,
-                           const Opt_Callback_TextRange_Void* value)
+    void SetOnDidIMEInputImpl(Ark_NativePointer node,
+                              const Opt_Callback_TextRange_Void* value)
     {
     }
-    void AboutToDeleteImpl(Ark_NativePointer node,
-                           const Opt_Callback_RichEditorDeleteValue_Boolean* value)
+    void SetAboutToDeleteImpl(Ark_NativePointer node,
+                              const Opt_Callback_RichEditorDeleteValue_Boolean* value)
     {
     }
-    void OnDeleteCompleteImpl(Ark_NativePointer node,
-                              const Opt_VoidCallback* value)
+    void SetOnDeleteCompleteImpl(Ark_NativePointer node,
+                                 const Opt_VoidCallback* value)
     {
     }
-    void CopyOptionsImpl(Ark_NativePointer node,
-                         const Opt_CopyOptions* value)
+    void SetCopyOptionsImpl(Ark_NativePointer node,
+                            const Opt_CopyOptions* value)
     {
     }
-    void OnPasteImpl(Ark_NativePointer node,
-                     const Opt_PasteEventCallback* value)
+    void SetOnPasteImpl(Ark_NativePointer node,
+                        const Opt_PasteEventCallback* value)
     {
     }
-    void EnableDataDetectorImpl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
-    {
-    }
-    void EnablePreviewTextImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
-    {
-    }
-    void DataDetectorConfigImpl(Ark_NativePointer node,
-                                const Opt_TextDataDetectorConfig* value)
-    {
-    }
-    void CaretColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
-    {
-    }
-    void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
-    {
-    }
-    void OnEditingChangeImpl(Ark_NativePointer node,
-                             const Opt_Callback_Boolean_Void* value)
-    {
-    }
-    void EnterKeyTypeImpl(Ark_NativePointer node,
-                          const Opt_EnterKeyType* value)
-    {
-    }
-    void OnSubmitImpl(Ark_NativePointer node,
-                      const Opt_SubmitCallback* value)
-    {
-    }
-    void OnWillChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_RichEditorChangeValue_Boolean* value)
-    {
-    }
-    void OnDidChangeImpl(Ark_NativePointer node,
-                         const Opt_OnDidChangeCallback* value)
-    {
-    }
-    void OnCutImpl(Ark_NativePointer node,
-                   const Opt_Callback_CutEvent_Void* value)
-    {
-    }
-    void OnCopyImpl(Ark_NativePointer node,
-                    const Opt_Callback_CopyEvent_Void* value)
-    {
-    }
-    void EditMenuOptionsImpl(Ark_NativePointer node,
-                             const Opt_EditMenuOptions* value)
-    {
-    }
-    void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
+    void SetEnableDataDetectorImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
+    void SetEnablePreviewTextImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
     }
-    void BarStateImpl(Ark_NativePointer node,
-                      const Opt_BarState* value)
+    void SetDataDetectorConfigImpl(Ark_NativePointer node,
+                                   const Opt_TextDataDetectorConfig* value)
     {
     }
-    void MaxLengthImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+    void SetCaretColorImpl(Ark_NativePointer node,
+                           const Opt_ResourceColor* value)
     {
     }
-    void MaxLinesImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void KeyboardAppearanceImpl(Ark_NativePointer node,
-                                const Opt_KeyboardAppearance* value)
+    void SetOnEditingChangeImpl(Ark_NativePointer node,
+                                const Opt_Callback_Boolean_Void* value)
     {
     }
-    void StopBackPressImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetEnterKeyTypeImpl(Ark_NativePointer node,
+                             const Opt_EnterKeyType* value)
     {
     }
-    void BindSelectionMenuImpl(Ark_NativePointer node,
-                               const Opt_RichEditorSpanType* spanType,
-                               const Opt_CustomNodeBuilder* content,
-                               const Opt_Union_ResponseType_RichEditorResponseType* responseType,
-                               const Opt_SelectionMenuOptions* options)
+    void SetOnSubmitImpl(Ark_NativePointer node,
+                         const Opt_SubmitCallback* value)
     {
     }
-    void CustomKeyboardImpl(Ark_NativePointer node,
-                            const Opt_CustomNodeBuilder* value,
-                            const Opt_KeyboardOptions* options)
+    void SetOnWillChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_RichEditorChangeValue_Boolean* value)
     {
     }
-    void PlaceholderImpl(Ark_NativePointer node,
-                         const Opt_ResourceStr* value,
-                         const Opt_PlaceholderStyle* style)
+    void SetOnDidChangeImpl(Ark_NativePointer node,
+                            const Opt_OnDidChangeCallback* value)
+    {
+    }
+    void SetOnCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_CutEvent_Void* value)
+    {
+    }
+    void SetOnCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_CopyEvent_Void* value)
+    {
+    }
+    void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditMenuOptions* value)
+    {
+    }
+    void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+    }
+    void SetBarStateImpl(Ark_NativePointer node,
+                         const Opt_BarState* value)
+    {
+    }
+    void SetMaxLengthImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
+    {
+    }
+    void SetMaxLinesImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
+    {
+    }
+    void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                                   const Opt_KeyboardAppearance* value)
+    {
+    }
+    void SetStopBackPressImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+    {
+    }
+    void SetBindSelectionMenuImpl(Ark_NativePointer node,
+                                  const Opt_RichEditorSpanType* spanType,
+                                  const Opt_CustomNodeBuilder* content,
+                                  const Opt_Union_ResponseType_RichEditorResponseType* responseType,
+                                  const Opt_SelectionMenuOptions* options)
+    {
+    }
+    void SetCustomKeyboardImpl(Ark_NativePointer node,
+                               const Opt_CustomNodeBuilder* value,
+                               const Opt_KeyboardOptions* options)
+    {
+    }
+    void SetPlaceholderImpl(Ark_NativePointer node,
+                            const Opt_ResourceStr* value,
+                            const Opt_PlaceholderStyle* style)
     {
     }
     } // RichEditorAttributeModifier
@@ -4619,12 +4632,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RichTextInterfaceModifier
     namespace RichTextAttributeModifier {
-    void OnStartImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnStartImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void OnCompleteImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+    void SetOnCompleteImpl(Ark_NativePointer node,
+                           const Opt_Callback_Void* value)
     {
     }
     } // RichTextAttributeModifier
@@ -4662,20 +4675,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RowInterfaceModifier
     namespace RowAttributeModifier {
-    void AlignItemsImpl(Ark_NativePointer node,
-                        const Opt_VerticalAlign* value)
+    void SetAlignItemsImpl(Ark_NativePointer node,
+                           const Opt_VerticalAlign* value)
     {
     }
-    void JustifyContentImpl(Ark_NativePointer node,
-                            const Opt_FlexAlign* value)
+    void SetJustifyContentImpl(Ark_NativePointer node,
+                               const Opt_FlexAlign* value)
     {
     }
-    void PointLightImpl(Ark_NativePointer node,
-                        const Opt_PointLightStyle* value)
+    void SetPointLightImpl(Ark_NativePointer node,
+                           const Opt_PointLightStyle* value)
     {
     }
-    void ReverseImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+    void SetReverseImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
     {
     }
     } // RowAttributeModifier
@@ -4692,8 +4705,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RowSplitInterfaceModifier
     namespace RowSplitAttributeModifier {
-    void ResizeableImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetResizeableImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
     } // RowSplitAttributeModifier
@@ -4724,73 +4737,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ScrollInterfaceModifier
     namespace ScrollAttributeModifier {
-    void ScrollableImpl(Ark_NativePointer node,
-                        const Opt_ScrollDirection* value)
+    void SetScrollableImpl(Ark_NativePointer node,
+                           const Opt_ScrollDirection* value)
     {
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                          const Opt_ScrollOnWillScrollCallback* value)
+    void SetOnWillScrollImpl(Ark_NativePointer node,
+                             const Opt_ScrollOnWillScrollCallback* value)
     {
     }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_ScrollOnScrollCallback* value)
+    void SetOnDidScrollImpl(Ark_NativePointer node,
+                            const Opt_ScrollOnScrollCallback* value)
     {
     }
-    void OnScrollEdgeImpl(Ark_NativePointer node,
-                          const Opt_OnScrollEdgeCallback* value)
+    void SetOnScrollEdgeImpl(Ark_NativePointer node,
+                             const Opt_OnScrollEdgeCallback* value)
     {
     }
-    void OnScrollStartImpl(Ark_NativePointer node,
-                           const Opt_VoidCallback* value)
+    void SetOnScrollStartImpl(Ark_NativePointer node,
+                              const Opt_VoidCallback* value)
     {
     }
-    void OnScrollStopImpl(Ark_NativePointer node,
-                          const Opt_VoidCallback* value)
+    void SetOnScrollStopImpl(Ark_NativePointer node,
+                             const Opt_VoidCallback* value)
     {
     }
-    void ScrollBarImpl(Ark_NativePointer node,
-                       const Opt_BarState* value)
+    void SetScrollBarImpl(Ark_NativePointer node,
+                          const Opt_BarState* value)
     {
     }
-    void ScrollBarColorImpl(Ark_NativePointer node,
-                            const Opt_Union_Color_Number_String* value)
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_Union_Color_Number_String* value)
     {
     }
-    void ScrollBarWidthImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String* value)
+    void SetScrollBarWidthImpl(Ark_NativePointer node,
+                               const Opt_Union_Number_String* value)
     {
     }
-    void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_OnScrollFrameBeginCallback* value)
+    void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
+                                   const Opt_OnScrollFrameBeginCallback* value)
     {
     }
-    void NestedScrollImpl(Ark_NativePointer node,
-                          const Opt_NestedScrollOptions* value)
+    void SetNestedScrollImpl(Ark_NativePointer node,
+                             const Opt_NestedScrollOptions* value)
     {
     }
-    void EnableScrollInteractionImpl(Ark_NativePointer node,
-                                     const Opt_Boolean* value)
+    void SetEnableScrollInteractionImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
     {
     }
-    void FrictionImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+    void SetFrictionImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource* value)
     {
     }
-    void ScrollSnapImpl(Ark_NativePointer node,
-                        const Opt_ScrollSnapOptions* value)
+    void SetScrollSnapImpl(Ark_NativePointer node,
+                           const Opt_ScrollSnapOptions* value)
     {
     }
-    void EnablePagingImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetEnablePagingImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
     {
     }
-    void InitialOffsetImpl(Ark_NativePointer node,
-                           const Opt_OffsetOptions* value)
+    void SetInitialOffsetImpl(Ark_NativePointer node,
+                              const Opt_OffsetOptions* value)
     {
     }
-    void EdgeEffectImpl(Ark_NativePointer node,
-                        const Opt_EdgeEffect* edgeEffect,
-                        const Opt_EdgeEffectOptions* options)
+    void SetEdgeEffectImpl(Ark_NativePointer node,
+                           const Opt_EdgeEffect* edgeEffect,
+                           const Opt_EdgeEffectOptions* options)
     {
     }
     } // ScrollAttributeModifier
@@ -4800,70 +4813,70 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void ScrollBarImpl(Ark_NativePointer node,
-                       const Opt_BarState* value)
+    void SetScrollBarImpl(Ark_NativePointer node,
+                          const Opt_BarState* value)
     {
     }
-    void ScrollBarColorImpl(Ark_NativePointer node,
-                            const Opt_Union_Color_Number_String* value)
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_Union_Color_Number_String* value)
     {
     }
-    void ScrollBarWidthImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String* value)
+    void SetScrollBarWidthImpl(Ark_NativePointer node,
+                               const Opt_Union_Number_String* value)
     {
     }
-    void NestedScrollImpl(Ark_NativePointer node,
-                          const Opt_NestedScrollOptions* value)
+    void SetNestedScrollImpl(Ark_NativePointer node,
+                             const Opt_NestedScrollOptions* value)
     {
     }
-    void EnableScrollInteractionImpl(Ark_NativePointer node,
-                                     const Opt_Boolean* value)
+    void SetEnableScrollInteractionImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
     {
     }
-    void FrictionImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+    void SetFrictionImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource* value)
     {
     }
-    void OnReachStartImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
+    void SetOnReachStartImpl(Ark_NativePointer node,
+                             const Opt_Callback_Void* value)
     {
     }
-    void OnReachEndImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
-    {
-    }
-    void OnScrollStartImpl(Ark_NativePointer node,
+    void SetOnReachEndImpl(Ark_NativePointer node,
                            const Opt_Callback_Void* value)
     {
     }
-    void OnScrollStopImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
+    void SetOnScrollStartImpl(Ark_NativePointer node,
+                              const Opt_Callback_Void* value)
     {
     }
-    void FlingSpeedLimitImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+    void SetOnScrollStopImpl(Ark_NativePointer node,
+                             const Opt_Callback_Void* value)
     {
     }
-    void ClipContentImpl(Ark_NativePointer node,
-                         const Opt_Union_ContentClipMode_RectShape* value)
+    void SetFlingSpeedLimitImpl(Ark_NativePointer node,
+                                const Opt_Number* value)
     {
     }
-    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                     const Opt_CrownSensitivity* value)
+    void SetClipContentImpl(Ark_NativePointer node,
+                            const Opt_Union_ContentClipMode_RectShape* value)
     {
     }
-    void BackToTopImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                        const Opt_CrownSensitivity* value)
     {
     }
-    void EdgeEffectImpl(Ark_NativePointer node,
-                        const Opt_EdgeEffect* edgeEffect,
-                        const Opt_EdgeEffectOptions* options)
+    void SetBackToTopImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void FadingEdgeImpl(Ark_NativePointer node,
-                        const Opt_Boolean* enabled,
-                        const Opt_FadingEdgeOptions* options)
+    void SetEdgeEffectImpl(Ark_NativePointer node,
+                           const Opt_EdgeEffect* edgeEffect,
+                           const Opt_EdgeEffectOptions* options)
+    {
+    }
+    void SetFadingEdgeImpl(Ark_NativePointer node,
+                           const Opt_Boolean* enabled,
+                           const Opt_FadingEdgeOptions* options)
     {
     }
     } // ScrollableCommonMethodModifier
@@ -4881,8 +4894,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ScrollBarInterfaceModifier
     namespace ScrollBarAttributeModifier {
-    void EnableNestedScrollImpl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
+    void SetEnableNestedScrollImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
     {
     }
     } // ScrollBarAttributeModifier
@@ -4900,199 +4913,195 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SearchInterfaceModifier
     namespace SearchAttributeModifier {
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void SearchIconImpl(Ark_NativePointer node,
-                        const Opt_Union_IconOptions_SymbolGlyphModifier* value)
+    void SetSearchIconImpl(Ark_NativePointer node,
+                           const Opt_Union_IconOptions_SymbolGlyphModifier* value)
     {
     }
-    void CancelButtonImpl(Ark_NativePointer node,
-                          const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+    void SetCancelButtonImpl(Ark_NativePointer node,
+                             const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
     {
     }
-    void TextIndentImpl(Ark_NativePointer node,
-                        const Opt_Dimension* value)
+    void SetTextIndentImpl(Ark_NativePointer node,
+                           const Opt_Dimension* value)
     {
     }
-    void OnEditChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_Boolean_Void* value)
+    void SetOnEditChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_Boolean_Void* value)
     {
     }
-    void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
+    void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void CaretStyleImpl(Ark_NativePointer node,
-                        const Opt_CaretStyle* value)
+    void SetCaretStyleImpl(Ark_NativePointer node,
+                           const Opt_CaretStyle* value)
     {
     }
-    void PlaceholderColorImpl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
+    void SetPlaceholderColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
     {
     }
-    void PlaceholderFontImpl(Ark_NativePointer node,
-                             const Opt_Font* value)
+    void SetPlaceholderFontImpl(Ark_NativePointer node,
+                                const Opt_Font* value)
     {
     }
-    void TextFontImpl(Ark_NativePointer node,
-                      const Opt_Font* value)
+    void SetTextFontImpl(Ark_NativePointer node,
+                         const Opt_Font* value)
     {
     }
-    void EnterKeyTypeImpl(Ark_NativePointer node,
-                          const Opt_EnterKeyType* value)
+    void SetEnterKeyTypeImpl(Ark_NativePointer node,
+                             const Opt_EnterKeyType* value)
     {
     }
-    void OnSubmitImpl(Ark_NativePointer node,
-                      const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
+    void SetOnSubmitImpl(Ark_NativePointer node,
+                         const Opt_Union_Callback_String_Void_SearchSubmitCallback* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_EditableTextOnChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_EditableTextOnChangeCallback* value)
     {
     }
-    void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                                   const Opt_OnTextSelectionChangeCallback* value)
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_OnTextSelectionChangeCallback* value)
     {
     }
-    void OnContentScrollImpl(Ark_NativePointer node,
-                             const Opt_OnContentScrollCallback* value)
+    void SetOnContentScrollImpl(Ark_NativePointer node,
+                                const Opt_OnContentScrollCallback* value)
     {
     }
-    void OnCopyImpl(Ark_NativePointer node,
-                    const Opt_Callback_String_Void* value)
+    void SetOnCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Void* value)
     {
     }
-    void OnCutImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+    void SetOnCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Void* value)
     {
     }
-    void OnPasteImpl(Ark_NativePointer node,
-                     const Opt_OnPasteCallback* value)
+    void SetOnPasteImpl(Ark_NativePointer node,
+                        const Opt_OnPasteCallback* value)
     {
     }
-    void CopyOptionImpl(Ark_NativePointer node,
-                        const Opt_CopyOptions* value)
+    void SetCopyOptionImpl(Ark_NativePointer node,
+                           const Opt_CopyOptions* value)
     {
     }
-    void MaxLengthImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+    void SetMaxLengthImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
     {
     }
-    void TextAlignImpl(Ark_NativePointer node,
-                       const Opt_TextAlign* value)
+    void SetTextAlignImpl(Ark_NativePointer node,
+                          const Opt_TextAlign* value)
     {
     }
-    void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
+    void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
     {
     }
-    void SelectionMenuHiddenImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
+    void SetSelectionMenuHiddenImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
     {
     }
-    void MinFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetMinFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MaxFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetMaxFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMinFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMaxFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void DecorationImpl(Ark_NativePointer node,
-                        const Opt_TextDecorationOptions* value)
+    void SetDecorationImpl(Ark_NativePointer node,
+                           const Opt_TextDecorationOptions* value)
     {
     }
-    void LetterSpacingImpl(Ark_NativePointer node,
+    void SetLetterSpacingImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String_Resource* value)
+    {
+    }
+    void SetLineHeightImpl(Ark_NativePointer node,
                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void LineHeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+    void SetTypeImpl(Ark_NativePointer node,
+                     const Opt_SearchType* value)
     {
     }
-    void TypeImpl(Ark_NativePointer node,
-                  const Opt_SearchType* value)
+    void SetFontFeatureImpl(Ark_NativePointer node,
+                            const Opt_String* value)
     {
     }
-    void FontFeatureImpl(Ark_NativePointer node,
-                         const Opt_String* value)
+    void SetOnWillInsertImpl(Ark_NativePointer node,
+                             const Opt_Callback_InsertValue_Boolean* value)
     {
     }
-    void OnWillInsertImpl(Ark_NativePointer node,
-                          const Opt_Callback_InsertValue_Boolean* value)
+    void SetOnDidInsertImpl(Ark_NativePointer node,
+                            const Opt_Callback_InsertValue_Void* value)
     {
     }
-    void OnDidInsertImpl(Ark_NativePointer node,
-                         const Opt_Callback_InsertValue_Void* value)
+    void SetOnWillDeleteImpl(Ark_NativePointer node,
+                             const Opt_Callback_DeleteValue_Boolean* value)
     {
     }
-    void OnWillDeleteImpl(Ark_NativePointer node,
-                          const Opt_Callback_DeleteValue_Boolean* value)
+    void SetOnDidDeleteImpl(Ark_NativePointer node,
+                            const Opt_Callback_DeleteValue_Void* value)
     {
     }
-    void OnDidDeleteImpl(Ark_NativePointer node,
-                         const Opt_Callback_DeleteValue_Void* value)
+    void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditMenuOptions* value)
     {
     }
-    void EditMenuOptionsImpl(Ark_NativePointer node,
-                             const Opt_EditMenuOptions* value)
-    {
-    }
-    void EnablePreviewTextImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
-    {
-    }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
+    void SetEnablePreviewTextImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
     }
-    void AutoCapitalizationModeImpl(Ark_NativePointer node,
-                                    const Opt_AutoCapitalizationMode* value)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void HalfLeadingImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
+                                       const Opt_AutoCapitalizationMode* value)
     {
     }
-    void StopBackPressImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetHalfLeadingImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void OnWillChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_EditableTextChangeValue_Boolean* value)
+    void SetStopBackPressImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void KeyboardAppearanceImpl(Ark_NativePointer node,
-                                const Opt_KeyboardAppearance* value)
+    void SetOnWillChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_EditableTextChangeValue_Boolean* value)
     {
     }
-    void SearchButtonImpl(Ark_NativePointer node,
-                          const Opt_ResourceStr* value,
-                          const Opt_SearchButtonOptions* option)
+    void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                                   const Opt_KeyboardAppearance* value)
     {
     }
-    void InputFilterImpl(Ark_NativePointer node,
-                         const Opt_ResourceStr* value,
-                         const Opt_Callback_String_Void* error)
+    void SetSearchButtonImpl(Ark_NativePointer node,
+                             const Opt_ResourceStr* value,
+                             const Opt_SearchButtonOptions* option)
     {
     }
-    void CustomKeyboardImpl(Ark_NativePointer node,
-                            const Opt_CustomNodeBuilder* value,
-                            const Opt_KeyboardOptions* options)
+    void SetInputFilterImpl(Ark_NativePointer node,
+                            const Opt_ResourceStr* value,
+                            const Opt_Callback_String_Void* error)
     {
     }
-    void _onChangeEvent_valueImpl(Ark_NativePointer node,
-                                  const Callback_String_Void* callback_)
+    void SetCustomKeyboardImpl(Ark_NativePointer node,
+                               const Opt_CustomNodeBuilder* value,
+                               const Opt_KeyboardOptions* options)
     {
     }
     } // SearchAttributeModifier
@@ -5110,125 +5119,113 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SelectInterfaceModifier
     namespace SelectAttributeModifier {
-    void SelectedImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+    void SetSelectedImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource_Bindable_Bindable* value)
     {
     }
-    void ValueImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceStr_String_Resource* value)
+    void SetValueImpl(Ark_NativePointer node,
+                      const Opt_Union_ResourceStr_Bindable_Bindable* value)
     {
     }
-    void FontImpl(Ark_NativePointer node,
-                  const Opt_Font* value)
+    void SetFontImpl(Ark_NativePointer node,
+                     const Opt_Font* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void SelectedOptionBgColorImpl(Ark_NativePointer node,
-                                   const Opt_ResourceColor* value)
+    void SetSelectedOptionBgColorImpl(Ark_NativePointer node,
+                                      const Opt_ResourceColor* value)
     {
     }
-    void SelectedOptionFontImpl(Ark_NativePointer node,
-                                const Opt_Font* value)
+    void SetSelectedOptionFontImpl(Ark_NativePointer node,
+                                   const Opt_Font* value)
     {
     }
-    void SelectedOptionFontColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
+    void SetSelectedOptionFontColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void OptionBgColorImpl(Ark_NativePointer node,
-                           const Opt_ResourceColor* value)
+    void SetOptionBgColorImpl(Ark_NativePointer node,
+                              const Opt_ResourceColor* value)
     {
     }
-    void OptionFontImpl(Ark_NativePointer node,
-                        const Opt_Font* value)
+    void SetOptionFontImpl(Ark_NativePointer node,
+                           const Opt_Font* value)
     {
     }
-    void OptionFontColorImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
+    void SetOptionFontColorImpl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
     {
     }
-    void OnSelectImpl(Ark_NativePointer node,
-                      const Opt_OnSelectCallback* value)
+    void SetOnSelectImpl(Ark_NativePointer node,
+                         const Opt_OnSelectCallback* value)
     {
     }
-    void SpaceImpl(Ark_NativePointer node,
-                   const Opt_Length* value)
+    void SetSpaceImpl(Ark_NativePointer node,
+                      const Opt_Length* value)
     {
     }
-    void ArrowPositionImpl(Ark_NativePointer node,
-                           const Opt_ArrowPosition* value)
+    void SetArrowPositionImpl(Ark_NativePointer node,
+                              const Opt_ArrowPosition* value)
     {
     }
-    void OptionWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Dimension_OptionWidthMode* value)
+    void SetOptionWidthImpl(Ark_NativePointer node,
+                            const Opt_Union_Dimension_OptionWidthMode* value)
     {
     }
-    void OptionHeightImpl(Ark_NativePointer node,
-                          const Opt_Dimension* value)
+    void SetOptionHeightImpl(Ark_NativePointer node,
+                             const Opt_Dimension* value)
     {
     }
-    void MenuBackgroundColorImpl(Ark_NativePointer node,
-                                 const Opt_ResourceColor* value)
+    void SetMenuBackgroundColorImpl(Ark_NativePointer node,
+                                    const Opt_ResourceColor* value)
     {
     }
-    void MenuBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                     const Opt_BlurStyle* value)
+    void SetMenuBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                        const Opt_BlurStyle* value)
     {
     }
-    void ControlSizeImpl(Ark_NativePointer node,
-                         const Opt_ControlSize* value)
+    void SetControlSizeImpl(Ark_NativePointer node,
+                            const Opt_ControlSize* value)
     {
     }
-    void MenuItemContentModifierImpl(Ark_NativePointer node,
-                                     const Opt_ContentModifier* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerOptions* value)
     {
     }
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_DividerOptions* value)
+    void SetTextModifierImpl(Ark_NativePointer node,
+                             const Opt_TextModifier* value)
     {
     }
-    void TextModifierImpl(Ark_NativePointer node,
-                          const Opt_TextModifier* value)
+    void SetArrowModifierImpl(Ark_NativePointer node,
+                              const Opt_SymbolGlyphModifier* value)
     {
     }
-    void ArrowModifierImpl(Ark_NativePointer node,
-                           const Opt_SymbolGlyphModifier* value)
+    void SetOptionTextModifierImpl(Ark_NativePointer node,
+                                   const Opt_TextModifier* value)
     {
     }
-    void OptionTextModifierImpl(Ark_NativePointer node,
-                                const Opt_TextModifier* value)
+    void SetSelectedOptionTextModifierImpl(Ark_NativePointer node,
+                                           const Opt_TextModifier* value)
     {
     }
-    void SelectedOptionTextModifierImpl(Ark_NativePointer node,
-                                        const Opt_TextModifier* value)
+    void SetDividerStyleImpl(Ark_NativePointer node,
+                             const Opt_DividerStyleOptions* value)
     {
     }
-    void DividerStyleImpl(Ark_NativePointer node,
-                          const Opt_DividerStyleOptions* value)
+    void SetAvoidanceImpl(Ark_NativePointer node,
+                          const Opt_AvoidanceMode* value)
     {
     }
-    void AvoidanceImpl(Ark_NativePointer node,
-                       const Opt_AvoidanceMode* value)
+    void SetMenuOutlineImpl(Ark_NativePointer node,
+                            const Opt_MenuOutlineOptions* value)
     {
     }
-    void MenuOutlineImpl(Ark_NativePointer node,
-                         const Opt_MenuOutlineOptions* value)
-    {
-    }
-    void MenuAlignImpl(Ark_NativePointer node,
-                       const Opt_MenuAlignType* alignType,
-                       const Opt_Offset* offset)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Opt_Union_Number_Resource_Void* callback_)
-    {
-    }
-    void _onChangeEvent_valueImpl(Ark_NativePointer node,
-                                  const Callback_Opt_Union_ResourceStr_String_Resource_Void* callback_)
+    void SetMenuAlignImpl(Ark_NativePointer node,
+                          const Opt_MenuAlignType* alignType,
+                          const Opt_Offset* offset)
     {
     }
     } // SelectAttributeModifier
@@ -5246,58 +5243,58 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ShapeInterfaceModifier
     namespace ShapeAttributeModifier {
-    void ViewPortImpl(Ark_NativePointer node,
-                      const Opt_ViewportRect* value)
+    void SetViewPortImpl(Ark_NativePointer node,
+                         const Opt_ViewportRect* value)
     {
     }
-    void StrokeImpl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+    void SetStrokeImpl(Ark_NativePointer node,
+                       const Opt_ResourceColor* value)
     {
     }
-    void FillImpl(Ark_NativePointer node,
-                  const Opt_ResourceColor* value)
+    void SetFillImpl(Ark_NativePointer node,
+                     const Opt_ResourceColor* value)
     {
     }
-    void StrokeDashOffsetImpl(Ark_NativePointer node,
-                              const Opt_Length* value)
+    void SetStrokeDashOffsetImpl(Ark_NativePointer node,
+                                 const Opt_Length* value)
     {
     }
-    void StrokeDashArrayImpl(Ark_NativePointer node,
-                             const Opt_Array_Length* value)
+    void SetStrokeDashArrayImpl(Ark_NativePointer node,
+                                const Opt_Array_Length* value)
     {
     }
-    void StrokeLineCapImpl(Ark_NativePointer node,
-                           const Opt_LineCapStyle* value)
+    void SetStrokeLineCapImpl(Ark_NativePointer node,
+                              const Opt_LineCapStyle* value)
     {
     }
-    void StrokeLineJoinImpl(Ark_NativePointer node,
-                            const Opt_LineJoinStyle* value)
+    void SetStrokeLineJoinImpl(Ark_NativePointer node,
+                               const Opt_LineJoinStyle* value)
     {
     }
-    void StrokeMiterLimitImpl(Ark_NativePointer node,
-                              const Opt_Length* value)
+    void SetStrokeMiterLimitImpl(Ark_NativePointer node,
+                                 const Opt_Length* value)
     {
     }
-    void StrokeOpacityImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+    void SetStrokeOpacityImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String_Resource* value)
     {
     }
-    void FillOpacityImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetFillOpacityImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void StrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Length* value)
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_Length* value)
     {
     }
-    void AntiAliasImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetAntiAliasImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void MeshImpl(Ark_NativePointer node,
-                  const Opt_Array_Number* value,
-                  const Opt_Number* column,
-                  const Opt_Number* row)
+    void SetMeshImpl(Ark_NativePointer node,
+                     const Opt_Array_Number* value,
+                     const Opt_Number* column,
+                     const Opt_Number* row)
     {
     }
     } // ShapeAttributeModifier
@@ -5315,64 +5312,60 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SideBarContainerInterfaceModifier
     namespace SideBarContainerAttributeModifier {
-    void ShowSideBarImpl(Ark_NativePointer node,
+    void SetShowSideBarImpl(Ark_NativePointer node,
+                            const Opt_Union_Boolean_Bindable* value)
+    {
+    }
+    void SetControlButtonImpl(Ark_NativePointer node,
+                              const Opt_ButtonStyle* value)
+    {
+    }
+    void SetShowControlButtonImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Boolean_Void* value)
+    {
+    }
+    void SetSideBarWidth0Impl(Ark_NativePointer node,
+                              const Opt_Union_Number_Bindable* value)
+    {
+    }
+    void SetMinSideBarWidth0Impl(Ark_NativePointer node,
+                                 const Opt_Number* value)
+    {
+    }
+    void SetMaxSideBarWidth0Impl(Ark_NativePointer node,
+                                 const Opt_Number* value)
+    {
+    }
+    void SetSideBarWidth1Impl(Ark_NativePointer node,
+                              const Opt_Length* value)
+    {
+    }
+    void SetMinSideBarWidth1Impl(Ark_NativePointer node,
+                                 const Opt_Length* value)
+    {
+    }
+    void SetMaxSideBarWidth1Impl(Ark_NativePointer node,
+                                 const Opt_Length* value)
+    {
+    }
+    void SetAutoHideImpl(Ark_NativePointer node,
                          const Opt_Boolean* value)
     {
     }
-    void ControlButtonImpl(Ark_NativePointer node,
-                           const Opt_ButtonStyle* value)
+    void SetSideBarPositionImpl(Ark_NativePointer node,
+                                const Opt_SideBarPosition* value)
     {
     }
-    void ShowControlButtonImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerStyle* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Boolean_Void* value)
-    {
-    }
-    void SideBarWidth0Impl(Ark_NativePointer node,
-                           const Opt_Number* value)
-    {
-    }
-    void MinSideBarWidth0Impl(Ark_NativePointer node,
-                              const Opt_Number* value)
-    {
-    }
-    void MaxSideBarWidth0Impl(Ark_NativePointer node,
-                              const Opt_Number* value)
-    {
-    }
-    void SideBarWidth1Impl(Ark_NativePointer node,
-                           const Opt_Length* value)
-    {
-    }
-    void MinSideBarWidth1Impl(Ark_NativePointer node,
-                              const Opt_Length* value)
-    {
-    }
-    void MaxSideBarWidth1Impl(Ark_NativePointer node,
-                              const Opt_Length* value)
-    {
-    }
-    void AutoHideImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
-    {
-    }
-    void SideBarPositionImpl(Ark_NativePointer node,
-                             const Opt_SideBarPosition* value)
-    {
-    }
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_DividerStyle* value)
-    {
-    }
-    void MinContentWidthImpl(Ark_NativePointer node,
-                             const Opt_Dimension* value)
-    {
-    }
-    void _onChangeEvent_showSideBarImpl(Ark_NativePointer node,
-                                        const Callback_Opt_Boolean_Void* callback_)
+    void SetMinContentWidthImpl(Ark_NativePointer node,
+                                const Opt_Dimension* value)
     {
     }
     } // SideBarContainerAttributeModifier
@@ -5390,93 +5383,85 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SliderInterfaceModifier
     namespace SliderAttributeModifier {
-    void BlockColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+    void SetBlockColorImpl(Ark_NativePointer node,
+                           const Opt_ResourceColor* value)
     {
     }
-    void TrackColorImpl(Ark_NativePointer node,
-                        const Opt_Union_ResourceColor_LinearGradient* value)
-    {
-    }
-    void SelectedColorImpl(Ark_NativePointer node,
+    void SetTrackColorImpl(Ark_NativePointer node,
                            const Opt_Union_ResourceColor_LinearGradient* value)
     {
     }
-    void ShowStepsImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetSelectedColorImpl(Ark_NativePointer node,
+                              const Opt_Union_ResourceColor_LinearGradient* value)
     {
     }
-    void TrackThicknessImpl(Ark_NativePointer node,
-                            const Opt_Length* value)
+    void SetShowStepsImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Number_SliderChangeMode_Void* value)
-    {
-    }
-    void BlockBorderColorImpl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
-    {
-    }
-    void BlockBorderWidthImpl(Ark_NativePointer node,
-                              const Opt_Length* value)
-    {
-    }
-    void StepColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
-    {
-    }
-    void TrackBorderRadiusImpl(Ark_NativePointer node,
+    void SetTrackThicknessImpl(Ark_NativePointer node,
                                const Opt_Length* value)
     {
     }
-    void SelectedBorderRadiusImpl(Ark_NativePointer node,
-                                  const Opt_Dimension* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Number_SliderChangeMode_Void* value)
     {
     }
-    void BlockSizeImpl(Ark_NativePointer node,
-                       const Opt_SizeOptions* value)
+    void SetBlockBorderColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
     {
     }
-    void BlockStyleImpl(Ark_NativePointer node,
-                        const Opt_SliderBlockStyle* value)
+    void SetBlockBorderWidthImpl(Ark_NativePointer node,
+                                 const Opt_Length* value)
     {
     }
-    void StepSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetStepColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void SliderInteractionModeImpl(Ark_NativePointer node,
-                                   const Opt_SliderInteraction* value)
+    void SetTrackBorderRadiusImpl(Ark_NativePointer node,
+                                  const Opt_Length* value)
     {
     }
-    void MinResponsiveDistanceImpl(Ark_NativePointer node,
-                                   const Opt_Number* value)
+    void SetSelectedBorderRadiusImpl(Ark_NativePointer node,
+                                     const Opt_Dimension* value)
     {
     }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetBlockSizeImpl(Ark_NativePointer node,
+                          const Opt_SizeOptions* value)
     {
     }
-    void SlideRangeImpl(Ark_NativePointer node,
-                        const Opt_SlideRange* value)
+    void SetBlockStyleImpl(Ark_NativePointer node,
+                           const Opt_SliderBlockStyle* value)
     {
     }
-    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                     const Opt_CrownSensitivity* value)
+    void SetStepSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetSliderInteractionModeImpl(Ark_NativePointer node,
+                                      const Opt_SliderInteraction* value)
     {
     }
-    void ShowTipsImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value,
-                      const Opt_ResourceStr* content)
+    void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
+                                      const Opt_Number* value)
     {
     }
-    void _onChangeEvent_valueImpl(Ark_NativePointer node,
-                                  const Callback_Opt_Number_Void* callback_)
+    void SetSlideRangeImpl(Ark_NativePointer node,
+                           const Opt_SlideRange* value)
+    {
+    }
+    void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                        const Opt_CrownSensitivity* value)
+    {
+    }
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+    }
+    void SetShowTipsImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value,
+                         const Opt_ResourceStr* content)
     {
     }
     } // SliderAttributeModifier
@@ -5494,40 +5479,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SpanInterfaceModifier
     namespace SpanAttributeModifier {
-    void FontImpl(Ark_NativePointer node,
-                  const Opt_Font* value)
+    void SetFontImpl(Ark_NativePointer node,
+                     const Opt_Font* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String_Resource* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_String_Resource* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_Union_String_Resource* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
-    void DecorationImpl(Ark_NativePointer node,
-                        const Opt_DecorationStyleInterface* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_Union_String_Resource* value)
     {
     }
-    void TextCaseImpl(Ark_NativePointer node,
-                      const Opt_TextCase* value)
+    void SetDecorationImpl(Ark_NativePointer node,
+                           const Opt_DecorationStyleInterface* value)
     {
     }
-    void LineHeightImpl(Ark_NativePointer node,
-                        const Opt_Length* value)
+    void SetLetterSpacingImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String* value)
     {
     }
-    void TextShadowImpl(Ark_NativePointer node,
-                        const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
+    void SetTextCaseImpl(Ark_NativePointer node,
+                         const Opt_TextCase* value)
+    {
+    }
+    void SetLineHeightImpl(Ark_NativePointer node,
+                           const Opt_Length* value)
+    {
+    }
+    void SetTextShadowImpl(Ark_NativePointer node,
+                           const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
     {
     }
     } // SpanAttributeModifier
@@ -5545,12 +5538,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // StackInterfaceModifier
     namespace StackAttributeModifier {
-    void AlignContentImpl(Ark_NativePointer node,
-                          const Opt_Alignment* value)
+    void SetAlignContentImpl(Ark_NativePointer node,
+                             const Opt_Alignment* value)
     {
     }
-    void PointLightImpl(Ark_NativePointer node,
-                        const Opt_PointLightStyle* value)
+    void SetPointLightImpl(Ark_NativePointer node,
+                           const Opt_PointLightStyle* value)
     {
     }
     } // StackAttributeModifier
@@ -5568,28 +5561,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // StepperInterfaceModifier
     namespace StepperAttributeModifier {
-    void OnFinishImpl(Ark_NativePointer node,
-                      const Opt_Callback_Void* value)
+    void SetOnFinishImpl(Ark_NativePointer node,
+                         const Opt_Callback_Void* value)
     {
     }
-    void OnSkipImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+    void SetOnSkipImpl(Ark_NativePointer node,
+                       const Opt_Callback_Void* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Number_Number_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void OnNextImpl(Ark_NativePointer node,
-                    const Opt_Callback_Number_Number_Void* value)
+    void SetOnNextImpl(Ark_NativePointer node,
+                       const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void OnPreviousImpl(Ark_NativePointer node,
-                        const Opt_Callback_Number_Number_Void* value)
-    {
-    }
-    void _onChangeEvent_indexImpl(Ark_NativePointer node,
-                                  const Callback_Number_Void* callback_)
+    void SetOnPreviousImpl(Ark_NativePointer node,
+                           const Opt_Callback_Number_Number_Void* value)
     {
     }
     } // StepperAttributeModifier
@@ -5606,16 +5595,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // StepperItemInterfaceModifier
     namespace StepperItemAttributeModifier {
-    void PrevLabelImpl(Ark_NativePointer node,
-                       const Opt_String* value)
+    void SetPrevLabelImpl(Ark_NativePointer node,
+                          const Opt_String* value)
     {
     }
-    void NextLabelImpl(Ark_NativePointer node,
-                       const Opt_String* value)
+    void SetNextLabelImpl(Ark_NativePointer node,
+                          const Opt_String* value)
     {
     }
-    void StatusImpl(Ark_NativePointer node,
-                    const Opt_ItemState* value)
+    void SetStatusImpl(Ark_NativePointer node,
+                       const Opt_ItemState* value)
     {
     }
     } // StepperItemAttributeModifier
@@ -5633,134 +5622,130 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SwiperInterfaceModifier
     namespace SwiperAttributeModifier {
-    void IndexImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+    void SetIndexImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Bindable* value)
     {
     }
-    void IntervalImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetIntervalImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void IndicatorImpl(Ark_NativePointer node,
-                       const Opt_Union_IndicatorComponentController_DotIndicator_DigitIndicator_Boolean* value)
+    void SetIndicatorImpl(Ark_NativePointer node,
+                          const Opt_Union_IndicatorComponentController_DotIndicator_DigitIndicator_Boolean* value)
     {
     }
-    void LoopImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+    void SetLoopImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
     {
     }
-    void DurationImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetDurationImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void VerticalImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetVerticalImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void ItemSpaceImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String* value)
+    void SetItemSpaceImpl(Ark_NativePointer node,
+                          const Opt_Union_Number_String* value)
     {
     }
-    void DisplayModeImpl(Ark_NativePointer node,
-                         const Opt_SwiperDisplayMode* value)
+    void SetDisplayModeImpl(Ark_NativePointer node,
+                            const Opt_SwiperDisplayMode* value)
     {
     }
-    void CachedCount0Impl(Ark_NativePointer node,
-                          const Opt_Number* value)
+    void SetCachedCount0Impl(Ark_NativePointer node,
+                             const Opt_Number* value)
     {
     }
-    void EffectModeImpl(Ark_NativePointer node,
-                        const Opt_EdgeEffect* value)
+    void SetEffectModeImpl(Ark_NativePointer node,
+                           const Opt_EdgeEffect* value)
     {
     }
-    void DisableSwipeImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetDisableSwipeImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
     {
     }
-    void CurveImpl(Ark_NativePointer node,
-                   const Opt_Union_Curve_String_ICurve* value)
+    void SetCurveImpl(Ark_NativePointer node,
+                      const Opt_Union_Curve_String_ICurve* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Number_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Number_Void* value)
     {
     }
-    void OnSelectedImpl(Ark_NativePointer node,
-                        const Opt_Callback_Number_Void* value)
+    void SetOnSelectedImpl(Ark_NativePointer node,
+                           const Opt_Callback_Number_Void* value)
     {
     }
-    void OnUnselectedImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Void* value)
+    void SetOnUnselectedImpl(Ark_NativePointer node,
+                             const Opt_Callback_Number_Void* value)
     {
     }
-    void OnAnimationStartImpl(Ark_NativePointer node,
-                              const Opt_OnSwiperAnimationStartCallback* value)
+    void SetOnAnimationStartImpl(Ark_NativePointer node,
+                                 const Opt_OnSwiperAnimationStartCallback* value)
     {
     }
-    void OnAnimationEndImpl(Ark_NativePointer node,
-                            const Opt_OnSwiperAnimationEndCallback* value)
+    void SetOnAnimationEndImpl(Ark_NativePointer node,
+                               const Opt_OnSwiperAnimationEndCallback* value)
     {
     }
-    void OnGestureSwipeImpl(Ark_NativePointer node,
-                            const Opt_OnSwiperGestureSwipeCallback* value)
+    void SetOnGestureSwipeImpl(Ark_NativePointer node,
+                               const Opt_OnSwiperGestureSwipeCallback* value)
     {
     }
-    void NestedScrollImpl(Ark_NativePointer node,
-                          const Opt_SwiperNestedScrollMode* value)
+    void SetNestedScrollImpl(Ark_NativePointer node,
+                             const Opt_SwiperNestedScrollMode* value)
     {
     }
-    void CustomContentTransitionImpl(Ark_NativePointer node,
-                                     const Opt_SwiperContentAnimatedTransition* value)
+    void SetCustomContentTransitionImpl(Ark_NativePointer node,
+                                        const Opt_SwiperContentAnimatedTransition* value)
     {
     }
-    void OnContentDidScrollImpl(Ark_NativePointer node,
-                                const Opt_ContentDidScrollCallback* value)
+    void SetOnContentDidScrollImpl(Ark_NativePointer node,
+                                   const Opt_ContentDidScrollCallback* value)
     {
     }
-    void IndicatorInteractiveImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetIndicatorInteractiveImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void PageFlipModeImpl(Ark_NativePointer node,
-                          const Opt_PageFlipMode* value)
+    void SetPageFlipModeImpl(Ark_NativePointer node,
+                             const Opt_PageFlipMode* value)
     {
     }
-    void OnContentWillScrollImpl(Ark_NativePointer node,
-                                 const Opt_ContentWillScrollCallback* value)
+    void SetOnContentWillScrollImpl(Ark_NativePointer node,
+                                    const Opt_ContentWillScrollCallback* value)
     {
     }
-    void AutoPlayImpl(Ark_NativePointer node,
-                      const Opt_Boolean* autoPlay,
-                      const Opt_AutoPlayOptions* options)
+    void SetAutoPlayImpl(Ark_NativePointer node,
+                         const Opt_Boolean* autoPlay,
+                         const Opt_AutoPlayOptions* options)
     {
     }
-    void DisplayArrowImpl(Ark_NativePointer node,
-                          const Opt_Union_ArrowStyle_Boolean* value,
-                          const Opt_Boolean* isHoverShow)
+    void SetDisplayArrowImpl(Ark_NativePointer node,
+                             const Opt_Union_ArrowStyle_Boolean* value,
+                             const Opt_Boolean* isHoverShow)
     {
     }
-    void CachedCount1Impl(Ark_NativePointer node,
-                          const Opt_Number* count,
-                          const Opt_Boolean* isShown)
+    void SetCachedCount1Impl(Ark_NativePointer node,
+                             const Opt_Number* count,
+                             const Opt_Boolean* isShown)
     {
     }
-    void DisplayCountImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String_SwiperAutoFill* value,
-                          const Opt_Boolean* swipeByGroup)
+    void SetDisplayCountImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_String_SwiperAutoFill* value,
+                             const Opt_Boolean* swipeByGroup)
     {
     }
-    void PrevMarginImpl(Ark_NativePointer node,
-                        const Opt_Length* value,
-                        const Opt_Boolean* ignoreBlank)
+    void SetPrevMarginImpl(Ark_NativePointer node,
+                           const Opt_Length* value,
+                           const Opt_Boolean* ignoreBlank)
     {
     }
-    void NextMarginImpl(Ark_NativePointer node,
-                        const Opt_Length* value,
-                        const Opt_Boolean* ignoreBlank)
-    {
-    }
-    void _onChangeEvent_indexImpl(Ark_NativePointer node,
-                                  const Callback_Opt_Number_Void* callback_)
+    void SetNextMarginImpl(Ark_NativePointer node,
+                           const Opt_Length* value,
+                           const Opt_Boolean* ignoreBlank)
     {
     }
     } // SwiperAttributeModifier
@@ -5778,37 +5763,37 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SymbolGlyphInterfaceModifier
     namespace SymbolGlyphAttributeModifier {
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String_Resource* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_String_Resource* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_Array_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_Array_ResourceColor* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
-    void EffectStrategyImpl(Ark_NativePointer node,
-                            const Opt_SymbolEffectStrategy* value)
+    void SetEffectStrategyImpl(Ark_NativePointer node,
+                               const Opt_SymbolEffectStrategy* value)
     {
     }
-    void RenderingStrategyImpl(Ark_NativePointer node,
-                               const Opt_SymbolRenderingStrategy* value)
+    void SetRenderingStrategyImpl(Ark_NativePointer node,
+                                  const Opt_SymbolRenderingStrategy* value)
     {
     }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMinFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMaxFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void SymbolEffectImpl(Ark_NativePointer node,
-                          const Opt_SymbolEffect* symbolEffect,
-                          const Opt_Union_Boolean_Number* triggerValue)
+    void SetSymbolEffectImpl(Ark_NativePointer node,
+                             const Opt_SymbolEffect* symbolEffect,
+                             const Opt_Union_Boolean_Number* triggerValue)
     {
     }
     } // SymbolGlyphAttributeModifier
@@ -5826,24 +5811,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // SymbolSpanInterfaceModifier
     namespace SymbolSpanAttributeModifier {
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String_Resource* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_String_Resource* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_Array_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_Array_ResourceColor* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
-    void EffectStrategyImpl(Ark_NativePointer node,
-                            const Opt_SymbolEffectStrategy* value)
+    void SetEffectStrategyImpl(Ark_NativePointer node,
+                               const Opt_SymbolEffectStrategy* value)
     {
     }
-    void RenderingStrategyImpl(Ark_NativePointer node,
-                               const Opt_SymbolRenderingStrategy* value)
+    void SetRenderingStrategyImpl(Ark_NativePointer node,
+                                  const Opt_SymbolRenderingStrategy* value)
     {
     }
     } // SymbolSpanAttributeModifier
@@ -5860,16 +5845,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TabContentInterfaceModifier
     namespace TabContentAttributeModifier {
-    void TabBarImpl(Ark_NativePointer node,
-                    const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
+    void SetTabBarImpl(Ark_NativePointer node,
+                       const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
     {
     }
-    void OnWillShowImpl(Ark_NativePointer node,
-                        const Opt_VoidCallback* value)
+    void SetOnWillShowImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
     {
     }
-    void OnWillHideImpl(Ark_NativePointer node,
-                        const Opt_VoidCallback* value)
+    void SetOnWillHideImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
     {
     }
     } // TabContentAttributeModifier
@@ -5887,123 +5872,119 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TabsInterfaceModifier
     namespace TabsAttributeModifier {
-    void VerticalImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetVerticalImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void BarPositionImpl(Ark_NativePointer node,
-                         const Opt_BarPosition* value)
+    void SetBarPositionImpl(Ark_NativePointer node,
+                            const Opt_BarPosition* value)
     {
     }
-    void ScrollableImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetScrollableImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void BarWidthImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetBarWidthImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void BarHeightImpl(Ark_NativePointer node,
-                       const Opt_Length* value)
+    void SetBarHeightImpl(Ark_NativePointer node,
+                          const Opt_Length* value)
     {
     }
-    void AnimationDurationImpl(Ark_NativePointer node,
-                               const Opt_Number* value)
+    void SetAnimationDurationImpl(Ark_NativePointer node,
+                                  const Opt_Number* value)
     {
     }
-    void AnimationModeImpl(Ark_NativePointer node,
-                           const Opt_AnimationMode* value)
+    void SetAnimationModeImpl(Ark_NativePointer node,
+                              const Opt_AnimationMode* value)
     {
     }
-    void EdgeEffectImpl(Ark_NativePointer node,
-                        const Opt_EdgeEffect* value)
+    void SetEdgeEffectImpl(Ark_NativePointer node,
+                           const Opt_EdgeEffect* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Number_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Number_Void* value)
     {
     }
-    void OnSelectedImpl(Ark_NativePointer node,
-                        const Opt_Callback_Number_Void* value)
-    {
-    }
-    void OnTabBarClickImpl(Ark_NativePointer node,
+    void SetOnSelectedImpl(Ark_NativePointer node,
                            const Opt_Callback_Number_Void* value)
     {
     }
-    void OnUnselectedImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Void* value)
+    void SetOnTabBarClickImpl(Ark_NativePointer node,
+                              const Opt_Callback_Number_Void* value)
     {
     }
-    void OnAnimationStartImpl(Ark_NativePointer node,
-                              const Opt_OnTabsAnimationStartCallback* value)
+    void SetOnUnselectedImpl(Ark_NativePointer node,
+                             const Opt_Callback_Number_Void* value)
     {
     }
-    void OnAnimationEndImpl(Ark_NativePointer node,
-                            const Opt_OnTabsAnimationEndCallback* value)
+    void SetOnAnimationStartImpl(Ark_NativePointer node,
+                                 const Opt_OnTabsAnimationStartCallback* value)
     {
     }
-    void OnGestureSwipeImpl(Ark_NativePointer node,
-                            const Opt_OnTabsGestureSwipeCallback* value)
+    void SetOnAnimationEndImpl(Ark_NativePointer node,
+                               const Opt_OnTabsAnimationEndCallback* value)
     {
     }
-    void FadingEdgeImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetOnGestureSwipeImpl(Ark_NativePointer node,
+                               const Opt_OnTabsGestureSwipeCallback* value)
     {
     }
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_DividerStyle* value)
+    void SetFadingEdgeImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void BarOverlapImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerStyle* value)
     {
     }
-    void BarBackgroundColorImpl(Ark_NativePointer node,
-                                const Opt_ResourceColor* value)
+    void SetBarOverlapImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void BarGridAlignImpl(Ark_NativePointer node,
-                          const Opt_BarGridColumnOptions* value)
+    void SetBarBackgroundColorImpl(Ark_NativePointer node,
+                                   const Opt_ResourceColor* value)
     {
     }
-    void CustomContentTransitionImpl(Ark_NativePointer node,
-                                     const Opt_TabsCustomContentTransitionCallback* value)
+    void SetBarGridAlignImpl(Ark_NativePointer node,
+                             const Opt_BarGridColumnOptions* value)
     {
     }
-    void BarBackgroundBlurStyle0Impl(Ark_NativePointer node,
-                                     const Opt_BlurStyle* value)
+    void SetCustomContentTransitionImpl(Ark_NativePointer node,
+                                        const Opt_TabsCustomContentTransitionCallback* value)
     {
     }
-    void PageFlipModeImpl(Ark_NativePointer node,
-                          const Opt_PageFlipMode* value)
+    void SetBarBackgroundBlurStyle0Impl(Ark_NativePointer node,
+                                        const Opt_BlurStyle* value)
     {
     }
-    void BarBackgroundEffectImpl(Ark_NativePointer node,
-                                 const Opt_BackgroundEffectOptions* value)
+    void SetPageFlipModeImpl(Ark_NativePointer node,
+                             const Opt_PageFlipMode* value)
     {
     }
-    void OnContentWillChangeImpl(Ark_NativePointer node,
-                                 const Opt_OnTabsContentWillChangeCallback* value)
+    void SetBarBackgroundEffectImpl(Ark_NativePointer node,
+                                    const Opt_BackgroundEffectOptions* value)
     {
     }
-    void BarModeImpl(Ark_NativePointer node,
-                     const Opt_BarMode* value,
-                     const Opt_ScrollableBarModeOptions* options)
+    void SetOnContentWillChangeImpl(Ark_NativePointer node,
+                                    const Opt_OnTabsContentWillChangeCallback* value)
     {
     }
-    void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
-                                     const Opt_BlurStyle* style,
-                                     const Opt_BackgroundBlurStyleOptions* options)
+    void SetBarModeImpl(Ark_NativePointer node,
+                        const Opt_BarMode* value,
+                        const Opt_ScrollableBarModeOptions* options)
     {
     }
-    void CachedMaxCountImpl(Ark_NativePointer node,
-                            const Opt_Number* count,
-                            const Opt_TabsCacheMode* mode)
+    void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
+                                        const Opt_BlurStyle* style,
+                                        const Opt_BackgroundBlurStyleOptions* options)
     {
     }
-    void _onChangeEvent_indexImpl(Ark_NativePointer node,
-                                  const Callback_Number_Void* callback_)
+    void SetCachedMaxCountImpl(Ark_NativePointer node,
+                               const Opt_Number* count,
+                               const Opt_TabsCacheMode* mode)
     {
     }
     } // TabsAttributeModifier
@@ -6022,182 +6003,182 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextInterfaceModifier
     namespace TextAttributeModifier {
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String_Resource* value)
-    {
-    }
-    void MinFontSizeImpl(Ark_NativePointer node,
+    void SetFontSizeImpl(Ark_NativePointer node,
                          const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MaxFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetMinFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMaxFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMinFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetMaxFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void LineSpacingImpl(Ark_NativePointer node,
-                         const Opt_LengthMetrics* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void TextAlignImpl(Ark_NativePointer node,
-                       const Opt_TextAlign* value)
+    void SetLineSpacingImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* value)
     {
     }
-    void LineHeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+    void SetTextAlignImpl(Ark_NativePointer node,
+                          const Opt_TextAlign* value)
     {
     }
-    void TextOverflowImpl(Ark_NativePointer node,
-                          const Opt_TextOverflowOptions* value)
+    void SetLineHeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_String_Resource* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_Union_String_Resource* value)
+    void SetTextOverflowImpl(Ark_NativePointer node,
+                             const Opt_TextOverflowOptions* value)
     {
     }
-    void MaxLinesImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_Union_String_Resource* value)
     {
     }
-    void DecorationImpl(Ark_NativePointer node,
-                        const Opt_DecorationStyleInterface* value)
+    void SetMaxLinesImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void LetterSpacingImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
+    void SetDecorationImpl(Ark_NativePointer node,
+                           const Opt_DecorationStyleInterface* value)
     {
     }
-    void TextCaseImpl(Ark_NativePointer node,
-                      const Opt_TextCase* value)
+    void SetLetterSpacingImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String* value)
     {
     }
-    void BaselineOffsetImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String* value)
+    void SetTextCaseImpl(Ark_NativePointer node,
+                         const Opt_TextCase* value)
     {
     }
-    void CopyOptionImpl(Ark_NativePointer node,
-                        const Opt_CopyOptions* value)
+    void SetBaselineOffsetImpl(Ark_NativePointer node,
+                               const Opt_Union_Number_String* value)
     {
     }
-    void DraggableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetCopyOptionImpl(Ark_NativePointer node,
+                           const Opt_CopyOptions* value)
     {
     }
-    void TextShadowImpl(Ark_NativePointer node,
-                        const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
+    void SetDraggableImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
     {
     }
-    void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                                  const Opt_TextHeightAdaptivePolicy* value)
+    void SetTextShadowImpl(Ark_NativePointer node,
+                           const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
     {
     }
-    void TextIndentImpl(Ark_NativePointer node,
-                        const Opt_Length* value)
+    void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
+                                     const Opt_TextHeightAdaptivePolicy* value)
     {
     }
-    void WordBreakImpl(Ark_NativePointer node,
-                       const Opt_WordBreak* value)
+    void SetTextIndentImpl(Ark_NativePointer node,
+                           const Opt_Length* value)
     {
     }
-    void LineBreakStrategyImpl(Ark_NativePointer node,
-                               const Opt_LineBreakStrategy* value)
+    void SetWordBreakImpl(Ark_NativePointer node,
+                          const Opt_WordBreak* value)
     {
     }
-    void OnCopyImpl(Ark_NativePointer node,
-                    const Opt_Callback_String_Void* value)
+    void SetLineBreakStrategyImpl(Ark_NativePointer node,
+                                  const Opt_LineBreakStrategy* value)
     {
     }
-    void CaretColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+    void SetOnCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Void* value)
     {
     }
-    void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
+    void SetCaretColorImpl(Ark_NativePointer node,
+                           const Opt_ResourceColor* value)
     {
     }
-    void EllipsisModeImpl(Ark_NativePointer node,
-                          const Opt_EllipsisMode* value)
+    void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void EnableDataDetectorImpl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
+    void SetEllipsisModeImpl(Ark_NativePointer node,
+                             const Opt_EllipsisMode* value)
     {
     }
-    void DataDetectorConfigImpl(Ark_NativePointer node,
-                                const Opt_TextDataDetectorConfig* value)
+    void SetEnableDataDetectorImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
     {
     }
-    void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                                   const Opt_Callback_Number_Number_Void* value)
+    void SetDataDetectorConfigImpl(Ark_NativePointer node,
+                                   const Opt_TextDataDetectorConfig* value)
     {
     }
-    void FontFeatureImpl(Ark_NativePointer node,
-                         const Opt_String* value)
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void MarqueeOptionsImpl(Ark_NativePointer node,
-                            const Opt_TextMarqueeOptions* value)
+    void SetFontFeatureImpl(Ark_NativePointer node,
+                            const Opt_String* value)
     {
     }
-    void OnMarqueeStateChangeImpl(Ark_NativePointer node,
-                                  const Opt_Callback_MarqueeState_Void* value)
+    void SetMarqueeOptionsImpl(Ark_NativePointer node,
+                               const Opt_TextMarqueeOptions* value)
     {
     }
-    void PrivacySensitiveImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetOnMarqueeStateChangeImpl(Ark_NativePointer node,
+                                     const Opt_Callback_MarqueeState_Void* value)
     {
     }
-    void TextSelectableImpl(Ark_NativePointer node,
-                            const Opt_TextSelectableMode* value)
+    void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
     {
     }
-    void EditMenuOptionsImpl(Ark_NativePointer node,
-                             const Opt_EditMenuOptions* value)
+    void SetTextSelectableImpl(Ark_NativePointer node,
+                               const Opt_TextSelectableMode* value)
     {
     }
-    void HalfLeadingImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditMenuOptions* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetHalfLeadingImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void FontImpl(Ark_NativePointer node,
-                  const Opt_Font* fontValue,
-                  const Opt_FontSettingOptions* options)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* weight,
-                        const Opt_FontSettingOptions* options)
+    void SetFontImpl(Ark_NativePointer node,
+                     const Opt_Font* fontValue,
+                     const Opt_FontSettingOptions* options)
     {
     }
-    void SelectionImpl(Ark_NativePointer node,
-                       const Opt_Number* selectionStart,
-                       const Opt_Number* selectionEnd)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* weight,
+                           const Opt_FontSettingOptions* options)
     {
     }
-    void BindSelectionMenuImpl(Ark_NativePointer node,
-                               const Opt_TextSpanType* spanType,
-                               const Opt_CustomNodeBuilder* content,
-                               const Opt_TextResponseType* responseType,
-                               const Opt_SelectionMenuOptions* options)
+    void SetSelectionImpl(Ark_NativePointer node,
+                          const Opt_Number* selectionStart,
+                          const Opt_Number* selectionEnd)
+    {
+    }
+    void SetBindSelectionMenuImpl(Ark_NativePointer node,
+                                  const Opt_TextSpanType* spanType,
+                                  const Opt_CustomNodeBuilder* content,
+                                  const Opt_TextResponseType* responseType,
+                                  const Opt_SelectionMenuOptions* options)
     {
     }
     } // TextAttributeModifier
@@ -6215,251 +6196,247 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextAreaInterfaceModifier
     namespace TextAreaAttributeModifier {
-    void PlaceholderColorImpl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
+    void SetPlaceholderColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
     {
     }
-    void PlaceholderFontImpl(Ark_NativePointer node,
-                             const Opt_Font* value)
+    void SetPlaceholderFontImpl(Ark_NativePointer node,
+                                const Opt_Font* value)
     {
     }
-    void EnterKeyTypeImpl(Ark_NativePointer node,
-                          const Opt_EnterKeyType* value)
+    void SetEnterKeyTypeImpl(Ark_NativePointer node,
+                             const Opt_EnterKeyType* value)
     {
     }
-    void TextAlignImpl(Ark_NativePointer node,
-                       const Opt_TextAlign* value)
+    void SetTextAlignImpl(Ark_NativePointer node,
+                          const Opt_TextAlign* value)
     {
     }
-    void CaretColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+    void SetCaretColorImpl(Ark_NativePointer node,
+                           const Opt_ResourceColor* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_ResourceStr* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_ResourceStr* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_ResourceStr* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_ResourceStr* value)
     {
     }
-    void TextOverflowImpl(Ark_NativePointer node,
-                          const Opt_TextOverflow* value)
+    void SetTextOverflowImpl(Ark_NativePointer node,
+                             const Opt_TextOverflow* value)
     {
     }
-    void TextIndentImpl(Ark_NativePointer node,
-                        const Opt_Dimension* value)
+    void SetTextIndentImpl(Ark_NativePointer node,
+                           const Opt_Dimension* value)
     {
     }
-    void CaretStyleImpl(Ark_NativePointer node,
-                        const Opt_CaretStyle* value)
+    void SetCaretStyleImpl(Ark_NativePointer node,
+                           const Opt_CaretStyle* value)
     {
     }
-    void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
+    void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void OnSubmitImpl(Ark_NativePointer node,
-                      const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
+    void SetOnSubmitImpl(Ark_NativePointer node,
+                         const Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_EditableTextOnChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_EditableTextOnChangeCallback* value)
     {
     }
-    void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                                   const Opt_Callback_Number_Number_Void* value)
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void OnContentScrollImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Number_Void* value)
+    void SetOnContentScrollImpl(Ark_NativePointer node,
+                                const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void OnEditChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_Boolean_Void* value)
+    void SetOnEditChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_Boolean_Void* value)
     {
     }
-    void OnCopyImpl(Ark_NativePointer node,
-                    const Opt_Callback_String_Void* value)
+    void SetOnCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Void* value)
     {
     }
-    void OnCutImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+    void SetOnCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Void* value)
     {
     }
-    void OnPasteImpl(Ark_NativePointer node,
-                     const Opt_Callback_String_PasteEvent_Void* value)
+    void SetOnPasteImpl(Ark_NativePointer node,
+                        const Opt_Callback_String_PasteEvent_Void* value)
     {
     }
-    void CopyOptionImpl(Ark_NativePointer node,
-                        const Opt_CopyOptions* value)
+    void SetCopyOptionImpl(Ark_NativePointer node,
+                           const Opt_CopyOptions* value)
     {
     }
-    void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
+    void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
     {
     }
-    void MaxLengthImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+    void SetMaxLengthImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
     {
     }
-    void StyleImpl(Ark_NativePointer node,
-                   const Opt_TextContentStyle* value)
+    void SetStyleImpl(Ark_NativePointer node,
+                      const Opt_TextContentStyle* value)
     {
     }
-    void BarStateImpl(Ark_NativePointer node,
-                      const Opt_BarState* value)
+    void SetBarStateImpl(Ark_NativePointer node,
+                         const Opt_BarState* value)
     {
     }
-    void SelectionMenuHiddenImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
+    void SetSelectionMenuHiddenImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
     {
     }
-    void MinFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetMinFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MaxFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetMaxFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMinFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetMaxFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                                  const Opt_TextHeightAdaptivePolicy* value)
+    void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
+                                     const Opt_TextHeightAdaptivePolicy* value)
     {
     }
-    void MaxLinesImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetMaxLinesImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void WordBreakImpl(Ark_NativePointer node,
-                       const Opt_WordBreak* value)
+    void SetWordBreakImpl(Ark_NativePointer node,
+                          const Opt_WordBreak* value)
     {
     }
-    void LineBreakStrategyImpl(Ark_NativePointer node,
-                               const Opt_LineBreakStrategy* value)
+    void SetLineBreakStrategyImpl(Ark_NativePointer node,
+                                  const Opt_LineBreakStrategy* value)
     {
     }
-    void DecorationImpl(Ark_NativePointer node,
-                        const Opt_TextDecorationOptions* value)
+    void SetDecorationImpl(Ark_NativePointer node,
+                           const Opt_TextDecorationOptions* value)
     {
     }
-    void LetterSpacingImpl(Ark_NativePointer node,
+    void SetLetterSpacingImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String_Resource* value)
+    {
+    }
+    void SetLineSpacingImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* value)
+    {
+    }
+    void SetLineHeightImpl(Ark_NativePointer node,
                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void LineSpacingImpl(Ark_NativePointer node,
-                         const Opt_LengthMetrics* value)
+    void SetTypeImpl(Ark_NativePointer node,
+                     const Opt_TextAreaType* value)
     {
     }
-    void LineHeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
-    {
-    }
-    void TypeImpl(Ark_NativePointer node,
-                  const Opt_TextAreaType* value)
-    {
-    }
-    void EnableAutoFillImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
-    {
-    }
-    void ContentTypeImpl(Ark_NativePointer node,
-                         const Opt_ContentType* value)
-    {
-    }
-    void FontFeatureImpl(Ark_NativePointer node,
-                         const Opt_String* value)
-    {
-    }
-    void OnWillInsertImpl(Ark_NativePointer node,
-                          const Opt_Callback_InsertValue_Boolean* value)
-    {
-    }
-    void OnDidInsertImpl(Ark_NativePointer node,
-                         const Opt_Callback_InsertValue_Void* value)
-    {
-    }
-    void OnWillDeleteImpl(Ark_NativePointer node,
-                          const Opt_Callback_DeleteValue_Boolean* value)
-    {
-    }
-    void OnDidDeleteImpl(Ark_NativePointer node,
-                         const Opt_Callback_DeleteValue_Void* value)
-    {
-    }
-    void EditMenuOptionsImpl(Ark_NativePointer node,
-                             const Opt_EditMenuOptions* value)
-    {
-    }
-    void EnablePreviewTextImpl(Ark_NativePointer node,
+    void SetEnableAutoFillImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
+    void SetContentTypeImpl(Ark_NativePointer node,
+                            const Opt_ContentType* value)
+    {
+    }
+    void SetFontFeatureImpl(Ark_NativePointer node,
+                            const Opt_String* value)
+    {
+    }
+    void SetOnWillInsertImpl(Ark_NativePointer node,
+                             const Opt_Callback_InsertValue_Boolean* value)
+    {
+    }
+    void SetOnDidInsertImpl(Ark_NativePointer node,
+                            const Opt_Callback_InsertValue_Void* value)
+    {
+    }
+    void SetOnWillDeleteImpl(Ark_NativePointer node,
+                             const Opt_Callback_DeleteValue_Boolean* value)
+    {
+    }
+    void SetOnDidDeleteImpl(Ark_NativePointer node,
+                            const Opt_Callback_DeleteValue_Void* value)
+    {
+    }
+    void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditMenuOptions* value)
+    {
+    }
+    void SetEnablePreviewTextImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
     }
-    void AutoCapitalizationModeImpl(Ark_NativePointer node,
-                                    const Opt_AutoCapitalizationMode* value)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void HalfLeadingImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
+                                       const Opt_AutoCapitalizationMode* value)
     {
     }
-    void EllipsisModeImpl(Ark_NativePointer node,
-                          const Opt_EllipsisMode* value)
+    void SetHalfLeadingImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void StopBackPressImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetEllipsisModeImpl(Ark_NativePointer node,
+                             const Opt_EllipsisMode* value)
     {
     }
-    void OnWillChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_EditableTextChangeValue_Boolean* value)
+    void SetStopBackPressImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void KeyboardAppearanceImpl(Ark_NativePointer node,
-                                const Opt_KeyboardAppearance* value)
+    void SetOnWillChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_EditableTextChangeValue_Boolean* value)
     {
     }
-    void InputFilterImpl(Ark_NativePointer node,
-                         const Opt_ResourceStr* value,
-                         const Opt_Callback_String_Void* error)
+    void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                                   const Opt_KeyboardAppearance* value)
     {
     }
-    void ShowCounterImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value,
-                         const Opt_InputCounterOptions* options)
+    void SetInputFilterImpl(Ark_NativePointer node,
+                            const Opt_ResourceStr* value,
+                            const Opt_Callback_String_Void* error)
     {
     }
-    void CustomKeyboardImpl(Ark_NativePointer node,
-                            const Opt_CustomNodeBuilder* value,
-                            const Opt_KeyboardOptions* options)
+    void SetShowCounterImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value,
+                            const Opt_InputCounterOptions* options)
     {
     }
-    void _onChangeEvent_textImpl(Ark_NativePointer node,
-                                 const Callback_Union_ResourceStr_Resource_String_Void* callback_)
+    void SetCustomKeyboardImpl(Ark_NativePointer node,
+                               const Opt_CustomNodeBuilder* value,
+                               const Opt_KeyboardOptions* options)
     {
     }
     } // TextAreaAttributeModifier
@@ -6477,48 +6454,44 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextClockInterfaceModifier
     namespace TextClockAttributeModifier {
-    void FormatImpl(Ark_NativePointer node,
-                    const Opt_ResourceStr* value)
+    void SetFormatImpl(Ark_NativePointer node,
+                       const Opt_ResourceStr* value)
     {
     }
-    void OnDateChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Void* value)
+    void SetOnDateChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_Number_Void* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_String* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_ResourceStr* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_ResourceStr* value)
     {
     }
-    void TextShadowImpl(Ark_NativePointer node,
-                        const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
+    void SetTextShadowImpl(Ark_NativePointer node,
+                           const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
     {
     }
-    void FontFeatureImpl(Ark_NativePointer node,
-                         const Opt_String* value)
+    void SetFontFeatureImpl(Ark_NativePointer node,
+                            const Opt_String* value)
     {
     }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
-    {
-    }
-    void DateTimeOptionsImpl(Ark_NativePointer node,
-                             const Opt_intl_DateTimeOptions* value)
+    void SetDateTimeOptionsImpl(Ark_NativePointer node,
+                                const Opt_intl_DateTimeOptions* value)
     {
     }
     } // TextClockAttributeModifier
@@ -6536,295 +6509,291 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextInputInterfaceModifier
     namespace TextInputAttributeModifier {
-    void TypeImpl(Ark_NativePointer node,
-                  const Opt_InputType* value)
+    void SetTypeImpl(Ark_NativePointer node,
+                     const Opt_InputType* value)
     {
     }
-    void ContentTypeImpl(Ark_NativePointer node,
-                         const Opt_ContentType* value)
+    void SetContentTypeImpl(Ark_NativePointer node,
+                            const Opt_ContentType* value)
     {
     }
-    void PlaceholderColorImpl(Ark_NativePointer node,
-                              const Opt_ResourceColor* value)
+    void SetPlaceholderColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
     {
     }
-    void TextOverflowImpl(Ark_NativePointer node,
-                          const Opt_TextOverflow* value)
+    void SetTextOverflowImpl(Ark_NativePointer node,
+                             const Opt_TextOverflow* value)
     {
     }
-    void TextIndentImpl(Ark_NativePointer node,
-                        const Opt_Dimension* value)
+    void SetTextIndentImpl(Ark_NativePointer node,
+                           const Opt_Dimension* value)
     {
     }
-    void PlaceholderFontImpl(Ark_NativePointer node,
-                             const Opt_Font* value)
+    void SetPlaceholderFontImpl(Ark_NativePointer node,
+                                const Opt_Font* value)
     {
     }
-    void EnterKeyTypeImpl(Ark_NativePointer node,
-                          const Opt_EnterKeyType* value)
+    void SetEnterKeyTypeImpl(Ark_NativePointer node,
+                             const Opt_EnterKeyType* value)
     {
     }
-    void CaretColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+    void SetCaretColorImpl(Ark_NativePointer node,
+                           const Opt_ResourceColor* value)
     {
     }
-    void OnEditChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_Boolean_Void* value)
+    void SetOnEditChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_Boolean_Void* value)
     {
     }
-    void OnSubmitImpl(Ark_NativePointer node,
-                      const Opt_OnSubmitCallback* value)
+    void SetOnSubmitImpl(Ark_NativePointer node,
+                         const Opt_OnSubmitCallback* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_EditableTextOnChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_EditableTextOnChangeCallback* value)
     {
     }
-    void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                                   const Opt_OnTextSelectionChangeCallback* value)
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_OnTextSelectionChangeCallback* value)
     {
     }
-    void OnContentScrollImpl(Ark_NativePointer node,
-                             const Opt_OnContentScrollCallback* value)
+    void SetOnContentScrollImpl(Ark_NativePointer node,
+                                const Opt_OnContentScrollCallback* value)
     {
     }
-    void MaxLengthImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+    void SetMaxLengthImpl(Ark_NativePointer node,
+                          const Opt_Number* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_ResourceStr* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_ResourceStr* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_ResourceStr* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_ResourceStr* value)
     {
     }
-    void OnCopyImpl(Ark_NativePointer node,
-                    const Opt_Callback_String_Void* value)
+    void SetOnCopyImpl(Ark_NativePointer node,
+                       const Opt_Callback_String_Void* value)
     {
     }
-    void OnCutImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+    void SetOnCutImpl(Ark_NativePointer node,
+                      const Opt_Callback_String_Void* value)
     {
     }
-    void OnPasteImpl(Ark_NativePointer node,
-                     const Opt_OnPasteCallback* value)
+    void SetOnPasteImpl(Ark_NativePointer node,
+                        const Opt_OnPasteCallback* value)
     {
     }
-    void CopyOptionImpl(Ark_NativePointer node,
-                        const Opt_CopyOptions* value)
+    void SetCopyOptionImpl(Ark_NativePointer node,
+                           const Opt_CopyOptions* value)
     {
     }
-    void ShowPasswordIconImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
-    {
-    }
-    void TextAlignImpl(Ark_NativePointer node,
-                       const Opt_TextAlign* value)
-    {
-    }
-    void StyleImpl(Ark_NativePointer node,
-                   const Opt_Union_TextInputStyle_TextContentStyle* value)
-    {
-    }
-    void CaretStyleImpl(Ark_NativePointer node,
-                        const Opt_CaretStyle* value)
-    {
-    }
-    void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                     const Opt_ResourceColor* value)
-    {
-    }
-    void CaretPositionImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
-    {
-    }
-    void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
-    {
-    }
-    void PasswordIconImpl(Ark_NativePointer node,
-                          const Opt_PasswordIcon* value)
-    {
-    }
-    void ShowErrorImpl(Ark_NativePointer node,
-                       const Opt_ResourceStr* value)
-    {
-    }
-    void ShowUnitImpl(Ark_NativePointer node,
-                      const Opt_CustomNodeBuilder* value)
-    {
-    }
-    void ShowUnderlineImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
-    {
-    }
-    void UnderlineColorImpl(Ark_NativePointer node,
-                            const Opt_Union_ResourceColor_UnderlineColor* value)
-    {
-    }
-    void SelectionMenuHiddenImpl(Ark_NativePointer node,
+    void SetShowPasswordIconImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
     {
     }
-    void BarStateImpl(Ark_NativePointer node,
-                      const Opt_BarState* value)
+    void SetTextAlignImpl(Ark_NativePointer node,
+                          const Opt_TextAlign* value)
     {
     }
-    void MaxLinesImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+    void SetStyleImpl(Ark_NativePointer node,
+                      const Opt_Union_TextInputStyle_TextContentStyle* value)
     {
     }
-    void WordBreakImpl(Ark_NativePointer node,
-                       const Opt_WordBreak* value)
+    void SetCaretStyleImpl(Ark_NativePointer node,
+                           const Opt_CaretStyle* value)
     {
     }
-    void LineBreakStrategyImpl(Ark_NativePointer node,
-                               const Opt_LineBreakStrategy* value)
+    void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
+                                        const Opt_ResourceColor* value)
     {
     }
-    void CancelButtonImpl(Ark_NativePointer node,
-                          const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+    void SetCaretPositionImpl(Ark_NativePointer node,
+                              const Opt_Number* value)
     {
     }
-    void SelectAllImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+    void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
     {
     }
-    void MinFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetPasswordIconImpl(Ark_NativePointer node,
+                             const Opt_PasswordIcon* value)
     {
     }
-    void MaxFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+    void SetShowErrorImpl(Ark_NativePointer node,
+                          const Opt_ResourceStr* value)
     {
     }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetShowUnitImpl(Ark_NativePointer node,
+                         const Opt_CustomNodeBuilder* value)
     {
     }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_Resource* value)
+    void SetShowUnderlineImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                                  const Opt_TextHeightAdaptivePolicy* value)
+    void SetUnderlineColorImpl(Ark_NativePointer node,
+                               const Opt_Union_ResourceColor_UnderlineColor* value)
     {
     }
-    void EnableAutoFillImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetSelectionMenuHiddenImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
     {
     }
-    void DecorationImpl(Ark_NativePointer node,
-                        const Opt_TextDecorationOptions* value)
+    void SetBarStateImpl(Ark_NativePointer node,
+                         const Opt_BarState* value)
     {
     }
-    void LetterSpacingImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+    void SetMaxLinesImpl(Ark_NativePointer node,
+                         const Opt_Number* value)
     {
     }
-    void LineHeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+    void SetWordBreakImpl(Ark_NativePointer node,
+                          const Opt_WordBreak* value)
     {
     }
-    void PasswordRulesImpl(Ark_NativePointer node,
-                           const Opt_String* value)
+    void SetLineBreakStrategyImpl(Ark_NativePointer node,
+                                  const Opt_LineBreakStrategy* value)
     {
     }
-    void FontFeatureImpl(Ark_NativePointer node,
-                         const Opt_String* value)
+    void SetCancelButtonImpl(Ark_NativePointer node,
+                             const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
     {
     }
-    void ShowPasswordImpl(Ark_NativePointer node,
+    void SetSelectAllImpl(Ark_NativePointer node,
                           const Opt_Boolean* value)
     {
     }
-    void OnSecurityStateChangeImpl(Ark_NativePointer node,
-                                   const Opt_Callback_Boolean_Void* value)
+    void SetMinFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void OnWillInsertImpl(Ark_NativePointer node,
-                          const Opt_Callback_InsertValue_Boolean* value)
+    void SetMaxFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Union_Number_String_Resource* value)
     {
     }
-    void OnDidInsertImpl(Ark_NativePointer node,
-                         const Opt_Callback_InsertValue_Void* value)
+    void SetMinFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void OnWillDeleteImpl(Ark_NativePointer node,
-                          const Opt_Callback_DeleteValue_Boolean* value)
+    void SetMaxFontScaleImpl(Ark_NativePointer node,
+                             const Opt_Union_Number_Resource* value)
     {
     }
-    void OnDidDeleteImpl(Ark_NativePointer node,
-                         const Opt_Callback_DeleteValue_Void* value)
+    void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
+                                     const Opt_TextHeightAdaptivePolicy* value)
     {
     }
-    void EditMenuOptionsImpl(Ark_NativePointer node,
-                             const Opt_EditMenuOptions* value)
-    {
-    }
-    void EnablePreviewTextImpl(Ark_NativePointer node,
+    void SetEnableAutoFillImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
+    void SetDecorationImpl(Ark_NativePointer node,
+                           const Opt_TextDecorationOptions* value)
+    {
+    }
+    void SetLetterSpacingImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_String_Resource* value)
+    {
+    }
+    void SetLineHeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_String_Resource* value)
+    {
+    }
+    void SetPasswordRulesImpl(Ark_NativePointer node,
+                              const Opt_String* value)
+    {
+    }
+    void SetFontFeatureImpl(Ark_NativePointer node,
+                            const Opt_String* value)
+    {
+    }
+    void SetShowPasswordImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
+    {
+    }
+    void SetOnSecurityStateChangeImpl(Ark_NativePointer node,
+                                      const Opt_Callback_Boolean_Void* value)
+    {
+    }
+    void SetOnWillInsertImpl(Ark_NativePointer node,
+                             const Opt_Callback_InsertValue_Boolean* value)
+    {
+    }
+    void SetOnDidInsertImpl(Ark_NativePointer node,
+                            const Opt_Callback_InsertValue_Void* value)
+    {
+    }
+    void SetOnWillDeleteImpl(Ark_NativePointer node,
+                             const Opt_Callback_DeleteValue_Boolean* value)
+    {
+    }
+    void SetOnDidDeleteImpl(Ark_NativePointer node,
+                            const Opt_Callback_DeleteValue_Void* value)
+    {
+    }
+    void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditMenuOptions* value)
+    {
+    }
+    void SetEnablePreviewTextImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
     }
-    void AutoCapitalizationModeImpl(Ark_NativePointer node,
-                                    const Opt_AutoCapitalizationMode* value)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void HalfLeadingImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
+    void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
+                                       const Opt_AutoCapitalizationMode* value)
     {
     }
-    void EllipsisModeImpl(Ark_NativePointer node,
-                          const Opt_EllipsisMode* value)
+    void SetHalfLeadingImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
-    void StopBackPressImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+    void SetEllipsisModeImpl(Ark_NativePointer node,
+                             const Opt_EllipsisMode* value)
     {
     }
-    void OnWillChangeImpl(Ark_NativePointer node,
-                          const Opt_Callback_EditableTextChangeValue_Boolean* value)
+    void SetStopBackPressImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
-    void KeyboardAppearanceImpl(Ark_NativePointer node,
-                                const Opt_KeyboardAppearance* value)
+    void SetOnWillChangeImpl(Ark_NativePointer node,
+                             const Opt_Callback_EditableTextChangeValue_Boolean* value)
     {
     }
-    void InputFilterImpl(Ark_NativePointer node,
-                         const Opt_ResourceStr* value,
-                         const Opt_Callback_String_Void* error)
+    void SetKeyboardAppearanceImpl(Ark_NativePointer node,
+                                   const Opt_KeyboardAppearance* value)
     {
     }
-    void CustomKeyboardImpl(Ark_NativePointer node,
-                            const Opt_CustomNodeBuilder* value,
-                            const Opt_KeyboardOptions* options)
+    void SetInputFilterImpl(Ark_NativePointer node,
+                            const Opt_ResourceStr* value,
+                            const Opt_Callback_String_Void* error)
     {
     }
-    void ShowCounterImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value,
-                         const Opt_InputCounterOptions* options)
+    void SetCustomKeyboardImpl(Ark_NativePointer node,
+                               const Opt_CustomNodeBuilder* value,
+                               const Opt_KeyboardOptions* options)
     {
     }
-    void _onChangeEvent_textImpl(Ark_NativePointer node,
-                                 const Callback_Union_ResourceStr_Resource_String_Void* callback_)
+    void SetShowCounterImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value,
+                            const Opt_InputCounterOptions* options)
     {
     }
     } // TextInputAttributeModifier
@@ -6842,72 +6811,64 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextPickerInterfaceModifier
     namespace TextPickerAttributeModifier {
-    void DefaultPickerItemHeightImpl(Ark_NativePointer node,
-                                     const Opt_Union_Number_String* value)
+    void SetDefaultPickerItemHeightImpl(Ark_NativePointer node,
+                                        const Opt_Union_Number_String* value)
     {
     }
-    void CanLoopImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+    void SetCanLoopImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
     {
     }
-    void DisappearTextStyleImpl(Ark_NativePointer node,
-                                const Opt_PickerTextStyle* value)
+    void SetDisappearTextStyleImpl(Ark_NativePointer node,
+                                   const Opt_PickerTextStyle* value)
     {
     }
-    void TextStyleImpl(Ark_NativePointer node,
-                       const Opt_PickerTextStyle* value)
+    void SetTextStyleImpl(Ark_NativePointer node,
+                          const Opt_PickerTextStyle* value)
     {
     }
-    void SelectedTextStyleImpl(Ark_NativePointer node,
-                               const Opt_PickerTextStyle* value)
+    void SetSelectedTextStyleImpl(Ark_NativePointer node,
+                                  const Opt_PickerTextStyle* value)
     {
     }
-    void DisableTextStyleAnimationImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
+    void SetDisableTextStyleAnimationImpl(Ark_NativePointer node,
+                                          const Opt_Boolean* value)
     {
     }
-    void DefaultTextStyleImpl(Ark_NativePointer node,
-                              const Opt_TextPickerTextStyle* value)
+    void SetDefaultTextStyleImpl(Ark_NativePointer node,
+                                 const Opt_TextPickerTextStyle* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnTextPickerChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnTextPickerChangeCallback* value)
     {
     }
-    void OnScrollStopImpl(Ark_NativePointer node,
-                          const Opt_TextPickerScrollStopCallback* value)
+    void SetOnScrollStopImpl(Ark_NativePointer node,
+                             const Opt_TextPickerScrollStopCallback* value)
     {
     }
-    void OnEnterSelectedAreaImpl(Ark_NativePointer node,
-                                 const Opt_TextPickerEnterSelectedAreaCallback* value)
+    void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
+                                    const Opt_TextPickerEnterSelectedAreaCallback* value)
     {
     }
-    void SelectedIndexImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_Array_Number* value)
+    void SetSelectedIndexImpl(Ark_NativePointer node,
+                              const Opt_Union_Number_Array_Number* value)
     {
     }
-    void DividerImpl(Ark_NativePointer node,
-                     const Opt_DividerOptions* value)
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerOptions* value)
     {
     }
-    void GradientHeightImpl(Ark_NativePointer node,
-                            const Opt_Dimension* value)
+    void SetGradientHeightImpl(Ark_NativePointer node,
+                               const Opt_Dimension* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                     const Opt_CrownSensitivity* value)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Union_Number_Array_Number_Void* callback_)
-    {
-    }
-    void _onChangeEvent_valueImpl(Ark_NativePointer node,
-                                  const Callback_Union_ResourceStr_Array_ResourceStr_Void* callback_)
+    void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                        const Opt_CrownSensitivity* value)
     {
     }
     } // TextPickerAttributeModifier
@@ -6925,40 +6886,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextTimerInterfaceModifier
     namespace TextTimerAttributeModifier {
-    void FormatImpl(Ark_NativePointer node,
-                    const Opt_String* value)
+    void SetFormatImpl(Ark_NativePointer node,
+                       const Opt_String* value)
     {
     }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+    void SetFontColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
     {
     }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+    void SetFontSizeImpl(Ark_NativePointer node,
+                         const Opt_Length* value)
     {
     }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
+    void SetFontStyleImpl(Ark_NativePointer node,
+                          const Opt_FontStyle* value)
     {
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_ResourceStr* value)
+    void SetFontWeightImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_FontWeight_ResourceStr* value)
     {
     }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_ResourceStr* value)
+    void SetFontFamilyImpl(Ark_NativePointer node,
+                           const Opt_ResourceStr* value)
     {
     }
-    void OnTimerImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Number_Void* value)
+    void SetOnTimerImpl(Ark_NativePointer node,
+                        const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void TextShadowImpl(Ark_NativePointer node,
-                        const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
-    {
-    }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
+    void SetTextShadowImpl(Ark_NativePointer node,
+                           const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
     {
     }
     } // TextTimerAttributeModifier
@@ -6976,52 +6933,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TimePickerInterfaceModifier
     namespace TimePickerAttributeModifier {
-    void UseMilitaryTimeImpl(Ark_NativePointer node,
-                             const Opt_Boolean* value)
+    void SetUseMilitaryTimeImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
     {
     }
-    void LoopImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+    void SetLoopImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
     {
     }
-    void DisappearTextStyleImpl(Ark_NativePointer node,
-                                const Opt_PickerTextStyle* value)
+    void SetDisappearTextStyleImpl(Ark_NativePointer node,
+                                   const Opt_PickerTextStyle* value)
     {
     }
-    void TextStyleImpl(Ark_NativePointer node,
-                       const Opt_PickerTextStyle* value)
+    void SetTextStyleImpl(Ark_NativePointer node,
+                          const Opt_PickerTextStyle* value)
     {
     }
-    void SelectedTextStyleImpl(Ark_NativePointer node,
-                               const Opt_PickerTextStyle* value)
+    void SetSelectedTextStyleImpl(Ark_NativePointer node,
+                                  const Opt_PickerTextStyle* value)
     {
     }
-    void DateTimeOptionsImpl(Ark_NativePointer node,
-                             const Opt_intl_DateTimeOptions* value)
+    void SetDateTimeOptionsImpl(Ark_NativePointer node,
+                                const Opt_intl_DateTimeOptions* value)
     {
     }
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_OnTimePickerChangeCallback* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnTimePickerChangeCallback* value)
     {
     }
-    void OnEnterSelectedAreaImpl(Ark_NativePointer node,
-                                 const Opt_Callback_TimePickerResult_Void* value)
+    void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
+                                    const Opt_Callback_TimePickerResult_Void* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
     {
     }
-    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                     const Opt_CrownSensitivity* value)
+    void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                        const Opt_CrownSensitivity* value)
     {
     }
-    void EnableCascadeImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
-    {
-    }
-    void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                     const Callback_Date_Void* callback_)
+    void SetEnableCascadeImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
     {
     }
     } // TimePickerAttributeModifier
@@ -7039,28 +6992,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ToggleInterfaceModifier
     namespace ToggleAttributeModifier {
-    void OnChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Boolean_Void* value)
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Boolean_Void* value)
     {
     }
-    void ContentModifierImpl(Ark_NativePointer node,
-                             const Opt_ContentModifier* value)
-    {
-    }
-    void SelectedColorImpl(Ark_NativePointer node,
-                           const Opt_ResourceColor* value)
-    {
-    }
-    void SwitchPointColorImpl(Ark_NativePointer node,
+    void SetSelectedColorImpl(Ark_NativePointer node,
                               const Opt_ResourceColor* value)
     {
     }
-    void SwitchStyleImpl(Ark_NativePointer node,
-                         const Opt_SwitchStyle* value)
+    void SetSwitchPointColorImpl(Ark_NativePointer node,
+                                 const Opt_ResourceColor* value)
     {
     }
-    void _onChangeEvent_isOnImpl(Ark_NativePointer node,
-                                 const Callback_Opt_Boolean_Void* callback_)
+    void SetSwitchStyleImpl(Ark_NativePointer node,
+                            const Opt_SwitchStyle* value)
     {
     }
     } // ToggleAttributeModifier
@@ -7079,24 +7024,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // UIExtensionComponentInterfaceModifier
     namespace UIExtensionComponentAttributeModifier {
-    void OnRemoteReadyImpl(Ark_NativePointer node,
-                           const Opt_Callback_UIExtensionProxy_Void* value)
+    void SetOnRemoteReadyImpl(Ark_NativePointer node,
+                              const Opt_Callback_UIExtensionProxy_Void* value)
     {
     }
-    void OnReceiveImpl(Ark_NativePointer node,
-                       const Opt_Callback_Map_String_Object_Void* value)
+    void SetOnReceiveImpl(Ark_NativePointer node,
+                          const Opt_Callback_Map_String_Object_Void* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_ErrorCallback* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_ErrorCallback* value)
     {
     }
-    void OnTerminatedImpl(Ark_NativePointer node,
-                          const Opt_Callback_TerminationInfo_Void* value)
+    void SetOnTerminatedImpl(Ark_NativePointer node,
+                             const Opt_Callback_TerminationInfo_Void* value)
     {
     }
-    void OnDrawReadyImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+    void SetOnDrawReadyImpl(Ark_NativePointer node,
+                            const Opt_Callback_Void* value)
     {
     }
     } // UIExtensionComponentAttributeModifier
@@ -7114,80 +7059,80 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // VideoInterfaceModifier
     namespace VideoAttributeModifier {
-    void MutedImpl(Ark_NativePointer node,
-                   const Opt_Boolean* value)
-    {
-    }
-    void AutoPlayImpl(Ark_NativePointer node,
+    void SetMutedImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
     {
     }
-    void ControlsImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+    void SetAutoPlayImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void LoopImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+    void SetControlsImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
-    void ObjectFitImpl(Ark_NativePointer node,
-                       const Opt_ImageFit* value)
+    void SetLoopImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
     {
     }
-    void OnStartImpl(Ark_NativePointer node,
-                     const Opt_VoidCallback* value)
+    void SetObjectFitImpl(Ark_NativePointer node,
+                          const Opt_ImageFit* value)
     {
     }
-    void OnPauseImpl(Ark_NativePointer node,
-                     const Opt_VoidCallback* value)
+    void SetOnStartImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* value)
     {
     }
-    void OnFinishImpl(Ark_NativePointer node,
-                      const Opt_VoidCallback* value)
+    void SetOnPauseImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* value)
     {
     }
-    void OnFullscreenChangeImpl(Ark_NativePointer node,
-                                const Opt_Callback_FullscreenInfo_Void* value)
+    void SetOnFinishImpl(Ark_NativePointer node,
+                         const Opt_VoidCallback* value)
     {
     }
-    void OnPreparedImpl(Ark_NativePointer node,
-                        const Opt_Callback_PreparedInfo_Void* value)
+    void SetOnFullscreenChangeImpl(Ark_NativePointer node,
+                                   const Opt_Callback_FullscreenInfo_Void* value)
     {
     }
-    void OnSeekingImpl(Ark_NativePointer node,
-                       const Opt_Callback_PlaybackInfo_Void* value)
+    void SetOnPreparedImpl(Ark_NativePointer node,
+                           const Opt_Callback_PreparedInfo_Void* value)
     {
     }
-    void OnSeekedImpl(Ark_NativePointer node,
-                      const Opt_Callback_PlaybackInfo_Void* value)
+    void SetOnSeekingImpl(Ark_NativePointer node,
+                          const Opt_Callback_PlaybackInfo_Void* value)
     {
     }
-    void OnUpdateImpl(Ark_NativePointer node,
-                      const Opt_Callback_PlaybackInfo_Void* value)
+    void SetOnSeekedImpl(Ark_NativePointer node,
+                         const Opt_Callback_PlaybackInfo_Void* value)
     {
     }
-    void OnErrorImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+    void SetOnUpdateImpl(Ark_NativePointer node,
+                         const Opt_Callback_PlaybackInfo_Void* value)
     {
     }
-    void OnStopImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+    void SetOnErrorImpl(Ark_NativePointer node,
+                        const Opt_Callback_Void* value)
     {
     }
-    void EnableAnalyzerImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetOnStopImpl(Ark_NativePointer node,
+                       const Opt_Callback_Void* value)
     {
     }
-    void AnalyzerConfigImpl(Ark_NativePointer node,
-                            const Opt_ImageAnalyzerConfig* value)
-    {
-    }
-    void SurfaceBackgroundColorImpl(Ark_NativePointer node,
-                                    const Opt_ColorMetrics* value)
-    {
-    }
-    void EnableShortcutKeyImpl(Ark_NativePointer node,
+    void SetEnableAnalyzerImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
+    {
+    }
+    void SetAnalyzerConfigImpl(Ark_NativePointer node,
+                               const Opt_ImageAnalyzerConfig* value)
+    {
+    }
+    void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
+                                       const Opt_ColorMetrics* value)
+    {
+    }
+    void SetEnableShortcutKeyImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
     {
     }
     } // VideoAttributeModifier
@@ -7205,53 +7150,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // WaterFlowInterfaceModifier
     namespace WaterFlowAttributeModifier {
-    void ColumnsTemplateImpl(Ark_NativePointer node,
+    void SetColumnsTemplateImpl(Ark_NativePointer node,
+                                const Opt_String* value)
+    {
+    }
+    void SetItemConstraintSizeImpl(Ark_NativePointer node,
+                                   const Opt_ConstraintSizeOptions* value)
+    {
+    }
+    void SetRowsTemplateImpl(Ark_NativePointer node,
                              const Opt_String* value)
     {
     }
-    void ItemConstraintSizeImpl(Ark_NativePointer node,
-                                const Opt_ConstraintSizeOptions* value)
+    void SetColumnsGapImpl(Ark_NativePointer node,
+                           const Opt_Length* value)
     {
     }
-    void RowsTemplateImpl(Ark_NativePointer node,
-                          const Opt_String* value)
-    {
-    }
-    void ColumnsGapImpl(Ark_NativePointer node,
+    void SetRowsGapImpl(Ark_NativePointer node,
                         const Opt_Length* value)
     {
     }
-    void RowsGapImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+    void SetLayoutDirectionImpl(Ark_NativePointer node,
+                                const Opt_FlexDirection* value)
     {
     }
-    void LayoutDirectionImpl(Ark_NativePointer node,
-                             const Opt_FlexDirection* value)
+    void SetCachedCount0Impl(Ark_NativePointer node,
+                             const Opt_Number* value)
     {
     }
-    void CachedCount0Impl(Ark_NativePointer node,
-                          const Opt_Number* value)
+    void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
+                                   const Opt_OnScrollFrameBeginCallback* value)
     {
     }
-    void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_OnScrollFrameBeginCallback* value)
+    void SetOnScrollIndexImpl(Ark_NativePointer node,
+                              const Opt_Callback_Number_Number_Void* value)
     {
     }
-    void OnScrollIndexImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Number_Void* value)
+    void SetOnWillScrollImpl(Ark_NativePointer node,
+                             const Opt_OnWillScrollCallback* value)
     {
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                          const Opt_OnWillScrollCallback* value)
+    void SetOnDidScrollImpl(Ark_NativePointer node,
+                            const Opt_OnScrollCallback* value)
     {
     }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
-    {
-    }
-    void CachedCount1Impl(Ark_NativePointer node,
-                          const Opt_Number* count,
-                          const Opt_Boolean* show)
+    void SetCachedCount1Impl(Ark_NativePointer node,
+                             const Opt_Number* count,
+                             const Opt_Boolean* show)
     {
     }
     } // WaterFlowAttributeModifier
@@ -7269,480 +7214,480 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // WebInterfaceModifier
     namespace WebAttributeModifier {
-    void JavaScriptAccessImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetJavaScriptAccessImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
     {
     }
-    void FileAccessImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+    void SetFileAccessImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
-    void OnlineImageAccessImpl(Ark_NativePointer node,
+    void SetOnlineImageAccessImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetDomStorageAccessImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+    {
+    }
+    void SetImageAccessImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+    {
+    }
+    void SetMixedModeImpl(Ark_NativePointer node,
+                          const Opt_MixedMode* value)
+    {
+    }
+    void SetZoomAccessImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+    {
+    }
+    void SetGeolocationAccessImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetJavaScriptProxyImpl(Ark_NativePointer node,
+                                const Opt_JavaScriptProxy* value)
+    {
+    }
+    void SetCacheModeImpl(Ark_NativePointer node,
+                          const Opt_CacheMode* value)
+    {
+    }
+    void SetDarkModeImpl(Ark_NativePointer node,
+                         const Opt_WebDarkMode* value)
+    {
+    }
+    void SetForceDarkAccessImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+    }
+    void SetMediaOptionsImpl(Ark_NativePointer node,
+                             const Opt_WebMediaOptions* value)
+    {
+    }
+    void SetOverviewModeAccessImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+    {
+    }
+    void SetOverScrollModeImpl(Ark_NativePointer node,
+                               const Opt_OverScrollMode* value)
+    {
+    }
+    void SetBlurOnKeyboardHideModeImpl(Ark_NativePointer node,
+                                       const Opt_BlurOnKeyboardHideMode* value)
+    {
+    }
+    void SetTextZoomRatioImpl(Ark_NativePointer node,
+                              const Opt_Int32* value)
+    {
+    }
+    void SetDatabaseAccessImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
     {
     }
-    void DomStorageAccessImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+    void SetInitialScaleImpl(Ark_NativePointer node,
+                             const Opt_Float64* value)
     {
     }
-    void ImageAccessImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
-    {
-    }
-    void MixedModeImpl(Ark_NativePointer node,
-                       const Opt_MixedMode* value)
-    {
-    }
-    void ZoomAccessImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
-    {
-    }
-    void GeolocationAccessImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
-    {
-    }
-    void JavaScriptProxyImpl(Ark_NativePointer node,
-                             const Opt_JavaScriptProxy* value)
-    {
-    }
-    void CacheModeImpl(Ark_NativePointer node,
-                       const Opt_CacheMode* value)
-    {
-    }
-    void DarkModeImpl(Ark_NativePointer node,
-                      const Opt_WebDarkMode* value)
-    {
-    }
-    void ForceDarkAccessImpl(Ark_NativePointer node,
+    void SetMetaViewportImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
     {
     }
-    void MediaOptionsImpl(Ark_NativePointer node,
-                          const Opt_WebMediaOptions* value)
+    void SetOnPageEndImpl(Ark_NativePointer node,
+                          const Opt_Callback_OnPageEndEvent_Void* value)
     {
     }
-    void OverviewModeAccessImpl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
+    void SetOnPageBeginImpl(Ark_NativePointer node,
+                            const Opt_Callback_OnPageBeginEvent_Void* value)
     {
     }
-    void OverScrollModeImpl(Ark_NativePointer node,
-                            const Opt_OverScrollMode* value)
+    void SetOnProgressChangeImpl(Ark_NativePointer node,
+                                 const Opt_Callback_OnProgressChangeEvent_Void* value)
     {
     }
-    void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
-                                    const Opt_BlurOnKeyboardHideMode* value)
+    void SetOnTitleReceiveImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnTitleReceiveEvent_Void* value)
     {
     }
-    void TextZoomRatioImpl(Ark_NativePointer node,
-                           const Opt_Int32* value)
-    {
-    }
-    void DatabaseAccessImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
-    {
-    }
-    void InitialScaleImpl(Ark_NativePointer node,
-                          const Opt_Float64* value)
-    {
-    }
-    void MetaViewportImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
-    {
-    }
-    void OnPageEndImpl(Ark_NativePointer node,
-                       const Opt_Callback_OnPageEndEvent_Void* value)
-    {
-    }
-    void OnPageBeginImpl(Ark_NativePointer node,
-                         const Opt_Callback_OnPageBeginEvent_Void* value)
-    {
-    }
-    void OnProgressChangeImpl(Ark_NativePointer node,
-                              const Opt_Callback_OnProgressChangeEvent_Void* value)
-    {
-    }
-    void OnTitleReceiveImpl(Ark_NativePointer node,
-                            const Opt_Callback_OnTitleReceiveEvent_Void* value)
-    {
-    }
-    void OnGeolocationHideImpl(Ark_NativePointer node,
-                               const Opt_Callback_Void* value)
-    {
-    }
-    void OnGeolocationShowImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnGeolocationShowEvent_Void* value)
-    {
-    }
-    void OnRequestSelectedImpl(Ark_NativePointer node,
-                               const Opt_Callback_Void* value)
-    {
-    }
-    void OnAlertImpl(Ark_NativePointer node,
-                     const Opt_Callback_OnAlertEvent_Boolean* value)
-    {
-    }
-    void OnBeforeUnloadImpl(Ark_NativePointer node,
-                            const Opt_Callback_OnBeforeUnloadEvent_Boolean* value)
-    {
-    }
-    void OnConfirmImpl(Ark_NativePointer node,
-                       const Opt_Callback_OnConfirmEvent_Boolean* value)
-    {
-    }
-    void OnPromptImpl(Ark_NativePointer node,
-                      const Opt_Callback_OnPromptEvent_Boolean* value)
-    {
-    }
-    void OnConsoleImpl(Ark_NativePointer node,
-                       const Opt_Callback_OnConsoleEvent_Boolean* value)
-    {
-    }
-    void OnErrorReceiveImpl(Ark_NativePointer node,
-                            const Opt_Callback_OnErrorReceiveEvent_Void* value)
-    {
-    }
-    void OnHttpErrorReceiveImpl(Ark_NativePointer node,
-                                const Opt_Callback_OnHttpErrorReceiveEvent_Void* value)
-    {
-    }
-    void OnDownloadStartImpl(Ark_NativePointer node,
-                             const Opt_Callback_OnDownloadStartEvent_Void* value)
-    {
-    }
-    void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
-                                      const Opt_Callback_OnRefreshAccessedHistoryEvent_Void* value)
-    {
-    }
-    void OnRenderExitedImpl(Ark_NativePointer node,
-                            const Opt_Callback_OnRenderExitedEvent_Void* value)
-    {
-    }
-    void OnShowFileSelectorImpl(Ark_NativePointer node,
-                                const Opt_Callback_OnShowFileSelectorEvent_Boolean* value)
-    {
-    }
-    void OnResourceLoadImpl(Ark_NativePointer node,
-                            const Opt_Callback_OnResourceLoadEvent_Void* value)
-    {
-    }
-    void OnFullScreenExitImpl(Ark_NativePointer node,
-                              const Opt_Callback_Void* value)
-    {
-    }
-    void OnFullScreenEnterImpl(Ark_NativePointer node,
-                               const Opt_OnFullScreenEnterCallback* value)
-    {
-    }
-    void OnScaleChangeImpl(Ark_NativePointer node,
-                           const Opt_Callback_OnScaleChangeEvent_Void* value)
-    {
-    }
-    void OnHttpAuthRequestImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnHttpAuthRequestEvent_Boolean* value)
-    {
-    }
-    void OnInterceptRequestImpl(Ark_NativePointer node,
-                                const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
-    {
-    }
-    void OnPermissionRequestImpl(Ark_NativePointer node,
-                                 const Opt_Callback_OnPermissionRequestEvent_Void* value)
-    {
-    }
-    void OnScreenCaptureRequestImpl(Ark_NativePointer node,
-                                    const Opt_Callback_OnScreenCaptureRequestEvent_Void* value)
-    {
-    }
-    void OnContextMenuShowImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnContextMenuShowEvent_Boolean* value)
-    {
-    }
-    void OnContextMenuHideImpl(Ark_NativePointer node,
-                               const Opt_OnContextMenuHideCallback* value)
-    {
-    }
-    void MediaPlayGestureAccessImpl(Ark_NativePointer node,
-                                    const Opt_Boolean* value)
-    {
-    }
-    void OnSearchResultReceiveImpl(Ark_NativePointer node,
-                                   const Opt_Callback_OnSearchResultReceiveEvent_Void* value)
-    {
-    }
-    void OnScrollImpl(Ark_NativePointer node,
-                      const Opt_Callback_OnScrollEvent_Void* value)
-    {
-    }
-    void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
-                                    const Opt_Callback_OnSslErrorEventReceiveEvent_Void* value)
-    {
-    }
-    void OnSslErrorEventImpl(Ark_NativePointer node,
-                             const Opt_OnSslErrorEventCallback* value)
-    {
-    }
-    void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
-                                           const Opt_Callback_OnClientAuthenticationEvent_Void* value)
-    {
-    }
-    void OnWindowNewImpl(Ark_NativePointer node,
-                         const Opt_Callback_OnWindowNewEvent_Void* value)
-    {
-    }
-    void OnWindowExitImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
-    {
-    }
-    void MultiWindowAccessImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
-    {
-    }
-    void OnInterceptKeyEventImpl(Ark_NativePointer node,
-                                 const Opt_Callback_KeyEvent_Boolean* value)
-    {
-    }
-    void WebStandardFontImpl(Ark_NativePointer node,
-                             const Opt_String* value)
-    {
-    }
-    void WebSerifFontImpl(Ark_NativePointer node,
-                          const Opt_String* value)
-    {
-    }
-    void WebSansSerifFontImpl(Ark_NativePointer node,
-                              const Opt_String* value)
-    {
-    }
-    void WebFixedFontImpl(Ark_NativePointer node,
-                          const Opt_String* value)
-    {
-    }
-    void WebFantasyFontImpl(Ark_NativePointer node,
-                            const Opt_String* value)
-    {
-    }
-    void WebCursiveFontImpl(Ark_NativePointer node,
-                            const Opt_String* value)
-    {
-    }
-    void DefaultFixedFontSizeImpl(Ark_NativePointer node,
-                                  const Opt_Int32* value)
-    {
-    }
-    void DefaultFontSizeImpl(Ark_NativePointer node,
-                             const Opt_Int32* value)
-    {
-    }
-    void MinFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Int32* value)
-    {
-    }
-    void MinLogicalFontSizeImpl(Ark_NativePointer node,
-                                const Opt_Int32* value)
-    {
-    }
-    void DefaultTextEncodingFormatImpl(Ark_NativePointer node,
-                                       const Opt_String* value)
-    {
-    }
-    void ForceDisplayScrollBarImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
-    {
-    }
-    void BlockNetworkImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
-    {
-    }
-    void HorizontalScrollBarAccessImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
-    {
-    }
-    void VerticalScrollBarAccessImpl(Ark_NativePointer node,
-                                     const Opt_Boolean* value)
-    {
-    }
-    void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
-                                    const Opt_Callback_OnTouchIconUrlReceivedEvent_Void* value)
-    {
-    }
-    void OnFaviconReceivedImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnFaviconReceivedEvent_Void* value)
-    {
-    }
-    void OnPageVisibleImpl(Ark_NativePointer node,
-                           const Opt_Callback_OnPageVisibleEvent_Void* value)
-    {
-    }
-    void OnDataResubmittedImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnDataResubmittedEvent_Void* value)
-    {
-    }
-    void PinchSmoothImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
-    {
-    }
-    void AllowWindowOpenMethodImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
-    {
-    }
-    void OnAudioStateChangedImpl(Ark_NativePointer node,
-                                 const Opt_Callback_OnAudioStateChangedEvent_Void* value)
-    {
-    }
-    void OnFirstContentfulPaintImpl(Ark_NativePointer node,
-                                    const Opt_Callback_OnFirstContentfulPaintEvent_Void* value)
-    {
-    }
-    void OnFirstMeaningfulPaintImpl(Ark_NativePointer node,
-                                    const Opt_OnFirstMeaningfulPaintCallback* value)
-    {
-    }
-    void OnLargestContentfulPaintImpl(Ark_NativePointer node,
-                                      const Opt_OnLargestContentfulPaintCallback* value)
-    {
-    }
-    void OnLoadInterceptImpl(Ark_NativePointer node,
-                             const Opt_Callback_OnLoadInterceptEvent_Boolean* value)
-    {
-    }
-    void OnControllerAttachedImpl(Ark_NativePointer node,
+    void SetOnGeolocationHideImpl(Ark_NativePointer node,
                                   const Opt_Callback_Void* value)
     {
     }
-    void OnOverScrollImpl(Ark_NativePointer node,
-                          const Opt_Callback_OnOverScrollEvent_Void* value)
+    void SetOnGeolocationShowImpl(Ark_NativePointer node,
+                                  const Opt_Callback_OnGeolocationShowEvent_Void* value)
     {
     }
-    void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
-                                       const Opt_OnSafeBrowsingCheckResultCallback* value)
+    void SetOnRequestSelectedImpl(Ark_NativePointer node,
+                                  const Opt_Callback_Void* value)
     {
     }
-    void OnNavigationEntryCommittedImpl(Ark_NativePointer node,
-                                        const Opt_OnNavigationEntryCommittedCallback* value)
+    void SetOnAlertImpl(Ark_NativePointer node,
+                        const Opt_Callback_OnAlertEvent_Boolean* value)
     {
     }
-    void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
-                                                   const Opt_OnIntelligentTrackingPreventionCallback* value)
+    void SetOnBeforeUnloadImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnBeforeUnloadEvent_Boolean* value)
     {
     }
-    void JavaScriptOnDocumentStartImpl(Ark_NativePointer node,
-                                       const Opt_Array_ScriptItem* value)
+    void SetOnConfirmImpl(Ark_NativePointer node,
+                          const Opt_Callback_OnConfirmEvent_Boolean* value)
     {
     }
-    void JavaScriptOnDocumentEndImpl(Ark_NativePointer node,
-                                     const Opt_Array_ScriptItem* value)
+    void SetOnPromptImpl(Ark_NativePointer node,
+                         const Opt_Callback_OnPromptEvent_Boolean* value)
     {
     }
-    void LayoutModeImpl(Ark_NativePointer node,
-                        const Opt_WebLayoutMode* value)
+    void SetOnConsoleImpl(Ark_NativePointer node,
+                          const Opt_Callback_OnConsoleEvent_Boolean* value)
     {
     }
-    void NestedScrollImpl(Ark_NativePointer node,
-                          const Opt_Union_NestedScrollOptions_NestedScrollOptionsExt* value)
+    void SetOnErrorReceiveImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnErrorReceiveEvent_Void* value)
     {
     }
-    void EnableNativeEmbedModeImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
+    void SetOnHttpErrorReceiveImpl(Ark_NativePointer node,
+                                   const Opt_Callback_OnHttpErrorReceiveEvent_Void* value)
     {
     }
-    void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
-                                          const Opt_Callback_NativeEmbedDataInfo_Void* value)
+    void SetOnDownloadStartImpl(Ark_NativePointer node,
+                                const Opt_Callback_OnDownloadStartEvent_Void* value)
     {
     }
-    void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
-                                           const Opt_OnNativeEmbedVisibilityChangeCallback* value)
+    void SetOnRefreshAccessedHistoryImpl(Ark_NativePointer node,
+                                         const Opt_Callback_OnRefreshAccessedHistoryEvent_Void* value)
     {
     }
-    void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
-                                       const Opt_Callback_NativeEmbedTouchInfo_Void* value)
+    void SetOnRenderExitedImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnRenderExitedEvent_Void* value)
     {
     }
-    void CopyOptionsImpl(Ark_NativePointer node,
-                         const Opt_CopyOptions* value)
+    void SetOnShowFileSelectorImpl(Ark_NativePointer node,
+                                   const Opt_Callback_OnShowFileSelectorEvent_Boolean* value)
     {
     }
-    void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
-                                  const Opt_OnOverrideUrlLoadingCallback* value)
+    void SetOnResourceLoadImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnResourceLoadEvent_Void* value)
     {
     }
-    void TextAutosizingImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetOnFullScreenExitImpl(Ark_NativePointer node,
+                                 const Opt_Callback_Void* value)
     {
     }
-    void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
-                                     const Opt_NativeMediaPlayerConfig* value)
+    void SetOnFullScreenEnterImpl(Ark_NativePointer node,
+                                  const Opt_OnFullScreenEnterCallback* value)
     {
     }
-    void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
-                                          const Opt_OnRenderProcessNotRespondingCallback* value)
+    void SetOnScaleChangeImpl(Ark_NativePointer node,
+                              const Opt_Callback_OnScaleChangeEvent_Void* value)
     {
     }
-    void OnRenderProcessRespondingImpl(Ark_NativePointer node,
-                                       const Opt_OnRenderProcessRespondingCallback* value)
+    void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
+                                  const Opt_Callback_OnHttpAuthRequestEvent_Boolean* value)
     {
     }
-    void OnViewportFitChangedImpl(Ark_NativePointer node,
-                                  const Opt_OnViewportFitChangedCallback* value)
+    void SetOnInterceptRequestImpl(Ark_NativePointer node,
+                                   const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
     {
     }
-    void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
-                                       const Opt_WebKeyboardCallback* value)
+    void SetOnPermissionRequestImpl(Ark_NativePointer node,
+                                    const Opt_Callback_OnPermissionRequestEvent_Void* value)
     {
     }
-    void OnAdsBlockedImpl(Ark_NativePointer node,
-                          const Opt_OnAdsBlockedCallback* value)
+    void SetOnScreenCaptureRequestImpl(Ark_NativePointer node,
+                                       const Opt_Callback_OnScreenCaptureRequestEvent_Void* value)
     {
     }
-    void KeyboardAvoidModeImpl(Ark_NativePointer node,
-                               const Opt_WebKeyboardAvoidMode* value)
+    void SetOnContextMenuShowImpl(Ark_NativePointer node,
+                                  const Opt_Callback_OnContextMenuShowEvent_Boolean* value)
     {
     }
-    void EditMenuOptionsImpl(Ark_NativePointer node,
-                             const Opt_EditMenuOptions* value)
+    void SetOnContextMenuHideImpl(Ark_NativePointer node,
+                                  const Opt_OnContextMenuHideCallback* value)
     {
     }
-    void EnableHapticFeedbackImpl(Ark_NativePointer node,
+    void SetMediaPlayGestureAccessImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
+    void SetOnSearchResultReceiveImpl(Ark_NativePointer node,
+                                      const Opt_Callback_OnSearchResultReceiveEvent_Void* value)
+    {
+    }
+    void SetOnScrollImpl(Ark_NativePointer node,
+                         const Opt_Callback_OnScrollEvent_Void* value)
+    {
+    }
+    void SetOnSslErrorEventReceiveImpl(Ark_NativePointer node,
+                                       const Opt_Callback_OnSslErrorEventReceiveEvent_Void* value)
+    {
+    }
+    void SetOnSslErrorEventImpl(Ark_NativePointer node,
+                                const Opt_OnSslErrorEventCallback* value)
+    {
+    }
+    void SetOnClientAuthenticationRequestImpl(Ark_NativePointer node,
+                                              const Opt_Callback_OnClientAuthenticationEvent_Void* value)
+    {
+    }
+    void SetOnWindowNewImpl(Ark_NativePointer node,
+                            const Opt_Callback_OnWindowNewEvent_Void* value)
+    {
+    }
+    void SetOnWindowExitImpl(Ark_NativePointer node,
+                             const Opt_Callback_Void* value)
+    {
+    }
+    void SetMultiWindowAccessImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
     {
     }
-    void OptimizeParserBudgetImpl(Ark_NativePointer node,
-                                  const Opt_Boolean* value)
+    void SetOnInterceptKeyEventImpl(Ark_NativePointer node,
+                                    const Opt_Callback_KeyEvent_Boolean* value)
     {
     }
-    void EnableFollowSystemFontWeightImpl(Ark_NativePointer node,
+    void SetWebStandardFontImpl(Ark_NativePointer node,
+                                const Opt_String* value)
+    {
+    }
+    void SetWebSerifFontImpl(Ark_NativePointer node,
+                             const Opt_String* value)
+    {
+    }
+    void SetWebSansSerifFontImpl(Ark_NativePointer node,
+                                 const Opt_String* value)
+    {
+    }
+    void SetWebFixedFontImpl(Ark_NativePointer node,
+                             const Opt_String* value)
+    {
+    }
+    void SetWebFantasyFontImpl(Ark_NativePointer node,
+                               const Opt_String* value)
+    {
+    }
+    void SetWebCursiveFontImpl(Ark_NativePointer node,
+                               const Opt_String* value)
+    {
+    }
+    void SetDefaultFixedFontSizeImpl(Ark_NativePointer node,
+                                     const Opt_Int32* value)
+    {
+    }
+    void SetDefaultFontSizeImpl(Ark_NativePointer node,
+                                const Opt_Int32* value)
+    {
+    }
+    void SetMinFontSizeImpl(Ark_NativePointer node,
+                            const Opt_Int32* value)
+    {
+    }
+    void SetMinLogicalFontSizeImpl(Ark_NativePointer node,
+                                   const Opt_Int32* value)
+    {
+    }
+    void SetDefaultTextEncodingFormatImpl(Ark_NativePointer node,
+                                          const Opt_String* value)
+    {
+    }
+    void SetForceDisplayScrollBarImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
+    void SetBlockNetworkImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
+    {
+    }
+    void SetHorizontalScrollBarAccessImpl(Ark_NativePointer node,
                                           const Opt_Boolean* value)
     {
     }
-    void EnableWebAVSessionImpl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
+    void SetVerticalScrollBarAccessImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
     {
     }
-    void RunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
+    void SetOnTouchIconUrlReceivedImpl(Ark_NativePointer node,
+                                       const Opt_Callback_OnTouchIconUrlReceivedEvent_Void* value)
+    {
+    }
+    void SetOnFaviconReceivedImpl(Ark_NativePointer node,
+                                  const Opt_Callback_OnFaviconReceivedEvent_Void* value)
+    {
+    }
+    void SetOnPageVisibleImpl(Ark_NativePointer node,
+                              const Opt_Callback_OnPageVisibleEvent_Void* value)
+    {
+    }
+    void SetOnDataResubmittedImpl(Ark_NativePointer node,
+                                  const Opt_Callback_OnDataResubmittedEvent_Void* value)
+    {
+    }
+    void SetPinchSmoothImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+    {
+    }
+    void SetAllowWindowOpenMethodImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
+    void SetOnAudioStateChangedImpl(Ark_NativePointer node,
+                                    const Opt_Callback_OnAudioStateChangedEvent_Void* value)
+    {
+    }
+    void SetOnFirstContentfulPaintImpl(Ark_NativePointer node,
+                                       const Opt_Callback_OnFirstContentfulPaintEvent_Void* value)
+    {
+    }
+    void SetOnFirstMeaningfulPaintImpl(Ark_NativePointer node,
+                                       const Opt_OnFirstMeaningfulPaintCallback* value)
+    {
+    }
+    void SetOnLargestContentfulPaintImpl(Ark_NativePointer node,
+                                         const Opt_OnLargestContentfulPaintCallback* value)
+    {
+    }
+    void SetOnLoadInterceptImpl(Ark_NativePointer node,
+                                const Opt_Callback_OnLoadInterceptEvent_Boolean* value)
+    {
+    }
+    void SetOnControllerAttachedImpl(Ark_NativePointer node,
+                                     const Opt_Callback_Void* value)
+    {
+    }
+    void SetOnOverScrollImpl(Ark_NativePointer node,
+                             const Opt_Callback_OnOverScrollEvent_Void* value)
+    {
+    }
+    void SetOnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
+                                          const Opt_OnSafeBrowsingCheckResultCallback* value)
+    {
+    }
+    void SetOnNavigationEntryCommittedImpl(Ark_NativePointer node,
+                                           const Opt_OnNavigationEntryCommittedCallback* value)
+    {
+    }
+    void SetOnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
+                                                      const Opt_OnIntelligentTrackingPreventionCallback* value)
+    {
+    }
+    void SetJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                           const Opt_Array_ScriptItem* value)
     {
     }
-    void RunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
+    void SetJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
                                         const Opt_Array_ScriptItem* value)
     {
     }
-    void RunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
-                                    const Opt_Array_ScriptItem* value)
+    void SetLayoutModeImpl(Ark_NativePointer node,
+                           const Opt_WebLayoutMode* value)
     {
     }
-    void NativeEmbedOptionsImpl(Ark_NativePointer node,
-                                const Opt_EmbedOptions* value)
+    void SetNestedScrollImpl(Ark_NativePointer node,
+                             const Opt_Union_NestedScrollOptions_NestedScrollOptionsExt* value)
     {
     }
-    void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
-                                     const Opt_String* tag,
-                                     const Opt_String* type)
+    void SetEnableNativeEmbedModeImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
     {
     }
-    void BindSelectionMenuImpl(Ark_NativePointer node,
-                               const Opt_WebElementType* elementType,
-                               const Opt_CustomNodeBuilder* content,
-                               const Opt_WebResponseType* responseType,
-                               const Opt_SelectionMenuOptionsExt* options)
+    void SetOnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
+                                             const Opt_Callback_NativeEmbedDataInfo_Void* value)
+    {
+    }
+    void SetOnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
+                                              const Opt_OnNativeEmbedVisibilityChangeCallback* value)
+    {
+    }
+    void SetOnNativeEmbedGestureEventImpl(Ark_NativePointer node,
+                                          const Opt_Callback_NativeEmbedTouchInfo_Void* value)
+    {
+    }
+    void SetCopyOptionsImpl(Ark_NativePointer node,
+                            const Opt_CopyOptions* value)
+    {
+    }
+    void SetOnOverrideUrlLoadingImpl(Ark_NativePointer node,
+                                     const Opt_OnOverrideUrlLoadingCallback* value)
+    {
+    }
+    void SetTextAutosizingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
+    void SetEnableNativeMediaPlayerImpl(Ark_NativePointer node,
+                                        const Opt_NativeMediaPlayerConfig* value)
+    {
+    }
+    void SetOnRenderProcessNotRespondingImpl(Ark_NativePointer node,
+                                             const Opt_OnRenderProcessNotRespondingCallback* value)
+    {
+    }
+    void SetOnRenderProcessRespondingImpl(Ark_NativePointer node,
+                                          const Opt_OnRenderProcessRespondingCallback* value)
+    {
+    }
+    void SetOnViewportFitChangedImpl(Ark_NativePointer node,
+                                     const Opt_OnViewportFitChangedCallback* value)
+    {
+    }
+    void SetOnInterceptKeyboardAttachImpl(Ark_NativePointer node,
+                                          const Opt_WebKeyboardCallback* value)
+    {
+    }
+    void SetOnAdsBlockedImpl(Ark_NativePointer node,
+                             const Opt_OnAdsBlockedCallback* value)
+    {
+    }
+    void SetKeyboardAvoidModeImpl(Ark_NativePointer node,
+                                  const Opt_WebKeyboardAvoidMode* value)
+    {
+    }
+    void SetEditMenuOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditMenuOptions* value)
+    {
+    }
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+    }
+    void SetOptimizeParserBudgetImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+    }
+    void SetEnableFollowSystemFontWeightImpl(Ark_NativePointer node,
+                                             const Opt_Boolean* value)
+    {
+    }
+    void SetEnableWebAVSessionImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+    {
+    }
+    void SetRunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
+                                             const Opt_Array_ScriptItem* value)
+    {
+    }
+    void SetRunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
+                                           const Opt_Array_ScriptItem* value)
+    {
+    }
+    void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
+                                       const Opt_Array_ScriptItem* value)
+    {
+    }
+    void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
+                                   const Opt_EmbedOptions* value)
+    {
+    }
+    void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
+                                        const Opt_String* tag,
+                                        const Opt_String* type)
+    {
+    }
+    void SetBindSelectionMenuImpl(Ark_NativePointer node,
+                                  const Opt_WebElementType* elementType,
+                                  const Opt_CustomNodeBuilder* content,
+                                  const Opt_WebResponseType* responseType,
+                                  const Opt_SelectionMenuOptionsExt* options)
     {
     }
     } // WebAttributeModifier
@@ -7760,12 +7705,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // WindowSceneInterfaceModifier
     namespace WindowSceneAttributeModifier {
-    void AttractionEffectImpl(Ark_NativePointer node,
-                              const Opt_Position* destination,
-                              const Opt_Number* fraction)
+    void SetAttractionEffectImpl(Ark_NativePointer node,
+                                 const Opt_Position* destination,
+                                 const Opt_Number* fraction)
     {
     }
     } // WindowSceneAttributeModifier
+    namespace WithThemeModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        return {};
+    }
+    } // WithThemeModifier
+    namespace WithThemeInterfaceModifier {
+    void SetWithThemeOptionsImpl(Ark_NativePointer node,
+                                 const Ark_WithThemeOptions* options)
+    {
+    }
+    } // WithThemeInterfaceModifier
     namespace XComponentModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -7788,28 +7746,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // XComponentInterfaceModifier
     namespace XComponentAttributeModifier {
-    void OnLoadImpl(Ark_NativePointer node,
-                    const Opt_OnNativeLoadCallback* value)
+    void SetOnLoadImpl(Ark_NativePointer node,
+                       const Opt_OnNativeLoadCallback* value)
     {
     }
-    void OnDestroyImpl(Ark_NativePointer node,
-                       const Opt_VoidCallback* value)
+    void SetOnDestroyImpl(Ark_NativePointer node,
+                          const Opt_VoidCallback* value)
     {
     }
-    void EnableAnalyzerImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+    void SetEnableAnalyzerImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
     {
     }
-    void EnableSecureImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+    void SetEnableSecureImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
     {
     }
-    void HdrBrightnessImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+    void SetHdrBrightnessImpl(Ark_NativePointer node,
+                              const Opt_Number* value)
     {
     }
-    void EnableTransparentLayerImpl(Ark_NativePointer node,
-                                    const Opt_Boolean* value)
+    void SetEnableTransparentLayerImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
     {
     }
     } // XComponentAttributeModifier
@@ -7818,33 +7776,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIAlphabetIndexerModifier ArkUIAlphabetIndexerModifierImpl {
             AlphabetIndexerModifier::ConstructImpl,
             AlphabetIndexerInterfaceModifier::SetAlphabetIndexerOptionsImpl,
-            AlphabetIndexerAttributeModifier::ColorImpl,
-            AlphabetIndexerAttributeModifier::SelectedColorImpl,
-            AlphabetIndexerAttributeModifier::PopupColorImpl,
-            AlphabetIndexerAttributeModifier::SelectedBackgroundColorImpl,
-            AlphabetIndexerAttributeModifier::PopupBackgroundImpl,
-            AlphabetIndexerAttributeModifier::PopupSelectedColorImpl,
-            AlphabetIndexerAttributeModifier::PopupUnselectedColorImpl,
-            AlphabetIndexerAttributeModifier::PopupItemBackgroundColorImpl,
-            AlphabetIndexerAttributeModifier::UsingPopupImpl,
-            AlphabetIndexerAttributeModifier::SelectedFontImpl,
-            AlphabetIndexerAttributeModifier::PopupFontImpl,
-            AlphabetIndexerAttributeModifier::PopupItemFontImpl,
-            AlphabetIndexerAttributeModifier::ItemSizeImpl,
-            AlphabetIndexerAttributeModifier::FontImpl,
-            AlphabetIndexerAttributeModifier::OnSelectImpl,
-            AlphabetIndexerAttributeModifier::OnRequestPopupDataImpl,
-            AlphabetIndexerAttributeModifier::OnPopupSelectImpl,
-            AlphabetIndexerAttributeModifier::SelectedImpl,
-            AlphabetIndexerAttributeModifier::PopupPositionImpl,
-            AlphabetIndexerAttributeModifier::AutoCollapseImpl,
-            AlphabetIndexerAttributeModifier::PopupItemBorderRadiusImpl,
-            AlphabetIndexerAttributeModifier::ItemBorderRadiusImpl,
-            AlphabetIndexerAttributeModifier::PopupBackgroundBlurStyleImpl,
-            AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
-            AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
-            AlphabetIndexerAttributeModifier::AlignStyleImpl,
-            AlphabetIndexerAttributeModifier::_onChangeEvent_selectedImpl,
+            AlphabetIndexerAttributeModifier::SetColorImpl,
+            AlphabetIndexerAttributeModifier::SetSelectedColorImpl,
+            AlphabetIndexerAttributeModifier::SetPopupColorImpl,
+            AlphabetIndexerAttributeModifier::SetSelectedBackgroundColorImpl,
+            AlphabetIndexerAttributeModifier::SetPopupBackgroundImpl,
+            AlphabetIndexerAttributeModifier::SetPopupSelectedColorImpl,
+            AlphabetIndexerAttributeModifier::SetPopupUnselectedColorImpl,
+            AlphabetIndexerAttributeModifier::SetPopupItemBackgroundColorImpl,
+            AlphabetIndexerAttributeModifier::SetUsingPopupImpl,
+            AlphabetIndexerAttributeModifier::SetSelectedFontImpl,
+            AlphabetIndexerAttributeModifier::SetPopupFontImpl,
+            AlphabetIndexerAttributeModifier::SetPopupItemFontImpl,
+            AlphabetIndexerAttributeModifier::SetItemSizeImpl,
+            AlphabetIndexerAttributeModifier::SetFontImpl,
+            AlphabetIndexerAttributeModifier::SetOnSelectImpl,
+            AlphabetIndexerAttributeModifier::SetOnRequestPopupDataImpl,
+            AlphabetIndexerAttributeModifier::SetOnPopupSelectImpl,
+            AlphabetIndexerAttributeModifier::SetSelectedImpl,
+            AlphabetIndexerAttributeModifier::SetPopupPositionImpl,
+            AlphabetIndexerAttributeModifier::SetAutoCollapseImpl,
+            AlphabetIndexerAttributeModifier::SetPopupItemBorderRadiusImpl,
+            AlphabetIndexerAttributeModifier::SetItemBorderRadiusImpl,
+            AlphabetIndexerAttributeModifier::SetPopupBackgroundBlurStyleImpl,
+            AlphabetIndexerAttributeModifier::SetPopupTitleBackgroundImpl,
+            AlphabetIndexerAttributeModifier::SetEnableHapticFeedbackImpl,
+            AlphabetIndexerAttributeModifier::SetAlignStyleImpl,
         };
         return &ArkUIAlphabetIndexerModifierImpl;
     }
@@ -7854,20 +7811,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIAnimatorModifier ArkUIAnimatorModifierImpl {
             AnimatorModifier::ConstructImpl,
             AnimatorInterfaceModifier::SetAnimatorOptionsImpl,
-            AnimatorAttributeModifier::StateImpl,
-            AnimatorAttributeModifier::DurationImpl,
-            AnimatorAttributeModifier::CurveImpl,
-            AnimatorAttributeModifier::DelayImpl,
-            AnimatorAttributeModifier::FillModeImpl,
-            AnimatorAttributeModifier::IterationsImpl,
-            AnimatorAttributeModifier::PlayModeImpl,
-            AnimatorAttributeModifier::MotionImpl,
-            AnimatorAttributeModifier::OnStartImpl,
-            AnimatorAttributeModifier::OnPauseImpl,
-            AnimatorAttributeModifier::OnRepeatImpl,
-            AnimatorAttributeModifier::OnCancelImpl,
-            AnimatorAttributeModifier::OnFinishImpl,
-            AnimatorAttributeModifier::OnFrameImpl,
+            AnimatorAttributeModifier::SetStateImpl,
+            AnimatorAttributeModifier::SetDurationImpl,
+            AnimatorAttributeModifier::SetCurveImpl,
+            AnimatorAttributeModifier::SetDelayImpl,
+            AnimatorAttributeModifier::SetFillModeImpl,
+            AnimatorAttributeModifier::SetIterationsImpl,
+            AnimatorAttributeModifier::SetPlayModeImpl,
+            AnimatorAttributeModifier::SetMotionImpl,
+            AnimatorAttributeModifier::SetOnStartImpl,
+            AnimatorAttributeModifier::SetOnPauseImpl,
+            AnimatorAttributeModifier::SetOnRepeatImpl,
+            AnimatorAttributeModifier::SetOnCancelImpl,
+            AnimatorAttributeModifier::SetOnFinishImpl,
+            AnimatorAttributeModifier::SetOnFrameImpl,
         };
         return &ArkUIAnimatorModifierImpl;
     }
@@ -7886,8 +7843,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIBaseSpanModifier ArkUIBaseSpanModifierImpl {
             BaseSpanModifier::ConstructImpl,
-            BaseSpanModifier::TextBackgroundStyleImpl,
-            BaseSpanModifier::BaselineOffsetImpl,
+            BaseSpanModifier::SetTextBackgroundStyleImpl,
+            BaseSpanModifier::SetBaselineOffsetImpl,
         };
         return &ArkUIBaseSpanModifierImpl;
     }
@@ -7897,7 +7854,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {
             BlankModifier::ConstructImpl,
             BlankInterfaceModifier::SetBlankOptionsImpl,
-            BlankAttributeModifier::ColorImpl,
+            BlankAttributeModifier::SetColorImpl,
         };
         return &ArkUIBlankModifierImpl;
     }
@@ -7906,23 +7863,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
             ButtonModifier::ConstructImpl,
-            ButtonInterfaceModifier::SetButtonOptions0Impl,
-            ButtonInterfaceModifier::SetButtonOptions1Impl,
-            ButtonInterfaceModifier::SetButtonOptions2Impl,
-            ButtonAttributeModifier::TypeImpl,
-            ButtonAttributeModifier::StateEffectImpl,
-            ButtonAttributeModifier::ButtonStyleImpl,
-            ButtonAttributeModifier::ControlSizeImpl,
-            ButtonAttributeModifier::RoleImpl,
-            ButtonAttributeModifier::FontColorImpl,
-            ButtonAttributeModifier::FontSizeImpl,
-            ButtonAttributeModifier::FontWeightImpl,
-            ButtonAttributeModifier::FontStyleImpl,
-            ButtonAttributeModifier::FontFamilyImpl,
-            ButtonAttributeModifier::ContentModifierImpl,
-            ButtonAttributeModifier::LabelStyleImpl,
-            ButtonAttributeModifier::MinFontScaleImpl,
-            ButtonAttributeModifier::MaxFontScaleImpl,
+            ButtonInterfaceModifier::SetButtonOptionsImpl,
+            ButtonAttributeModifier::SetTypeImpl,
+            ButtonAttributeModifier::SetStateEffectImpl,
+            ButtonAttributeModifier::SetButtonStyleImpl,
+            ButtonAttributeModifier::SetControlSizeImpl,
+            ButtonAttributeModifier::SetRoleImpl,
+            ButtonAttributeModifier::SetFontColorImpl,
+            ButtonAttributeModifier::SetFontSizeImpl,
+            ButtonAttributeModifier::SetFontWeightImpl,
+            ButtonAttributeModifier::SetFontStyleImpl,
+            ButtonAttributeModifier::SetFontFamilyImpl,
+            ButtonAttributeModifier::SetLabelStyleImpl,
+            ButtonAttributeModifier::SetMinFontScaleImpl,
+            ButtonAttributeModifier::SetMaxFontScaleImpl,
         };
         return &ArkUIButtonModifierImpl;
     }
@@ -7932,10 +7886,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
             CalendarPickerModifier::ConstructImpl,
             CalendarPickerInterfaceModifier::SetCalendarPickerOptionsImpl,
-            CalendarPickerAttributeModifier::TextStyleImpl,
-            CalendarPickerAttributeModifier::OnChangeImpl,
-            CalendarPickerAttributeModifier::MarkTodayImpl,
-            CalendarPickerAttributeModifier::EdgeAlignImpl,
+            CalendarPickerAttributeModifier::SetTextStyleImpl,
+            CalendarPickerAttributeModifier::SetOnChangeImpl,
+            CalendarPickerAttributeModifier::SetMarkTodayImpl,
+            CalendarPickerAttributeModifier::SetEdgeAlignImpl,
         };
         return &ArkUICalendarPickerModifierImpl;
     }
@@ -7946,8 +7900,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasModifier::ConstructImpl,
             CanvasInterfaceModifier::SetCanvasOptions0Impl,
             CanvasInterfaceModifier::SetCanvasOptions1Impl,
-            CanvasAttributeModifier::OnReadyImpl,
-            CanvasAttributeModifier::EnableAnalyzerImpl,
+            CanvasAttributeModifier::SetOnReadyImpl,
+            CanvasAttributeModifier::SetEnableAnalyzerImpl,
         };
         return &ArkUICanvasModifierImpl;
     }
@@ -7957,14 +7911,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUICheckboxModifier ArkUICheckboxModifierImpl {
             CheckboxModifier::ConstructImpl,
             CheckboxInterfaceModifier::SetCheckboxOptionsImpl,
-            CheckboxAttributeModifier::SelectImpl,
-            CheckboxAttributeModifier::SelectedColorImpl,
-            CheckboxAttributeModifier::ShapeImpl,
-            CheckboxAttributeModifier::UnselectedColorImpl,
-            CheckboxAttributeModifier::MarkImpl,
-            CheckboxAttributeModifier::OnChangeImpl,
-            CheckboxAttributeModifier::ContentModifierImpl,
-            CheckboxAttributeModifier::_onChangeEvent_selectImpl,
+            CheckboxAttributeModifier::SetSelectImpl,
+            CheckboxAttributeModifier::SetSelectedColorImpl,
+            CheckboxAttributeModifier::SetShapeImpl,
+            CheckboxAttributeModifier::SetUnselectedColorImpl,
+            CheckboxAttributeModifier::SetMarkImpl,
+            CheckboxAttributeModifier::SetOnChangeImpl,
         };
         return &ArkUICheckboxModifierImpl;
     }
@@ -7974,13 +7926,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUICheckboxGroupModifier ArkUICheckboxGroupModifierImpl {
             CheckboxGroupModifier::ConstructImpl,
             CheckboxGroupInterfaceModifier::SetCheckboxGroupOptionsImpl,
-            CheckboxGroupAttributeModifier::SelectAllImpl,
-            CheckboxGroupAttributeModifier::SelectedColorImpl,
-            CheckboxGroupAttributeModifier::UnselectedColorImpl,
-            CheckboxGroupAttributeModifier::MarkImpl,
-            CheckboxGroupAttributeModifier::OnChangeImpl,
-            CheckboxGroupAttributeModifier::CheckboxShapeImpl,
-            CheckboxGroupAttributeModifier::_onChangeEvent_selectAllImpl,
+            CheckboxGroupAttributeModifier::SetSelectAllImpl,
+            CheckboxGroupAttributeModifier::SetSelectedColorImpl,
+            CheckboxGroupAttributeModifier::SetUnselectedColorImpl,
+            CheckboxGroupAttributeModifier::SetMarkImpl,
+            CheckboxGroupAttributeModifier::SetOnChangeImpl,
+            CheckboxGroupAttributeModifier::SetCheckboxShapeImpl,
         };
         return &ArkUICheckboxGroupModifierImpl;
     }
@@ -7999,10 +7950,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
             ColumnModifier::ConstructImpl,
             ColumnInterfaceModifier::SetColumnOptionsImpl,
-            ColumnAttributeModifier::AlignItemsImpl,
-            ColumnAttributeModifier::JustifyContentImpl,
-            ColumnAttributeModifier::PointLightImpl,
-            ColumnAttributeModifier::ReverseImpl,
+            ColumnAttributeModifier::SetAlignItemsImpl,
+            ColumnAttributeModifier::SetJustifyContentImpl,
+            ColumnAttributeModifier::SetPointLightImpl,
+            ColumnAttributeModifier::SetReverseImpl,
         };
         return &ArkUIColumnModifierImpl;
     }
@@ -8012,8 +7963,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIColumnSplitModifier ArkUIColumnSplitModifierImpl {
             ColumnSplitModifier::ConstructImpl,
             ColumnSplitInterfaceModifier::SetColumnSplitOptionsImpl,
-            ColumnSplitAttributeModifier::ResizeableImpl,
-            ColumnSplitAttributeModifier::DividerImpl,
+            ColumnSplitAttributeModifier::SetResizeableImpl,
+            ColumnSplitAttributeModifier::SetDividerImpl,
         };
         return &ArkUIColumnSplitModifierImpl;
     }
@@ -8022,206 +7973,206 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUICommonMethodModifier ArkUICommonMethodModifierImpl {
             CommonMethodModifier::ConstructImpl,
-            CommonMethodModifier::WidthImpl,
-            CommonMethodModifier::HeightImpl,
-            CommonMethodModifier::DrawModifierImpl,
-            CommonMethodModifier::ResponseRegionImpl,
-            CommonMethodModifier::MouseResponseRegionImpl,
-            CommonMethodModifier::SizeImpl,
-            CommonMethodModifier::ConstraintSizeImpl,
-            CommonMethodModifier::HitTestBehaviorImpl,
-            CommonMethodModifier::OnChildTouchTestImpl,
-            CommonMethodModifier::LayoutWeightImpl,
-            CommonMethodModifier::ChainWeightImpl,
-            CommonMethodModifier::PaddingImpl,
-            CommonMethodModifier::SafeAreaPaddingImpl,
-            CommonMethodModifier::MarginImpl,
-            CommonMethodModifier::BackgroundColorImpl,
-            CommonMethodModifier::PixelRoundImpl,
-            CommonMethodModifier::BackgroundImageSizeImpl,
-            CommonMethodModifier::BackgroundImagePositionImpl,
-            CommonMethodModifier::BackgroundEffect0Impl,
-            CommonMethodModifier::BackgroundImageResizableImpl,
-            CommonMethodModifier::ForegroundEffectImpl,
-            CommonMethodModifier::VisualEffectImpl,
-            CommonMethodModifier::BackgroundFilterImpl,
-            CommonMethodModifier::ForegroundFilterImpl,
-            CommonMethodModifier::CompositingFilterImpl,
-            CommonMethodModifier::OpacityImpl,
-            CommonMethodModifier::BorderImpl,
-            CommonMethodModifier::BorderStyleImpl,
-            CommonMethodModifier::BorderWidthImpl,
-            CommonMethodModifier::BorderColorImpl,
-            CommonMethodModifier::BorderRadiusImpl,
-            CommonMethodModifier::BorderImageImpl,
-            CommonMethodModifier::OutlineImpl,
-            CommonMethodModifier::OutlineStyleImpl,
-            CommonMethodModifier::OutlineWidthImpl,
-            CommonMethodModifier::OutlineColorImpl,
-            CommonMethodModifier::OutlineRadiusImpl,
-            CommonMethodModifier::ForegroundColorImpl,
-            CommonMethodModifier::OnClick0Impl,
-            CommonMethodModifier::OnHoverImpl,
-            CommonMethodModifier::OnHoverMoveImpl,
-            CommonMethodModifier::OnAccessibilityHoverImpl,
-            CommonMethodModifier::HoverEffectImpl,
-            CommonMethodModifier::OnMouseImpl,
-            CommonMethodModifier::OnTouchImpl,
-            CommonMethodModifier::OnKeyEventImpl,
-            CommonMethodModifier::OnDigitalCrownImpl,
-            CommonMethodModifier::OnKeyPreImeImpl,
-            CommonMethodModifier::OnKeyEventDispatchImpl,
-            CommonMethodModifier::OnFocusAxisEventImpl,
-            CommonMethodModifier::OnAxisEventImpl,
-            CommonMethodModifier::FocusableImpl,
-            CommonMethodModifier::NextFocusImpl,
-            CommonMethodModifier::TabStopImpl,
-            CommonMethodModifier::OnFocusImpl,
-            CommonMethodModifier::OnBlurImpl,
-            CommonMethodModifier::TabIndexImpl,
-            CommonMethodModifier::DefaultFocusImpl,
-            CommonMethodModifier::GroupDefaultFocusImpl,
-            CommonMethodModifier::FocusOnTouchImpl,
-            CommonMethodModifier::FocusBoxImpl,
-            CommonMethodModifier::AnimationImpl,
-            CommonMethodModifier::Transition0Impl,
-            CommonMethodModifier::MotionBlurImpl,
-            CommonMethodModifier::BrightnessImpl,
-            CommonMethodModifier::ContrastImpl,
-            CommonMethodModifier::GrayscaleImpl,
-            CommonMethodModifier::ColorBlendImpl,
-            CommonMethodModifier::SaturateImpl,
-            CommonMethodModifier::SepiaImpl,
-            CommonMethodModifier::InvertImpl,
-            CommonMethodModifier::HueRotateImpl,
-            CommonMethodModifier::UseShadowBatchingImpl,
-            CommonMethodModifier::UseEffect0Impl,
-            CommonMethodModifier::RenderGroupImpl,
-            CommonMethodModifier::FreezeImpl,
-            CommonMethodModifier::TranslateImpl,
-            CommonMethodModifier::ScaleImpl,
-            CommonMethodModifier::RotateImpl,
-            CommonMethodModifier::TransformImpl,
-            CommonMethodModifier::OnAppearImpl,
-            CommonMethodModifier::OnDisAppearImpl,
-            CommonMethodModifier::OnAttachImpl,
-            CommonMethodModifier::OnDetachImpl,
-            CommonMethodModifier::OnAreaChangeImpl,
-            CommonMethodModifier::VisibilityImpl,
-            CommonMethodModifier::FlexGrowImpl,
-            CommonMethodModifier::FlexShrinkImpl,
-            CommonMethodModifier::FlexBasisImpl,
-            CommonMethodModifier::AlignSelfImpl,
-            CommonMethodModifier::DisplayPriorityImpl,
-            CommonMethodModifier::ZIndexImpl,
-            CommonMethodModifier::DirectionImpl,
-            CommonMethodModifier::AlignImpl,
-            CommonMethodModifier::PositionImpl,
-            CommonMethodModifier::MarkAnchorImpl,
-            CommonMethodModifier::OffsetImpl,
-            CommonMethodModifier::EnabledImpl,
-            CommonMethodModifier::AlignRules0Impl,
-            CommonMethodModifier::AlignRules1Impl,
-            CommonMethodModifier::AspectRatioImpl,
-            CommonMethodModifier::ClickEffectImpl,
-            CommonMethodModifier::OnDragStartImpl,
-            CommonMethodModifier::OnDragEnterImpl,
-            CommonMethodModifier::OnDragMoveImpl,
-            CommonMethodModifier::OnDragLeaveImpl,
-            CommonMethodModifier::OnDrop0Impl,
-            CommonMethodModifier::OnDragEndImpl,
-            CommonMethodModifier::AllowDropImpl,
-            CommonMethodModifier::DraggableImpl,
-            CommonMethodModifier::DragPreview0Impl,
-            CommonMethodModifier::OnPreDragImpl,
-            CommonMethodModifier::LinearGradientImpl,
-            CommonMethodModifier::SweepGradientImpl,
-            CommonMethodModifier::RadialGradientImpl,
-            CommonMethodModifier::MotionPathImpl,
-            CommonMethodModifier::ShadowImpl,
-            CommonMethodModifier::ClipImpl,
-            CommonMethodModifier::ClipShapeImpl,
-            CommonMethodModifier::MaskImpl,
-            CommonMethodModifier::MaskShapeImpl,
-            CommonMethodModifier::KeyImpl,
-            CommonMethodModifier::IdImpl,
-            CommonMethodModifier::GeometryTransition0Impl,
-            CommonMethodModifier::RestoreIdImpl,
-            CommonMethodModifier::SphericalEffectImpl,
-            CommonMethodModifier::LightUpEffectImpl,
-            CommonMethodModifier::PixelStretchEffectImpl,
-            CommonMethodModifier::AccessibilityGroup0Impl,
-            CommonMethodModifier::AccessibilityText0Impl,
-            CommonMethodModifier::AccessibilityNextFocusIdImpl,
-            CommonMethodModifier::AccessibilityDefaultFocusImpl,
-            CommonMethodModifier::AccessibilityUseSamePageImpl,
-            CommonMethodModifier::AccessibilityScrollTriggerableImpl,
-            CommonMethodModifier::AccessibilityText1Impl,
-            CommonMethodModifier::AccessibilityRoleImpl,
-            CommonMethodModifier::OnAccessibilityFocusImpl,
-            CommonMethodModifier::AccessibilityTextHintImpl,
-            CommonMethodModifier::AccessibilityDescription0Impl,
-            CommonMethodModifier::AccessibilityDescription1Impl,
-            CommonMethodModifier::AccessibilityLevelImpl,
-            CommonMethodModifier::AccessibilityVirtualNodeImpl,
-            CommonMethodModifier::AccessibilityCheckedImpl,
-            CommonMethodModifier::AccessibilitySelectedImpl,
-            CommonMethodModifier::ObscuredImpl,
-            CommonMethodModifier::ReuseIdImpl,
-            CommonMethodModifier::ReuseImpl,
-            CommonMethodModifier::RenderFitImpl,
-            CommonMethodModifier::GestureModifierImpl,
-            CommonMethodModifier::BackgroundBrightnessImpl,
-            CommonMethodModifier::OnGestureJudgeBeginImpl,
-            CommonMethodModifier::OnGestureRecognizerJudgeBegin0Impl,
-            CommonMethodModifier::ShouldBuiltInRecognizerParallelWithImpl,
-            CommonMethodModifier::MonopolizeEventsImpl,
-            CommonMethodModifier::OnTouchInterceptImpl,
-            CommonMethodModifier::OnSizeChangeImpl,
-            CommonMethodModifier::AccessibilityFocusDrawLevelImpl,
-            CommonMethodModifier::CustomPropertyImpl,
-            CommonMethodModifier::ExpandSafeAreaImpl,
-            CommonMethodModifier::BackgroundImpl,
-            CommonMethodModifier::BackgroundImage0Impl,
-            CommonMethodModifier::BackgroundImage1Impl,
-            CommonMethodModifier::BackgroundBlurStyleImpl,
-            CommonMethodModifier::BackgroundEffect1Impl,
-            CommonMethodModifier::ForegroundBlurStyleImpl,
-            CommonMethodModifier::OnClick1Impl,
-            CommonMethodModifier::FocusScopeIdImpl,
-            CommonMethodModifier::FocusScopePriorityImpl,
-            CommonMethodModifier::Transition1Impl,
-            CommonMethodModifier::GestureImpl,
-            CommonMethodModifier::PriorityGestureImpl,
-            CommonMethodModifier::ParallelGestureImpl,
-            CommonMethodModifier::BlurImpl,
-            CommonMethodModifier::LinearGradientBlurImpl,
-            CommonMethodModifier::SystemBarEffectImpl,
-            CommonMethodModifier::UseEffect1Impl,
-            CommonMethodModifier::BackdropBlurImpl,
-            CommonMethodModifier::SharedTransitionImpl,
-            CommonMethodModifier::ChainModeImpl,
-            CommonMethodModifier::OnDrop1Impl,
-            CommonMethodModifier::DragPreview1Impl,
-            CommonMethodModifier::DragPreviewOptionsImpl,
-            CommonMethodModifier::OverlayImpl,
-            CommonMethodModifier::BlendModeImpl,
-            CommonMethodModifier::AdvancedBlendModeImpl,
-            CommonMethodModifier::GeometryTransition1Impl,
-            CommonMethodModifier::BindTipsImpl,
-            CommonMethodModifier::BindPopupImpl,
-            CommonMethodModifier::BindMenu0Impl,
-            CommonMethodModifier::BindMenu1Impl,
-            CommonMethodModifier::BindContextMenu0Impl,
-            CommonMethodModifier::BindContextMenu1Impl,
-            CommonMethodModifier::BindContentCover0Impl,
-            CommonMethodModifier::BindContentCover1Impl,
-            CommonMethodModifier::BindSheetImpl,
-            CommonMethodModifier::OnVisibleAreaChangeImpl,
-            CommonMethodModifier::OnVisibleAreaApproximateChangeImpl,
-            CommonMethodModifier::KeyboardShortcutImpl,
-            CommonMethodModifier::AccessibilityGroup1Impl,
-            CommonMethodModifier::OnGestureRecognizerJudgeBegin1Impl,
+            CommonMethodModifier::SetWidthImpl,
+            CommonMethodModifier::SetHeightImpl,
+            CommonMethodModifier::SetDrawModifierImpl,
+            CommonMethodModifier::SetResponseRegionImpl,
+            CommonMethodModifier::SetMouseResponseRegionImpl,
+            CommonMethodModifier::SetSizeImpl,
+            CommonMethodModifier::SetConstraintSizeImpl,
+            CommonMethodModifier::SetHitTestBehaviorImpl,
+            CommonMethodModifier::SetOnChildTouchTestImpl,
+            CommonMethodModifier::SetLayoutWeightImpl,
+            CommonMethodModifier::SetChainWeightImpl,
+            CommonMethodModifier::SetPaddingImpl,
+            CommonMethodModifier::SetSafeAreaPaddingImpl,
+            CommonMethodModifier::SetMarginImpl,
+            CommonMethodModifier::SetBackgroundColorImpl,
+            CommonMethodModifier::SetPixelRoundImpl,
+            CommonMethodModifier::SetBackgroundImageSizeImpl,
+            CommonMethodModifier::SetBackgroundImagePositionImpl,
+            CommonMethodModifier::SetBackgroundEffect0Impl,
+            CommonMethodModifier::SetBackgroundImageResizableImpl,
+            CommonMethodModifier::SetForegroundEffectImpl,
+            CommonMethodModifier::SetVisualEffectImpl,
+            CommonMethodModifier::SetBackgroundFilterImpl,
+            CommonMethodModifier::SetForegroundFilterImpl,
+            CommonMethodModifier::SetCompositingFilterImpl,
+            CommonMethodModifier::SetOpacityImpl,
+            CommonMethodModifier::SetBorderImpl,
+            CommonMethodModifier::SetBorderStyleImpl,
+            CommonMethodModifier::SetBorderWidthImpl,
+            CommonMethodModifier::SetBorderColorImpl,
+            CommonMethodModifier::SetBorderRadiusImpl,
+            CommonMethodModifier::SetBorderImageImpl,
+            CommonMethodModifier::SetOutlineImpl,
+            CommonMethodModifier::SetOutlineStyleImpl,
+            CommonMethodModifier::SetOutlineWidthImpl,
+            CommonMethodModifier::SetOutlineColorImpl,
+            CommonMethodModifier::SetOutlineRadiusImpl,
+            CommonMethodModifier::SetForegroundColorImpl,
+            CommonMethodModifier::SetOnClick0Impl,
+            CommonMethodModifier::SetOnHoverImpl,
+            CommonMethodModifier::SetOnHoverMoveImpl,
+            CommonMethodModifier::SetOnAccessibilityHoverImpl,
+            CommonMethodModifier::SetHoverEffectImpl,
+            CommonMethodModifier::SetOnMouseImpl,
+            CommonMethodModifier::SetOnTouchImpl,
+            CommonMethodModifier::SetOnKeyEventImpl,
+            CommonMethodModifier::SetOnDigitalCrownImpl,
+            CommonMethodModifier::SetOnKeyPreImeImpl,
+            CommonMethodModifier::SetOnKeyEventDispatchImpl,
+            CommonMethodModifier::SetOnFocusAxisEventImpl,
+            CommonMethodModifier::SetOnAxisEventImpl,
+            CommonMethodModifier::SetFocusableImpl,
+            CommonMethodModifier::SetNextFocusImpl,
+            CommonMethodModifier::SetTabStopImpl,
+            CommonMethodModifier::SetOnFocusImpl,
+            CommonMethodModifier::SetOnBlurImpl,
+            CommonMethodModifier::SetTabIndexImpl,
+            CommonMethodModifier::SetDefaultFocusImpl,
+            CommonMethodModifier::SetGroupDefaultFocusImpl,
+            CommonMethodModifier::SetFocusOnTouchImpl,
+            CommonMethodModifier::SetFocusBoxImpl,
+            CommonMethodModifier::SetAnimationImpl,
+            CommonMethodModifier::SetTransition0Impl,
+            CommonMethodModifier::SetMotionBlurImpl,
+            CommonMethodModifier::SetBrightnessImpl,
+            CommonMethodModifier::SetContrastImpl,
+            CommonMethodModifier::SetGrayscaleImpl,
+            CommonMethodModifier::SetColorBlendImpl,
+            CommonMethodModifier::SetSaturateImpl,
+            CommonMethodModifier::SetSepiaImpl,
+            CommonMethodModifier::SetInvertImpl,
+            CommonMethodModifier::SetHueRotateImpl,
+            CommonMethodModifier::SetUseShadowBatchingImpl,
+            CommonMethodModifier::SetUseEffect0Impl,
+            CommonMethodModifier::SetRenderGroupImpl,
+            CommonMethodModifier::SetFreezeImpl,
+            CommonMethodModifier::SetTranslateImpl,
+            CommonMethodModifier::SetScaleImpl,
+            CommonMethodModifier::SetRotateImpl,
+            CommonMethodModifier::SetTransformImpl,
+            CommonMethodModifier::SetOnAppearImpl,
+            CommonMethodModifier::SetOnDisAppearImpl,
+            CommonMethodModifier::SetOnAttachImpl,
+            CommonMethodModifier::SetOnDetachImpl,
+            CommonMethodModifier::SetOnAreaChangeImpl,
+            CommonMethodModifier::SetVisibilityImpl,
+            CommonMethodModifier::SetFlexGrowImpl,
+            CommonMethodModifier::SetFlexShrinkImpl,
+            CommonMethodModifier::SetFlexBasisImpl,
+            CommonMethodModifier::SetAlignSelfImpl,
+            CommonMethodModifier::SetDisplayPriorityImpl,
+            CommonMethodModifier::SetZIndexImpl,
+            CommonMethodModifier::SetDirectionImpl,
+            CommonMethodModifier::SetAlignImpl,
+            CommonMethodModifier::SetPositionImpl,
+            CommonMethodModifier::SetMarkAnchorImpl,
+            CommonMethodModifier::SetOffsetImpl,
+            CommonMethodModifier::SetEnabledImpl,
+            CommonMethodModifier::SetAlignRules0Impl,
+            CommonMethodModifier::SetAlignRules1Impl,
+            CommonMethodModifier::SetAspectRatioImpl,
+            CommonMethodModifier::SetClickEffectImpl,
+            CommonMethodModifier::SetOnDragStartImpl,
+            CommonMethodModifier::SetOnDragEnterImpl,
+            CommonMethodModifier::SetOnDragMoveImpl,
+            CommonMethodModifier::SetOnDragLeaveImpl,
+            CommonMethodModifier::SetOnDrop0Impl,
+            CommonMethodModifier::SetOnDragEndImpl,
+            CommonMethodModifier::SetAllowDropImpl,
+            CommonMethodModifier::SetDraggableImpl,
+            CommonMethodModifier::SetDragPreview0Impl,
+            CommonMethodModifier::SetOnPreDragImpl,
+            CommonMethodModifier::SetLinearGradientImpl,
+            CommonMethodModifier::SetSweepGradientImpl,
+            CommonMethodModifier::SetRadialGradientImpl,
+            CommonMethodModifier::SetMotionPathImpl,
+            CommonMethodModifier::SetShadowImpl,
+            CommonMethodModifier::SetClipImpl,
+            CommonMethodModifier::SetClipShapeImpl,
+            CommonMethodModifier::SetMaskImpl,
+            CommonMethodModifier::SetMaskShapeImpl,
+            CommonMethodModifier::SetKeyImpl,
+            CommonMethodModifier::SetIdImpl,
+            CommonMethodModifier::SetGeometryTransition0Impl,
+            CommonMethodModifier::SetRestoreIdImpl,
+            CommonMethodModifier::SetSphericalEffectImpl,
+            CommonMethodModifier::SetLightUpEffectImpl,
+            CommonMethodModifier::SetPixelStretchEffectImpl,
+            CommonMethodModifier::SetAccessibilityGroup0Impl,
+            CommonMethodModifier::SetAccessibilityText0Impl,
+            CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
+            CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
+            CommonMethodModifier::SetAccessibilityUseSamePageImpl,
+            CommonMethodModifier::SetAccessibilityScrollTriggerableImpl,
+            CommonMethodModifier::SetAccessibilityText1Impl,
+            CommonMethodModifier::SetAccessibilityRoleImpl,
+            CommonMethodModifier::SetOnAccessibilityFocusImpl,
+            CommonMethodModifier::SetAccessibilityTextHintImpl,
+            CommonMethodModifier::SetAccessibilityDescription0Impl,
+            CommonMethodModifier::SetAccessibilityDescription1Impl,
+            CommonMethodModifier::SetAccessibilityLevelImpl,
+            CommonMethodModifier::SetAccessibilityVirtualNodeImpl,
+            CommonMethodModifier::SetAccessibilityCheckedImpl,
+            CommonMethodModifier::SetAccessibilitySelectedImpl,
+            CommonMethodModifier::SetObscuredImpl,
+            CommonMethodModifier::SetReuseIdImpl,
+            CommonMethodModifier::SetReuseImpl,
+            CommonMethodModifier::SetRenderFitImpl,
+            CommonMethodModifier::SetGestureModifierImpl,
+            CommonMethodModifier::SetBackgroundBrightnessImpl,
+            CommonMethodModifier::SetOnGestureJudgeBeginImpl,
+            CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
+            CommonMethodModifier::SetShouldBuiltInRecognizerParallelWithImpl,
+            CommonMethodModifier::SetMonopolizeEventsImpl,
+            CommonMethodModifier::SetOnTouchInterceptImpl,
+            CommonMethodModifier::SetOnSizeChangeImpl,
+            CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+            CommonMethodModifier::SetCustomPropertyImpl,
+            CommonMethodModifier::SetExpandSafeAreaImpl,
+            CommonMethodModifier::SetBackgroundImpl,
+            CommonMethodModifier::SetBackgroundImage0Impl,
+            CommonMethodModifier::SetBackgroundImage1Impl,
+            CommonMethodModifier::SetBackgroundBlurStyleImpl,
+            CommonMethodModifier::SetBackgroundEffect1Impl,
+            CommonMethodModifier::SetForegroundBlurStyleImpl,
+            CommonMethodModifier::SetOnClick1Impl,
+            CommonMethodModifier::SetFocusScopeIdImpl,
+            CommonMethodModifier::SetFocusScopePriorityImpl,
+            CommonMethodModifier::SetTransition1Impl,
+            CommonMethodModifier::SetGestureImpl,
+            CommonMethodModifier::SetPriorityGestureImpl,
+            CommonMethodModifier::SetParallelGestureImpl,
+            CommonMethodModifier::SetBlurImpl,
+            CommonMethodModifier::SetLinearGradientBlurImpl,
+            CommonMethodModifier::SetSystemBarEffectImpl,
+            CommonMethodModifier::SetUseEffect1Impl,
+            CommonMethodModifier::SetBackdropBlurImpl,
+            CommonMethodModifier::SetSharedTransitionImpl,
+            CommonMethodModifier::SetChainModeImpl,
+            CommonMethodModifier::SetOnDrop1Impl,
+            CommonMethodModifier::SetDragPreview1Impl,
+            CommonMethodModifier::SetDragPreviewOptionsImpl,
+            CommonMethodModifier::SetOverlayImpl,
+            CommonMethodModifier::SetBlendModeImpl,
+            CommonMethodModifier::SetAdvancedBlendModeImpl,
+            CommonMethodModifier::SetGeometryTransition1Impl,
+            CommonMethodModifier::SetBindTipsImpl,
+            CommonMethodModifier::SetBindPopupImpl,
+            CommonMethodModifier::SetBindMenu0Impl,
+            CommonMethodModifier::SetBindMenu1Impl,
+            CommonMethodModifier::SetBindContextMenu0Impl,
+            CommonMethodModifier::SetBindContextMenu1Impl,
+            CommonMethodModifier::SetBindContentCover0Impl,
+            CommonMethodModifier::SetBindContentCover1Impl,
+            CommonMethodModifier::SetBindSheetImpl,
+            CommonMethodModifier::SetOnVisibleAreaChangeImpl,
+            CommonMethodModifier::SetOnVisibleAreaApproximateChangeImpl,
+            CommonMethodModifier::SetKeyboardShortcutImpl,
+            CommonMethodModifier::SetAccessibilityGroup1Impl,
+            CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         };
         return &ArkUICommonMethodModifierImpl;
     }
@@ -8230,17 +8181,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUICommonShapeMethodModifier ArkUICommonShapeMethodModifierImpl {
             CommonShapeMethodModifier::ConstructImpl,
-            CommonShapeMethodModifier::StrokeImpl,
-            CommonShapeMethodModifier::FillImpl,
-            CommonShapeMethodModifier::StrokeDashOffsetImpl,
-            CommonShapeMethodModifier::StrokeLineCapImpl,
-            CommonShapeMethodModifier::StrokeLineJoinImpl,
-            CommonShapeMethodModifier::StrokeMiterLimitImpl,
-            CommonShapeMethodModifier::StrokeOpacityImpl,
-            CommonShapeMethodModifier::FillOpacityImpl,
-            CommonShapeMethodModifier::StrokeWidthImpl,
-            CommonShapeMethodModifier::AntiAliasImpl,
-            CommonShapeMethodModifier::StrokeDashArrayImpl,
+            CommonShapeMethodModifier::SetStrokeImpl,
+            CommonShapeMethodModifier::SetFillImpl,
+            CommonShapeMethodModifier::SetStrokeDashOffsetImpl,
+            CommonShapeMethodModifier::SetStrokeLineCapImpl,
+            CommonShapeMethodModifier::SetStrokeLineJoinImpl,
+            CommonShapeMethodModifier::SetStrokeMiterLimitImpl,
+            CommonShapeMethodModifier::SetStrokeOpacityImpl,
+            CommonShapeMethodModifier::SetFillOpacityImpl,
+            CommonShapeMethodModifier::SetStrokeWidthImpl,
+            CommonShapeMethodModifier::SetAntiAliasImpl,
+            CommonShapeMethodModifier::SetStrokeDashArrayImpl,
         };
         return &ArkUICommonShapeMethodModifierImpl;
     }
@@ -8258,7 +8209,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
             ContainerSpanModifier::ConstructImpl,
             ContainerSpanInterfaceModifier::SetContainerSpanOptionsImpl,
-            ContainerSpanAttributeModifier::TextBackgroundStyleImpl,
+            ContainerSpanAttributeModifier::SetTextBackgroundStyleImpl,
         };
         return &ArkUIContainerSpanModifierImpl;
     }
@@ -8268,10 +8219,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUICounterModifier ArkUICounterModifierImpl {
             CounterModifier::ConstructImpl,
             CounterInterfaceModifier::SetCounterOptionsImpl,
-            CounterAttributeModifier::OnIncImpl,
-            CounterAttributeModifier::OnDecImpl,
-            CounterAttributeModifier::EnableDecImpl,
-            CounterAttributeModifier::EnableIncImpl,
+            CounterAttributeModifier::SetOnIncImpl,
+            CounterAttributeModifier::SetOnDecImpl,
+            CounterAttributeModifier::SetEnableDecImpl,
+            CounterAttributeModifier::SetEnableIncImpl,
         };
         return &ArkUICounterModifierImpl;
     }
@@ -8280,8 +8231,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUICustomLayoutRootModifier ArkUICustomLayoutRootModifierImpl {
             CustomLayoutRootModifier::ConstructImpl,
-            CustomLayoutRootModifier::SubscribeOnMeasureSizeImpl,
-            CustomLayoutRootModifier::SubscribeOnPlaceChildrenImpl,
+            CustomLayoutRootModifier::SetSubscribeOnMeasureSizeImpl,
+            CustomLayoutRootModifier::SetSubscribeOnPlaceChildrenImpl,
         };
         return &ArkUICustomLayoutRootModifierImpl;
     }
@@ -8291,12 +8242,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIDataPanelModifier ArkUIDataPanelModifierImpl {
             DataPanelModifier::ConstructImpl,
             DataPanelInterfaceModifier::SetDataPanelOptionsImpl,
-            DataPanelAttributeModifier::CloseEffectImpl,
-            DataPanelAttributeModifier::ValueColorsImpl,
-            DataPanelAttributeModifier::TrackBackgroundColorImpl,
-            DataPanelAttributeModifier::StrokeWidthImpl,
-            DataPanelAttributeModifier::TrackShadowImpl,
-            DataPanelAttributeModifier::ContentModifierImpl,
+            DataPanelAttributeModifier::SetCloseEffectImpl,
+            DataPanelAttributeModifier::SetValueColorsImpl,
+            DataPanelAttributeModifier::SetTrackBackgroundColorImpl,
+            DataPanelAttributeModifier::SetStrokeWidthImpl,
+            DataPanelAttributeModifier::SetTrackShadowImpl,
         };
         return &ArkUIDataPanelModifierImpl;
     }
@@ -8306,14 +8256,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIDatePickerModifier ArkUIDatePickerModifierImpl {
             DatePickerModifier::ConstructImpl,
             DatePickerInterfaceModifier::SetDatePickerOptionsImpl,
-            DatePickerAttributeModifier::LunarImpl,
-            DatePickerAttributeModifier::DisappearTextStyleImpl,
-            DatePickerAttributeModifier::TextStyleImpl,
-            DatePickerAttributeModifier::SelectedTextStyleImpl,
-            DatePickerAttributeModifier::OnDateChangeImpl,
-            DatePickerAttributeModifier::DigitalCrownSensitivityImpl,
-            DatePickerAttributeModifier::EnableHapticFeedbackImpl,
-            DatePickerAttributeModifier::_onChangeEvent_selectedImpl,
+            DatePickerAttributeModifier::SetLunarImpl,
+            DatePickerAttributeModifier::SetDisappearTextStyleImpl,
+            DatePickerAttributeModifier::SetTextStyleImpl,
+            DatePickerAttributeModifier::SetSelectedTextStyleImpl,
+            DatePickerAttributeModifier::SetOnDateChangeImpl,
+            DatePickerAttributeModifier::SetDigitalCrownSensitivityImpl,
+            DatePickerAttributeModifier::SetEnableHapticFeedbackImpl,
         };
         return &ArkUIDatePickerModifierImpl;
     }
@@ -8323,10 +8272,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIDividerModifier ArkUIDividerModifierImpl {
             DividerModifier::ConstructImpl,
             DividerInterfaceModifier::SetDividerOptionsImpl,
-            DividerAttributeModifier::VerticalImpl,
-            DividerAttributeModifier::ColorImpl,
-            DividerAttributeModifier::StrokeWidthImpl,
-            DividerAttributeModifier::LineCapImpl,
+            DividerAttributeModifier::SetVerticalImpl,
+            DividerAttributeModifier::SetColorImpl,
+            DividerAttributeModifier::SetStrokeWidthImpl,
+            DividerAttributeModifier::SetLineCapImpl,
         };
         return &ArkUIDividerModifierImpl;
     }
@@ -8354,8 +8303,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIEmbeddedComponentModifier ArkUIEmbeddedComponentModifierImpl {
             EmbeddedComponentModifier::ConstructImpl,
             EmbeddedComponentInterfaceModifier::SetEmbeddedComponentOptionsImpl,
-            EmbeddedComponentAttributeModifier::OnTerminatedImpl,
-            EmbeddedComponentAttributeModifier::OnErrorImpl,
+            EmbeddedComponentAttributeModifier::SetOnTerminatedImpl,
+            EmbeddedComponentAttributeModifier::SetOnErrorImpl,
         };
         return &ArkUIEmbeddedComponentModifierImpl;
     }
@@ -8365,7 +8314,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
             FlexModifier::ConstructImpl,
             FlexInterfaceModifier::SetFlexOptionsImpl,
-            FlexAttributeModifier::PointLightImpl,
+            FlexAttributeModifier::SetPointLightImpl,
         };
         return &ArkUIFlexModifierImpl;
     }
@@ -8384,11 +8333,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIFolderStackModifier ArkUIFolderStackModifierImpl {
             FolderStackModifier::ConstructImpl,
             FolderStackInterfaceModifier::SetFolderStackOptionsImpl,
-            FolderStackAttributeModifier::AlignContentImpl,
-            FolderStackAttributeModifier::OnFolderStateChangeImpl,
-            FolderStackAttributeModifier::OnHoverStatusChangeImpl,
-            FolderStackAttributeModifier::EnableAnimationImpl,
-            FolderStackAttributeModifier::AutoHalfFoldImpl,
+            FolderStackAttributeModifier::SetAlignContentImpl,
+            FolderStackAttributeModifier::SetOnFolderStateChangeImpl,
+            FolderStackAttributeModifier::SetOnHoverStatusChangeImpl,
+            FolderStackAttributeModifier::SetEnableAnimationImpl,
+            FolderStackAttributeModifier::SetAutoHalfFoldImpl,
         };
         return &ArkUIFolderStackModifierImpl;
     }
@@ -8398,17 +8347,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIFormComponentModifier ArkUIFormComponentModifierImpl {
             FormComponentModifier::ConstructImpl,
             FormComponentInterfaceModifier::SetFormComponentOptionsImpl,
-            FormComponentAttributeModifier::SizeImpl,
-            FormComponentAttributeModifier::ModuleNameImpl,
-            FormComponentAttributeModifier::DimensionImpl,
-            FormComponentAttributeModifier::AllowUpdateImpl,
-            FormComponentAttributeModifier::VisibilityImpl,
-            FormComponentAttributeModifier::OnAcquiredImpl,
-            FormComponentAttributeModifier::OnErrorImpl,
-            FormComponentAttributeModifier::OnRouterImpl,
-            FormComponentAttributeModifier::OnUninstallImpl,
-            FormComponentAttributeModifier::OnLoadImpl,
-            FormComponentAttributeModifier::OnUpdateImpl,
+            FormComponentAttributeModifier::SetSizeImpl,
+            FormComponentAttributeModifier::SetModuleNameImpl,
+            FormComponentAttributeModifier::SetDimensionImpl,
+            FormComponentAttributeModifier::SetAllowUpdateImpl,
+            FormComponentAttributeModifier::SetVisibilityImpl,
+            FormComponentAttributeModifier::SetOnAcquiredImpl,
+            FormComponentAttributeModifier::SetOnErrorImpl,
+            FormComponentAttributeModifier::SetOnRouterImpl,
+            FormComponentAttributeModifier::SetOnUninstallImpl,
+            FormComponentAttributeModifier::SetOnLoadImpl,
+            FormComponentAttributeModifier::SetOnUpdateImpl,
         };
         return &ArkUIFormComponentModifierImpl;
     }
@@ -8427,16 +8376,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
             GaugeModifier::ConstructImpl,
             GaugeInterfaceModifier::SetGaugeOptionsImpl,
-            GaugeAttributeModifier::ValueImpl,
-            GaugeAttributeModifier::StartAngleImpl,
-            GaugeAttributeModifier::EndAngleImpl,
-            GaugeAttributeModifier::ColorsImpl,
-            GaugeAttributeModifier::StrokeWidthImpl,
-            GaugeAttributeModifier::DescriptionImpl,
-            GaugeAttributeModifier::TrackShadowImpl,
-            GaugeAttributeModifier::IndicatorImpl,
-            GaugeAttributeModifier::PrivacySensitiveImpl,
-            GaugeAttributeModifier::ContentModifierImpl,
+            GaugeAttributeModifier::SetValueImpl,
+            GaugeAttributeModifier::SetStartAngleImpl,
+            GaugeAttributeModifier::SetEndAngleImpl,
+            GaugeAttributeModifier::SetColorsImpl,
+            GaugeAttributeModifier::SetStrokeWidthImpl,
+            GaugeAttributeModifier::SetDescriptionImpl,
+            GaugeAttributeModifier::SetTrackShadowImpl,
+            GaugeAttributeModifier::SetIndicatorImpl,
+            GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
     }
@@ -8446,30 +8394,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGridModifier ArkUIGridModifierImpl {
             GridModifier::ConstructImpl,
             GridInterfaceModifier::SetGridOptionsImpl,
-            GridAttributeModifier::ColumnsTemplateImpl,
-            GridAttributeModifier::RowsTemplateImpl,
-            GridAttributeModifier::ColumnsGapImpl,
-            GridAttributeModifier::RowsGapImpl,
-            GridAttributeModifier::OnScrollBarUpdateImpl,
-            GridAttributeModifier::OnScrollIndexImpl,
-            GridAttributeModifier::CachedCount0Impl,
-            GridAttributeModifier::EditModeImpl,
-            GridAttributeModifier::MultiSelectableImpl,
-            GridAttributeModifier::MaxCountImpl,
-            GridAttributeModifier::MinCountImpl,
-            GridAttributeModifier::CellLengthImpl,
-            GridAttributeModifier::LayoutDirectionImpl,
-            GridAttributeModifier::SupportAnimationImpl,
-            GridAttributeModifier::OnItemDragStartImpl,
-            GridAttributeModifier::OnItemDragEnterImpl,
-            GridAttributeModifier::OnItemDragMoveImpl,
-            GridAttributeModifier::OnItemDragLeaveImpl,
-            GridAttributeModifier::OnItemDropImpl,
-            GridAttributeModifier::AlignItemsImpl,
-            GridAttributeModifier::OnScrollFrameBeginImpl,
-            GridAttributeModifier::OnWillScrollImpl,
-            GridAttributeModifier::OnDidScrollImpl,
-            GridAttributeModifier::CachedCount1Impl,
+            GridAttributeModifier::SetColumnsTemplateImpl,
+            GridAttributeModifier::SetRowsTemplateImpl,
+            GridAttributeModifier::SetColumnsGapImpl,
+            GridAttributeModifier::SetRowsGapImpl,
+            GridAttributeModifier::SetOnScrollBarUpdateImpl,
+            GridAttributeModifier::SetOnScrollIndexImpl,
+            GridAttributeModifier::SetCachedCount0Impl,
+            GridAttributeModifier::SetEditModeImpl,
+            GridAttributeModifier::SetMultiSelectableImpl,
+            GridAttributeModifier::SetMaxCountImpl,
+            GridAttributeModifier::SetMinCountImpl,
+            GridAttributeModifier::SetCellLengthImpl,
+            GridAttributeModifier::SetLayoutDirectionImpl,
+            GridAttributeModifier::SetSupportAnimationImpl,
+            GridAttributeModifier::SetOnItemDragStartImpl,
+            GridAttributeModifier::SetOnItemDragEnterImpl,
+            GridAttributeModifier::SetOnItemDragMoveImpl,
+            GridAttributeModifier::SetOnItemDragLeaveImpl,
+            GridAttributeModifier::SetOnItemDropImpl,
+            GridAttributeModifier::SetAlignItemsImpl,
+            GridAttributeModifier::SetOnScrollFrameBeginImpl,
+            GridAttributeModifier::SetOnWillScrollImpl,
+            GridAttributeModifier::SetOnDidScrollImpl,
+            GridAttributeModifier::SetCachedCount1Impl,
         };
         return &ArkUIGridModifierImpl;
     }
@@ -8479,9 +8427,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGridColModifier ArkUIGridColModifierImpl {
             GridColModifier::ConstructImpl,
             GridColInterfaceModifier::SetGridColOptionsImpl,
-            GridColAttributeModifier::SpanImpl,
-            GridColAttributeModifier::GridColOffsetImpl,
-            GridColAttributeModifier::OrderImpl,
+            GridColAttributeModifier::SetSpanImpl,
+            GridColAttributeModifier::SetGridColOffsetImpl,
+            GridColAttributeModifier::SetOrderImpl,
         };
         return &ArkUIGridColModifierImpl;
     }
@@ -8491,14 +8439,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGridItemModifier ArkUIGridItemModifierImpl {
             GridItemModifier::ConstructImpl,
             GridItemInterfaceModifier::SetGridItemOptionsImpl,
-            GridItemAttributeModifier::RowStartImpl,
-            GridItemAttributeModifier::RowEndImpl,
-            GridItemAttributeModifier::ColumnStartImpl,
-            GridItemAttributeModifier::ColumnEndImpl,
-            GridItemAttributeModifier::SelectableImpl,
-            GridItemAttributeModifier::SelectedImpl,
-            GridItemAttributeModifier::OnSelectImpl,
-            GridItemAttributeModifier::_onChangeEvent_selectedImpl,
+            GridItemAttributeModifier::SetRowStartImpl,
+            GridItemAttributeModifier::SetRowEndImpl,
+            GridItemAttributeModifier::SetColumnStartImpl,
+            GridItemAttributeModifier::SetColumnEndImpl,
+            GridItemAttributeModifier::SetSelectableImpl,
+            GridItemAttributeModifier::SetSelectedImpl,
+            GridItemAttributeModifier::SetOnSelectImpl,
         };
         return &ArkUIGridItemModifierImpl;
     }
@@ -8508,8 +8455,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGridRowModifier ArkUIGridRowModifierImpl {
             GridRowModifier::ConstructImpl,
             GridRowInterfaceModifier::SetGridRowOptionsImpl,
-            GridRowAttributeModifier::OnBreakpointChangeImpl,
-            GridRowAttributeModifier::AlignItemsImpl,
+            GridRowAttributeModifier::SetOnBreakpointChangeImpl,
+            GridRowAttributeModifier::SetAlignItemsImpl,
         };
         return &ArkUIGridRowModifierImpl;
     }
@@ -8519,7 +8466,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
             HyperlinkModifier::ConstructImpl,
             HyperlinkInterfaceModifier::SetHyperlinkOptionsImpl,
-            HyperlinkAttributeModifier::ColorImpl,
+            HyperlinkAttributeModifier::SetColorImpl,
         };
         return &ArkUIHyperlinkModifierImpl;
     }
@@ -8530,33 +8477,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageModifier::ConstructImpl,
             ImageInterfaceModifier::SetImageOptions0Impl,
             ImageInterfaceModifier::SetImageOptions1Impl,
-            ImageAttributeModifier::AltImpl,
-            ImageAttributeModifier::MatchTextDirectionImpl,
-            ImageAttributeModifier::FitOriginalSizeImpl,
-            ImageAttributeModifier::FillColorImpl,
-            ImageAttributeModifier::ObjectFitImpl,
-            ImageAttributeModifier::ImageMatrixImpl,
-            ImageAttributeModifier::ObjectRepeatImpl,
-            ImageAttributeModifier::AutoResizeImpl,
-            ImageAttributeModifier::RenderModeImpl,
-            ImageAttributeModifier::DynamicRangeModeImpl,
-            ImageAttributeModifier::InterpolationImpl,
-            ImageAttributeModifier::SourceSizeImpl,
-            ImageAttributeModifier::SyncLoadImpl,
-            ImageAttributeModifier::ColorFilterImpl,
-            ImageAttributeModifier::CopyOptionImpl,
-            ImageAttributeModifier::DraggableImpl,
-            ImageAttributeModifier::PointLightImpl,
-            ImageAttributeModifier::EdgeAntialiasingImpl,
-            ImageAttributeModifier::OnCompleteImpl,
-            ImageAttributeModifier::OnErrorImpl,
-            ImageAttributeModifier::OnFinishImpl,
-            ImageAttributeModifier::EnableAnalyzerImpl,
-            ImageAttributeModifier::AnalyzerConfigImpl,
-            ImageAttributeModifier::ResizableImpl,
-            ImageAttributeModifier::PrivacySensitiveImpl,
-            ImageAttributeModifier::EnhancedImageQualityImpl,
-            ImageAttributeModifier::OrientationImpl,
+            ImageAttributeModifier::SetAltImpl,
+            ImageAttributeModifier::SetMatchTextDirectionImpl,
+            ImageAttributeModifier::SetFitOriginalSizeImpl,
+            ImageAttributeModifier::SetFillColorImpl,
+            ImageAttributeModifier::SetObjectFitImpl,
+            ImageAttributeModifier::SetImageMatrixImpl,
+            ImageAttributeModifier::SetObjectRepeatImpl,
+            ImageAttributeModifier::SetAutoResizeImpl,
+            ImageAttributeModifier::SetRenderModeImpl,
+            ImageAttributeModifier::SetDynamicRangeModeImpl,
+            ImageAttributeModifier::SetInterpolationImpl,
+            ImageAttributeModifier::SetSourceSizeImpl,
+            ImageAttributeModifier::SetSyncLoadImpl,
+            ImageAttributeModifier::SetColorFilterImpl,
+            ImageAttributeModifier::SetCopyOptionImpl,
+            ImageAttributeModifier::SetDraggableImpl,
+            ImageAttributeModifier::SetPointLightImpl,
+            ImageAttributeModifier::SetEdgeAntialiasingImpl,
+            ImageAttributeModifier::SetOnCompleteImpl,
+            ImageAttributeModifier::SetOnErrorImpl,
+            ImageAttributeModifier::SetOnFinishImpl,
+            ImageAttributeModifier::SetEnableAnalyzerImpl,
+            ImageAttributeModifier::SetAnalyzerConfigImpl,
+            ImageAttributeModifier::SetResizableImpl,
+            ImageAttributeModifier::SetPrivacySensitiveImpl,
+            ImageAttributeModifier::SetEnhancedImageQualityImpl,
+            ImageAttributeModifier::SetOrientationImpl,
         };
         return &ArkUIImageModifierImpl;
     }
@@ -8566,19 +8513,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIImageAnimatorModifier ArkUIImageAnimatorModifierImpl {
             ImageAnimatorModifier::ConstructImpl,
             ImageAnimatorInterfaceModifier::SetImageAnimatorOptionsImpl,
-            ImageAnimatorAttributeModifier::ImagesImpl,
-            ImageAnimatorAttributeModifier::StateImpl,
-            ImageAnimatorAttributeModifier::DurationImpl,
-            ImageAnimatorAttributeModifier::ReverseImpl,
-            ImageAnimatorAttributeModifier::FixedSizeImpl,
-            ImageAnimatorAttributeModifier::FillModeImpl,
-            ImageAnimatorAttributeModifier::IterationsImpl,
-            ImageAnimatorAttributeModifier::MonitorInvisibleAreaImpl,
-            ImageAnimatorAttributeModifier::OnStartImpl,
-            ImageAnimatorAttributeModifier::OnPauseImpl,
-            ImageAnimatorAttributeModifier::OnRepeatImpl,
-            ImageAnimatorAttributeModifier::OnCancelImpl,
-            ImageAnimatorAttributeModifier::OnFinishImpl,
+            ImageAnimatorAttributeModifier::SetImagesImpl,
+            ImageAnimatorAttributeModifier::SetStateImpl,
+            ImageAnimatorAttributeModifier::SetDurationImpl,
+            ImageAnimatorAttributeModifier::SetReverseImpl,
+            ImageAnimatorAttributeModifier::SetFixedSizeImpl,
+            ImageAnimatorAttributeModifier::SetFillModeImpl,
+            ImageAnimatorAttributeModifier::SetIterationsImpl,
+            ImageAnimatorAttributeModifier::SetMonitorInvisibleAreaImpl,
+            ImageAnimatorAttributeModifier::SetOnStartImpl,
+            ImageAnimatorAttributeModifier::SetOnPauseImpl,
+            ImageAnimatorAttributeModifier::SetOnRepeatImpl,
+            ImageAnimatorAttributeModifier::SetOnCancelImpl,
+            ImageAnimatorAttributeModifier::SetOnFinishImpl,
         };
         return &ArkUIImageAnimatorModifierImpl;
     }
@@ -8588,12 +8535,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
             ImageSpanModifier::ConstructImpl,
             ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
-            ImageSpanAttributeModifier::VerticalAlignImpl,
-            ImageSpanAttributeModifier::ColorFilterImpl,
-            ImageSpanAttributeModifier::ObjectFitImpl,
-            ImageSpanAttributeModifier::OnCompleteImpl,
-            ImageSpanAttributeModifier::OnErrorImpl,
-            ImageSpanAttributeModifier::AltImpl,
+            ImageSpanAttributeModifier::SetVerticalAlignImpl,
+            ImageSpanAttributeModifier::SetColorFilterImpl,
+            ImageSpanAttributeModifier::SetObjectFitImpl,
+            ImageSpanAttributeModifier::SetOnCompleteImpl,
+            ImageSpanAttributeModifier::SetOnErrorImpl,
+            ImageSpanAttributeModifier::SetAltImpl,
         };
         return &ArkUIImageSpanModifierImpl;
     }
@@ -8603,12 +8550,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIIndicatorComponentModifier ArkUIIndicatorComponentModifierImpl {
             IndicatorComponentModifier::ConstructImpl,
             IndicatorComponentInterfaceModifier::SetIndicatorComponentOptionsImpl,
-            IndicatorComponentAttributeModifier::InitialIndexImpl,
-            IndicatorComponentAttributeModifier::CountImpl,
-            IndicatorComponentAttributeModifier::StyleImpl,
-            IndicatorComponentAttributeModifier::LoopImpl,
-            IndicatorComponentAttributeModifier::VerticalImpl,
-            IndicatorComponentAttributeModifier::OnChangeImpl,
+            IndicatorComponentAttributeModifier::SetInitialIndexImpl,
+            IndicatorComponentAttributeModifier::SetCountImpl,
+            IndicatorComponentAttributeModifier::SetStyleImpl,
+            IndicatorComponentAttributeModifier::SetLoopImpl,
+            IndicatorComponentAttributeModifier::SetVerticalImpl,
+            IndicatorComponentAttributeModifier::SetOnChangeImpl,
         };
         return &ArkUIIndicatorComponentModifierImpl;
     }
@@ -8618,8 +8565,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUILineModifier ArkUILineModifierImpl {
             LineModifier::ConstructImpl,
             LineInterfaceModifier::SetLineOptionsImpl,
-            LineAttributeModifier::StartPointImpl,
-            LineAttributeModifier::EndPointImpl,
+            LineAttributeModifier::SetStartPointImpl,
+            LineAttributeModifier::SetEndPointImpl,
         };
         return &ArkUILineModifierImpl;
     }
@@ -8629,9 +8576,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUILinearIndicatorModifier ArkUILinearIndicatorModifierImpl {
             LinearIndicatorModifier::ConstructImpl,
             LinearIndicatorInterfaceModifier::SetLinearIndicatorOptionsImpl,
-            LinearIndicatorAttributeModifier::IndicatorStyleImpl,
-            LinearIndicatorAttributeModifier::IndicatorLoopImpl,
-            LinearIndicatorAttributeModifier::OnChangeImpl,
+            LinearIndicatorAttributeModifier::SetIndicatorStyleImpl,
+            LinearIndicatorAttributeModifier::SetIndicatorLoopImpl,
+            LinearIndicatorAttributeModifier::SetOnChangeImpl,
         };
         return &ArkUILinearIndicatorModifierImpl;
     }
@@ -8641,33 +8588,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIListModifier ArkUIListModifierImpl {
             ListModifier::ConstructImpl,
             ListInterfaceModifier::SetListOptionsImpl,
-            ListAttributeModifier::AlignListItemImpl,
-            ListAttributeModifier::ListDirectionImpl,
-            ListAttributeModifier::ContentStartOffsetImpl,
-            ListAttributeModifier::ContentEndOffsetImpl,
-            ListAttributeModifier::DividerImpl,
-            ListAttributeModifier::MultiSelectableImpl,
-            ListAttributeModifier::CachedCount0Impl,
-            ListAttributeModifier::ChainAnimationImpl,
-            ListAttributeModifier::ChainAnimationOptionsImpl,
-            ListAttributeModifier::StickyImpl,
-            ListAttributeModifier::ScrollSnapAlignImpl,
-            ListAttributeModifier::ChildrenMainSizeImpl,
-            ListAttributeModifier::MaintainVisibleContentPositionImpl,
-            ListAttributeModifier::StackFromEndImpl,
-            ListAttributeModifier::OnScrollIndexImpl,
-            ListAttributeModifier::OnScrollVisibleContentChangeImpl,
-            ListAttributeModifier::OnItemMoveImpl,
-            ListAttributeModifier::OnItemDragStartImpl,
-            ListAttributeModifier::OnItemDragEnterImpl,
-            ListAttributeModifier::OnItemDragMoveImpl,
-            ListAttributeModifier::OnItemDragLeaveImpl,
-            ListAttributeModifier::OnItemDropImpl,
-            ListAttributeModifier::OnScrollFrameBeginImpl,
-            ListAttributeModifier::OnWillScrollImpl,
-            ListAttributeModifier::OnDidScrollImpl,
-            ListAttributeModifier::LanesImpl,
-            ListAttributeModifier::CachedCount1Impl,
+            ListAttributeModifier::SetAlignListItemImpl,
+            ListAttributeModifier::SetListDirectionImpl,
+            ListAttributeModifier::SetContentStartOffsetImpl,
+            ListAttributeModifier::SetContentEndOffsetImpl,
+            ListAttributeModifier::SetDividerImpl,
+            ListAttributeModifier::SetMultiSelectableImpl,
+            ListAttributeModifier::SetCachedCount0Impl,
+            ListAttributeModifier::SetChainAnimationImpl,
+            ListAttributeModifier::SetChainAnimationOptionsImpl,
+            ListAttributeModifier::SetStickyImpl,
+            ListAttributeModifier::SetScrollSnapAlignImpl,
+            ListAttributeModifier::SetChildrenMainSizeImpl,
+            ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
+            ListAttributeModifier::SetStackFromEndImpl,
+            ListAttributeModifier::SetOnScrollIndexImpl,
+            ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
+            ListAttributeModifier::SetOnItemMoveImpl,
+            ListAttributeModifier::SetOnItemDragStartImpl,
+            ListAttributeModifier::SetOnItemDragEnterImpl,
+            ListAttributeModifier::SetOnItemDragMoveImpl,
+            ListAttributeModifier::SetOnItemDragLeaveImpl,
+            ListAttributeModifier::SetOnItemDropImpl,
+            ListAttributeModifier::SetOnScrollFrameBeginImpl,
+            ListAttributeModifier::SetOnWillScrollImpl,
+            ListAttributeModifier::SetOnDidScrollImpl,
+            ListAttributeModifier::SetLanesImpl,
+            ListAttributeModifier::SetCachedCount1Impl,
         };
         return &ArkUIListModifierImpl;
     }
@@ -8677,11 +8624,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIListItemModifier ArkUIListItemModifierImpl {
             ListItemModifier::ConstructImpl,
             ListItemInterfaceModifier::SetListItemOptionsImpl,
-            ListItemAttributeModifier::SelectableImpl,
-            ListItemAttributeModifier::SelectedImpl,
-            ListItemAttributeModifier::SwipeActionImpl,
-            ListItemAttributeModifier::OnSelectImpl,
-            ListItemAttributeModifier::_onChangeEvent_selectedImpl,
+            ListItemAttributeModifier::SetSelectableImpl,
+            ListItemAttributeModifier::SetSelectedImpl,
+            ListItemAttributeModifier::SetSwipeActionImpl,
+            ListItemAttributeModifier::SetOnSelectImpl,
         };
         return &ArkUIListItemModifierImpl;
     }
@@ -8691,8 +8637,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIListItemGroupModifier ArkUIListItemGroupModifierImpl {
             ListItemGroupModifier::ConstructImpl,
             ListItemGroupInterfaceModifier::SetListItemGroupOptionsImpl,
-            ListItemGroupAttributeModifier::DividerImpl,
-            ListItemGroupAttributeModifier::ChildrenMainSizeImpl,
+            ListItemGroupAttributeModifier::SetDividerImpl,
+            ListItemGroupAttributeModifier::SetChildrenMainSizeImpl,
         };
         return &ArkUIListItemGroupModifierImpl;
     }
@@ -8702,9 +8648,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
             LoadingProgressModifier::ConstructImpl,
             LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl,
-            LoadingProgressAttributeModifier::ColorImpl,
-            LoadingProgressAttributeModifier::EnableLoadingImpl,
-            LoadingProgressAttributeModifier::ContentModifierImpl,
+            LoadingProgressAttributeModifier::SetColorImpl,
+            LoadingProgressAttributeModifier::SetEnableLoadingImpl,
         };
         return &ArkUILoadingProgressModifierImpl;
     }
@@ -8714,15 +8659,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIMarqueeModifier ArkUIMarqueeModifierImpl {
             MarqueeModifier::ConstructImpl,
             MarqueeInterfaceModifier::SetMarqueeOptionsImpl,
-            MarqueeAttributeModifier::FontColorImpl,
-            MarqueeAttributeModifier::FontSizeImpl,
-            MarqueeAttributeModifier::AllowScaleImpl,
-            MarqueeAttributeModifier::FontWeightImpl,
-            MarqueeAttributeModifier::FontFamilyImpl,
-            MarqueeAttributeModifier::MarqueeUpdateStrategyImpl,
-            MarqueeAttributeModifier::OnStartImpl,
-            MarqueeAttributeModifier::OnBounceImpl,
-            MarqueeAttributeModifier::OnFinishImpl,
+            MarqueeAttributeModifier::SetFontColorImpl,
+            MarqueeAttributeModifier::SetFontSizeImpl,
+            MarqueeAttributeModifier::SetAllowScaleImpl,
+            MarqueeAttributeModifier::SetFontWeightImpl,
+            MarqueeAttributeModifier::SetFontFamilyImpl,
+            MarqueeAttributeModifier::SetMarqueeUpdateStrategyImpl,
+            MarqueeAttributeModifier::SetOnStartImpl,
+            MarqueeAttributeModifier::SetOnBounceImpl,
+            MarqueeAttributeModifier::SetOnFinishImpl,
         };
         return &ArkUIMarqueeModifierImpl;
     }
@@ -8741,12 +8686,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIMenuModifier ArkUIMenuModifierImpl {
             MenuModifier::ConstructImpl,
             MenuInterfaceModifier::SetMenuOptionsImpl,
-            MenuAttributeModifier::FontImpl,
-            MenuAttributeModifier::FontColorImpl,
-            MenuAttributeModifier::RadiusImpl,
-            MenuAttributeModifier::MenuItemDividerImpl,
-            MenuAttributeModifier::MenuItemGroupDividerImpl,
-            MenuAttributeModifier::SubMenuExpandingModeImpl,
+            MenuAttributeModifier::SetFontImpl,
+            MenuAttributeModifier::SetFontColorImpl,
+            MenuAttributeModifier::SetRadiusImpl,
+            MenuAttributeModifier::SetMenuItemDividerImpl,
+            MenuAttributeModifier::SetMenuItemGroupDividerImpl,
+            MenuAttributeModifier::SetSubMenuExpandingModeImpl,
         };
         return &ArkUIMenuModifierImpl;
     }
@@ -8756,14 +8701,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIMenuItemModifier ArkUIMenuItemModifierImpl {
             MenuItemModifier::ConstructImpl,
             MenuItemInterfaceModifier::SetMenuItemOptionsImpl,
-            MenuItemAttributeModifier::SelectedImpl,
-            MenuItemAttributeModifier::SelectIconImpl,
-            MenuItemAttributeModifier::OnChangeImpl,
-            MenuItemAttributeModifier::ContentFontImpl,
-            MenuItemAttributeModifier::ContentFontColorImpl,
-            MenuItemAttributeModifier::LabelFontImpl,
-            MenuItemAttributeModifier::LabelFontColorImpl,
-            MenuItemAttributeModifier::_onChangeEvent_selectedImpl,
+            MenuItemAttributeModifier::SetSelectedImpl,
+            MenuItemAttributeModifier::SetSelectIconImpl,
+            MenuItemAttributeModifier::SetOnChangeImpl,
+            MenuItemAttributeModifier::SetContentFontImpl,
+            MenuItemAttributeModifier::SetContentFontColorImpl,
+            MenuItemAttributeModifier::SetLabelFontImpl,
+            MenuItemAttributeModifier::SetLabelFontColorImpl,
         };
         return &ArkUIMenuItemModifierImpl;
     }
@@ -8782,39 +8726,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUINavDestinationModifier ArkUINavDestinationModifierImpl {
             NavDestinationModifier::ConstructImpl,
             NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
-            NavDestinationAttributeModifier::HideTitleBar0Impl,
-            NavDestinationAttributeModifier::HideBackButtonImpl,
-            NavDestinationAttributeModifier::OnShownImpl,
-            NavDestinationAttributeModifier::OnHiddenImpl,
-            NavDestinationAttributeModifier::OnBackPressedImpl,
-            NavDestinationAttributeModifier::OnResultImpl,
-            NavDestinationAttributeModifier::ModeImpl,
-            NavDestinationAttributeModifier::BackButtonIcon0Impl,
-            NavDestinationAttributeModifier::Menus0Impl,
-            NavDestinationAttributeModifier::OnReadyImpl,
-            NavDestinationAttributeModifier::OnWillAppearImpl,
-            NavDestinationAttributeModifier::OnWillDisappearImpl,
-            NavDestinationAttributeModifier::OnWillShowImpl,
-            NavDestinationAttributeModifier::OnWillHideImpl,
-            NavDestinationAttributeModifier::SystemBarStyleImpl,
-            NavDestinationAttributeModifier::RecoverableImpl,
-            NavDestinationAttributeModifier::SystemTransitionImpl,
-            NavDestinationAttributeModifier::BindToScrollableImpl,
-            NavDestinationAttributeModifier::BindToNestedScrollableImpl,
-            NavDestinationAttributeModifier::OnActiveImpl,
-            NavDestinationAttributeModifier::OnInactiveImpl,
-            NavDestinationAttributeModifier::CustomTransitionImpl,
-            NavDestinationAttributeModifier::OnNewParamImpl,
-            NavDestinationAttributeModifier::PreferredOrientationImpl,
-            NavDestinationAttributeModifier::EnableNavigationIndicatorImpl,
-            NavDestinationAttributeModifier::TitleImpl,
-            NavDestinationAttributeModifier::HideTitleBar1Impl,
-            NavDestinationAttributeModifier::BackButtonIcon1Impl,
-            NavDestinationAttributeModifier::Menus1Impl,
-            NavDestinationAttributeModifier::ToolbarConfigurationImpl,
-            NavDestinationAttributeModifier::HideToolBarImpl,
-            NavDestinationAttributeModifier::IgnoreLayoutSafeAreaImpl,
-            NavDestinationAttributeModifier::EnableStatusBarImpl,
+            NavDestinationAttributeModifier::SetHideTitleBar0Impl,
+            NavDestinationAttributeModifier::SetHideBackButtonImpl,
+            NavDestinationAttributeModifier::SetOnShownImpl,
+            NavDestinationAttributeModifier::SetOnHiddenImpl,
+            NavDestinationAttributeModifier::SetOnBackPressedImpl,
+            NavDestinationAttributeModifier::SetOnResultImpl,
+            NavDestinationAttributeModifier::SetModeImpl,
+            NavDestinationAttributeModifier::SetBackButtonIcon0Impl,
+            NavDestinationAttributeModifier::SetMenus0Impl,
+            NavDestinationAttributeModifier::SetOnReadyImpl,
+            NavDestinationAttributeModifier::SetOnWillAppearImpl,
+            NavDestinationAttributeModifier::SetOnWillDisappearImpl,
+            NavDestinationAttributeModifier::SetOnWillShowImpl,
+            NavDestinationAttributeModifier::SetOnWillHideImpl,
+            NavDestinationAttributeModifier::SetSystemBarStyleImpl,
+            NavDestinationAttributeModifier::SetRecoverableImpl,
+            NavDestinationAttributeModifier::SetSystemTransitionImpl,
+            NavDestinationAttributeModifier::SetBindToScrollableImpl,
+            NavDestinationAttributeModifier::SetBindToNestedScrollableImpl,
+            NavDestinationAttributeModifier::SetOnActiveImpl,
+            NavDestinationAttributeModifier::SetOnInactiveImpl,
+            NavDestinationAttributeModifier::SetCustomTransitionImpl,
+            NavDestinationAttributeModifier::SetOnNewParamImpl,
+            NavDestinationAttributeModifier::SetPreferredOrientationImpl,
+            NavDestinationAttributeModifier::SetEnableNavigationIndicatorImpl,
+            NavDestinationAttributeModifier::SetTitleImpl,
+            NavDestinationAttributeModifier::SetHideTitleBar1Impl,
+            NavDestinationAttributeModifier::SetBackButtonIcon1Impl,
+            NavDestinationAttributeModifier::SetMenus1Impl,
+            NavDestinationAttributeModifier::SetToolbarConfigurationImpl,
+            NavDestinationAttributeModifier::SetHideToolBarImpl,
+            NavDestinationAttributeModifier::SetIgnoreLayoutSafeAreaImpl,
+            NavDestinationAttributeModifier::SetEnableStatusBarImpl,
         };
         return &ArkUINavDestinationModifierImpl;
     }
@@ -8825,35 +8769,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationModifier::ConstructImpl,
             NavigationInterfaceModifier::SetNavigationOptions0Impl,
             NavigationInterfaceModifier::SetNavigationOptions1Impl,
-            NavigationAttributeModifier::NavBarWidthImpl,
-            NavigationAttributeModifier::NavBarPositionImpl,
-            NavigationAttributeModifier::NavBarWidthRangeImpl,
-            NavigationAttributeModifier::MinContentWidthImpl,
-            NavigationAttributeModifier::ModeImpl,
-            NavigationAttributeModifier::BackButtonIcon0Impl,
-            NavigationAttributeModifier::HideNavBarImpl,
-            NavigationAttributeModifier::HideTitleBar0Impl,
-            NavigationAttributeModifier::HideBackButtonImpl,
-            NavigationAttributeModifier::TitleModeImpl,
-            NavigationAttributeModifier::Menus0Impl,
-            NavigationAttributeModifier::HideToolBar0Impl,
-            NavigationAttributeModifier::EnableToolBarAdaptationImpl,
-            NavigationAttributeModifier::OnTitleModeChangeImpl,
-            NavigationAttributeModifier::OnNavBarStateChangeImpl,
-            NavigationAttributeModifier::OnNavigationModeChangeImpl,
-            NavigationAttributeModifier::NavDestinationImpl,
-            NavigationAttributeModifier::CustomNavContentTransitionImpl,
-            NavigationAttributeModifier::SystemBarStyleImpl,
-            NavigationAttributeModifier::RecoverableImpl,
-            NavigationAttributeModifier::EnableDragBarImpl,
-            NavigationAttributeModifier::EnableModeChangeAnimationImpl,
-            NavigationAttributeModifier::BackButtonIcon1Impl,
-            NavigationAttributeModifier::TitleImpl,
-            NavigationAttributeModifier::HideTitleBar1Impl,
-            NavigationAttributeModifier::Menus1Impl,
-            NavigationAttributeModifier::ToolbarConfigurationImpl,
-            NavigationAttributeModifier::HideToolBar1Impl,
-            NavigationAttributeModifier::IgnoreLayoutSafeAreaImpl,
+            NavigationAttributeModifier::SetNavBarWidthImpl,
+            NavigationAttributeModifier::SetNavBarPositionImpl,
+            NavigationAttributeModifier::SetNavBarWidthRangeImpl,
+            NavigationAttributeModifier::SetMinContentWidthImpl,
+            NavigationAttributeModifier::SetModeImpl,
+            NavigationAttributeModifier::SetBackButtonIcon0Impl,
+            NavigationAttributeModifier::SetHideNavBarImpl,
+            NavigationAttributeModifier::SetHideTitleBar0Impl,
+            NavigationAttributeModifier::SetHideBackButtonImpl,
+            NavigationAttributeModifier::SetTitleModeImpl,
+            NavigationAttributeModifier::SetMenus0Impl,
+            NavigationAttributeModifier::SetHideToolBar0Impl,
+            NavigationAttributeModifier::SetEnableToolBarAdaptationImpl,
+            NavigationAttributeModifier::SetOnTitleModeChangeImpl,
+            NavigationAttributeModifier::SetOnNavBarStateChangeImpl,
+            NavigationAttributeModifier::SetOnNavigationModeChangeImpl,
+            NavigationAttributeModifier::SetNavDestinationImpl,
+            NavigationAttributeModifier::SetCustomNavContentTransitionImpl,
+            NavigationAttributeModifier::SetSystemBarStyleImpl,
+            NavigationAttributeModifier::SetRecoverableImpl,
+            NavigationAttributeModifier::SetEnableDragBarImpl,
+            NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
+            NavigationAttributeModifier::SetBackButtonIcon1Impl,
+            NavigationAttributeModifier::SetTitleImpl,
+            NavigationAttributeModifier::SetHideTitleBar1Impl,
+            NavigationAttributeModifier::SetMenus1Impl,
+            NavigationAttributeModifier::SetToolbarConfigurationImpl,
+            NavigationAttributeModifier::SetHideToolBar1Impl,
+            NavigationAttributeModifier::SetIgnoreLayoutSafeAreaImpl,
         };
         return &ArkUINavigationModifierImpl;
     }
@@ -8881,19 +8825,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIPatternLockModifier ArkUIPatternLockModifierImpl {
             PatternLockModifier::ConstructImpl,
             PatternLockInterfaceModifier::SetPatternLockOptionsImpl,
-            PatternLockAttributeModifier::SideLengthImpl,
-            PatternLockAttributeModifier::CircleRadiusImpl,
-            PatternLockAttributeModifier::BackgroundColorImpl,
-            PatternLockAttributeModifier::RegularColorImpl,
-            PatternLockAttributeModifier::SelectedColorImpl,
-            PatternLockAttributeModifier::ActiveColorImpl,
-            PatternLockAttributeModifier::PathColorImpl,
-            PatternLockAttributeModifier::PathStrokeWidthImpl,
-            PatternLockAttributeModifier::OnPatternCompleteImpl,
-            PatternLockAttributeModifier::AutoResetImpl,
-            PatternLockAttributeModifier::OnDotConnectImpl,
-            PatternLockAttributeModifier::ActivateCircleStyleImpl,
-            PatternLockAttributeModifier::SkipUnselectedPointImpl,
+            PatternLockAttributeModifier::SetSideLengthImpl,
+            PatternLockAttributeModifier::SetCircleRadiusImpl,
+            PatternLockAttributeModifier::SetBackgroundColorImpl,
+            PatternLockAttributeModifier::SetRegularColorImpl,
+            PatternLockAttributeModifier::SetSelectedColorImpl,
+            PatternLockAttributeModifier::SetActiveColorImpl,
+            PatternLockAttributeModifier::SetPathColorImpl,
+            PatternLockAttributeModifier::SetPathStrokeWidthImpl,
+            PatternLockAttributeModifier::SetOnPatternCompleteImpl,
+            PatternLockAttributeModifier::SetAutoResetImpl,
+            PatternLockAttributeModifier::SetOnDotConnectImpl,
+            PatternLockAttributeModifier::SetActivateCircleStyleImpl,
+            PatternLockAttributeModifier::SetSkipUnselectedPointImpl,
         };
         return &ArkUIPatternLockModifierImpl;
     }
@@ -8903,8 +8847,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
             PluginComponentModifier::ConstructImpl,
             PluginComponentInterfaceModifier::SetPluginComponentOptionsImpl,
-            PluginComponentAttributeModifier::OnCompleteImpl,
-            PluginComponentAttributeModifier::OnErrorImpl,
+            PluginComponentAttributeModifier::SetOnCompleteImpl,
+            PluginComponentAttributeModifier::SetOnErrorImpl,
         };
         return &ArkUIPluginComponentModifierImpl;
     }
@@ -8914,7 +8858,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
             PolygonModifier::ConstructImpl,
             PolygonInterfaceModifier::SetPolygonOptionsImpl,
-            PolygonAttributeModifier::PointsImpl,
+            PolygonAttributeModifier::SetPointsImpl,
         };
         return &ArkUIPolygonModifierImpl;
     }
@@ -8924,7 +8868,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIPolylineModifier ArkUIPolylineModifierImpl {
             PolylineModifier::ConstructImpl,
             PolylineInterfaceModifier::SetPolylineOptionsImpl,
-            PolylineAttributeModifier::PointsImpl,
+            PolylineAttributeModifier::SetPointsImpl,
         };
         return &ArkUIPolylineModifierImpl;
     }
@@ -8934,11 +8878,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIProgressModifier ArkUIProgressModifierImpl {
             ProgressModifier::ConstructImpl,
             ProgressInterfaceModifier::SetProgressOptionsImpl,
-            ProgressAttributeModifier::ValueImpl,
-            ProgressAttributeModifier::ColorImpl,
-            ProgressAttributeModifier::StyleImpl,
-            ProgressAttributeModifier::PrivacySensitiveImpl,
-            ProgressAttributeModifier::ContentModifierImpl,
+            ProgressAttributeModifier::SetValueImpl,
+            ProgressAttributeModifier::SetColorImpl,
+            ProgressAttributeModifier::SetStyleImpl,
+            ProgressAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIProgressModifierImpl;
     }
@@ -8948,9 +8891,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIQRCodeModifier ArkUIQRCodeModifierImpl {
             QRCodeModifier::ConstructImpl,
             QRCodeInterfaceModifier::SetQRCodeOptionsImpl,
-            QRCodeAttributeModifier::ColorImpl,
-            QRCodeAttributeModifier::BackgroundColorImpl,
-            QRCodeAttributeModifier::ContentOpacityImpl,
+            QRCodeAttributeModifier::SetColorImpl,
+            QRCodeAttributeModifier::SetBackgroundColorImpl,
+            QRCodeAttributeModifier::SetContentOpacityImpl,
         };
         return &ArkUIQRCodeModifierImpl;
     }
@@ -8960,11 +8903,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
             RadioModifier::ConstructImpl,
             RadioInterfaceModifier::SetRadioOptionsImpl,
-            RadioAttributeModifier::CheckedImpl,
-            RadioAttributeModifier::OnChangeImpl,
-            RadioAttributeModifier::RadioStyleImpl,
-            RadioAttributeModifier::ContentModifierImpl,
-            RadioAttributeModifier::_onChangeEvent_checkedImpl,
+            RadioAttributeModifier::SetCheckedImpl,
+            RadioAttributeModifier::SetOnChangeImpl,
+            RadioAttributeModifier::SetRadioStyleImpl,
         };
         return &ArkUIRadioModifierImpl;
     }
@@ -8974,12 +8915,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRatingModifier ArkUIRatingModifierImpl {
             RatingModifier::ConstructImpl,
             RatingInterfaceModifier::SetRatingOptionsImpl,
-            RatingAttributeModifier::StarsImpl,
-            RatingAttributeModifier::StepSizeImpl,
-            RatingAttributeModifier::StarStyleImpl,
-            RatingAttributeModifier::OnChangeImpl,
-            RatingAttributeModifier::ContentModifierImpl,
-            RatingAttributeModifier::_onChangeEvent_ratingImpl,
+            RatingAttributeModifier::SetStarsImpl,
+            RatingAttributeModifier::SetStepSizeImpl,
+            RatingAttributeModifier::SetStarStyleImpl,
+            RatingAttributeModifier::SetOnChangeImpl,
         };
         return &ArkUIRatingModifierImpl;
     }
@@ -8989,7 +8928,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRectModifier ArkUIRectModifierImpl {
             RectModifier::ConstructImpl,
             RectInterfaceModifier::SetRectOptionsImpl,
-            RectAttributeModifier::RadiusImpl,
+            RectAttributeModifier::SetRadiusImpl,
         };
         return &ArkUIRectModifierImpl;
     }
@@ -8999,13 +8938,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRefreshModifier ArkUIRefreshModifierImpl {
             RefreshModifier::ConstructImpl,
             RefreshInterfaceModifier::SetRefreshOptionsImpl,
-            RefreshAttributeModifier::OnStateChangeImpl,
-            RefreshAttributeModifier::OnRefreshingImpl,
-            RefreshAttributeModifier::RefreshOffsetImpl,
-            RefreshAttributeModifier::PullToRefreshImpl,
-            RefreshAttributeModifier::OnOffsetChangeImpl,
-            RefreshAttributeModifier::PullDownRatioImpl,
-            RefreshAttributeModifier::_onChangeEvent_refreshingImpl,
+            RefreshAttributeModifier::SetOnStateChangeImpl,
+            RefreshAttributeModifier::SetOnRefreshingImpl,
+            RefreshAttributeModifier::SetRefreshOffsetImpl,
+            RefreshAttributeModifier::SetPullToRefreshImpl,
+            RefreshAttributeModifier::SetOnOffsetChangeImpl,
+            RefreshAttributeModifier::SetPullDownRatioImpl,
         };
         return &ArkUIRefreshModifierImpl;
     }
@@ -9015,8 +8953,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
             RelativeContainerModifier::ConstructImpl,
             RelativeContainerInterfaceModifier::SetRelativeContainerOptionsImpl,
-            RelativeContainerAttributeModifier::GuideLineImpl,
-            RelativeContainerAttributeModifier::BarrierImpl,
+            RelativeContainerAttributeModifier::SetGuideLineImpl,
+            RelativeContainerAttributeModifier::SetBarrierImpl,
         };
         return &ArkUIRelativeContainerModifierImpl;
     }
@@ -9036,39 +8974,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorModifier::ConstructImpl,
             RichEditorInterfaceModifier::SetRichEditorOptions0Impl,
             RichEditorInterfaceModifier::SetRichEditorOptions1Impl,
-            RichEditorAttributeModifier::OnReadyImpl,
-            RichEditorAttributeModifier::OnSelectImpl,
-            RichEditorAttributeModifier::OnSelectionChangeImpl,
-            RichEditorAttributeModifier::AboutToIMEInputImpl,
-            RichEditorAttributeModifier::OnIMEInputCompleteImpl,
-            RichEditorAttributeModifier::OnDidIMEInputImpl,
-            RichEditorAttributeModifier::AboutToDeleteImpl,
-            RichEditorAttributeModifier::OnDeleteCompleteImpl,
-            RichEditorAttributeModifier::CopyOptionsImpl,
-            RichEditorAttributeModifier::OnPasteImpl,
-            RichEditorAttributeModifier::EnableDataDetectorImpl,
-            RichEditorAttributeModifier::EnablePreviewTextImpl,
-            RichEditorAttributeModifier::DataDetectorConfigImpl,
-            RichEditorAttributeModifier::CaretColorImpl,
-            RichEditorAttributeModifier::SelectedBackgroundColorImpl,
-            RichEditorAttributeModifier::OnEditingChangeImpl,
-            RichEditorAttributeModifier::EnterKeyTypeImpl,
-            RichEditorAttributeModifier::OnSubmitImpl,
-            RichEditorAttributeModifier::OnWillChangeImpl,
-            RichEditorAttributeModifier::OnDidChangeImpl,
-            RichEditorAttributeModifier::OnCutImpl,
-            RichEditorAttributeModifier::OnCopyImpl,
-            RichEditorAttributeModifier::EditMenuOptionsImpl,
-            RichEditorAttributeModifier::EnableKeyboardOnFocusImpl,
-            RichEditorAttributeModifier::EnableHapticFeedbackImpl,
-            RichEditorAttributeModifier::BarStateImpl,
-            RichEditorAttributeModifier::MaxLengthImpl,
-            RichEditorAttributeModifier::MaxLinesImpl,
-            RichEditorAttributeModifier::KeyboardAppearanceImpl,
-            RichEditorAttributeModifier::StopBackPressImpl,
-            RichEditorAttributeModifier::BindSelectionMenuImpl,
-            RichEditorAttributeModifier::CustomKeyboardImpl,
-            RichEditorAttributeModifier::PlaceholderImpl,
+            RichEditorAttributeModifier::SetOnReadyImpl,
+            RichEditorAttributeModifier::SetOnSelectImpl,
+            RichEditorAttributeModifier::SetOnSelectionChangeImpl,
+            RichEditorAttributeModifier::SetAboutToIMEInputImpl,
+            RichEditorAttributeModifier::SetOnIMEInputCompleteImpl,
+            RichEditorAttributeModifier::SetOnDidIMEInputImpl,
+            RichEditorAttributeModifier::SetAboutToDeleteImpl,
+            RichEditorAttributeModifier::SetOnDeleteCompleteImpl,
+            RichEditorAttributeModifier::SetCopyOptionsImpl,
+            RichEditorAttributeModifier::SetOnPasteImpl,
+            RichEditorAttributeModifier::SetEnableDataDetectorImpl,
+            RichEditorAttributeModifier::SetEnablePreviewTextImpl,
+            RichEditorAttributeModifier::SetDataDetectorConfigImpl,
+            RichEditorAttributeModifier::SetCaretColorImpl,
+            RichEditorAttributeModifier::SetSelectedBackgroundColorImpl,
+            RichEditorAttributeModifier::SetOnEditingChangeImpl,
+            RichEditorAttributeModifier::SetEnterKeyTypeImpl,
+            RichEditorAttributeModifier::SetOnSubmitImpl,
+            RichEditorAttributeModifier::SetOnWillChangeImpl,
+            RichEditorAttributeModifier::SetOnDidChangeImpl,
+            RichEditorAttributeModifier::SetOnCutImpl,
+            RichEditorAttributeModifier::SetOnCopyImpl,
+            RichEditorAttributeModifier::SetEditMenuOptionsImpl,
+            RichEditorAttributeModifier::SetEnableKeyboardOnFocusImpl,
+            RichEditorAttributeModifier::SetEnableHapticFeedbackImpl,
+            RichEditorAttributeModifier::SetBarStateImpl,
+            RichEditorAttributeModifier::SetMaxLengthImpl,
+            RichEditorAttributeModifier::SetMaxLinesImpl,
+            RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
+            RichEditorAttributeModifier::SetStopBackPressImpl,
+            RichEditorAttributeModifier::SetBindSelectionMenuImpl,
+            RichEditorAttributeModifier::SetCustomKeyboardImpl,
+            RichEditorAttributeModifier::SetPlaceholderImpl,
         };
         return &ArkUIRichEditorModifierImpl;
     }
@@ -9078,8 +9016,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRichTextModifier ArkUIRichTextModifierImpl {
             RichTextModifier::ConstructImpl,
             RichTextInterfaceModifier::SetRichTextOptionsImpl,
-            RichTextAttributeModifier::OnStartImpl,
-            RichTextAttributeModifier::OnCompleteImpl,
+            RichTextAttributeModifier::SetOnStartImpl,
+            RichTextAttributeModifier::SetOnCompleteImpl,
         };
         return &ArkUIRichTextModifierImpl;
     }
@@ -9106,10 +9044,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
             RowModifier::ConstructImpl,
             RowInterfaceModifier::SetRowOptionsImpl,
-            RowAttributeModifier::AlignItemsImpl,
-            RowAttributeModifier::JustifyContentImpl,
-            RowAttributeModifier::PointLightImpl,
-            RowAttributeModifier::ReverseImpl,
+            RowAttributeModifier::SetAlignItemsImpl,
+            RowAttributeModifier::SetJustifyContentImpl,
+            RowAttributeModifier::SetPointLightImpl,
+            RowAttributeModifier::SetReverseImpl,
         };
         return &ArkUIRowModifierImpl;
     }
@@ -9119,7 +9057,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
             RowSplitModifier::ConstructImpl,
             RowSplitInterfaceModifier::SetRowSplitOptionsImpl,
-            RowSplitAttributeModifier::ResizeableImpl,
+            RowSplitAttributeModifier::SetResizeableImpl,
         };
         return &ArkUIRowSplitModifierImpl;
     }
@@ -9138,23 +9076,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIScrollModifier ArkUIScrollModifierImpl {
             ScrollModifier::ConstructImpl,
             ScrollInterfaceModifier::SetScrollOptionsImpl,
-            ScrollAttributeModifier::ScrollableImpl,
-            ScrollAttributeModifier::OnWillScrollImpl,
-            ScrollAttributeModifier::OnDidScrollImpl,
-            ScrollAttributeModifier::OnScrollEdgeImpl,
-            ScrollAttributeModifier::OnScrollStartImpl,
-            ScrollAttributeModifier::OnScrollStopImpl,
-            ScrollAttributeModifier::ScrollBarImpl,
-            ScrollAttributeModifier::ScrollBarColorImpl,
-            ScrollAttributeModifier::ScrollBarWidthImpl,
-            ScrollAttributeModifier::OnScrollFrameBeginImpl,
-            ScrollAttributeModifier::NestedScrollImpl,
-            ScrollAttributeModifier::EnableScrollInteractionImpl,
-            ScrollAttributeModifier::FrictionImpl,
-            ScrollAttributeModifier::ScrollSnapImpl,
-            ScrollAttributeModifier::EnablePagingImpl,
-            ScrollAttributeModifier::InitialOffsetImpl,
-            ScrollAttributeModifier::EdgeEffectImpl,
+            ScrollAttributeModifier::SetScrollableImpl,
+            ScrollAttributeModifier::SetOnWillScrollImpl,
+            ScrollAttributeModifier::SetOnDidScrollImpl,
+            ScrollAttributeModifier::SetOnScrollEdgeImpl,
+            ScrollAttributeModifier::SetOnScrollStartImpl,
+            ScrollAttributeModifier::SetOnScrollStopImpl,
+            ScrollAttributeModifier::SetScrollBarImpl,
+            ScrollAttributeModifier::SetScrollBarColorImpl,
+            ScrollAttributeModifier::SetScrollBarWidthImpl,
+            ScrollAttributeModifier::SetOnScrollFrameBeginImpl,
+            ScrollAttributeModifier::SetNestedScrollImpl,
+            ScrollAttributeModifier::SetEnableScrollInteractionImpl,
+            ScrollAttributeModifier::SetFrictionImpl,
+            ScrollAttributeModifier::SetScrollSnapImpl,
+            ScrollAttributeModifier::SetEnablePagingImpl,
+            ScrollAttributeModifier::SetInitialOffsetImpl,
+            ScrollAttributeModifier::SetEdgeEffectImpl,
         };
         return &ArkUIScrollModifierImpl;
     }
@@ -9163,22 +9101,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIScrollableCommonMethodModifier ArkUIScrollableCommonMethodModifierImpl {
             ScrollableCommonMethodModifier::ConstructImpl,
-            ScrollableCommonMethodModifier::ScrollBarImpl,
-            ScrollableCommonMethodModifier::ScrollBarColorImpl,
-            ScrollableCommonMethodModifier::ScrollBarWidthImpl,
-            ScrollableCommonMethodModifier::NestedScrollImpl,
-            ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
-            ScrollableCommonMethodModifier::FrictionImpl,
-            ScrollableCommonMethodModifier::OnReachStartImpl,
-            ScrollableCommonMethodModifier::OnReachEndImpl,
-            ScrollableCommonMethodModifier::OnScrollStartImpl,
-            ScrollableCommonMethodModifier::OnScrollStopImpl,
-            ScrollableCommonMethodModifier::FlingSpeedLimitImpl,
-            ScrollableCommonMethodModifier::ClipContentImpl,
-            ScrollableCommonMethodModifier::DigitalCrownSensitivityImpl,
-            ScrollableCommonMethodModifier::BackToTopImpl,
-            ScrollableCommonMethodModifier::EdgeEffectImpl,
-            ScrollableCommonMethodModifier::FadingEdgeImpl,
+            ScrollableCommonMethodModifier::SetScrollBarImpl,
+            ScrollableCommonMethodModifier::SetScrollBarColorImpl,
+            ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
+            ScrollableCommonMethodModifier::SetNestedScrollImpl,
+            ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
+            ScrollableCommonMethodModifier::SetFrictionImpl,
+            ScrollableCommonMethodModifier::SetOnReachStartImpl,
+            ScrollableCommonMethodModifier::SetOnReachEndImpl,
+            ScrollableCommonMethodModifier::SetOnScrollStartImpl,
+            ScrollableCommonMethodModifier::SetOnScrollStopImpl,
+            ScrollableCommonMethodModifier::SetFlingSpeedLimitImpl,
+            ScrollableCommonMethodModifier::SetClipContentImpl,
+            ScrollableCommonMethodModifier::SetDigitalCrownSensitivityImpl,
+            ScrollableCommonMethodModifier::SetBackToTopImpl,
+            ScrollableCommonMethodModifier::SetEdgeEffectImpl,
+            ScrollableCommonMethodModifier::SetFadingEdgeImpl,
         };
         return &ArkUIScrollableCommonMethodModifierImpl;
     }
@@ -9188,7 +9126,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
             ScrollBarModifier::ConstructImpl,
             ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
-            ScrollBarAttributeModifier::EnableNestedScrollImpl,
+            ScrollBarAttributeModifier::SetEnableNestedScrollImpl,
         };
         return &ArkUIScrollBarModifierImpl;
     }
@@ -9198,54 +9136,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISearchModifier ArkUISearchModifierImpl {
             SearchModifier::ConstructImpl,
             SearchInterfaceModifier::SetSearchOptionsImpl,
-            SearchAttributeModifier::FontColorImpl,
-            SearchAttributeModifier::SearchIconImpl,
-            SearchAttributeModifier::CancelButtonImpl,
-            SearchAttributeModifier::TextIndentImpl,
-            SearchAttributeModifier::OnEditChangeImpl,
-            SearchAttributeModifier::SelectedBackgroundColorImpl,
-            SearchAttributeModifier::CaretStyleImpl,
-            SearchAttributeModifier::PlaceholderColorImpl,
-            SearchAttributeModifier::PlaceholderFontImpl,
-            SearchAttributeModifier::TextFontImpl,
-            SearchAttributeModifier::EnterKeyTypeImpl,
-            SearchAttributeModifier::OnSubmitImpl,
-            SearchAttributeModifier::OnChangeImpl,
-            SearchAttributeModifier::OnTextSelectionChangeImpl,
-            SearchAttributeModifier::OnContentScrollImpl,
-            SearchAttributeModifier::OnCopyImpl,
-            SearchAttributeModifier::OnCutImpl,
-            SearchAttributeModifier::OnPasteImpl,
-            SearchAttributeModifier::CopyOptionImpl,
-            SearchAttributeModifier::MaxLengthImpl,
-            SearchAttributeModifier::TextAlignImpl,
-            SearchAttributeModifier::EnableKeyboardOnFocusImpl,
-            SearchAttributeModifier::SelectionMenuHiddenImpl,
-            SearchAttributeModifier::MinFontSizeImpl,
-            SearchAttributeModifier::MaxFontSizeImpl,
-            SearchAttributeModifier::MinFontScaleImpl,
-            SearchAttributeModifier::MaxFontScaleImpl,
-            SearchAttributeModifier::DecorationImpl,
-            SearchAttributeModifier::LetterSpacingImpl,
-            SearchAttributeModifier::LineHeightImpl,
-            SearchAttributeModifier::TypeImpl,
-            SearchAttributeModifier::FontFeatureImpl,
-            SearchAttributeModifier::OnWillInsertImpl,
-            SearchAttributeModifier::OnDidInsertImpl,
-            SearchAttributeModifier::OnWillDeleteImpl,
-            SearchAttributeModifier::OnDidDeleteImpl,
-            SearchAttributeModifier::EditMenuOptionsImpl,
-            SearchAttributeModifier::EnablePreviewTextImpl,
-            SearchAttributeModifier::EnableHapticFeedbackImpl,
-            SearchAttributeModifier::AutoCapitalizationModeImpl,
-            SearchAttributeModifier::HalfLeadingImpl,
-            SearchAttributeModifier::StopBackPressImpl,
-            SearchAttributeModifier::OnWillChangeImpl,
-            SearchAttributeModifier::KeyboardAppearanceImpl,
-            SearchAttributeModifier::SearchButtonImpl,
-            SearchAttributeModifier::InputFilterImpl,
-            SearchAttributeModifier::CustomKeyboardImpl,
-            SearchAttributeModifier::_onChangeEvent_valueImpl,
+            SearchAttributeModifier::SetFontColorImpl,
+            SearchAttributeModifier::SetSearchIconImpl,
+            SearchAttributeModifier::SetCancelButtonImpl,
+            SearchAttributeModifier::SetTextIndentImpl,
+            SearchAttributeModifier::SetOnEditChangeImpl,
+            SearchAttributeModifier::SetSelectedBackgroundColorImpl,
+            SearchAttributeModifier::SetCaretStyleImpl,
+            SearchAttributeModifier::SetPlaceholderColorImpl,
+            SearchAttributeModifier::SetPlaceholderFontImpl,
+            SearchAttributeModifier::SetTextFontImpl,
+            SearchAttributeModifier::SetEnterKeyTypeImpl,
+            SearchAttributeModifier::SetOnSubmitImpl,
+            SearchAttributeModifier::SetOnChangeImpl,
+            SearchAttributeModifier::SetOnTextSelectionChangeImpl,
+            SearchAttributeModifier::SetOnContentScrollImpl,
+            SearchAttributeModifier::SetOnCopyImpl,
+            SearchAttributeModifier::SetOnCutImpl,
+            SearchAttributeModifier::SetOnPasteImpl,
+            SearchAttributeModifier::SetCopyOptionImpl,
+            SearchAttributeModifier::SetMaxLengthImpl,
+            SearchAttributeModifier::SetTextAlignImpl,
+            SearchAttributeModifier::SetEnableKeyboardOnFocusImpl,
+            SearchAttributeModifier::SetSelectionMenuHiddenImpl,
+            SearchAttributeModifier::SetMinFontSizeImpl,
+            SearchAttributeModifier::SetMaxFontSizeImpl,
+            SearchAttributeModifier::SetMinFontScaleImpl,
+            SearchAttributeModifier::SetMaxFontScaleImpl,
+            SearchAttributeModifier::SetDecorationImpl,
+            SearchAttributeModifier::SetLetterSpacingImpl,
+            SearchAttributeModifier::SetLineHeightImpl,
+            SearchAttributeModifier::SetTypeImpl,
+            SearchAttributeModifier::SetFontFeatureImpl,
+            SearchAttributeModifier::SetOnWillInsertImpl,
+            SearchAttributeModifier::SetOnDidInsertImpl,
+            SearchAttributeModifier::SetOnWillDeleteImpl,
+            SearchAttributeModifier::SetOnDidDeleteImpl,
+            SearchAttributeModifier::SetEditMenuOptionsImpl,
+            SearchAttributeModifier::SetEnablePreviewTextImpl,
+            SearchAttributeModifier::SetEnableHapticFeedbackImpl,
+            SearchAttributeModifier::SetAutoCapitalizationModeImpl,
+            SearchAttributeModifier::SetHalfLeadingImpl,
+            SearchAttributeModifier::SetStopBackPressImpl,
+            SearchAttributeModifier::SetOnWillChangeImpl,
+            SearchAttributeModifier::SetKeyboardAppearanceImpl,
+            SearchAttributeModifier::SetSearchButtonImpl,
+            SearchAttributeModifier::SetInputFilterImpl,
+            SearchAttributeModifier::SetCustomKeyboardImpl,
         };
         return &ArkUISearchModifierImpl;
     }
@@ -9255,36 +9192,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISelectModifier ArkUISelectModifierImpl {
             SelectModifier::ConstructImpl,
             SelectInterfaceModifier::SetSelectOptionsImpl,
-            SelectAttributeModifier::SelectedImpl,
-            SelectAttributeModifier::ValueImpl,
-            SelectAttributeModifier::FontImpl,
-            SelectAttributeModifier::FontColorImpl,
-            SelectAttributeModifier::SelectedOptionBgColorImpl,
-            SelectAttributeModifier::SelectedOptionFontImpl,
-            SelectAttributeModifier::SelectedOptionFontColorImpl,
-            SelectAttributeModifier::OptionBgColorImpl,
-            SelectAttributeModifier::OptionFontImpl,
-            SelectAttributeModifier::OptionFontColorImpl,
-            SelectAttributeModifier::OnSelectImpl,
-            SelectAttributeModifier::SpaceImpl,
-            SelectAttributeModifier::ArrowPositionImpl,
-            SelectAttributeModifier::OptionWidthImpl,
-            SelectAttributeModifier::OptionHeightImpl,
-            SelectAttributeModifier::MenuBackgroundColorImpl,
-            SelectAttributeModifier::MenuBackgroundBlurStyleImpl,
-            SelectAttributeModifier::ControlSizeImpl,
-            SelectAttributeModifier::MenuItemContentModifierImpl,
-            SelectAttributeModifier::DividerImpl,
-            SelectAttributeModifier::TextModifierImpl,
-            SelectAttributeModifier::ArrowModifierImpl,
-            SelectAttributeModifier::OptionTextModifierImpl,
-            SelectAttributeModifier::SelectedOptionTextModifierImpl,
-            SelectAttributeModifier::DividerStyleImpl,
-            SelectAttributeModifier::AvoidanceImpl,
-            SelectAttributeModifier::MenuOutlineImpl,
-            SelectAttributeModifier::MenuAlignImpl,
-            SelectAttributeModifier::_onChangeEvent_selectedImpl,
-            SelectAttributeModifier::_onChangeEvent_valueImpl,
+            SelectAttributeModifier::SetSelectedImpl,
+            SelectAttributeModifier::SetValueImpl,
+            SelectAttributeModifier::SetFontImpl,
+            SelectAttributeModifier::SetFontColorImpl,
+            SelectAttributeModifier::SetSelectedOptionBgColorImpl,
+            SelectAttributeModifier::SetSelectedOptionFontImpl,
+            SelectAttributeModifier::SetSelectedOptionFontColorImpl,
+            SelectAttributeModifier::SetOptionBgColorImpl,
+            SelectAttributeModifier::SetOptionFontImpl,
+            SelectAttributeModifier::SetOptionFontColorImpl,
+            SelectAttributeModifier::SetOnSelectImpl,
+            SelectAttributeModifier::SetSpaceImpl,
+            SelectAttributeModifier::SetArrowPositionImpl,
+            SelectAttributeModifier::SetOptionWidthImpl,
+            SelectAttributeModifier::SetOptionHeightImpl,
+            SelectAttributeModifier::SetMenuBackgroundColorImpl,
+            SelectAttributeModifier::SetMenuBackgroundBlurStyleImpl,
+            SelectAttributeModifier::SetControlSizeImpl,
+            SelectAttributeModifier::SetDividerImpl,
+            SelectAttributeModifier::SetTextModifierImpl,
+            SelectAttributeModifier::SetArrowModifierImpl,
+            SelectAttributeModifier::SetOptionTextModifierImpl,
+            SelectAttributeModifier::SetSelectedOptionTextModifierImpl,
+            SelectAttributeModifier::SetDividerStyleImpl,
+            SelectAttributeModifier::SetAvoidanceImpl,
+            SelectAttributeModifier::SetMenuOutlineImpl,
+            SelectAttributeModifier::SetMenuAlignImpl,
         };
         return &ArkUISelectModifierImpl;
     }
@@ -9294,19 +9228,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIShapeModifier ArkUIShapeModifierImpl {
             ShapeModifier::ConstructImpl,
             ShapeInterfaceModifier::SetShapeOptionsImpl,
-            ShapeAttributeModifier::ViewPortImpl,
-            ShapeAttributeModifier::StrokeImpl,
-            ShapeAttributeModifier::FillImpl,
-            ShapeAttributeModifier::StrokeDashOffsetImpl,
-            ShapeAttributeModifier::StrokeDashArrayImpl,
-            ShapeAttributeModifier::StrokeLineCapImpl,
-            ShapeAttributeModifier::StrokeLineJoinImpl,
-            ShapeAttributeModifier::StrokeMiterLimitImpl,
-            ShapeAttributeModifier::StrokeOpacityImpl,
-            ShapeAttributeModifier::FillOpacityImpl,
-            ShapeAttributeModifier::StrokeWidthImpl,
-            ShapeAttributeModifier::AntiAliasImpl,
-            ShapeAttributeModifier::MeshImpl,
+            ShapeAttributeModifier::SetViewPortImpl,
+            ShapeAttributeModifier::SetStrokeImpl,
+            ShapeAttributeModifier::SetFillImpl,
+            ShapeAttributeModifier::SetStrokeDashOffsetImpl,
+            ShapeAttributeModifier::SetStrokeDashArrayImpl,
+            ShapeAttributeModifier::SetStrokeLineCapImpl,
+            ShapeAttributeModifier::SetStrokeLineJoinImpl,
+            ShapeAttributeModifier::SetStrokeMiterLimitImpl,
+            ShapeAttributeModifier::SetStrokeOpacityImpl,
+            ShapeAttributeModifier::SetFillOpacityImpl,
+            ShapeAttributeModifier::SetStrokeWidthImpl,
+            ShapeAttributeModifier::SetAntiAliasImpl,
+            ShapeAttributeModifier::SetMeshImpl,
         };
         return &ArkUIShapeModifierImpl;
     }
@@ -9316,21 +9250,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISideBarContainerModifier ArkUISideBarContainerModifierImpl {
             SideBarContainerModifier::ConstructImpl,
             SideBarContainerInterfaceModifier::SetSideBarContainerOptionsImpl,
-            SideBarContainerAttributeModifier::ShowSideBarImpl,
-            SideBarContainerAttributeModifier::ControlButtonImpl,
-            SideBarContainerAttributeModifier::ShowControlButtonImpl,
-            SideBarContainerAttributeModifier::OnChangeImpl,
-            SideBarContainerAttributeModifier::SideBarWidth0Impl,
-            SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
-            SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
-            SideBarContainerAttributeModifier::SideBarWidth1Impl,
-            SideBarContainerAttributeModifier::MinSideBarWidth1Impl,
-            SideBarContainerAttributeModifier::MaxSideBarWidth1Impl,
-            SideBarContainerAttributeModifier::AutoHideImpl,
-            SideBarContainerAttributeModifier::SideBarPositionImpl,
-            SideBarContainerAttributeModifier::DividerImpl,
-            SideBarContainerAttributeModifier::MinContentWidthImpl,
-            SideBarContainerAttributeModifier::_onChangeEvent_showSideBarImpl,
+            SideBarContainerAttributeModifier::SetShowSideBarImpl,
+            SideBarContainerAttributeModifier::SetControlButtonImpl,
+            SideBarContainerAttributeModifier::SetShowControlButtonImpl,
+            SideBarContainerAttributeModifier::SetOnChangeImpl,
+            SideBarContainerAttributeModifier::SetSideBarWidth0Impl,
+            SideBarContainerAttributeModifier::SetMinSideBarWidth0Impl,
+            SideBarContainerAttributeModifier::SetMaxSideBarWidth0Impl,
+            SideBarContainerAttributeModifier::SetSideBarWidth1Impl,
+            SideBarContainerAttributeModifier::SetMinSideBarWidth1Impl,
+            SideBarContainerAttributeModifier::SetMaxSideBarWidth1Impl,
+            SideBarContainerAttributeModifier::SetAutoHideImpl,
+            SideBarContainerAttributeModifier::SetSideBarPositionImpl,
+            SideBarContainerAttributeModifier::SetDividerImpl,
+            SideBarContainerAttributeModifier::SetMinContentWidthImpl,
         };
         return &ArkUISideBarContainerModifierImpl;
     }
@@ -9340,28 +9273,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISliderModifier ArkUISliderModifierImpl {
             SliderModifier::ConstructImpl,
             SliderInterfaceModifier::SetSliderOptionsImpl,
-            SliderAttributeModifier::BlockColorImpl,
-            SliderAttributeModifier::TrackColorImpl,
-            SliderAttributeModifier::SelectedColorImpl,
-            SliderAttributeModifier::ShowStepsImpl,
-            SliderAttributeModifier::TrackThicknessImpl,
-            SliderAttributeModifier::OnChangeImpl,
-            SliderAttributeModifier::BlockBorderColorImpl,
-            SliderAttributeModifier::BlockBorderWidthImpl,
-            SliderAttributeModifier::StepColorImpl,
-            SliderAttributeModifier::TrackBorderRadiusImpl,
-            SliderAttributeModifier::SelectedBorderRadiusImpl,
-            SliderAttributeModifier::BlockSizeImpl,
-            SliderAttributeModifier::BlockStyleImpl,
-            SliderAttributeModifier::StepSizeImpl,
-            SliderAttributeModifier::SliderInteractionModeImpl,
-            SliderAttributeModifier::MinResponsiveDistanceImpl,
-            SliderAttributeModifier::ContentModifierImpl,
-            SliderAttributeModifier::SlideRangeImpl,
-            SliderAttributeModifier::DigitalCrownSensitivityImpl,
-            SliderAttributeModifier::EnableHapticFeedbackImpl,
-            SliderAttributeModifier::ShowTipsImpl,
-            SliderAttributeModifier::_onChangeEvent_valueImpl,
+            SliderAttributeModifier::SetBlockColorImpl,
+            SliderAttributeModifier::SetTrackColorImpl,
+            SliderAttributeModifier::SetSelectedColorImpl,
+            SliderAttributeModifier::SetShowStepsImpl,
+            SliderAttributeModifier::SetTrackThicknessImpl,
+            SliderAttributeModifier::SetOnChangeImpl,
+            SliderAttributeModifier::SetBlockBorderColorImpl,
+            SliderAttributeModifier::SetBlockBorderWidthImpl,
+            SliderAttributeModifier::SetStepColorImpl,
+            SliderAttributeModifier::SetTrackBorderRadiusImpl,
+            SliderAttributeModifier::SetSelectedBorderRadiusImpl,
+            SliderAttributeModifier::SetBlockSizeImpl,
+            SliderAttributeModifier::SetBlockStyleImpl,
+            SliderAttributeModifier::SetStepSizeImpl,
+            SliderAttributeModifier::SetSliderInteractionModeImpl,
+            SliderAttributeModifier::SetMinResponsiveDistanceImpl,
+            SliderAttributeModifier::SetSlideRangeImpl,
+            SliderAttributeModifier::SetDigitalCrownSensitivityImpl,
+            SliderAttributeModifier::SetEnableHapticFeedbackImpl,
+            SliderAttributeModifier::SetShowTipsImpl,
         };
         return &ArkUISliderModifierImpl;
     }
@@ -9371,15 +9302,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISpanModifier ArkUISpanModifierImpl {
             SpanModifier::ConstructImpl,
             SpanInterfaceModifier::SetSpanOptionsImpl,
-            SpanAttributeModifier::FontImpl,
-            SpanAttributeModifier::FontColorImpl,
-            SpanAttributeModifier::FontSizeImpl,
-            SpanAttributeModifier::FontStyleImpl,
-            SpanAttributeModifier::FontFamilyImpl,
-            SpanAttributeModifier::DecorationImpl,
-            SpanAttributeModifier::TextCaseImpl,
-            SpanAttributeModifier::LineHeightImpl,
-            SpanAttributeModifier::TextShadowImpl,
+            SpanAttributeModifier::SetFontImpl,
+            SpanAttributeModifier::SetFontColorImpl,
+            SpanAttributeModifier::SetFontSizeImpl,
+            SpanAttributeModifier::SetFontStyleImpl,
+            SpanAttributeModifier::SetFontWeightImpl,
+            SpanAttributeModifier::SetFontFamilyImpl,
+            SpanAttributeModifier::SetDecorationImpl,
+            SpanAttributeModifier::SetLetterSpacingImpl,
+            SpanAttributeModifier::SetTextCaseImpl,
+            SpanAttributeModifier::SetLineHeightImpl,
+            SpanAttributeModifier::SetTextShadowImpl,
         };
         return &ArkUISpanModifierImpl;
     }
@@ -9389,8 +9322,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIStackModifier ArkUIStackModifierImpl {
             StackModifier::ConstructImpl,
             StackInterfaceModifier::SetStackOptionsImpl,
-            StackAttributeModifier::AlignContentImpl,
-            StackAttributeModifier::PointLightImpl,
+            StackAttributeModifier::SetAlignContentImpl,
+            StackAttributeModifier::SetPointLightImpl,
         };
         return &ArkUIStackModifierImpl;
     }
@@ -9400,12 +9333,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIStepperModifier ArkUIStepperModifierImpl {
             StepperModifier::ConstructImpl,
             StepperInterfaceModifier::SetStepperOptionsImpl,
-            StepperAttributeModifier::OnFinishImpl,
-            StepperAttributeModifier::OnSkipImpl,
-            StepperAttributeModifier::OnChangeImpl,
-            StepperAttributeModifier::OnNextImpl,
-            StepperAttributeModifier::OnPreviousImpl,
-            StepperAttributeModifier::_onChangeEvent_indexImpl,
+            StepperAttributeModifier::SetOnFinishImpl,
+            StepperAttributeModifier::SetOnSkipImpl,
+            StepperAttributeModifier::SetOnChangeImpl,
+            StepperAttributeModifier::SetOnNextImpl,
+            StepperAttributeModifier::SetOnPreviousImpl,
         };
         return &ArkUIStepperModifierImpl;
     }
@@ -9415,9 +9347,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIStepperItemModifier ArkUIStepperItemModifierImpl {
             StepperItemModifier::ConstructImpl,
             StepperItemInterfaceModifier::SetStepperItemOptionsImpl,
-            StepperItemAttributeModifier::PrevLabelImpl,
-            StepperItemAttributeModifier::NextLabelImpl,
-            StepperItemAttributeModifier::StatusImpl,
+            StepperItemAttributeModifier::SetPrevLabelImpl,
+            StepperItemAttributeModifier::SetNextLabelImpl,
+            StepperItemAttributeModifier::SetStatusImpl,
         };
         return &ArkUIStepperItemModifierImpl;
     }
@@ -9427,37 +9359,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISwiperModifier ArkUISwiperModifierImpl {
             SwiperModifier::ConstructImpl,
             SwiperInterfaceModifier::SetSwiperOptionsImpl,
-            SwiperAttributeModifier::IndexImpl,
-            SwiperAttributeModifier::IntervalImpl,
-            SwiperAttributeModifier::IndicatorImpl,
-            SwiperAttributeModifier::LoopImpl,
-            SwiperAttributeModifier::DurationImpl,
-            SwiperAttributeModifier::VerticalImpl,
-            SwiperAttributeModifier::ItemSpaceImpl,
-            SwiperAttributeModifier::DisplayModeImpl,
-            SwiperAttributeModifier::CachedCount0Impl,
-            SwiperAttributeModifier::EffectModeImpl,
-            SwiperAttributeModifier::DisableSwipeImpl,
-            SwiperAttributeModifier::CurveImpl,
-            SwiperAttributeModifier::OnChangeImpl,
-            SwiperAttributeModifier::OnSelectedImpl,
-            SwiperAttributeModifier::OnUnselectedImpl,
-            SwiperAttributeModifier::OnAnimationStartImpl,
-            SwiperAttributeModifier::OnAnimationEndImpl,
-            SwiperAttributeModifier::OnGestureSwipeImpl,
-            SwiperAttributeModifier::NestedScrollImpl,
-            SwiperAttributeModifier::CustomContentTransitionImpl,
-            SwiperAttributeModifier::OnContentDidScrollImpl,
-            SwiperAttributeModifier::IndicatorInteractiveImpl,
-            SwiperAttributeModifier::PageFlipModeImpl,
-            SwiperAttributeModifier::OnContentWillScrollImpl,
-            SwiperAttributeModifier::AutoPlayImpl,
-            SwiperAttributeModifier::DisplayArrowImpl,
-            SwiperAttributeModifier::CachedCount1Impl,
-            SwiperAttributeModifier::DisplayCountImpl,
-            SwiperAttributeModifier::PrevMarginImpl,
-            SwiperAttributeModifier::NextMarginImpl,
-            SwiperAttributeModifier::_onChangeEvent_indexImpl,
+            SwiperAttributeModifier::SetIndexImpl,
+            SwiperAttributeModifier::SetIntervalImpl,
+            SwiperAttributeModifier::SetIndicatorImpl,
+            SwiperAttributeModifier::SetLoopImpl,
+            SwiperAttributeModifier::SetDurationImpl,
+            SwiperAttributeModifier::SetVerticalImpl,
+            SwiperAttributeModifier::SetItemSpaceImpl,
+            SwiperAttributeModifier::SetDisplayModeImpl,
+            SwiperAttributeModifier::SetCachedCount0Impl,
+            SwiperAttributeModifier::SetEffectModeImpl,
+            SwiperAttributeModifier::SetDisableSwipeImpl,
+            SwiperAttributeModifier::SetCurveImpl,
+            SwiperAttributeModifier::SetOnChangeImpl,
+            SwiperAttributeModifier::SetOnSelectedImpl,
+            SwiperAttributeModifier::SetOnUnselectedImpl,
+            SwiperAttributeModifier::SetOnAnimationStartImpl,
+            SwiperAttributeModifier::SetOnAnimationEndImpl,
+            SwiperAttributeModifier::SetOnGestureSwipeImpl,
+            SwiperAttributeModifier::SetNestedScrollImpl,
+            SwiperAttributeModifier::SetCustomContentTransitionImpl,
+            SwiperAttributeModifier::SetOnContentDidScrollImpl,
+            SwiperAttributeModifier::SetIndicatorInteractiveImpl,
+            SwiperAttributeModifier::SetPageFlipModeImpl,
+            SwiperAttributeModifier::SetOnContentWillScrollImpl,
+            SwiperAttributeModifier::SetAutoPlayImpl,
+            SwiperAttributeModifier::SetDisplayArrowImpl,
+            SwiperAttributeModifier::SetCachedCount1Impl,
+            SwiperAttributeModifier::SetDisplayCountImpl,
+            SwiperAttributeModifier::SetPrevMarginImpl,
+            SwiperAttributeModifier::SetNextMarginImpl,
         };
         return &ArkUISwiperModifierImpl;
     }
@@ -9467,14 +9398,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISymbolGlyphModifier ArkUISymbolGlyphModifierImpl {
             SymbolGlyphModifier::ConstructImpl,
             SymbolGlyphInterfaceModifier::SetSymbolGlyphOptionsImpl,
-            SymbolGlyphAttributeModifier::FontSizeImpl,
-            SymbolGlyphAttributeModifier::FontColorImpl,
-            SymbolGlyphAttributeModifier::FontWeightImpl,
-            SymbolGlyphAttributeModifier::EffectStrategyImpl,
-            SymbolGlyphAttributeModifier::RenderingStrategyImpl,
-            SymbolGlyphAttributeModifier::MinFontScaleImpl,
-            SymbolGlyphAttributeModifier::MaxFontScaleImpl,
-            SymbolGlyphAttributeModifier::SymbolEffectImpl,
+            SymbolGlyphAttributeModifier::SetFontSizeImpl,
+            SymbolGlyphAttributeModifier::SetFontColorImpl,
+            SymbolGlyphAttributeModifier::SetFontWeightImpl,
+            SymbolGlyphAttributeModifier::SetEffectStrategyImpl,
+            SymbolGlyphAttributeModifier::SetRenderingStrategyImpl,
+            SymbolGlyphAttributeModifier::SetMinFontScaleImpl,
+            SymbolGlyphAttributeModifier::SetMaxFontScaleImpl,
+            SymbolGlyphAttributeModifier::SetSymbolEffectImpl,
         };
         return &ArkUISymbolGlyphModifierImpl;
     }
@@ -9484,11 +9415,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUISymbolSpanModifier ArkUISymbolSpanModifierImpl {
             SymbolSpanModifier::ConstructImpl,
             SymbolSpanInterfaceModifier::SetSymbolSpanOptionsImpl,
-            SymbolSpanAttributeModifier::FontSizeImpl,
-            SymbolSpanAttributeModifier::FontColorImpl,
-            SymbolSpanAttributeModifier::FontWeightImpl,
-            SymbolSpanAttributeModifier::EffectStrategyImpl,
-            SymbolSpanAttributeModifier::RenderingStrategyImpl,
+            SymbolSpanAttributeModifier::SetFontSizeImpl,
+            SymbolSpanAttributeModifier::SetFontColorImpl,
+            SymbolSpanAttributeModifier::SetFontWeightImpl,
+            SymbolSpanAttributeModifier::SetEffectStrategyImpl,
+            SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
         };
         return &ArkUISymbolSpanModifierImpl;
     }
@@ -9498,9 +9429,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
             TabContentModifier::ConstructImpl,
             TabContentInterfaceModifier::SetTabContentOptionsImpl,
-            TabContentAttributeModifier::TabBarImpl,
-            TabContentAttributeModifier::OnWillShowImpl,
-            TabContentAttributeModifier::OnWillHideImpl,
+            TabContentAttributeModifier::SetTabBarImpl,
+            TabContentAttributeModifier::SetOnWillShowImpl,
+            TabContentAttributeModifier::SetOnWillHideImpl,
         };
         return &ArkUITabContentModifierImpl;
     }
@@ -9510,35 +9441,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITabsModifier ArkUITabsModifierImpl {
             TabsModifier::ConstructImpl,
             TabsInterfaceModifier::SetTabsOptionsImpl,
-            TabsAttributeModifier::VerticalImpl,
-            TabsAttributeModifier::BarPositionImpl,
-            TabsAttributeModifier::ScrollableImpl,
-            TabsAttributeModifier::BarWidthImpl,
-            TabsAttributeModifier::BarHeightImpl,
-            TabsAttributeModifier::AnimationDurationImpl,
-            TabsAttributeModifier::AnimationModeImpl,
-            TabsAttributeModifier::EdgeEffectImpl,
-            TabsAttributeModifier::OnChangeImpl,
-            TabsAttributeModifier::OnSelectedImpl,
-            TabsAttributeModifier::OnTabBarClickImpl,
-            TabsAttributeModifier::OnUnselectedImpl,
-            TabsAttributeModifier::OnAnimationStartImpl,
-            TabsAttributeModifier::OnAnimationEndImpl,
-            TabsAttributeModifier::OnGestureSwipeImpl,
-            TabsAttributeModifier::FadingEdgeImpl,
-            TabsAttributeModifier::DividerImpl,
-            TabsAttributeModifier::BarOverlapImpl,
-            TabsAttributeModifier::BarBackgroundColorImpl,
-            TabsAttributeModifier::BarGridAlignImpl,
-            TabsAttributeModifier::CustomContentTransitionImpl,
-            TabsAttributeModifier::BarBackgroundBlurStyle0Impl,
-            TabsAttributeModifier::PageFlipModeImpl,
-            TabsAttributeModifier::BarBackgroundEffectImpl,
-            TabsAttributeModifier::OnContentWillChangeImpl,
-            TabsAttributeModifier::BarModeImpl,
-            TabsAttributeModifier::BarBackgroundBlurStyle1Impl,
-            TabsAttributeModifier::CachedMaxCountImpl,
-            TabsAttributeModifier::_onChangeEvent_indexImpl,
+            TabsAttributeModifier::SetVerticalImpl,
+            TabsAttributeModifier::SetBarPositionImpl,
+            TabsAttributeModifier::SetScrollableImpl,
+            TabsAttributeModifier::SetBarWidthImpl,
+            TabsAttributeModifier::SetBarHeightImpl,
+            TabsAttributeModifier::SetAnimationDurationImpl,
+            TabsAttributeModifier::SetAnimationModeImpl,
+            TabsAttributeModifier::SetEdgeEffectImpl,
+            TabsAttributeModifier::SetOnChangeImpl,
+            TabsAttributeModifier::SetOnSelectedImpl,
+            TabsAttributeModifier::SetOnTabBarClickImpl,
+            TabsAttributeModifier::SetOnUnselectedImpl,
+            TabsAttributeModifier::SetOnAnimationStartImpl,
+            TabsAttributeModifier::SetOnAnimationEndImpl,
+            TabsAttributeModifier::SetOnGestureSwipeImpl,
+            TabsAttributeModifier::SetFadingEdgeImpl,
+            TabsAttributeModifier::SetDividerImpl,
+            TabsAttributeModifier::SetBarOverlapImpl,
+            TabsAttributeModifier::SetBarBackgroundColorImpl,
+            TabsAttributeModifier::SetBarGridAlignImpl,
+            TabsAttributeModifier::SetCustomContentTransitionImpl,
+            TabsAttributeModifier::SetBarBackgroundBlurStyle0Impl,
+            TabsAttributeModifier::SetPageFlipModeImpl,
+            TabsAttributeModifier::SetBarBackgroundEffectImpl,
+            TabsAttributeModifier::SetOnContentWillChangeImpl,
+            TabsAttributeModifier::SetBarModeImpl,
+            TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
+            TabsAttributeModifier::SetCachedMaxCountImpl,
         };
         return &ArkUITabsModifierImpl;
     }
@@ -9548,49 +9478,49 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
             TextModifier::ConstructImpl,
             TextInterfaceModifier::SetTextOptionsImpl,
-            TextAttributeModifier::FontColorImpl,
-            TextAttributeModifier::FontSizeImpl,
-            TextAttributeModifier::MinFontSizeImpl,
-            TextAttributeModifier::MaxFontSizeImpl,
-            TextAttributeModifier::MinFontScaleImpl,
-            TextAttributeModifier::MaxFontScaleImpl,
-            TextAttributeModifier::FontStyleImpl,
-            TextAttributeModifier::LineSpacingImpl,
-            TextAttributeModifier::TextAlignImpl,
-            TextAttributeModifier::LineHeightImpl,
-            TextAttributeModifier::TextOverflowImpl,
-            TextAttributeModifier::FontFamilyImpl,
-            TextAttributeModifier::MaxLinesImpl,
-            TextAttributeModifier::DecorationImpl,
-            TextAttributeModifier::LetterSpacingImpl,
-            TextAttributeModifier::TextCaseImpl,
-            TextAttributeModifier::BaselineOffsetImpl,
-            TextAttributeModifier::CopyOptionImpl,
-            TextAttributeModifier::DraggableImpl,
-            TextAttributeModifier::TextShadowImpl,
-            TextAttributeModifier::HeightAdaptivePolicyImpl,
-            TextAttributeModifier::TextIndentImpl,
-            TextAttributeModifier::WordBreakImpl,
-            TextAttributeModifier::LineBreakStrategyImpl,
-            TextAttributeModifier::OnCopyImpl,
-            TextAttributeModifier::CaretColorImpl,
-            TextAttributeModifier::SelectedBackgroundColorImpl,
-            TextAttributeModifier::EllipsisModeImpl,
-            TextAttributeModifier::EnableDataDetectorImpl,
-            TextAttributeModifier::DataDetectorConfigImpl,
-            TextAttributeModifier::OnTextSelectionChangeImpl,
-            TextAttributeModifier::FontFeatureImpl,
-            TextAttributeModifier::MarqueeOptionsImpl,
-            TextAttributeModifier::OnMarqueeStateChangeImpl,
-            TextAttributeModifier::PrivacySensitiveImpl,
-            TextAttributeModifier::TextSelectableImpl,
-            TextAttributeModifier::EditMenuOptionsImpl,
-            TextAttributeModifier::HalfLeadingImpl,
-            TextAttributeModifier::EnableHapticFeedbackImpl,
-            TextAttributeModifier::FontImpl,
-            TextAttributeModifier::FontWeightImpl,
-            TextAttributeModifier::SelectionImpl,
-            TextAttributeModifier::BindSelectionMenuImpl,
+            TextAttributeModifier::SetFontColorImpl,
+            TextAttributeModifier::SetFontSizeImpl,
+            TextAttributeModifier::SetMinFontSizeImpl,
+            TextAttributeModifier::SetMaxFontSizeImpl,
+            TextAttributeModifier::SetMinFontScaleImpl,
+            TextAttributeModifier::SetMaxFontScaleImpl,
+            TextAttributeModifier::SetFontStyleImpl,
+            TextAttributeModifier::SetLineSpacingImpl,
+            TextAttributeModifier::SetTextAlignImpl,
+            TextAttributeModifier::SetLineHeightImpl,
+            TextAttributeModifier::SetTextOverflowImpl,
+            TextAttributeModifier::SetFontFamilyImpl,
+            TextAttributeModifier::SetMaxLinesImpl,
+            TextAttributeModifier::SetDecorationImpl,
+            TextAttributeModifier::SetLetterSpacingImpl,
+            TextAttributeModifier::SetTextCaseImpl,
+            TextAttributeModifier::SetBaselineOffsetImpl,
+            TextAttributeModifier::SetCopyOptionImpl,
+            TextAttributeModifier::SetDraggableImpl,
+            TextAttributeModifier::SetTextShadowImpl,
+            TextAttributeModifier::SetHeightAdaptivePolicyImpl,
+            TextAttributeModifier::SetTextIndentImpl,
+            TextAttributeModifier::SetWordBreakImpl,
+            TextAttributeModifier::SetLineBreakStrategyImpl,
+            TextAttributeModifier::SetOnCopyImpl,
+            TextAttributeModifier::SetCaretColorImpl,
+            TextAttributeModifier::SetSelectedBackgroundColorImpl,
+            TextAttributeModifier::SetEllipsisModeImpl,
+            TextAttributeModifier::SetEnableDataDetectorImpl,
+            TextAttributeModifier::SetDataDetectorConfigImpl,
+            TextAttributeModifier::SetOnTextSelectionChangeImpl,
+            TextAttributeModifier::SetFontFeatureImpl,
+            TextAttributeModifier::SetMarqueeOptionsImpl,
+            TextAttributeModifier::SetOnMarqueeStateChangeImpl,
+            TextAttributeModifier::SetPrivacySensitiveImpl,
+            TextAttributeModifier::SetTextSelectableImpl,
+            TextAttributeModifier::SetEditMenuOptionsImpl,
+            TextAttributeModifier::SetHalfLeadingImpl,
+            TextAttributeModifier::SetEnableHapticFeedbackImpl,
+            TextAttributeModifier::SetFontImpl,
+            TextAttributeModifier::SetFontWeightImpl,
+            TextAttributeModifier::SetSelectionImpl,
+            TextAttributeModifier::SetBindSelectionMenuImpl,
         };
         return &ArkUITextModifierImpl;
     }
@@ -9600,67 +9530,66 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITextAreaModifier ArkUITextAreaModifierImpl {
             TextAreaModifier::ConstructImpl,
             TextAreaInterfaceModifier::SetTextAreaOptionsImpl,
-            TextAreaAttributeModifier::PlaceholderColorImpl,
-            TextAreaAttributeModifier::PlaceholderFontImpl,
-            TextAreaAttributeModifier::EnterKeyTypeImpl,
-            TextAreaAttributeModifier::TextAlignImpl,
-            TextAreaAttributeModifier::CaretColorImpl,
-            TextAreaAttributeModifier::FontColorImpl,
-            TextAreaAttributeModifier::FontSizeImpl,
-            TextAreaAttributeModifier::FontStyleImpl,
-            TextAreaAttributeModifier::FontWeightImpl,
-            TextAreaAttributeModifier::FontFamilyImpl,
-            TextAreaAttributeModifier::TextOverflowImpl,
-            TextAreaAttributeModifier::TextIndentImpl,
-            TextAreaAttributeModifier::CaretStyleImpl,
-            TextAreaAttributeModifier::SelectedBackgroundColorImpl,
-            TextAreaAttributeModifier::OnSubmitImpl,
-            TextAreaAttributeModifier::OnChangeImpl,
-            TextAreaAttributeModifier::OnTextSelectionChangeImpl,
-            TextAreaAttributeModifier::OnContentScrollImpl,
-            TextAreaAttributeModifier::OnEditChangeImpl,
-            TextAreaAttributeModifier::OnCopyImpl,
-            TextAreaAttributeModifier::OnCutImpl,
-            TextAreaAttributeModifier::OnPasteImpl,
-            TextAreaAttributeModifier::CopyOptionImpl,
-            TextAreaAttributeModifier::EnableKeyboardOnFocusImpl,
-            TextAreaAttributeModifier::MaxLengthImpl,
-            TextAreaAttributeModifier::StyleImpl,
-            TextAreaAttributeModifier::BarStateImpl,
-            TextAreaAttributeModifier::SelectionMenuHiddenImpl,
-            TextAreaAttributeModifier::MinFontSizeImpl,
-            TextAreaAttributeModifier::MaxFontSizeImpl,
-            TextAreaAttributeModifier::MinFontScaleImpl,
-            TextAreaAttributeModifier::MaxFontScaleImpl,
-            TextAreaAttributeModifier::HeightAdaptivePolicyImpl,
-            TextAreaAttributeModifier::MaxLinesImpl,
-            TextAreaAttributeModifier::WordBreakImpl,
-            TextAreaAttributeModifier::LineBreakStrategyImpl,
-            TextAreaAttributeModifier::DecorationImpl,
-            TextAreaAttributeModifier::LetterSpacingImpl,
-            TextAreaAttributeModifier::LineSpacingImpl,
-            TextAreaAttributeModifier::LineHeightImpl,
-            TextAreaAttributeModifier::TypeImpl,
-            TextAreaAttributeModifier::EnableAutoFillImpl,
-            TextAreaAttributeModifier::ContentTypeImpl,
-            TextAreaAttributeModifier::FontFeatureImpl,
-            TextAreaAttributeModifier::OnWillInsertImpl,
-            TextAreaAttributeModifier::OnDidInsertImpl,
-            TextAreaAttributeModifier::OnWillDeleteImpl,
-            TextAreaAttributeModifier::OnDidDeleteImpl,
-            TextAreaAttributeModifier::EditMenuOptionsImpl,
-            TextAreaAttributeModifier::EnablePreviewTextImpl,
-            TextAreaAttributeModifier::EnableHapticFeedbackImpl,
-            TextAreaAttributeModifier::AutoCapitalizationModeImpl,
-            TextAreaAttributeModifier::HalfLeadingImpl,
-            TextAreaAttributeModifier::EllipsisModeImpl,
-            TextAreaAttributeModifier::StopBackPressImpl,
-            TextAreaAttributeModifier::OnWillChangeImpl,
-            TextAreaAttributeModifier::KeyboardAppearanceImpl,
-            TextAreaAttributeModifier::InputFilterImpl,
-            TextAreaAttributeModifier::ShowCounterImpl,
-            TextAreaAttributeModifier::CustomKeyboardImpl,
-            TextAreaAttributeModifier::_onChangeEvent_textImpl,
+            TextAreaAttributeModifier::SetPlaceholderColorImpl,
+            TextAreaAttributeModifier::SetPlaceholderFontImpl,
+            TextAreaAttributeModifier::SetEnterKeyTypeImpl,
+            TextAreaAttributeModifier::SetTextAlignImpl,
+            TextAreaAttributeModifier::SetCaretColorImpl,
+            TextAreaAttributeModifier::SetFontColorImpl,
+            TextAreaAttributeModifier::SetFontSizeImpl,
+            TextAreaAttributeModifier::SetFontStyleImpl,
+            TextAreaAttributeModifier::SetFontWeightImpl,
+            TextAreaAttributeModifier::SetFontFamilyImpl,
+            TextAreaAttributeModifier::SetTextOverflowImpl,
+            TextAreaAttributeModifier::SetTextIndentImpl,
+            TextAreaAttributeModifier::SetCaretStyleImpl,
+            TextAreaAttributeModifier::SetSelectedBackgroundColorImpl,
+            TextAreaAttributeModifier::SetOnSubmitImpl,
+            TextAreaAttributeModifier::SetOnChangeImpl,
+            TextAreaAttributeModifier::SetOnTextSelectionChangeImpl,
+            TextAreaAttributeModifier::SetOnContentScrollImpl,
+            TextAreaAttributeModifier::SetOnEditChangeImpl,
+            TextAreaAttributeModifier::SetOnCopyImpl,
+            TextAreaAttributeModifier::SetOnCutImpl,
+            TextAreaAttributeModifier::SetOnPasteImpl,
+            TextAreaAttributeModifier::SetCopyOptionImpl,
+            TextAreaAttributeModifier::SetEnableKeyboardOnFocusImpl,
+            TextAreaAttributeModifier::SetMaxLengthImpl,
+            TextAreaAttributeModifier::SetStyleImpl,
+            TextAreaAttributeModifier::SetBarStateImpl,
+            TextAreaAttributeModifier::SetSelectionMenuHiddenImpl,
+            TextAreaAttributeModifier::SetMinFontSizeImpl,
+            TextAreaAttributeModifier::SetMaxFontSizeImpl,
+            TextAreaAttributeModifier::SetMinFontScaleImpl,
+            TextAreaAttributeModifier::SetMaxFontScaleImpl,
+            TextAreaAttributeModifier::SetHeightAdaptivePolicyImpl,
+            TextAreaAttributeModifier::SetMaxLinesImpl,
+            TextAreaAttributeModifier::SetWordBreakImpl,
+            TextAreaAttributeModifier::SetLineBreakStrategyImpl,
+            TextAreaAttributeModifier::SetDecorationImpl,
+            TextAreaAttributeModifier::SetLetterSpacingImpl,
+            TextAreaAttributeModifier::SetLineSpacingImpl,
+            TextAreaAttributeModifier::SetLineHeightImpl,
+            TextAreaAttributeModifier::SetTypeImpl,
+            TextAreaAttributeModifier::SetEnableAutoFillImpl,
+            TextAreaAttributeModifier::SetContentTypeImpl,
+            TextAreaAttributeModifier::SetFontFeatureImpl,
+            TextAreaAttributeModifier::SetOnWillInsertImpl,
+            TextAreaAttributeModifier::SetOnDidInsertImpl,
+            TextAreaAttributeModifier::SetOnWillDeleteImpl,
+            TextAreaAttributeModifier::SetOnDidDeleteImpl,
+            TextAreaAttributeModifier::SetEditMenuOptionsImpl,
+            TextAreaAttributeModifier::SetEnablePreviewTextImpl,
+            TextAreaAttributeModifier::SetEnableHapticFeedbackImpl,
+            TextAreaAttributeModifier::SetAutoCapitalizationModeImpl,
+            TextAreaAttributeModifier::SetHalfLeadingImpl,
+            TextAreaAttributeModifier::SetEllipsisModeImpl,
+            TextAreaAttributeModifier::SetStopBackPressImpl,
+            TextAreaAttributeModifier::SetOnWillChangeImpl,
+            TextAreaAttributeModifier::SetKeyboardAppearanceImpl,
+            TextAreaAttributeModifier::SetInputFilterImpl,
+            TextAreaAttributeModifier::SetShowCounterImpl,
+            TextAreaAttributeModifier::SetCustomKeyboardImpl,
         };
         return &ArkUITextAreaModifierImpl;
     }
@@ -9670,17 +9599,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITextClockModifier ArkUITextClockModifierImpl {
             TextClockModifier::ConstructImpl,
             TextClockInterfaceModifier::SetTextClockOptionsImpl,
-            TextClockAttributeModifier::FormatImpl,
-            TextClockAttributeModifier::OnDateChangeImpl,
-            TextClockAttributeModifier::FontColorImpl,
-            TextClockAttributeModifier::FontSizeImpl,
-            TextClockAttributeModifier::FontStyleImpl,
-            TextClockAttributeModifier::FontWeightImpl,
-            TextClockAttributeModifier::FontFamilyImpl,
-            TextClockAttributeModifier::TextShadowImpl,
-            TextClockAttributeModifier::FontFeatureImpl,
-            TextClockAttributeModifier::ContentModifierImpl,
-            TextClockAttributeModifier::DateTimeOptionsImpl,
+            TextClockAttributeModifier::SetFormatImpl,
+            TextClockAttributeModifier::SetOnDateChangeImpl,
+            TextClockAttributeModifier::SetFontColorImpl,
+            TextClockAttributeModifier::SetFontSizeImpl,
+            TextClockAttributeModifier::SetFontStyleImpl,
+            TextClockAttributeModifier::SetFontWeightImpl,
+            TextClockAttributeModifier::SetFontFamilyImpl,
+            TextClockAttributeModifier::SetTextShadowImpl,
+            TextClockAttributeModifier::SetFontFeatureImpl,
+            TextClockAttributeModifier::SetDateTimeOptionsImpl,
         };
         return &ArkUITextClockModifierImpl;
     }
@@ -9690,78 +9618,77 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITextInputModifier ArkUITextInputModifierImpl {
             TextInputModifier::ConstructImpl,
             TextInputInterfaceModifier::SetTextInputOptionsImpl,
-            TextInputAttributeModifier::TypeImpl,
-            TextInputAttributeModifier::ContentTypeImpl,
-            TextInputAttributeModifier::PlaceholderColorImpl,
-            TextInputAttributeModifier::TextOverflowImpl,
-            TextInputAttributeModifier::TextIndentImpl,
-            TextInputAttributeModifier::PlaceholderFontImpl,
-            TextInputAttributeModifier::EnterKeyTypeImpl,
-            TextInputAttributeModifier::CaretColorImpl,
-            TextInputAttributeModifier::OnEditChangeImpl,
-            TextInputAttributeModifier::OnSubmitImpl,
-            TextInputAttributeModifier::OnChangeImpl,
-            TextInputAttributeModifier::OnTextSelectionChangeImpl,
-            TextInputAttributeModifier::OnContentScrollImpl,
-            TextInputAttributeModifier::MaxLengthImpl,
-            TextInputAttributeModifier::FontColorImpl,
-            TextInputAttributeModifier::FontSizeImpl,
-            TextInputAttributeModifier::FontStyleImpl,
-            TextInputAttributeModifier::FontWeightImpl,
-            TextInputAttributeModifier::FontFamilyImpl,
-            TextInputAttributeModifier::OnCopyImpl,
-            TextInputAttributeModifier::OnCutImpl,
-            TextInputAttributeModifier::OnPasteImpl,
-            TextInputAttributeModifier::CopyOptionImpl,
-            TextInputAttributeModifier::ShowPasswordIconImpl,
-            TextInputAttributeModifier::TextAlignImpl,
-            TextInputAttributeModifier::StyleImpl,
-            TextInputAttributeModifier::CaretStyleImpl,
-            TextInputAttributeModifier::SelectedBackgroundColorImpl,
-            TextInputAttributeModifier::CaretPositionImpl,
-            TextInputAttributeModifier::EnableKeyboardOnFocusImpl,
-            TextInputAttributeModifier::PasswordIconImpl,
-            TextInputAttributeModifier::ShowErrorImpl,
-            TextInputAttributeModifier::ShowUnitImpl,
-            TextInputAttributeModifier::ShowUnderlineImpl,
-            TextInputAttributeModifier::UnderlineColorImpl,
-            TextInputAttributeModifier::SelectionMenuHiddenImpl,
-            TextInputAttributeModifier::BarStateImpl,
-            TextInputAttributeModifier::MaxLinesImpl,
-            TextInputAttributeModifier::WordBreakImpl,
-            TextInputAttributeModifier::LineBreakStrategyImpl,
-            TextInputAttributeModifier::CancelButtonImpl,
-            TextInputAttributeModifier::SelectAllImpl,
-            TextInputAttributeModifier::MinFontSizeImpl,
-            TextInputAttributeModifier::MaxFontSizeImpl,
-            TextInputAttributeModifier::MinFontScaleImpl,
-            TextInputAttributeModifier::MaxFontScaleImpl,
-            TextInputAttributeModifier::HeightAdaptivePolicyImpl,
-            TextInputAttributeModifier::EnableAutoFillImpl,
-            TextInputAttributeModifier::DecorationImpl,
-            TextInputAttributeModifier::LetterSpacingImpl,
-            TextInputAttributeModifier::LineHeightImpl,
-            TextInputAttributeModifier::PasswordRulesImpl,
-            TextInputAttributeModifier::FontFeatureImpl,
-            TextInputAttributeModifier::ShowPasswordImpl,
-            TextInputAttributeModifier::OnSecurityStateChangeImpl,
-            TextInputAttributeModifier::OnWillInsertImpl,
-            TextInputAttributeModifier::OnDidInsertImpl,
-            TextInputAttributeModifier::OnWillDeleteImpl,
-            TextInputAttributeModifier::OnDidDeleteImpl,
-            TextInputAttributeModifier::EditMenuOptionsImpl,
-            TextInputAttributeModifier::EnablePreviewTextImpl,
-            TextInputAttributeModifier::EnableHapticFeedbackImpl,
-            TextInputAttributeModifier::AutoCapitalizationModeImpl,
-            TextInputAttributeModifier::HalfLeadingImpl,
-            TextInputAttributeModifier::EllipsisModeImpl,
-            TextInputAttributeModifier::StopBackPressImpl,
-            TextInputAttributeModifier::OnWillChangeImpl,
-            TextInputAttributeModifier::KeyboardAppearanceImpl,
-            TextInputAttributeModifier::InputFilterImpl,
-            TextInputAttributeModifier::CustomKeyboardImpl,
-            TextInputAttributeModifier::ShowCounterImpl,
-            TextInputAttributeModifier::_onChangeEvent_textImpl,
+            TextInputAttributeModifier::SetTypeImpl,
+            TextInputAttributeModifier::SetContentTypeImpl,
+            TextInputAttributeModifier::SetPlaceholderColorImpl,
+            TextInputAttributeModifier::SetTextOverflowImpl,
+            TextInputAttributeModifier::SetTextIndentImpl,
+            TextInputAttributeModifier::SetPlaceholderFontImpl,
+            TextInputAttributeModifier::SetEnterKeyTypeImpl,
+            TextInputAttributeModifier::SetCaretColorImpl,
+            TextInputAttributeModifier::SetOnEditChangeImpl,
+            TextInputAttributeModifier::SetOnSubmitImpl,
+            TextInputAttributeModifier::SetOnChangeImpl,
+            TextInputAttributeModifier::SetOnTextSelectionChangeImpl,
+            TextInputAttributeModifier::SetOnContentScrollImpl,
+            TextInputAttributeModifier::SetMaxLengthImpl,
+            TextInputAttributeModifier::SetFontColorImpl,
+            TextInputAttributeModifier::SetFontSizeImpl,
+            TextInputAttributeModifier::SetFontStyleImpl,
+            TextInputAttributeModifier::SetFontWeightImpl,
+            TextInputAttributeModifier::SetFontFamilyImpl,
+            TextInputAttributeModifier::SetOnCopyImpl,
+            TextInputAttributeModifier::SetOnCutImpl,
+            TextInputAttributeModifier::SetOnPasteImpl,
+            TextInputAttributeModifier::SetCopyOptionImpl,
+            TextInputAttributeModifier::SetShowPasswordIconImpl,
+            TextInputAttributeModifier::SetTextAlignImpl,
+            TextInputAttributeModifier::SetStyleImpl,
+            TextInputAttributeModifier::SetCaretStyleImpl,
+            TextInputAttributeModifier::SetSelectedBackgroundColorImpl,
+            TextInputAttributeModifier::SetCaretPositionImpl,
+            TextInputAttributeModifier::SetEnableKeyboardOnFocusImpl,
+            TextInputAttributeModifier::SetPasswordIconImpl,
+            TextInputAttributeModifier::SetShowErrorImpl,
+            TextInputAttributeModifier::SetShowUnitImpl,
+            TextInputAttributeModifier::SetShowUnderlineImpl,
+            TextInputAttributeModifier::SetUnderlineColorImpl,
+            TextInputAttributeModifier::SetSelectionMenuHiddenImpl,
+            TextInputAttributeModifier::SetBarStateImpl,
+            TextInputAttributeModifier::SetMaxLinesImpl,
+            TextInputAttributeModifier::SetWordBreakImpl,
+            TextInputAttributeModifier::SetLineBreakStrategyImpl,
+            TextInputAttributeModifier::SetCancelButtonImpl,
+            TextInputAttributeModifier::SetSelectAllImpl,
+            TextInputAttributeModifier::SetMinFontSizeImpl,
+            TextInputAttributeModifier::SetMaxFontSizeImpl,
+            TextInputAttributeModifier::SetMinFontScaleImpl,
+            TextInputAttributeModifier::SetMaxFontScaleImpl,
+            TextInputAttributeModifier::SetHeightAdaptivePolicyImpl,
+            TextInputAttributeModifier::SetEnableAutoFillImpl,
+            TextInputAttributeModifier::SetDecorationImpl,
+            TextInputAttributeModifier::SetLetterSpacingImpl,
+            TextInputAttributeModifier::SetLineHeightImpl,
+            TextInputAttributeModifier::SetPasswordRulesImpl,
+            TextInputAttributeModifier::SetFontFeatureImpl,
+            TextInputAttributeModifier::SetShowPasswordImpl,
+            TextInputAttributeModifier::SetOnSecurityStateChangeImpl,
+            TextInputAttributeModifier::SetOnWillInsertImpl,
+            TextInputAttributeModifier::SetOnDidInsertImpl,
+            TextInputAttributeModifier::SetOnWillDeleteImpl,
+            TextInputAttributeModifier::SetOnDidDeleteImpl,
+            TextInputAttributeModifier::SetEditMenuOptionsImpl,
+            TextInputAttributeModifier::SetEnablePreviewTextImpl,
+            TextInputAttributeModifier::SetEnableHapticFeedbackImpl,
+            TextInputAttributeModifier::SetAutoCapitalizationModeImpl,
+            TextInputAttributeModifier::SetHalfLeadingImpl,
+            TextInputAttributeModifier::SetEllipsisModeImpl,
+            TextInputAttributeModifier::SetStopBackPressImpl,
+            TextInputAttributeModifier::SetOnWillChangeImpl,
+            TextInputAttributeModifier::SetKeyboardAppearanceImpl,
+            TextInputAttributeModifier::SetInputFilterImpl,
+            TextInputAttributeModifier::SetCustomKeyboardImpl,
+            TextInputAttributeModifier::SetShowCounterImpl,
         };
         return &ArkUITextInputModifierImpl;
     }
@@ -9771,23 +9698,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITextPickerModifier ArkUITextPickerModifierImpl {
             TextPickerModifier::ConstructImpl,
             TextPickerInterfaceModifier::SetTextPickerOptionsImpl,
-            TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
-            TextPickerAttributeModifier::CanLoopImpl,
-            TextPickerAttributeModifier::DisappearTextStyleImpl,
-            TextPickerAttributeModifier::TextStyleImpl,
-            TextPickerAttributeModifier::SelectedTextStyleImpl,
-            TextPickerAttributeModifier::DisableTextStyleAnimationImpl,
-            TextPickerAttributeModifier::DefaultTextStyleImpl,
-            TextPickerAttributeModifier::OnChangeImpl,
-            TextPickerAttributeModifier::OnScrollStopImpl,
-            TextPickerAttributeModifier::OnEnterSelectedAreaImpl,
-            TextPickerAttributeModifier::SelectedIndexImpl,
-            TextPickerAttributeModifier::DividerImpl,
-            TextPickerAttributeModifier::GradientHeightImpl,
-            TextPickerAttributeModifier::EnableHapticFeedbackImpl,
-            TextPickerAttributeModifier::DigitalCrownSensitivityImpl,
-            TextPickerAttributeModifier::_onChangeEvent_selectedImpl,
-            TextPickerAttributeModifier::_onChangeEvent_valueImpl,
+            TextPickerAttributeModifier::SetDefaultPickerItemHeightImpl,
+            TextPickerAttributeModifier::SetCanLoopImpl,
+            TextPickerAttributeModifier::SetDisappearTextStyleImpl,
+            TextPickerAttributeModifier::SetTextStyleImpl,
+            TextPickerAttributeModifier::SetSelectedTextStyleImpl,
+            TextPickerAttributeModifier::SetDisableTextStyleAnimationImpl,
+            TextPickerAttributeModifier::SetDefaultTextStyleImpl,
+            TextPickerAttributeModifier::SetOnChangeImpl,
+            TextPickerAttributeModifier::SetOnScrollStopImpl,
+            TextPickerAttributeModifier::SetOnEnterSelectedAreaImpl,
+            TextPickerAttributeModifier::SetSelectedIndexImpl,
+            TextPickerAttributeModifier::SetDividerImpl,
+            TextPickerAttributeModifier::SetGradientHeightImpl,
+            TextPickerAttributeModifier::SetEnableHapticFeedbackImpl,
+            TextPickerAttributeModifier::SetDigitalCrownSensitivityImpl,
         };
         return &ArkUITextPickerModifierImpl;
     }
@@ -9797,15 +9722,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITextTimerModifier ArkUITextTimerModifierImpl {
             TextTimerModifier::ConstructImpl,
             TextTimerInterfaceModifier::SetTextTimerOptionsImpl,
-            TextTimerAttributeModifier::FormatImpl,
-            TextTimerAttributeModifier::FontColorImpl,
-            TextTimerAttributeModifier::FontSizeImpl,
-            TextTimerAttributeModifier::FontStyleImpl,
-            TextTimerAttributeModifier::FontWeightImpl,
-            TextTimerAttributeModifier::FontFamilyImpl,
-            TextTimerAttributeModifier::OnTimerImpl,
-            TextTimerAttributeModifier::TextShadowImpl,
-            TextTimerAttributeModifier::ContentModifierImpl,
+            TextTimerAttributeModifier::SetFormatImpl,
+            TextTimerAttributeModifier::SetFontColorImpl,
+            TextTimerAttributeModifier::SetFontSizeImpl,
+            TextTimerAttributeModifier::SetFontStyleImpl,
+            TextTimerAttributeModifier::SetFontWeightImpl,
+            TextTimerAttributeModifier::SetFontFamilyImpl,
+            TextTimerAttributeModifier::SetOnTimerImpl,
+            TextTimerAttributeModifier::SetTextShadowImpl,
         };
         return &ArkUITextTimerModifierImpl;
     }
@@ -9815,18 +9739,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITimePickerModifier ArkUITimePickerModifierImpl {
             TimePickerModifier::ConstructImpl,
             TimePickerInterfaceModifier::SetTimePickerOptionsImpl,
-            TimePickerAttributeModifier::UseMilitaryTimeImpl,
-            TimePickerAttributeModifier::LoopImpl,
-            TimePickerAttributeModifier::DisappearTextStyleImpl,
-            TimePickerAttributeModifier::TextStyleImpl,
-            TimePickerAttributeModifier::SelectedTextStyleImpl,
-            TimePickerAttributeModifier::DateTimeOptionsImpl,
-            TimePickerAttributeModifier::OnChangeImpl,
-            TimePickerAttributeModifier::OnEnterSelectedAreaImpl,
-            TimePickerAttributeModifier::EnableHapticFeedbackImpl,
-            TimePickerAttributeModifier::DigitalCrownSensitivityImpl,
-            TimePickerAttributeModifier::EnableCascadeImpl,
-            TimePickerAttributeModifier::_onChangeEvent_selectedImpl,
+            TimePickerAttributeModifier::SetUseMilitaryTimeImpl,
+            TimePickerAttributeModifier::SetLoopImpl,
+            TimePickerAttributeModifier::SetDisappearTextStyleImpl,
+            TimePickerAttributeModifier::SetTextStyleImpl,
+            TimePickerAttributeModifier::SetSelectedTextStyleImpl,
+            TimePickerAttributeModifier::SetDateTimeOptionsImpl,
+            TimePickerAttributeModifier::SetOnChangeImpl,
+            TimePickerAttributeModifier::SetOnEnterSelectedAreaImpl,
+            TimePickerAttributeModifier::SetEnableHapticFeedbackImpl,
+            TimePickerAttributeModifier::SetDigitalCrownSensitivityImpl,
+            TimePickerAttributeModifier::SetEnableCascadeImpl,
         };
         return &ArkUITimePickerModifierImpl;
     }
@@ -9836,12 +9759,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
             ToggleModifier::ConstructImpl,
             ToggleInterfaceModifier::SetToggleOptionsImpl,
-            ToggleAttributeModifier::OnChangeImpl,
-            ToggleAttributeModifier::ContentModifierImpl,
-            ToggleAttributeModifier::SelectedColorImpl,
-            ToggleAttributeModifier::SwitchPointColorImpl,
-            ToggleAttributeModifier::SwitchStyleImpl,
-            ToggleAttributeModifier::_onChangeEvent_isOnImpl,
+            ToggleAttributeModifier::SetOnChangeImpl,
+            ToggleAttributeModifier::SetSelectedColorImpl,
+            ToggleAttributeModifier::SetSwitchPointColorImpl,
+            ToggleAttributeModifier::SetSwitchStyleImpl,
         };
         return &ArkUIToggleModifierImpl;
     }
@@ -9851,11 +9772,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIUIExtensionComponentModifier ArkUIUIExtensionComponentModifierImpl {
             UIExtensionComponentModifier::ConstructImpl,
             UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl,
-            UIExtensionComponentAttributeModifier::OnRemoteReadyImpl,
-            UIExtensionComponentAttributeModifier::OnReceiveImpl,
-            UIExtensionComponentAttributeModifier::OnErrorImpl,
-            UIExtensionComponentAttributeModifier::OnTerminatedImpl,
-            UIExtensionComponentAttributeModifier::OnDrawReadyImpl,
+            UIExtensionComponentAttributeModifier::SetOnRemoteReadyImpl,
+            UIExtensionComponentAttributeModifier::SetOnReceiveImpl,
+            UIExtensionComponentAttributeModifier::SetOnErrorImpl,
+            UIExtensionComponentAttributeModifier::SetOnTerminatedImpl,
+            UIExtensionComponentAttributeModifier::SetOnDrawReadyImpl,
         };
         return &ArkUIUIExtensionComponentModifierImpl;
     }
@@ -9865,25 +9786,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
             VideoModifier::ConstructImpl,
             VideoInterfaceModifier::SetVideoOptionsImpl,
-            VideoAttributeModifier::MutedImpl,
-            VideoAttributeModifier::AutoPlayImpl,
-            VideoAttributeModifier::ControlsImpl,
-            VideoAttributeModifier::LoopImpl,
-            VideoAttributeModifier::ObjectFitImpl,
-            VideoAttributeModifier::OnStartImpl,
-            VideoAttributeModifier::OnPauseImpl,
-            VideoAttributeModifier::OnFinishImpl,
-            VideoAttributeModifier::OnFullscreenChangeImpl,
-            VideoAttributeModifier::OnPreparedImpl,
-            VideoAttributeModifier::OnSeekingImpl,
-            VideoAttributeModifier::OnSeekedImpl,
-            VideoAttributeModifier::OnUpdateImpl,
-            VideoAttributeModifier::OnErrorImpl,
-            VideoAttributeModifier::OnStopImpl,
-            VideoAttributeModifier::EnableAnalyzerImpl,
-            VideoAttributeModifier::AnalyzerConfigImpl,
-            VideoAttributeModifier::SurfaceBackgroundColorImpl,
-            VideoAttributeModifier::EnableShortcutKeyImpl,
+            VideoAttributeModifier::SetMutedImpl,
+            VideoAttributeModifier::SetAutoPlayImpl,
+            VideoAttributeModifier::SetControlsImpl,
+            VideoAttributeModifier::SetLoopImpl,
+            VideoAttributeModifier::SetObjectFitImpl,
+            VideoAttributeModifier::SetOnStartImpl,
+            VideoAttributeModifier::SetOnPauseImpl,
+            VideoAttributeModifier::SetOnFinishImpl,
+            VideoAttributeModifier::SetOnFullscreenChangeImpl,
+            VideoAttributeModifier::SetOnPreparedImpl,
+            VideoAttributeModifier::SetOnSeekingImpl,
+            VideoAttributeModifier::SetOnSeekedImpl,
+            VideoAttributeModifier::SetOnUpdateImpl,
+            VideoAttributeModifier::SetOnErrorImpl,
+            VideoAttributeModifier::SetOnStopImpl,
+            VideoAttributeModifier::SetEnableAnalyzerImpl,
+            VideoAttributeModifier::SetAnalyzerConfigImpl,
+            VideoAttributeModifier::SetSurfaceBackgroundColorImpl,
+            VideoAttributeModifier::SetEnableShortcutKeyImpl,
         };
         return &ArkUIVideoModifierImpl;
     }
@@ -9893,18 +9814,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIWaterFlowModifier ArkUIWaterFlowModifierImpl {
             WaterFlowModifier::ConstructImpl,
             WaterFlowInterfaceModifier::SetWaterFlowOptionsImpl,
-            WaterFlowAttributeModifier::ColumnsTemplateImpl,
-            WaterFlowAttributeModifier::ItemConstraintSizeImpl,
-            WaterFlowAttributeModifier::RowsTemplateImpl,
-            WaterFlowAttributeModifier::ColumnsGapImpl,
-            WaterFlowAttributeModifier::RowsGapImpl,
-            WaterFlowAttributeModifier::LayoutDirectionImpl,
-            WaterFlowAttributeModifier::CachedCount0Impl,
-            WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
-            WaterFlowAttributeModifier::OnScrollIndexImpl,
-            WaterFlowAttributeModifier::OnWillScrollImpl,
-            WaterFlowAttributeModifier::OnDidScrollImpl,
-            WaterFlowAttributeModifier::CachedCount1Impl,
+            WaterFlowAttributeModifier::SetColumnsTemplateImpl,
+            WaterFlowAttributeModifier::SetItemConstraintSizeImpl,
+            WaterFlowAttributeModifier::SetRowsTemplateImpl,
+            WaterFlowAttributeModifier::SetColumnsGapImpl,
+            WaterFlowAttributeModifier::SetRowsGapImpl,
+            WaterFlowAttributeModifier::SetLayoutDirectionImpl,
+            WaterFlowAttributeModifier::SetCachedCount0Impl,
+            WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
+            WaterFlowAttributeModifier::SetOnScrollIndexImpl,
+            WaterFlowAttributeModifier::SetOnWillScrollImpl,
+            WaterFlowAttributeModifier::SetOnDidScrollImpl,
+            WaterFlowAttributeModifier::SetCachedCount1Impl,
         };
         return &ArkUIWaterFlowModifierImpl;
     }
@@ -9914,124 +9835,124 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIWebModifier ArkUIWebModifierImpl {
             WebModifier::ConstructImpl,
             WebInterfaceModifier::SetWebOptionsImpl,
-            WebAttributeModifier::JavaScriptAccessImpl,
-            WebAttributeModifier::FileAccessImpl,
-            WebAttributeModifier::OnlineImageAccessImpl,
-            WebAttributeModifier::DomStorageAccessImpl,
-            WebAttributeModifier::ImageAccessImpl,
-            WebAttributeModifier::MixedModeImpl,
-            WebAttributeModifier::ZoomAccessImpl,
-            WebAttributeModifier::GeolocationAccessImpl,
-            WebAttributeModifier::JavaScriptProxyImpl,
-            WebAttributeModifier::CacheModeImpl,
-            WebAttributeModifier::DarkModeImpl,
-            WebAttributeModifier::ForceDarkAccessImpl,
-            WebAttributeModifier::MediaOptionsImpl,
-            WebAttributeModifier::OverviewModeAccessImpl,
-            WebAttributeModifier::OverScrollModeImpl,
-            WebAttributeModifier::BlurOnKeyboardHideModeImpl,
-            WebAttributeModifier::TextZoomRatioImpl,
-            WebAttributeModifier::DatabaseAccessImpl,
-            WebAttributeModifier::InitialScaleImpl,
-            WebAttributeModifier::MetaViewportImpl,
-            WebAttributeModifier::OnPageEndImpl,
-            WebAttributeModifier::OnPageBeginImpl,
-            WebAttributeModifier::OnProgressChangeImpl,
-            WebAttributeModifier::OnTitleReceiveImpl,
-            WebAttributeModifier::OnGeolocationHideImpl,
-            WebAttributeModifier::OnGeolocationShowImpl,
-            WebAttributeModifier::OnRequestSelectedImpl,
-            WebAttributeModifier::OnAlertImpl,
-            WebAttributeModifier::OnBeforeUnloadImpl,
-            WebAttributeModifier::OnConfirmImpl,
-            WebAttributeModifier::OnPromptImpl,
-            WebAttributeModifier::OnConsoleImpl,
-            WebAttributeModifier::OnErrorReceiveImpl,
-            WebAttributeModifier::OnHttpErrorReceiveImpl,
-            WebAttributeModifier::OnDownloadStartImpl,
-            WebAttributeModifier::OnRefreshAccessedHistoryImpl,
-            WebAttributeModifier::OnRenderExitedImpl,
-            WebAttributeModifier::OnShowFileSelectorImpl,
-            WebAttributeModifier::OnResourceLoadImpl,
-            WebAttributeModifier::OnFullScreenExitImpl,
-            WebAttributeModifier::OnFullScreenEnterImpl,
-            WebAttributeModifier::OnScaleChangeImpl,
-            WebAttributeModifier::OnHttpAuthRequestImpl,
-            WebAttributeModifier::OnInterceptRequestImpl,
-            WebAttributeModifier::OnPermissionRequestImpl,
-            WebAttributeModifier::OnScreenCaptureRequestImpl,
-            WebAttributeModifier::OnContextMenuShowImpl,
-            WebAttributeModifier::OnContextMenuHideImpl,
-            WebAttributeModifier::MediaPlayGestureAccessImpl,
-            WebAttributeModifier::OnSearchResultReceiveImpl,
-            WebAttributeModifier::OnScrollImpl,
-            WebAttributeModifier::OnSslErrorEventReceiveImpl,
-            WebAttributeModifier::OnSslErrorEventImpl,
-            WebAttributeModifier::OnClientAuthenticationRequestImpl,
-            WebAttributeModifier::OnWindowNewImpl,
-            WebAttributeModifier::OnWindowExitImpl,
-            WebAttributeModifier::MultiWindowAccessImpl,
-            WebAttributeModifier::OnInterceptKeyEventImpl,
-            WebAttributeModifier::WebStandardFontImpl,
-            WebAttributeModifier::WebSerifFontImpl,
-            WebAttributeModifier::WebSansSerifFontImpl,
-            WebAttributeModifier::WebFixedFontImpl,
-            WebAttributeModifier::WebFantasyFontImpl,
-            WebAttributeModifier::WebCursiveFontImpl,
-            WebAttributeModifier::DefaultFixedFontSizeImpl,
-            WebAttributeModifier::DefaultFontSizeImpl,
-            WebAttributeModifier::MinFontSizeImpl,
-            WebAttributeModifier::MinLogicalFontSizeImpl,
-            WebAttributeModifier::DefaultTextEncodingFormatImpl,
-            WebAttributeModifier::ForceDisplayScrollBarImpl,
-            WebAttributeModifier::BlockNetworkImpl,
-            WebAttributeModifier::HorizontalScrollBarAccessImpl,
-            WebAttributeModifier::VerticalScrollBarAccessImpl,
-            WebAttributeModifier::OnTouchIconUrlReceivedImpl,
-            WebAttributeModifier::OnFaviconReceivedImpl,
-            WebAttributeModifier::OnPageVisibleImpl,
-            WebAttributeModifier::OnDataResubmittedImpl,
-            WebAttributeModifier::PinchSmoothImpl,
-            WebAttributeModifier::AllowWindowOpenMethodImpl,
-            WebAttributeModifier::OnAudioStateChangedImpl,
-            WebAttributeModifier::OnFirstContentfulPaintImpl,
-            WebAttributeModifier::OnFirstMeaningfulPaintImpl,
-            WebAttributeModifier::OnLargestContentfulPaintImpl,
-            WebAttributeModifier::OnLoadInterceptImpl,
-            WebAttributeModifier::OnControllerAttachedImpl,
-            WebAttributeModifier::OnOverScrollImpl,
-            WebAttributeModifier::OnSafeBrowsingCheckResultImpl,
-            WebAttributeModifier::OnNavigationEntryCommittedImpl,
-            WebAttributeModifier::OnIntelligentTrackingPreventionResultImpl,
-            WebAttributeModifier::JavaScriptOnDocumentStartImpl,
-            WebAttributeModifier::JavaScriptOnDocumentEndImpl,
-            WebAttributeModifier::LayoutModeImpl,
-            WebAttributeModifier::NestedScrollImpl,
-            WebAttributeModifier::EnableNativeEmbedModeImpl,
-            WebAttributeModifier::OnNativeEmbedLifecycleChangeImpl,
-            WebAttributeModifier::OnNativeEmbedVisibilityChangeImpl,
-            WebAttributeModifier::OnNativeEmbedGestureEventImpl,
-            WebAttributeModifier::CopyOptionsImpl,
-            WebAttributeModifier::OnOverrideUrlLoadingImpl,
-            WebAttributeModifier::TextAutosizingImpl,
-            WebAttributeModifier::EnableNativeMediaPlayerImpl,
-            WebAttributeModifier::OnRenderProcessNotRespondingImpl,
-            WebAttributeModifier::OnRenderProcessRespondingImpl,
-            WebAttributeModifier::OnViewportFitChangedImpl,
-            WebAttributeModifier::OnInterceptKeyboardAttachImpl,
-            WebAttributeModifier::OnAdsBlockedImpl,
-            WebAttributeModifier::KeyboardAvoidModeImpl,
-            WebAttributeModifier::EditMenuOptionsImpl,
-            WebAttributeModifier::EnableHapticFeedbackImpl,
-            WebAttributeModifier::OptimizeParserBudgetImpl,
-            WebAttributeModifier::EnableFollowSystemFontWeightImpl,
-            WebAttributeModifier::EnableWebAVSessionImpl,
-            WebAttributeModifier::RunJavaScriptOnDocumentStartImpl,
-            WebAttributeModifier::RunJavaScriptOnDocumentEndImpl,
-            WebAttributeModifier::RunJavaScriptOnHeadEndImpl,
-            WebAttributeModifier::NativeEmbedOptionsImpl,
-            WebAttributeModifier::RegisterNativeEmbedRuleImpl,
-            WebAttributeModifier::BindSelectionMenuImpl,
+            WebAttributeModifier::SetJavaScriptAccessImpl,
+            WebAttributeModifier::SetFileAccessImpl,
+            WebAttributeModifier::SetOnlineImageAccessImpl,
+            WebAttributeModifier::SetDomStorageAccessImpl,
+            WebAttributeModifier::SetImageAccessImpl,
+            WebAttributeModifier::SetMixedModeImpl,
+            WebAttributeModifier::SetZoomAccessImpl,
+            WebAttributeModifier::SetGeolocationAccessImpl,
+            WebAttributeModifier::SetJavaScriptProxyImpl,
+            WebAttributeModifier::SetCacheModeImpl,
+            WebAttributeModifier::SetDarkModeImpl,
+            WebAttributeModifier::SetForceDarkAccessImpl,
+            WebAttributeModifier::SetMediaOptionsImpl,
+            WebAttributeModifier::SetOverviewModeAccessImpl,
+            WebAttributeModifier::SetOverScrollModeImpl,
+            WebAttributeModifier::SetBlurOnKeyboardHideModeImpl,
+            WebAttributeModifier::SetTextZoomRatioImpl,
+            WebAttributeModifier::SetDatabaseAccessImpl,
+            WebAttributeModifier::SetInitialScaleImpl,
+            WebAttributeModifier::SetMetaViewportImpl,
+            WebAttributeModifier::SetOnPageEndImpl,
+            WebAttributeModifier::SetOnPageBeginImpl,
+            WebAttributeModifier::SetOnProgressChangeImpl,
+            WebAttributeModifier::SetOnTitleReceiveImpl,
+            WebAttributeModifier::SetOnGeolocationHideImpl,
+            WebAttributeModifier::SetOnGeolocationShowImpl,
+            WebAttributeModifier::SetOnRequestSelectedImpl,
+            WebAttributeModifier::SetOnAlertImpl,
+            WebAttributeModifier::SetOnBeforeUnloadImpl,
+            WebAttributeModifier::SetOnConfirmImpl,
+            WebAttributeModifier::SetOnPromptImpl,
+            WebAttributeModifier::SetOnConsoleImpl,
+            WebAttributeModifier::SetOnErrorReceiveImpl,
+            WebAttributeModifier::SetOnHttpErrorReceiveImpl,
+            WebAttributeModifier::SetOnDownloadStartImpl,
+            WebAttributeModifier::SetOnRefreshAccessedHistoryImpl,
+            WebAttributeModifier::SetOnRenderExitedImpl,
+            WebAttributeModifier::SetOnShowFileSelectorImpl,
+            WebAttributeModifier::SetOnResourceLoadImpl,
+            WebAttributeModifier::SetOnFullScreenExitImpl,
+            WebAttributeModifier::SetOnFullScreenEnterImpl,
+            WebAttributeModifier::SetOnScaleChangeImpl,
+            WebAttributeModifier::SetOnHttpAuthRequestImpl,
+            WebAttributeModifier::SetOnInterceptRequestImpl,
+            WebAttributeModifier::SetOnPermissionRequestImpl,
+            WebAttributeModifier::SetOnScreenCaptureRequestImpl,
+            WebAttributeModifier::SetOnContextMenuShowImpl,
+            WebAttributeModifier::SetOnContextMenuHideImpl,
+            WebAttributeModifier::SetMediaPlayGestureAccessImpl,
+            WebAttributeModifier::SetOnSearchResultReceiveImpl,
+            WebAttributeModifier::SetOnScrollImpl,
+            WebAttributeModifier::SetOnSslErrorEventReceiveImpl,
+            WebAttributeModifier::SetOnSslErrorEventImpl,
+            WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
+            WebAttributeModifier::SetOnWindowNewImpl,
+            WebAttributeModifier::SetOnWindowExitImpl,
+            WebAttributeModifier::SetMultiWindowAccessImpl,
+            WebAttributeModifier::SetOnInterceptKeyEventImpl,
+            WebAttributeModifier::SetWebStandardFontImpl,
+            WebAttributeModifier::SetWebSerifFontImpl,
+            WebAttributeModifier::SetWebSansSerifFontImpl,
+            WebAttributeModifier::SetWebFixedFontImpl,
+            WebAttributeModifier::SetWebFantasyFontImpl,
+            WebAttributeModifier::SetWebCursiveFontImpl,
+            WebAttributeModifier::SetDefaultFixedFontSizeImpl,
+            WebAttributeModifier::SetDefaultFontSizeImpl,
+            WebAttributeModifier::SetMinFontSizeImpl,
+            WebAttributeModifier::SetMinLogicalFontSizeImpl,
+            WebAttributeModifier::SetDefaultTextEncodingFormatImpl,
+            WebAttributeModifier::SetForceDisplayScrollBarImpl,
+            WebAttributeModifier::SetBlockNetworkImpl,
+            WebAttributeModifier::SetHorizontalScrollBarAccessImpl,
+            WebAttributeModifier::SetVerticalScrollBarAccessImpl,
+            WebAttributeModifier::SetOnTouchIconUrlReceivedImpl,
+            WebAttributeModifier::SetOnFaviconReceivedImpl,
+            WebAttributeModifier::SetOnPageVisibleImpl,
+            WebAttributeModifier::SetOnDataResubmittedImpl,
+            WebAttributeModifier::SetPinchSmoothImpl,
+            WebAttributeModifier::SetAllowWindowOpenMethodImpl,
+            WebAttributeModifier::SetOnAudioStateChangedImpl,
+            WebAttributeModifier::SetOnFirstContentfulPaintImpl,
+            WebAttributeModifier::SetOnFirstMeaningfulPaintImpl,
+            WebAttributeModifier::SetOnLargestContentfulPaintImpl,
+            WebAttributeModifier::SetOnLoadInterceptImpl,
+            WebAttributeModifier::SetOnControllerAttachedImpl,
+            WebAttributeModifier::SetOnOverScrollImpl,
+            WebAttributeModifier::SetOnSafeBrowsingCheckResultImpl,
+            WebAttributeModifier::SetOnNavigationEntryCommittedImpl,
+            WebAttributeModifier::SetOnIntelligentTrackingPreventionResultImpl,
+            WebAttributeModifier::SetJavaScriptOnDocumentStartImpl,
+            WebAttributeModifier::SetJavaScriptOnDocumentEndImpl,
+            WebAttributeModifier::SetLayoutModeImpl,
+            WebAttributeModifier::SetNestedScrollImpl,
+            WebAttributeModifier::SetEnableNativeEmbedModeImpl,
+            WebAttributeModifier::SetOnNativeEmbedLifecycleChangeImpl,
+            WebAttributeModifier::SetOnNativeEmbedVisibilityChangeImpl,
+            WebAttributeModifier::SetOnNativeEmbedGestureEventImpl,
+            WebAttributeModifier::SetCopyOptionsImpl,
+            WebAttributeModifier::SetOnOverrideUrlLoadingImpl,
+            WebAttributeModifier::SetTextAutosizingImpl,
+            WebAttributeModifier::SetEnableNativeMediaPlayerImpl,
+            WebAttributeModifier::SetOnRenderProcessNotRespondingImpl,
+            WebAttributeModifier::SetOnRenderProcessRespondingImpl,
+            WebAttributeModifier::SetOnViewportFitChangedImpl,
+            WebAttributeModifier::SetOnInterceptKeyboardAttachImpl,
+            WebAttributeModifier::SetOnAdsBlockedImpl,
+            WebAttributeModifier::SetKeyboardAvoidModeImpl,
+            WebAttributeModifier::SetEditMenuOptionsImpl,
+            WebAttributeModifier::SetEnableHapticFeedbackImpl,
+            WebAttributeModifier::SetOptimizeParserBudgetImpl,
+            WebAttributeModifier::SetEnableFollowSystemFontWeightImpl,
+            WebAttributeModifier::SetEnableWebAVSessionImpl,
+            WebAttributeModifier::SetRunJavaScriptOnDocumentStartImpl,
+            WebAttributeModifier::SetRunJavaScriptOnDocumentEndImpl,
+            WebAttributeModifier::SetRunJavaScriptOnHeadEndImpl,
+            WebAttributeModifier::SetNativeEmbedOptionsImpl,
+            WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
+            WebAttributeModifier::SetBindSelectionMenuImpl,
         };
         return &ArkUIWebModifierImpl;
     }
@@ -10041,9 +9962,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIWindowSceneModifier ArkUIWindowSceneModifierImpl {
             WindowSceneModifier::ConstructImpl,
             WindowSceneInterfaceModifier::SetWindowSceneOptionsImpl,
-            WindowSceneAttributeModifier::AttractionEffectImpl,
+            WindowSceneAttributeModifier::SetAttractionEffectImpl,
         };
         return &ArkUIWindowSceneModifierImpl;
+    }
+
+    const GENERATED_ArkUIWithThemeModifier* GetWithThemeModifier()
+    {
+        static const GENERATED_ArkUIWithThemeModifier ArkUIWithThemeModifierImpl {
+            WithThemeModifier::ConstructImpl,
+            WithThemeInterfaceModifier::SetWithThemeOptionsImpl,
+        };
+        return &ArkUIWithThemeModifierImpl;
     }
 
     const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
@@ -10053,12 +9983,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             XComponentInterfaceModifier::SetXComponentOptions0Impl,
             XComponentInterfaceModifier::SetXComponentOptions1Impl,
             XComponentInterfaceModifier::SetXComponentOptions2Impl,
-            XComponentAttributeModifier::OnLoadImpl,
-            XComponentAttributeModifier::OnDestroyImpl,
-            XComponentAttributeModifier::EnableAnalyzerImpl,
-            XComponentAttributeModifier::EnableSecureImpl,
-            XComponentAttributeModifier::HdrBrightnessImpl,
-            XComponentAttributeModifier::EnableTransparentLayerImpl,
+            XComponentAttributeModifier::SetOnLoadImpl,
+            XComponentAttributeModifier::SetOnDestroyImpl,
+            XComponentAttributeModifier::SetEnableAnalyzerImpl,
+            XComponentAttributeModifier::SetEnableSecureImpl,
+            XComponentAttributeModifier::SetHdrBrightnessImpl,
+            XComponentAttributeModifier::SetEnableTransparentLayerImpl,
         };
         return &ArkUIXComponentModifierImpl;
     }
@@ -10170,6 +10100,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetWaterFlowModifier,
             GetWebModifier,
             GetWindowSceneModifier,
+            GetWithThemeModifier,
             GetXComponentModifier,
         };
         return &modifiersImpl;
@@ -11874,9 +11805,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierButtonImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierCheckBoxImpl(Ark_NativePointer node,
                                      const Ark_Object* contentModifier,
                                      const CheckBoxModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierCheckBoxImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -11888,9 +11829,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierDataPanelImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierGaugeImpl(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const GaugeModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierGaugeImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -11902,9 +11853,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierLoadingProgressImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierProgressImpl(Ark_NativePointer node,
                                      const Ark_Object* contentModifier,
                                      const ProgressModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierProgressImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -11916,9 +11877,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierRadioImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierRatingImpl(Ark_NativePointer node,
                                    const Ark_Object* contentModifier,
                                    const RatingModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierRatingImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -11930,9 +11901,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierSliderImpl(Ark_NativePointer node,
                                    const Ark_Object* contentModifier,
                                    const SliderModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierSliderImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -11944,6 +11925,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierTextClockImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierTextTimerImpl(Ark_NativePointer node,
                                       const Ark_Object* contentModifier,
                                       const TextTimerModifierBuilder* builder)
@@ -11951,9 +11937,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void ContentModifierToggleImpl(Ark_NativePointer node,
                                    const Ark_Object* contentModifier,
                                    const ToggleModifierBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ResetContentModifierToggleImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -12298,6 +12294,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                                   const Callback_Void* customDropAnimation)
+    {
+    }
+    void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
+                                         const Ark_String* configuration)
     {
     }
     Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
@@ -13915,6 +13915,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // EllipseShapeAccessor
+    namespace EnvironmentBackendAccessor {
+    Ark_Boolean IsAccessibilityEnabledImpl()
+    {
+        return {};
+    }
+    Ark_Int32 GetColorModeImpl()
+    {
+        return {};
+    }
+    Ark_Float32 GetFontScaleImpl()
+    {
+        return {};
+    }
+    Ark_Float32 GetFontWeightScaleImpl()
+    {
+        return {};
+    }
+    Ark_String GetLayoutDirectionImpl()
+    {
+        return {};
+    }
+    Ark_String GetLanguageCodeImpl()
+    {
+        return {};
+    }
+    } // EnvironmentBackendAccessor
     namespace EventEmulatorAccessor {
     void EmitClickEventImpl(Ark_NativePointer node,
                             Ark_ClickEvent event)
@@ -13997,6 +14023,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_Int32 GetUniqueIdImpl(Ark_ExtendableComponent peer)
+    {
+        return {};
+    }
+    Opt_uiObserver_NavDestinationInfo QueryNavDestinationInfo0Impl(Ark_ExtendableComponent peer)
+    {
+        return {};
+    }
+    Opt_uiObserver_NavDestinationInfo QueryNavDestinationInfo1Impl(Ark_ExtendableComponent peer,
+                                                                   const Opt_Boolean* isInner)
+    {
+        return {};
+    }
+    Opt_uiObserver_NavigationInfo QueryNavigationInfoImpl(Ark_ExtendableComponent peer)
+    {
+        return {};
+    }
+    Opt_uiObserver_RouterPageInfo QueryRouterPageInfoImpl(Ark_ExtendableComponent peer)
     {
         return {};
     }
@@ -14276,6 +14319,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_FrameNode CreateTypedFrameNodeImpl(const Ark_String* type)
+    {
+        return {};
+    }
+    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
+                                         Ark_FrameNode pointer)
+    {
+        return {};
+    }
+    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
+                                   Ark_NativePointer pointer)
     {
         return {};
     }
@@ -16924,6 +16977,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // PermissionRequestAccessor
+    namespace PersistentStorageBackendAccessor {
+    Opt_String GetImpl(const Ark_String* key)
+    {
+        return {};
+    }
+    Ark_Boolean HasImpl(const Ark_String* key)
+    {
+        return {};
+    }
+    void RemoveImpl(const Ark_String* key)
+    {
+    }
+    void SetImpl(const Ark_String* key,
+                 const Ark_String* value)
+    {
+    }
+    void ClearImpl()
+    {
+    }
+    } // PersistentStorageBackendAccessor
     namespace PinchGestureEventAccessor {
     void DestroyPeerImpl(Ark_PinchGestureEvent peer)
     {
@@ -17991,6 +18064,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ScreenCaptureHandlerAccessor
+    namespace ScreenshotServiceAccessor {
+    Ark_Boolean RequestScreenshotImpl(const Ark_String* target,
+                                      const Ark_String* name)
+    {
+        return {};
+    }
+    } // ScreenshotServiceAccessor
     namespace ScrollableTargetInfoAccessor {
     void DestroyPeerImpl(Ark_ScrollableTargetInfo peer)
     {
@@ -20230,6 +20310,96 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // UIExtensionProxyAccessor
+    namespace uiObserver_DensityInfoAccessor {
+    void DestroyPeerImpl(Ark_uiObserver_DensityInfo peer)
+    {
+        auto peerImpl = reinterpret_cast<uiObserver_DensityInfoPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_uiObserver_DensityInfo ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_UIContext GetContextImpl(Ark_uiObserver_DensityInfo peer)
+    {
+        return {};
+    }
+    void SetContextImpl(Ark_uiObserver_DensityInfo peer,
+                        Ark_UIContext context)
+    {
+    }
+    Ark_Number GetDensityImpl(Ark_uiObserver_DensityInfo peer)
+    {
+        return {};
+    }
+    void SetDensityImpl(Ark_uiObserver_DensityInfo peer,
+                        const Ark_Number* density)
+    {
+    }
+    } // uiObserver_DensityInfoAccessor
+    namespace uiObserver_RouterPageInfoAccessor {
+    void DestroyPeerImpl(Ark_uiObserver_RouterPageInfo peer)
+    {
+        auto peerImpl = reinterpret_cast<uiObserver_RouterPageInfoPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_uiObserver_RouterPageInfo ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_Number GetIndexImpl(Ark_uiObserver_RouterPageInfo peer)
+    {
+        return {};
+    }
+    void SetIndexImpl(Ark_uiObserver_RouterPageInfo peer,
+                      const Ark_Number* index)
+    {
+    }
+    Ark_String GetNameImpl(Ark_uiObserver_RouterPageInfo peer)
+    {
+        return {};
+    }
+    void SetNameImpl(Ark_uiObserver_RouterPageInfo peer,
+                     const Ark_String* name)
+    {
+    }
+    Ark_String GetPathImpl(Ark_uiObserver_RouterPageInfo peer)
+    {
+        return {};
+    }
+    void SetPathImpl(Ark_uiObserver_RouterPageInfo peer,
+                     const Ark_String* path)
+    {
+    }
+    Ark_uiObserver_RouterPageState GetStateImpl(Ark_uiObserver_RouterPageInfo peer)
+    {
+        return {};
+    }
+    void SetStateImpl(Ark_uiObserver_RouterPageInfo peer,
+                      Ark_uiObserver_RouterPageState state)
+    {
+    }
+    Ark_String GetPageIdImpl(Ark_uiObserver_RouterPageInfo peer)
+    {
+        return {};
+    }
+    void SetPageIdImpl(Ark_uiObserver_RouterPageInfo peer,
+                       const Ark_String* pageId)
+    {
+    }
+    } // uiObserver_RouterPageInfoAccessor
     namespace unifiedDataChannel_UnifiedDataAccessor {
     void DestroyPeerImpl(Ark_unifiedDataChannel_UnifiedData peer)
     {
@@ -20810,12 +20980,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Callback_Void* event)
     {
     }
-    void BindCompatibleProvideCallbackImpl(Ark_ExtendableComponent component,
-                                           const Ark_CustomObject* createCompatibleState,
-                                           const Ark_CustomObject* setCallback,
-                                           const Opt_CustomObject* compatibleComponent)
-    {
-    }
     Ark_BorderRadiuses BorderRadiusesImpl(const Ark_Number* all)
     {
         return {};
@@ -20824,20 +20988,57 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void CompatibleComponentImpl(const CompatibleInitCallback* init,
-                                 const CompatibleUpdateCallback* update,
-                                 const Opt_ExtendableComponent* component)
-    {
-    }
-    void CompatibleWrappedBuilderImpl(const Ark_CustomObject* builder,
-                                      const Ark_CustomObject* args)
-    {
-    }
     void CursorControl_restoreDefaultImpl()
     {
     }
     void CursorControl_setCursorImpl(Ark_pointer_PointerStyle value)
     {
+    }
+    Ark_curves_ICurve Curves_cubicBezierCurveImpl(const Ark_Number* x1,
+                                                  const Ark_Number* y1,
+                                                  const Ark_Number* x2,
+                                                  const Ark_Number* y2)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_customCurveImpl(const curves_Callback_Number_Number* interpolate)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_initCurveImpl(const Opt_curves_Curve* curve)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_interpolatingSpringImpl(const Ark_Number* velocity,
+                                                     const Ark_Number* mass,
+                                                     const Ark_Number* stiffness,
+                                                     const Ark_Number* damping)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_responsiveSpringMotionImpl(const Opt_Number* response,
+                                                        const Opt_Number* dampingFraction,
+                                                        const Opt_Number* overlapDuration)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_springCurveImpl(const Ark_Number* velocity,
+                                             const Ark_Number* mass,
+                                             const Ark_Number* stiffness,
+                                             const Ark_Number* damping)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_springMotionImpl(const Opt_Number* response,
+                                              const Opt_Number* dampingFraction,
+                                              const Opt_Number* overlapDuration)
+    {
+        return {};
+    }
+    Ark_curves_ICurve Curves_stepsCurveImpl(const Ark_Number* count,
+                                            Ark_Boolean end)
+    {
+        return {};
     }
     Ark_Edges EdgeColorsImpl(const Ark_Number* all)
     {
@@ -20852,11 +21053,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_font_UIFontConfig Font_getUIFontConfigImpl()
-    {
-        return {};
-    }
-    Ark_CustomObject GetCompatibleStateImpl(const Ark_CustomObject* state,
-                                            const Ark_CustomObject* createCompatibleState)
     {
         return {};
     }
@@ -21556,18 +21752,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
             ContentModifierHelperAccessor::ContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ResetContentModifierButtonImpl,
             ContentModifierHelperAccessor::ContentModifierCheckBoxImpl,
+            ContentModifierHelperAccessor::ResetContentModifierCheckBoxImpl,
             ContentModifierHelperAccessor::ContentModifierDataPanelImpl,
+            ContentModifierHelperAccessor::ResetContentModifierDataPanelImpl,
             ContentModifierHelperAccessor::ContentModifierGaugeImpl,
+            ContentModifierHelperAccessor::ResetContentModifierGaugeImpl,
             ContentModifierHelperAccessor::ContentModifierLoadingProgressImpl,
+            ContentModifierHelperAccessor::ResetContentModifierLoadingProgressImpl,
             ContentModifierHelperAccessor::ContentModifierProgressImpl,
+            ContentModifierHelperAccessor::ResetContentModifierProgressImpl,
             ContentModifierHelperAccessor::ContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
             ContentModifierHelperAccessor::ContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRatingImpl,
             ContentModifierHelperAccessor::ContentModifierMenuItemImpl,
+            ContentModifierHelperAccessor::ResetContentModifierMenuItemImpl,
             ContentModifierHelperAccessor::ContentModifierSliderImpl,
+            ContentModifierHelperAccessor::ResetContentModifierSliderImpl,
             ContentModifierHelperAccessor::ContentModifierTextClockImpl,
+            ContentModifierHelperAccessor::ResetContentModifierTextClockImpl,
             ContentModifierHelperAccessor::ContentModifierTextTimerImpl,
+            ContentModifierHelperAccessor::ResetContentModifierTextTimerImpl,
             ContentModifierHelperAccessor::ContentModifierToggleImpl,
+            ContentModifierHelperAccessor::ResetContentModifierToggleImpl,
         };
         return &ContentModifierHelperAccessorImpl;
     }
@@ -21757,6 +21966,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityYImpl,
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
+            DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
@@ -22308,6 +22518,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct EllipseShapePeer {
         virtual ~EllipseShapePeer() = default;
     };
+    const GENERATED_ArkUIEnvironmentBackendAccessor* GetEnvironmentBackendAccessor()
+    {
+        static const GENERATED_ArkUIEnvironmentBackendAccessor EnvironmentBackendAccessorImpl {
+            EnvironmentBackendAccessor::IsAccessibilityEnabledImpl,
+            EnvironmentBackendAccessor::GetColorModeImpl,
+            EnvironmentBackendAccessor::GetFontScaleImpl,
+            EnvironmentBackendAccessor::GetFontWeightScaleImpl,
+            EnvironmentBackendAccessor::GetLayoutDirectionImpl,
+            EnvironmentBackendAccessor::GetLanguageCodeImpl,
+        };
+        return &EnvironmentBackendAccessorImpl;
+    }
+
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
     {
         static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
@@ -22354,6 +22577,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ExtendableComponentAccessor::GetFinalizerImpl,
             ExtendableComponentAccessor::GetUIContextImpl,
             ExtendableComponentAccessor::GetUniqueIdImpl,
+            ExtendableComponentAccessor::QueryNavDestinationInfo0Impl,
+            ExtendableComponentAccessor::QueryNavDestinationInfo1Impl,
+            ExtendableComponentAccessor::QueryNavigationInfoImpl,
+            ExtendableComponentAccessor::QueryRouterPageInfoImpl,
         };
         return &ExtendableComponentAccessorImpl;
     }
@@ -22466,6 +22693,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::RecycleImpl,
             FrameNodeAccessor::GetFrameNodePtrImpl,
             FrameNodeAccessor::CreateTypedFrameNodeImpl,
+            FrameNodeAccessor::CreateByRawPtrImpl,
+            FrameNodeAccessor::UnWrapRawPtrImpl,
         };
         return &FrameNodeAccessorImpl;
     }
@@ -23653,6 +23882,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct PermissionRequestPeer {
         virtual ~PermissionRequestPeer() = default;
     };
+    const GENERATED_ArkUIPersistentStorageBackendAccessor* GetPersistentStorageBackendAccessor()
+    {
+        static const GENERATED_ArkUIPersistentStorageBackendAccessor PersistentStorageBackendAccessorImpl {
+            PersistentStorageBackendAccessor::GetImpl,
+            PersistentStorageBackendAccessor::HasImpl,
+            PersistentStorageBackendAccessor::RemoveImpl,
+            PersistentStorageBackendAccessor::SetImpl,
+            PersistentStorageBackendAccessor::ClearImpl,
+        };
+        return &PersistentStorageBackendAccessorImpl;
+    }
+
     const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
     {
         static const GENERATED_ArkUIPinchGestureEventAccessor PinchGestureEventAccessorImpl {
@@ -24082,6 +24323,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ScreenCaptureHandlerPeer {
         virtual ~ScreenCaptureHandlerPeer() = default;
     };
+    const GENERATED_ArkUIScreenshotServiceAccessor* GetScreenshotServiceAccessor()
+    {
+        static const GENERATED_ArkUIScreenshotServiceAccessor ScreenshotServiceAccessorImpl {
+            ScreenshotServiceAccessor::RequestScreenshotImpl,
+        };
+        return &ScreenshotServiceAccessorImpl;
+    }
+
     const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor()
     {
         static const GENERATED_ArkUIScrollableTargetInfoAccessor ScrollableTargetInfoAccessorImpl {
@@ -25092,6 +25341,46 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct UIExtensionProxyPeer {
         virtual ~UIExtensionProxyPeer() = default;
     };
+    const GENERATED_ArkUIUiObserver_DensityInfoAccessor* GetUiObserver_DensityInfoAccessor()
+    {
+        static const GENERATED_ArkUIUiObserver_DensityInfoAccessor UiObserver_DensityInfoAccessorImpl {
+            uiObserver_DensityInfoAccessor::DestroyPeerImpl,
+            uiObserver_DensityInfoAccessor::ConstructImpl,
+            uiObserver_DensityInfoAccessor::GetFinalizerImpl,
+            uiObserver_DensityInfoAccessor::GetContextImpl,
+            uiObserver_DensityInfoAccessor::SetContextImpl,
+            uiObserver_DensityInfoAccessor::GetDensityImpl,
+            uiObserver_DensityInfoAccessor::SetDensityImpl,
+        };
+        return &UiObserver_DensityInfoAccessorImpl;
+    }
+
+    struct UiObserver_DensityInfoPeer {
+        virtual ~UiObserver_DensityInfoPeer() = default;
+    };
+    const GENERATED_ArkUIUiObserver_RouterPageInfoAccessor* GetUiObserver_RouterPageInfoAccessor()
+    {
+        static const GENERATED_ArkUIUiObserver_RouterPageInfoAccessor UiObserver_RouterPageInfoAccessorImpl {
+            uiObserver_RouterPageInfoAccessor::DestroyPeerImpl,
+            uiObserver_RouterPageInfoAccessor::ConstructImpl,
+            uiObserver_RouterPageInfoAccessor::GetFinalizerImpl,
+            uiObserver_RouterPageInfoAccessor::GetIndexImpl,
+            uiObserver_RouterPageInfoAccessor::SetIndexImpl,
+            uiObserver_RouterPageInfoAccessor::GetNameImpl,
+            uiObserver_RouterPageInfoAccessor::SetNameImpl,
+            uiObserver_RouterPageInfoAccessor::GetPathImpl,
+            uiObserver_RouterPageInfoAccessor::SetPathImpl,
+            uiObserver_RouterPageInfoAccessor::GetStateImpl,
+            uiObserver_RouterPageInfoAccessor::SetStateImpl,
+            uiObserver_RouterPageInfoAccessor::GetPageIdImpl,
+            uiObserver_RouterPageInfoAccessor::SetPageIdImpl,
+        };
+        return &UiObserver_RouterPageInfoAccessorImpl;
+    }
+
+    struct UiObserver_RouterPageInfoPeer {
+        virtual ~UiObserver_RouterPageInfoPeer() = default;
+    };
     const GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor* GetUnifiedDataChannel_UnifiedDataAccessor()
     {
         static const GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor UnifiedDataChannel_UnifiedDataAccessorImpl {
@@ -25363,18 +25652,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::$rawfileImpl,
             GlobalScopeAccessor::AnimateToImpl,
             GlobalScopeAccessor::AnimateToImmediatelyImpl,
-            GlobalScopeAccessor::BindCompatibleProvideCallbackImpl,
             GlobalScopeAccessor::BorderRadiusesImpl,
             GlobalScopeAccessor::BorderStylesImpl,
-            GlobalScopeAccessor::CompatibleComponentImpl,
-            GlobalScopeAccessor::CompatibleWrappedBuilderImpl,
             GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
             GlobalScopeAccessor::CursorControl_setCursorImpl,
+            GlobalScopeAccessor::Curves_cubicBezierCurveImpl,
+            GlobalScopeAccessor::Curves_customCurveImpl,
+            GlobalScopeAccessor::Curves_initCurveImpl,
+            GlobalScopeAccessor::Curves_interpolatingSpringImpl,
+            GlobalScopeAccessor::Curves_responsiveSpringMotionImpl,
+            GlobalScopeAccessor::Curves_springCurveImpl,
+            GlobalScopeAccessor::Curves_springMotionImpl,
+            GlobalScopeAccessor::Curves_stepsCurveImpl,
             GlobalScopeAccessor::EdgeColorsImpl,
             GlobalScopeAccessor::EdgeWidthsImpl,
             GlobalScopeAccessor::FocusControl_requestFocusImpl,
             GlobalScopeAccessor::Font_getUIFontConfigImpl,
-            GlobalScopeAccessor::GetCompatibleStateImpl,
             GlobalScopeAccessor::GetRectangleByIdImpl,
             GlobalScopeAccessor::PostCardActionImpl,
             GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
@@ -25462,6 +25755,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDrawingRenderingContextAccessor,
             GetDrawModifierAccessor,
             GetEllipseShapeAccessor,
+            GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,
             GetEventResultAccessor,
             GetEventTargetInfoAccessor,
@@ -25536,6 +25830,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPathShapeAccessor,
             GetPatternLockControllerAccessor,
             GetPermissionRequestAccessor,
+            GetPersistentStorageBackendAccessor,
             GetPinchGestureEventAccessor,
             GetPinchGestureInterfaceAccessor,
             GetPinchRecognizerAccessor,
@@ -25557,6 +25852,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetScaleSymbolEffectAccessor,
             GetSceneAccessor,
             GetScreenCaptureHandlerAccessor,
+            GetScreenshotServiceAccessor,
             GetScrollableTargetInfoAccessor,
             GetScrollerAccessor,
             GetScrollMotionAccessor,
@@ -25614,6 +25910,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUIContextAtomicServiceBarAccessor,
             GetUiEffect_VisualEffectAccessor,
             GetUIExtensionProxyAccessor,
+            GetUiObserver_DensityInfoAccessor,
+            GetUiObserver_RouterPageInfoAccessor,
             GetUnifiedDataChannel_UnifiedDataAccessor,
             GetUrlStyleAccessor,
             GetUserDataSpanAccessor,

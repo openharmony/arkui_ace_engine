@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
+import { int32, int64to32 } from "@koalaui/common"
 
 export type UID = int32
 
@@ -307,7 +307,7 @@ function find<U extends Unique>(array: Array<U>, uid: UID): number {
     let left = 0
     let right = array.length
     while (left < right) {
-        const center = ((left + right) >>> 1) as int32
+        const center = int64to32((left + right) >>> 1)
         if (array[center].uid < uid) left = center + 1
         else right = center
     }

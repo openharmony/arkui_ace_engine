@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { asArray, float64, int32 } from "@koalaui/common"
 import {
     GlobalStateManager,
@@ -27,14 +26,14 @@ import {
     rememberDisposable,
     rememberMutableState,
     testTick,
-} from "../../src"
+} from "../../ets"
 
 const collector = new Array<string>()
 
 function testExpected(root: State<TestNode>, ...expected: string[]) {
     collector.length = 0
     testTick(root)
-    Assert.deepEqual(collector, asArray(expected))
+    assert.deepEqual(collector, asArray(expected))
     if (expected.length > 0) testExpected(root)
 }
 
@@ -43,7 +42,7 @@ suite("remember tests", () => {
     test("memoLifecycle runs when attaching and detaching", () => {
         GlobalStateManager.reset()
         const state = mutableState(0)
-        const root = TestNode.create((node) => {
+        const root = TestNode.create((node): void => {
             if (state.value > 0) {
                 memoLifecycle(
                     () => { collector.push("attach") },
@@ -64,7 +63,7 @@ suite("remember tests", () => {
     test("once runs once when attaching to composition", () => {
         GlobalStateManager.reset()
         const state = mutableState(0)
-        const root = TestNode.create((node) => {
+        const root = TestNode.create((node): void => {
             once(() => { collector.push("once" + state.value) })
             collector.push("update" + state.value)
         })
@@ -77,8 +76,8 @@ suite("remember tests", () => {
 
     test("remember computes once", () => {
         GlobalStateManager.reset()
-        const root = TestNode.create((node) => {
-            remember(() => collector.push("inner"))
+        const root = TestNode.create((node): void => {
+            remember((): float64 => collector.push("inner"))
             collector.push("outer")
         })
         testExpected(root, "inner", "outer")
@@ -87,8 +86,8 @@ suite("remember tests", () => {
     test("remember computes once even if inner state changed", () => {
         GlobalStateManager.reset()
         const state = mutableState(false)
-        const root = TestNode.create((node) => {
-            remember(() => {
+        const root = TestNode.create((node): void => {
+            remember((): boolean => {
                 collector.push("inner")
                 return state.value // not depended // Improve: remember cannot be void
             })
@@ -102,8 +101,8 @@ suite("remember tests", () => {
     test("remember computes once even if outer state changed", () => {
         GlobalStateManager.reset()
         const state = mutableState(false)
-        const root = TestNode.create((node) => {
-            remember(() => collector.push("inner"))
+        const root = TestNode.create((node): void => {
+            remember((): float64 => collector.push("inner"))
             state.value // depended
             collector.push("outer")
         })
@@ -115,10 +114,10 @@ suite("remember tests", () => {
     test("intrinsic remember should not conflict each other", () => {
         GlobalStateManager.reset()
         const state = mutableState(false)
-        const root = TestNode.create((node) => {
+        const root = TestNode.create((node): void => {
             state.value
-                ? remember(() => collector.push("positive"))
-                : remember(() => collector.push("negative"))
+                ? remember((): float64 => collector.push("positive"))
+                : remember((): float64 => collector.push("negative"))
         })
         testExpected(root, "negative")
         state.value = true
@@ -132,10 +131,10 @@ suite("remember tests", () => {
     test("rememberDisposable created and disposed accordingly", () => {
         GlobalStateManager.reset()
         const state = mutableState(false)
-        const root = TestNode.create((node) => {
+        const root = TestNode.create((node): void => {
             if (state.value) {
                 rememberDisposable(
-                    () => collector.push("create"),
+                    (): float64 => collector.push("create"),
                     (_: float64 | undefined) => { collector.push("dispose") })
             }
         })
@@ -151,7 +150,7 @@ suite("remember tests", () => {
     test("rememberMutableState computes once even if initial state changed", () => {
         GlobalStateManager.reset()
         const global = mutableState(0)
-        const root = TestNode.create((node) => {
+        const root = TestNode.create((node): void => {
             const local = rememberMutableState<int32>(global.value)
             collector.push("global=" + global.value)
             collector.push("local=" + local.value)

@@ -17,9 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { image_PixelMap_serializer, image } from "./../generated/ohos.multimedia.image"
 import { Resource_serializer, Resource } from "./../generated/resource"
@@ -29,15 +28,17 @@ import { ColorMetrics_serializer, ColorMetrics } from "./../generated/arkui.Grap
 import { matrix4_Matrix4Transit_serializer, matrix4 } from "./../generated/ohos.matrix4"
 import { ColorFilter_serializer, ResourceColor, ColorFilter, ResourceStr, EdgeWidths, EdgeWidths_serializer } from "./units"
 import { drawing_ColorFilter_serializer, drawing, drawing_Lattice_serializer } from "./../generated/ohos.graphics.drawing"
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { BusinessError, BusinessError_serializer } from "./../generated/ohos.base"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ColorContentInternal {
     public static fromPtr(ptr: KPointer): ColorContent {
         return new ColorContent(ptr)
@@ -78,77 +79,62 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkImagePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Image_construct(peerId, flags)
-        const _peer  = new ArkImagePeer(_peerPtr, peerId, "Image", flags)
+        const _peer  = new ArkImagePeer(_peerPtr, peerId, 'Image', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setImageOptions0Attribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let src_type : int32 = RuntimeType.UNDEFINED
-        src_type = runtimeType(src)
-        if (TypeChecker.isimage_PixelMap(src, false, false)) {
+        if (src instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toChar())
-            const src_0  = src as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, src_0)
-        }
-        else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
+            const srcForIdx0  = src as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
+        } else if (src instanceof ResourceStr) {
             thisSerializer.writeInt8((1).toChar())
-            const src_1  = src as ResourceStr
-            let src_1_type : int32 = RuntimeType.UNDEFINED
-            src_1_type = runtimeType(src_1)
-            if (RuntimeType.STRING == src_1_type) {
+            const srcForIdx1  = src as ResourceStr
+            if (srcForIdx1 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const src_1_0  = src_1 as string
-                thisSerializer.writeString(src_1_0)
-            }
-            else if (RuntimeType.OBJECT == src_1_type) {
+                const srcForIdx1ForIdx0  = srcForIdx1 as string
+                thisSerializer.writeString(srcForIdx1ForIdx0)
+            } else if (srcForIdx1 instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const src_1_1  = src_1 as Resource
-                Resource_serializer.write(thisSerializer, src_1_1)
+                const srcForIdx1ForIdx1  = srcForIdx1 as Resource
+                Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
+        } else if (src instanceof DrawableDescriptor) {
             thisSerializer.writeInt8((2).toChar())
-            const src_2  = src as DrawableDescriptor
-            DrawableDescriptor_serializer.write(thisSerializer, src_2)
-        }
-        else if (TypeChecker.isImageContent(src)) {
+            const srcForIdx2  = src as DrawableDescriptor
+            DrawableDescriptor_serializer.write(thisSerializer, srcForIdx2)
+        } else if (src instanceof ImageContent) {
             thisSerializer.writeInt8((3).toChar())
-            const src_3  = src as ImageContent
-            thisSerializer.writeInt32(TypeChecker.ImageContent_ToNumeric(src_3))
+            const srcForIdx3  = src as ImageContent
+            thisSerializer.writeInt32(TypeChecker.ImageContent_ToNumeric(srcForIdx3))
         }
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setImageOptions1Attribute(src: image.PixelMap | ResourceStr | DrawableDescriptor, imageAIOptions: ImageAIOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let src_type : int32 = RuntimeType.UNDEFINED
-        src_type = runtimeType(src)
-        if (TypeChecker.isimage_PixelMap(src, false, false)) {
+        if (src instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toChar())
-            const src_0  = src as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, src_0)
-        }
-        else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
+            const srcForIdx0  = src as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
+        } else if (src instanceof ResourceStr) {
             thisSerializer.writeInt8((1).toChar())
-            const src_1  = src as ResourceStr
-            let src_1_type : int32 = RuntimeType.UNDEFINED
-            src_1_type = runtimeType(src_1)
-            if (RuntimeType.STRING == src_1_type) {
+            const srcForIdx1  = src as ResourceStr
+            if (srcForIdx1 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const src_1_0  = src_1 as string
-                thisSerializer.writeString(src_1_0)
-            }
-            else if (RuntimeType.OBJECT == src_1_type) {
+                const srcForIdx1ForIdx0  = srcForIdx1 as string
+                thisSerializer.writeString(srcForIdx1ForIdx0)
+            } else if (srcForIdx1 instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const src_1_1  = src_1 as Resource
-                Resource_serializer.write(thisSerializer, src_1_1)
+                const srcForIdx1ForIdx1  = srcForIdx1 as Resource
+                Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
+        } else if (src instanceof DrawableDescriptor) {
             thisSerializer.writeInt8((2).toChar())
-            const src_2  = src as DrawableDescriptor
-            DrawableDescriptor_serializer.write(thisSerializer, src_2)
+            const srcForIdx2  = src as DrawableDescriptor
+            DrawableDescriptor_serializer.write(thisSerializer, srcForIdx2)
         }
         ImageAIOptions_serializer.write(thisSerializer, imageAIOptions)
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -156,388 +142,372 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     }
     setAltAttribute(value: string | Resource | image.PixelMap | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isimage_PixelMap(value_value, false, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof image.PixelMap) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as image.PixelMap
-                image_PixelMap_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setAlt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMatchTextDirectionAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setMatchTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFitOriginalSizeAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setFitOriginalSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFillColorAttribute(value: ResourceColor | ColorContent | ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ResourceColor) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ResourceColor
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (TypeChecker.isColor(value_value_0)) {
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as Color
-                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0ForIdx0))
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((3).toChar())
-                    const value_value_0_3  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_3)
+                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
-            }
-            else if (TypeChecker.isColorContent(value_value)) {
+            } else if (valueTmpValue instanceof ColorContent) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as ColorContent
-                ColorContent_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isColorMetrics(value_value)) {
+                const valueTmpValueForIdx1  = valueTmpValue as ColorContent
+                ColorContent_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof ColorMetrics) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as ColorMetrics
-                ColorMetrics_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as ColorMetrics
+                ColorMetrics_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setFillColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setObjectFitAttribute(value: ImageFit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageFit)
-            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageFit)
+            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setObjectFit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setImageMatrixAttribute(value: matrix4.Matrix4Transit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            matrix4_Matrix4Transit_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            matrix4_Matrix4Transit_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setImageMatrix(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setObjectRepeatAttribute(value: ImageRepeat | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageRepeat)
-            thisSerializer.writeInt32(TypeChecker.ImageRepeat_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageRepeat)
+            thisSerializer.writeInt32(TypeChecker.ImageRepeat_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setObjectRepeat(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoResizeAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setAutoResize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRenderModeAttribute(value: ImageRenderMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageRenderMode)
-            thisSerializer.writeInt32(TypeChecker.ImageRenderMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageRenderMode)
+            thisSerializer.writeInt32(TypeChecker.ImageRenderMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setRenderMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDynamicRangeModeAttribute(value: DynamicRangeMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as DynamicRangeMode)
-            thisSerializer.writeInt32(TypeChecker.DynamicRangeMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as DynamicRangeMode)
+            thisSerializer.writeInt32(TypeChecker.DynamicRangeMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setDynamicRangeMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setInterpolationAttribute(value: ImageInterpolation | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageInterpolation)
-            thisSerializer.writeInt32(TypeChecker.ImageInterpolation_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageInterpolation)
+            thisSerializer.writeInt32(TypeChecker.ImageInterpolation_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setInterpolation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSourceSizeAttribute(value: ImageSourceSize | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ImageSourceSize_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ImageSourceSize_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setSourceSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSyncLoadAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColorFilter(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ColorFilter) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ColorFilter
-                ColorFilter_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (TypeChecker.isdrawing_ColorFilter(value_value)) {
+                const valueTmpValueForIdx0  = valueTmpValue as ColorFilter
+                ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof drawing.ColorFilter) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as drawing.ColorFilter
-                drawing_ColorFilter_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as drawing.ColorFilter
+                drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setColorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCopyOptionAttribute(value: CopyOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as CopyOptions)
-            thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as CopyOptions)
+            thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setCopyOption(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDraggableAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setDraggable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPointLightAttribute(value: PointLightStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PointLightStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PointLightStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEdgeAntialiasingAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setEdgeAntialiasing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnCompleteAttribute(value: ImageOnCompleteCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setOnComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnErrorAttribute(value: ImageErrorCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnFinishAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setOnFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setEnableAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAnalyzerConfigAttribute(value: ImageAnalyzerConfig | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ImageAnalyzerConfig_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ImageAnalyzerConfig_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setAnalyzerConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setResizableAttribute(value: ResizableOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ResizableOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ResizableOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setResizable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPrivacySensitiveAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setPrivacySensitive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnhancedImageQualityAttribute(value: image.ResolutionQuality | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as image.ResolutionQuality)
-            thisSerializer.writeInt32(TypeChecker.image_ResolutionQuality_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as image.ResolutionQuality)
+            thisSerializer.writeInt32(TypeChecker.image_ResolutionQuality_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setEnhancedImageQuality(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOrientationAttribute(value: ImageRotateOrientation | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageRotateOrientation)
-            thisSerializer.writeInt32(TypeChecker.ImageRotateOrientation_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageRotateOrientation)
+            thisSerializer.writeInt32(TypeChecker.ImageRotateOrientation_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageAttribute_setOrientation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -794,63 +764,6 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: ImageAttribute): void {
-        super.apply(target)
-        if (this.alt_value !== undefined)
-            target.alt(this.alt_value!)
-        if (this.matchTextDirection_value !== undefined)
-            target.matchTextDirection(this.matchTextDirection_value!)
-        if (this.fitOriginalSize_value !== undefined)
-            target.fitOriginalSize(this.fitOriginalSize_value!)
-        if (this.fillColor_value !== undefined)
-            target.fillColor(this.fillColor_value!)
-        if (this.objectFit_value !== undefined)
-            target.objectFit(this.objectFit_value!)
-        if (this.imageMatrix_value !== undefined)
-            target.imageMatrix(this.imageMatrix_value!)
-        if (this.objectRepeat_value !== undefined)
-            target.objectRepeat(this.objectRepeat_value!)
-        if (this.autoResize_value !== undefined)
-            target.autoResize(this.autoResize_value!)
-        if (this.renderMode_value !== undefined)
-            target.renderMode(this.renderMode_value!)
-        if (this.dynamicRangeMode_value !== undefined)
-            target.dynamicRangeMode(this.dynamicRangeMode_value!)
-        if (this.interpolation_value !== undefined)
-            target.interpolation(this.interpolation_value!)
-        if (this.sourceSize_value !== undefined)
-            target.sourceSize(this.sourceSize_value!)
-        if (this.syncLoad_value !== undefined)
-            target.syncLoad(this.syncLoad_value!)
-        if (this.colorFilter_value !== undefined)
-            target.colorFilter(this.colorFilter_value!)
-        if (this.copyOption_value !== undefined)
-            target.copyOption(this.copyOption_value!)
-        if (this.draggable_value !== undefined)
-            target.draggable(this.draggable_value!)
-        if (this.pointLight_value !== undefined)
-            target.pointLight(this.pointLight_value!)
-        if (this.edgeAntialiasing_value !== undefined)
-            target.edgeAntialiasing(this.edgeAntialiasing_value!)
-        if (this.onComplete_value !== undefined)
-            target.onComplete(this.onComplete_value!)
-        if (this.onError_value !== undefined)
-            target.onError(this.onError_value!)
-        if (this.onFinish_value !== undefined)
-            target.onFinish(this.onFinish_value!)
-        if (this.enableAnalyzer_value !== undefined)
-            target.enableAnalyzer(this.enableAnalyzer_value!)
-        if (this.analyzerConfig_value !== undefined)
-            target.analyzerConfig(this.analyzerConfig_value!)
-        if (this.resizable_value !== undefined)
-            target.resizable(this.resizable_value!)
-        if (this.privacySensitive_value !== undefined)
-            target.privacySensitive(this.privacySensitive_value!)
-        if (this.enhancedImageQuality_value !== undefined)
-            target.enhancedImageQuality(this.enhancedImageQuality_value!)
-        if (this.orientation_value !== undefined)
-            target.orientation(this.orientation_value!)
-    }
 }
 export type ImageErrorCallback = (error: ImageError) => void;
 export type ImageOnCompleteCallback = (loadEvent?: ImageCompleteEvent) => void;
@@ -1103,7 +1016,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -1111,26 +1023,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         super.applyAttributesFinish()
     }
 }
-export function withImageStyle(receiver: ImageAttribute, modifier: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkImageStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Image")
-// export function Image(
-//     src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent,
-//     @memo
-//     content_?: () => void,
-// ): ImageAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Image(
@@ -1146,21 +1038,11 @@ export function Image(
     NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
         receiver.setImageOptions(src)
         style?.(receiver)
-        withImageStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-// @memo
-// @BuilderLambda("Image")
-// export function Image(
-//     src: image.PixelMap | ResourceStr | DrawableDescriptor, imageAIOptions: ImageAIOptions,
-//     @memo
-//     content_?: () => void,
-// ): ImageAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Image(
@@ -1176,260 +1058,1208 @@ export function Image(
     NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
         receiver.setImageOptions(src,imageAIOptions)
         style?.(receiver)
-        withImageStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkImageSet extends ArkCommonMethodSet implements ImageAttribute {
+export class ImageModifier extends CommonMethodModifier implements ImageAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _alt_flag?: boolean
-    _alt0_value?: string | Resource | image.PixelMap | undefined
-    _matchTextDirection_flag?: boolean
-    _matchTextDirection0_value?: boolean | undefined
-    _fitOriginalSize_flag?: boolean
-    _fitOriginalSize0_value?: boolean | undefined
-    _fillColor_flag?: boolean
-    _fillColor0_value?: ResourceColor | ColorContent | ColorMetrics | undefined
-    _objectFit_flag?: boolean
-    _objectFit0_value?: ImageFit | undefined
-    _imageMatrix_flag?: boolean
-    _imageMatrix0_value?: matrix4.Matrix4Transit | undefined
-    _objectRepeat_flag?: boolean
-    _objectRepeat0_value?: ImageRepeat | undefined
-    _autoResize_flag?: boolean
-    _autoResize0_value?: boolean | undefined
-    _renderMode_flag?: boolean
-    _renderMode0_value?: ImageRenderMode | undefined
-    _dynamicRangeMode_flag?: boolean
-    _dynamicRangeMode0_value?: DynamicRangeMode | undefined
-    _interpolation_flag?: boolean
-    _interpolation0_value?: ImageInterpolation | undefined
-    _sourceSize_flag?: boolean
-    _sourceSize0_value?: ImageSourceSize | undefined
-    _syncLoad_flag?: boolean
-    _syncLoad0_value?: boolean | undefined
-    _colorFilter_flag?: boolean
-    _colorFilter0_value?: ColorFilter | drawing.ColorFilter | undefined
-    _copyOption_flag?: boolean
-    _copyOption0_value?: CopyOptions | undefined
-    _draggable_flag?: boolean
-    _draggable0_value?: boolean | undefined
-    _pointLight_flag?: boolean
-    _pointLight0_value?: PointLightStyle | undefined
-    _edgeAntialiasing_flag?: boolean
-    _edgeAntialiasing0_value?: number | undefined
-    _onComplete_flag?: boolean
-    _onComplete0_value?: ImageOnCompleteCallback | undefined
-    _onError_flag?: boolean
-    _onError0_value?: ImageErrorCallback | undefined
-    _onFinish_flag?: boolean
-    _onFinish0_value?: (() => void) | undefined
-    _enableAnalyzer_flag?: boolean
-    _enableAnalyzer0_value?: boolean | undefined
-    _analyzerConfig_flag?: boolean
-    _analyzerConfig0_value?: ImageAnalyzerConfig | undefined
-    _resizable_flag?: boolean
-    _resizable0_value?: ResizableOptions | undefined
-    _privacySensitive_flag?: boolean
-    _privacySensitive0_value?: boolean | undefined
-    _enhancedImageQuality_flag?: boolean
-    _enhancedImageQuality0_value?: image.ResolutionQuality | undefined
-    _orientation_flag?: boolean
-    _orientation0_value?: ImageRotateOrientation | undefined
-    applyModifierPatch(component: ImageAttribute): void {
-        if (this._alt_flag)
-            component.alt((this._alt0_value as string | Resource | image.PixelMap | undefined))
-        if (this._matchTextDirection_flag)
-            component.matchTextDirection((this._matchTextDirection0_value as boolean | undefined))
-        if (this._fitOriginalSize_flag)
-            component.fitOriginalSize((this._fitOriginalSize0_value as boolean | undefined))
-        if (this._fillColor_flag)
-            component.fillColor((this._fillColor0_value as ResourceColor | ColorContent | ColorMetrics | undefined))
-        if (this._objectFit_flag)
-            component.objectFit((this._objectFit0_value as ImageFit | undefined))
-        if (this._imageMatrix_flag)
-            component.imageMatrix((this._imageMatrix0_value as matrix4.Matrix4Transit | undefined))
-        if (this._objectRepeat_flag)
-            component.objectRepeat((this._objectRepeat0_value as ImageRepeat | undefined))
-        if (this._autoResize_flag)
-            component.autoResize((this._autoResize0_value as boolean | undefined))
-        if (this._renderMode_flag)
-            component.renderMode((this._renderMode0_value as ImageRenderMode | undefined))
-        if (this._dynamicRangeMode_flag)
-            component.dynamicRangeMode((this._dynamicRangeMode0_value as DynamicRangeMode | undefined))
-        if (this._interpolation_flag)
-            component.interpolation((this._interpolation0_value as ImageInterpolation | undefined))
-        if (this._sourceSize_flag)
-            component.sourceSize((this._sourceSize0_value as ImageSourceSize | undefined))
-        if (this._syncLoad_flag)
-            component.syncLoad((this._syncLoad0_value as boolean | undefined))
-        if (this._colorFilter_flag)
-            component.colorFilter((this._colorFilter0_value as ColorFilter | drawing.ColorFilter | undefined))
-        if (this._copyOption_flag)
-            component.copyOption((this._copyOption0_value as CopyOptions | undefined))
-        if (this._draggable_flag)
-            component.draggable((this._draggable0_value as boolean | undefined))
-        if (this._pointLight_flag)
-            component.pointLight((this._pointLight0_value as PointLightStyle | undefined))
-        if (this._edgeAntialiasing_flag)
-            component.edgeAntialiasing((this._edgeAntialiasing0_value as number | undefined))
-        if (this._onComplete_flag)
-            component.onComplete((this._onComplete0_value as ImageOnCompleteCallback | undefined))
-        if (this._onError_flag)
-            component.onError((this._onError0_value as ImageErrorCallback | undefined))
-        if (this._onFinish_flag)
-            component.onFinish((this._onFinish0_value as (() => void) | undefined))
-        if (this._enableAnalyzer_flag)
-            component.enableAnalyzer((this._enableAnalyzer0_value as boolean | undefined))
-        if (this._analyzerConfig_flag)
-            component.analyzerConfig((this._analyzerConfig0_value as ImageAnalyzerConfig | undefined))
-        if (this._resizable_flag)
-            component.resizable((this._resizable0_value as ResizableOptions | undefined))
-        if (this._privacySensitive_flag)
-            component.privacySensitive((this._privacySensitive0_value as boolean | undefined))
-        if (this._enhancedImageQuality_flag)
-            component.enhancedImageQuality((this._enhancedImageQuality0_value as image.ResolutionQuality | undefined))
-        if (this._orientation_flag)
-            component.orientation((this._orientation0_value as ImageRotateOrientation | undefined))
+    _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _alt_0_0value?: string | Resource | image.PixelMap | undefined
+    _matchTextDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _matchTextDirection_0_0value?: boolean | undefined
+    _fitOriginalSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fitOriginalSize_0_0value?: boolean | undefined
+    _fillColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fillColor_0_0value?: ResourceColor | ColorContent | ColorMetrics | undefined
+    _objectFit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _objectFit_0_0value?: ImageFit | undefined
+    _imageMatrix_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _imageMatrix_0_0value?: matrix4.Matrix4Transit | undefined
+    _objectRepeat_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _objectRepeat_0_0value?: ImageRepeat | undefined
+    _autoResize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoResize_0_0value?: boolean | undefined
+    _renderMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _renderMode_0_0value?: ImageRenderMode | undefined
+    _dynamicRangeMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dynamicRangeMode_0_0value?: DynamicRangeMode | undefined
+    _interpolation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _interpolation_0_0value?: ImageInterpolation | undefined
+    _sourceSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _sourceSize_0_0value?: ImageSourceSize | undefined
+    _syncLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _syncLoad_0_0value?: boolean | undefined
+    _colorFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _colorFilter_0_0value?: ColorFilter | drawing.ColorFilter | undefined
+    _copyOption_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _copyOption_0_0value?: CopyOptions | undefined
+    _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _draggable_0_0value?: boolean | undefined
+    _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pointLight_0_0value?: PointLightStyle | undefined
+    _edgeAntialiasing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _edgeAntialiasing_0_0value?: number | undefined
+    _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onComplete_0_0value?: ImageOnCompleteCallback | undefined
+    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onError_0_0value?: ImageErrorCallback | undefined
+    _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFinish_0_0value?: (() => void) | undefined
+    _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAnalyzer_0_0value?: boolean | undefined
+    _analyzerConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _analyzerConfig_0_0value?: ImageAnalyzerConfig | undefined
+    _resizable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _resizable_0_0value?: ResizableOptions | undefined
+    _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _privacySensitive_0_0value?: boolean | undefined
+    _enhancedImageQuality_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enhancedImageQuality_0_0value?: image.ResolutionQuality | undefined
+    _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _orientation_0_0value?: ImageRotateOrientation | undefined
+    applyModifierPatch(peer: ArkImagePeer): void {
+        super.applyModifierPatch(peer)
+        if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._alt_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAltAttribute((this._alt_0_0value as string | Resource | image.PixelMap | undefined));
+                    this._alt_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._alt_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAltAttribute((undefined as string | Resource | image.PixelMap | undefined));
+                }
+            }
+        }
+        if (this._matchTextDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._matchTextDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMatchTextDirectionAttribute((this._matchTextDirection_0_0value as boolean | undefined));
+                    this._matchTextDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._matchTextDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._matchTextDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMatchTextDirectionAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fitOriginalSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fitOriginalSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFitOriginalSizeAttribute((this._fitOriginalSize_0_0value as boolean | undefined));
+                    this._fitOriginalSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fitOriginalSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fitOriginalSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFitOriginalSizeAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fillColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fillColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFillColorAttribute((this._fillColor_0_0value as ResourceColor | ColorContent | ColorMetrics | undefined));
+                    this._fillColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fillColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fillColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFillColorAttribute((undefined as ResourceColor | ColorContent | ColorMetrics | undefined));
+                }
+            }
+        }
+        if (this._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._objectFit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setObjectFitAttribute((this._objectFit_0_0value as ImageFit | undefined));
+                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._objectFit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setObjectFitAttribute((undefined as ImageFit | undefined));
+                }
+            }
+        }
+        if (this._imageMatrix_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._imageMatrix_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setImageMatrixAttribute((this._imageMatrix_0_0value as matrix4.Matrix4Transit | undefined));
+                    this._imageMatrix_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._imageMatrix_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._imageMatrix_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setImageMatrixAttribute((undefined as matrix4.Matrix4Transit | undefined));
+                }
+            }
+        }
+        if (this._objectRepeat_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._objectRepeat_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setObjectRepeatAttribute((this._objectRepeat_0_0value as ImageRepeat | undefined));
+                    this._objectRepeat_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._objectRepeat_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._objectRepeat_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setObjectRepeatAttribute((undefined as ImageRepeat | undefined));
+                }
+            }
+        }
+        if (this._autoResize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._autoResize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAutoResizeAttribute((this._autoResize_0_0value as boolean | undefined));
+                    this._autoResize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._autoResize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._autoResize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoResizeAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._renderMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._renderMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRenderModeAttribute((this._renderMode_0_0value as ImageRenderMode | undefined));
+                    this._renderMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._renderMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._renderMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRenderModeAttribute((undefined as ImageRenderMode | undefined));
+                }
+            }
+        }
+        if (this._dynamicRangeMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dynamicRangeMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDynamicRangeModeAttribute((this._dynamicRangeMode_0_0value as DynamicRangeMode | undefined));
+                    this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDynamicRangeModeAttribute((undefined as DynamicRangeMode | undefined));
+                }
+            }
+        }
+        if (this._interpolation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._interpolation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setInterpolationAttribute((this._interpolation_0_0value as ImageInterpolation | undefined));
+                    this._interpolation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._interpolation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._interpolation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setInterpolationAttribute((undefined as ImageInterpolation | undefined));
+                }
+            }
+        }
+        if (this._sourceSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._sourceSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSourceSizeAttribute((this._sourceSize_0_0value as ImageSourceSize | undefined));
+                    this._sourceSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._sourceSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._sourceSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSourceSizeAttribute((undefined as ImageSourceSize | undefined));
+                }
+            }
+        }
+        if (this._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSyncLoadAttribute((this._syncLoad_0_0value as boolean | undefined));
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSyncLoadAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._colorFilter_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._colorFilter_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColorFilterAttribute((this._colorFilter_0_0value as ColorFilter | drawing.ColorFilter | undefined));
+                    this._colorFilter_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._colorFilter_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._colorFilter_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColorFilterAttribute((undefined as ColorFilter | drawing.ColorFilter | undefined));
+                }
+            }
+        }
+        if (this._copyOption_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._copyOption_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCopyOptionAttribute((this._copyOption_0_0value as CopyOptions | undefined));
+                    this._copyOption_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._copyOption_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._copyOption_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCopyOptionAttribute((undefined as CopyOptions | undefined));
+                }
+            }
+        }
+        if (this._draggable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._draggable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDraggableAttribute((this._draggable_0_0value as boolean | undefined));
+                    this._draggable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._draggable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._draggable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDraggableAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pointLight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPointLightAttribute((this._pointLight_0_0value as PointLightStyle | undefined));
+                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pointLight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPointLightAttribute((undefined as PointLightStyle | undefined));
+                }
+            }
+        }
+        if (this._edgeAntialiasing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._edgeAntialiasing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEdgeAntialiasingAttribute((this._edgeAntialiasing_0_0value as number | undefined));
+                    this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEdgeAntialiasingAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onComplete_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnCompleteAttribute((this._onComplete_0_0value as ImageOnCompleteCallback | undefined));
+                    this._onComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onComplete_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnCompleteAttribute((undefined as ImageOnCompleteCallback | undefined));
+                }
+            }
+        }
+        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnErrorAttribute((this._onError_0_0value as ImageErrorCallback | undefined));
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnErrorAttribute((undefined as ImageErrorCallback | undefined));
+                }
+            }
+        }
+        if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFinishAttribute((this._onFinish_0_0value as (() => void) | undefined));
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFinishAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAnalyzerAttribute((this._enableAnalyzer_0_0value as boolean | undefined));
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAnalyzerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._analyzerConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._analyzerConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAnalyzerConfigAttribute((this._analyzerConfig_0_0value as ImageAnalyzerConfig | undefined));
+                    this._analyzerConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._analyzerConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._analyzerConfig_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAnalyzerConfigAttribute((undefined as ImageAnalyzerConfig | undefined));
+                }
+            }
+        }
+        if (this._resizable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._resizable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setResizableAttribute((this._resizable_0_0value as ResizableOptions | undefined));
+                    this._resizable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._resizable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._resizable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setResizableAttribute((undefined as ResizableOptions | undefined));
+                }
+            }
+        }
+        if (this._privacySensitive_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._privacySensitive_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPrivacySensitiveAttribute((this._privacySensitive_0_0value as boolean | undefined));
+                    this._privacySensitive_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._privacySensitive_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._privacySensitive_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPrivacySensitiveAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enhancedImageQuality_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enhancedImageQuality_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnhancedImageQualityAttribute((this._enhancedImageQuality_0_0value as image.ResolutionQuality | undefined));
+                    this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnhancedImageQualityAttribute((undefined as image.ResolutionQuality | undefined));
+                }
+            }
+        }
+        if (this._orientation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._orientation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOrientationAttribute((this._orientation_0_0value as ImageRotateOrientation | undefined));
+                    this._orientation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._orientation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._orientation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOrientationAttribute((undefined as ImageRotateOrientation | undefined));
+                }
+            }
+        }
     }
-    public alt(value: string | Resource | image.PixelMap | undefined): this {
-        this._alt_flag = true
-        this._alt0_value = value
+    mergeModifier(modifier: ImageModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._alt_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.alt(modifier._alt_0_0value);
+                    break;
+                }
+                default: {
+                    this.alt((undefined as string | Resource | image.PixelMap | undefined));
+                }
+            }
+        }
+        if (modifier._matchTextDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._matchTextDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.matchTextDirection(modifier._matchTextDirection_0_0value);
+                    break;
+                }
+                default: {
+                    this.matchTextDirection((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fitOriginalSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fitOriginalSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fitOriginalSize(modifier._fitOriginalSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.fitOriginalSize((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fillColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fillColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fillColor(modifier._fillColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.fillColor((undefined as ResourceColor | ColorContent | ColorMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._objectFit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.objectFit(modifier._objectFit_0_0value);
+                    break;
+                }
+                default: {
+                    this.objectFit((undefined as ImageFit | undefined));
+                }
+            }
+        }
+        if (modifier._imageMatrix_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._imageMatrix_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.imageMatrix(modifier._imageMatrix_0_0value);
+                    break;
+                }
+                default: {
+                    this.imageMatrix((undefined as matrix4.Matrix4Transit | undefined));
+                }
+            }
+        }
+        if (modifier._objectRepeat_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._objectRepeat_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.objectRepeat(modifier._objectRepeat_0_0value);
+                    break;
+                }
+                default: {
+                    this.objectRepeat((undefined as ImageRepeat | undefined));
+                }
+            }
+        }
+        if (modifier._autoResize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._autoResize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.autoResize(modifier._autoResize_0_0value);
+                    break;
+                }
+                default: {
+                    this.autoResize((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._renderMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._renderMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.renderMode(modifier._renderMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.renderMode((undefined as ImageRenderMode | undefined));
+                }
+            }
+        }
+        if (modifier._dynamicRangeMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dynamicRangeMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dynamicRangeMode(modifier._dynamicRangeMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.dynamicRangeMode((undefined as DynamicRangeMode | undefined));
+                }
+            }
+        }
+        if (modifier._interpolation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._interpolation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.interpolation(modifier._interpolation_0_0value);
+                    break;
+                }
+                default: {
+                    this.interpolation((undefined as ImageInterpolation | undefined));
+                }
+            }
+        }
+        if (modifier._sourceSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._sourceSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.sourceSize(modifier._sourceSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.sourceSize((undefined as ImageSourceSize | undefined));
+                }
+            }
+        }
+        if (modifier._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.syncLoad(modifier._syncLoad_0_0value);
+                    break;
+                }
+                default: {
+                    this.syncLoad((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._colorFilter_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._colorFilter_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.colorFilter(modifier._colorFilter_0_0value);
+                    break;
+                }
+                default: {
+                    this.colorFilter((undefined as ColorFilter | drawing.ColorFilter | undefined));
+                }
+            }
+        }
+        if (modifier._copyOption_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._copyOption_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.copyOption(modifier._copyOption_0_0value);
+                    break;
+                }
+                default: {
+                    this.copyOption((undefined as CopyOptions | undefined));
+                }
+            }
+        }
+        if (modifier._draggable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._draggable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.draggable(modifier._draggable_0_0value);
+                    break;
+                }
+                default: {
+                    this.draggable((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pointLight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pointLight(modifier._pointLight_0_0value);
+                    break;
+                }
+                default: {
+                    this.pointLight((undefined as PointLightStyle | undefined));
+                }
+            }
+        }
+        if (modifier._edgeAntialiasing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._edgeAntialiasing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.edgeAntialiasing(modifier._edgeAntialiasing_0_0value);
+                    break;
+                }
+                default: {
+                    this.edgeAntialiasing((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onComplete_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onComplete(modifier._onComplete_0_0value);
+                    break;
+                }
+                default: {
+                    this.onComplete((undefined as ImageOnCompleteCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onError(modifier._onError_0_0value);
+                    break;
+                }
+                default: {
+                    this.onError((undefined as ImageErrorCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFinish(modifier._onFinish_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFinish((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAnalyzer(modifier._enableAnalyzer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAnalyzer((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._analyzerConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._analyzerConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.analyzerConfig(modifier._analyzerConfig_0_0value);
+                    break;
+                }
+                default: {
+                    this.analyzerConfig((undefined as ImageAnalyzerConfig | undefined));
+                }
+            }
+        }
+        if (modifier._resizable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._resizable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.resizable(modifier._resizable_0_0value);
+                    break;
+                }
+                default: {
+                    this.resizable((undefined as ResizableOptions | undefined));
+                }
+            }
+        }
+        if (modifier._privacySensitive_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._privacySensitive_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.privacySensitive(modifier._privacySensitive_0_0value);
+                    break;
+                }
+                default: {
+                    this.privacySensitive((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enhancedImageQuality_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enhancedImageQuality_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enhancedImageQuality(modifier._enhancedImageQuality_0_0value);
+                    break;
+                }
+                default: {
+                    this.enhancedImageQuality((undefined as image.ResolutionQuality | undefined));
+                }
+            }
+        }
+        if (modifier._orientation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._orientation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.orientation(modifier._orientation_0_0value);
+                    break;
+                }
+                default: {
+                    this.orientation((undefined as ImageRotateOrientation | undefined));
+                }
+            }
+        }
+    }
+    alt(value: string | Resource | image.PixelMap | undefined): this {
+        if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._alt_0_flag = AttributeUpdaterFlag.UPDATE
+            this._alt_0_0value = value
+        } else
+        {
+            this._alt_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public matchTextDirection(value: boolean | undefined): this {
-        this._matchTextDirection_flag = true
-        this._matchTextDirection0_value = value
+    matchTextDirection(value: boolean | undefined): this {
+        if (((this._matchTextDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._matchTextDirection_0_0value) !== (value)))
+        {
+            this._matchTextDirection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._matchTextDirection_0_0value = value
+        } else
+        {
+            this._matchTextDirection_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fitOriginalSize(value: boolean | undefined): this {
-        this._fitOriginalSize_flag = true
-        this._fitOriginalSize0_value = value
+    fitOriginalSize(value: boolean | undefined): this {
+        if (((this._fitOriginalSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fitOriginalSize_0_0value) !== (value)))
+        {
+            this._fitOriginalSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fitOriginalSize_0_0value = value
+        } else
+        {
+            this._fitOriginalSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this {
-        this._fillColor_flag = true
-        this._fillColor0_value = value
+    fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this {
+        if (((this._fillColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fillColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fillColor_0_0value = value
+        } else
+        {
+            this._fillColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public objectFit(value: ImageFit | undefined): this {
-        this._objectFit_flag = true
-        this._objectFit0_value = value
+    objectFit(value: ImageFit | undefined): this {
+        if (((this._objectFit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._objectFit_0_0value = value
+        } else
+        {
+            this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public imageMatrix(value: matrix4.Matrix4Transit | undefined): this {
-        this._imageMatrix_flag = true
-        this._imageMatrix0_value = value
+    imageMatrix(value: matrix4.Matrix4Transit | undefined): this {
+        if (((this._imageMatrix_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._imageMatrix_0_flag = AttributeUpdaterFlag.UPDATE
+            this._imageMatrix_0_0value = value
+        } else
+        {
+            this._imageMatrix_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public objectRepeat(value: ImageRepeat | undefined): this {
-        this._objectRepeat_flag = true
-        this._objectRepeat0_value = value
+    objectRepeat(value: ImageRepeat | undefined): this {
+        if (((this._objectRepeat_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._objectRepeat_0_flag = AttributeUpdaterFlag.UPDATE
+            this._objectRepeat_0_0value = value
+        } else
+        {
+            this._objectRepeat_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public autoResize(value: boolean | undefined): this {
-        this._autoResize_flag = true
-        this._autoResize0_value = value
+    autoResize(value: boolean | undefined): this {
+        if (((this._autoResize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoResize_0_0value) !== (value)))
+        {
+            this._autoResize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._autoResize_0_0value = value
+        } else
+        {
+            this._autoResize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public renderMode(value: ImageRenderMode | undefined): this {
-        this._renderMode_flag = true
-        this._renderMode0_value = value
+    renderMode(value: ImageRenderMode | undefined): this {
+        if (((this._renderMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._renderMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._renderMode_0_0value = value
+        } else
+        {
+            this._renderMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public dynamicRangeMode(value: DynamicRangeMode | undefined): this {
-        this._dynamicRangeMode_flag = true
-        this._dynamicRangeMode0_value = value
+    dynamicRangeMode(value: DynamicRangeMode | undefined): this {
+        if (((this._dynamicRangeMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dynamicRangeMode_0_0value = value
+        } else
+        {
+            this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public interpolation(value: ImageInterpolation | undefined): this {
-        this._interpolation_flag = true
-        this._interpolation0_value = value
+    interpolation(value: ImageInterpolation | undefined): this {
+        if (((this._interpolation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._interpolation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._interpolation_0_0value = value
+        } else
+        {
+            this._interpolation_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public sourceSize(value: ImageSourceSize | undefined): this {
-        this._sourceSize_flag = true
-        this._sourceSize0_value = value
+    sourceSize(value: ImageSourceSize | undefined): this {
+        if (((this._sourceSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._sourceSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._sourceSize_0_0value = value
+        } else
+        {
+            this._sourceSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public syncLoad(value: boolean | undefined): this {
-        this._syncLoad_flag = true
-        this._syncLoad0_value = value
+    syncLoad(value: boolean | undefined): this {
+        if (((this._syncLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._syncLoad_0_0value) !== (value)))
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
+            this._syncLoad_0_0value = value
+        } else
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
-        this._colorFilter_flag = true
-        this._colorFilter0_value = value
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+        if (((this._colorFilter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
+            this._colorFilter_0_0value = value
+        } else
+        {
+            this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public copyOption(value: CopyOptions | undefined): this {
-        this._copyOption_flag = true
-        this._copyOption0_value = value
+    copyOption(value: CopyOptions | undefined): this {
+        if (((this._copyOption_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
+            this._copyOption_0_0value = value
+        } else
+        {
+            this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public draggable(value: boolean | undefined): this {
-        this._draggable_flag = true
-        this._draggable0_value = value
+    draggable(value: boolean | undefined): this {
+        if (((this._draggable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._draggable_0_0value) !== (value)))
+        {
+            this._draggable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._draggable_0_0value = value
+        } else
+        {
+            this._draggable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pointLight(value: PointLightStyle | undefined): this {
-        this._pointLight_flag = true
-        this._pointLight0_value = value
+    pointLight(value: PointLightStyle | undefined): this {
+        if (((this._pointLight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pointLight_0_0value = value
+        } else
+        {
+            this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public edgeAntialiasing(value: number | undefined): this {
-        this._edgeAntialiasing_flag = true
-        this._edgeAntialiasing0_value = value
+    edgeAntialiasing(value: number | undefined): this {
+        if (((this._edgeAntialiasing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._edgeAntialiasing_0_0value) !== (value)))
+        {
+            this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._edgeAntialiasing_0_0value = value
+        } else
+        {
+            this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onComplete(value: ImageOnCompleteCallback | undefined): this {
-        this._onComplete_flag = true
-        this._onComplete0_value = value
+    onComplete(value: ImageOnCompleteCallback | undefined): this {
+        if (((this._onComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onComplete_0_0value = value
+        } else
+        {
+            this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onError(value: ImageErrorCallback | undefined): this {
-        this._onError_flag = true
-        this._onError0_value = value
+    onError(value: ImageErrorCallback | undefined): this {
+        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onError_0_0value = value
+        } else
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onFinish(value: (() => void) | undefined): this {
-        this._onFinish_flag = true
-        this._onFinish0_value = value
+    onFinish(value: (() => void) | undefined): this {
+        if (((this._onFinish_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFinish_0_0value = value
+        } else
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableAnalyzer(value: boolean | undefined): this {
-        this._enableAnalyzer_flag = true
-        this._enableAnalyzer0_value = value
+    enableAnalyzer(value: boolean | undefined): this {
+        if (((this._enableAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAnalyzer_0_0value = value
+        } else
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
-        this._analyzerConfig_flag = true
-        this._analyzerConfig0_value = value
+    analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
+        if (((this._analyzerConfig_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._analyzerConfig_0_flag = AttributeUpdaterFlag.UPDATE
+            this._analyzerConfig_0_0value = value
+        } else
+        {
+            this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public resizable(value: ResizableOptions | undefined): this {
-        this._resizable_flag = true
-        this._resizable0_value = value
+    resizable(value: ResizableOptions | undefined): this {
+        if (((this._resizable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._resizable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._resizable_0_0value = value
+        } else
+        {
+            this._resizable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public privacySensitive(value: boolean | undefined): this {
-        this._privacySensitive_flag = true
-        this._privacySensitive0_value = value
+    privacySensitive(value: boolean | undefined): this {
+        if (((this._privacySensitive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._privacySensitive_0_0value) !== (value)))
+        {
+            this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
+            this._privacySensitive_0_0value = value
+        } else
+        {
+            this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enhancedImageQuality(value: image.ResolutionQuality | undefined): this {
-        this._enhancedImageQuality_flag = true
-        this._enhancedImageQuality0_value = value
+    enhancedImageQuality(value: image.ResolutionQuality | undefined): this {
+        if (((this._enhancedImageQuality_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enhancedImageQuality_0_0value = value
+        } else
+        {
+            this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public orientation(value: ImageRotateOrientation | undefined): this {
-        this._orientation_flag = true
-        this._orientation0_value = value
+    orientation(value: ImageRotateOrientation | undefined): this {
+        if (((this._orientation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._orientation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._orientation_0_0value = value
+        } else
+        {
+            this._orientation_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1450,127 +2280,124 @@ export class ColorContent_serializer {
 export class ImageCompleteEvent_serializer {
     public static write(buffer: SerializerBase, value: ImageCompleteEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
-        const value_componentWidth  = value.componentWidth
-        valueSerializer.writeNumber(value_componentWidth)
-        const value_componentHeight  = value.componentHeight
-        valueSerializer.writeNumber(value_componentHeight)
-        const value_loadingStatus  = value.loadingStatus
-        valueSerializer.writeNumber(value_loadingStatus)
-        const value_contentWidth  = value.contentWidth
-        valueSerializer.writeNumber(value_contentWidth)
-        const value_contentHeight  = value.contentHeight
-        valueSerializer.writeNumber(value_contentHeight)
-        const value_contentOffsetX  = value.contentOffsetX
-        valueSerializer.writeNumber(value_contentOffsetX)
-        const value_contentOffsetY  = value.contentOffsetY
-        valueSerializer.writeNumber(value_contentOffsetY)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
+        const valueHolderForComponentWidth  = value.componentWidth
+        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        const valueHolderForComponentHeight  = value.componentHeight
+        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        const valueHolderForLoadingStatus  = value.loadingStatus
+        valueSerializer.writeNumber(valueHolderForLoadingStatus)
+        const valueHolderForContentWidth  = value.contentWidth
+        valueSerializer.writeNumber(valueHolderForContentWidth)
+        const valueHolderForContentHeight  = value.contentHeight
+        valueSerializer.writeNumber(valueHolderForContentHeight)
+        const valueHolderForContentOffsetX  = value.contentOffsetX
+        valueSerializer.writeNumber(valueHolderForContentOffsetX)
+        const valueHolderForContentOffsetY  = value.contentOffsetY
+        valueSerializer.writeNumber(valueHolderForContentOffsetY)
     }
     public static read(buffer: DeserializerBase): ImageCompleteEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        const componentWidth_result : number = (valueDeserializer.readNumber() as number)
-        const componentHeight_result : number = (valueDeserializer.readNumber() as number)
-        const loadingStatus_result : number = (valueDeserializer.readNumber() as number)
-        const contentWidth_result : number = (valueDeserializer.readNumber() as number)
-        const contentHeight_result : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetX_result : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetY_result : number = (valueDeserializer.readNumber() as number)
-        let value : ImageCompleteEvent = ({width: width_result, height: height_result, componentWidth: componentWidth_result, componentHeight: componentHeight_result, loadingStatus: loadingStatus_result, contentWidth: contentWidth_result, contentHeight: contentHeight_result, contentOffsetX: contentOffsetX_result, contentOffsetY: contentOffsetY_result} as ImageCompleteEvent)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const loadingStatusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentOffsetXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentOffsetYTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ImageCompleteEvent = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageCompleteEvent)
         return value
     }
 }
 export class ImageSourceSize_serializer {
     public static write(buffer: SerializerBase, value: ImageSourceSize): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): ImageSourceSize {
         let valueDeserializer : DeserializerBase = buffer
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : ImageSourceSize = ({width: width_result, height: height_result} as ImageSourceSize)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ImageSourceSize = ({width: widthTmpResult, height: heightTmpResult} as ImageSourceSize)
         return value
     }
 }
 export class ImageError_serializer {
     public static write(buffer: SerializerBase, value: ImageError): void {
         let valueSerializer : SerializerBase = buffer
-        const value_componentWidth  = value.componentWidth
-        valueSerializer.writeNumber(value_componentWidth)
-        const value_componentHeight  = value.componentHeight
-        valueSerializer.writeNumber(value_componentHeight)
-        const value_message  = value.message
-        valueSerializer.writeString(value_message)
-        const value_error  = value.error
-        let value_error_type : int32 = RuntimeType.UNDEFINED
-        value_error_type = runtimeType(value_error)
-        valueSerializer.writeInt8((value_error_type).toChar())
-        if ((value_error_type) != (RuntimeType.UNDEFINED)) {
-            const value_error_value  = value_error!
-            BusinessError_serializer.write(valueSerializer, value_error_value)
+        const valueHolderForComponentWidth  = value.componentWidth
+        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        const valueHolderForComponentHeight  = value.componentHeight
+        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        const valueHolderForMessage  = value.message
+        valueSerializer.writeString(valueHolderForMessage)
+        const valueHolderForError  = value.error
+        if (valueHolderForError !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForErrorTmpValue  = valueHolderForError!
+            BusinessError_serializer.write(valueSerializer, valueHolderForErrorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ImageError {
         let valueDeserializer : DeserializerBase = buffer
-        const componentWidth_result : number = (valueDeserializer.readNumber() as number)
-        const componentHeight_result : number = (valueDeserializer.readNumber() as number)
-        const message_result : string = (valueDeserializer.readString() as string)
-        const error_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let error_buf : BusinessError | undefined
-        if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            error_buf = BusinessError_serializer.read(valueDeserializer)
+        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const messageTmpResult : string = (valueDeserializer.readString() as string)
+        const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let errorTmpBuf : BusinessError | undefined
+        if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            errorTmpBuf = BusinessError_serializer.read(valueDeserializer)
         }
-        const error_result : BusinessError | undefined = error_buf
-        let value : ImageError = ({componentWidth: componentWidth_result, componentHeight: componentHeight_result, message: message_result, error: error_result} as ImageError)
+        const errorTmpResult : BusinessError | undefined = errorTmpBuf
+        let value : ImageError = ({componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, message: messageTmpResult, error: errorTmpResult} as ImageError)
         return value
     }
 }
 export class ResizableOptions_serializer {
     public static write(buffer: SerializerBase, value: ResizableOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_slice  = value.slice
-        let value_slice_type : int32 = RuntimeType.UNDEFINED
-        value_slice_type = runtimeType(value_slice)
-        valueSerializer.writeInt8((value_slice_type).toChar())
-        if ((value_slice_type) != (RuntimeType.UNDEFINED)) {
-            const value_slice_value  = value_slice!
-            EdgeWidths_serializer.write(valueSerializer, value_slice_value)
+        const valueHolderForSlice  = value.slice
+        if (valueHolderForSlice !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSliceTmpValue  = valueHolderForSlice!
+            EdgeWidths_serializer.write(valueSerializer, valueHolderForSliceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_lattice  = value.lattice
-        let value_lattice_type : int32 = RuntimeType.UNDEFINED
-        value_lattice_type = runtimeType(value_lattice)
-        valueSerializer.writeInt8((value_lattice_type).toChar())
-        if ((value_lattice_type) != (RuntimeType.UNDEFINED)) {
-            const value_lattice_value  = value_lattice!
-            drawing_Lattice_serializer.write(valueSerializer, value_lattice_value)
+        const valueHolderForLattice  = value.lattice
+        if (valueHolderForLattice !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLatticeTmpValue  = valueHolderForLattice!
+            drawing_Lattice_serializer.write(valueSerializer, valueHolderForLatticeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ResizableOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const slice_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let slice_buf : EdgeWidths | undefined
-        if ((slice_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            slice_buf = EdgeWidths_serializer.read(valueDeserializer)
+        const sliceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sliceTmpBuf : EdgeWidths | undefined
+        if ((sliceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sliceTmpBuf = EdgeWidths_serializer.read(valueDeserializer)
         }
-        const slice_result : EdgeWidths | undefined = slice_buf
-        const lattice_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lattice_buf : drawing.Lattice | undefined
-        if ((lattice_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            lattice_buf = (drawing_Lattice_serializer.read(valueDeserializer) as drawing.Lattice)
+        const sliceTmpResult : EdgeWidths | undefined = sliceTmpBuf
+        const latticeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let latticeTmpBuf : drawing.Lattice | undefined
+        if ((latticeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            latticeTmpBuf = (drawing_Lattice_serializer.read(valueDeserializer) as drawing.Lattice)
         }
-        const lattice_result : drawing.Lattice | undefined = lattice_buf
-        let value : ResizableOptions = ({slice: slice_result, lattice: lattice_result} as ResizableOptions)
+        const latticeTmpResult : drawing.Lattice | undefined = latticeTmpBuf
+        let value : ResizableOptions = ({slice: sliceTmpResult, lattice: latticeTmpResult} as ResizableOptions)
         return value
     }
 }

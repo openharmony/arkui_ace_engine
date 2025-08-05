@@ -16,13 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
 import { ResourceColor, Edges, BorderRadiuses } from "./../component/units"
 import { Color, BorderStyle } from "./../component/enums"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { drawing } from "./ohos.graphics.drawing"
 import { common2D_Rect_serializer, common2D } from "./ohos.graphics.common2D"
@@ -64,27 +63,22 @@ export class ColorMetrics implements MaterializedBase {
     }
     private static resourceColor_serialize(color: ResourceColor): ColorMetrics {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
-        color_type = runtimeType(color)
-        if (TypeChecker.isColor(color)) {
+        if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
-            const color_0  = color as Color
-            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        }
-        else if (RuntimeType.NUMBER == color_type) {
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(colorForIdx0))
+        } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const color_1  = color as number
-            thisSerializer.writeNumber(color_1)
-        }
-        else if (RuntimeType.STRING == color_type) {
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
-            const color_2  = color as string
-            thisSerializer.writeString(color_2)
-        }
-        else if (RuntimeType.OBJECT == color_type) {
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
             thisSerializer.writeInt8((3).toChar())
-            const color_3  = color as Resource
-            Resource_serializer.write(thisSerializer, color_3)
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         const retval  = ArkUIGeneratedNativeModule._ColorMetrics_resourceColor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -673,105 +667,105 @@ export class ShapeMask_serializer {
 export class Size_serializer {
     public static write(buffer: SerializerBase, value: Size): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): Size {
         let valueDeserializer : DeserializerBase = buffer
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : Size = ({width: width_result, height: height_result} as Size)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Size = ({width: widthTmpResult, height: heightTmpResult} as Size)
         return value
     }
 }
 export class Vector2_serializer {
     public static write(buffer: SerializerBase, value: Vector2): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): Vector2 {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : Vector2 = ({x: x_result, y: y_result} as Vector2)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Vector2 = ({x: xTmpResult, y: yTmpResult} as Vector2)
         return value
     }
 }
 export class Vector3_serializer {
     public static write(buffer: SerializerBase, value: Vector3): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
-        const value_z  = value.z
-        valueSerializer.writeNumber(value_z)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForZ  = value.z
+        valueSerializer.writeNumber(valueHolderForZ)
     }
     public static read(buffer: DeserializerBase): Vector3 {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        const z_result : number = (valueDeserializer.readNumber() as number)
-        let value : Vector3 = ({x: x_result, y: y_result, z: z_result} as Vector3)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Vector3 = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as Vector3)
         return value
     }
 }
 export class Circle_serializer {
     public static write(buffer: SerializerBase, value: Circle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_centerX  = value.centerX
-        valueSerializer.writeNumber(value_centerX)
-        const value_centerY  = value.centerY
-        valueSerializer.writeNumber(value_centerY)
-        const value_radius  = value.radius
-        valueSerializer.writeNumber(value_radius)
+        const valueHolderForCenterX  = value.centerX
+        valueSerializer.writeNumber(valueHolderForCenterX)
+        const valueHolderForCenterY  = value.centerY
+        valueSerializer.writeNumber(valueHolderForCenterY)
+        const valueHolderForRadius  = value.radius
+        valueSerializer.writeNumber(valueHolderForRadius)
     }
     public static read(buffer: DeserializerBase): Circle {
         let valueDeserializer : DeserializerBase = buffer
-        const centerX_result : number = (valueDeserializer.readNumber() as number)
-        const centerY_result : number = (valueDeserializer.readNumber() as number)
-        const radius_result : number = (valueDeserializer.readNumber() as number)
-        let value : Circle = ({centerX: centerX_result, centerY: centerY_result, radius: radius_result} as Circle)
+        const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Circle = ({centerX: centerXTmpResult, centerY: centerYTmpResult, radius: radiusTmpResult} as Circle)
         return value
     }
 }
 export class CommandPath_serializer {
     public static write(buffer: SerializerBase, value: CommandPath): void {
         let valueSerializer : SerializerBase = buffer
-        const value_commands  = value.commands
-        valueSerializer.writeString(value_commands)
+        const valueHolderForCommands  = value.commands
+        valueSerializer.writeString(valueHolderForCommands)
     }
     public static read(buffer: DeserializerBase): CommandPath {
         let valueDeserializer : DeserializerBase = buffer
-        const commands_result : string = (valueDeserializer.readString() as string)
-        let value : CommandPath = ({commands: commands_result} as CommandPath)
+        const commandsTmpResult : string = (valueDeserializer.readString() as string)
+        let value : CommandPath = ({commands: commandsTmpResult} as CommandPath)
         return value
     }
 }
 export class Frame_serializer {
     public static write(buffer: SerializerBase, value: Frame): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        valueSerializer.writeNumber(value_x)
-        const value_y  = value.y
-        valueSerializer.writeNumber(value_y)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): Frame {
         let valueDeserializer : DeserializerBase = buffer
-        const x_result : number = (valueDeserializer.readNumber() as number)
-        const y_result : number = (valueDeserializer.readNumber() as number)
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : Frame = ({x: x_result, y: y_result, width: width_result, height: height_result} as Frame)
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : Frame = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as Frame)
         return value
     }
 }
@@ -789,16 +783,16 @@ export class LengthMetrics_serializer {
 export class RoundRect_serializer {
     public static write(buffer: SerializerBase, value: RoundRect): void {
         let valueSerializer : SerializerBase = buffer
-        const value_rect  = value.rect
-        common2D_Rect_serializer.write(valueSerializer, value_rect)
-        const value_corners  = value.corners
-        CornerRadius_serializer.write(valueSerializer, value_corners)
+        const valueHolderForRect  = value.rect
+        common2D_Rect_serializer.write(valueSerializer, valueHolderForRect)
+        const valueHolderForCorners  = value.corners
+        CornerRadius_serializer.write(valueSerializer, valueHolderForCorners)
     }
     public static read(buffer: DeserializerBase): RoundRect {
         let valueDeserializer : DeserializerBase = buffer
-        const rect_result : common2D.Rect = common2D_Rect_serializer.read(valueDeserializer)
-        const corners_result : CornerRadius = CornerRadius_serializer.read(valueDeserializer)
-        let value : RoundRect = ({rect: rect_result, corners: corners_result} as RoundRect)
+        const rectTmpResult : common2D.Rect = common2D_Rect_serializer.read(valueDeserializer)
+        const cornersTmpResult : CornerRadius = CornerRadius_serializer.read(valueDeserializer)
+        let value : RoundRect = ({rect: rectTmpResult, corners: cornersTmpResult} as RoundRect)
         return value
     }
 }

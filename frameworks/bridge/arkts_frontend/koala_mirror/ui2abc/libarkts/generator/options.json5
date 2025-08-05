@@ -277,6 +277,141 @@
                     definition: "extension_ETSModuleGetNamespaceFlag",
                 }
             ]
-        }
+        },
+        {
+            interface: "ScriptFunction",
+            methods: [
+                {
+                    name: "getSignaturePointer",
+                    definition: "extension_ScriptFunctionGetSignaturePointer",
+                },
+                {
+                    name: "setSignaturePointer",
+                    definition: "extension_ScriptFunctionSetSignaturePointer",
+                },
+                {
+                    name: "getPreferredReturnTypePointer",
+                    definition: "extension_ScriptFunctionGetPreferredReturnTypePointer",
+                },
+                {
+                    name: "setPreferredReturnTypePointer",
+                    definition: "extension_ScriptFunctionSetPreferredReturnTypePointer",
+                },
+            ]
+        },
+    ],
+    parameters: [
+        {
+            interface: "ArrowFunctionExpression",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "CallExpression",
+            parameters: [
+                {
+                    name: "trailingBlock",
+                },
+            ],
+        },
+        {
+            interface: "ClassDeclaration",
+            parameters: [
+                {
+                    name: "modifierFlags",
+                },
+            ],
+        },
+        {
+            interface: "ClassDefinition",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "ClassProperty",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "ETSFunctionType",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "ETSParameterExpression",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "ETSUnionType",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "MethodDefinition",
+            parameters: [
+                {
+                    name: "overloads",
+                },
+            ],
+        },
+        {
+            interface: "ScriptFunction",
+            parameters: [
+                {
+                    name: "ident",
+                    setter: "setIdent",
+                    getter: "id",
+                },
+                {
+                    name: "annotations",
+                },
+            ],
+        },
+        {
+            interface: "TSInterfaceDeclaration",
+            parameters: [
+                {
+                    name: "modifierFlags",
+                },
+            ],
+        },
+        {
+            interface: "TSTypeAliasDeclaration",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+                {
+                    name: "modifierFlags",
+                },
+            ],
+        },
+        {
+            interface: "VariableDeclaration",
+            parameters: [
+                {
+                    name: "annotations",
+                },
+            ],
+        },
     ],
 }

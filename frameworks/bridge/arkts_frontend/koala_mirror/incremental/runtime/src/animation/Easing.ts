@@ -99,7 +99,7 @@ export class Easing {
             if (value < 1) {
                 value *= easing.length
                 const index = Math.floor(value)
-                if (index < easing.length) return easing[index as uint32](value - index)
+                if (index < easing.length) return easing[index](value - index)
             }
             return easing[easing.length - 1](1)
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, float64ToLong, int32, int64, isFiniteNumber, uint32 } from "@koalaui/common"
+import { float64, float64toInt64, int32, int64, isFiniteNumber, uint32 } from "@koalaui/common"
 import { AnimationRange, NumberAnimationRange } from "./AnimationRange"
 import { Easing, EasingCurve } from "./Easing"
 import { scheduleCallback } from "../states/GlobalStateManager"
@@ -322,7 +322,7 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
         let result = this.state
         let passedTime = currentTime - startTime
         if (passedTime > this.period) {
-            result += float64ToLong(Math.floor(passedTime / this.period))
+            result += float64toInt64(Math.floor(passedTime / this.period))
             passedTime = passedTime % this.period
             // tune start time for long animations
             this.startTime = currentTime - passedTime
@@ -514,19 +514,19 @@ class AnimationImpl<Value> implements TimeAnimation<Value> {
             if (this.lastState < 0) {
                 // tune start time on direction change
                 this.running = true
-                this.startTime = time + (this.lastState * this.duration) as int64
+                this.startTime = time + float64toInt64(this.lastState * this.duration)
             }
         }
         else {
             // set start time to continue animation from the current state
             this.running = true
-            this.startTime = time - (
+            this.startTime = time - float64toInt64(
                 this.lastState < 0
                     ? (2 + this.lastState) * this.duration
                     : this.lastState > 0
                         ? this.lastState * this.duration
                         : (0 - this.delay) // add delay for the state 0 only
-            ) as int64
+            )
         }
     }
 
@@ -539,7 +539,7 @@ class AnimationImpl<Value> implements TimeAnimation<Value> {
             if (this.lastState > 0) {
                 // tune start time on direction change
                 this.running = true
-                this.startTime = time - (this.duration * (2 - this.lastState)) as int64
+                this.startTime = time - float64toInt64(this.duration * (2 - this.lastState))
             }
         }
         else {

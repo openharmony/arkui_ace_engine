@@ -16,9 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, registerCallback, wrapCallback, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -37,30 +36,30 @@ export class unifiedDataChannel_UnifiedData_serializer {
 export class unifiedDataChannel_Summary_serializer {
     public static write(buffer: SerializerBase, value: unifiedDataChannel.Summary): void {
         let valueSerializer : SerializerBase = buffer
-        const value_summary  = value.summary
-        valueSerializer.writeInt32((value_summary.size).toInt())
-        for (const pair of value_summary) {
-            const value_summary_key = pair[0]
-            const value_summary_value = pair[1]
-            valueSerializer.writeString(value_summary_key)
-            valueSerializer.writeInt64(value_summary_value)
+        const valueHolderForSummary  = value.summary
+        valueSerializer.writeInt32((valueHolderForSummary.size).toInt())
+        for (const pair of valueHolderForSummary) {
+            const valueHolderForSummaryKeyVar = pair[0]
+            const valueHolderForSummaryValueVar = pair[1]
+            valueSerializer.writeString(valueHolderForSummaryKeyVar)
+            valueSerializer.writeInt64(valueHolderForSummaryValueVar)
         }
-        const value_totalSize  = value.totalSize
-        valueSerializer.writeInt64(value_totalSize)
+        const valueHolderForTotalSize  = value.totalSize
+        valueSerializer.writeInt64(valueHolderForTotalSize)
     }
     public static read(buffer: DeserializerBase): unifiedDataChannel.Summary {
         let valueDeserializer : DeserializerBase = buffer
-        const summary_buf_size : int32 = valueDeserializer.readInt32()
-        let summary_buf : Map<string, int64> = new Map<string, int64>()
+        const summaryTmpBufSizeVar : int32 = valueDeserializer.readInt32()
+        let summaryTmpBuf : Map<string, int64> = new Map<string, int64>()
         // TODO: TS map resize
-        for (let summary_buf_i = 0; summary_buf_i < summary_buf_size; summary_buf_i++) {
-            const summary_buf_key : string = (valueDeserializer.readString() as string)
-            const summary_buf_value : int64 = valueDeserializer.readInt64()
-            summary_buf.set(summary_buf_key, summary_buf_value)
+        for (let summaryTmpBufIVar = 0; summaryTmpBufIVar < summaryTmpBufSizeVar; summaryTmpBufIVar++) {
+            const summaryTmpBufKeyVar : string = (valueDeserializer.readString() as string)
+            const summaryTmpBufValueVar : int64 = valueDeserializer.readInt64()
+            summaryTmpBuf.set(summaryTmpBufKeyVar, summaryTmpBufValueVar)
         }
-        const summary_result : Map<string, int64> = summary_buf
-        const totalSize_result : int64 = valueDeserializer.readInt64()
-        let value : unifiedDataChannel.Summary = ({summary: summary_result, totalSize: totalSize_result} as unifiedDataChannel.Summary)
+        const summaryTmpResult : Map<string, int64> = summaryTmpBuf
+        const totalSizeTmpResult : int64 = valueDeserializer.readInt64()
+        let value : unifiedDataChannel.Summary = ({summary: summaryTmpResult, totalSize: totalSizeTmpResult} as unifiedDataChannel.Summary)
         return value
     }
 }
@@ -102,10 +101,10 @@ export namespace unifiedDataChannel {
         private getTypes_serialize(): Array<string> {
             const retval  = ArkUIGeneratedNativeModule._unifiedDataChannel_UnifiedData_getTypes(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<string> = new Array<string>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = (retvalDeserializer.readString() as string)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<string> = new Array<string>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
             }
             const returnResult : Array<string> = buffer
             return returnResult
@@ -114,5 +113,8 @@ export namespace unifiedDataChannel {
     export interface Summary {
         summary: Map<string, int64>;
         totalSize: int64;
+    }
+    export interface GetDataParams {
+        destUri?: string;
     }
 }

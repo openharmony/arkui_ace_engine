@@ -22,7 +22,7 @@ import { ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodPeer, Co
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { AttributeModifier } from "./component/base"
 import { AttributeUpdater } from "./AttributeUpdater"
-import { TEST_LOG_NUMBER } from "../Application"
+import { TEST_LOG_NUMBER } from "../ArkUIEntry"
 import { ComponentBase } from "../ComponentBase"
 import { PeerNode } from "../PeerNode"
 
@@ -39,7 +39,7 @@ export class TestComponentPeer extends ArkCommonMethodPeer {
     setTestComponentOptionsAttribute(option?: TestComponentOptions): void {
         if (option != undefined) {
             if (option.id != undefined) {
-                this.setId(option.id!.toInt())
+                this.setUserId("" + option.id!.toInt())
             }
             if (option.log != undefined) {
                 this.logAttribute(option.log as string)
@@ -70,7 +70,6 @@ export type TestComponentInterface = (options?: TestComponentOptions) => TestCom
 export interface TestComponentAttribute extends CommonMethod {
     onChange(callback: () => void): this
     log(message: string): this
-    attributeModifier(value: AttributeModifier<TestComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 
 export class ArkTestComponentStyle extends ArkCommonMethodStyle implements TestComponentAttribute {
@@ -90,16 +89,6 @@ export class ArkTestComponentStyle extends ArkCommonMethodStyle implements TestC
     }
     attributeModifier(value: AttributeModifier<TestComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         return this
-    }
-    @memo
-    apply(target: TestComponentAttribute): void {
-        super.apply(target)
-        if (this.backgroundColor_value !== undefined)
-            target.backgroundColor(this.backgroundColor_value!)
-        if (this.log_value !== undefined)
-            target.log(this.log_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
     }
 }
 
@@ -121,10 +110,6 @@ export class TestComponentComponent extends ArkCommonMethodComponent implements 
         this.getPeer()?.logAttribute(message)
         return this
     }
-    public attributeModifier(value: AttributeModifier<TestComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
-        return this
-    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -142,19 +127,6 @@ export function TestComponent(
 }
 
 @memo
-function withTestComponentStyle(receiver: TestComponentAttribute, modifier: AttributeModifier<TestComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkTestComponentStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-
-@memo
 export function TestComponentImpl(
   @memo
   style: ((attributes: TestComponentAttribute) => void) | undefined,
@@ -168,7 +140,6 @@ export function TestComponentImpl(
     NodeAttach<TestComponentPeer>((): TestComponentPeer => TestComponentPeer.create(receiver), (_: TestComponentPeer): void => {
         receiver.setTestComponentOptions(options)
         style?.(receiver)
-        withTestComponentStyle(receiver, receiver._modifier)
         content_?.()
     })
 }

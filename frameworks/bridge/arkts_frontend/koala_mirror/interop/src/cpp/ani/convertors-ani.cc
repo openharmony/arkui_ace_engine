@@ -20,7 +20,7 @@
 #include "interop-types.h"
 
 static const char* callCallbackFromNative = "callCallbackFromNative";
-static const char* callCallbackFromNativeSig = "IJI:I";
+static const char* callCallbackFromNativeSig = "ili:i";
 
 const bool registerByOne = true;
 
@@ -34,7 +34,7 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
         method.pointer = func;
         method.signature = nullptr;
         if (registerByOne) {
-            result &= env->Class_BindNativeMethods(clazz, &method, 1) == ANI_OK;
+            result &= env->Class_BindStaticNativeMethods(clazz, &method, 1) == ANI_OK;
             ani_boolean isError = false;
             CHECK_ANI_FATAL(env->ExistUnhandledError(&isError));
             if (isError) {
@@ -47,7 +47,7 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
         }
     }
     if (!registerByOne) {
-        result = env->Class_BindNativeMethods(clazz, methods.data(), static_cast<ani_size>(methods.size())) == ANI_OK;
+        result = env->Class_BindStaticNativeMethods(clazz, methods.data(), static_cast<ani_size>(methods.size())) == ANI_OK;
     }
     return registerByOne ? true : result;
 }
@@ -145,11 +145,11 @@ void AniExports::setClasspath(const char* module, const char *classpath) {
 }
 
 static std::map<std::string, std::string> g_defaultClasspaths = {
-    {"InteropNativeModule", "L@koalaui/interop/InteropNativeModule/InteropNativeModule;"},
+    {"InteropNativeModule", "@koalaui.interop.InteropNativeModule.InteropNativeModule"},
     // Improve: leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
-    {"TestNativeModule", "Larkui/generated/arkts/TestNativeModule/TestNativeModule;"},
-    {"ArkUINativeModule", "Larkui/generated/arkts/ArkUINativeModule/ArkUINativeModule;"},
-    {"ArkUIGeneratedNativeModule", "Larkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},
+    {"TestNativeModule", "arkui.generated.arkts.TestNativeModule.TestNativeModule"},
+    {"ArkUINativeModule", "arkui.generated.arkts.ArkUINativeModule.ArkUINativeModule"},
+    {"ArkUIGeneratedNativeModule", "arkui.generated.arkts.ArkUIGeneratedNativeModule.ArkUIGeneratedNativeModule"},
 };
 
 const std::string& AniExports::getClasspath(const std::string& module) {
@@ -183,9 +183,6 @@ bool setKoalaANICallbackDispatcher(
         clazz, dispatcherMethodName, dispatcherMethodSig,
         &g_koalaANICallbackDispatcher.method
     ));
-    if (!clazz || !g_koalaANICallbackDispatcher.method) {
-        INTEROP_FATAL("Dispatcher not found");
-    }
     if (g_koalaANICallbackDispatcher.method == nullptr) {
         return false;
     }
@@ -193,15 +190,11 @@ bool setKoalaANICallbackDispatcher(
 }
 
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) {
-    if (!g_koalaANICallbackDispatcher.clazz || !g_koalaANICallbackDispatcher.clazz) {
-        INTEROP_FATAL("Dispatcher not defined");
-    }
     *clazz = g_koalaANICallbackDispatcher.clazz;
     *method = g_koalaANICallbackDispatcher.method;
 }
 
-ani_env* getKoalaANIContext(void* hint)
-{
+ani_env* getKoalaANIContext(void* hint) {
     if (currentContext) {
         return currentContext;
     } else {

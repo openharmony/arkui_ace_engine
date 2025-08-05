@@ -529,7 +529,17 @@ export interface TrackableProps {
     /**
      * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
      */
-    trackedProperties(): ReadonlySet<string>
+    trackedProperties(): ReadonlySet<string> | undefined
+}
+
+export function trackableProperties(value: any): ReadonlySet<string> | undefined  {
+    if (typeof value.trackedProperties === 'function') {
+       return (value as TrackableProps).trackedProperties()
+    }
+    if (typeof value.tracedProperties === 'function') {
+        return (value as ObservableClassV2).tracedProperties()
+    }
+    return undefined
 }
 
 /**
@@ -540,4 +550,11 @@ export interface ObservableClass {
      * Indicates whether the class is decorated with `@Observed`.
      */
     isObserved(): boolean
+}
+
+/**
+ * To implement the ObservedV2 decorator
+ */
+export interface ObservableClassV2 {
+    tracedProperties(): ReadonlySet<string> | undefined
 }

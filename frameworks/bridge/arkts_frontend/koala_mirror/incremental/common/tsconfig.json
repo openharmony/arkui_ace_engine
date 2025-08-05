@@ -11,7 +11,6 @@
     "include": ["./src/**/*"],
     "exclude": ["./src/ohos"],
     "references": [
-        {"path": "../compat"},
-        {"path": "./bridges/ohos"}
+        {"path": "../compat"}
     ]
 }

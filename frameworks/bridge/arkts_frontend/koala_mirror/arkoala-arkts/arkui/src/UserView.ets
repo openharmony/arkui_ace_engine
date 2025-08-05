@@ -23,10 +23,10 @@ export interface UserApplicationControl {
     startLog(): UserApplicationControl
     getLog(): string
     stopLog(): UserApplicationControl
-    emitTask(type: int32, target: int32, arg1?: int32, arg2?: int32): UserApplicationControl
+    emitTask(type: int32, target: string, arg1?: int32, arg2?: int32): UserApplicationControl
     nextFrame(): Promise<UserApplicationControl>
     reloadView(): UserApplicationControl
-    requestStopApp(): void
+    requestStopApp(crash?: string): void
 }
 
 
@@ -37,23 +37,6 @@ export class UserView {
     }
     getBuilder(): UserViewBuilder {
         throw new Error("User must override this method");
-    }
-
-    // TODO: these native functions are here temporary.
-    static startNativeLog(group: int32) {
-        NativeLog.Default.startNativeLog(group)
-    }
-
-    static stopNativeLog(group: int32) {
-        NativeLog.Default.stopNativeLog(group)
-    }
-
-    static getNativeLog(group: int32): string {
-        return NativeLog.Default.getNativeLog(group)
-    }
-
-    static printNativeLog(group: int32) {
-        return NativeLog.Default.printNativeLog(group)
     }
 }
 
@@ -67,6 +50,7 @@ export function UserMemoWrapper(
 }
 
 export class EntryPoint {
+    constructor() {}
     @memo entry(): void {
         throw new Error("User must override this method");
     }

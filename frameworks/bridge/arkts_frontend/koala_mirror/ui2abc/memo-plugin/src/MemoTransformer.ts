@@ -14,7 +14,6 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { factory } from "./MemoFactory"
 import { AnalysisVisitor } from "./AnalysisVisitor"
 import { FunctionTransformer } from "./FunctionTransformer"
 import { dumpAstToFile, MemoFunctionKind, PositionalIdTracker } from "./utils"
@@ -37,8 +36,6 @@ export default function memoTransformer(
     userPluginOptions?: TransformerOptions
 ) {
     return (program: arkts.Program, options: arkts.CompilationOptions, context: arkts.PluginContext) => {
-        const restart = options.restart
-
         const scriptFunctions = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const ETSFunctionTypes = new Map<arkts.KNativePointer, MemoFunctionKind>()
         const analysisVisitor = new AnalysisVisitor(scriptFunctions, ETSFunctionTypes)
@@ -65,21 +62,7 @@ export default function memoTransformer(
             userPluginOptions?.trackContentParam ?? false,
         )
         let result = functionTransformer.visitor(node)
-        if (restart) {
-            if ((functionTransformer.modified || signatureTransformer.modified)) {
-                result = arkts.factory.updateETSModule(
-                    result,
-                    [
-                        factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
-                        ...result.statements
-                    ],
-                    result.ident,
-                    result.getNamespaceFlag(),
-                    result.program,
-                )
-            }
-        }
-        if (userPluginOptions?.keepTransformed && options.isMainProgram) {
+        if (userPluginOptions?.keepTransformed && options.isProgramForCodegeneration) {
             dumpAstToFile(result, userPluginOptions.keepTransformed, userPluginOptions?.stableForTests ?? false)
         }
         program.setAst(result)

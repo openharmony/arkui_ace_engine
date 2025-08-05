@@ -16,14 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Font_serializer, BorderRadiuses_serializer, DividerStyleOptions_serializer, Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions } from "./units"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
@@ -31,6 +31,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkMenuPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,7 +39,7 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkMenuPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Menu_construct(peerId, flags)
-        const _peer  = new ArkMenuPeer(_peerPtr, peerId, "Menu", flags)
+        const _peer  = new ArkMenuPeer(_peerPtr, peerId, 'Menu', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -47,120 +48,108 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
     }
     setFontAttribute(value: Font | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            Font_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Font_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MenuAttribute_setFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MenuAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRadiusAttribute(value: Dimension | BorderRadiuses | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Dimension) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Dimension
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Dimension
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_2)
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isBorderRadiuses(value_value, false, false, false, false)) {
+            } else if (valueTmpValue instanceof BorderRadiuses) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as BorderRadiuses
-                BorderRadiuses_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as BorderRadiuses
+                BorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MenuAttribute_setRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenuItemDividerAttribute(value: DividerStyleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DividerStyleOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DividerStyleOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MenuAttribute_setMenuItemDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenuItemGroupDividerAttribute(value: DividerStyleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DividerStyleOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DividerStyleOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MenuAttribute_setMenuItemGroupDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSubMenuExpandingModeAttribute(value: SubMenuExpandingMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as SubMenuExpandingMode)
-            thisSerializer.writeInt32(TypeChecker.SubMenuExpandingMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as SubMenuExpandingMode)
+            thisSerializer.writeInt32(TypeChecker.SubMenuExpandingMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MenuAttribute_setSubMenuExpandingMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -222,21 +211,6 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: MenuAttribute): void {
-        super.apply(target)
-        if (this.font_value !== undefined)
-            target.font(this.font_value!)
-        if (this.fontColor_value !== undefined)
-            target.fontColor(this.fontColor_value!)
-        if (this.radius_value !== undefined)
-            target.radius(this.radius_value!)
-        if (this.menuItemDivider_value !== undefined)
-            target.menuItemDivider(this.menuItemDivider_value!)
-        if (this.menuItemGroupDivider_value !== undefined)
-            target.menuItemGroupDivider(this.menuItemGroupDivider_value!)
-        if (this.subMenuExpandingMode_value !== undefined)
-            target.subMenuExpandingMode(this.subMenuExpandingMode_value!)
     }
 }
 
@@ -300,7 +274,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -308,26 +281,6 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
         super.applyAttributesFinish()
     }
 }
-export function withMenuStyle(receiver: MenuAttribute, modifier: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkMenuStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Menu")
-// export function Menu(
-//     
-//     @memo
-//     content_?: () => void,
-// ): MenuAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Menu(
@@ -343,71 +296,284 @@ export function Menu(
     NodeAttach<ArkMenuPeer>((): ArkMenuPeer => ArkMenuPeer.create(receiver), (_: ArkMenuPeer): void => {
         receiver.setMenuOptions()
         style?.(receiver)
-        withMenuStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkMenuSet extends ArkCommonMethodSet implements MenuAttribute {
+export class MenuModifier extends CommonMethodModifier implements MenuAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _font_flag?: boolean
-    _font0_value?: Font | undefined
-    _fontColor_flag?: boolean
-    _fontColor0_value?: ResourceColor | undefined
-    _radius_flag?: boolean
-    _radius0_value?: Dimension | BorderRadiuses | undefined
-    _menuItemDivider_flag?: boolean
-    _menuItemDivider0_value?: DividerStyleOptions | undefined
-    _menuItemGroupDivider_flag?: boolean
-    _menuItemGroupDivider0_value?: DividerStyleOptions | undefined
-    _subMenuExpandingMode_flag?: boolean
-    _subMenuExpandingMode0_value?: SubMenuExpandingMode | undefined
-    applyModifierPatch(component: MenuAttribute): void {
-        if (this._font_flag)
-            component.font((this._font0_value as Font | undefined))
-        if (this._fontColor_flag)
-            component.fontColor((this._fontColor0_value as ResourceColor | undefined))
-        if (this._radius_flag)
-            component.radius((this._radius0_value as Dimension | BorderRadiuses | undefined))
-        if (this._menuItemDivider_flag)
-            component.menuItemDivider((this._menuItemDivider0_value as DividerStyleOptions | undefined))
-        if (this._menuItemGroupDivider_flag)
-            component.menuItemGroupDivider((this._menuItemGroupDivider0_value as DividerStyleOptions | undefined))
-        if (this._subMenuExpandingMode_flag)
-            component.subMenuExpandingMode((this._subMenuExpandingMode0_value as SubMenuExpandingMode | undefined))
+    _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _font_0_0value?: Font | undefined
+    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontColor_0_0value?: ResourceColor | undefined
+    _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _radius_0_0value?: Dimension | BorderRadiuses | undefined
+    _menuItemDivider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuItemDivider_0_0value?: DividerStyleOptions | undefined
+    _menuItemGroupDivider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuItemGroupDivider_0_0value?: DividerStyleOptions | undefined
+    _subMenuExpandingMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
+    applyModifierPatch(peer: ArkMenuPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontAttribute((this._font_0_0value as Font | undefined));
+                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._font_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontAttribute((undefined as Font | undefined));
+                }
+            }
+        }
+        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._radius_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._radius_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRadiusAttribute((this._radius_0_0value as Dimension | BorderRadiuses | undefined));
+                    this._radius_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._radius_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._radius_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRadiusAttribute((undefined as Dimension | BorderRadiuses | undefined));
+                }
+            }
+        }
+        if (this._menuItemDivider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuItemDivider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuItemDividerAttribute((this._menuItemDivider_0_0value as DividerStyleOptions | undefined));
+                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuItemDividerAttribute((undefined as DividerStyleOptions | undefined));
+                }
+            }
+        }
+        if (this._menuItemGroupDivider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuItemGroupDivider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuItemGroupDividerAttribute((this._menuItemGroupDivider_0_0value as DividerStyleOptions | undefined));
+                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuItemGroupDividerAttribute((undefined as DividerStyleOptions | undefined));
+                }
+            }
+        }
+        if (this._subMenuExpandingMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._subMenuExpandingMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSubMenuExpandingModeAttribute((this._subMenuExpandingMode_0_0value as SubMenuExpandingMode | undefined));
+                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSubMenuExpandingModeAttribute((undefined as SubMenuExpandingMode | undefined));
+                }
+            }
+        }
     }
-    public font(value: Font | undefined): this {
-        this._font_flag = true
-        this._font0_value = value
+    mergeModifier(modifier: MenuModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.font(modifier._font_0_0value);
+                    break;
+                }
+                default: {
+                    this.font((undefined as Font | undefined));
+                }
+            }
+        }
+        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontColor(modifier._fontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._radius_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._radius_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.radius(modifier._radius_0_0value);
+                    break;
+                }
+                default: {
+                    this.radius((undefined as Dimension | BorderRadiuses | undefined));
+                }
+            }
+        }
+        if (modifier._menuItemDivider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuItemDivider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuItemDivider(modifier._menuItemDivider_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuItemDivider((undefined as DividerStyleOptions | undefined));
+                }
+            }
+        }
+        if (modifier._menuItemGroupDivider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuItemGroupDivider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuItemGroupDivider(modifier._menuItemGroupDivider_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuItemGroupDivider((undefined as DividerStyleOptions | undefined));
+                }
+            }
+        }
+        if (modifier._subMenuExpandingMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._subMenuExpandingMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.subMenuExpandingMode(modifier._subMenuExpandingMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.subMenuExpandingMode((undefined as SubMenuExpandingMode | undefined));
+                }
+            }
+        }
+    }
+    font(value: Font | undefined): this {
+        if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._font_0_flag = AttributeUpdaterFlag.UPDATE
+            this._font_0_0value = value
+        } else
+        {
+            this._font_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
-        this._fontColor_flag = true
-        this._fontColor0_value = value
+    fontColor(value: ResourceColor | undefined): this {
+        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontColor_0_0value = value
+        } else
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public radius(value: Dimension | BorderRadiuses | undefined): this {
-        this._radius_flag = true
-        this._radius0_value = value
+    radius(value: Dimension | BorderRadiuses | undefined): this {
+        if (((this._radius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._radius_0_flag = AttributeUpdaterFlag.UPDATE
+            this._radius_0_0value = value
+        } else
+        {
+            this._radius_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menuItemDivider(value: DividerStyleOptions | undefined): this {
-        this._menuItemDivider_flag = true
-        this._menuItemDivider0_value = value
+    menuItemDivider(value: DividerStyleOptions | undefined): this {
+        if (((this._menuItemDivider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menuItemDivider_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuItemDivider_0_0value = value
+        } else
+        {
+            this._menuItemDivider_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
-        this._menuItemGroupDivider_flag = true
-        this._menuItemGroupDivider0_value = value
+    menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
+        if (((this._menuItemGroupDivider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuItemGroupDivider_0_0value = value
+        } else
+        {
+            this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
-        this._subMenuExpandingMode_flag = true
-        this._subMenuExpandingMode0_value = value
+    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
+        if (((this._subMenuExpandingMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._subMenuExpandingMode_0_0value = value
+        } else
+        {
+            this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {

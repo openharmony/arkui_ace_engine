@@ -39,7 +39,7 @@ export function dumpProgramInfo(program: Program) {
     console.log(`\tSourceFilePath:        ${program.sourceFilePath}`)
 }
 
-export function dumpProgramSrcFormatted(program: Program, withLines: boolean = true) {
+export function dumpProgramSrcFormatted(program: Program, recursive: boolean, withLines: boolean = true) {
     const lines = program.ast.dumpSrc()
     console.log(`// file: ${program.absoluteName}`)
     if (withLines) {

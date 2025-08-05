@@ -1,6 +1,6 @@
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,10 +97,10 @@ function progressAnimation(state: RouterTransitionVisibility, style: ArkPageTran
     {
         return {
             propertyName: KEY_PAGE_TRANSITION_PROPERTY,
-            startValue: 0 as float32,
-            endValue: 1.0 as float32,
-            duration: (style.params.duration ?? 0) as int32,
-            delay: (style.params.delay ?? 0) as int32,
+            startValue: (0).toFloat(),
+            endValue: (1.0).toFloat(),
+            duration: (style.params.duration ?? 0).toInt(),
+            delay: (style.params.delay ?? 0).toInt(),
             curve: style.params.curve ?? Curve.EASE_OUT,
             onProgress: (state == RouterTransitionVisibility.Hiding && style._onExit != undefined) ?
                 (progress: float32) => style._onExit!(RouteType.Pop, progress) :

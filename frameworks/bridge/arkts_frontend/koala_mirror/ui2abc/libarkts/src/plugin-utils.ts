@@ -17,16 +17,14 @@ import {
     Es2pandaContextState,
     PluginContext,
     ImportStorage,
-    setBaseOverloads,
     arktsGlobal,
     ChainExpressionFilter,
     ProgramTransformer,
     Program,
-    inferVoidReturnType,
     ProgramProvider,
-    CompilationOptions
+    CompilationOptions,
+    dumpProgramSrcFormatted
 } from "./arkts-api"
-import { AstNode } from "./reexport-for-generated"
 
 export interface RunTransformerHooks {
     onProgramTransformStart?(options: CompilationOptions, program: Program): void
@@ -44,21 +42,41 @@ class ASTCache {
     }
 }
 
+export class DumpingHooks implements RunTransformerHooks {
+    constructor(private state: Es2pandaContextState, private pluginName: string, private dumpAst: boolean = false) {
+        if (process.env.KOALA_DUMP_PLUGIN_AST) {
+            this.dumpAst = true
+        }
+    }
+    onProgramTransformStart(options: CompilationOptions, program: Program) {
+        if (this.dumpAst) {
+            console.log(`BEFORE ${this.pluginName}:`)
+            dumpProgramSrcFormatted(program, true)
+        }
+        if (!options.isProgramForCodegeneration) arktsGlobal.profiler.transformDepStarted()
+    }
+    onProgramTransformEnd(options: CompilationOptions, program: Program) {
+        if (!options.isProgramForCodegeneration) arktsGlobal.profiler.transformDepEnded(this.state, this.pluginName)
+        if (this.dumpAst) {
+            console.log(`AFTER ${this.pluginName}:`)
+            dumpProgramSrcFormatted(program, true)
+        }
+    }
+}
+
+
 export function runTransformerOnProgram(program: Program, options: CompilationOptions, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
     // Perform some additional actions before the transformation start
     hooks.onProgramTransformStart?.(options, program)
 
     // Save currently existing imports in the program
-    const importStorage = new ImportStorage(program, options.stage == Es2pandaContextState.ES2PANDA_STATE_PARSED)
-
-    // Run some common plugins that should be run before plugin usage and depends on the current stage
-    stageSpecificPreFilters(program, options.stage)
+    const importStorage = new ImportStorage(program, options.state == Es2pandaContextState.ES2PANDA_STATE_PARSED)
 
     // Run the plugin itself
     transform?.(program, options, pluginContext)
 
-    // Run some common plugins that should be run after plugin usage and depends on the current stage
-    stageSpecificPostFilters(program, options.stage)
+    // Run some common plugins that should be run after plugin usage and depends on the current state
+    stateSpecificPostFilters(program, options.state)
 
     // Update internal import information based on import modification by plugin
     importStorage.update()
@@ -67,7 +85,7 @@ export function runTransformerOnProgram(program: Program, options: CompilationOp
     hooks.onProgramTransformEnd?.(options, program)
 }
 
-export function runTransformer(prog: Program, state: Es2pandaContextState, restart: boolean, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
+export function runTransformer(prog: Program, state: Es2pandaContextState, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
     // Program provider used to provide programs to transformer dynamically relative to inserted imports
     const provider = new ProgramProvider(prog)
 
@@ -78,15 +96,13 @@ export function runTransformer(prog: Program, state: Es2pandaContextState, resta
     while (currentProgram) {
         // Options passed to plugin and hooks
         const options: CompilationOptions = {
-            isMainProgram,
-            stage: state,
-            restart,
+            isProgramForCodegeneration: isProgramForCodegeneration(currentProgram, isMainProgram),
+            state,
         }
 
         runTransformerOnProgram(currentProgram, options, transform, pluginContext, hooks)
 
-        // The first program is always the main program, so break here if should not proceed external sources
-        if (restart) break
+        // The first program is always the main program
         isMainProgram = false
 
         // Proceed to the next program
@@ -94,18 +110,18 @@ export function runTransformer(prog: Program, state: Es2pandaContextState, resta
     }
 }
 
-function setAllParents(ast: AstNode) {
-    arktsGlobal.es2panda._AstNodeUpdateAll(arktsGlobal.context, ast.peer)
-}
-
-function stageSpecificPreFilters(program: Program, state: Es2pandaContextState) {
-    if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
-        inferVoidReturnType(program)
-    }
-}
-
-function stageSpecificPostFilters(program: Program, state: Es2pandaContextState) {
+function stateSpecificPostFilters(program: Program, state: Es2pandaContextState) {
     if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
         program.setAst(new ChainExpressionFilter().visitor(program.ast))
     }
+}
+
+function isProgramForCodegeneration(
+    program: Program,
+    isMainProgram: boolean,
+): boolean {
+    if (!arktsGlobal.isContextGenerateAbcForExternalSourceFiles) {
+        return isMainProgram
+    }
+    return program.isGenAbcForExternal
 }

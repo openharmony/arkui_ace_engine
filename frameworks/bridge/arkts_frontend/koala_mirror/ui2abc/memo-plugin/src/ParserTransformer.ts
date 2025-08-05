@@ -19,17 +19,17 @@ import { factory } from "./MemoFactory"
 const ignore = [
     "@koalaui/compat",
     "@koalaui/common",
+    "@koalaui/harness",
     "@koalaui/runtime/annotations",
 
     "@koalaui/runtime.internals",
     "@koalaui/runtime.index",
 
-    "@koalaui/runtime.states.State",
-    "@koalaui/runtime.tree.ReadonlyTreeNode",
-    "@koalaui/runtime.tree.IncrementalNode",
-    "@koalaui/runtime.states.Disposable",
-    "@koalaui/runtime.states.Dependency",
-    "@koalaui/runtime.states.Journal",
+    // Improve: this is a bad decision due to the way runtime tests are compiled
+    "@koalaui/runtime-tests.ets.internals",
+    "@koalaui/runtime-tests.ets.index",
+    "@koalaui/runtime-tests.annotations",
+    "@koalaui/runtime-tests.ets-test.tests",
 ]
 
 export interface TransformerOptions {
@@ -41,12 +41,6 @@ export default function memoParserTransformer(
     userPluginOptions?: TransformerOptions
 ) {
     return (program: arkts.Program, options: arkts.CompilationOptions, context: arkts.PluginContext) => {
-        const restart = options.restart
-        if (restart) {
-            console.log("Parser transformer of memo plugin does nothing with restart mode enabled")
-            return
-        }
-
         if (ignore.some(it => program.moduleName.startsWith(it)) || program.moduleName == "") {
             /* Some files should not be processed by plugin actually */
             return

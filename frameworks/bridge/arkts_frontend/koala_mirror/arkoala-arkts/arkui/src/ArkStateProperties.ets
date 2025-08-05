@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,95 @@
  * limitations under the License.
  */
 
-package arkui.stateManagement.decorator
-
 import { int32, observableProxy, propDeepCopy } from "@koalaui/common"
-import { mutableState, scheduleCallback, MutableState, GlobalStateManager } from "@koalaui/runtime"
+import { mutableState, scheduleCallback, MutableState, GlobalStateManager, ObservableClassV2 } from "@koalaui/runtime"
 import { SubscribedAbstractProperty } from "./ArkState"
 import { AppStorage, LocalStorage } from "./Storage"
 
+class StatableHolder<Value> {
+    private state: MutableState<Value> | undefined = undefined
+    private readonly stateManager = GlobalStateManager.instance
+
+    get value(): Value {
+        return this.state!.value!
+    }
+
+    set value(value: Value) {
+        if (this.state) {
+            this.state!.value = observableProxy<Value>(value)
+        } else {
+            this.state = this.mutableState(value)
+        }
+    }
+
+    dispose() {
+        if (this.state) {
+            this.state!.dispose()
+            this.state = undefined
+        }
+    }
+
+    private mutableState<Value>(value: Value): MutableState<Value> {
+        return this.stateManager.mutableState(observableProxy<Value>(value), true)
+    }
+}
+
+class PlainValueHolder<Value> {
+    private plainValue: Value | undefined = undefined
+    private state: StatableHolder<Value> | undefined = undefined
+
+    constructor(value: Value | undefined) {
+        if (value != undefined) {
+            this.setValue(value)
+        }
+    }
+
+    get value(): Value {
+        return this.state ? this.state!.value! : this.plainValue!
+    }
+
+    set value(value: Value) {
+        this.setValue(value)
+    }
+
+    dispose() {
+        this.state?.dispose()
+    }
+
+    private setValue(value: Value) {
+        if (this.isStatable(value)) {
+            this.setStateValue(value)
+            this.plainValue = undefined
+        } else {
+            this.plainValue = value
+            this.dispose()
+        }
+    }
+
+    private setStateValue(value: Value) {
+        if (!this.state) {
+            this.state = new StatableHolder<Value>()
+        }
+        this.state!.value = value
+    }
+
+    private isStatable(value: Value | undefined): boolean {
+        return value instanceof ObservableClassV2
+    }
+}
+
 export class PlainStructProperty<Value> implements SubscribedAbstractProperty<Value> {
     private name: string
-    private value: Value | undefined = undefined
+    private readonly holder: PlainValueHolder<Value>
 
     constructor(name: string, value?: Value) {
         this.name = name
-        this.value = value
+        this.holder = new PlainValueHolder<Value>(value)
     }
 
     init(value: Value | undefined): void {
-        if (value)
-            this.value = value
+        if (value != undefined)
+            this.holder.value = value
     }
 
     info(): string {
@@ -39,11 +109,11 @@ export class PlainStructProperty<Value> implements SubscribedAbstractProperty<Va
     }
 
     get(): Value {
-        return this.value!
+        return this.holder.value!
     }
 
     set(value: Value): void {
-        this.value = value
+        this.holder.value = value
     }
 
     subscribe(listener: () => void): void {
@@ -53,6 +123,7 @@ export class PlainStructProperty<Value> implements SubscribedAbstractProperty<Va
     }
 
     aboutToBeDeleted(): void {
+        this.holder.dispose()
     }
 }
 
@@ -154,6 +225,9 @@ export class PropDecoratorProperty<Value> extends StateDecoratorProperty<Value> 
     constructor(name: string, listener?: () => void) {
         super(name, listener)
     }
+    init(value?: Value, initial?: Value): void {
+        super.init(value ? this.deepCopyOnUpdate(value) : undefined, initial)
+    }
     get(): Value {
         let value = super.get() // subscribe
         if (this._modified) value = this._value as Value
@@ -178,7 +252,7 @@ export class PropDecoratorProperty<Value> extends StateDecoratorProperty<Value> 
         scope.recache()
     }
     protected deepCopyOnUpdate(value: Value): Value {
-        return value // TODO:observableProxy(propDeepCopy(value))
+        return observableProxy(propDeepCopy(value))
     }
 }
 

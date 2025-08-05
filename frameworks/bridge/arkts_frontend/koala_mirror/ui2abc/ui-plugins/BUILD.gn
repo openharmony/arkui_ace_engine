@@ -16,7 +16,9 @@ import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mir
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
-libarkts_root = "../libarkts"
+
+ui2abc_root = ".."
+libarkts_root = "${ui2abc_root}/libarkts"
 
 npm_cmd("ui_plugin_compile") {
     outputs = [
@@ -26,34 +28,31 @@ npm_cmd("ui_plugin_compile") {
     run_tasks = [ "compile" ]
 
     deps = [
-        "$libarkts_root:es2panda"
+        "${libarkts_root}:libarkts"
     ]
 }
 
 action("gen_ui_plugin") {
-  script = "../gn/command/copy_libs.py"
-  args = [
-    "--source_path",
-    rebase_path(get_path_info(".", "abspath")),
-    "--output_path",
-    rebase_path("$target_gen_dir"),
-    "--root_out_dir",
-    rebase_path(root_out_dir),
-  ]
-  outputs = [ "$target_gen_dir" ]
-  deps = [
-    ":ui_plugin_compile"
-  ]
+    script = "../gn/command/copy_libs.py"
+    args = [
+        "--source_path", rebase_path(get_path_info(".", "abspath")),
+        "--output_path", rebase_path("$target_gen_dir"),
+        "--root_out_dir", rebase_path(root_out_dir),
+    ]
+    outputs = [ "$target_gen_dir" ]
+    deps = [
+        ":ui_plugin_compile"
+    ]
 }
 
 # Use from OHOS-SDK build (//build/ohos/sdk/ohos_sdk_description_std.json)
 
 ohos_copy("ui-plugin-sdk") {
-  deps = [":gen_ui_plugin" ]
-  sources = [ rebase_path("$target_gen_dir") ]
-  outputs = [ target_out_dir + "/$target_name" ]
-  module_source_dir = target_out_dir + "/$target_name"
-  module_install_name = ""
-  subsystem_name = "arkui"
-  part_name = "ace_engine"
+    deps = [":gen_ui_plugin" ]
+    sources = [ rebase_path("$target_gen_dir") ]
+    outputs = [ target_out_dir + "/$target_name" ]
+    module_source_dir = target_out_dir + "/$target_name"
+    module_install_name = ""
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
 }

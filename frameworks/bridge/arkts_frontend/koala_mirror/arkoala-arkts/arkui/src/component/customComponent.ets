@@ -16,12 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { GeometryInfo_serializer, Layoutable_serializer, Measurable_serializer, SizeResult_serializer, GeometryInfo, Layoutable, LayoutableInternal, Measurable, MeasurableInternal, SizeResult } from "./common"
 import { ConstraintSizeOptions_serializer, ConstraintSizeOptions } from "./units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -67,9 +66,9 @@ export class LayoutCallbackInternal implements MaterializedBase,LayoutCallback {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         GeometryInfo_serializer.write(thisSerializer, selfLayoutInfo)
         thisSerializer.writeInt32((children.length).toInt())
-        for (let children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
-            const children_element : Layoutable = children[children_counter_i]
-            Layoutable_serializer.write(thisSerializer, children_element)
+        for (let childrenCounterI = 0; childrenCounterI < children.length; childrenCounterI++) {
+            const childrenTmpElement : Layoutable = children[childrenCounterI]
+            Layoutable_serializer.write(thisSerializer, childrenTmpElement)
         }
         ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
         ArkUIGeneratedNativeModule._LayoutCallback_onPlaceChildren(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -79,9 +78,9 @@ export class LayoutCallbackInternal implements MaterializedBase,LayoutCallback {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         GeometryInfo_serializer.write(thisSerializer, selfLayoutInfo)
         thisSerializer.writeInt32((children.length).toInt())
-        for (let children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
-            const children_element : Measurable = children[children_counter_i]
-            Measurable_serializer.write(thisSerializer, children_element)
+        for (let childrenCounterI = 0; childrenCounterI < children.length; childrenCounterI++) {
+            const childrenTmpElement : Measurable = children[childrenCounterI]
+            Measurable_serializer.write(thisSerializer, childrenTmpElement)
         }
         ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
         const retval  = ArkUIGeneratedNativeModule._LayoutCallback_onMeasureSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -154,12 +153,12 @@ export class PageLifeCycleInternal implements MaterializedBase,PageLifeCycle {
     }
     private onNewParam_serialize(param: Object | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let param_type : int32 = RuntimeType.UNDEFINED
-        param_type = runtimeType(param)
-        thisSerializer.writeInt8((param_type).toChar())
-        if ((param_type) != (RuntimeType.UNDEFINED)) {
-            const param_value  = param!
-            thisSerializer.holdAndWriteObject(param_value)
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            thisSerializer.holdAndWriteObject(paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PageLifeCycle_onNewParam(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier, Bindable_Date_serializer } from "./common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CrownSensitivity, Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { ResourceColor, Offset, VoidCallback } from "./units"
@@ -33,6 +33,7 @@ import { Resource } from "./../generated/resource"
 import { DialogAlignment } from "./alertDialog"
 import { intl } from "./../generated/ohos.intl"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class DatePickerDialogInternal {
     public static fromPtr(ptr: KPointer): DatePickerDialog {
         return new DatePickerDialog(ptr)
@@ -64,110 +65,104 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkDatePickerPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._DatePicker_construct(peerId, flags)
-        const _peer  = new ArkDatePickerPeer(_peerPtr, peerId, "DatePicker", flags)
+        const _peer  = new ArkDatePickerPeer(_peerPtr, peerId, 'DatePicker', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setDatePickerOptionsAttribute(options?: DatePickerOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            DatePickerOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            DatePickerOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerInterface_setDatePickerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLunarAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setLunar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDisappearTextStyleAttribute(value: PickerTextStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PickerTextStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PickerTextStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setDisappearTextStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextStyleAttribute(value: PickerTextStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PickerTextStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PickerTextStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setTextStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedTextStyleAttribute(value: PickerTextStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PickerTextStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PickerTextStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setSelectedTextStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDateChangeAttribute(value: ((value0: Date) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setOnDateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDigitalCrownSensitivityAttribute(value: CrownSensitivity | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as CrownSensitivity)
-            thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as CrownSensitivity)
+            thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setDigitalCrownSensitivity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableHapticFeedbackAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_selectedAttribute(callback_: ((value0: Date) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._DatePickerAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -184,7 +179,7 @@ export enum DatePickerMode {
 export interface DatePickerOptions {
     start?: Date;
     end?: Date;
-    selected?: Date;
+    selected?: Date | Bindable<Date>;
     mode?: DatePickerMode;
 }
 export interface DatePickerAttribute extends CommonMethod {
@@ -208,9 +203,6 @@ export interface DatePickerAttribute extends CommonMethod {
     }
     enableHapticFeedback(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableHapticFeedback")
-    }
-    _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_selected")
     }
     attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -246,28 +238,8 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     public enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: DatePickerAttribute): void {
-        super.apply(target)
-        if (this.lunar_value !== undefined)
-            target.lunar(this.lunar_value!)
-        if (this.disappearTextStyle_value !== undefined)
-            target.disappearTextStyle(this.disappearTextStyle_value!)
-        if (this.textStyle_value !== undefined)
-            target.textStyle(this.textStyle_value!)
-        if (this.selectedTextStyle_value !== undefined)
-            target.selectedTextStyle(this.selectedTextStyle_value!)
-        if (this.onDateChange_value !== undefined)
-            target.onDateChange(this.onDateChange_value!)
-        if (this.digitalCrownSensitivity_value !== undefined)
-            target.digitalCrownSensitivity(this.digitalCrownSensitivity_value!)
-        if (this.enableHapticFeedback_value !== undefined)
-            target.enableHapticFeedback(this.enableHapticFeedback_value!)
     }
 }
 export interface LunarSwitchStyle {
@@ -375,16 +347,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
-        if (this.checkPriority("_onChangeEvent_selected")) {
-            const callback__casted = callback_ as (((value0: Date) => void))
-            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -392,26 +355,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         super.applyAttributesFinish()
     }
 }
-export function withDatePickerStyle(receiver: DatePickerAttribute, modifier: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkDatePickerStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("DatePicker")
-// export function DatePicker(
-//     options?: DatePickerOptions,
-//     @memo
-//     content_?: () => void,
-// ): DatePickerAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function DatePicker(
@@ -427,85 +370,329 @@ export function DatePicker(
     NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (_: ArkDatePickerPeer): void => {
         receiver.setDatePickerOptions(options)
         style?.(receiver)
-        withDatePickerStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkDatePickerSet extends ArkCommonMethodSet implements DatePickerAttribute {
+export class DatePickerModifier extends CommonMethodModifier implements DatePickerAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _lunar_flag?: boolean
-    _lunar0_value?: boolean | undefined
-    _disappearTextStyle_flag?: boolean
-    _disappearTextStyle0_value?: PickerTextStyle | undefined
-    _textStyle_flag?: boolean
-    _textStyle0_value?: PickerTextStyle | undefined
-    _selectedTextStyle_flag?: boolean
-    _selectedTextStyle0_value?: PickerTextStyle | undefined
-    _onDateChange_flag?: boolean
-    _onDateChange0_value?: ((value0: Date) => void) | undefined
-    _digitalCrownSensitivity_flag?: boolean
-    _digitalCrownSensitivity0_value?: CrownSensitivity | undefined
-    _enableHapticFeedback_flag?: boolean
-    _enableHapticFeedback0_value?: boolean | undefined
-    __onChangeEvent_selected_flag?: boolean
-    __onChangeEvent_selected0_value?: ((value0: Date) => void)
-    applyModifierPatch(component: DatePickerAttribute): void {
-        if (this._lunar_flag)
-            component.lunar((this._lunar0_value as boolean | undefined))
-        if (this._disappearTextStyle_flag)
-            component.disappearTextStyle((this._disappearTextStyle0_value as PickerTextStyle | undefined))
-        if (this._textStyle_flag)
-            component.textStyle((this._textStyle0_value as PickerTextStyle | undefined))
-        if (this._selectedTextStyle_flag)
-            component.selectedTextStyle((this._selectedTextStyle0_value as PickerTextStyle | undefined))
-        if (this._onDateChange_flag)
-            component.onDateChange((this._onDateChange0_value as ((value0: Date) => void) | undefined))
-        if (this._digitalCrownSensitivity_flag)
-            component.digitalCrownSensitivity((this._digitalCrownSensitivity0_value as CrownSensitivity | undefined))
-        if (this._enableHapticFeedback_flag)
-            component.enableHapticFeedback((this._enableHapticFeedback0_value as boolean | undefined))
+    _lunar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _lunar_0_0value?: boolean | undefined
+    _disappearTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _disappearTextStyle_0_0value?: PickerTextStyle | undefined
+    _textStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textStyle_0_0value?: PickerTextStyle | undefined
+    _selectedTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedTextStyle_0_0value?: PickerTextStyle | undefined
+    _onDateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDateChange_0_0value?: ((value0: Date) => void) | undefined
+    _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
+    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableHapticFeedback_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkDatePickerPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._lunar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLunarAttribute((this._lunar_0_0value as boolean | undefined));
+                    this._lunar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._lunar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._lunar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLunarAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._disappearTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._disappearTextStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDisappearTextStyleAttribute((this._disappearTextStyle_0_0value as PickerTextStyle | undefined));
+                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDisappearTextStyleAttribute((undefined as PickerTextStyle | undefined));
+                }
+            }
+        }
+        if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextStyleAttribute((this._textStyle_0_0value as PickerTextStyle | undefined));
+                    this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextStyleAttribute((undefined as PickerTextStyle | undefined));
+                }
+            }
+        }
+        if (this._selectedTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedTextStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedTextStyleAttribute((this._selectedTextStyle_0_0value as PickerTextStyle | undefined));
+                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedTextStyleAttribute((undefined as PickerTextStyle | undefined));
+                }
+            }
+        }
+        if (this._onDateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDateChangeAttribute((this._onDateChange_0_0value as ((value0: Date) => void) | undefined));
+                    this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDateChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDateChangeAttribute((undefined as ((value0: Date) => void) | undefined));
+                }
+            }
+        }
+        if (this._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._digitalCrownSensitivity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
+                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
+                }
+            }
+        }
+        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableHapticFeedback_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public lunar(value: boolean | undefined): this {
-        this._lunar_flag = true
-        this._lunar0_value = value
+    mergeModifier(modifier: DatePickerModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._lunar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.lunar(modifier._lunar_0_0value);
+                    break;
+                }
+                default: {
+                    this.lunar((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._disappearTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._disappearTextStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.disappearTextStyle(modifier._disappearTextStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.disappearTextStyle((undefined as PickerTextStyle | undefined));
+                }
+            }
+        }
+        if (modifier._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textStyle(modifier._textStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.textStyle((undefined as PickerTextStyle | undefined));
+                }
+            }
+        }
+        if (modifier._selectedTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedTextStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedTextStyle(modifier._selectedTextStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedTextStyle((undefined as PickerTextStyle | undefined));
+                }
+            }
+        }
+        if (modifier._onDateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDateChange(modifier._onDateChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDateChange((undefined as ((value0: Date) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._digitalCrownSensitivity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.digitalCrownSensitivity(modifier._digitalCrownSensitivity_0_0value);
+                    break;
+                }
+                default: {
+                    this.digitalCrownSensitivity((undefined as CrownSensitivity | undefined));
+                }
+            }
+        }
+        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableHapticFeedback_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableHapticFeedback((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    lunar(value: boolean | undefined): this {
+        if (((this._lunar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._lunar_0_0value) !== (value)))
+        {
+            this._lunar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._lunar_0_0value = value
+        } else
+        {
+            this._lunar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public disappearTextStyle(value: PickerTextStyle | undefined): this {
-        this._disappearTextStyle_flag = true
-        this._disappearTextStyle0_value = value
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
+        if (((this._disappearTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._disappearTextStyle_0_0value = value
+        } else
+        {
+            this._disappearTextStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textStyle(value: PickerTextStyle | undefined): this {
-        this._textStyle_flag = true
-        this._textStyle0_value = value
+    textStyle(value: PickerTextStyle | undefined): this {
+        if (((this._textStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textStyle_0_0value = value
+        } else
+        {
+            this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedTextStyle(value: PickerTextStyle | undefined): this {
-        this._selectedTextStyle_flag = true
-        this._selectedTextStyle0_value = value
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
+        if (((this._selectedTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedTextStyle_0_0value = value
+        } else
+        {
+            this._selectedTextStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onDateChange(value: ((value0: Date) => void) | undefined): this {
-        this._onDateChange_flag = true
-        this._onDateChange0_value = value
+    onDateChange(value: ((value0: Date) => void) | undefined): this {
+        if (((this._onDateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDateChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDateChange_0_0value = value
+        } else
+        {
+            this._onDateChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        this._digitalCrownSensitivity_flag = true
-        this._digitalCrownSensitivity0_value = value
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        if (((this._digitalCrownSensitivity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._digitalCrownSensitivity_0_0value = value
+        } else
+        {
+            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
-        this._enableHapticFeedback_flag = true
-        this._enableHapticFeedback0_value = value
+    enableHapticFeedback(value: boolean | undefined): this {
+        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
+        {
+            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableHapticFeedback_0_0value = value
+        } else
+        {
+            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
-    }
-    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -525,70 +712,83 @@ export class DatePickerDialog_serializer {
 export class DatePickerOptions_serializer {
     public static write(buffer: SerializerBase, value: DatePickerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_start  = value.start
-        let value_start_type : int32 = RuntimeType.UNDEFINED
-        value_start_type = runtimeType(value_start)
-        valueSerializer.writeInt8((value_start_type).toChar())
-        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
-            const value_start_value  = value_start!
-            valueSerializer.writeInt64(value_start_value.getTime().toLong())
+        const valueHolderForStart  = value.start
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            valueSerializer.writeInt64(valueHolderForStartTmpValue.getTime().toLong())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_end  = value.end
-        let value_end_type : int32 = RuntimeType.UNDEFINED
-        value_end_type = runtimeType(value_end)
-        valueSerializer.writeInt8((value_end_type).toChar())
-        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
-            const value_end_value  = value_end!
-            valueSerializer.writeInt64(value_end_value.getTime().toLong())
+        const valueHolderForEnd  = value.end
+        if (valueHolderForEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndTmpValue  = valueHolderForEnd!
+            valueSerializer.writeInt64(valueHolderForEndTmpValue.getTime().toLong())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_selected  = value.selected
-        let value_selected_type : int32 = RuntimeType.UNDEFINED
-        value_selected_type = runtimeType(value_selected)
-        valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.writeInt64(value_selected_value.getTime().toLong())
+        const valueHolderForSelected  = value.selected
+        if (valueHolderForSelected !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSelectedTmpValue  = valueHolderForSelected!
+            if (valueHolderForSelectedTmpValue instanceof Date) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
+                valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
+                Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_mode  = value.mode
-        let value_mode_type : int32 = RuntimeType.UNDEFINED
-        value_mode_type = runtimeType(value_mode)
-        valueSerializer.writeInt8((value_mode_type).toChar())
-        if ((value_mode_type) != (RuntimeType.UNDEFINED)) {
-            const value_mode_value  = (value_mode as DatePickerMode)
-            valueSerializer.writeInt32(TypeChecker.DatePickerMode_ToNumeric(value_mode_value))
+        const valueHolderForMode  = value.mode
+        if (valueHolderForMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModeTmpValue  = (valueHolderForMode as DatePickerMode)
+            valueSerializer.writeInt32(TypeChecker.DatePickerMode_ToNumeric(valueHolderForModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DatePickerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let start_buf : Date | undefined
-        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            start_buf = new Date(valueDeserializer.readInt64())
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : Date | undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = new Date(valueDeserializer.readInt64())
         }
-        const start_result : Date | undefined = start_buf
-        const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let end_buf : Date | undefined
-        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            end_buf = new Date(valueDeserializer.readInt64())
+        const startTmpResult : Date | undefined = startTmpBuf
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endTmpBuf : Date | undefined
+        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            endTmpBuf = new Date(valueDeserializer.readInt64())
         }
-        const end_result : Date | undefined = end_buf
-        const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selected_buf : Date | undefined
-        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            selected_buf = new Date(valueDeserializer.readInt64())
+        const endTmpResult : Date | undefined = endTmpBuf
+        const selectedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let selectedTmpBuf : Date | Bindable<Date> | undefined
+        if ((selectedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const selectedTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedTmpBuf_ : Date | Bindable<Date> | undefined
+            if (selectedTmpBuf_UnionSelector == (0).toChar()) {
+                selectedTmpBuf_ = new Date(valueDeserializer.readInt64())
+            } else if (selectedTmpBuf_UnionSelector == (1).toChar()) {
+                selectedTmpBuf_ = Bindable_Date_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for selectedTmpBuf_ has to be chosen through deserialisation.")
+            }
+            selectedTmpBuf = (selectedTmpBuf_ as Date | Bindable<Date>)
         }
-        const selected_result : Date | undefined = selected_buf
-        const mode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mode_buf : DatePickerMode | undefined
-        if ((mode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            mode_buf = TypeChecker.DatePickerMode_FromNumeric(valueDeserializer.readInt32())
+        const selectedTmpResult : Date | Bindable<Date> | undefined = selectedTmpBuf
+        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modeTmpBuf : DatePickerMode | undefined
+        if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            modeTmpBuf = TypeChecker.DatePickerMode_FromNumeric(valueDeserializer.readInt32())
         }
-        const mode_result : DatePickerMode | undefined = mode_buf
-        let value : DatePickerOptions = ({start: start_result, end: end_result, selected: selected_result, mode: mode_result} as DatePickerOptions)
+        const modeTmpResult : DatePickerMode | undefined = modeTmpBuf
+        let value : DatePickerOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult} as DatePickerOptions)
         return value
     }
 }

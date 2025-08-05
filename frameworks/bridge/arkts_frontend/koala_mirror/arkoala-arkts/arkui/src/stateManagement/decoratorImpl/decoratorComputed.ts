@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ObserveSingleton } from "../base/observeSingleton";
-import { IBindingSource, ITrackedDecoratorRef } from "../base/mutableStateMeta";
-import { StateMgmtConsole } from "../tools/stateMgmtDFX";
+import { ObserveSingleton } from '../base/observeSingleton';
+import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable } from '../decorator';
-import { FactoryInternal } from "../base/iFactoryInternal";
+import { FactoryInternal } from '../base/iFactoryInternal';
 
 export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
     fireChange(): void;
@@ -33,6 +33,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
     private cachedValue_?: T;
     private readonly computedLambda_: () => T;
     private meta_: IMutableStateMeta = FactoryInternal.mkMutableStateMeta('Computed');
+    private initialized: boolean = false;
     constructor(computedLambda: () => T, varName: string) {
         this.id = ++ComputedDecoratedVariable.nextComputedId_;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this);
@@ -48,25 +49,27 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         }
     }
     clearReverseBindings(): void {
-        this.reverseBindings.forEach((dep: WeakRef<IBindingSource>) => {
+        Array.from(this.reverseBindings).forEach((dep: WeakRef<IBindingSource>) => {
             let ref = dep.deref();
             if (ref) {
                 ref.clearBindingRefs(this.weakThis);
             } else {
                 this.reverseBindings.delete(dep);
             }
-        }) 
+        });
     }
     get(): T {
-        // first get triffered by constructor, used only for dependency gathering.
         if (this.cachedValue_ === undefined) {
             this.cachedValue_ = this.runFunctionAndObserve();
-            return this.cachedValue_!;
         }
-        if (ObserveSingleton.instance.shouldAddRef(ObserveSingleton.InvalidRenderId)) {
+        if (this.shouldAddRef()) {
             this.meta_.addRef();
         }
-        return this.cachedValue_!;
+        return this.cachedValue_ as T;
+    }
+
+    private shouldAddRef(): boolean {
+        return ObserveSingleton.instance.renderingComponent >= ObserveSingleton.RenderingComponentV2;
     }
 
     private runFunctionAndObserve(): T {

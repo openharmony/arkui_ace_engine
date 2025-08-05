@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
-import { MarkableQueue, markableQueue } from "../../src/common/MarkableQueue"
+import { assert, suite, test } from "@koalaui/harness"
+import { MarkableQueue, markableQueue } from "../../ets/common/MarkableQueue"
 
 const collector = new Array<string>()
 
 function testQueue(queue: MarkableQueue, expected: Array<string>) {
     collector.length = 0
     queue.callCallbacks()
-    Assert.deepEqual(collector, expected)
+    assert.deepEqual(collector, expected)
 }
 
 suite("MarkableQueue tests", () => {

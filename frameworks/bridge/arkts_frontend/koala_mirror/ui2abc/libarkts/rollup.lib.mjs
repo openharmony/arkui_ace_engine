@@ -19,31 +19,39 @@ import commonjs from '@rollup/plugin-commonjs'
 const ENABLE_SOURCE_MAPS = false // Enable for debugging
 
 /** @type {import("rollup").RollupOptions} */
-export default [
-    makeConfig("./src/index.ts", "libarkts.js"),
-    makeConfig("./src/wrapper-compat/index.ts", "libarkts-compat.js"),
-]
+export default makeConfig()
 
 function makeConfig(input, output) {
     return {
-        input: input,
+        input: {
+            'libarkts': "./src/index.ts",
+            'libarkts-compat': "./src/wrapper-compat/index.ts"
+        },
         output: {
-            file: "./lib/" + output,
+            dir: "lib",
             format: "commonjs",
             plugins: [
                 // terser()
             ],
+            manualChunks: {
+                'libarkts-common': ["./src/index.ts"],
+                // Improve: maybe split scripts into smaller chunks
+                // 'libarkts-api': ["./src/arkts-api/index.ts"],
+                // 'libarkts-generated': ["./src/generated/index.ts"],
+            },
             banner: APACHE_LICENSE_HEADER(),
             sourcemap: ENABLE_SOURCE_MAPS
         },
         plugins: [
-        commonjs(),
+            commonjs(),
             typescript({
                 outputToFilesystem: false,
+                outDir: "lib",
                 module: "esnext",
                 sourceMap: ENABLE_SOURCE_MAPS,
-                declarationMap: false,
                 declaration: true,
+                declarationMap: false,
+                declarationDir: "lib/types",
                 composite: false,
             }),
             nodeResolve({

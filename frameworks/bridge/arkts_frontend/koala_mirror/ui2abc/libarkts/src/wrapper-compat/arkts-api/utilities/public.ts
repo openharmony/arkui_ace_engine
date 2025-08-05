@@ -196,7 +196,7 @@ export function ImportSpecifierIsRemovableConst(node: ImportSpecifier): boolean 
 }
 
 // Improve: It seems like Definition overrides AstNode  modifiers
-// with it's own modifiers which is completely unrelated set of flags.
+// with its own modifiers which is completely unrelated set of flags.
 // Use this function if you need
 // the language level modifiers: public, declare, export, etc.
 export function classDefinitionFlags(node: ClassDefinition): Es2pandaModifierFlags {
@@ -265,7 +265,7 @@ export function generateTsDeclarationsFromContext(
     passString(outputEts),
     exportAll,
     isolated,
-    recordFile
+    passString(recordFile)
   );
 }
 

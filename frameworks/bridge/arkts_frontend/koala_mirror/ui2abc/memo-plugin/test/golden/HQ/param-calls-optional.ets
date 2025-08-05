@@ -3,13 +3,13 @@ import { __memo_context_type as __memo_context_type, __memo_id_type as __memo_id
 
 import { memo as memo } from "@koalaui/runtime/annotations";
 
-function main(): void {}
+function main() {}
 
 
 
 class Test {
-  @memo() public optional_args(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1?: int, arg2?: (()=> int)): void {
-    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_optional_args_@test/HQ/param-calls-optional.ets"))), 3);
+  @memo() public optional_args(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1?: int, arg2?: (()=> int)) {
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_optional_args_@test/input/HQ/param-calls-optional.ets"))), 3);
     const __memo_parameter_this = __memo_scope.param(0, this), __memo_parameter_arg1 = __memo_scope.param(1, arg1), __memo_parameter_arg2 = __memo_scope.param(2, arg2);
     if (__memo_scope.unchanged) {
       __memo_scope.cached;

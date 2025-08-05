@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { assert } from "chai"
+import { assert } from "@koalaui/harness"
 import * as child from "child_process"
 import * as path from "path"
 
 function runCompiler(file: string) {
     return child.spawnSync("../../incremental/tools/panda/arkts/ui2abc", [
-        "--arktsconfig", path.resolve(path.join("test", "arktsconfig-golden.json")),
+        "--arktsconfig", path.resolve(path.join("test", "arktsconfig-rewrite.json")),
         "--output", path.resolve(path.join("test/build/abc", file.replace(/\.ets$/, ".abc"))),
         path.join("test", "diagnostics", "input", file),
    ])
@@ -116,22 +116,22 @@ suite("@memo function missing return type", () => {
     diagnostics(
         "Function",
         "missing-type-function.ets",
-        "@memo foo must have it's return type explicitly specified"
+        "@memo foo must have its return type explicitly specified"
     )
     diagnostics(
         "Arrow function",
         "missing-type-arrow-function.ets",
-        "@memo anonymous function must have it's return type explicitly specified"
+        "@memo anonymous function must have its return type explicitly specified"
     )
     diagnostics(
         "Method",
         "missing-type-method.ets",
-        "@memo foo must have it's return type explicitly specified"
+        "@memo foo must have its return type explicitly specified"
     )
     noDiagnostics(
         "Correct functions",
         "correctly-typed-functions.ets",
-        "must have it's return type explicitly specified"
+        "must have its return type explicitly specified"
     )
 })
 

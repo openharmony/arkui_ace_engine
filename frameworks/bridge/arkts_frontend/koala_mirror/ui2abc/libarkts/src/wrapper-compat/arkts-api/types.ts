@@ -45,6 +45,7 @@ import {
     ArrayExpression,
     BlockStatement,
     ClassDefinition,
+    ETSModule,
     ETSTypeReference,
     ETSTypeReferencePart,
     Expression,
@@ -56,14 +57,8 @@ import {
     TSTypeParameterInstantiation,
     TypeNode,
 } from '../../generated';
-import { createCallExpression, updateCallExpression } from 'src/arkts-api/node-utilities/CallExpression';
 
-export class EtsScript extends AstNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE);
-        super(peer);
-    }
-
+export class EtsScript extends ETSModule {
     static fromContext(): EtsScript {
         console.log('[TS WRAPPER] GET AST FROM CONTEXT');
         return new EtsScript(
@@ -99,19 +94,6 @@ export class EtsScript extends AstNode {
             statements.length
         );
         return node;
-    }
-
-    get statements(): readonly AstNode[] {
-        return unpackNodeArray(global.generatedEs2panda._BlockStatementStatements(global.context, this.peer));
-    }
-
-    set statements(nodes: readonly AstNode[]) {
-        global.generatedEs2panda._BlockStatementSetStatements(
-            global.context,
-            this.peer,
-            passNodeArray(nodes),
-            nodes.length
-        );
     }
 }
 

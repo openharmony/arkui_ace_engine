@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-export function errorAsString(error: Error): string {
-    return error.stack ?? error.toString()
+export function errorAsString(error: any): string {
+    if (error instanceof Error) {
+        return error.stack ?? error.toString()
+    }
+    return JSON.stringify(error)
 }
 
 export function unsafeCast<T>(value: unknown): T {

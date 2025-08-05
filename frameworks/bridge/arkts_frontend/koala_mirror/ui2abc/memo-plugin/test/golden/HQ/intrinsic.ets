@@ -3,7 +3,7 @@ import { __memo_context_type as __memo_context_type, __memo_id_type as __memo_id
 
 import { memo_intrinsic as memo_intrinsic } from "@koalaui/runtime/annotations";
 
-function main(): void {}
+function main() {}
 
 
 

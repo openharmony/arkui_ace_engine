@@ -54,7 +54,7 @@ export class CallTransformer extends arkts.AbstractVisitor {
     transformDollarCallExpression(callExpr: arkts.CallExpression): arkts.CallExpression {
         const name = (callExpr.callee as arkts.Identifier).name.replace('$', '_')
         // add import { _r, _rawfile } from "@ohos.arkui";
-        this.imports.add(name, "@ohos.arkui")
+        this.imports.add(name, "arkui")
         const args = callExpr.arguments.slice()
         return arkts.factory.updateCallExpression(
             callExpr,

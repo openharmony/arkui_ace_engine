@@ -16,14 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkScrollableCommonMethodSet, ArkCommonMethodSet } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ScrollableCommonMethodModifier, CommonMethodModifier } from "./common"
 import { Length } from "./units"
 import { ScrollState } from "./list"
 import { ScrollSource } from "./enums"
@@ -33,6 +33,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -40,352 +41,344 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkGridPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Grid_construct(peerId, flags)
-        const _peer  = new ArkGridPeer(_peerPtr, peerId, "Grid", flags)
+        const _peer  = new ArkGridPeer(_peerPtr, peerId, 'Grid', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setGridOptionsAttribute(scroller?: Scroller, layoutOptions?: GridLayoutOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scroller_type : int32 = RuntimeType.UNDEFINED
-        scroller_type = runtimeType(scroller)
-        thisSerializer.writeInt8((scroller_type).toChar())
-        if ((scroller_type) != (RuntimeType.UNDEFINED)) {
-            const scroller_value  = scroller!
-            Scroller_serializer.write(thisSerializer, scroller_value)
+        if (scroller !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scrollerTmpValue  = scroller!
+            Scroller_serializer.write(thisSerializer, scrollerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let layoutOptions_type : int32 = RuntimeType.UNDEFINED
-        layoutOptions_type = runtimeType(layoutOptions)
-        thisSerializer.writeInt8((layoutOptions_type).toChar())
-        if ((layoutOptions_type) != (RuntimeType.UNDEFINED)) {
-            const layoutOptions_value  = layoutOptions!
-            GridLayoutOptions_serializer.write(thisSerializer, layoutOptions_value)
+        if (layoutOptions !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const layoutOptionsTmpValue  = layoutOptions!
+            GridLayoutOptions_serializer.write(thisSerializer, layoutOptionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridInterface_setGridOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColumnsTemplateAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeString(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setColumnsTemplate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRowsTemplateAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeString(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setRowsTemplate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColumnsGapAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setColumnsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRowsGapAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setRowsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollBarUpdateAttribute(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnScrollBarUpdate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollIndexAttribute(value: ((first: number,last: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnScrollIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCachedCount0Attribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setCachedCount0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEditModeAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setEditMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMultiSelectableAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setMultiSelectable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxCountAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setMaxCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinCountAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setMinCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCellLengthAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setCellLength(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLayoutDirectionAttribute(value: GridDirection | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as GridDirection)
-            thisSerializer.writeInt32(TypeChecker.GridDirection_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as GridDirection)
+            thisSerializer.writeInt32(TypeChecker.GridDirection_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setLayoutDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSupportAnimationAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setSupportAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnItemDragStartAttribute(value: OnItemDragStartCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnItemDragEnterAttribute(value: ((event: ItemDragInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragEnter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnItemDragMoveAttribute(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragMove(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnItemDragLeaveAttribute(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDragLeave(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnItemDropAttribute(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAlignItemsAttribute(value: GridItemAlignment | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as GridItemAlignment)
-            thisSerializer.writeInt32(TypeChecker.GridItemAlignment_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as GridItemAlignment)
+            thisSerializer.writeInt32(TypeChecker.GridItemAlignment_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setAlignItems(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnScrollFrameBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnWillScrollAttribute(value: OnWillScrollCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDidScrollAttribute(value: OnScrollCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setOnDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCachedCount1Attribute(count: number | undefined, show: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let count_type : int32 = RuntimeType.UNDEFINED
-        count_type = runtimeType(count)
-        thisSerializer.writeInt8((count_type).toChar())
-        if ((count_type) != (RuntimeType.UNDEFINED)) {
-            const count_value  = count!
-            thisSerializer.writeNumber(count_value)
+        if (count !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const countTmpValue  = count!
+            thisSerializer.writeNumber(countTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let show_type : int32 = RuntimeType.UNDEFINED
-        show_type = runtimeType(show)
-        thisSerializer.writeInt8((show_type).toChar())
-        if ((show_type) != (RuntimeType.UNDEFINED)) {
-            const show_value  = show!
-            thisSerializer.writeBoolean(show_value)
+        if (show !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const showTmpValue  = show!
+            thisSerializer.writeBoolean(showTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setCachedCount1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -591,55 +584,6 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: GridAttribute): void {
-        super.apply(target)
-        if (this.columnsTemplate_value !== undefined)
-            target.columnsTemplate(this.columnsTemplate_value!)
-        if (this.rowsTemplate_value !== undefined)
-            target.rowsTemplate(this.rowsTemplate_value!)
-        if (this.columnsGap_value !== undefined)
-            target.columnsGap(this.columnsGap_value!)
-        if (this.rowsGap_value !== undefined)
-            target.rowsGap(this.rowsGap_value!)
-        if (this.onScrollBarUpdate_value !== undefined)
-            target.onScrollBarUpdate(this.onScrollBarUpdate_value!)
-        if (this.onScrollIndex_value !== undefined)
-            target.onScrollIndex(this.onScrollIndex_value!)
-        if (this.cachedCount_value !== undefined)
-            target.cachedCount(this.cachedCount_value!)
-        if (this.editMode_value !== undefined)
-            target.editMode(this.editMode_value!)
-        if (this.multiSelectable_value !== undefined)
-            target.multiSelectable(this.multiSelectable_value!)
-        if (this.maxCount_value !== undefined)
-            target.maxCount(this.maxCount_value!)
-        if (this.minCount_value !== undefined)
-            target.minCount(this.minCount_value!)
-        if (this.cellLength_value !== undefined)
-            target.cellLength(this.cellLength_value!)
-        if (this.layoutDirection_value !== undefined)
-            target.layoutDirection(this.layoutDirection_value!)
-        if (this.supportAnimation_value !== undefined)
-            target.supportAnimation(this.supportAnimation_value!)
-        if (this.onItemDragStart_value !== undefined)
-            target.onItemDragStart(this.onItemDragStart_value!)
-        if (this.onItemDragEnter_value !== undefined)
-            target.onItemDragEnter(this.onItemDragEnter_value!)
-        if (this.onItemDragMove_value !== undefined)
-            target.onItemDragMove(this.onItemDragMove_value!)
-        if (this.onItemDragLeave_value !== undefined)
-            target.onItemDragLeave(this.onItemDragLeave_value!)
-        if (this.onItemDrop_value !== undefined)
-            target.onItemDrop(this.onItemDrop_value!)
-        if (this.alignItems_value !== undefined)
-            target.alignItems(this.alignItems_value!)
-        if (this.onScrollFrameBegin_value !== undefined)
-            target.onScrollFrameBegin(this.onScrollFrameBegin_value!)
-        if (this.onWillScroll_value !== undefined)
-            target.onWillScroll(this.onWillScroll_value!)
-        if (this.onDidScroll_value !== undefined)
-            target.onDidScroll(this.onDidScroll_value!)
     }
 }
 
@@ -850,7 +794,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -858,26 +801,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         super.applyAttributesFinish()
     }
 }
-export function withGridStyle(receiver: GridAttribute, modifier: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkGridStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Grid")
-// export function Grid(
-//     scroller?: Scroller, layoutOptions?: GridLayoutOptions,
-//     @memo
-//     content_?: () => void,
-// ): GridAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Grid(
@@ -893,226 +816,1078 @@ export function Grid(
     NodeAttach<ArkGridPeer>((): ArkGridPeer => ArkGridPeer.create(receiver), (_: ArkGridPeer): void => {
         receiver.setGridOptions(scroller,layoutOptions)
         style?.(receiver)
-        withGridStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkGridSet extends ArkScrollableCommonMethodSet implements GridAttribute {
+export class GridModifier extends ScrollableCommonMethodModifier implements GridAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _columnsTemplate_flag?: boolean
-    _columnsTemplate0_value?: string | undefined
-    _rowsTemplate_flag?: boolean
-    _rowsTemplate0_value?: string | undefined
-    _columnsGap_flag?: boolean
-    _columnsGap0_value?: Length | undefined
-    _rowsGap_flag?: boolean
-    _rowsGap0_value?: Length | undefined
-    _onScrollBarUpdate_flag?: boolean
-    _onScrollBarUpdate0_value?: ((index: number,offset: number) => ComputedBarAttribute) | undefined
-    _onScrollIndex_flag?: boolean
-    _onScrollIndex0_value?: ((first: number,last: number) => void) | undefined
-    _cachedCount_flag?: boolean
-    _cachedCount0_value?: number | undefined
-    _cachedCount1_value?: boolean | undefined
-    _editMode_flag?: boolean
-    _editMode0_value?: boolean | undefined
-    _multiSelectable_flag?: boolean
-    _multiSelectable0_value?: boolean | undefined
-    _maxCount_flag?: boolean
-    _maxCount0_value?: number | undefined
-    _minCount_flag?: boolean
-    _minCount0_value?: number | undefined
-    _cellLength_flag?: boolean
-    _cellLength0_value?: number | undefined
-    _layoutDirection_flag?: boolean
-    _layoutDirection0_value?: GridDirection | undefined
-    _supportAnimation_flag?: boolean
-    _supportAnimation0_value?: boolean | undefined
-    _onItemDragStart_flag?: boolean
-    _onItemDragStart0_value?: OnItemDragStartCallback | undefined
-    _onItemDragEnter_flag?: boolean
-    _onItemDragEnter0_value?: ((event: ItemDragInfo) => void) | undefined
-    _onItemDragMove_flag?: boolean
-    _onItemDragMove0_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
-    _onItemDragLeave_flag?: boolean
-    _onItemDragLeave0_value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
-    _onItemDrop_flag?: boolean
-    _onItemDrop0_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
-    _alignItems_flag?: boolean
-    _alignItems0_value?: GridItemAlignment | undefined
-    _onScrollFrameBegin_flag?: boolean
-    _onScrollFrameBegin0_value?: OnScrollFrameBeginCallback | undefined
-    _onWillScroll_flag?: boolean
-    _onWillScroll0_value?: OnWillScrollCallback | undefined
-    _onDidScroll_flag?: boolean
-    _onDidScroll0_value?: OnScrollCallback | undefined
-    applyModifierPatch(component: GridAttribute): void {
-        if (this._columnsTemplate_flag)
-            component.columnsTemplate((this._columnsTemplate0_value as string | undefined))
-        if (this._rowsTemplate_flag)
-            component.rowsTemplate((this._rowsTemplate0_value as string | undefined))
-        if (this._columnsGap_flag)
-            component.columnsGap((this._columnsGap0_value as Length | undefined))
-        if (this._rowsGap_flag)
-            component.rowsGap((this._rowsGap0_value as Length | undefined))
-        if (this._onScrollBarUpdate_flag)
-            component.onScrollBarUpdate((this._onScrollBarUpdate0_value as ((index: number,offset: number) => ComputedBarAttribute) | undefined))
-        if (this._onScrollIndex_flag)
-            component.onScrollIndex((this._onScrollIndex0_value as ((first: number,last: number) => void) | undefined))
-        if (this._cachedCount_flag)
-            component.cachedCount((this._cachedCount0_value as number | undefined), (this._cachedCount1_value as boolean | undefined))
-        if (this._editMode_flag)
-            component.editMode((this._editMode0_value as boolean | undefined))
-        if (this._multiSelectable_flag)
-            component.multiSelectable((this._multiSelectable0_value as boolean | undefined))
-        if (this._maxCount_flag)
-            component.maxCount((this._maxCount0_value as number | undefined))
-        if (this._minCount_flag)
-            component.minCount((this._minCount0_value as number | undefined))
-        if (this._cellLength_flag)
-            component.cellLength((this._cellLength0_value as number | undefined))
-        if (this._layoutDirection_flag)
-            component.layoutDirection((this._layoutDirection0_value as GridDirection | undefined))
-        if (this._supportAnimation_flag)
-            component.supportAnimation((this._supportAnimation0_value as boolean | undefined))
-        if (this._onItemDragStart_flag)
-            component.onItemDragStart((this._onItemDragStart0_value as OnItemDragStartCallback | undefined))
-        if (this._onItemDragEnter_flag)
-            component.onItemDragEnter((this._onItemDragEnter0_value as ((event: ItemDragInfo) => void) | undefined))
-        if (this._onItemDragMove_flag)
-            component.onItemDragMove((this._onItemDragMove0_value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined))
-        if (this._onItemDragLeave_flag)
-            component.onItemDragLeave((this._onItemDragLeave0_value as ((event: ItemDragInfo,itemIndex: number) => void) | undefined))
-        if (this._onItemDrop_flag)
-            component.onItemDrop((this._onItemDrop0_value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined))
-        if (this._alignItems_flag)
-            component.alignItems((this._alignItems0_value as GridItemAlignment | undefined))
-        if (this._onScrollFrameBegin_flag)
-            component.onScrollFrameBegin((this._onScrollFrameBegin0_value as OnScrollFrameBeginCallback | undefined))
-        if (this._onWillScroll_flag)
-            component.onWillScroll((this._onWillScroll0_value as OnWillScrollCallback | undefined))
-        if (this._onDidScroll_flag)
-            component.onDidScroll((this._onDidScroll0_value as OnScrollCallback | undefined))
+    _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _columnsTemplate_0_0value?: string | undefined
+    _rowsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _rowsTemplate_0_0value?: string | undefined
+    _columnsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _columnsGap_0_0value?: Length | undefined
+    _rowsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _rowsGap_0_0value?: Length | undefined
+    _onScrollBarUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onScrollBarUpdate_0_0value?: ((index: number,offset: number) => ComputedBarAttribute) | undefined
+    _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onScrollIndex_0_0value?: ((first: number,last: number) => void) | undefined
+    _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cachedCount_0_0value?: number | undefined
+    _editMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _editMode_0_0value?: boolean | undefined
+    _multiSelectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _multiSelectable_0_0value?: boolean | undefined
+    _maxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxCount_0_0value?: number | undefined
+    _minCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minCount_0_0value?: number | undefined
+    _cellLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cellLength_0_0value?: number | undefined
+    _layoutDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _layoutDirection_0_0value?: GridDirection | undefined
+    _supportAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _supportAnimation_0_0value?: boolean | undefined
+    _onItemDragStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onItemDragStart_0_0value?: OnItemDragStartCallback | undefined
+    _onItemDragEnter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onItemDragEnter_0_0value?: ((event: ItemDragInfo) => void) | undefined
+    _onItemDragMove_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
+    _onItemDragLeave_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
+    _onItemDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
+    _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _alignItems_0_0value?: GridItemAlignment | undefined
+    _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
+    _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillScroll_0_0value?: OnWillScrollCallback | undefined
+    _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidScroll_0_0value?: OnScrollCallback | undefined
+    _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cachedCount_1_0value?: number | undefined
+    _cachedCount_1_1value?: boolean | undefined
+    applyModifierPatch(peer: ArkGridPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._columnsTemplate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColumnsTemplateAttribute((this._columnsTemplate_0_0value as string | undefined));
+                    this._columnsTemplate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._columnsTemplate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._columnsTemplate_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColumnsTemplateAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._rowsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._rowsTemplate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRowsTemplateAttribute((this._rowsTemplate_0_0value as string | undefined));
+                    this._rowsTemplate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._rowsTemplate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._rowsTemplate_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRowsTemplateAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._columnsGap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._columnsGap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColumnsGapAttribute((this._columnsGap_0_0value as Length | undefined));
+                    this._columnsGap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._columnsGap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._columnsGap_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColumnsGapAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._rowsGap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._rowsGap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRowsGapAttribute((this._rowsGap_0_0value as Length | undefined));
+                    this._rowsGap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._rowsGap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._rowsGap_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRowsGapAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._onScrollBarUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onScrollBarUpdate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnScrollBarUpdateAttribute((this._onScrollBarUpdate_0_0value as ((index: number,offset: number) => ComputedBarAttribute) | undefined));
+                    this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnScrollBarUpdateAttribute((undefined as ((index: number,offset: number) => ComputedBarAttribute) | undefined));
+                }
+            }
+        }
+        if (this._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onScrollIndex_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((first: number,last: number) => void) | undefined));
+                    this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onScrollIndex_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnScrollIndexAttribute((undefined as ((first: number,last: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._cachedCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cachedCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as number | undefined));
+                    this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCachedCount0Attribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._editMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._editMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEditModeAttribute((this._editMode_0_0value as boolean | undefined));
+                    this._editMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._editMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._editMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEditModeAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._multiSelectable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._multiSelectable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMultiSelectableAttribute((this._multiSelectable_0_0value as boolean | undefined));
+                    this._multiSelectable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._multiSelectable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._multiSelectable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMultiSelectableAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._maxCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxCountAttribute((this._maxCount_0_0value as number | undefined));
+                    this._maxCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxCountAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._minCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinCountAttribute((this._minCount_0_0value as number | undefined));
+                    this._minCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinCountAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._cellLength_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cellLength_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCellLengthAttribute((this._cellLength_0_0value as number | undefined));
+                    this._cellLength_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cellLength_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cellLength_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCellLengthAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._layoutDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._layoutDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLayoutDirectionAttribute((this._layoutDirection_0_0value as GridDirection | undefined));
+                    this._layoutDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._layoutDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._layoutDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLayoutDirectionAttribute((undefined as GridDirection | undefined));
+                }
+            }
+        }
+        if (this._supportAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._supportAnimation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSupportAnimationAttribute((this._supportAnimation_0_0value as boolean | undefined));
+                    this._supportAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._supportAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._supportAnimation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSupportAnimationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onItemDragStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onItemDragStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnItemDragStartAttribute((this._onItemDragStart_0_0value as OnItemDragStartCallback | undefined));
+                    this._onItemDragStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onItemDragStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onItemDragStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnItemDragStartAttribute((undefined as OnItemDragStartCallback | undefined));
+                }
+            }
+        }
+        if (this._onItemDragEnter_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onItemDragEnter_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnItemDragEnterAttribute((this._onItemDragEnter_0_0value as ((event: ItemDragInfo) => void) | undefined));
+                    this._onItemDragEnter_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onItemDragEnter_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onItemDragEnter_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnItemDragEnterAttribute((undefined as ((event: ItemDragInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onItemDragMove_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onItemDragMove_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnItemDragMoveAttribute((this._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                    this._onItemDragMove_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onItemDragMove_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onItemDragMove_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnItemDragMoveAttribute((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onItemDragLeave_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onItemDragLeave_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnItemDragLeaveAttribute((this._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                    this._onItemDragLeave_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onItemDragLeave_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onItemDragLeave_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnItemDragLeaveAttribute((undefined as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onItemDrop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onItemDrop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnItemDropAttribute((this._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                    this._onItemDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onItemDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onItemDrop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnItemDropAttribute((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                }
+            }
+        }
+        if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._alignItems_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAlignItemsAttribute((this._alignItems_0_0value as GridItemAlignment | undefined));
+                    this._alignItems_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._alignItems_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._alignItems_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAlignItemsAttribute((undefined as GridItemAlignment | undefined));
+                }
+            }
+        }
+        if (this._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onScrollFrameBegin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnScrollFrameBeginAttribute((this._onScrollFrameBegin_0_0value as OnScrollFrameBeginCallback | undefined));
+                    this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnScrollFrameBeginAttribute((undefined as OnScrollFrameBeginCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillScrollAttribute((this._onWillScroll_0_0value as OnWillScrollCallback | undefined));
+                    this._onWillScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillScrollAttribute((undefined as OnWillScrollCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidScrollAttribute((this._onDidScroll_0_0value as OnScrollCallback | undefined));
+                    this._onDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidScrollAttribute((undefined as OnScrollCallback | undefined));
+                }
+            }
+        }
+        if (this._cachedCount_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cachedCount_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as number | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCachedCount1Attribute((undefined as number | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public columnsTemplate(value: string | undefined): this {
-        this._columnsTemplate_flag = true
-        this._columnsTemplate0_value = value
+    mergeModifier(modifier: GridModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._columnsTemplate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.columnsTemplate(modifier._columnsTemplate_0_0value);
+                    break;
+                }
+                default: {
+                    this.columnsTemplate((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._rowsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._rowsTemplate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.rowsTemplate(modifier._rowsTemplate_0_0value);
+                    break;
+                }
+                default: {
+                    this.rowsTemplate((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._columnsGap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._columnsGap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.columnsGap(modifier._columnsGap_0_0value);
+                    break;
+                }
+                default: {
+                    this.columnsGap((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._rowsGap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._rowsGap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.rowsGap(modifier._rowsGap_0_0value);
+                    break;
+                }
+                default: {
+                    this.rowsGap((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._onScrollBarUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onScrollBarUpdate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onScrollBarUpdate(modifier._onScrollBarUpdate_0_0value);
+                    break;
+                }
+                default: {
+                    this.onScrollBarUpdate((undefined as ((index: number,offset: number) => ComputedBarAttribute) | undefined));
+                }
+            }
+        }
+        if (modifier._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onScrollIndex_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onScrollIndex(modifier._onScrollIndex_0_0value);
+                    break;
+                }
+                default: {
+                    this.onScrollIndex((undefined as ((first: number,last: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._cachedCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cachedCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cachedCount(modifier._cachedCount_0_0value);
+                    break;
+                }
+                default: {
+                    this.cachedCount((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._editMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._editMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.editMode(modifier._editMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.editMode((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._multiSelectable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._multiSelectable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.multiSelectable(modifier._multiSelectable_0_0value);
+                    break;
+                }
+                default: {
+                    this.multiSelectable((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._maxCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxCount(modifier._maxCount_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxCount((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._minCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minCount(modifier._minCount_0_0value);
+                    break;
+                }
+                default: {
+                    this.minCount((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._cellLength_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cellLength_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cellLength(modifier._cellLength_0_0value);
+                    break;
+                }
+                default: {
+                    this.cellLength((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._layoutDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._layoutDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.layoutDirection(modifier._layoutDirection_0_0value);
+                    break;
+                }
+                default: {
+                    this.layoutDirection((undefined as GridDirection | undefined));
+                }
+            }
+        }
+        if (modifier._supportAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._supportAnimation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.supportAnimation(modifier._supportAnimation_0_0value);
+                    break;
+                }
+                default: {
+                    this.supportAnimation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onItemDragStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onItemDragStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onItemDragStart(modifier._onItemDragStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onItemDragStart((undefined as OnItemDragStartCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onItemDragEnter_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onItemDragEnter_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onItemDragEnter(modifier._onItemDragEnter_0_0value);
+                    break;
+                }
+                default: {
+                    this.onItemDragEnter((undefined as ((event: ItemDragInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onItemDragMove_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onItemDragMove_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onItemDragMove(modifier._onItemDragMove_0_0value);
+                    break;
+                }
+                default: {
+                    this.onItemDragMove((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onItemDragLeave_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onItemDragLeave_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onItemDragLeave(modifier._onItemDragLeave_0_0value);
+                    break;
+                }
+                default: {
+                    this.onItemDragLeave((undefined as ((event: ItemDragInfo,itemIndex: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onItemDrop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onItemDrop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onItemDrop(modifier._onItemDrop_0_0value);
+                    break;
+                }
+                default: {
+                    this.onItemDrop((undefined as ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._alignItems_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.alignItems(modifier._alignItems_0_0value);
+                    break;
+                }
+                default: {
+                    this.alignItems((undefined as GridItemAlignment | undefined));
+                }
+            }
+        }
+        if (modifier._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onScrollFrameBegin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onScrollFrameBegin(modifier._onScrollFrameBegin_0_0value);
+                    break;
+                }
+                default: {
+                    this.onScrollFrameBegin((undefined as OnScrollFrameBeginCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillScroll(modifier._onWillScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillScroll((undefined as OnWillScrollCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidScroll(modifier._onDidScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidScroll((undefined as OnScrollCallback | undefined));
+                }
+            }
+        }
+        if (modifier._cachedCount_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cachedCount_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cachedCount(modifier._cachedCount_1_0value, modifier._cachedCount_1_1value);
+                    break;
+                }
+                default: {
+                    this.cachedCount((undefined as number | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    columnsTemplate(value: string | undefined): this {
+        if (((this._columnsTemplate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnsTemplate_0_0value) !== (value)))
+        {
+            this._columnsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
+            this._columnsTemplate_0_0value = value
+        } else
+        {
+            this._columnsTemplate_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public rowsTemplate(value: string | undefined): this {
-        this._rowsTemplate_flag = true
-        this._rowsTemplate0_value = value
+    rowsTemplate(value: string | undefined): this {
+        if (((this._rowsTemplate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._rowsTemplate_0_0value) !== (value)))
+        {
+            this._rowsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
+            this._rowsTemplate_0_0value = value
+        } else
+        {
+            this._rowsTemplate_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public columnsGap(value: Length | undefined): this {
-        this._columnsGap_flag = true
-        this._columnsGap0_value = value
+    columnsGap(value: Length | undefined): this {
+        if (((this._columnsGap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._columnsGap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._columnsGap_0_0value = value
+        } else
+        {
+            this._columnsGap_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public rowsGap(value: Length | undefined): this {
-        this._rowsGap_flag = true
-        this._rowsGap0_value = value
+    rowsGap(value: Length | undefined): this {
+        if (((this._rowsGap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._rowsGap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._rowsGap_0_0value = value
+        } else
+        {
+            this._rowsGap_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
-        this._onScrollBarUpdate_flag = true
-        this._onScrollBarUpdate0_value = value
+    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+        if (((this._onScrollBarUpdate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onScrollBarUpdate_0_0value = value
+        } else
+        {
+            this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
-        this._onScrollIndex_flag = true
-        this._onScrollIndex0_value = value
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+        if (((this._onScrollIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onScrollIndex_0_0value = value
+        } else
+        {
+            this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public cachedCount(count: number | undefined, show: boolean | undefined): this {
-        this._cachedCount_flag = true
-        this._cachedCount0_value = count
-        this._cachedCount1_value = show
+    cachedCount(value: number | undefined): this {
+        if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
+        {
+            this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
+            this._cachedCount_0_0value = value
+        } else
+        {
+            this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public editMode(value: boolean | undefined): this {
-        this._editMode_flag = true
-        this._editMode0_value = value
+    editMode(value: boolean | undefined): this {
+        if (((this._editMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._editMode_0_0value) !== (value)))
+        {
+            this._editMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._editMode_0_0value = value
+        } else
+        {
+            this._editMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public multiSelectable(value: boolean | undefined): this {
-        this._multiSelectable_flag = true
-        this._multiSelectable0_value = value
+    multiSelectable(value: boolean | undefined): this {
+        if (((this._multiSelectable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._multiSelectable_0_0value) !== (value)))
+        {
+            this._multiSelectable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._multiSelectable_0_0value = value
+        } else
+        {
+            this._multiSelectable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public maxCount(value: number | undefined): this {
-        this._maxCount_flag = true
-        this._maxCount0_value = value
+    maxCount(value: number | undefined): this {
+        if (((this._maxCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxCount_0_0value) !== (value)))
+        {
+            this._maxCount_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxCount_0_0value = value
+        } else
+        {
+            this._maxCount_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minCount(value: number | undefined): this {
-        this._minCount_flag = true
-        this._minCount0_value = value
+    minCount(value: number | undefined): this {
+        if (((this._minCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minCount_0_0value) !== (value)))
+        {
+            this._minCount_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minCount_0_0value = value
+        } else
+        {
+            this._minCount_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public cellLength(value: number | undefined): this {
-        this._cellLength_flag = true
-        this._cellLength0_value = value
+    cellLength(value: number | undefined): this {
+        if (((this._cellLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cellLength_0_0value) !== (value)))
+        {
+            this._cellLength_0_flag = AttributeUpdaterFlag.UPDATE
+            this._cellLength_0_0value = value
+        } else
+        {
+            this._cellLength_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public layoutDirection(value: GridDirection | undefined): this {
-        this._layoutDirection_flag = true
-        this._layoutDirection0_value = value
+    layoutDirection(value: GridDirection | undefined): this {
+        if (((this._layoutDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._layoutDirection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._layoutDirection_0_0value = value
+        } else
+        {
+            this._layoutDirection_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public supportAnimation(value: boolean | undefined): this {
-        this._supportAnimation_flag = true
-        this._supportAnimation0_value = value
+    supportAnimation(value: boolean | undefined): this {
+        if (((this._supportAnimation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportAnimation_0_0value) !== (value)))
+        {
+            this._supportAnimation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._supportAnimation_0_0value = value
+        } else
+        {
+            this._supportAnimation_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onItemDragStart(value: OnItemDragStartCallback | undefined): this {
-        this._onItemDragStart_flag = true
-        this._onItemDragStart0_value = value
+    onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+        if (((this._onItemDragStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onItemDragStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onItemDragStart_0_0value = value
+        } else
+        {
+            this._onItemDragStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
-        this._onItemDragEnter_flag = true
-        this._onItemDragEnter0_value = value
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+        if (((this._onItemDragEnter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onItemDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onItemDragEnter_0_0value = value
+        } else
+        {
+            this._onItemDragEnter_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
-        this._onItemDragMove_flag = true
-        this._onItemDragMove0_value = value
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+        if (((this._onItemDragMove_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onItemDragMove_0_0value = value
+        } else
+        {
+            this._onItemDragMove_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
-        this._onItemDragLeave_flag = true
-        this._onItemDragLeave0_value = value
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+        if (((this._onItemDragLeave_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onItemDragLeave_0_0value = value
+        } else
+        {
+            this._onItemDragLeave_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
-        this._onItemDrop_flag = true
-        this._onItemDrop0_value = value
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+        if (((this._onItemDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onItemDrop_0_0value = value
+        } else
+        {
+            this._onItemDrop_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public alignItems(value: GridItemAlignment | undefined): this {
-        this._alignItems_flag = true
-        this._alignItems0_value = value
+    alignItems(value: GridItemAlignment | undefined): this {
+        if (((this._alignItems_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
+            this._alignItems_0_0value = value
+        } else
+        {
+            this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
-        this._onScrollFrameBegin_flag = true
-        this._onScrollFrameBegin0_value = value
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        if (((this._onScrollFrameBegin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onScrollFrameBegin_0_0value = value
+        } else
+        {
+            this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onWillScroll(value: OnWillScrollCallback | undefined): this {
-        this._onWillScroll_flag = true
-        this._onWillScroll0_value = value
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
+        if (((this._onWillScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillScroll_0_0value = value
+        } else
+        {
+            this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onDidScroll(value: OnScrollCallback | undefined): this {
-        this._onDidScroll_flag = true
-        this._onDidScroll0_value = value
+    onDidScroll(value: OnScrollCallback | undefined): this {
+        if (((this._onDidScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidScroll_0_0value = value
+        } else
+        {
+            this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (show)))
+        {
+            this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
+            this._cachedCount_1_0value = count
+            this._cachedCount_1_1value = show
+        } else
+        {
+            this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1122,116 +1897,119 @@ export class ArkGridSet extends ArkScrollableCommonMethodSet implements GridAttr
 export class ComputedBarAttribute_serializer {
     public static write(buffer: SerializerBase, value: ComputedBarAttribute): void {
         let valueSerializer : SerializerBase = buffer
-        const value_totalOffset  = value.totalOffset
-        valueSerializer.writeNumber(value_totalOffset)
-        const value_totalLength  = value.totalLength
-        valueSerializer.writeNumber(value_totalLength)
+        const valueHolderForTotalOffset  = value.totalOffset
+        valueSerializer.writeNumber(valueHolderForTotalOffset)
+        const valueHolderForTotalLength  = value.totalLength
+        valueSerializer.writeNumber(valueHolderForTotalLength)
     }
     public static read(buffer: DeserializerBase): ComputedBarAttribute {
         let valueDeserializer : DeserializerBase = buffer
-        const totalOffset_result : number = (valueDeserializer.readNumber() as number)
-        const totalLength_result : number = (valueDeserializer.readNumber() as number)
-        let value : ComputedBarAttribute = ({totalOffset: totalOffset_result, totalLength: totalLength_result} as ComputedBarAttribute)
+        const totalOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const totalLengthTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ComputedBarAttribute = ({totalOffset: totalOffsetTmpResult, totalLength: totalLengthTmpResult} as ComputedBarAttribute)
         return value
     }
 }
 export class GridLayoutOptions_serializer {
     public static write(buffer: SerializerBase, value: GridLayoutOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_regularSize  = value.regularSize
-        const value_regularSize_0  = value_regularSize[0]
-        valueSerializer.writeNumber(value_regularSize_0)
-        const value_regularSize_1  = value_regularSize[1]
-        valueSerializer.writeNumber(value_regularSize_1)
-        const value_irregularIndexes  = value.irregularIndexes
-        let value_irregularIndexes_type : int32 = RuntimeType.UNDEFINED
-        value_irregularIndexes_type = runtimeType(value_irregularIndexes)
-        valueSerializer.writeInt8((value_irregularIndexes_type).toChar())
-        if ((value_irregularIndexes_type) != (RuntimeType.UNDEFINED)) {
-            const value_irregularIndexes_value  = value_irregularIndexes!
-            valueSerializer.writeInt32((value_irregularIndexes_value.length).toInt())
-            for (let value_irregularIndexes_value_counter_i = 0; value_irregularIndexes_value_counter_i < value_irregularIndexes_value.length; value_irregularIndexes_value_counter_i++) {
-                const value_irregularIndexes_value_element : number = value_irregularIndexes_value[value_irregularIndexes_value_counter_i]
-                valueSerializer.writeNumber(value_irregularIndexes_value_element)
+        const valueHolderForRegularSize  = value.regularSize
+        const valueHolderForRegularSize_0  = valueHolderForRegularSize[0]
+        valueSerializer.writeNumber(valueHolderForRegularSize_0)
+        const valueHolderForRegularSize_1  = valueHolderForRegularSize[1]
+        valueSerializer.writeNumber(valueHolderForRegularSize_1)
+        const valueHolderForIrregularIndexes  = value.irregularIndexes
+        if (valueHolderForIrregularIndexes !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIrregularIndexesTmpValue  = valueHolderForIrregularIndexes!
+            valueSerializer.writeInt32((valueHolderForIrregularIndexesTmpValue.length).toInt())
+            for (let valueHolderForIrregularIndexesTmpValueCounterI = 0; valueHolderForIrregularIndexesTmpValueCounterI < valueHolderForIrregularIndexesTmpValue.length; valueHolderForIrregularIndexesTmpValueCounterI++) {
+                const valueHolderForIrregularIndexesTmpValueTmpElement : number = valueHolderForIrregularIndexesTmpValue[valueHolderForIrregularIndexesTmpValueCounterI]
+                valueSerializer.writeNumber(valueHolderForIrregularIndexesTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_onGetIrregularSizeByIndex  = value.onGetIrregularSizeByIndex
-        let value_onGetIrregularSizeByIndex_type : int32 = RuntimeType.UNDEFINED
-        value_onGetIrregularSizeByIndex_type = runtimeType(value_onGetIrregularSizeByIndex)
-        valueSerializer.writeInt8((value_onGetIrregularSizeByIndex_type).toChar())
-        if ((value_onGetIrregularSizeByIndex_type) != (RuntimeType.UNDEFINED)) {
-            const value_onGetIrregularSizeByIndex_value  = value_onGetIrregularSizeByIndex!
-            valueSerializer.holdAndWriteCallback(value_onGetIrregularSizeByIndex_value)
+        const valueHolderForOnGetIrregularSizeByIndex  = value.onGetIrregularSizeByIndex
+        if (valueHolderForOnGetIrregularSizeByIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnGetIrregularSizeByIndexTmpValue  = valueHolderForOnGetIrregularSizeByIndex!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnGetIrregularSizeByIndexTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_onGetRectByIndex  = value.onGetRectByIndex
-        let value_onGetRectByIndex_type : int32 = RuntimeType.UNDEFINED
-        value_onGetRectByIndex_type = runtimeType(value_onGetRectByIndex)
-        valueSerializer.writeInt8((value_onGetRectByIndex_type).toChar())
-        if ((value_onGetRectByIndex_type) != (RuntimeType.UNDEFINED)) {
-            const value_onGetRectByIndex_value  = value_onGetRectByIndex!
-            valueSerializer.holdAndWriteCallback(value_onGetRectByIndex_value)
+        const valueHolderForOnGetRectByIndex  = value.onGetRectByIndex
+        if (valueHolderForOnGetRectByIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnGetRectByIndexTmpValue  = valueHolderForOnGetRectByIndex!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnGetRectByIndexTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): GridLayoutOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const regularSize_buf_value0 : number = (valueDeserializer.readNumber() as number)
-        const regularSize_buf_value1 : number = (valueDeserializer.readNumber() as number)
-        const regularSize_result : [ number, number ] = ([regularSize_buf_value0, regularSize_buf_value1] as [ number, number ])
-        const irregularIndexes_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let irregularIndexes_buf : Array<number> | undefined
-        if ((irregularIndexes_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const irregularIndexes_buf__length : int32 = valueDeserializer.readInt32()
-            let irregularIndexes_buf_ : Array<number> = new Array<number>(irregularIndexes_buf__length)
-            for (let irregularIndexes_buf__i = 0; irregularIndexes_buf__i < irregularIndexes_buf__length; irregularIndexes_buf__i++) {
-                irregularIndexes_buf_[irregularIndexes_buf__i] = (valueDeserializer.readNumber() as number)
+        const regularSizeTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
+        const regularSizeTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
+        const regularSizeTmpResult : [ number, number ] = ([regularSizeTmpBufValue0, regularSizeTmpBufValue1] as [ number, number ])
+        const irregularIndexesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let irregularIndexesTmpBuf : Array<number> | undefined
+        if ((irregularIndexesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const irregularIndexesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let irregularIndexesTmpBuf_ : Array<number> = new Array<number>(irregularIndexesTmpBuf_Length)
+            for (let irregularIndexesTmpBuf_BufCounterI = 0; irregularIndexesTmpBuf_BufCounterI < irregularIndexesTmpBuf_Length; irregularIndexesTmpBuf_BufCounterI++) {
+                irregularIndexesTmpBuf_[irregularIndexesTmpBuf_BufCounterI] = (valueDeserializer.readNumber() as number)
             }
-            irregularIndexes_buf = irregularIndexes_buf_
+            irregularIndexesTmpBuf = irregularIndexesTmpBuf_
         }
-        const irregularIndexes_result : Array<number> | undefined = irregularIndexes_buf
-        const onGetIrregularSizeByIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onGetIrregularSizeByIndex_buf : ((index: number) => [ number, number ]) | undefined
-        if ((onGetIrregularSizeByIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onGetIrregularSizeByIndex_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onGetIrregularSizeByIndex_buf__call : KPointer = valueDeserializer.readPointer()
-            const onGetIrregularSizeByIndex_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onGetIrregularSizeByIndex_buf = (index: number):[ number, number ] => { 
-    const onGetIrregularSizeByIndex_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onGetIrregularSizeByIndex_buf__argsSerializer.writeInt32(onGetIrregularSizeByIndex_buf__resource.resourceId);
-    onGetIrregularSizeByIndex_buf__argsSerializer.writePointer(onGetIrregularSizeByIndex_buf__call);
-    onGetIrregularSizeByIndex_buf__argsSerializer.writePointer(onGetIrregularSizeByIndex_buf__callSync);
-    onGetIrregularSizeByIndex_buf__argsSerializer.writeNumber(index);
-    let onGetIrregularSizeByIndex_buf__continuationValue : [ number, number ] | undefined;
-    const onGetIrregularSizeByIndex_buf__continuationCallback : ((value: [ number, number ]) => void) = (value: [ number, number ]):void => {     onGetIrregularSizeByIndex_buf__continuationValue = value; }
-    onGetIrregularSizeByIndex_buf__argsSerializer.holdAndWriteCallback(onGetIrregularSizeByIndex_buf__continuationCallback);
-    InteropNativeModule._CallCallback(1602877440, onGetIrregularSizeByIndex_buf__argsSerializer.asBuffer(), onGetIrregularSizeByIndex_buf__argsSerializer.length());
-    onGetIrregularSizeByIndex_buf__argsSerializer.release();
-    return (onGetIrregularSizeByIndex_buf__continuationValue as [ number, number ]); }
+        const irregularIndexesTmpResult : Array<number> | undefined = irregularIndexesTmpBuf
+        const onGetIrregularSizeByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetIrregularSizeByIndexTmpBuf : ((index: number) => [ number, number ]) | undefined
+        if ((onGetIrregularSizeByIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetIrregularSizeByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetIrregularSizeByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetIrregularSizeByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetIrregularSizeByIndexTmpBuf = (index: number):[ number, number ] => {
+                const onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetIrregularSizeByIndexTmpBuf_BufResource.resourceId);
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetIrregularSizeByIndexTmpBuf_BufCall);
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetIrregularSizeByIndexTmpBuf_BufCallSync);
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writeNumber(index);
+                let onGetIrregularSizeByIndexTmpBuf_BufContinuationValue : [ number, number ] | undefined;
+                const onGetIrregularSizeByIndexTmpBuf_BufContinuationCallback : ((value: [ number, number ]) => void) = (value: [ number, number ]):void => {
+                onGetIrregularSizeByIndexTmpBuf_BufContinuationValue = value;
+            }
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetIrregularSizeByIndexTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallback(1602877440, onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.length());
+                onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.release();
+                return (onGetIrregularSizeByIndexTmpBuf_BufContinuationValue as [ number, number ]);
+            }
         }
-        const onGetIrregularSizeByIndex_result : ((index: number) => [ number, number ]) | undefined = onGetIrregularSizeByIndex_buf
-        const onGetRectByIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onGetRectByIndex_buf : ((index: number) => [ number, number, number, number ]) | undefined
-        if ((onGetRectByIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onGetRectByIndex_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onGetRectByIndex_buf__call : KPointer = valueDeserializer.readPointer()
-            const onGetRectByIndex_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onGetRectByIndex_buf = (index: number):[ number, number, number, number ] => { 
-    const onGetRectByIndex_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onGetRectByIndex_buf__argsSerializer.writeInt32(onGetRectByIndex_buf__resource.resourceId);
-    onGetRectByIndex_buf__argsSerializer.writePointer(onGetRectByIndex_buf__call);
-    onGetRectByIndex_buf__argsSerializer.writePointer(onGetRectByIndex_buf__callSync);
-    onGetRectByIndex_buf__argsSerializer.writeNumber(index);
-    let onGetRectByIndex_buf__continuationValue : [ number, number, number, number ] | undefined;
-    const onGetRectByIndex_buf__continuationCallback : ((value: [ number, number, number, number ]) => void) = (value: [ number, number, number, number ]):void => {     onGetRectByIndex_buf__continuationValue = value; }
-    onGetRectByIndex_buf__argsSerializer.holdAndWriteCallback(onGetRectByIndex_buf__continuationCallback);
-    InteropNativeModule._CallCallback(1618565120, onGetRectByIndex_buf__argsSerializer.asBuffer(), onGetRectByIndex_buf__argsSerializer.length());
-    onGetRectByIndex_buf__argsSerializer.release();
-    return (onGetRectByIndex_buf__continuationValue as [ number, number, number, number ]); }
+        const onGetIrregularSizeByIndexTmpResult : ((index: number) => [ number, number ]) | undefined = onGetIrregularSizeByIndexTmpBuf
+        const onGetRectByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetRectByIndexTmpBuf : ((index: number) => [ number, number, number, number ]) | undefined
+        if ((onGetRectByIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetRectByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetRectByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetRectByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetRectByIndexTmpBuf = (index: number):[ number, number, number, number ] => {
+                const onGetRectByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetRectByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetRectByIndexTmpBuf_BufResource.resourceId);
+                onGetRectByIndexTmpBuf_BufArgsSerializer.writePointer(onGetRectByIndexTmpBuf_BufCall);
+                onGetRectByIndexTmpBuf_BufArgsSerializer.writePointer(onGetRectByIndexTmpBuf_BufCallSync);
+                onGetRectByIndexTmpBuf_BufArgsSerializer.writeNumber(index);
+                let onGetRectByIndexTmpBuf_BufContinuationValue : [ number, number, number, number ] | undefined;
+                const onGetRectByIndexTmpBuf_BufContinuationCallback : ((value: [ number, number, number, number ]) => void) = (value: [ number, number, number, number ]):void => {
+                onGetRectByIndexTmpBuf_BufContinuationValue = value;
+            }
+                onGetRectByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetRectByIndexTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallback(1618565120, onGetRectByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetRectByIndexTmpBuf_BufArgsSerializer.length());
+                onGetRectByIndexTmpBuf_BufArgsSerializer.release();
+                return (onGetRectByIndexTmpBuf_BufContinuationValue as [ number, number, number, number ]);
+            }
         }
-        const onGetRectByIndex_result : ((index: number) => [ number, number, number, number ]) | undefined = onGetRectByIndex_buf
-        let value : GridLayoutOptions = ({regularSize: regularSize_result, irregularIndexes: irregularIndexes_result, onGetIrregularSizeByIndex: onGetIrregularSizeByIndex_result, onGetRectByIndex: onGetRectByIndex_result} as GridLayoutOptions)
+        const onGetRectByIndexTmpResult : ((index: number) => [ number, number, number, number ]) | undefined = onGetRectByIndexTmpBuf
+        let value : GridLayoutOptions = ({regularSize: regularSizeTmpResult, irregularIndexes: irregularIndexesTmpResult, onGetIrregularSizeByIndex: onGetIrregularSizeByIndexTmpResult, onGetRectByIndex: onGetRectByIndexTmpResult} as GridLayoutOptions)
         return value
     }
 }

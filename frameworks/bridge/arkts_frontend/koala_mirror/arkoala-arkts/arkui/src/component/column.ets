@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -28,8 +28,9 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
-import { Resource } from "./../generated/resource"
+import { Resource, Resource_serializer } from "./../generated/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkColumnPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -37,77 +38,74 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkColumnPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Column_construct(peerId, flags)
-        const _peer  = new ArkColumnPeer(_peerPtr, peerId, "Column", flags)
+        const _peer  = new ArkColumnPeer(_peerPtr, peerId, 'Column', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setColumnOptionsAttribute(options?: ColumnOptions | ColumnOptionsV2): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            let options_value_type : int32 = RuntimeType.UNDEFINED
-            options_value_type = runtimeType(options_value)
-            if (TypeChecker.isColumnOptions(options_value, false)) {
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            if (optionsTmpValue instanceof ColumnOptions) {
                 thisSerializer.writeInt8((0).toChar())
-                const options_value_0  = options_value as ColumnOptions
-                ColumnOptions_serializer.write(thisSerializer, options_value_0)
-            }
-            else if (TypeChecker.isColumnOptionsV2(options_value, false)) {
+                const optionsTmpValueForIdx0  = optionsTmpValue as ColumnOptions
+                ColumnOptions_serializer.write(thisSerializer, optionsTmpValueForIdx0)
+            } else if (optionsTmpValue instanceof ColumnOptionsV2) {
                 thisSerializer.writeInt8((1).toChar())
-                const options_value_1  = options_value as ColumnOptionsV2
-                ColumnOptionsV2_serializer.write(thisSerializer, options_value_1)
+                const optionsTmpValueForIdx1  = optionsTmpValue as ColumnOptionsV2
+                ColumnOptionsV2_serializer.write(thisSerializer, optionsTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ColumnInterface_setColumnOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAlignItemsAttribute(value: HorizontalAlign | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as HorizontalAlign)
-            thisSerializer.writeInt32(TypeChecker.HorizontalAlign_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as HorizontalAlign)
+            thisSerializer.writeInt32(TypeChecker.HorizontalAlign_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ColumnAttribute_setAlignItems(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setJustifyContentAttribute(value: FlexAlign | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as FlexAlign)
-            thisSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as FlexAlign)
+            thisSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ColumnAttribute_setJustifyContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPointLightAttribute(value: PointLightStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PointLightStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PointLightStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ColumnAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setReverseAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ColumnAttribute_setReverse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -115,7 +113,7 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
 }
 export type SpaceType = string | number | Resource;
 export interface ColumnOptions {
-    space?: string | number;
+    space?: SpaceType;
 }
 export interface ColumnOptionsV2 {
     _stub: int32;
@@ -157,17 +155,6 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
     }
     public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: ColumnAttribute): void {
-        super.apply(target)
-        if (this.alignItems_value !== undefined)
-            target.alignItems(this.alignItems_value!)
-        if (this.justifyContent_value !== undefined)
-            target.justifyContent(this.justifyContent_value!)
-        if (this.pointLight_value !== undefined)
-            target.pointLight(this.pointLight_value!)
-        if (this.reverse_value !== undefined)
-            target.reverse(this.reverse_value!)
     }
 }
 
@@ -216,7 +203,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -224,26 +210,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         super.applyAttributesFinish()
     }
 }
-export function withColumnStyle(receiver: ColumnAttribute, modifier: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkColumnStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Column")
-// export function Column(
-//     options?: ColumnOptions | ColumnOptionsV2,
-//     @memo
-//     content_?: () => void,
-// ): ColumnAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Column(
@@ -259,116 +225,259 @@ export function Column(
     NodeAttach<ArkColumnPeer>((): ArkColumnPeer => ArkColumnPeer.create(receiver), (_: ArkColumnPeer): void => {
         receiver.setColumnOptions(options)
         style?.(receiver)
-        withColumnStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkColumnSet extends ArkCommonMethodSet implements ColumnAttribute {
+export class ColumnModifier extends CommonMethodModifier implements ColumnAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _alignItems_flag?: boolean
-    _alignItems0_value?: HorizontalAlign | undefined
-    _justifyContent_flag?: boolean
-    _justifyContent0_value?: FlexAlign | undefined
-    _pointLight_flag?: boolean
-    _pointLight0_value?: PointLightStyle | undefined
-    _reverse_flag?: boolean
-    _reverse0_value?: boolean | undefined
-    applyModifierPatch(component: ColumnAttribute): void {
-        if (this._alignItems_flag)
-            component.alignItems((this._alignItems0_value as HorizontalAlign | undefined))
-        if (this._justifyContent_flag)
-            component.justifyContent((this._justifyContent0_value as FlexAlign | undefined))
-        if (this._pointLight_flag)
-            component.pointLight((this._pointLight0_value as PointLightStyle | undefined))
-        if (this._reverse_flag)
-            component.reverse((this._reverse0_value as boolean | undefined))
+    _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _alignItems_0_0value?: HorizontalAlign | undefined
+    _justifyContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _justifyContent_0_0value?: FlexAlign | undefined
+    _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pointLight_0_0value?: PointLightStyle | undefined
+    _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _reverse_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkColumnPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._alignItems_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAlignItemsAttribute((this._alignItems_0_0value as HorizontalAlign | undefined));
+                    this._alignItems_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._alignItems_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._alignItems_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAlignItemsAttribute((undefined as HorizontalAlign | undefined));
+                }
+            }
+        }
+        if (this._justifyContent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._justifyContent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setJustifyContentAttribute((this._justifyContent_0_0value as FlexAlign | undefined));
+                    this._justifyContent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._justifyContent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._justifyContent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setJustifyContentAttribute((undefined as FlexAlign | undefined));
+                }
+            }
+        }
+        if (this._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pointLight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPointLightAttribute((this._pointLight_0_0value as PointLightStyle | undefined));
+                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pointLight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPointLightAttribute((undefined as PointLightStyle | undefined));
+                }
+            }
+        }
+        if (this._reverse_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._reverse_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setReverseAttribute((this._reverse_0_0value as boolean | undefined));
+                    this._reverse_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._reverse_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._reverse_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setReverseAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public alignItems(value: HorizontalAlign | undefined): this {
-        this._alignItems_flag = true
-        this._alignItems0_value = value
+    mergeModifier(modifier: ColumnModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._alignItems_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.alignItems(modifier._alignItems_0_0value);
+                    break;
+                }
+                default: {
+                    this.alignItems((undefined as HorizontalAlign | undefined));
+                }
+            }
+        }
+        if (modifier._justifyContent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._justifyContent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.justifyContent(modifier._justifyContent_0_0value);
+                    break;
+                }
+                default: {
+                    this.justifyContent((undefined as FlexAlign | undefined));
+                }
+            }
+        }
+        if (modifier._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pointLight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pointLight(modifier._pointLight_0_0value);
+                    break;
+                }
+                default: {
+                    this.pointLight((undefined as PointLightStyle | undefined));
+                }
+            }
+        }
+        if (modifier._reverse_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._reverse_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.reverse(modifier._reverse_0_0value);
+                    break;
+                }
+                default: {
+                    this.reverse((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    alignItems(value: HorizontalAlign | undefined): this {
+        if (((this._alignItems_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
+            this._alignItems_0_0value = value
+        } else
+        {
+            this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public justifyContent(value: FlexAlign | undefined): this {
-        this._justifyContent_flag = true
-        this._justifyContent0_value = value
+    justifyContent(value: FlexAlign | undefined): this {
+        if (((this._justifyContent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._justifyContent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._justifyContent_0_0value = value
+        } else
+        {
+            this._justifyContent_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pointLight(value: PointLightStyle | undefined): this {
-        this._pointLight_flag = true
-        this._pointLight0_value = value
+    pointLight(value: PointLightStyle | undefined): this {
+        if (((this._pointLight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pointLight_0_0value = value
+        } else
+        {
+            this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public reverse(value: boolean | undefined): this {
-        this._reverse_flag = true
-        this._reverse0_value = value
+    reverse(value: boolean | undefined): this {
+        if (((this._reverse_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._reverse_0_0value) !== (value)))
+        {
+            this._reverse_0_flag = AttributeUpdaterFlag.UPDATE
+            this._reverse_0_0value = value
+        } else
+        {
+            this._reverse_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
 }
+export class ColumnOptionsV2_serializer {
+    public static write(buffer: SerializerBase, value: ColumnOptionsV2): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderFor_stub  = value._stub
+        valueSerializer.writeInt32(valueHolderFor_stub)
+    }
+    public static read(buffer: DeserializerBase): ColumnOptionsV2 {
+        let valueDeserializer : DeserializerBase = buffer
+        const _stubTmpResult : int32 = valueDeserializer.readInt32()
+        let value : ColumnOptionsV2 = ({_stub: _stubTmpResult} as ColumnOptionsV2)
+        return value
+    }
+}
 export class ColumnOptions_serializer {
     public static write(buffer: SerializerBase, value: ColumnOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_space  = value.space
-        let value_space_type : int32 = RuntimeType.UNDEFINED
-        value_space_type = runtimeType(value_space)
-        valueSerializer.writeInt8((value_space_type).toChar())
-        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
-            const value_space_value  = value_space!
-            let value_space_value_type : int32 = RuntimeType.UNDEFINED
-            value_space_value_type = runtimeType(value_space_value)
-            if (RuntimeType.STRING == value_space_value_type) {
+        const valueHolderForSpace  = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue  = valueHolderForSpace!
+            if (valueHolderForSpaceTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_space_value_0  = value_space_value as string
-                valueSerializer.writeString(value_space_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_space_value_type) {
+                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx0)
+            } else if (valueHolderForSpaceTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_space_value_1  = value_space_value as number
-                valueSerializer.writeNumber(value_space_value_1)
+                const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as number
+                valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx1)
+            } else if (valueHolderForSpaceTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForSpaceTmpValueForIdx2  = valueHolderForSpaceTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSpaceTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ColumnOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let space_buf : string | number | undefined
-        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const space_buf__selector : int32 = valueDeserializer.readInt8()
-            let space_buf_ : string | number | undefined
-            if (space_buf__selector == (0).toChar()) {
-                space_buf_ = (valueDeserializer.readString() as string)
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spaceTmpBuf : SpaceType | undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let spaceTmpBuf_ : string | number | Resource | undefined
+            if (spaceTmpBuf_UnionSelector == (0).toChar()) {
+                spaceTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (spaceTmpBuf_UnionSelector == (1).toChar()) {
+                spaceTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (spaceTmpBuf_UnionSelector == (2).toChar()) {
+                spaceTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for spaceTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (space_buf__selector == (1).toChar()) {
-                space_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else {
-                throw new Error("One of the branches for space_buf_ has to be chosen through deserialisation.")
-            }
-            space_buf = (space_buf_ as string | number)
+            spaceTmpBuf = (spaceTmpBuf_ as string | number | Resource)
         }
-        const space_result : string | number | undefined = space_buf
-        let value : ColumnOptions = ({space: space_result} as ColumnOptions)
-        return value
-    }
-}
-export class ColumnOptionsV2_serializer {
-    public static write(buffer: SerializerBase, value: ColumnOptionsV2): void {
-        let valueSerializer : SerializerBase = buffer
-        const value__stub  = value._stub
-        valueSerializer.writeInt32(value__stub)
-    }
-    public static read(buffer: DeserializerBase): ColumnOptionsV2 {
-        let valueDeserializer : DeserializerBase = buffer
-        const _stub_result : int32 = valueDeserializer.readInt32()
-        let value : ColumnOptionsV2 = ({_stub: _stub_result} as ColumnOptionsV2)
+        const spaceTmpResult : SpaceType | undefined = spaceTmpBuf
+        let value : ColumnOptions = ({space: spaceTmpResult} as ColumnOptions)
         return value
     }
 }

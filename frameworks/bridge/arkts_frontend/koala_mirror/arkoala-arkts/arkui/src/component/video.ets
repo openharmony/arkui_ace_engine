@@ -17,23 +17,24 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
 import { ColorMetrics_serializer, ColorMetrics } from "./../generated/arkui.Graphics"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { Resource, Resource_serializer } from "./../generated/resource"
 import { image, image_PixelMap_serializer } from "./../generated/ohos.multimedia.image"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class VideoControllerInternal {
     public static fromPtr(ptr: KPointer): VideoController {
         return new VideoController(ptr)
@@ -125,7 +126,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkVideoPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Video_construct(peerId, flags)
-        const _peer  = new ArkVideoPeer(_peerPtr, peerId, "Video", flags)
+        const _peer  = new ArkVideoPeer(_peerPtr, peerId, 'Video', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -137,228 +138,228 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
     }
     setMutedAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setMuted(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoPlayAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setAutoPlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setControlsAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setControls(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLoopAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setObjectFitAttribute(value: ImageFit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageFit)
-            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageFit)
+            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setObjectFit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnStartAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPauseAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnPause(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnFinishAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnFullscreenChangeAttribute(value: ((value0: FullscreenInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnFullscreenChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPreparedAttribute(value: ((value0: PreparedInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnPrepared(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnSeekingAttribute(value: ((value0: PlaybackInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnSeeking(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnSeekedAttribute(value: ((value0: PlaybackInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnSeeked(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnUpdateAttribute(value: ((value0: PlaybackInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnUpdate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnErrorAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnStopAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setOnStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setEnableAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAnalyzerConfigAttribute(value: ImageAnalyzerConfig | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ImageAnalyzerConfig_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ImageAnalyzerConfig_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setAnalyzerConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSurfaceBackgroundColorAttribute(value: ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ColorMetrics_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setSurfaceBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableShortcutKeyAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._VideoAttribute_setEnableShortcutKey(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -549,47 +550,6 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: VideoAttribute): void {
-        super.apply(target)
-        if (this.muted_value !== undefined)
-            target.muted(this.muted_value!)
-        if (this.autoPlay_value !== undefined)
-            target.autoPlay(this.autoPlay_value!)
-        if (this.controls_value !== undefined)
-            target.controls(this.controls_value!)
-        if (this.loop_value !== undefined)
-            target.loop(this.loop_value!)
-        if (this.objectFit_value !== undefined)
-            target.objectFit(this.objectFit_value!)
-        if (this.onStart_value !== undefined)
-            target.onStart(this.onStart_value!)
-        if (this.onPause_value !== undefined)
-            target.onPause(this.onPause_value!)
-        if (this.onFinish_value !== undefined)
-            target.onFinish(this.onFinish_value!)
-        if (this.onFullscreenChange_value !== undefined)
-            target.onFullscreenChange(this.onFullscreenChange_value!)
-        if (this.onPrepared_value !== undefined)
-            target.onPrepared(this.onPrepared_value!)
-        if (this.onSeeking_value !== undefined)
-            target.onSeeking(this.onSeeking_value!)
-        if (this.onSeeked_value !== undefined)
-            target.onSeeked(this.onSeeked_value!)
-        if (this.onUpdate_value !== undefined)
-            target.onUpdate(this.onUpdate_value!)
-        if (this.onError_value !== undefined)
-            target.onError(this.onError_value!)
-        if (this.onStop_value !== undefined)
-            target.onStop(this.onStop_value!)
-        if (this.enableAnalyzer_value !== undefined)
-            target.enableAnalyzer(this.enableAnalyzer_value!)
-        if (this.analyzerConfig_value !== undefined)
-            target.analyzerConfig(this.analyzerConfig_value!)
-        if (this.surfaceBackgroundColor_value !== undefined)
-            target.surfaceBackgroundColor(this.surfaceBackgroundColor_value!)
-        if (this.enableShortcutKey_value !== undefined)
-            target.enableShortcutKey(this.enableShortcutKey_value!)
-    }
 }
 
 export class ArkVideoComponent extends ArkCommonMethodComponent implements VideoAttribute {
@@ -757,7 +717,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -765,26 +724,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         super.applyAttributesFinish()
     }
 }
-export function withVideoStyle(receiver: VideoAttribute, modifier: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkVideoStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Video")
-// export function Video(
-//     value: VideoOptions,
-//     @memo
-//     content_?: () => void,
-// ): VideoAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Video(
@@ -800,188 +739,856 @@ export function Video(
     NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (_: ArkVideoPeer): void => {
         receiver.setVideoOptions(value)
         style?.(receiver)
-        withVideoStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkVideoSet extends ArkCommonMethodSet implements VideoAttribute {
+export class VideoModifier extends CommonMethodModifier implements VideoAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _muted_flag?: boolean
-    _muted0_value?: boolean | undefined
-    _autoPlay_flag?: boolean
-    _autoPlay0_value?: boolean | undefined
-    _controls_flag?: boolean
-    _controls0_value?: boolean | undefined
-    _loop_flag?: boolean
-    _loop0_value?: boolean | undefined
-    _objectFit_flag?: boolean
-    _objectFit0_value?: ImageFit | undefined
-    _onStart_flag?: boolean
-    _onStart0_value?: VoidCallback | undefined
-    _onPause_flag?: boolean
-    _onPause0_value?: VoidCallback | undefined
-    _onFinish_flag?: boolean
-    _onFinish0_value?: VoidCallback | undefined
-    _onFullscreenChange_flag?: boolean
-    _onFullscreenChange0_value?: ((value0: FullscreenInfo) => void) | undefined
-    _onPrepared_flag?: boolean
-    _onPrepared0_value?: ((value0: PreparedInfo) => void) | undefined
-    _onSeeking_flag?: boolean
-    _onSeeking0_value?: ((value0: PlaybackInfo) => void) | undefined
-    _onSeeked_flag?: boolean
-    _onSeeked0_value?: ((value0: PlaybackInfo) => void) | undefined
-    _onUpdate_flag?: boolean
-    _onUpdate0_value?: ((value0: PlaybackInfo) => void) | undefined
-    _onError_flag?: boolean
-    _onError0_value?: (() => void) | undefined
-    _onStop_flag?: boolean
-    _onStop0_value?: (() => void) | undefined
-    _enableAnalyzer_flag?: boolean
-    _enableAnalyzer0_value?: boolean | undefined
-    _analyzerConfig_flag?: boolean
-    _analyzerConfig0_value?: ImageAnalyzerConfig | undefined
-    _surfaceBackgroundColor_flag?: boolean
-    _surfaceBackgroundColor0_value?: ColorMetrics | undefined
-    _enableShortcutKey_flag?: boolean
-    _enableShortcutKey0_value?: boolean | undefined
-    applyModifierPatch(component: VideoAttribute): void {
-        if (this._muted_flag)
-            component.muted((this._muted0_value as boolean | undefined))
-        if (this._autoPlay_flag)
-            component.autoPlay((this._autoPlay0_value as boolean | undefined))
-        if (this._controls_flag)
-            component.controls((this._controls0_value as boolean | undefined))
-        if (this._loop_flag)
-            component.loop((this._loop0_value as boolean | undefined))
-        if (this._objectFit_flag)
-            component.objectFit((this._objectFit0_value as ImageFit | undefined))
-        if (this._onStart_flag)
-            component.onStart((this._onStart0_value as VoidCallback | undefined))
-        if (this._onPause_flag)
-            component.onPause((this._onPause0_value as VoidCallback | undefined))
-        if (this._onFinish_flag)
-            component.onFinish((this._onFinish0_value as VoidCallback | undefined))
-        if (this._onFullscreenChange_flag)
-            component.onFullscreenChange((this._onFullscreenChange0_value as ((value0: FullscreenInfo) => void) | undefined))
-        if (this._onPrepared_flag)
-            component.onPrepared((this._onPrepared0_value as ((value0: PreparedInfo) => void) | undefined))
-        if (this._onSeeking_flag)
-            component.onSeeking((this._onSeeking0_value as ((value0: PlaybackInfo) => void) | undefined))
-        if (this._onSeeked_flag)
-            component.onSeeked((this._onSeeked0_value as ((value0: PlaybackInfo) => void) | undefined))
-        if (this._onUpdate_flag)
-            component.onUpdate((this._onUpdate0_value as ((value0: PlaybackInfo) => void) | undefined))
-        if (this._onError_flag)
-            component.onError((this._onError0_value as (() => void) | undefined))
-        if (this._onStop_flag)
-            component.onStop((this._onStop0_value as (() => void) | undefined))
-        if (this._enableAnalyzer_flag)
-            component.enableAnalyzer((this._enableAnalyzer0_value as boolean | undefined))
-        if (this._analyzerConfig_flag)
-            component.analyzerConfig((this._analyzerConfig0_value as ImageAnalyzerConfig | undefined))
-        if (this._surfaceBackgroundColor_flag)
-            component.surfaceBackgroundColor((this._surfaceBackgroundColor0_value as ColorMetrics | undefined))
-        if (this._enableShortcutKey_flag)
-            component.enableShortcutKey((this._enableShortcutKey0_value as boolean | undefined))
+    _muted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _muted_0_0value?: boolean | undefined
+    _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoPlay_0_0value?: boolean | undefined
+    _controls_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _controls_0_0value?: boolean | undefined
+    _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _loop_0_0value?: boolean | undefined
+    _objectFit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _objectFit_0_0value?: ImageFit | undefined
+    _onStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onStart_0_0value?: VoidCallback | undefined
+    _onPause_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPause_0_0value?: VoidCallback | undefined
+    _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFinish_0_0value?: VoidCallback | undefined
+    _onFullscreenChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFullscreenChange_0_0value?: ((value0: FullscreenInfo) => void) | undefined
+    _onPrepared_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPrepared_0_0value?: ((value0: PreparedInfo) => void) | undefined
+    _onSeeking_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSeeking_0_0value?: ((value0: PlaybackInfo) => void) | undefined
+    _onSeeked_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSeeked_0_0value?: ((value0: PlaybackInfo) => void) | undefined
+    _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onUpdate_0_0value?: ((value0: PlaybackInfo) => void) | undefined
+    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onError_0_0value?: (() => void) | undefined
+    _onStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onStop_0_0value?: (() => void) | undefined
+    _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAnalyzer_0_0value?: boolean | undefined
+    _analyzerConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _analyzerConfig_0_0value?: ImageAnalyzerConfig | undefined
+    _surfaceBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
+    _enableShortcutKey_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableShortcutKey_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkVideoPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._muted_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMutedAttribute((this._muted_0_0value as boolean | undefined));
+                    this._muted_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._muted_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._muted_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMutedAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._autoPlay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAutoPlayAttribute((this._autoPlay_0_0value as boolean | undefined));
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoPlayAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._controls_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._controls_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setControlsAttribute((this._controls_0_0value as boolean | undefined));
+                    this._controls_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._controls_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._controls_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setControlsAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._loop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._loop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLoopAttribute((this._loop_0_0value as boolean | undefined));
+                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._loop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLoopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._objectFit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setObjectFitAttribute((this._objectFit_0_0value as ImageFit | undefined));
+                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._objectFit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setObjectFitAttribute((undefined as ImageFit | undefined));
+                }
+            }
+        }
+        if (this._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnStartAttribute((this._onStart_0_0value as VoidCallback | undefined));
+                    this._onStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnStartAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onPause_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPause_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPauseAttribute((this._onPause_0_0value as VoidCallback | undefined));
+                    this._onPause_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPause_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPause_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPauseAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFinishAttribute((this._onFinish_0_0value as VoidCallback | undefined));
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFinishAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onFullscreenChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFullscreenChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFullscreenChangeAttribute((this._onFullscreenChange_0_0value as ((value0: FullscreenInfo) => void) | undefined));
+                    this._onFullscreenChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFullscreenChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFullscreenChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFullscreenChangeAttribute((undefined as ((value0: FullscreenInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onPrepared_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPrepared_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPreparedAttribute((this._onPrepared_0_0value as ((value0: PreparedInfo) => void) | undefined));
+                    this._onPrepared_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPrepared_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPrepared_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPreparedAttribute((undefined as ((value0: PreparedInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onSeeking_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSeeking_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSeekingAttribute((this._onSeeking_0_0value as ((value0: PlaybackInfo) => void) | undefined));
+                    this._onSeeking_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSeeking_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSeeking_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSeekingAttribute((undefined as ((value0: PlaybackInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onSeeked_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSeeked_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSeekedAttribute((this._onSeeked_0_0value as ((value0: PlaybackInfo) => void) | undefined));
+                    this._onSeeked_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSeeked_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSeeked_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSeekedAttribute((undefined as ((value0: PlaybackInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onUpdate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnUpdateAttribute((this._onUpdate_0_0value as ((value0: PlaybackInfo) => void) | undefined));
+                    this._onUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onUpdate_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnUpdateAttribute((undefined as ((value0: PlaybackInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnErrorAttribute((this._onError_0_0value as (() => void) | undefined));
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnErrorAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onStop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onStop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnStopAttribute((this._onStop_0_0value as (() => void) | undefined));
+                    this._onStop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onStop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onStop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnStopAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAnalyzerAttribute((this._enableAnalyzer_0_0value as boolean | undefined));
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAnalyzerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._analyzerConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._analyzerConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAnalyzerConfigAttribute((this._analyzerConfig_0_0value as ImageAnalyzerConfig | undefined));
+                    this._analyzerConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._analyzerConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._analyzerConfig_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAnalyzerConfigAttribute((undefined as ImageAnalyzerConfig | undefined));
+                }
+            }
+        }
+        if (this._surfaceBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._surfaceBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSurfaceBackgroundColorAttribute((this._surfaceBackgroundColor_0_0value as ColorMetrics | undefined));
+                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSurfaceBackgroundColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (this._enableShortcutKey_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableShortcutKey_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableShortcutKeyAttribute((this._enableShortcutKey_0_0value as boolean | undefined));
+                    this._enableShortcutKey_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableShortcutKey_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableShortcutKey_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableShortcutKeyAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public muted(value: boolean | undefined): this {
-        this._muted_flag = true
-        this._muted0_value = value
+    mergeModifier(modifier: VideoModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._muted_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._muted_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.muted(modifier._muted_0_0value);
+                    break;
+                }
+                default: {
+                    this.muted((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._autoPlay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.autoPlay(modifier._autoPlay_0_0value);
+                    break;
+                }
+                default: {
+                    this.autoPlay((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._controls_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._controls_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.controls(modifier._controls_0_0value);
+                    break;
+                }
+                default: {
+                    this.controls((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._loop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._loop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.loop(modifier._loop_0_0value);
+                    break;
+                }
+                default: {
+                    this.loop((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._objectFit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.objectFit(modifier._objectFit_0_0value);
+                    break;
+                }
+                default: {
+                    this.objectFit((undefined as ImageFit | undefined));
+                }
+            }
+        }
+        if (modifier._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onStart(modifier._onStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onStart((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onPause_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPause_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPause(modifier._onPause_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPause((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFinish(modifier._onFinish_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFinish((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onFullscreenChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFullscreenChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFullscreenChange(modifier._onFullscreenChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFullscreenChange((undefined as ((value0: FullscreenInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onPrepared_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPrepared_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPrepared(modifier._onPrepared_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPrepared((undefined as ((value0: PreparedInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onSeeking_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSeeking_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSeeking(modifier._onSeeking_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSeeking((undefined as ((value0: PlaybackInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onSeeked_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSeeked_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSeeked(modifier._onSeeked_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSeeked((undefined as ((value0: PlaybackInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onUpdate_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onUpdate(modifier._onUpdate_0_0value);
+                    break;
+                }
+                default: {
+                    this.onUpdate((undefined as ((value0: PlaybackInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onError(modifier._onError_0_0value);
+                    break;
+                }
+                default: {
+                    this.onError((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onStop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onStop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onStop(modifier._onStop_0_0value);
+                    break;
+                }
+                default: {
+                    this.onStop((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAnalyzer(modifier._enableAnalyzer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAnalyzer((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._analyzerConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._analyzerConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.analyzerConfig(modifier._analyzerConfig_0_0value);
+                    break;
+                }
+                default: {
+                    this.analyzerConfig((undefined as ImageAnalyzerConfig | undefined));
+                }
+            }
+        }
+        if (modifier._surfaceBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._surfaceBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.surfaceBackgroundColor(modifier._surfaceBackgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.surfaceBackgroundColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._enableShortcutKey_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableShortcutKey_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableShortcutKey(modifier._enableShortcutKey_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableShortcutKey((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    muted(value: boolean | undefined): this {
+        if (((this._muted_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._muted_0_0value) !== (value)))
+        {
+            this._muted_0_flag = AttributeUpdaterFlag.UPDATE
+            this._muted_0_0value = value
+        } else
+        {
+            this._muted_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public autoPlay(value: boolean | undefined): this {
-        this._autoPlay_flag = true
-        this._autoPlay0_value = value
+    autoPlay(value: boolean | undefined): this {
+        if (((this._autoPlay_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoPlay_0_0value) !== (value)))
+        {
+            this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
+            this._autoPlay_0_0value = value
+        } else
+        {
+            this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public controls(value: boolean | undefined): this {
-        this._controls_flag = true
-        this._controls0_value = value
+    controls(value: boolean | undefined): this {
+        if (((this._controls_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._controls_0_0value) !== (value)))
+        {
+            this._controls_0_flag = AttributeUpdaterFlag.UPDATE
+            this._controls_0_0value = value
+        } else
+        {
+            this._controls_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public loop(value: boolean | undefined): this {
-        this._loop_flag = true
-        this._loop0_value = value
+    loop(value: boolean | undefined): this {
+        if (((this._loop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._loop_0_0value) !== (value)))
+        {
+            this._loop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._loop_0_0value = value
+        } else
+        {
+            this._loop_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public objectFit(value: ImageFit | undefined): this {
-        this._objectFit_flag = true
-        this._objectFit0_value = value
+    objectFit(value: ImageFit | undefined): this {
+        if (((this._objectFit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._objectFit_0_0value = value
+        } else
+        {
+            this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onStart(value: VoidCallback | undefined): this {
-        this._onStart_flag = true
-        this._onStart0_value = value
+    onStart(value: VoidCallback | undefined): this {
+        if (((this._onStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onStart_0_0value = value
+        } else
+        {
+            this._onStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onPause(value: VoidCallback | undefined): this {
-        this._onPause_flag = true
-        this._onPause0_value = value
+    onPause(value: VoidCallback | undefined): this {
+        if (((this._onPause_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPause_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPause_0_0value = value
+        } else
+        {
+            this._onPause_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onFinish(value: VoidCallback | undefined): this {
-        this._onFinish_flag = true
-        this._onFinish0_value = value
+    onFinish(value: VoidCallback | undefined): this {
+        if (((this._onFinish_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFinish_0_0value = value
+        } else
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this {
-        this._onFullscreenChange_flag = true
-        this._onFullscreenChange0_value = value
+    onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this {
+        if (((this._onFullscreenChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFullscreenChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFullscreenChange_0_0value = value
+        } else
+        {
+            this._onFullscreenChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this {
-        this._onPrepared_flag = true
-        this._onPrepared0_value = value
+    onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this {
+        if (((this._onPrepared_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPrepared_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPrepared_0_0value = value
+        } else
+        {
+            this._onPrepared_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        this._onSeeking_flag = true
-        this._onSeeking0_value = value
+    onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this {
+        if (((this._onSeeking_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSeeking_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSeeking_0_0value = value
+        } else
+        {
+            this._onSeeking_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        this._onSeeked_flag = true
-        this._onSeeked0_value = value
+    onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this {
+        if (((this._onSeeked_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSeeked_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSeeked_0_0value = value
+        } else
+        {
+            this._onSeeked_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
-        this._onUpdate_flag = true
-        this._onUpdate0_value = value
+    onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
+        if (((this._onUpdate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onUpdate_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onUpdate_0_0value = value
+        } else
+        {
+            this._onUpdate_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onError(value: (() => void) | undefined): this {
-        this._onError_flag = true
-        this._onError0_value = value
+    onError(value: (() => void) | undefined): this {
+        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onError_0_0value = value
+        } else
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onStop(value: (() => void) | undefined): this {
-        this._onStop_flag = true
-        this._onStop0_value = value
+    onStop(value: (() => void) | undefined): this {
+        if (((this._onStop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onStop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onStop_0_0value = value
+        } else
+        {
+            this._onStop_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableAnalyzer(value: boolean | undefined): this {
-        this._enableAnalyzer_flag = true
-        this._enableAnalyzer0_value = value
+    enableAnalyzer(value: boolean | undefined): this {
+        if (((this._enableAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAnalyzer_0_0value = value
+        } else
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
-        this._analyzerConfig_flag = true
-        this._analyzerConfig0_value = value
+    analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
+        if (((this._analyzerConfig_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._analyzerConfig_0_flag = AttributeUpdaterFlag.UPDATE
+            this._analyzerConfig_0_0value = value
+        } else
+        {
+            this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public surfaceBackgroundColor(value: ColorMetrics | undefined): this {
-        this._surfaceBackgroundColor_flag = true
-        this._surfaceBackgroundColor0_value = value
+    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
+        if (((this._surfaceBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._surfaceBackgroundColor_0_0value = value
+        } else
+        {
+            this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableShortcutKey(value: boolean | undefined): this {
-        this._enableShortcutKey_flag = true
-        this._enableShortcutKey0_value = value
+    enableShortcutKey(value: boolean | undefined): this {
+        if (((this._enableShortcutKey_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableShortcutKey_0_0value) !== (value)))
+        {
+            this._enableShortcutKey_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableShortcutKey_0_0value = value
+        } else
+        {
+            this._enableShortcutKey_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -991,39 +1598,39 @@ export class ArkVideoSet extends ArkCommonMethodSet implements VideoAttribute {
 export class FullscreenInfo_serializer {
     public static write(buffer: SerializerBase, value: FullscreenInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fullscreen  = value.fullscreen
-        valueSerializer.writeBoolean(value_fullscreen)
+        const valueHolderForFullscreen  = value.fullscreen
+        valueSerializer.writeBoolean(valueHolderForFullscreen)
     }
     public static read(buffer: DeserializerBase): FullscreenInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const fullscreen_result : boolean = valueDeserializer.readBoolean()
-        let value : FullscreenInfo = ({fullscreen: fullscreen_result} as FullscreenInfo)
+        const fullscreenTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : FullscreenInfo = ({fullscreen: fullscreenTmpResult} as FullscreenInfo)
         return value
     }
 }
 export class PlaybackInfo_serializer {
     public static write(buffer: SerializerBase, value: PlaybackInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_time  = value.time
-        valueSerializer.writeNumber(value_time)
+        const valueHolderForTime  = value.time
+        valueSerializer.writeNumber(valueHolderForTime)
     }
     public static read(buffer: DeserializerBase): PlaybackInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const time_result : number = (valueDeserializer.readNumber() as number)
-        let value : PlaybackInfo = ({time: time_result} as PlaybackInfo)
+        const timeTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : PlaybackInfo = ({time: timeTmpResult} as PlaybackInfo)
         return value
     }
 }
 export class PreparedInfo_serializer {
     public static write(buffer: SerializerBase, value: PreparedInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_duration  = value.duration
-        valueSerializer.writeNumber(value_duration)
+        const valueHolderForDuration  = value.duration
+        valueSerializer.writeNumber(valueHolderForDuration)
     }
     public static read(buffer: DeserializerBase): PreparedInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const duration_result : number = (valueDeserializer.readNumber() as number)
-        let value : PreparedInfo = ({duration: duration_result} as PreparedInfo)
+        const durationTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : PreparedInfo = ({duration: durationTmpResult} as PreparedInfo)
         return value
     }
 }
@@ -1041,207 +1648,181 @@ export class VideoController_serializer {
 export class PosterOptions_serializer {
     public static write(buffer: SerializerBase, value: PosterOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_showFirstFrame  = value.showFirstFrame
-        let value_showFirstFrame_type : int32 = RuntimeType.UNDEFINED
-        value_showFirstFrame_type = runtimeType(value_showFirstFrame)
-        valueSerializer.writeInt8((value_showFirstFrame_type).toChar())
-        if ((value_showFirstFrame_type) != (RuntimeType.UNDEFINED)) {
-            const value_showFirstFrame_value  = value_showFirstFrame!
-            valueSerializer.writeBoolean(value_showFirstFrame_value)
+        const valueHolderForShowFirstFrame  = value.showFirstFrame
+        if (valueHolderForShowFirstFrame !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowFirstFrameTmpValue  = valueHolderForShowFirstFrame!
+            valueSerializer.writeBoolean(valueHolderForShowFirstFrameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PosterOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const showFirstFrame_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showFirstFrame_buf : boolean | undefined
-        if ((showFirstFrame_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            showFirstFrame_buf = valueDeserializer.readBoolean()
+        const showFirstFrameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showFirstFrameTmpBuf : boolean | undefined
+        if ((showFirstFrameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showFirstFrameTmpBuf = valueDeserializer.readBoolean()
         }
-        const showFirstFrame_result : boolean | undefined = showFirstFrame_buf
-        let value : PosterOptions = ({showFirstFrame: showFirstFrame_result} as PosterOptions)
+        const showFirstFrameTmpResult : boolean | undefined = showFirstFrameTmpBuf
+        let value : PosterOptions = ({showFirstFrame: showFirstFrameTmpResult} as PosterOptions)
         return value
     }
 }
 export class VideoOptions_serializer {
     public static write(buffer: SerializerBase, value: VideoOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_src  = value.src
-        let value_src_type : int32 = RuntimeType.UNDEFINED
-        value_src_type = runtimeType(value_src)
-        valueSerializer.writeInt8((value_src_type).toChar())
-        if ((value_src_type) != (RuntimeType.UNDEFINED)) {
-            const value_src_value  = value_src!
-            let value_src_value_type : int32 = RuntimeType.UNDEFINED
-            value_src_value_type = runtimeType(value_src_value)
-            if (RuntimeType.STRING == value_src_value_type) {
+        const valueHolderForSrc  = value.src
+        if (valueHolderForSrc !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSrcTmpValue  = valueHolderForSrc!
+            if (valueHolderForSrcTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_src_value_0  = value_src_value as string
-                valueSerializer.writeString(value_src_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_src_value_type) {
+                const valueHolderForSrcTmpValueForIdx0  = valueHolderForSrcTmpValue as string
+                valueSerializer.writeString(valueHolderForSrcTmpValueForIdx0)
+            } else if (valueHolderForSrcTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_src_value_1  = value_src_value as Resource
-                Resource_serializer.write(valueSerializer, value_src_value_1)
+                const valueHolderForSrcTmpValueForIdx1  = valueHolderForSrcTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSrcTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_currentProgressRate  = value.currentProgressRate
-        let value_currentProgressRate_type : int32 = RuntimeType.UNDEFINED
-        value_currentProgressRate_type = runtimeType(value_currentProgressRate)
-        valueSerializer.writeInt8((value_currentProgressRate_type).toChar())
-        if ((value_currentProgressRate_type) != (RuntimeType.UNDEFINED)) {
-            const value_currentProgressRate_value  = value_currentProgressRate!
-            let value_currentProgressRate_value_type : int32 = RuntimeType.UNDEFINED
-            value_currentProgressRate_value_type = runtimeType(value_currentProgressRate_value)
-            if (RuntimeType.NUMBER == value_currentProgressRate_value_type) {
+        const valueHolderForCurrentProgressRate  = value.currentProgressRate
+        if (valueHolderForCurrentProgressRate !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCurrentProgressRateTmpValue  = valueHolderForCurrentProgressRate!
+            if (valueHolderForCurrentProgressRateTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_currentProgressRate_value_0  = value_currentProgressRate_value as number
-                valueSerializer.writeNumber(value_currentProgressRate_value_0)
-            }
-            else if (RuntimeType.STRING == value_currentProgressRate_value_type) {
+                const valueHolderForCurrentProgressRateTmpValueForIdx0  = valueHolderForCurrentProgressRateTmpValue as number
+                valueSerializer.writeNumber(valueHolderForCurrentProgressRateTmpValueForIdx0)
+            } else if (valueHolderForCurrentProgressRateTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_currentProgressRate_value_1  = value_currentProgressRate_value as string
-                valueSerializer.writeString(value_currentProgressRate_value_1)
-            }
-            else if (TypeChecker.isPlaybackSpeed(value_currentProgressRate_value)) {
+                const valueHolderForCurrentProgressRateTmpValueForIdx1  = valueHolderForCurrentProgressRateTmpValue as string
+                valueSerializer.writeString(valueHolderForCurrentProgressRateTmpValueForIdx1)
+            } else if (valueHolderForCurrentProgressRateTmpValue instanceof PlaybackSpeed) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_currentProgressRate_value_2  = value_currentProgressRate_value as PlaybackSpeed
-                valueSerializer.writeInt32(TypeChecker.PlaybackSpeed_ToNumeric(value_currentProgressRate_value_2))
+                const valueHolderForCurrentProgressRateTmpValueForIdx2  = valueHolderForCurrentProgressRateTmpValue as PlaybackSpeed
+                valueSerializer.writeInt32(TypeChecker.PlaybackSpeed_ToNumeric(valueHolderForCurrentProgressRateTmpValueForIdx2))
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_previewUri  = value.previewUri
-        let value_previewUri_type : int32 = RuntimeType.UNDEFINED
-        value_previewUri_type = runtimeType(value_previewUri)
-        valueSerializer.writeInt8((value_previewUri_type).toChar())
-        if ((value_previewUri_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewUri_value  = value_previewUri!
-            let value_previewUri_value_type : int32 = RuntimeType.UNDEFINED
-            value_previewUri_value_type = runtimeType(value_previewUri_value)
-            if (RuntimeType.STRING == value_previewUri_value_type) {
+        const valueHolderForPreviewUri  = value.previewUri
+        if (valueHolderForPreviewUri !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewUriTmpValue  = valueHolderForPreviewUri!
+            if (valueHolderForPreviewUriTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_previewUri_value_0  = value_previewUri_value as string
-                valueSerializer.writeString(value_previewUri_value_0)
-            }
-            else if (TypeChecker.isimage_PixelMap(value_previewUri_value, false, false)) {
+                const valueHolderForPreviewUriTmpValueForIdx0  = valueHolderForPreviewUriTmpValue as string
+                valueSerializer.writeString(valueHolderForPreviewUriTmpValueForIdx0)
+            } else if (valueHolderForPreviewUriTmpValue instanceof image.PixelMap) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_previewUri_value_1  = value_previewUri_value as image.PixelMap
-                image_PixelMap_serializer.write(valueSerializer, value_previewUri_value_1)
-            }
-            else if (TypeChecker.isResource(value_previewUri_value, false, false, false, false, false)) {
+                const valueHolderForPreviewUriTmpValueForIdx1  = valueHolderForPreviewUriTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx1)
+            } else if (valueHolderForPreviewUriTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_previewUri_value_2  = value_previewUri_value as Resource
-                Resource_serializer.write(valueSerializer, value_previewUri_value_2)
+                const valueHolderForPreviewUriTmpValueForIdx2  = valueHolderForPreviewUriTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForPreviewUriTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
-            const value_controller_value  = value_controller!
-            VideoController_serializer.write(valueSerializer, value_controller_value)
+        const valueHolderForController  = value.controller
+        if (valueHolderForController !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForControllerTmpValue  = valueHolderForController!
+            VideoController_serializer.write(valueSerializer, valueHolderForControllerTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_imageAIOptions  = value.imageAIOptions
-        let value_imageAIOptions_type : int32 = RuntimeType.UNDEFINED
-        value_imageAIOptions_type = runtimeType(value_imageAIOptions)
-        valueSerializer.writeInt8((value_imageAIOptions_type).toChar())
-        if ((value_imageAIOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_imageAIOptions_value  = value_imageAIOptions!
-            ImageAIOptions_serializer.write(valueSerializer, value_imageAIOptions_value)
+        const valueHolderForImageAIOptions  = value.imageAIOptions
+        if (valueHolderForImageAIOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForImageAIOptionsTmpValue  = valueHolderForImageAIOptions!
+            ImageAIOptions_serializer.write(valueSerializer, valueHolderForImageAIOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_posterOptions  = value.posterOptions
-        let value_posterOptions_type : int32 = RuntimeType.UNDEFINED
-        value_posterOptions_type = runtimeType(value_posterOptions)
-        valueSerializer.writeInt8((value_posterOptions_type).toChar())
-        if ((value_posterOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_posterOptions_value  = value_posterOptions!
-            PosterOptions_serializer.write(valueSerializer, value_posterOptions_value)
+        const valueHolderForPosterOptions  = value.posterOptions
+        if (valueHolderForPosterOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPosterOptionsTmpValue  = valueHolderForPosterOptions!
+            PosterOptions_serializer.write(valueSerializer, valueHolderForPosterOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): VideoOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const src_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let src_buf : string | Resource | undefined
-        if ((src_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const src_buf__selector : int32 = valueDeserializer.readInt8()
-            let src_buf_ : string | Resource | undefined
-            if (src_buf__selector == (0).toChar()) {
-                src_buf_ = (valueDeserializer.readString() as string)
+        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let srcTmpBuf : string | Resource | undefined
+        if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const srcTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let srcTmpBuf_ : string | Resource | undefined
+            if (srcTmpBuf_UnionSelector == (0).toChar()) {
+                srcTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (srcTmpBuf_UnionSelector == (1).toChar()) {
+                srcTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for srcTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (src_buf__selector == (1).toChar()) {
-                src_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for src_buf_ has to be chosen through deserialisation.")
-            }
-            src_buf = (src_buf_ as string | Resource)
+            srcTmpBuf = (srcTmpBuf_ as string | Resource)
         }
-        const src_result : string | Resource | undefined = src_buf
-        const currentProgressRate_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let currentProgressRate_buf : number | string | PlaybackSpeed | undefined
-        if ((currentProgressRate_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const currentProgressRate_buf__selector : int32 = valueDeserializer.readInt8()
-            let currentProgressRate_buf_ : number | string | PlaybackSpeed | undefined
-            if (currentProgressRate_buf__selector == (0).toChar()) {
-                currentProgressRate_buf_ = (valueDeserializer.readNumber() as number)
+        const srcTmpResult : string | Resource | undefined = srcTmpBuf
+        const currentProgressRateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let currentProgressRateTmpBuf : number | string | PlaybackSpeed | undefined
+        if ((currentProgressRateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const currentProgressRateTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let currentProgressRateTmpBuf_ : number | string | PlaybackSpeed | undefined
+            if (currentProgressRateTmpBuf_UnionSelector == (0).toChar()) {
+                currentProgressRateTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (currentProgressRateTmpBuf_UnionSelector == (1).toChar()) {
+                currentProgressRateTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (currentProgressRateTmpBuf_UnionSelector == (2).toChar()) {
+                currentProgressRateTmpBuf_ = TypeChecker.PlaybackSpeed_FromNumeric(valueDeserializer.readInt32())
+            } else {
+                throw new Error("One of the branches for currentProgressRateTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (currentProgressRate_buf__selector == (1).toChar()) {
-                currentProgressRate_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (currentProgressRate_buf__selector == (2).toChar()) {
-                currentProgressRate_buf_ = TypeChecker.PlaybackSpeed_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for currentProgressRate_buf_ has to be chosen through deserialisation.")
-            }
-            currentProgressRate_buf = (currentProgressRate_buf_ as number | string | PlaybackSpeed)
+            currentProgressRateTmpBuf = (currentProgressRateTmpBuf_ as number | string | PlaybackSpeed)
         }
-        const currentProgressRate_result : number | string | PlaybackSpeed | undefined = currentProgressRate_buf
-        const previewUri_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewUri_buf : string | image.PixelMap | Resource | undefined
-        if ((previewUri_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const previewUri_buf__selector : int32 = valueDeserializer.readInt8()
-            let previewUri_buf_ : string | image.PixelMap | Resource | undefined
-            if (previewUri_buf__selector == (0).toChar()) {
-                previewUri_buf_ = (valueDeserializer.readString() as string)
+        const currentProgressRateTmpResult : number | string | PlaybackSpeed | undefined = currentProgressRateTmpBuf
+        const previewUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewUriTmpBuf : string | image.PixelMap | Resource | undefined
+        if ((previewUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const previewUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let previewUriTmpBuf_ : string | image.PixelMap | Resource | undefined
+            if (previewUriTmpBuf_UnionSelector == (0).toChar()) {
+                previewUriTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (previewUriTmpBuf_UnionSelector == (1).toChar()) {
+                previewUriTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else if (previewUriTmpBuf_UnionSelector == (2).toChar()) {
+                previewUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for previewUriTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (previewUri_buf__selector == (1).toChar()) {
-                previewUri_buf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
-            }
-            else if (previewUri_buf__selector == (2).toChar()) {
-                previewUri_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for previewUri_buf_ has to be chosen through deserialisation.")
-            }
-            previewUri_buf = (previewUri_buf_ as string | image.PixelMap | Resource)
+            previewUriTmpBuf = (previewUriTmpBuf_ as string | image.PixelMap | Resource)
         }
-        const previewUri_result : string | image.PixelMap | Resource | undefined = previewUri_buf
-        const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let controller_buf : VideoController | undefined
-        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            controller_buf = (VideoController_serializer.read(valueDeserializer) as VideoController)
+        const previewUriTmpResult : string | image.PixelMap | Resource | undefined = previewUriTmpBuf
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let controllerTmpBuf : VideoController | undefined
+        if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            controllerTmpBuf = (VideoController_serializer.read(valueDeserializer) as VideoController)
         }
-        const controller_result : VideoController | undefined = controller_buf
-        const imageAIOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let imageAIOptions_buf : ImageAIOptions | undefined
-        if ((imageAIOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            imageAIOptions_buf = ImageAIOptions_serializer.read(valueDeserializer)
+        const controllerTmpResult : VideoController | undefined = controllerTmpBuf
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let imageAIOptionsTmpBuf : ImageAIOptions | undefined
+        if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
         }
-        const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
-        const posterOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let posterOptions_buf : PosterOptions | undefined
-        if ((posterOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            posterOptions_buf = PosterOptions_serializer.read(valueDeserializer)
+        const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
+        const posterOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let posterOptionsTmpBuf : PosterOptions | undefined
+        if ((posterOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            posterOptionsTmpBuf = PosterOptions_serializer.read(valueDeserializer)
         }
-        const posterOptions_result : PosterOptions | undefined = posterOptions_buf
-        let value : VideoOptions = ({src: src_result, currentProgressRate: currentProgressRate_result, previewUri: previewUri_result, controller: controller_result, imageAIOptions: imageAIOptions_result, posterOptions: posterOptions_result} as VideoOptions)
+        const posterOptionsTmpResult : PosterOptions | undefined = posterOptionsTmpBuf
+        let value : VideoOptions = ({src: srcTmpResult, currentProgressRate: currentProgressRateTmpResult, previewUri: previewUriTmpResult, controller: controllerTmpResult, imageAIOptions: imageAIOptionsTmpResult, posterOptions: posterOptionsTmpResult} as VideoOptions)
         return value
     }
 }

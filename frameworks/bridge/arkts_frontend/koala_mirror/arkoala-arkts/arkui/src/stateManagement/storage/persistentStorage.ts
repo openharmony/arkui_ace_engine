@@ -78,7 +78,7 @@ class TypedMap {
         const r1 = this.key2Type_.delete(key);
         const ref = this.key2Value_.get(key);
         if (ref !== undefined) {
-            const regId = (ref as AbstractProperty<NullishType>).getMyTriggerFromSourceWatchId();
+            const regId = (ref as AbstractProperty<Any>).getMyTriggerFromSourceWatchId();
             AppStorage.__getStoragePropUnsafe(key)!.__unregister(regId);
         }
         const r2 = this.key2Value_.delete(key);
@@ -234,7 +234,7 @@ class PersistentStorage {
 
     // Note: persistProps can not be supported because each
     // property has different T
-    // framework can not recover T from Array<PersistPropsOptions<NullishType>>
+    // framework can not recover T from Array<PersistPropsOptions<Any>>
     // must use separate persistProp calls instead
 
     /**
@@ -330,7 +330,7 @@ class PersistentStorage {
         }
         PersistentStorage.getOrCreate().map_.add(key, ttype, ref);
         const writeToDiskOnChange: OnChangeType<T> = (key1: string, newValue: T) => {
-            if (key !== key1) {
+            if (key != key1) {
                 StateMgmtConsole.log('persistProp callback will non-matching key. Ignoring. Internal error.');
                 return;
             }

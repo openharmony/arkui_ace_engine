@@ -8,31 +8,33 @@
             "#stateMgmtTool": ["./stateManagement/tools/arkts"],
             "arkui.ani": ["./ani/arkts/ArkUIAniModule"],
             "@ohos.arkui.stateManagement": ["./stateManagement"],
-            "@koalaui/interop": ["../../../../interop/src/arkts"],
-            "@koalaui/common": ["../../../../incremental/common/src"],
-            "@koalaui/compat": ["../../../../incremental/compat/src/arkts"],
-            "@koalaui/runtime": ["../../../../incremental/runtime/ets"],
-            "@koalaui/runtime/annotations": ["../../../../incremental/runtime/annotations"],
+            "@koalaui/interop": ["../../../interop/src/arkts"],
+            "@koalaui/common": ["../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["../../../incremental/runtime/ets"],
+            "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"],
             "@koalaui/builderLambda": ["./annotations"]
         },
         "plugins": [
             {
                 "transform": "@koalaui/memo-plugin",
-                "stage": "checked",
+                "state": "parsed",
+                "name": "memo"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "state": "checked",
                 "name": "memo"
             }
         ]
     },
     "include": [
         "./src/ani/arkts/ArkUIAniModule.ts",
-        "./src/component/interop.ts",
         "./src/stateManagement/**/*.ts",
         "./src/**/*.ets"
     ],
     "exclude": [
-        "generated/ts/*.ts"
-    ],
-    "dependencies": {
-        "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]
-    }
+        "./src/generated/ts/*.ets",
+        "./src/sdk/**/*.ets"
+    ]
 }

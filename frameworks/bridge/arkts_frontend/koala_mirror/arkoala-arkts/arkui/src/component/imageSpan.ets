@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { image_PixelMap_serializer, image } from "./../generated/ohos.multimedia.image"
 import { ColorFilter_serializer, ColorFilter, ResourceStr } from "./units"
@@ -25,16 +25,17 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle, ArkBaseSpanSet } from "./span"
+import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle, BaseSpanModifier } from "./span"
 import { ImageSpanAlignment, ImageFit } from "./enums"
 import { ImageErrorCallback, ImageError } from "./image"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
-import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -42,117 +43,108 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkImageSpanPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._ImageSpan_construct(peerId, flags)
-        const _peer  = new ArkImageSpanPeer(_peerPtr, peerId, "ImageSpan", flags)
+        const _peer  = new ArkImageSpanPeer(_peerPtr, peerId, 'ImageSpan', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setImageSpanOptionsAttribute(value: ResourceStr | image.PixelMap): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type)) {
+        if (value instanceof ResourceStr) {
             thisSerializer.writeInt8((0).toChar())
-            const value_0  = value as ResourceStr
-            let value_0_type : int32 = RuntimeType.UNDEFINED
-            value_0_type = runtimeType(value_0)
-            if (RuntimeType.STRING == value_0_type) {
+            const valueForIdx0  = value as ResourceStr
+            if (valueForIdx0 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_0_0  = value_0 as string
-                thisSerializer.writeString(value_0_0)
-            }
-            else if (RuntimeType.OBJECT == value_0_type) {
+                const valueForIdx0ForIdx0  = valueForIdx0 as string
+                thisSerializer.writeString(valueForIdx0ForIdx0)
+            } else if (valueForIdx0 instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_0_1  = value_0 as Resource
-                Resource_serializer.write(thisSerializer, value_0_1)
+                const valueForIdx0ForIdx1  = valueForIdx0 as Resource
+                Resource_serializer.write(thisSerializer, valueForIdx0ForIdx1)
             }
-        }
-        else if (TypeChecker.isimage_PixelMap(value, false, false)) {
+        } else if (value instanceof image.PixelMap) {
             thisSerializer.writeInt8((1).toChar())
-            const value_1  = value as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, value_1)
+            const valueForIdx1  = value as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, valueForIdx1)
         }
         ArkUIGeneratedNativeModule._ImageSpanInterface_setImageSpanOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setVerticalAlignAttribute(value: ImageSpanAlignment | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageSpanAlignment)
-            thisSerializer.writeInt32(TypeChecker.ImageSpanAlignment_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageSpanAlignment)
+            thisSerializer.writeInt32(TypeChecker.ImageSpanAlignment_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setVerticalAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColorFilter(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ColorFilter) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ColorFilter
-                ColorFilter_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (TypeChecker.isdrawing_ColorFilter(value_value)) {
+                const valueTmpValueForIdx0  = valueTmpValue as ColorFilter
+                ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof drawing.ColorFilter) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as drawing.ColorFilter
-                drawing_ColorFilter_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as drawing.ColorFilter
+                drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setColorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setObjectFitAttribute(value: ImageFit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ImageFit)
-            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ImageFit)
+            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setObjectFit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnCompleteAttribute(value: ImageCompleteCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setOnComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnErrorAttribute(value: ImageErrorCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAltAttribute(value: image.PixelMap | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            image_PixelMap_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            image_PixelMap_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setAlt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -209,21 +201,6 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: ImageSpanAttribute): void {
-        super.apply(target)
-        if (this.verticalAlign_value !== undefined)
-            target.verticalAlign(this.verticalAlign_value!)
-        if (this.colorFilter_value !== undefined)
-            target.colorFilter(this.colorFilter_value!)
-        if (this.objectFit_value !== undefined)
-            target.objectFit(this.objectFit_value!)
-        if (this.onComplete_value !== undefined)
-            target.onComplete(this.onComplete_value!)
-        if (this.onError_value !== undefined)
-            target.onError(this.onError_value!)
-        if (this.alt_value !== undefined)
-            target.alt(this.alt_value!)
     }
 }
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
@@ -300,7 +277,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -308,26 +284,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         super.applyAttributesFinish()
     }
 }
-export function withImageSpanStyle(receiver: ImageSpanAttribute, modifier: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkImageSpanStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("ImageSpan")
-// export function ImageSpan(
-//     value: ResourceStr | image.PixelMap,
-//     @memo
-//     content_?: () => void,
-// ): ImageSpanAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function ImageSpan(
@@ -343,71 +299,284 @@ export function ImageSpan(
     NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (_: ArkImageSpanPeer): void => {
         receiver.setImageSpanOptions(value)
         style?.(receiver)
-        withImageSpanStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkImageSpanSet extends ArkBaseSpanSet implements ImageSpanAttribute {
+export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _verticalAlign_flag?: boolean
-    _verticalAlign0_value?: ImageSpanAlignment | undefined
-    _colorFilter_flag?: boolean
-    _colorFilter0_value?: ColorFilter | drawing.ColorFilter | undefined
-    _objectFit_flag?: boolean
-    _objectFit0_value?: ImageFit | undefined
-    _onComplete_flag?: boolean
-    _onComplete0_value?: ImageCompleteCallback | undefined
-    _onError_flag?: boolean
-    _onError0_value?: ImageErrorCallback | undefined
-    _alt_flag?: boolean
-    _alt0_value?: image.PixelMap | undefined
-    applyModifierPatch(component: ImageSpanAttribute): void {
-        if (this._verticalAlign_flag)
-            component.verticalAlign((this._verticalAlign0_value as ImageSpanAlignment | undefined))
-        if (this._colorFilter_flag)
-            component.colorFilter((this._colorFilter0_value as ColorFilter | drawing.ColorFilter | undefined))
-        if (this._objectFit_flag)
-            component.objectFit((this._objectFit0_value as ImageFit | undefined))
-        if (this._onComplete_flag)
-            component.onComplete((this._onComplete0_value as ImageCompleteCallback | undefined))
-        if (this._onError_flag)
-            component.onError((this._onError0_value as ImageErrorCallback | undefined))
-        if (this._alt_flag)
-            component.alt((this._alt0_value as image.PixelMap | undefined))
+    _verticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _verticalAlign_0_0value?: ImageSpanAlignment | undefined
+    _colorFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _colorFilter_0_0value?: ColorFilter | drawing.ColorFilter | undefined
+    _objectFit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _objectFit_0_0value?: ImageFit | undefined
+    _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onComplete_0_0value?: ImageCompleteCallback | undefined
+    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onError_0_0value?: ImageErrorCallback | undefined
+    _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _alt_0_0value?: image.PixelMap | undefined
+    applyModifierPatch(peer: ArkImageSpanPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._verticalAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setVerticalAlignAttribute((this._verticalAlign_0_0value as ImageSpanAlignment | undefined));
+                    this._verticalAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._verticalAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._verticalAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setVerticalAlignAttribute((undefined as ImageSpanAlignment | undefined));
+                }
+            }
+        }
+        if (this._colorFilter_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._colorFilter_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColorFilterAttribute((this._colorFilter_0_0value as ColorFilter | drawing.ColorFilter | undefined));
+                    this._colorFilter_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._colorFilter_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._colorFilter_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColorFilterAttribute((undefined as ColorFilter | drawing.ColorFilter | undefined));
+                }
+            }
+        }
+        if (this._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._objectFit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setObjectFitAttribute((this._objectFit_0_0value as ImageFit | undefined));
+                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._objectFit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setObjectFitAttribute((undefined as ImageFit | undefined));
+                }
+            }
+        }
+        if (this._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onComplete_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnCompleteAttribute((this._onComplete_0_0value as ImageCompleteCallback | undefined));
+                    this._onComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onComplete_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnCompleteAttribute((undefined as ImageCompleteCallback | undefined));
+                }
+            }
+        }
+        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnErrorAttribute((this._onError_0_0value as ImageErrorCallback | undefined));
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnErrorAttribute((undefined as ImageErrorCallback | undefined));
+                }
+            }
+        }
+        if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._alt_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAltAttribute((this._alt_0_0value as image.PixelMap | undefined));
+                    this._alt_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._alt_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAltAttribute((undefined as image.PixelMap | undefined));
+                }
+            }
+        }
     }
-    public verticalAlign(value: ImageSpanAlignment | undefined): this {
-        this._verticalAlign_flag = true
-        this._verticalAlign0_value = value
+    mergeModifier(modifier: ImageSpanModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._verticalAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.verticalAlign(modifier._verticalAlign_0_0value);
+                    break;
+                }
+                default: {
+                    this.verticalAlign((undefined as ImageSpanAlignment | undefined));
+                }
+            }
+        }
+        if (modifier._colorFilter_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._colorFilter_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.colorFilter(modifier._colorFilter_0_0value);
+                    break;
+                }
+                default: {
+                    this.colorFilter((undefined as ColorFilter | drawing.ColorFilter | undefined));
+                }
+            }
+        }
+        if (modifier._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._objectFit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.objectFit(modifier._objectFit_0_0value);
+                    break;
+                }
+                default: {
+                    this.objectFit((undefined as ImageFit | undefined));
+                }
+            }
+        }
+        if (modifier._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onComplete_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onComplete(modifier._onComplete_0_0value);
+                    break;
+                }
+                default: {
+                    this.onComplete((undefined as ImageCompleteCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onError(modifier._onError_0_0value);
+                    break;
+                }
+                default: {
+                    this.onError((undefined as ImageErrorCallback | undefined));
+                }
+            }
+        }
+        if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._alt_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.alt(modifier._alt_0_0value);
+                    break;
+                }
+                default: {
+                    this.alt((undefined as image.PixelMap | undefined));
+                }
+            }
+        }
+    }
+    verticalAlign(value: ImageSpanAlignment | undefined): this {
+        if (((this._verticalAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._verticalAlign_0_flag = AttributeUpdaterFlag.UPDATE
+            this._verticalAlign_0_0value = value
+        } else
+        {
+            this._verticalAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
-        this._colorFilter_flag = true
-        this._colorFilter0_value = value
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+        if (((this._colorFilter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
+            this._colorFilter_0_0value = value
+        } else
+        {
+            this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public objectFit(value: ImageFit | undefined): this {
-        this._objectFit_flag = true
-        this._objectFit0_value = value
+    objectFit(value: ImageFit | undefined): this {
+        if (((this._objectFit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._objectFit_0_0value = value
+        } else
+        {
+            this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onComplete(value: ImageCompleteCallback | undefined): this {
-        this._onComplete_flag = true
-        this._onComplete0_value = value
+    onComplete(value: ImageCompleteCallback | undefined): this {
+        if (((this._onComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onComplete_0_0value = value
+        } else
+        {
+            this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onError(value: ImageErrorCallback | undefined): this {
-        this._onError_flag = true
-        this._onError0_value = value
+    onError(value: ImageErrorCallback | undefined): this {
+        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onError_0_0value = value
+        } else
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public alt(value: image.PixelMap | undefined): this {
-        this._alt_flag = true
-        this._alt0_value = value
+    alt(value: image.PixelMap | undefined): this {
+        if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._alt_0_flag = AttributeUpdaterFlag.UPDATE
+            this._alt_0_0value = value
+        } else
+        {
+            this._alt_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
@@ -417,37 +586,37 @@ export class ArkImageSpanSet extends ArkBaseSpanSet implements ImageSpanAttribut
 export class ImageLoadResult_serializer {
     public static write(buffer: SerializerBase, value: ImageLoadResult): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
-        const value_componentWidth  = value.componentWidth
-        valueSerializer.writeNumber(value_componentWidth)
-        const value_componentHeight  = value.componentHeight
-        valueSerializer.writeNumber(value_componentHeight)
-        const value_loadingStatus  = value.loadingStatus
-        valueSerializer.writeNumber(value_loadingStatus)
-        const value_contentWidth  = value.contentWidth
-        valueSerializer.writeNumber(value_contentWidth)
-        const value_contentHeight  = value.contentHeight
-        valueSerializer.writeNumber(value_contentHeight)
-        const value_contentOffsetX  = value.contentOffsetX
-        valueSerializer.writeNumber(value_contentOffsetX)
-        const value_contentOffsetY  = value.contentOffsetY
-        valueSerializer.writeNumber(value_contentOffsetY)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
+        const valueHolderForComponentWidth  = value.componentWidth
+        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        const valueHolderForComponentHeight  = value.componentHeight
+        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        const valueHolderForLoadingStatus  = value.loadingStatus
+        valueSerializer.writeNumber(valueHolderForLoadingStatus)
+        const valueHolderForContentWidth  = value.contentWidth
+        valueSerializer.writeNumber(valueHolderForContentWidth)
+        const valueHolderForContentHeight  = value.contentHeight
+        valueSerializer.writeNumber(valueHolderForContentHeight)
+        const valueHolderForContentOffsetX  = value.contentOffsetX
+        valueSerializer.writeNumber(valueHolderForContentOffsetX)
+        const valueHolderForContentOffsetY  = value.contentOffsetY
+        valueSerializer.writeNumber(valueHolderForContentOffsetY)
     }
     public static read(buffer: DeserializerBase): ImageLoadResult {
         let valueDeserializer : DeserializerBase = buffer
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        const componentWidth_result : number = (valueDeserializer.readNumber() as number)
-        const componentHeight_result : number = (valueDeserializer.readNumber() as number)
-        const loadingStatus_result : number = (valueDeserializer.readNumber() as number)
-        const contentWidth_result : number = (valueDeserializer.readNumber() as number)
-        const contentHeight_result : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetX_result : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetY_result : number = (valueDeserializer.readNumber() as number)
-        let value : ImageLoadResult = ({width: width_result, height: height_result, componentWidth: componentWidth_result, componentHeight: componentHeight_result, loadingStatus: loadingStatus_result, contentWidth: contentWidth_result, contentHeight: contentHeight_result, contentOffsetX: contentOffsetX_result, contentOffsetY: contentOffsetY_result} as ImageLoadResult)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const loadingStatusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentOffsetXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentOffsetYTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ImageLoadResult = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageLoadResult)
         return value
     }
 }

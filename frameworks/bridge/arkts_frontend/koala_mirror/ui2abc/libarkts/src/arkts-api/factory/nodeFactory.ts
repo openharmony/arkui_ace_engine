@@ -14,7 +14,10 @@
  */
 
 import {
+    BlockStatement,
+    CallExpression,
     ClassDefinition,
+    ClassProperty,
     ETSImportDeclaration,
     ETSModule,
     ETSStructDeclaration,
@@ -28,7 +31,7 @@ import {
 } from "../../generated"
 import { factory as generatedFactory } from "../../generated/factory"
 import { createScriptFunction, updateScriptFunction } from "../node-utilities/ScriptFunction"
-import { createCallExpression, updateCallExpression } from "../node-utilities/CallExpression"
+import { updateCallExpression } from "../node-utilities/CallExpression"
 import { createNumberLiteral, updateNumberLiteral } from "../node-utilities/NumberLiteral"
 import { updateMemberExpression } from "../node-utilities/MemberExpression"
 import { createETSParameterExpression, updateETSParameterExpression } from "../node-utilities/ETSParameterExpression"
@@ -38,21 +41,16 @@ import { updateETSImportDeclaration } from "../node-utilities/ETSImportDeclarati
 import { updateVariableDeclarator } from "../node-utilities/VariableDeclarator"
 import { updateClassDefinition } from "../node-utilities/ClassDefinition"
 import { updateETSStructDeclaration } from "../node-utilities/ETSStructDeclaration"
-import { createClassProperty, updateClassProperty } from "../node-utilities/ClassProperty"
+import { updateClassProperty } from "../node-utilities/ClassProperty"
 import { createETSFunctionType, updateETSFunctionType } from "../node-utilities/ETSFunctionType"
 import { createMethodDefinition, updateMethodDefinition } from "../node-utilities/MethodDefinition"
 import { createTSInterfaceDeclaration, updateTSInterfaceDeclaration } from "../node-utilities/TSInterfaceDeclaration"
-import { createArrowFunctionExpression, updateArrowFunctionExpression } from "../node-utilities/ArrowFunctionExpression"
 import { updateTryStatement } from "../node-utilities/TryStatement"
-import { createVariableDeclaration, updateVariableDeclaration } from "../node-utilities/VariableDeclaration"
 import { createAssignmentExpression, updateAssignmentExpression } from "../node-utilities/AssignmentExpression"
 import { updateObjectExpression } from "../node-utilities/ObjectExpression"
 import { updateETSTuple } from "../node-utilities/ETSTuple"
 import { createArrayExpression, updateArrayExpression } from "../node-utilities/ArrayExpression"
-import { createTSTypeAliasDeclaration, updateTSTypeAliasDeclaration } from "../node-utilities/TSTypeAliasDeclaration"
-import { createClassDeclaration, updateClassDeclaration } from "../node-utilities/ClassDeclaration"
-import { createBlockStatement, updateBlockStatement } from "../node-utilities/BlockStatement"
-import { updateAnnotationUsage } from "../node-utilities/AnnotationUsage"
+import { updateBlockStatement } from "../node-utilities/BlockStatement"
 import { updateETSModule } from "../node-utilities/ETSModule"
 
 export const factory = {
@@ -61,7 +59,7 @@ export const factory = {
     createETSModule: ETSModule.createETSModule,
     updateETSModule,
 
-    createCallExpression,
+    createCallExpression: CallExpression.createCallExpression,
     updateCallExpression,
 
     createMemberExpression: MemberExpression.createMemberExpression,
@@ -88,19 +86,13 @@ export const factory = {
     createVariableDeclarator: VariableDeclarator.create1VariableDeclarator,
     updateVariableDeclarator,
 
-    createVariableDeclaration,
-    updateVariableDeclaration,
-
     createETSStructDeclaration: ETSStructDeclaration.createETSStructDeclaration,
     updateETSStructDeclaration,
 
     createClassDefinition: ClassDefinition.createClassDefinition,
     updateClassDefinition,
 
-    createClassDeclaration,
-    updateClassDeclaration,
-
-    createClassProperty,
+    createClassProperty: ClassProperty.createClassProperty,
     updateClassProperty,
 
     createETSFunctionType,
@@ -111,9 +103,6 @@ export const factory = {
 
     createInterfaceDeclaration: createTSInterfaceDeclaration,
     updateInterfaceDeclaration: updateTSInterfaceDeclaration,
-
-    createArrowFunctionExpression,
-    updateArrowFunctionExpression,
 
     createTryStatement: TryStatement.createTryStatement,
     updateTryStatement,
@@ -130,13 +119,8 @@ export const factory = {
     createArrayExpression,
     updateArrayExpression,
 
-    createTSTypeAliasDeclaration,
-    updateTSTypeAliasDeclaration,
-
-    createBlockStatement,
+    createBlockStatement: BlockStatement.createBlockStatement,
     updateBlockStatement,
 
-    updateAnnotationUsage,
-    update1AnnotationUsage: generatedFactory.updateAnnotationUsage,
-    updateInterfaceBody : generatedFactory.updateTSInterfaceBody
+    updateInterfaceBody : generatedFactory.updateTSInterfaceBody,
 }

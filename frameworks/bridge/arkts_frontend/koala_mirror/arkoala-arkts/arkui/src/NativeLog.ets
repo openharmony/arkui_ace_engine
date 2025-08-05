@@ -14,7 +14,7 @@
  */
 import { InteropNativeModule } from "@koalaui/interop"
 import { int32, float32, int8Array } from "@koalaui/common"
-import { TEST_LOG_NUMBER } from "./Application"
+import { TEST_LOG_NUMBER } from "./ArkUIEntry"
 import { memo } from "@koalaui/runtime/annotations"
 
 export class NativeLog {

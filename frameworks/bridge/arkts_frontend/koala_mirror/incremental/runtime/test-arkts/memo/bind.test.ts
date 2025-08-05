@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { asArray } from "@koalaui/common"
 import {
     GlobalStateManager,
@@ -22,14 +21,14 @@ import {
     TestNode,
     memoBind,
     testTick,
-} from "../../src"
+} from "../../ets"
 
 const collector = new Array<string>()
 
 function testExpected(root: State<TestNode>, ...expected: string[]) {
     collector.length = 0
     testTick(root)
-    Assert.deepEqual(collector, asArray(expected))
+    assert.deepEqual(collector, asArray(expected))
     if (expected.length > 0) testExpected(root)
 }
 
@@ -41,7 +40,7 @@ function sample(arg: string): void {
 suite("memo tests", () => {
     test("memoBind trivial test", () => {
         GlobalStateManager.reset()
-        const root = TestNode.create((_) => {
+        const root = TestNode.create((_): void => {
             /** @memo */
             const bind = memoBind(sample, "red")
             bind()

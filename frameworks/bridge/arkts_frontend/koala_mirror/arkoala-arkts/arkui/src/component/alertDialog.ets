@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { DialogButtonStyle, Color, WordBreak, BorderStyle } from "./enums"
@@ -65,7 +65,7 @@ export interface AlertDialogButtonBaseOptions {
 export interface AlertDialogButtonOptions extends AlertDialogButtonBaseOptions {
     primary?: boolean;
 }
-export interface TextStyle {
+export interface AlertDialogTextStyleOptions {
     wordBreak?: WordBreak;
 }
 export interface AlertDialogParam {
@@ -93,7 +93,7 @@ export interface AlertDialogParam {
     borderColor?: ResourceColor | EdgeColors | LocalizedEdgeColors;
     borderStyle?: BorderStyle | EdgeStyles;
     shadow?: ShadowOptions | ShadowStyle;
-    textStyle?: TextStyle;
+    textStyle?: AlertDialogTextStyleOptions;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     onDidAppear?: (() => void);

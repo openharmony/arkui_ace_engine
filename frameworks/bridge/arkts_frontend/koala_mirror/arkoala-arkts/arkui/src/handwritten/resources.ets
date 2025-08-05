@@ -14,7 +14,7 @@
  */
 
 import { Resource } from "../generated";
-import { int32 } from "@koalaui/common";
+import { int32, int64 } from "@koalaui/common";
 import { SerializerBase } from "@koalaui/interop";
 import { ArkUIGeneratedNativeModule } from "#components";
 
@@ -22,8 +22,8 @@ class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
     params?: Array<string> | undefined;
-    type?: number | undefined;
-    _id: number = -1;
+    type?: int32 | undefined;
+    _id: int64 = -1;
     constructor(resourceName: string, bundleName: string, moduleName: string) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
@@ -46,10 +46,10 @@ class ArkResource implements Resource {
                 break;
         }
     }
-    set id(value: number) {
+    set id(value: int64) {
         this._id = value;
     }
-    get id(): number {
+    get id(): int64 {
         if (this._id == -1) {
             if (this.params == null || this.params == undefined) {
                 return this._id;
@@ -62,7 +62,7 @@ class ArkResource implements Resource {
                 thisSerializer.release();
                 return this._id;
             }
-            thisSerializer.writeInt32(param.length as int32);
+            thisSerializer.writeInt32(param.length.toInt());
             for (let i = 0; i < param.length; i++) {
                 const params_element: string = param[i];
                 thisSerializer.writeString(params_element);

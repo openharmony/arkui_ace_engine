@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { TextBackgroundStyle_serializer, TextBackgroundStyle } from "./span"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -28,6 +28,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkContainerSpanPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -35,7 +36,7 @@ export class ArkContainerSpanPeer extends PeerNode {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkContainerSpanPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._ContainerSpan_construct(peerId, flags)
-        const _peer  = new ArkContainerSpanPeer(_peerPtr, peerId, "ContainerSpan", flags)
+        const _peer  = new ArkContainerSpanPeer(_peerPtr, peerId, 'ContainerSpan', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -44,12 +45,12 @@ export class ArkContainerSpanPeer extends PeerNode {
     }
     setTextBackgroundStyleAttribute(value: TextBackgroundStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextBackgroundStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextBackgroundStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ContainerSpanAttribute_setTextBackgroundStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -72,10 +73,6 @@ export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: ContainerSpanAttribute): void {
-        if (this.textBackgroundStyle_value !== undefined)
-            target.textBackgroundStyle(this.textBackgroundStyle_value!)
-    }
 }
 
 export class ArkContainerSpanComponent extends ComponentBase implements ContainerSpanAttribute {
@@ -97,9 +94,7 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
         }
         return this
     }
-    _modifier?: AttributeModifier<ContainerSpanAttribute> | undefined
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
-        this._modifier = value
         return this
     }
     public applyAttributesFinish(): void {
@@ -107,26 +102,6 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
         super.applyAttributesFinish()
     }
 }
-export function withContainerSpanStyle(receiver: ContainerSpanAttribute, modifier: AttributeModifier<ContainerSpanAttribute> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkContainerSpanStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<ContainerSpanAttribute>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<ContainerSpanAttribute>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("ContainerSpan")
-// export function ContainerSpan(
-//     
-//     @memo
-//     content_?: () => void,
-// ): ContainerSpanAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function ContainerSpan(
@@ -142,26 +117,62 @@ export function ContainerSpan(
     NodeAttach<ArkContainerSpanPeer>((): ArkContainerSpanPeer => ArkContainerSpanPeer.create(receiver), (_: ArkContainerSpanPeer): void => {
         receiver.setContainerSpanOptions()
         style?.(receiver)
-        withContainerSpanStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkContainerSpanSet implements ContainerSpanAttribute {
+export class ContainerSpanModifier implements ContainerSpanAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _textBackgroundStyle_flag?: boolean
-    _textBackgroundStyle0_value?: TextBackgroundStyle | undefined
-    applyModifierPatch(component: ContainerSpanAttribute): void {
-        if (this._textBackgroundStyle_flag)
-            component.textBackgroundStyle((this._textBackgroundStyle0_value as TextBackgroundStyle | undefined))
+    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    applyModifierPatch(peer: ArkContainerSpanPeer): void {
+        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
+                }
+            }
+        }
     }
-    public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
-        this._textBackgroundStyle_flag = true
-        this._textBackgroundStyle0_value = value
+    mergeModifier(modifier: ContainerSpanModifier): void {
+        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textBackgroundStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.textBackgroundStyle((undefined as TextBackgroundStyle | undefined));
+                }
+            }
+        }
+    }
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textBackgroundStyle_0_0value = value
+        } else
+        {
+            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {

@@ -16,9 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, KInt, KBoolean, KStringPtr, wrapCallback } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -26,25 +25,24 @@ import { ComponentBuilder } from "@koalaui/builderLambda"
 export class window_SystemBarStyle_serializer {
     public static write(buffer: SerializerBase, value: window.SystemBarStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_statusBarContentColor  = value.statusBarContentColor
-        let value_statusBarContentColor_type : int32 = RuntimeType.UNDEFINED
-        value_statusBarContentColor_type = runtimeType(value_statusBarContentColor)
-        valueSerializer.writeInt8((value_statusBarContentColor_type).toChar())
-        if ((value_statusBarContentColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_statusBarContentColor_value  = value_statusBarContentColor!
-            valueSerializer.writeString(value_statusBarContentColor_value)
+        const valueHolderForStatusBarContentColor  = value.statusBarContentColor
+        if (valueHolderForStatusBarContentColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStatusBarContentColorTmpValue  = valueHolderForStatusBarContentColor!
+            valueSerializer.writeString(valueHolderForStatusBarContentColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): window.SystemBarStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const statusBarContentColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let statusBarContentColor_buf : string | undefined
-        if ((statusBarContentColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            statusBarContentColor_buf = (valueDeserializer.readString() as string)
+        const statusBarContentColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let statusBarContentColorTmpBuf : string | undefined
+        if ((statusBarContentColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            statusBarContentColorTmpBuf = (valueDeserializer.readString() as string)
         }
-        const statusBarContentColor_result : string | undefined = statusBarContentColor_buf
-        let value : window.SystemBarStyle = ({statusBarContentColor: statusBarContentColor_result} as window.SystemBarStyle)
+        const statusBarContentColorTmpResult : string | undefined = statusBarContentColorTmpBuf
+        let value : window.SystemBarStyle = ({statusBarContentColor: statusBarContentColorTmpResult} as window.SystemBarStyle)
         return value
     }
 }

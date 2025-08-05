@@ -23,13 +23,13 @@ import {
     getRuntimeAnnotationsPackage,
     getDecoratorPackage
 } from "./utils";
-import { BuilderParamTransformer, ConsumeTransformer, LinkTransformer, LocalStorageLinkTransformer, LocalStoragePropTransformer, ObjectLinkTransformer, PropertyTransformer, PropTransformer, ProvideTransformer, StateTransformer, StorageLinkTransformer, StoragePropTransformer, PlainPropertyTransformer, fieldOf, isOptionBackedByProperty, isOptionBackedByPropertyName } from "./property-transformers";
+import { BuilderParamTransformer, ConsumeTransformer, LinkTransformer, LocalStorageLinkTransformer, LocalStoragePropTransformer, ObjectLinkTransformer, PropertyTransformer, PropTransformer, ProvideTransformer, StateTransformer, StorageLinkTransformer, StoragePropTransformer, PlainPropertyTransformer, fieldOf } from "./property-transformers";
 import { annotation, isAnnotation, classMethods } from "./common/arkts-utils";
-import { DecoratorNames, DecoratorParameters, hasDecorator, hasBuilderDecorator, hasEntryAnnotation } from "./property-translators/utils";
+import { DecoratorNames, DecoratorParameters, hasBuilderDecorator, hasEntryAnnotation } from "./utils";
 import {
     factory
 } from "./ui-factory"
-import { Es2pandaVariableDeclarationKind } from "@koalaui/libarkts"
+import { Es2pandaVariableDeclarationKind } from "@koalaui/libarkts";
 
 export interface ApplicationInfo {
     bundleName: string,
@@ -182,7 +182,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
 
     private addInitializeStruct(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
         const statements: arkts.Statement[] = []
-        // TODO: this is to workaround panda bug #27680
+        // Improve: this is to workaround panda bug #27680
         // It should be OptionsT, but the compiler has lost the bridge
         statements.push(
             arkts.factory.createVariableDeclaration(
@@ -252,6 +252,25 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         })
 
         if (props.length > 0) {
+            // Improve: this is to workaround panda bug #27680
+            // It should be OptionsT, but the compiler has lost the bridge
+            const paramTypeDeclaration = arkts.factory.createVariableDeclaration(
+                Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
+                [
+                    arkts.factory.createVariableDeclarator(
+                    arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
+                    arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME),
+                        arkts.factory.createTSAsExpression(
+                            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME_0),
+                                arkts.factory.createETSUnionType([
+                                    factory.createTypeReferenceFromString(this.optionsName(clazz.definition!).name),
+                                    arkts.factory.createETSUndefinedType()
+                                    ]),
+                            false
+                        )
+                    )
+                ]
+            )
             const resultDeclaration = arkts.factory.createVariableDeclaration(
                 arkts.Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_LET,
                 [
@@ -295,12 +314,13 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                     arkts.factory.createIdentifier(methodName),
                     arkts.factory.createScriptFunction(
                         arkts.factory.createBlockStatement([
+                            paramTypeDeclaration,
                             resultDeclaration,
                             initBlock,
                             arkts.factory.createReturnStatement(arkts.factory.createIdentifier(resultName))
                         ]),
                         undefined,
-                        [factory.createInitializersOptionsParameter(computeOptionsName(clazz), false)],
+                        [factory.createInitializersOptionsParameter(computeOptionsName(clazz), true)],
                         createRecordTypeReference(),
                         false,
                         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD,
@@ -482,7 +502,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         })
         if (useSharedStorage) {
             return arkts.factory.createCallExpression(
-                fieldOf(arkts.factory.createIdentifier("LocalStorage"), "getShared"), [], undefined
+                fieldOf(arkts.factory.createIdentifier("LocalStorage"), "getShared"), [], undefined, false, false, undefined,
             )
         }
 
@@ -565,6 +585,9 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                                                 arkts.factory.createIdentifier(className),
                                                 [],
                                                 undefined,
+                                                false,
+                                                false,
+                                                undefined,
                                             )
                                         )
                                     ],
@@ -595,10 +618,21 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
     }
 
     private rewriteStruct(node: arkts.ETSStructDeclaration, result: arkts.Statement[]) {
+        this.verifyStructAnnotations(node)
         result.push(this.rewriteStructToClass(node))
         result.push(this.rewriteStructToOptions(node))
         if (node.definition && hasEntryAnnotation(node.definition)) {
             result.push(this.createEntryWrapper(node.definition.ident!.name))
+        }
+    }
+
+    private verifyStructAnnotations(node: arkts.ETSStructDeclaration) {
+        const unsuitable = node.definition?.annotations
+            .filter(it => !isAnnotation(it, DecoratorNames.ENTRY))
+            .filter(it => !isAnnotation(it, DecoratorNames.COMPONENT))
+            .filter(it => !isAnnotation(it, DecoratorNames.REUSABLE))
+        if (unsuitable?.length) {
+            console.warn(`${unsuitable[0].baseName?.name} decorator is not applicable to struct declaration`)
         }
     }
 

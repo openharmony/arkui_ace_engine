@@ -15,10 +15,12 @@
 
 import * as arkts from "@koalaui/libarkts"
 
-import { classProperties, mangle } from "./common/arkts-utils"
-import { createETSTypeReference, getRuntimePackage, getComponentPackage, Importer } from "./utils"
-import { DecoratorNames, hasDecorator, isDecoratorAnnotation } from "./property-translators/utils";
+import { classProperties } from "./common/arkts-utils"
+import { createETSTypeReference, getRuntimePackage, getComponentPackage, Importer, mangle } from "./utils"
+import { DecoratorNames, hasDecorator, isDecoratorAnnotation } from "./utils";
 import { fieldOf } from "./property-transformers";
+
+type ObservedDecoratorType = DecoratorNames.OBSERVED | DecoratorNames.OBSERVED_V2
 
 export class ClassTransformer extends arkts.AbstractVisitor {
     constructor(private importer: Importer, options?: arkts.VisitorOptions) {
@@ -37,30 +39,45 @@ export class ClassTransformer extends arkts.AbstractVisitor {
         }
         if (arkts.isClassDeclaration(node) && !arkts.isETSStructDeclaration(node)) {
             const props = classProperties(node, propertyVerifier)
-            return classVerifier(node, props) ? this.updateClass(node, props) : node
+            const classContext = extractClassContext(node, props)
+            return classContext?.decoratorType || classContext?.trackedProperties.length
+                ? this.updateClass(node, props, classContext) : node
         }
         return node
     }
 
-    updateClass(clazz: arkts.ClassDeclaration, properties: arkts.ClassProperty[]): arkts.ClassDeclaration {
+    addImplObservedDecorator(decoratorType: ObservedDecoratorType, result: arkts.TSClassImplements[]) {
+        this.importer.add('observableProxy', getRuntimePackage())
+        let className: string
+        if (decoratorType == DecoratorNames.OBSERVED) {
+            className = "ObservableClass"
+        } else if (decoratorType == DecoratorNames.OBSERVED_V2) {
+            className = "ObservableClassV2"
+        }
+        this.importer.add(className!, getRuntimePackage())
+        result.push(arkts.factory.createTSClassImplements(createETSTypeReference(className!)))
+    }
+
+    addImplTrackDecorator(result: arkts.TSClassImplements[]) {
+        this.importer.add('TrackableProps', getRuntimePackage())
+        result.push(arkts.factory.createTSClassImplements(
+            createETSTypeReference("TrackableProps"))
+        )
+    }
+
+    updateClass(clazz: arkts.ClassDeclaration,
+                properties: arkts.ClassProperty[],
+                classContext: ClassContext): arkts.ClassDeclaration {
         let classDef = clazz.definition!
-        const isObserved = isObservedClass(classDef)
         const classImplements: arkts.TSClassImplements[] = [
             ...clazz.definition?.implements ?? [],
         ]
-        if (isObserved) {
-            this.importer.add('observableProxy', getRuntimePackage())
-            this.importer.add('ObservableClass', getRuntimePackage())
-            classImplements.push(arkts.factory.createTSClassImplements(
-                createETSTypeReference("ObservableClass"))
-            )
-        }
-        if (properties.length > 0 || isObserved) {
-            if (properties.find(trackPropVerifier)) {
-                this.importer.add('TrackableProps', getRuntimePackage())
-                classImplements.push(arkts.factory.createTSClassImplements(
-                    createETSTypeReference("TrackableProps"))
-                )
+        if (properties.length > 0) {
+            if (classContext.decoratorType) {
+                this.addImplObservedDecorator(classContext.decoratorType, classImplements)
+            }
+            if (classContext.trackedProperties.length) {
+                this.addImplTrackDecorator(classImplements)
             }
             classDef = arkts.factory.updateClassDefinition(
                 classDef,
@@ -70,7 +87,7 @@ export class ClassTransformer extends arkts.AbstractVisitor {
                 classImplements,
                 undefined,
                 classDef.super,
-                this.rewriteClassProperties(clazz, properties, classDef.body as arkts.ClassElement[] ?? [], isObserved),
+                this.rewriteClassProperties(classDef, properties, classDef.body as arkts.ClassElement[] ?? [], classContext),
                 classDef.modifiers,
                 classDef.modifierFlags
             )
@@ -81,25 +98,30 @@ export class ClassTransformer extends arkts.AbstractVisitor {
         )
     }
 
-    rewriteClassProperties(clazz: arkts.ClassDeclaration,
+    rewriteClassProperties(classDef: arkts.ClassDefinition,
                            properties: arkts.ClassProperty[],
                            body: readonly arkts.ClassElement[],
-                           isObservedClass: boolean): arkts.ClassElement[] {
+                           classContext: ClassContext): arkts.ClassElement[] {
         const result: arkts.ClassElement[] = []
-        if (isObservedClass) {
+        if (classContext.decoratorType == DecoratorNames.OBSERVED) {
             createImplObservedFlagMethod(result)
+        } else if (classContext.decoratorType == DecoratorNames.OBSERVED_V2) {
+            const tracedProps = properties
+                .filter(tracePropVerifier)
+                .map(it => it.id?.name!)
+            createImplTrackablePropsMethod(classDef, "ObservableClassV2", "tracedProperties", tracedProps, result)
         }
         const trackedProps = properties
             .filter(trackPropVerifier)
             .map(it => it.id?.name!)
         if (trackedProps.length > 0) {
-            createImplTrackedPropsMethod(trackedProps, result);
+            createImplTrackablePropsMethod(classDef, "TrackableProps", "trackedProperties", trackedProps, result)
         }
         body.forEach(node => {
             if (arkts.isClassProperty(node) && propertyVerifier(node)) {
-                this.rewriteProperty(node, isObservedClass, result)
+                this.rewriteProperty(node, classContext, result)
             } else if (arkts.isMethodDefinition(node) && node.isConstructor) {
-                result.push(this.updateConstructor(node, properties, isObservedClass))
+                result.push(this.updateConstructor(node, properties, classContext))
             } else {
                 result.push(node)
             }
@@ -107,10 +129,12 @@ export class ClassTransformer extends arkts.AbstractVisitor {
         return result
     }
 
-    rewriteProperty(property: arkts.ClassProperty, isObservedClass: boolean, result: arkts.ClassElement[]) {
+    rewriteProperty(property: arkts.ClassProperty,
+                    classContext: ClassContext,
+                    result: arkts.ClassElement[]) {
         const backing = arkts.factory.createClassProperty(
             createBackingIdentifier(property),
-            observeValueIfNeeded(property.value, isObservedClass),
+            observePropIfNeeded(property.id?.name!, property.value, classContext),
             property.typeAnnotation,
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE,
             false
@@ -118,14 +142,19 @@ export class ClassTransformer extends arkts.AbstractVisitor {
         backing.setAnnotations(this.rewriteAnnotations(property.annotations))
         result.push(backing)
 
-        result.push(createGetterSetter(property, isObservedClass))
+        result.push(createGetterSetter(property, classContext))
     }
 
     rewriteAnnotations(annotations: readonly arkts.AnnotationUsage[]): arkts.AnnotationUsage[] {
-        return annotations.filter(it => !isDecoratorAnnotation(it, DecoratorNames.TRACK) && !isDecoratorAnnotation(it, DecoratorNames.OBSERVED))
+        const decorators = [DecoratorNames.TRACK, DecoratorNames.TRACE, DecoratorNames.OBSERVED, DecoratorNames.OBSERVED_V2]
+        return annotations.filter(it =>
+            !decorators.some(decorator => isDecoratorAnnotation(it, decorator))
+        )
     }
 
-    updateConstructor(method: arkts.MethodDefinition, properties: arkts.ClassProperty[], isObservedClass: boolean) {
+    updateConstructor(method: arkts.MethodDefinition,
+                      properties: arkts.ClassProperty[],
+                      classContext: ClassContext) {
         const originalBody = method.function?.body as arkts.BlockStatement
         if (!method.function || !originalBody) {
             return method
@@ -135,7 +164,7 @@ export class ClassTransformer extends arkts.AbstractVisitor {
         originalBody.statements.forEach(state => {
             if (arkts.isExpressionStatement(state)
                 && arkts.isAssignmentExpression((state as arkts.ExpressionStatement).expression)) {
-                statements.push(this.rewriteStatement(state, properties, isObservedClass))
+                statements.push(this.rewriteStatement(state, properties, classContext))
             } else {
                 statements.push(state)
             }
@@ -164,7 +193,9 @@ export class ClassTransformer extends arkts.AbstractVisitor {
         )
     }
 
-    rewriteStatement(state: arkts.ExpressionStatement, properties: arkts.ClassProperty[], isObservedClass: boolean): arkts.ExpressionStatement {
+    rewriteStatement(state: arkts.ExpressionStatement,
+                     properties: arkts.ClassProperty[],
+                     classContext: ClassContext): arkts.ExpressionStatement {
         const expr = state.expression as arkts.AssignmentExpression
         if (arkts.isMemberExpression(expr.left)
             && arkts.isThisExpression(expr.left.object)
@@ -181,7 +212,7 @@ export class ClassTransformer extends arkts.AbstractVisitor {
                             false,
                             false
                         ),
-                        observeValueIfNeeded(expr.right, isObservedClass),
+                        observePropIfNeeded(propertyName, expr.right, classContext),
                         expr.operatorType
                     )
                 )
@@ -200,21 +231,30 @@ function trackPropVerifier(property: arkts.ClassProperty): boolean {
     return hasDecorator(property, DecoratorNames.TRACK) && propertyVerifier(property)
 }
 
-function classVerifier(clazz: arkts.ClassDeclaration, properties: readonly arkts.ClassProperty[]): boolean {
-    if (clazz.definition == undefined) {
-        return false
+function tracePropVerifier(property: arkts.ClassProperty): boolean {
+    return hasDecorator(property, DecoratorNames.TRACE) && propertyVerifier(property)
+}
+
+function extractClassContext(clazz: arkts.ClassDeclaration,
+                             properties: readonly arkts.ClassProperty[]): ClassContext | undefined {
+    if (clazz.definition != undefined) {
+        return new ClassContext(getObservedDecoratorType(clazz.definition),
+            properties
+                .filter(trackPropVerifier)
+                .map(it => it.id?.name!),
+            properties
+                .filter(tracePropVerifier)
+                .map(it => it.id?.name!))
     }
-    if (isObservedClass(clazz.definition)) {
-        return true
-    }
-    return properties.some(hasTrackDecorator);
+    return undefined
 }
 
 function createBackingIdentifier(property: arkts.ClassProperty): arkts.Identifier {
     return arkts.factory.createIdentifier("__backing_" + property.id!.name)
 }
 
-function createGetterSetter(property: arkts.ClassProperty, isObservedClass: boolean): arkts.MethodDefinition {
+function createGetterSetter(property: arkts.ClassProperty,
+                            classContext: ClassContext): arkts.MethodDefinition {
     const name = property.id!.name
     const getterFunction = arkts.factory.createScriptFunction(
         arkts.factory.createBlockStatement([
@@ -249,7 +289,9 @@ function createGetterSetter(property: arkts.ClassProperty, isObservedClass: bool
                         false,
                         false
                     ),
-                    observeValueIfNeeded(arkts.factory.createIdentifier("value", property.typeAnnotation?.clone()), isObservedClass),
+                    observePropIfNeeded(property.id?.name!,
+                        arkts.factory.createIdentifier("value", property.typeAnnotation?.clone()),
+                        classContext),
                     arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_SUBSTITUTION
                 )
             )
@@ -290,42 +332,115 @@ function createGetterSetter(property: arkts.ClassProperty, isObservedClass: bool
     return getter
 }
 
-function createImplTrackedPropsMethod(trackedProps: readonly string[], result: arkts.ClassElement[]) {
-    createMethodDefinition("trackedProperties",
+function addTrackablePropsFromParent(trackedPropsIdent: string,
+                                     interfaceName: string,
+                                     methodName: string,
+                                     result: arkts.Statement[]) {
+    const trackableProps = arkts.factory.createIfStatement(
+        arkts.factory.createBinaryExpression(
+            arkts.factory.createThisExpression(),
+            createETSTypeReference(interfaceName),
+            arkts.Es2pandaTokenType.TOKEN_TYPE_KEYW_INSTANCEOF
+        ),
         arkts.factory.createBlockStatement(
             [
-                arkts.factory.createIfStatement(
-                    checkThisCurrentClass(),
-                    arkts.factory.createReturnStatement(
-                        arkts.factory.createETSNewClassInstanceExpression(
-                            createETSTypeReference("Set", ["string"]),
-                            trackedProps.length
-                                ? [arkts.factory.createArrayExpression(
-                                    trackedProps.map(it => arkts.factory.createStringLiteral(it)))]
-                                : []
-                        )
+                arkts.factory.createExpressionStatement(
+                    arkts.factory.createAssignmentExpression(
+                        arkts.factory.createIdentifier(trackedPropsIdent),
+                        arkts.factory.createCallExpression(
+                            fieldOf(arkts.factory.createIdentifier(trackedPropsIdent), "concat"),
+                            [
+                                arkts.factory.createCallExpression(
+                                    fieldOf(arkts.factory.createIdentifier("Array"), "from"),
+                                    [
+                                        arkts.factory.createCallExpression(
+                                            fieldOf(arkts.factory.createSuperExpression(), methodName),
+                                            [],
+                                            undefined,
+                                            false,
+                                            false,
+                                            undefined,
+                                        )
+                                    ],
+                                    undefined,
+                                    false,
+                                    false,
+                                    undefined,
+                                )
+                            ],
+                            undefined,
+                            false,
+                            false,
+                            undefined,
+                        ),
+                        arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_SUBSTITUTION
                     )
-                ),
-                arkts.factory.createReturnStatement(arkts.factory.createUndefinedLiteral())
+                )
             ]
-        ),
-        arkts.factory.createETSUnionType(
-            [createETSTypeReference("ReadonlySet", ["string"]), createETSTypeReference("undefined")]
-        ),
-        result)
+        )
+    )
+    result.push(trackableProps)
+}
+
+function createImplTrackablePropsMethod(classDef: arkts.ClassDefinition,
+                                        interfaceName: string,
+                                        methodName: string,
+                                        trackableProps: readonly string[],
+                                        result: arkts.ClassElement[]) {
+    const trackedPropsIdent = mangle("trackedProps")
+    const body: arkts.Statement[] = []
+    body.push(
+        arkts.factory.createVariableDeclaration(
+            arkts.Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_LET,
+            [
+                arkts.factory.createVariableDeclarator(
+                    arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_LET,
+                    arkts.factory.createIdentifier(trackedPropsIdent),
+                    arkts.factory.createArrayExpression(
+                        trackableProps.map(it => arkts.factory.createStringLiteral(it))
+                    )
+                )
+            ]
+        )
+    )
+    if (classDef.super) {
+        addTrackablePropsFromParent(trackedPropsIdent, interfaceName, methodName, body)
+    }
+    body.push(arkts.factory.createReturnStatement(
+        arkts.factory.createETSNewClassInstanceExpression(
+            createETSTypeReference("Set", ["string"]),
+            [arkts.factory.createIdentifier(trackedPropsIdent)]
+        )
+    ))
+    createMethodDefinition(methodName,
+        arkts.factory.createBlockStatement(body),
+        createETSTypeReference("ReadonlySet", ["string"]),
+        result
+    )
 }
 
 function createImplObservedFlagMethod(result: arkts.ClassElement[]) {
+    result.push(
+        arkts.factory.createClassProperty(
+            arkts.factory.createIdentifier(mangle("isCalleeCurrentClass")),
+            createCheckThisCurrentClass(),
+            arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_BOOLEAN),
+            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE | arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_READONLY,
+            false
+        )
+    )
     createMethodDefinition("isObserved",
-        arkts.factory.createBlockStatement([arkts.factory.createReturnStatement(checkThisCurrentClass())]),
+        arkts.factory.createBlockStatement([arkts.factory.createReturnStatement(
+            fieldOf(arkts.factory.createThisExpression(), mangle("isCalleeCurrentClass"))
+        )]),
         arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_BOOLEAN),
         result)
 }
 
 function createMethodDefinition(methodName: string,
-                         body: arkts.AstNode,
-                         returnTypeNode: arkts.TypeNode,
-                         result: arkts.ClassElement[]) {
+                                body: arkts.AstNode,
+                                returnTypeNode: arkts.TypeNode,
+                                result: arkts.ClassElement[]) {
     result.push(arkts.factory.createMethodDefinition(
         arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
         arkts.factory.createIdentifier(methodName),
@@ -349,41 +464,82 @@ function createMethodDefinition(methodName: string,
     ))
 }
 
-function observeValueIfNeeded(value: arkts.Expression | undefined, isObservedClass: boolean) {
-    if (!value || !isObservedClass) {
-        return value
+function observePropIfNeeded(propertyName: string,
+                             propertyValue: arkts.Expression | undefined,
+                             classContext: ClassContext) {
+    const isClassFullyObserved = classContext.decoratorType == DecoratorNames.OBSERVED && classContext.trackedProperties.length == 0
+    const isTrackedProp = classContext.tracedProperties.includes(propertyName)
+    const isTracedProp = classContext.trackedProperties.includes(propertyName)
+    if (propertyValue && (isClassFullyObserved || isTrackedProp || isTracedProp)) {
+        return arkts.factory.createCallExpression(
+            arkts.factory.createIdentifier("observableProxy"),
+            [propertyValue],
+            undefined,
+            false,
+            false,
+            undefined,
+        )
     }
-    return arkts.factory.createCallExpression(
-        arkts.factory.createIdentifier("observableProxy"),
-        [value],
-        undefined
-    )
+    return propertyValue
 }
 
-function isObservedClass(definition: arkts.ClassDefinition): boolean {
-    return definition.annotations.some(annot =>
-        isDecoratorAnnotation(annot, DecoratorNames.OBSERVED)
-    )
+function getObservedDecoratorType(definition: arkts.ClassDefinition): ObservedDecoratorType | undefined {
+    if (definition.annotations.some(annot =>
+        isDecoratorAnnotation(annot, DecoratorNames.OBSERVED))) {
+        return DecoratorNames.OBSERVED
+    } else if (definition.annotations.some(annot =>
+        isDecoratorAnnotation(annot, DecoratorNames.OBSERVED_V2))) {
+        return DecoratorNames.OBSERVED_V2
+    }
+    return undefined
 }
 
-function hasTrackDecorator(prop: arkts.ClassProperty): boolean {
-    return prop.annotations.some(annot =>
-        isDecoratorAnnotation(annot, DecoratorNames.TRACK)
-    )
-}
-
-function checkThisCurrentClass(): arkts.Expression {
+function createCheckThisCurrentClass(): arkts.Expression {
     return arkts.factory.createBinaryExpression(
         arkts.factory.createCallExpression(
             fieldOf(arkts.factory.createIdentifier("Class"), "of"),
             [arkts.factory.createThisExpression()],
-            undefined
+            undefined,
+            false,
+            false,
+            undefined,
         ),
         arkts.factory.createCallExpression(
             fieldOf(arkts.factory.createIdentifier("Class"), "current"),
             [],
-            undefined
+            undefined,
+            false,
+            false,
+            undefined,
         ),
         arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_EQUAL
     )
+}
+
+class ClassContext {
+    readonly decoratorType: ObservedDecoratorType | undefined
+    readonly trackedProperties: readonly string[] = []
+    readonly tracedProperties: readonly string[] = []
+
+    constructor(observedDecoratorType: ObservedDecoratorType | undefined,
+                trackedProperties: readonly string[],
+                tracedProperties: readonly string[]) {
+        this.decoratorType = observedDecoratorType
+        this.trackedProperties = trackedProperties
+        this.tracedProperties = tracedProperties
+
+        this.verify()
+    }
+
+    private verify() {
+        if (this.decoratorType == DecoratorNames.OBSERVED_V2) {
+            if (this.trackedProperties.length) {
+                throw new Error("@Track decorator is not applicable with @ObservedV2 decorator")
+            }
+        } else {
+            if (this.tracedProperties.length) {
+                throw new Error("@Trace decorator is only used with @ObservedV2 decorator")
+            }
+        }
+    }
 }

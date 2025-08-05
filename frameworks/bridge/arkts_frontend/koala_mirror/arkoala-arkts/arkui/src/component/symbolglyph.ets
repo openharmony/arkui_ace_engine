@@ -17,20 +17,21 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class SymbolEffectInternal {
     public static fromPtr(ptr: KPointer): SymbolEffect {
         return new SymbolEffect(ptr)
@@ -62,211 +63,189 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSymbolGlyphPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._SymbolGlyph_construct(peerId, flags)
-        const _peer  = new ArkSymbolGlyphPeer(_peerPtr, peerId, "SymbolGlyph", flags)
+        const _peer  = new ArkSymbolGlyphPeer(_peerPtr, peerId, 'SymbolGlyph', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setSymbolGlyphOptionsAttribute(value?: Resource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            Resource_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphInterface_setSymbolGlyphOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontSizeAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontColorAttribute(value: Array<ResourceColor> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : ResourceColor = value_value[value_value_counter_i]
-                let value_value_element_type : int32 = RuntimeType.UNDEFINED
-                value_value_element_type = runtimeType(value_value_element)
-                if (TypeChecker.isColor(value_value_element)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : ResourceColor = valueTmpValue[valueTmpValueCounterI]
+                if (valueTmpValueTmpElement instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_element_0  = value_value_element as Color
-                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_element_0))
-                }
-                else if (RuntimeType.NUMBER == value_value_element_type) {
+                    const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueTmpElementForIdx0))
+                } else if (valueTmpValueTmpElement instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_element_1  = value_value_element as number
-                    thisSerializer.writeNumber(value_value_element_1)
-                }
-                else if (RuntimeType.STRING == value_value_element_type) {
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
+                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                } else if (valueTmpValueTmpElement instanceof string) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_element_2  = value_value_element as string
-                    thisSerializer.writeString(value_value_element_2)
-                }
-                else if (RuntimeType.OBJECT == value_value_element_type) {
+                    const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as string
+                    thisSerializer.writeString(valueTmpValueTmpElementForIdx2)
+                } else if (valueTmpValueTmpElement instanceof Resource) {
                     thisSerializer.writeInt8((3).toChar())
-                    const value_value_element_3  = value_value_element as Resource
-                    Resource_serializer.write(thisSerializer, value_value_element_3)
+                    const valueTmpValueTmpElementForIdx3  = valueTmpValueTmpElement as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx3)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_value)) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as FontWeight
-                thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as FontWeight
+                thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(valueTmpValueForIdx1))
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEffectStrategyAttribute(value: SymbolEffectStrategy | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as SymbolEffectStrategy)
-            thisSerializer.writeInt32(TypeChecker.SymbolEffectStrategy_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as SymbolEffectStrategy)
+            thisSerializer.writeInt32(TypeChecker.SymbolEffectStrategy_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setEffectStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRenderingStrategyAttribute(value: SymbolRenderingStrategy | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as SymbolRenderingStrategy)
-            thisSerializer.writeInt32(TypeChecker.SymbolRenderingStrategy_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as SymbolRenderingStrategy)
+            thisSerializer.writeInt32(TypeChecker.SymbolRenderingStrategy_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setRenderingStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinFontScaleAttribute(value: number | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxFontScaleAttribute(value: number | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setMaxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSymbolEffectAttribute(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let symbolEffect_type : int32 = RuntimeType.UNDEFINED
-        symbolEffect_type = runtimeType(symbolEffect)
-        thisSerializer.writeInt8((symbolEffect_type).toChar())
-        if ((symbolEffect_type) != (RuntimeType.UNDEFINED)) {
-            const symbolEffect_value  = symbolEffect!
-            SymbolEffect_serializer.write(thisSerializer, symbolEffect_value)
+        if (symbolEffect !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const symbolEffectTmpValue  = symbolEffect!
+            SymbolEffect_serializer.write(thisSerializer, symbolEffectTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let triggerValue_type : int32 = RuntimeType.UNDEFINED
-        triggerValue_type = runtimeType(triggerValue)
-        thisSerializer.writeInt8((triggerValue_type).toChar())
-        if ((triggerValue_type) != (RuntimeType.UNDEFINED)) {
-            const triggerValue_value  = triggerValue!
-            let triggerValue_value_type : int32 = RuntimeType.UNDEFINED
-            triggerValue_value_type = runtimeType(triggerValue_value)
-            if (RuntimeType.BOOLEAN == triggerValue_value_type) {
+        if (triggerValue !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const triggerValueTmpValue  = triggerValue!
+            if (triggerValueTmpValue instanceof boolean) {
                 thisSerializer.writeInt8((0).toChar())
-                const triggerValue_value_0  = triggerValue_value as boolean
-                thisSerializer.writeBoolean(triggerValue_value_0)
-            }
-            else if (RuntimeType.NUMBER == triggerValue_value_type) {
+                const triggerValueTmpValueForIdx0  = triggerValueTmpValue as boolean
+                thisSerializer.writeBoolean(triggerValueTmpValueForIdx0)
+            } else if (triggerValueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const triggerValue_value_1  = triggerValue_value as number
-                thisSerializer.writeNumber(triggerValue_value_1)
+                const triggerValueTmpValueForIdx1  = triggerValueTmpValue as number
+                thisSerializer.writeNumber(triggerValueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -359,23 +338,6 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: SymbolGlyphAttribute): void {
-        super.apply(target)
-        if (this.fontSize_value !== undefined)
-            target.fontSize(this.fontSize_value!)
-        if (this.fontColor_value !== undefined)
-            target.fontColor(this.fontColor_value!)
-        if (this.fontWeight_value !== undefined)
-            target.fontWeight(this.fontWeight_value!)
-        if (this.effectStrategy_value !== undefined)
-            target.effectStrategy(this.effectStrategy_value!)
-        if (this.renderingStrategy_value !== undefined)
-            target.renderingStrategy(this.renderingStrategy_value!)
-        if (this.minFontScale_value !== undefined)
-            target.minFontScale(this.minFontScale_value!)
-        if (this.maxFontScale_value !== undefined)
-            target.maxFontScale(this.maxFontScale_value!)
-    }
 }
 
 export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements SymbolGlyphAttribute {
@@ -456,7 +418,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -464,26 +425,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         super.applyAttributesFinish()
     }
 }
-export function withSymbolGlyphStyle(receiver: SymbolGlyphAttribute, modifier: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkSymbolGlyphStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("SymbolGlyph")
-// export function SymbolGlyph(
-//     value?: Resource,
-//     @memo
-//     content_?: () => void,
-// ): SymbolGlyphAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function SymbolGlyph(
@@ -499,91 +440,374 @@ export function SymbolGlyph(
     NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer): void => {
         receiver.setSymbolGlyphOptions(value)
         style?.(receiver)
-        withSymbolGlyphStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkSymbolGlyphSet extends ArkCommonMethodSet implements SymbolGlyphAttribute {
+export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _fontSize_flag?: boolean
-    _fontSize0_value?: number | string | Resource | undefined
-    _fontColor_flag?: boolean
-    _fontColor0_value?: Array<ResourceColor> | undefined
-    _fontWeight_flag?: boolean
-    _fontWeight0_value?: number | FontWeight | string | undefined
-    _effectStrategy_flag?: boolean
-    _effectStrategy0_value?: SymbolEffectStrategy | undefined
-    _renderingStrategy_flag?: boolean
-    _renderingStrategy0_value?: SymbolRenderingStrategy | undefined
-    _minFontScale_flag?: boolean
-    _minFontScale0_value?: number | Resource | undefined
-    _maxFontScale_flag?: boolean
-    _maxFontScale0_value?: number | Resource | undefined
-    _symbolEffect_flag?: boolean
-    _symbolEffect0_value?: SymbolEffect | undefined
-    _symbolEffect1_value?: boolean | number | undefined
-    applyModifierPatch(component: SymbolGlyphAttribute): void {
-        if (this._fontSize_flag)
-            component.fontSize((this._fontSize0_value as number | string | Resource | undefined))
-        if (this._fontColor_flag)
-            component.fontColor((this._fontColor0_value as Array<ResourceColor> | undefined))
-        if (this._fontWeight_flag)
-            component.fontWeight((this._fontWeight0_value as number | FontWeight | string | undefined))
-        if (this._effectStrategy_flag)
-            component.effectStrategy((this._effectStrategy0_value as SymbolEffectStrategy | undefined))
-        if (this._renderingStrategy_flag)
-            component.renderingStrategy((this._renderingStrategy0_value as SymbolRenderingStrategy | undefined))
-        if (this._minFontScale_flag)
-            component.minFontScale((this._minFontScale0_value as number | Resource | undefined))
-        if (this._maxFontScale_flag)
-            component.maxFontScale((this._maxFontScale0_value as number | Resource | undefined))
-        if (this._symbolEffect_flag)
-            component.symbolEffect((this._symbolEffect0_value as SymbolEffect | undefined), (this._symbolEffect1_value as boolean | number | undefined))
+    _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontSize_0_0value?: number | string | Resource | undefined
+    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontColor_0_0value?: Array<ResourceColor> | undefined
+    _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _effectStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
+    _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
+    _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxFontScale_0_0value?: number | Resource | undefined
+    _symbolEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _symbolEffect_0_0value?: SymbolEffect | undefined
+    _symbolEffect_0_1value?: boolean | number | undefined
+    applyModifierPatch(peer: ArkSymbolGlyphPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as number | string | Resource | undefined));
+                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontSizeAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontColorAttribute((this._fontColor_0_0value as Array<ResourceColor> | undefined));
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontColorAttribute((undefined as Array<ResourceColor> | undefined));
+                }
+            }
+        }
+        if (this._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontWeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                }
+            }
+        }
+        if (this._effectStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._effectStrategy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEffectStrategyAttribute((this._effectStrategy_0_0value as SymbolEffectStrategy | undefined));
+                    this._effectStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._effectStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._effectStrategy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEffectStrategyAttribute((undefined as SymbolEffectStrategy | undefined));
+                }
+            }
+        }
+        if (this._renderingStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._renderingStrategy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRenderingStrategyAttribute((this._renderingStrategy_0_0value as SymbolRenderingStrategy | undefined));
+                    this._renderingStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._renderingStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._renderingStrategy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRenderingStrategyAttribute((undefined as SymbolRenderingStrategy | undefined));
+                }
+            }
+        }
+        if (this._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (this._maxFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (this._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._symbolEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolEffectAttribute((this._symbolEffect_0_0value as SymbolEffect | undefined), (this._symbolEffect_0_1value as boolean | number | undefined));
+                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._symbolEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSymbolEffectAttribute((undefined as SymbolEffect | undefined), (undefined as boolean | number | undefined | undefined));
+                }
+            }
+        }
     }
-    public fontSize(value: number | string | Resource | undefined): this {
-        this._fontSize_flag = true
-        this._fontSize0_value = value
+    mergeModifier(modifier: SymbolGlyphModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontSize(modifier._fontSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontSize((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontColor(modifier._fontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontColor((undefined as Array<ResourceColor> | undefined));
+                }
+            }
+        }
+        if (modifier._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontWeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontWeight(modifier._fontWeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                }
+            }
+        }
+        if (modifier._effectStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._effectStrategy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.effectStrategy(modifier._effectStrategy_0_0value);
+                    break;
+                }
+                default: {
+                    this.effectStrategy((undefined as SymbolEffectStrategy | undefined));
+                }
+            }
+        }
+        if (modifier._renderingStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._renderingStrategy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.renderingStrategy(modifier._renderingStrategy_0_0value);
+                    break;
+                }
+                default: {
+                    this.renderingStrategy((undefined as SymbolRenderingStrategy | undefined));
+                }
+            }
+        }
+        if (modifier._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minFontScale(modifier._minFontScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.minFontScale((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._maxFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxFontScale(modifier._maxFontScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxFontScale((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._symbolEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.symbolEffect(modifier._symbolEffect_0_0value, modifier._symbolEffect_0_1value);
+                    break;
+                }
+                default: {
+                    this.symbolEffect((undefined as SymbolEffect | undefined), (undefined as boolean | number | undefined | undefined));
+                }
+            }
+        }
+    }
+    fontSize(value: number | string | Resource | undefined): this {
+        if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontSize_0_0value = value
+        } else
+        {
+            this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontColor(value: Array<ResourceColor> | undefined): this {
-        this._fontColor_flag = true
-        this._fontColor0_value = value
+    fontColor(value: Array<ResourceColor> | undefined): this {
+        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontColor_0_0value = value
+        } else
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
-        this._fontWeight_flag = true
-        this._fontWeight0_value = value
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontWeight_0_0value = value
+        } else
+        {
+            this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public effectStrategy(value: SymbolEffectStrategy | undefined): this {
-        this._effectStrategy_flag = true
-        this._effectStrategy0_value = value
+    effectStrategy(value: SymbolEffectStrategy | undefined): this {
+        if (((this._effectStrategy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._effectStrategy_0_flag = AttributeUpdaterFlag.UPDATE
+            this._effectStrategy_0_0value = value
+        } else
+        {
+            this._effectStrategy_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
-        this._renderingStrategy_flag = true
-        this._renderingStrategy0_value = value
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+        if (((this._renderingStrategy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._renderingStrategy_0_flag = AttributeUpdaterFlag.UPDATE
+            this._renderingStrategy_0_0value = value
+        } else
+        {
+            this._renderingStrategy_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
-        this._minFontScale_flag = true
-        this._minFontScale0_value = value
+    minFontScale(value: number | Resource | undefined): this {
+        if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minFontScale_0_0value = value
+        } else
+        {
+            this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
-        this._maxFontScale_flag = true
-        this._maxFontScale0_value = value
+    maxFontScale(value: number | Resource | undefined): this {
+        if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxFontScale_0_0value = value
+        } else
+        {
+            this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
-        this._symbolEffect_flag = true
-        this._symbolEffect0_value = symbolEffect
-        this._symbolEffect1_value = triggerValue
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
+        if (((this._symbolEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_0_1value) !== (triggerValue)))
+        {
+            this._symbolEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._symbolEffect_0_0value = symbolEffect
+            this._symbolEffect_0_1value = triggerValue
+        } else
+        {
+            this._symbolEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -688,12 +912,12 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
     }
     static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._AppearSymbolEffect_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -715,8 +939,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectScope | undefined = buffer
@@ -724,12 +947,12 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AppearSymbolEffect_setScope(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -763,19 +986,19 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
     }
     static construct(scope?: EffectScope, direction?: EffectDirection): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let direction_type : int32 = RuntimeType.UNDEFINED
-        direction_type = runtimeType(direction)
-        thisSerializer.writeInt8((direction_type).toChar())
-        if ((direction_type) != (RuntimeType.UNDEFINED)) {
-            const direction_value  = (direction as EffectDirection)
-            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
+        if (direction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const directionTmpValue  = (direction as EffectDirection)
+            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(directionTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._BounceSymbolEffect_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -805,8 +1028,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectScope | undefined = buffer
@@ -814,12 +1036,12 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BounceSymbolEffect_setScope(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -829,8 +1051,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectDirection | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectDirection_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectDirection | undefined = buffer
@@ -838,12 +1059,12 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let direction_type : int32 = RuntimeType.UNDEFINED
-        direction_type = runtimeType(direction)
-        thisSerializer.writeInt8((direction_type).toChar())
-        if ((direction_type) != (RuntimeType.UNDEFINED)) {
-            const direction_value  = (direction as EffectDirection)
-            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
+        if (direction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const directionTmpValue  = (direction as EffectDirection)
+            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(directionTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BounceSymbolEffect_setDirection(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -870,12 +1091,12 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
     }
     static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._DisappearSymbolEffect_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -897,8 +1118,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectScope | undefined = buffer
@@ -906,12 +1126,12 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DisappearSymbolEffect_setScope(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -938,12 +1158,12 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
     }
     static construct(fillStyle?: EffectFillStyle): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillStyle_type : int32 = RuntimeType.UNDEFINED
-        fillStyle_type = runtimeType(fillStyle)
-        thisSerializer.writeInt8((fillStyle_type).toChar())
-        if ((fillStyle_type) != (RuntimeType.UNDEFINED)) {
-            const fillStyle_value  = (fillStyle as EffectFillStyle)
-            thisSerializer.writeInt32(TypeChecker.EffectFillStyle_ToNumeric(fillStyle_value))
+        if (fillStyle !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fillStyleTmpValue  = (fillStyle as EffectFillStyle)
+            thisSerializer.writeInt32(TypeChecker.EffectFillStyle_ToNumeric(fillStyleTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -965,8 +1185,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectFillStyle | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectFillStyle_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectFillStyle | undefined = buffer
@@ -974,12 +1193,12 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
     }
     private setFillStyle_serialize(fillStyle: EffectFillStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillStyle_type : int32 = RuntimeType.UNDEFINED
-        fillStyle_type = runtimeType(fillStyle)
-        thisSerializer.writeInt8((fillStyle_type).toChar())
-        if ((fillStyle_type) != (RuntimeType.UNDEFINED)) {
-            const fillStyle_value  = (fillStyle as EffectFillStyle)
-            thisSerializer.writeInt32(TypeChecker.EffectFillStyle_ToNumeric(fillStyle_value))
+        if (fillStyle !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fillStyleTmpValue  = (fillStyle as EffectFillStyle)
+            thisSerializer.writeInt32(TypeChecker.EffectFillStyle_ToNumeric(fillStyleTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_setFillStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1006,12 +1225,12 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
     }
     static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._ReplaceSymbolEffect_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1033,8 +1252,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectScope | undefined = buffer
@@ -1042,12 +1260,12 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ReplaceSymbolEffect_setScope(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1081,19 +1299,19 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
     }
     static construct(scope?: EffectScope, direction?: EffectDirection): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let direction_type : int32 = RuntimeType.UNDEFINED
-        direction_type = runtimeType(direction)
-        thisSerializer.writeInt8((direction_type).toChar())
-        if ((direction_type) != (RuntimeType.UNDEFINED)) {
-            const direction_value  = (direction as EffectDirection)
-            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
+        if (direction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const directionTmpValue  = (direction as EffectDirection)
+            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(directionTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._ScaleSymbolEffect_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1123,8 +1341,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectScope | undefined = buffer
@@ -1132,12 +1349,12 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let scope_type : int32 = RuntimeType.UNDEFINED
-        scope_type = runtimeType(scope)
-        thisSerializer.writeInt8((scope_type).toChar())
-        if ((scope_type) != (RuntimeType.UNDEFINED)) {
-            const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
+        if (scope !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const scopeTmpValue  = (scope as EffectScope)
+            thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scopeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScaleSymbolEffect_setScope(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1147,8 +1364,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectDirection | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = TypeChecker.EffectDirection_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : EffectDirection | undefined = buffer
@@ -1156,12 +1372,12 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let direction_type : int32 = RuntimeType.UNDEFINED
-        direction_type = runtimeType(direction)
-        thisSerializer.writeInt8((direction_type).toChar())
-        if ((direction_type) != (RuntimeType.UNDEFINED)) {
-            const direction_value  = (direction as EffectDirection)
-            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
+        if (direction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const directionTmpValue  = (direction as EffectDirection)
+            thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(directionTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScaleSymbolEffect_setDirection(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

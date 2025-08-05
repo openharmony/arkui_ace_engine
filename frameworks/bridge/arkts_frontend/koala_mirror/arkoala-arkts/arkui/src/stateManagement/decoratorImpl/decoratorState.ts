@@ -26,7 +26,7 @@ import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../handwritten/component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
@@ -84,7 +84,6 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
             // unregister if old value is an object
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(value);
-            // TODO unregister Watch from old value object, add to new value object
             this.execWatchFuncs();
         }
     }

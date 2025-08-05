@@ -21,11 +21,9 @@
         "../interop"
     ],
     "devDependencies": {
-        "@koalaui/ets-tsc": "4.9.5-r6",
-        "@types/chai": "^4.3.1",
+        "@koalaui/ets-tsc": "4.9.5-r5",
         "@types/mocha": "^9.1.0",
         "bin-links": "^4.0.4",
-        "chai": "^4.3.6",
         "chalk": "^4.1.2",
         "minimist": "1.2.8",
         "node-addon-api": "8.0.0",
@@ -55,27 +53,10 @@
         "compile:native:hzvm-ohos-arm32": "npm run compile:native-panda-with-hzvm-ohos-arm32 --prefix ./framework",
         "compile:native:hzvm-ohos-arm64": "npm run compile:native-panda-with-hzvm-ohos-arm64 --prefix ./framework",
         "build:loader:node": "npm run build:loader:node --prefix loader",
-        "build:incremental": "npm run build:incremental --prefix ../incremental/runtime",
-        "build:incremental:inc": "npm run build:incremental:inc --prefix ../incremental/runtime",
-        "build:incremental:inc:ui2abc": "npm run build:incremental:inc:ui2abc --prefix ../incremental/runtime",
-        "clean:incremental": "npm run clean:incremental --prefix ../incremental/runtime",
-        "build:interop": "npm run build:interop --prefix ../interop",
-        "build:interop:inc": "npm run build:interop:inc --prefix ../interop",
-        "clean:common": "npm run clean:common --prefix ../incremental/common",
-        "clean:interop": "npm run clean:interop --prefix ../interop",
-        "build:arkui": "npm run build:arkui-no-common --prefix arkui",
-        "clean:arkui": "npm run clean:arkui-no-common --prefix arkui",
-        "build:arkoala:components": "npm run build:incremental && npm run build:interop && npm run build:arkui-common && npm run build:arkui",
-        "build:arkoala:components:inc": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui",
-        "build:arkoala": "npm run panda:sdk:check-install && npm run build:arkoala:components && npm run link:arkoala",
-        "build:arkoala:m3": "npm run build:all -C ../ui2abc && npm run build:incremental:inc:ui2abc && npm run build:interop:inc -C ../interop && npm run -C arkui build:m3",
-        "build:arkoala:inc": "npm run build:arkoala:components:inc && npm run link:arkoala",
-        "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui.abc ./arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
-        "link:arkoala:m3": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build-m3-impl/arkui-m3.abc",
 
-        "arkoala:m3:aot:host": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc",
-        "arkoala:m3:aot:arm32": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc --aot-target arm",
-        "arkoala:m3:aot:arm64": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc --aot-target arm64",
+        "arkoala:aot:host": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc",
+        "arkoala:aot:arm32": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc --aot-target arm",
+        "arkoala:aot:arm64": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc --aot-target arm64",
 
         "build:trivial": "npm run build:abc --prefix trivial",
         "build:user": "npm run build:trivial",
@@ -118,14 +99,12 @@
         "shopping:node": "npm run node --prefix shopping",
         "clean:shopping": "npm run clean:all --prefix shopping",
 
-        "arkoala:har-arm32": "npm run compile:native:hzvm-ohos-arm32 && npm run build:arkoala && npm run har-arm32 --prefix har",
-        "arkoala:har-arm32:m3": "npm run compile:native:hzvm-ohos-arm32 && npm run build:arkoala:m3 && npm run link:arkoala:m3 && npm run har-arm32:m3 --prefix har",
-        "arkoala:har-arm64": "npm run compile:native:hzvm-ohos-arm64 && npm run build:arkoala && npm run har-arm64 --prefix har",
-        "arkoala:har-arm64:m3": "npm run compile:native:hzvm-ohos-arm64 && npm run build:arkoala:m3 && npm run link:arkoala:m3 && npm run har-arm64:m3 --prefix har",
-        "arkoala:har-universal": "npm run compile:native:node-host && npm run compile:native:panda-host && npm run compile:native:hzvm-ohos-arm32 && npm run compile:native:hzvm-ohos-arm64 && npm run build:arkoala && npm run har-universal --prefix har",
+        "arkoala:har-arm32": "npm run compile:native:hzvm-ohos-arm32 && npm run build && npm run har-arm32 --prefix har",
+        "arkoala:har-arm64": "npm run compile:native:hzvm-ohos-arm64 && npm run build && npm run har-arm64 --prefix har",
+        "arkoala:har-universal": "npm run compile:native:node-host && npm run compile:native:panda-host && npm run compile:native:hzvm-ohos-arm32 && npm run compile:native:hzvm-ohos-arm64 && npm run build && npm run har-universal --prefix har",
 
-        "arkoala:har-arm64:aot": "npm run compile:native:hzvm-ohos-arm64 && npm run build:arkoala && npm run arkoala:aot:arm64 && npm run har-arm64 --prefix har",
-        "arkoala:har-universal:aot": "npm run compile:native:node-host && npm run compile:native:panda-host && npm run compile:native:hzvm-ohos-arm32 && npm run compile:native:hzvm-ohos-arm64 && npm run build:arkoala && npm run arkoala:aot:host && npm run har-universal --prefix har",
+        "arkoala:har-arm64:aot": "npm run compile:native:hzvm-ohos-arm64 && npm run build && npm run arkoala:aot:arm64 && npm run har-arm64 --prefix har",
+        "arkoala:har-universal:aot": "npm run compile:native:node-host && npm run compile:native:panda-host && npm run compile:native:hzvm-ohos-arm32 && npm run compile:native:hzvm-ohos-arm64 && npm run build && npm run arkoala:aot:host && npm run har-universal --prefix har",
 
         "trivial:har-arm32": "npm run user:har:arm32 --prefix trivial",
         "trivial:har-arm64": "npm run trivial:aot:arm64 && npm run user:har:arm64 --prefix trivial",
@@ -141,18 +120,18 @@
 
         "clean": "rimraf build",
         "clean:native": "npm run clean --prefix ./framework",
-        "clean:all": "npm run clean && npm run clean:common && npm run clean:incremental && npm run clean:interop && npm run clean:arkui-common && npm run clean:arkui && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:all --prefix shopping",
+        "clean:all": "npm run clean && npm run clean --prefix arkui && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:all --prefix shopping",
         "perf:trivial": "npm run perf --prefix trivial",
-
-        "libarkts:clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix arkui && npm run clean --prefix trivial/user",
-        "libarkts:build:all": "npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run compile --prefix memo-plugin && npm run runtime:prepare --prefix memo-plugin",
-        "libarkts:all": "npm run libarkts:clean:all && npm run libarkts:build:all && npm run libarkts:test:all",
 
         "previewer:run": "node scripts/previewer-cli.mjs run",
         "previewer:clear": "rimraf ../tools/previewers/* ../tools/previewers/.* || true",
         "previewer:download": "node scripts/previewer-cli.mjs download",
         "previewer:check": "node scripts/previewer-cli.mjs check",
         "previewer:list-remote": "node scripts/previewer-cli.mjs list-remote",
-        "previewer:set-active": "node scripts/previewer-cli.mjs set-active"
+        "previewer:set-active": "node scripts/previewer-cli.mjs set-active",
+
+        "link": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build/arkui.abc",
+        "build": "npm run build --prefix ../incremental && npm run build --prefix ../interop && npm run build --prefix arkui && npm run link"
     }
 }
+

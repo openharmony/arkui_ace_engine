@@ -16,18 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkRootScenePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -35,7 +36,7 @@ export class ArkRootScenePeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRootScenePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._RootScene_construct(peerId, flags)
-        const _peer  = new ArkRootScenePeer(_peerPtr, peerId, "RootScene", flags)
+        const _peer  = new ArkRootScenePeer(_peerPtr, peerId, 'RootScene', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -58,9 +59,6 @@ export class ArkRootSceneStyle extends ArkCommonMethodStyle implements RootScene
     public attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: RootSceneAttribute): void {
-        super.apply(target)
-    }
 }
 
 export class ArkRootSceneComponent extends ArkCommonMethodComponent implements RootSceneAttribute {
@@ -76,7 +74,6 @@ export class ArkRootSceneComponent extends ArkCommonMethodComponent implements R
         return this
     }
     public attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -84,26 +81,6 @@ export class ArkRootSceneComponent extends ArkCommonMethodComponent implements R
         super.applyAttributesFinish()
     }
 }
-export function withRootSceneStyle(receiver: RootSceneAttribute, modifier: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkRootSceneStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("RootScene")
-// export function RootScene(
-//     session: RootSceneSession,
-//     @memo
-//     content_?: () => void,
-// ): RootSceneAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function RootScene(
@@ -119,18 +96,21 @@ export function RootScene(
     NodeAttach<ArkRootScenePeer>((): ArkRootScenePeer => ArkRootScenePeer.create(receiver), (_: ArkRootScenePeer): void => {
         receiver.setRootSceneOptions(session)
         style?.(receiver)
-        withRootSceneStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkRootSceneSet extends ArkCommonMethodSet implements RootSceneAttribute {
+export class RootSceneModifier extends CommonMethodModifier implements RootSceneAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: RootSceneAttribute): void {
+    applyModifierPatch(peer: ArkRootScenePeer): void {
+        super.applyModifierPatch(peer)
+    }
+    mergeModifier(modifier: RootSceneModifier): void {
+        super.mergeModifier(modifier)
     }
     public attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

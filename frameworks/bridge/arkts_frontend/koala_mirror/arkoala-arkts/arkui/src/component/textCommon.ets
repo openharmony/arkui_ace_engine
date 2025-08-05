@@ -17,9 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
 import { SelectionOptions_serializer, SelectionOptions } from "./common"
@@ -156,12 +155,12 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
     }
     private setSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            SelectionOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SelectionOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -210,17 +209,14 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static of_serialize(id: ResourceStr): TextMenuItemId {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let id_type : int32 = RuntimeType.UNDEFINED
-        id_type = runtimeType(id)
-        if (RuntimeType.STRING == id_type) {
+        if (id instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const id_0  = id as string
-            thisSerializer.writeString(id_0)
-        }
-        else if (RuntimeType.OBJECT == id_type) {
+            const idForIdx0  = id as string
+            thisSerializer.writeString(idForIdx0)
+        } else if (id instanceof Resource) {
             thisSerializer.writeInt8((1).toChar())
-            const id_1  = id as Resource
-            Resource_serializer.write(thisSerializer, id_1)
+            const idForIdx1  = id as Resource
+            Resource_serializer.write(thisSerializer, idForIdx1)
         }
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_of(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -440,13 +436,13 @@ export class LayoutManager_serializer {
 export class PositionWithAffinity_serializer {
     public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
         let valueSerializer : SerializerBase = buffer
-        const value_position  = value.position
-        valueSerializer.writeNumber(value_position)
+        const valueHolderForPosition  = value.position
+        valueSerializer.writeNumber(valueHolderForPosition)
     }
     public static read(buffer: DeserializerBase): PositionWithAffinity {
         let valueDeserializer : DeserializerBase = buffer
-        const position_result : number = (valueDeserializer.readNumber() as number)
-        let value : PositionWithAffinity = ({position: position_result} as PositionWithAffinity)
+        const positionTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : PositionWithAffinity = ({position: positionTmpResult} as PositionWithAffinity)
         return value
     }
 }
@@ -497,757 +493,702 @@ export class TextMenuItemId_serializer {
 export class DeleteValue_serializer {
     public static write(buffer: SerializerBase, value: DeleteValue): void {
         let valueSerializer : SerializerBase = buffer
-        const value_deleteOffset  = value.deleteOffset
-        valueSerializer.writeNumber(value_deleteOffset)
-        const value_direction  = value.direction
-        valueSerializer.writeInt32(TypeChecker.TextDeleteDirection_ToNumeric(value_direction))
-        const value_deleteValue  = value.deleteValue
-        valueSerializer.writeString(value_deleteValue)
+        const valueHolderForDeleteOffset  = value.deleteOffset
+        valueSerializer.writeNumber(valueHolderForDeleteOffset)
+        const valueHolderForDirection  = value.direction
+        valueSerializer.writeInt32(TypeChecker.TextDeleteDirection_ToNumeric(valueHolderForDirection))
+        const valueHolderForDeleteValue  = value.deleteValue
+        valueSerializer.writeString(valueHolderForDeleteValue)
     }
     public static read(buffer: DeserializerBase): DeleteValue {
         let valueDeserializer : DeserializerBase = buffer
-        const deleteOffset_result : number = (valueDeserializer.readNumber() as number)
-        const direction_result : TextDeleteDirection = TypeChecker.TextDeleteDirection_FromNumeric(valueDeserializer.readInt32())
-        const deleteValue_result : string = (valueDeserializer.readString() as string)
-        let value : DeleteValue = ({deleteOffset: deleteOffset_result, direction: direction_result, deleteValue: deleteValue_result} as DeleteValue)
+        const deleteOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const directionTmpResult : TextDeleteDirection = TypeChecker.TextDeleteDirection_FromNumeric(valueDeserializer.readInt32())
+        const deleteValueTmpResult : string = (valueDeserializer.readString() as string)
+        let value : DeleteValue = ({deleteOffset: deleteOffsetTmpResult, direction: directionTmpResult, deleteValue: deleteValueTmpResult} as DeleteValue)
         return value
     }
 }
 export class EditMenuOptions_serializer {
     public static write(buffer: SerializerBase, value: EditMenuOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_onCreateMenu  = value.onCreateMenu
-        valueSerializer.holdAndWriteCallback(value_onCreateMenu)
-        const value_onMenuItemClick  = value.onMenuItemClick
-        valueSerializer.holdAndWriteCallback(value_onMenuItemClick)
+        const valueHolderForOnCreateMenu  = value.onCreateMenu
+        valueSerializer.holdAndWriteCallback(valueHolderForOnCreateMenu)
+        const valueHolderForOnMenuItemClick  = value.onMenuItemClick
+        valueSerializer.holdAndWriteCallback(valueHolderForOnMenuItemClick)
     }
     public static read(buffer: DeserializerBase): EditMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const onCreateMenu_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const onCreateMenu_buf_call : KPointer = valueDeserializer.readPointer()
-        const onCreateMenu_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const onCreateMenu_result : OnCreateMenuCallback = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => { 
-    const onCreateMenu_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    onCreateMenu_buf_argsSerializer.writeInt32(onCreateMenu_buf_resource.resourceId);
-    onCreateMenu_buf_argsSerializer.writePointer(onCreateMenu_buf_call);
-    onCreateMenu_buf_argsSerializer.writePointer(onCreateMenu_buf_callSync);
-    onCreateMenu_buf_argsSerializer.writeInt32((menuItems.length).toInt());
-    for (let menuItems_counter_i = 0; menuItems_counter_i < menuItems.length; menuItems_counter_i++) {
-        const menuItems_element : TextMenuItem = menuItems[menuItems_counter_i];
-        TextMenuItem_serializer.write(onCreateMenu_buf_argsSerializer, menuItems_element);
-    }
-    let onCreateMenu_buf_continuationValue : Array<TextMenuItem> | undefined;
-    const onCreateMenu_buf_continuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {     onCreateMenu_buf_continuationValue = value; }
-    onCreateMenu_buf_argsSerializer.holdAndWriteCallback(onCreateMenu_buf_continuationCallback);
-    InteropNativeModule._CallCallback(312701677, onCreateMenu_buf_argsSerializer.asBuffer(), onCreateMenu_buf_argsSerializer.length());
-    onCreateMenu_buf_argsSerializer.release();
-    return (onCreateMenu_buf_continuationValue as Array<TextMenuItem>); }
-        const onMenuItemClick_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const onMenuItemClick_buf_call : KPointer = valueDeserializer.readPointer()
-        const onMenuItemClick_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const onMenuItemClick_result : OnMenuItemClickCallback = (menuItem: TextMenuItem, range: TextRange):boolean => { 
-    const onMenuItemClick_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    onMenuItemClick_buf_argsSerializer.writeInt32(onMenuItemClick_buf_resource.resourceId);
-    onMenuItemClick_buf_argsSerializer.writePointer(onMenuItemClick_buf_call);
-    onMenuItemClick_buf_argsSerializer.writePointer(onMenuItemClick_buf_callSync);
-    TextMenuItem_serializer.write(onMenuItemClick_buf_argsSerializer, menuItem);
-    TextRange_serializer.write(onMenuItemClick_buf_argsSerializer, range);
-    let onMenuItemClick_buf_continuationValue : boolean | undefined;
-    const onMenuItemClick_buf_continuationCallback : ((value0: boolean) => void) = (value: boolean):void => {     onMenuItemClick_buf_continuationValue = value; }
-    onMenuItemClick_buf_argsSerializer.holdAndWriteCallback(onMenuItemClick_buf_continuationCallback);
-    InteropNativeModule._CallCallback(-1106041422, onMenuItemClick_buf_argsSerializer.asBuffer(), onMenuItemClick_buf_argsSerializer.length());
-    onMenuItemClick_buf_argsSerializer.release();
-    return (onMenuItemClick_buf_continuationValue as boolean); }
-        let value : EditMenuOptions = ({onCreateMenu: onCreateMenu_result, onMenuItemClick: onMenuItemClick_result} as EditMenuOptions)
+        const onCreateMenuTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onCreateMenuTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onCreateMenuTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onCreateMenuTmpResult : OnCreateMenuCallback = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
+            const onCreateMenuTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onCreateMenuTmpBufBufArgsSerializer.writeInt32(onCreateMenuTmpBufBufResource.resourceId);
+            onCreateMenuTmpBufBufArgsSerializer.writePointer(onCreateMenuTmpBufBufCall);
+            onCreateMenuTmpBufBufArgsSerializer.writePointer(onCreateMenuTmpBufBufCallSync);
+            onCreateMenuTmpBufBufArgsSerializer.writeInt32((menuItems.length).toInt());
+            for (let menuItemsCounterI = 0; menuItemsCounterI < menuItems.length; menuItemsCounterI++) {
+                const menuItemsTmpElement : TextMenuItem = menuItems[menuItemsCounterI];
+                TextMenuItem_serializer.write(onCreateMenuTmpBufBufArgsSerializer, menuItemsTmpElement);
+            }
+            let onCreateMenuTmpBufBufContinuationValue : Array<TextMenuItem> | undefined;
+            const onCreateMenuTmpBufBufContinuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+            onCreateMenuTmpBufBufContinuationValue = value;
+        }
+            onCreateMenuTmpBufBufArgsSerializer.holdAndWriteCallback(onCreateMenuTmpBufBufContinuationCallback);
+            InteropNativeModule._CallCallback(312701677, onCreateMenuTmpBufBufArgsSerializer.asBuffer(), onCreateMenuTmpBufBufArgsSerializer.length());
+            onCreateMenuTmpBufBufArgsSerializer.release();
+            return (onCreateMenuTmpBufBufContinuationValue as Array<TextMenuItem>);
+        }
+        const onMenuItemClickTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onMenuItemClickTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onMenuItemClickTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onMenuItemClickTmpResult : OnMenuItemClickCallback = (menuItem: TextMenuItem, range: TextRange):boolean => {
+            const onMenuItemClickTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onMenuItemClickTmpBufBufArgsSerializer.writeInt32(onMenuItemClickTmpBufBufResource.resourceId);
+            onMenuItemClickTmpBufBufArgsSerializer.writePointer(onMenuItemClickTmpBufBufCall);
+            onMenuItemClickTmpBufBufArgsSerializer.writePointer(onMenuItemClickTmpBufBufCallSync);
+            TextMenuItem_serializer.write(onMenuItemClickTmpBufBufArgsSerializer, menuItem);
+            TextRange_serializer.write(onMenuItemClickTmpBufBufArgsSerializer, range);
+            let onMenuItemClickTmpBufBufContinuationValue : boolean | undefined;
+            const onMenuItemClickTmpBufBufContinuationCallback : ((value0: boolean) => void) = (value: boolean):void => {
+            onMenuItemClickTmpBufBufContinuationValue = value;
+        }
+            onMenuItemClickTmpBufBufArgsSerializer.holdAndWriteCallback(onMenuItemClickTmpBufBufContinuationCallback);
+            InteropNativeModule._CallCallback(-1106041422, onMenuItemClickTmpBufBufArgsSerializer.asBuffer(), onMenuItemClickTmpBufBufArgsSerializer.length());
+            onMenuItemClickTmpBufBufArgsSerializer.release();
+            return (onMenuItemClickTmpBufBufContinuationValue as boolean);
+        }
+        let value : EditMenuOptions = ({onCreateMenu: onCreateMenuTmpResult, onMenuItemClick: onMenuItemClickTmpResult} as EditMenuOptions)
         return value
     }
 }
 export class FontSettingOptions_serializer {
     public static write(buffer: SerializerBase, value: FontSettingOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_enableVariableFontWeight  = value.enableVariableFontWeight
-        let value_enableVariableFontWeight_type : int32 = RuntimeType.UNDEFINED
-        value_enableVariableFontWeight_type = runtimeType(value_enableVariableFontWeight)
-        valueSerializer.writeInt8((value_enableVariableFontWeight_type).toChar())
-        if ((value_enableVariableFontWeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableVariableFontWeight_value  = value_enableVariableFontWeight!
-            valueSerializer.writeBoolean(value_enableVariableFontWeight_value)
+        const valueHolderForEnableVariableFontWeight  = value.enableVariableFontWeight
+        if (valueHolderForEnableVariableFontWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableVariableFontWeightTmpValue  = valueHolderForEnableVariableFontWeight!
+            valueSerializer.writeBoolean(valueHolderForEnableVariableFontWeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FontSettingOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const enableVariableFontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableVariableFontWeight_buf : boolean | undefined
-        if ((enableVariableFontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableVariableFontWeight_buf = valueDeserializer.readBoolean()
+        const enableVariableFontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableVariableFontWeightTmpBuf : boolean | undefined
+        if ((enableVariableFontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableVariableFontWeightTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableVariableFontWeight_result : boolean | undefined = enableVariableFontWeight_buf
-        let value : FontSettingOptions = ({enableVariableFontWeight: enableVariableFontWeight_result} as FontSettingOptions)
+        const enableVariableFontWeightTmpResult : boolean | undefined = enableVariableFontWeightTmpBuf
+        let value : FontSettingOptions = ({enableVariableFontWeight: enableVariableFontWeightTmpResult} as FontSettingOptions)
         return value
     }
 }
 export class InsertValue_serializer {
     public static write(buffer: SerializerBase, value: InsertValue): void {
         let valueSerializer : SerializerBase = buffer
-        const value_insertOffset  = value.insertOffset
-        valueSerializer.writeNumber(value_insertOffset)
-        const value_insertValue  = value.insertValue
-        valueSerializer.writeString(value_insertValue)
+        const valueHolderForInsertOffset  = value.insertOffset
+        valueSerializer.writeNumber(valueHolderForInsertOffset)
+        const valueHolderForInsertValue  = value.insertValue
+        valueSerializer.writeString(valueHolderForInsertValue)
     }
     public static read(buffer: DeserializerBase): InsertValue {
         let valueDeserializer : DeserializerBase = buffer
-        const insertOffset_result : number = (valueDeserializer.readNumber() as number)
-        const insertValue_result : string = (valueDeserializer.readString() as string)
-        let value : InsertValue = ({insertOffset: insertOffset_result, insertValue: insertValue_result} as InsertValue)
+        const insertOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const insertValueTmpResult : string = (valueDeserializer.readString() as string)
+        let value : InsertValue = ({insertOffset: insertOffsetTmpResult, insertValue: insertValueTmpResult} as InsertValue)
         return value
     }
 }
 export class PreviewText_serializer {
     public static write(buffer: SerializerBase, value: PreviewText): void {
         let valueSerializer : SerializerBase = buffer
-        const value_offset  = value.offset
-        valueSerializer.writeNumber(value_offset)
-        const value_value  = value.value
-        valueSerializer.writeString(value_value)
+        const valueHolderForOffset  = value.offset
+        valueSerializer.writeNumber(valueHolderForOffset)
+        const valueHolderForValue  = value.value
+        valueSerializer.writeString(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): PreviewText {
         let valueDeserializer : DeserializerBase = buffer
-        const offset_result : number = (valueDeserializer.readNumber() as number)
-        const value_result : string = (valueDeserializer.readString() as string)
-        let value : PreviewText = ({offset: offset_result, value: value_result} as PreviewText)
+        const offsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : string = (valueDeserializer.readString() as string)
+        let value : PreviewText = ({offset: offsetTmpResult, value: valueTmpResult} as PreviewText)
         return value
     }
 }
 export class StyledStringChangedListener_serializer {
     public static write(buffer: SerializerBase, value: StyledStringChangedListener): void {
         let valueSerializer : SerializerBase = buffer
-        const value_onWillChange  = value.onWillChange
-        let value_onWillChange_type : int32 = RuntimeType.UNDEFINED
-        value_onWillChange_type = runtimeType(value_onWillChange)
-        valueSerializer.writeInt8((value_onWillChange_type).toChar())
-        if ((value_onWillChange_type) != (RuntimeType.UNDEFINED)) {
-            const value_onWillChange_value  = value_onWillChange!
-            valueSerializer.holdAndWriteCallback(value_onWillChange_value)
+        const valueHolderForOnWillChange  = value.onWillChange
+        if (valueHolderForOnWillChange !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnWillChangeTmpValue  = valueHolderForOnWillChange!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnWillChangeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_onDidChange  = value.onDidChange
-        let value_onDidChange_type : int32 = RuntimeType.UNDEFINED
-        value_onDidChange_type = runtimeType(value_onDidChange)
-        valueSerializer.writeInt8((value_onDidChange_type).toChar())
-        if ((value_onDidChange_type) != (RuntimeType.UNDEFINED)) {
-            const value_onDidChange_value  = value_onDidChange!
-            valueSerializer.holdAndWriteCallback(value_onDidChange_value)
+        const valueHolderForOnDidChange  = value.onDidChange
+        if (valueHolderForOnDidChange !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDidChangeTmpValue  = valueHolderForOnDidChange!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDidChangeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): StyledStringChangedListener {
         let valueDeserializer : DeserializerBase = buffer
-        const onWillChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillChange_buf : ((value0: StyledStringChangeValue) => boolean) | undefined
-        if ((onWillChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onWillChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillChange_buf__call : KPointer = valueDeserializer.readPointer()
-            const onWillChange_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onWillChange_buf = (value0: StyledStringChangeValue):boolean => { 
-    const onWillChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onWillChange_buf__argsSerializer.writeInt32(onWillChange_buf__resource.resourceId);
-    onWillChange_buf__argsSerializer.writePointer(onWillChange_buf__call);
-    onWillChange_buf__argsSerializer.writePointer(onWillChange_buf__callSync);
-    StyledStringChangeValue_serializer.write(onWillChange_buf__argsSerializer, value0);
-    let onWillChange_buf__continuationValue : boolean | undefined;
-    const onWillChange_buf__continuationCallback : ((value0: boolean) => void) = (value: boolean):void => {     onWillChange_buf__continuationValue = value; }
-    onWillChange_buf__argsSerializer.holdAndWriteCallback(onWillChange_buf__continuationCallback);
-    InteropNativeModule._CallCallback(2116745428, onWillChange_buf__argsSerializer.asBuffer(), onWillChange_buf__argsSerializer.length());
-    onWillChange_buf__argsSerializer.release();
-    return (onWillChange_buf__continuationValue as boolean); }
+        const onWillChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillChangeTmpBuf : ((value0: StyledStringChangeValue) => boolean) | undefined
+        if ((onWillChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onWillChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onWillChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onWillChangeTmpBuf = (value0: StyledStringChangeValue):boolean => {
+                const onWillChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onWillChangeTmpBuf_BufArgsSerializer.writeInt32(onWillChangeTmpBuf_BufResource.resourceId);
+                onWillChangeTmpBuf_BufArgsSerializer.writePointer(onWillChangeTmpBuf_BufCall);
+                onWillChangeTmpBuf_BufArgsSerializer.writePointer(onWillChangeTmpBuf_BufCallSync);
+                StyledStringChangeValue_serializer.write(onWillChangeTmpBuf_BufArgsSerializer, value0);
+                let onWillChangeTmpBuf_BufContinuationValue : boolean | undefined;
+                const onWillChangeTmpBuf_BufContinuationCallback : ((value0: boolean) => void) = (value: boolean):void => {
+                onWillChangeTmpBuf_BufContinuationValue = value;
+            }
+                onWillChangeTmpBuf_BufArgsSerializer.holdAndWriteCallback(onWillChangeTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallback(2116745428, onWillChangeTmpBuf_BufArgsSerializer.asBuffer(), onWillChangeTmpBuf_BufArgsSerializer.length());
+                onWillChangeTmpBuf_BufArgsSerializer.release();
+                return (onWillChangeTmpBuf_BufContinuationValue as boolean);
+            }
         }
-        const onWillChange_result : ((value0: StyledStringChangeValue) => boolean) | undefined = onWillChange_buf
-        const onDidChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDidChange_buf : OnDidChangeCallback | undefined
-        if ((onDidChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onDidChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDidChange_buf__call : KPointer = valueDeserializer.readPointer()
-            const onDidChange_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onDidChange_buf = (rangeBefore: TextRange, rangeAfter: TextRange):void => { 
-    const onDidChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onDidChange_buf__argsSerializer.writeInt32(onDidChange_buf__resource.resourceId);
-    onDidChange_buf__argsSerializer.writePointer(onDidChange_buf__call);
-    onDidChange_buf__argsSerializer.writePointer(onDidChange_buf__callSync);
-    TextRange_serializer.write(onDidChange_buf__argsSerializer, rangeBefore);
-    TextRange_serializer.write(onDidChange_buf__argsSerializer, rangeAfter);
-    InteropNativeModule._CallCallback(1648184341, onDidChange_buf__argsSerializer.asBuffer(), onDidChange_buf__argsSerializer.length());
-    onDidChange_buf__argsSerializer.release();
-    return; }
+        const onWillChangeTmpResult : ((value0: StyledStringChangeValue) => boolean) | undefined = onWillChangeTmpBuf
+        const onDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDidChangeTmpBuf : OnDidChangeCallback | undefined
+        if ((onDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDidChangeTmpBuf = (rangeBefore: TextRange, rangeAfter: TextRange):void => {
+                const onDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDidChangeTmpBuf_BufArgsSerializer.writeInt32(onDidChangeTmpBuf_BufResource.resourceId);
+                onDidChangeTmpBuf_BufArgsSerializer.writePointer(onDidChangeTmpBuf_BufCall);
+                onDidChangeTmpBuf_BufArgsSerializer.writePointer(onDidChangeTmpBuf_BufCallSync);
+                TextRange_serializer.write(onDidChangeTmpBuf_BufArgsSerializer, rangeBefore);
+                TextRange_serializer.write(onDidChangeTmpBuf_BufArgsSerializer, rangeAfter);
+                InteropNativeModule._CallCallback(1648184341, onDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDidChangeTmpBuf_BufArgsSerializer.length());
+                onDidChangeTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const onDidChange_result : OnDidChangeCallback | undefined = onDidChange_buf
-        let value : StyledStringChangedListener = ({onWillChange: onWillChange_result, onDidChange: onDidChange_result} as StyledStringChangedListener)
+        const onDidChangeTmpResult : OnDidChangeCallback | undefined = onDidChangeTmpBuf
+        let value : StyledStringChangedListener = ({onWillChange: onWillChangeTmpResult, onDidChange: onDidChangeTmpResult} as StyledStringChangedListener)
         return value
     }
 }
 export class TextMenuOptions_serializer {
     public static write(buffer: SerializerBase, value: TextMenuOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_showMode  = value.showMode
-        let value_showMode_type : int32 = RuntimeType.UNDEFINED
-        value_showMode_type = runtimeType(value_showMode)
-        valueSerializer.writeInt8((value_showMode_type).toChar())
-        if ((value_showMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_showMode_value  = (value_showMode as TextMenuShowMode)
-            valueSerializer.writeInt32(TypeChecker.TextMenuShowMode_ToNumeric(value_showMode_value))
+        const valueHolderForShowMode  = value.showMode
+        if (valueHolderForShowMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowModeTmpValue  = (valueHolderForShowMode as TextMenuShowMode)
+            valueSerializer.writeInt32(TypeChecker.TextMenuShowMode_ToNumeric(valueHolderForShowModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const showMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showMode_buf : TextMenuShowMode | undefined
-        if ((showMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            showMode_buf = TypeChecker.TextMenuShowMode_FromNumeric(valueDeserializer.readInt32())
+        const showModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showModeTmpBuf : TextMenuShowMode | undefined
+        if ((showModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showModeTmpBuf = TypeChecker.TextMenuShowMode_FromNumeric(valueDeserializer.readInt32())
         }
-        const showMode_result : TextMenuShowMode | undefined = showMode_buf
-        let value : TextMenuOptions = ({showMode: showMode_result} as TextMenuOptions)
+        const showModeTmpResult : TextMenuShowMode | undefined = showModeTmpBuf
+        let value : TextMenuOptions = ({showMode: showModeTmpResult} as TextMenuOptions)
         return value
     }
 }
 export class TextRange_serializer {
     public static write(buffer: SerializerBase, value: TextRange): void {
         let valueSerializer : SerializerBase = buffer
-        const value_start  = value.start
-        let value_start_type : int32 = RuntimeType.UNDEFINED
-        value_start_type = runtimeType(value_start)
-        valueSerializer.writeInt8((value_start_type).toChar())
-        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
-            const value_start_value  = value_start!
-            valueSerializer.writeNumber(value_start_value)
+        const valueHolderForStart  = value.start
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            valueSerializer.writeNumber(valueHolderForStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_end  = value.end
-        let value_end_type : int32 = RuntimeType.UNDEFINED
-        value_end_type = runtimeType(value_end)
-        valueSerializer.writeInt8((value_end_type).toChar())
-        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
-            const value_end_value  = value_end!
-            valueSerializer.writeNumber(value_end_value)
+        const valueHolderForEnd  = value.end
+        if (valueHolderForEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndTmpValue  = valueHolderForEnd!
+            valueSerializer.writeNumber(valueHolderForEndTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextRange {
         let valueDeserializer : DeserializerBase = buffer
-        const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let start_buf : number | undefined
-        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            start_buf = (valueDeserializer.readNumber() as number)
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : number | undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const start_result : number | undefined = start_buf
-        const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let end_buf : number | undefined
-        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            end_buf = (valueDeserializer.readNumber() as number)
+        const startTmpResult : number | undefined = startTmpBuf
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endTmpBuf : number | undefined
+        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            endTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const end_result : number | undefined = end_buf
-        let value : TextRange = ({start: start_result, end: end_result} as TextRange)
+        const endTmpResult : number | undefined = endTmpBuf
+        let value : TextRange = ({start: startTmpResult, end: endTmpResult} as TextRange)
         return value
     }
 }
 export class DecorationStyleResult_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyleResult): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        valueSerializer.writeInt32(TypeChecker.TextDecorationType_ToNumeric(value_type))
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        if (TypeChecker.isColor(value_color)) {
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(TypeChecker.TextDecorationType_ToNumeric(valueHolderForType))
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_color_0  = value_color as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_0))
-        }
-        else if (RuntimeType.NUMBER == value_color_type) {
+            const valueHolderForColorForIdx0  = valueHolderForColor as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorForIdx0))
+        } else if (valueHolderForColor instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_color_1  = value_color as number
-            valueSerializer.writeNumber(value_color_1)
-        }
-        else if (RuntimeType.STRING == value_color_type) {
+            const valueHolderForColorForIdx1  = valueHolderForColor as number
+            valueSerializer.writeNumber(valueHolderForColorForIdx1)
+        } else if (valueHolderForColor instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_color_2  = value_color as string
-            valueSerializer.writeString(value_color_2)
-        }
-        else if (RuntimeType.OBJECT == value_color_type) {
+            const valueHolderForColorForIdx2  = valueHolderForColor as string
+            valueSerializer.writeString(valueHolderForColorForIdx2)
+        } else if (valueHolderForColor instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_color_3  = value_color as Resource
-            Resource_serializer.write(valueSerializer, value_color_3)
+            const valueHolderForColorForIdx3  = valueHolderForColor as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
-        const value_style  = value.style
-        let value_style_type : int32 = RuntimeType.UNDEFINED
-        value_style_type = runtimeType(value_style)
-        valueSerializer.writeInt8((value_style_type).toChar())
-        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
-            const value_style_value  = (value_style as TextDecorationStyle)
-            valueSerializer.writeInt32(TypeChecker.TextDecorationStyle_ToNumeric(value_style_value))
+        const valueHolderForStyle  = value.style
+        if (valueHolderForStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStyleTmpValue  = (valueHolderForStyle as TextDecorationStyle)
+            valueSerializer.writeInt32(TypeChecker.TextDecorationStyle_ToNumeric(valueHolderForStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DecorationStyleResult {
         let valueDeserializer : DeserializerBase = buffer
-        const type_result : TextDecorationType = TypeChecker.TextDecorationType_FromNumeric(valueDeserializer.readInt32())
-        const color_buf_selector : int32 = valueDeserializer.readInt8()
-        let color_buf : Color | number | string | Resource | undefined
-        if (color_buf_selector == (0).toChar()) {
-            color_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const typeTmpResult : TextDecorationType = TypeChecker.TextDecorationType_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let colorTmpBuf : Color | number | string | Resource | undefined
+        if (colorTmpBufUnionSelector == (0).toChar()) {
+            colorTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (colorTmpBufUnionSelector == (1).toChar()) {
+            colorTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (colorTmpBufUnionSelector == (2).toChar()) {
+            colorTmpBuf = (valueDeserializer.readString() as string)
+        } else if (colorTmpBufUnionSelector == (3).toChar()) {
+            colorTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for colorTmpBuf has to be chosen through deserialisation.")
         }
-        else if (color_buf_selector == (1).toChar()) {
-            color_buf = (valueDeserializer.readNumber() as number)
+        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
+        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let styleTmpBuf : TextDecorationStyle | undefined
+        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            styleTmpBuf = TypeChecker.TextDecorationStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        else if (color_buf_selector == (2).toChar()) {
-            color_buf = (valueDeserializer.readString() as string)
-        }
-        else if (color_buf_selector == (3).toChar()) {
-            color_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for color_buf has to be chosen through deserialisation.")
-        }
-        const color_result : ResourceColor = (color_buf as Color | number | string | Resource)
-        const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let style_buf : TextDecorationStyle | undefined
-        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            style_buf = TypeChecker.TextDecorationStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const style_result : TextDecorationStyle | undefined = style_buf
-        let value : DecorationStyleResult = ({type: type_result, color: color_result, style: style_result} as DecorationStyleResult)
+        const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
+        let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleResult)
         return value
     }
 }
 export class StyledStringChangeValue_serializer {
     public static write(buffer: SerializerBase, value: StyledStringChangeValue): void {
         let valueSerializer : SerializerBase = buffer
-        const value_range  = value.range
-        TextRange_serializer.write(valueSerializer, value_range)
-        const value_replacementString  = value.replacementString
-        StyledString_serializer.write(valueSerializer, value_replacementString)
-        const value_previewText  = value.previewText
-        let value_previewText_type : int32 = RuntimeType.UNDEFINED
-        value_previewText_type = runtimeType(value_previewText)
-        valueSerializer.writeInt8((value_previewText_type).toChar())
-        if ((value_previewText_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewText_value  = value_previewText!
-            StyledString_serializer.write(valueSerializer, value_previewText_value)
+        const valueHolderForRange  = value.range
+        TextRange_serializer.write(valueSerializer, valueHolderForRange)
+        const valueHolderForReplacementString  = value.replacementString
+        StyledString_serializer.write(valueSerializer, valueHolderForReplacementString)
+        const valueHolderForPreviewText  = value.previewText
+        if (valueHolderForPreviewText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewTextTmpValue  = valueHolderForPreviewText!
+            StyledString_serializer.write(valueSerializer, valueHolderForPreviewTextTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): StyledStringChangeValue {
         let valueDeserializer : DeserializerBase = buffer
-        const range_result : TextRange = TextRange_serializer.read(valueDeserializer)
-        const replacementString_result : StyledString = (StyledString_serializer.read(valueDeserializer) as StyledString)
-        const previewText_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewText_buf : StyledString | undefined
-        if ((previewText_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            previewText_buf = (StyledString_serializer.read(valueDeserializer) as StyledString)
+        const rangeTmpResult : TextRange = TextRange_serializer.read(valueDeserializer)
+        const replacementStringTmpResult : StyledString = (StyledString_serializer.read(valueDeserializer) as StyledString)
+        const previewTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewTextTmpBuf : StyledString | undefined
+        if ((previewTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            previewTextTmpBuf = (StyledString_serializer.read(valueDeserializer) as StyledString)
         }
-        const previewText_result : StyledString | undefined = previewText_buf
-        let value : StyledStringChangeValue = ({range: range_result, replacementString: replacementString_result, previewText: previewText_result} as StyledStringChangeValue)
+        const previewTextTmpResult : StyledString | undefined = previewTextTmpBuf
+        let value : StyledStringChangeValue = ({range: rangeTmpResult, replacementString: replacementStringTmpResult, previewText: previewTextTmpResult} as StyledStringChangeValue)
         return value
     }
 }
 export class TextChangeOptions_serializer {
     public static write(buffer: SerializerBase, value: TextChangeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_rangeBefore  = value.rangeBefore
-        TextRange_serializer.write(valueSerializer, value_rangeBefore)
-        const value_rangeAfter  = value.rangeAfter
-        TextRange_serializer.write(valueSerializer, value_rangeAfter)
-        const value_oldContent  = value.oldContent
-        valueSerializer.writeString(value_oldContent)
-        const value_oldPreviewText  = value.oldPreviewText
-        PreviewText_serializer.write(valueSerializer, value_oldPreviewText)
+        const valueHolderForRangeBefore  = value.rangeBefore
+        TextRange_serializer.write(valueSerializer, valueHolderForRangeBefore)
+        const valueHolderForRangeAfter  = value.rangeAfter
+        TextRange_serializer.write(valueSerializer, valueHolderForRangeAfter)
+        const valueHolderForOldContent  = value.oldContent
+        valueSerializer.writeString(valueHolderForOldContent)
+        const valueHolderForOldPreviewText  = value.oldPreviewText
+        PreviewText_serializer.write(valueSerializer, valueHolderForOldPreviewText)
     }
     public static read(buffer: DeserializerBase): TextChangeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const rangeBefore_result : TextRange = TextRange_serializer.read(valueDeserializer)
-        const rangeAfter_result : TextRange = TextRange_serializer.read(valueDeserializer)
-        const oldContent_result : string = (valueDeserializer.readString() as string)
-        const oldPreviewText_result : PreviewText = PreviewText_serializer.read(valueDeserializer)
-        let value : TextChangeOptions = ({rangeBefore: rangeBefore_result, rangeAfter: rangeAfter_result, oldContent: oldContent_result, oldPreviewText: oldPreviewText_result} as TextChangeOptions)
+        const rangeBeforeTmpResult : TextRange = TextRange_serializer.read(valueDeserializer)
+        const rangeAfterTmpResult : TextRange = TextRange_serializer.read(valueDeserializer)
+        const oldContentTmpResult : string = (valueDeserializer.readString() as string)
+        const oldPreviewTextTmpResult : PreviewText = PreviewText_serializer.read(valueDeserializer)
+        let value : TextChangeOptions = ({rangeBefore: rangeBeforeTmpResult, rangeAfter: rangeAfterTmpResult, oldContent: oldContentTmpResult, oldPreviewText: oldPreviewTextTmpResult} as TextChangeOptions)
         return value
     }
 }
 export class TextMenuItem_serializer {
     public static write(buffer: SerializerBase, value: TextMenuItem): void {
         let valueSerializer : SerializerBase = buffer
-        const value_content  = value.content
-        let value_content_type : int32 = RuntimeType.UNDEFINED
-        value_content_type = runtimeType(value_content)
-        if (RuntimeType.STRING == value_content_type) {
+        const valueHolderForContent  = value.content
+        if (valueHolderForContent instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_content_0  = value_content as string
-            valueSerializer.writeString(value_content_0)
-        }
-        else if (RuntimeType.OBJECT == value_content_type) {
+            const valueHolderForContentForIdx0  = valueHolderForContent as string
+            valueSerializer.writeString(valueHolderForContentForIdx0)
+        } else if (valueHolderForContent instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_content_1  = value_content as Resource
-            Resource_serializer.write(valueSerializer, value_content_1)
+            const valueHolderForContentForIdx1  = valueHolderForContent as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForContentForIdx1)
         }
-        const value_icon  = value.icon
-        let value_icon_type : int32 = RuntimeType.UNDEFINED
-        value_icon_type = runtimeType(value_icon)
-        valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
-            const value_icon_value  = value_icon!
-            let value_icon_value_type : int32 = RuntimeType.UNDEFINED
-            value_icon_value_type = runtimeType(value_icon_value)
-            if (RuntimeType.STRING == value_icon_value_type) {
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_icon_value_0  = value_icon_value as string
-                valueSerializer.writeString(value_icon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_icon_value_type) {
+                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
+            } else if (valueHolderForIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_icon_value_1  = value_icon_value as Resource
-                Resource_serializer.write(valueSerializer, value_icon_value_1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_id  = value.id
-        TextMenuItemId_serializer.write(valueSerializer, value_id)
-        const value_labelInfo  = value.labelInfo
-        let value_labelInfo_type : int32 = RuntimeType.UNDEFINED
-        value_labelInfo_type = runtimeType(value_labelInfo)
-        valueSerializer.writeInt8((value_labelInfo_type).toChar())
-        if ((value_labelInfo_type) != (RuntimeType.UNDEFINED)) {
-            const value_labelInfo_value  = value_labelInfo!
-            let value_labelInfo_value_type : int32 = RuntimeType.UNDEFINED
-            value_labelInfo_value_type = runtimeType(value_labelInfo_value)
-            if (RuntimeType.STRING == value_labelInfo_value_type) {
+        const valueHolderForId  = value.id
+        TextMenuItemId_serializer.write(valueSerializer, valueHolderForId)
+        const valueHolderForLabelInfo  = value.labelInfo
+        if (valueHolderForLabelInfo !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLabelInfoTmpValue  = valueHolderForLabelInfo!
+            if (valueHolderForLabelInfoTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_labelInfo_value_0  = value_labelInfo_value as string
-                valueSerializer.writeString(value_labelInfo_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_labelInfo_value_type) {
+                const valueHolderForLabelInfoTmpValueForIdx0  = valueHolderForLabelInfoTmpValue as string
+                valueSerializer.writeString(valueHolderForLabelInfoTmpValueForIdx0)
+            } else if (valueHolderForLabelInfoTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_labelInfo_value_1  = value_labelInfo_value as Resource
-                Resource_serializer.write(valueSerializer, value_labelInfo_value_1)
+                const valueHolderForLabelInfoTmpValueForIdx1  = valueHolderForLabelInfoTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForLabelInfoTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextMenuItem {
         let valueDeserializer : DeserializerBase = buffer
-        const content_buf_selector : int32 = valueDeserializer.readInt8()
-        let content_buf : string | Resource | undefined
-        if (content_buf_selector == (0).toChar()) {
-            content_buf = (valueDeserializer.readString() as string)
+        const contentTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let contentTmpBuf : string | Resource | undefined
+        if (contentTmpBufUnionSelector == (0).toChar()) {
+            contentTmpBuf = (valueDeserializer.readString() as string)
+        } else if (contentTmpBufUnionSelector == (1).toChar()) {
+            contentTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for contentTmpBuf has to be chosen through deserialisation.")
         }
-        else if (content_buf_selector == (1).toChar()) {
-            content_buf = Resource_serializer.read(valueDeserializer)
+        const contentTmpResult : ResourceStr = (contentTmpBuf as string | Resource)
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : ResourceStr | undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBuf_ : string | Resource | undefined
+            if (iconTmpBuf_UnionSelector == (0).toChar()) {
+                iconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
+                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
+            }
+            iconTmpBuf = (iconTmpBuf_ as string | Resource)
         }
-        else {
-            throw new Error("One of the branches for content_buf has to be chosen through deserialisation.")
+        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
+        const idTmpResult : TextMenuItemId = (TextMenuItemId_serializer.read(valueDeserializer) as TextMenuItemId)
+        const labelInfoTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let labelInfoTmpBuf : ResourceStr | undefined
+        if ((labelInfoTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const labelInfoTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let labelInfoTmpBuf_ : string | Resource | undefined
+            if (labelInfoTmpBuf_UnionSelector == (0).toChar()) {
+                labelInfoTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (labelInfoTmpBuf_UnionSelector == (1).toChar()) {
+                labelInfoTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for labelInfoTmpBuf_ has to be chosen through deserialisation.")
+            }
+            labelInfoTmpBuf = (labelInfoTmpBuf_ as string | Resource)
         }
-        const content_result : ResourceStr = (content_buf as string | Resource)
-        const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icon_buf : ResourceStr | undefined
-        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const icon_buf__selector : int32 = valueDeserializer.readInt8()
-            let icon_buf_ : string | Resource | undefined
-            if (icon_buf__selector == (0).toChar()) {
-                icon_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (icon_buf__selector == (1).toChar()) {
-                icon_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for icon_buf_ has to be chosen through deserialisation.")
-            }
-            icon_buf = (icon_buf_ as string | Resource)
-        }
-        const icon_result : ResourceStr | undefined = icon_buf
-        const id_result : TextMenuItemId = (TextMenuItemId_serializer.read(valueDeserializer) as TextMenuItemId)
-        const labelInfo_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let labelInfo_buf : ResourceStr | undefined
-        if ((labelInfo_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const labelInfo_buf__selector : int32 = valueDeserializer.readInt8()
-            let labelInfo_buf_ : string | Resource | undefined
-            if (labelInfo_buf__selector == (0).toChar()) {
-                labelInfo_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (labelInfo_buf__selector == (1).toChar()) {
-                labelInfo_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for labelInfo_buf_ has to be chosen through deserialisation.")
-            }
-            labelInfo_buf = (labelInfo_buf_ as string | Resource)
-        }
-        const labelInfo_result : ResourceStr | undefined = labelInfo_buf
-        let value : TextMenuItem = ({content: content_result, icon: icon_result, id: id_result, labelInfo: labelInfo_result} as TextMenuItem)
+        const labelInfoTmpResult : ResourceStr | undefined = labelInfoTmpBuf
+        let value : TextMenuItem = ({content: contentTmpResult, icon: iconTmpResult, id: idTmpResult, labelInfo: labelInfoTmpResult} as TextMenuItem)
         return value
     }
 }
 export class CaretStyle_serializer {
     public static write(buffer: SerializerBase, value: CaretStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.STRING == value_width_value_type) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as string
-                valueSerializer.writeString(value_width_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_width_value_2  = value_width_value as Resource
-                Resource_serializer.write(valueSerializer, value_width_value_2)
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (TypeChecker.isColor(value_color_value)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorTmpValueForIdx0))
+            } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_color_value_1  = value_color_value as number
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_color_value_2  = value_color_value as string
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_color_value_3  = value_color_value as Resource
-                Resource_serializer.write(valueSerializer, value_color_value_3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CaretStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : Length | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : string | number | Resource | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : Length | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : string | number | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (2).toChar()) {
-                width_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
         }
-        const width_result : Length | undefined = width_buf
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : ResourceColor | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | number | string | Resource | undefined
-            if (color_buf__selector == (0).toChar()) {
-                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const widthTmpResult : Length | undefined = widthTmpBuf
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (color_buf__selector == (1).toChar()) {
-                color_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (color_buf__selector == (2).toChar()) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == (3).toChar()) {
-                color_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
         }
-        const color_result : ResourceColor | undefined = color_buf
-        let value : CaretStyle = ({width: width_result, color: color_result} as CaretStyle)
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        let value : CaretStyle = ({width: widthTmpResult, color: colorTmpResult} as CaretStyle)
         return value
     }
 }
 export class EditableTextChangeValue_serializer {
     public static write(buffer: SerializerBase, value: EditableTextChangeValue): void {
         let valueSerializer : SerializerBase = buffer
-        const value_content  = value.content
-        valueSerializer.writeString(value_content)
-        const value_previewText  = value.previewText
-        let value_previewText_type : int32 = RuntimeType.UNDEFINED
-        value_previewText_type = runtimeType(value_previewText)
-        valueSerializer.writeInt8((value_previewText_type).toChar())
-        if ((value_previewText_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewText_value  = value_previewText!
-            PreviewText_serializer.write(valueSerializer, value_previewText_value)
+        const valueHolderForContent  = value.content
+        valueSerializer.writeString(valueHolderForContent)
+        const valueHolderForPreviewText  = value.previewText
+        if (valueHolderForPreviewText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewTextTmpValue  = valueHolderForPreviewText!
+            PreviewText_serializer.write(valueSerializer, valueHolderForPreviewTextTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_options  = value.options
-        let value_options_type : int32 = RuntimeType.UNDEFINED
-        value_options_type = runtimeType(value_options)
-        valueSerializer.writeInt8((value_options_type).toChar())
-        if ((value_options_type) != (RuntimeType.UNDEFINED)) {
-            const value_options_value  = value_options!
-            TextChangeOptions_serializer.write(valueSerializer, value_options_value)
+        const valueHolderForOptions  = value.options
+        if (valueHolderForOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOptionsTmpValue  = valueHolderForOptions!
+            TextChangeOptions_serializer.write(valueSerializer, valueHolderForOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): EditableTextChangeValue {
         let valueDeserializer : DeserializerBase = buffer
-        const content_result : string = (valueDeserializer.readString() as string)
-        const previewText_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewText_buf : PreviewText | undefined
-        if ((previewText_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            previewText_buf = PreviewText_serializer.read(valueDeserializer)
+        const contentTmpResult : string = (valueDeserializer.readString() as string)
+        const previewTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewTextTmpBuf : PreviewText | undefined
+        if ((previewTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            previewTextTmpBuf = PreviewText_serializer.read(valueDeserializer)
         }
-        const previewText_result : PreviewText | undefined = previewText_buf
-        const options_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let options_buf : TextChangeOptions | undefined
-        if ((options_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            options_buf = TextChangeOptions_serializer.read(valueDeserializer)
+        const previewTextTmpResult : PreviewText | undefined = previewTextTmpBuf
+        const optionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let optionsTmpBuf : TextChangeOptions | undefined
+        if ((optionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            optionsTmpBuf = TextChangeOptions_serializer.read(valueDeserializer)
         }
-        const options_result : TextChangeOptions | undefined = options_buf
-        let value : EditableTextChangeValue = ({content: content_result, previewText: previewText_result, options: options_result} as EditableTextChangeValue)
+        const optionsTmpResult : TextChangeOptions | undefined = optionsTmpBuf
+        let value : EditableTextChangeValue = ({content: contentTmpResult, previewText: previewTextTmpResult, options: optionsTmpResult} as EditableTextChangeValue)
         return value
     }
 }
 export class TextDataDetectorConfig_serializer {
     public static write(buffer: SerializerBase, value: TextDataDetectorConfig): void {
         let valueSerializer : SerializerBase = buffer
-        const value_types  = value.types
-        valueSerializer.writeInt32((value_types.length).toInt())
-        for (let value_types_counter_i = 0; value_types_counter_i < value_types.length; value_types_counter_i++) {
-            const value_types_element : TextDataDetectorType = value_types[value_types_counter_i]
-            valueSerializer.writeInt32(TypeChecker.TextDataDetectorType_ToNumeric(value_types_element))
+        const valueHolderForTypes  = value.types
+        valueSerializer.writeInt32((valueHolderForTypes.length).toInt())
+        for (let valueHolderForTypesCounterI = 0; valueHolderForTypesCounterI < valueHolderForTypes.length; valueHolderForTypesCounterI++) {
+            const valueHolderForTypesTmpElement : TextDataDetectorType = valueHolderForTypes[valueHolderForTypesCounterI]
+            valueSerializer.writeInt32(TypeChecker.TextDataDetectorType_ToNumeric(valueHolderForTypesTmpElement))
         }
-        const value_onDetectResultUpdate  = value.onDetectResultUpdate
-        let value_onDetectResultUpdate_type : int32 = RuntimeType.UNDEFINED
-        value_onDetectResultUpdate_type = runtimeType(value_onDetectResultUpdate)
-        valueSerializer.writeInt8((value_onDetectResultUpdate_type).toChar())
-        if ((value_onDetectResultUpdate_type) != (RuntimeType.UNDEFINED)) {
-            const value_onDetectResultUpdate_value  = value_onDetectResultUpdate!
-            valueSerializer.holdAndWriteCallback(value_onDetectResultUpdate_value)
+        const valueHolderForOnDetectResultUpdate  = value.onDetectResultUpdate
+        if (valueHolderForOnDetectResultUpdate !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDetectResultUpdateTmpValue  = valueHolderForOnDetectResultUpdate!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDetectResultUpdateTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (TypeChecker.isColor(value_color_value)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorTmpValueForIdx0))
+            } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_color_value_1  = value_color_value as number
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_color_value_2  = value_color_value as string
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_color_value_3  = value_color_value as Resource
-                Resource_serializer.write(valueSerializer, value_color_value_3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_decoration  = value.decoration
-        let value_decoration_type : int32 = RuntimeType.UNDEFINED
-        value_decoration_type = runtimeType(value_decoration)
-        valueSerializer.writeInt8((value_decoration_type).toChar())
-        if ((value_decoration_type) != (RuntimeType.UNDEFINED)) {
-            const value_decoration_value  = value_decoration!
-            DecorationStyleInterface_serializer.write(valueSerializer, value_decoration_value)
+        const valueHolderForDecoration  = value.decoration
+        if (valueHolderForDecoration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDecorationTmpValue  = valueHolderForDecoration!
+            DecorationStyleInterface_serializer.write(valueSerializer, valueHolderForDecorationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextDataDetectorConfig {
         let valueDeserializer : DeserializerBase = buffer
-        const types_buf_length : int32 = valueDeserializer.readInt32()
-        let types_buf : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(types_buf_length)
-        for (let types_buf_i = 0; types_buf_i < types_buf_length; types_buf_i++) {
-            types_buf[types_buf_i] = TypeChecker.TextDataDetectorType_FromNumeric(valueDeserializer.readInt32())
+        const typesTmpBufLength : int32 = valueDeserializer.readInt32()
+        let typesTmpBuf : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBufLength)
+        for (let typesTmpBufBufCounterI = 0; typesTmpBufBufCounterI < typesTmpBufLength; typesTmpBufBufCounterI++) {
+            typesTmpBuf[typesTmpBufBufCounterI] = TypeChecker.TextDataDetectorType_FromNumeric(valueDeserializer.readInt32())
         }
-        const types_result : Array<TextDataDetectorType> = types_buf
-        const onDetectResultUpdate_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDetectResultUpdate_buf : ((value0: string) => void) | undefined
-        if ((onDetectResultUpdate_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onDetectResultUpdate_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDetectResultUpdate_buf__call : KPointer = valueDeserializer.readPointer()
-            const onDetectResultUpdate_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onDetectResultUpdate_buf = (value0: string):void => { 
-    const onDetectResultUpdate_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onDetectResultUpdate_buf__argsSerializer.writeInt32(onDetectResultUpdate_buf__resource.resourceId);
-    onDetectResultUpdate_buf__argsSerializer.writePointer(onDetectResultUpdate_buf__call);
-    onDetectResultUpdate_buf__argsSerializer.writePointer(onDetectResultUpdate_buf__callSync);
-    onDetectResultUpdate_buf__argsSerializer.writeString(value0);
-    InteropNativeModule._CallCallback(814634522, onDetectResultUpdate_buf__argsSerializer.asBuffer(), onDetectResultUpdate_buf__argsSerializer.length());
-    onDetectResultUpdate_buf__argsSerializer.release();
-    return; }
+        const typesTmpResult : Array<TextDataDetectorType> = typesTmpBuf
+        const onDetectResultUpdateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDetectResultUpdateTmpBuf : ((value0: string) => void) | undefined
+        if ((onDetectResultUpdateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDetectResultUpdateTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDetectResultUpdateTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDetectResultUpdateTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDetectResultUpdateTmpBuf = (value0: string):void => {
+                const onDetectResultUpdateTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDetectResultUpdateTmpBuf_BufArgsSerializer.writeInt32(onDetectResultUpdateTmpBuf_BufResource.resourceId);
+                onDetectResultUpdateTmpBuf_BufArgsSerializer.writePointer(onDetectResultUpdateTmpBuf_BufCall);
+                onDetectResultUpdateTmpBuf_BufArgsSerializer.writePointer(onDetectResultUpdateTmpBuf_BufCallSync);
+                onDetectResultUpdateTmpBuf_BufArgsSerializer.writeString(value0);
+                InteropNativeModule._CallCallback(814634522, onDetectResultUpdateTmpBuf_BufArgsSerializer.asBuffer(), onDetectResultUpdateTmpBuf_BufArgsSerializer.length());
+                onDetectResultUpdateTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const onDetectResultUpdate_result : ((value0: string) => void) | undefined = onDetectResultUpdate_buf
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : ResourceColor | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | number | string | Resource | undefined
-            if (color_buf__selector == (0).toChar()) {
-                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const onDetectResultUpdateTmpResult : ((value0: string) => void) | undefined = onDetectResultUpdateTmpBuf
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (color_buf__selector == (1).toChar()) {
-                color_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (color_buf__selector == (2).toChar()) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == (3).toChar()) {
-                color_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
         }
-        const color_result : ResourceColor | undefined = color_buf
-        const decoration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let decoration_buf : DecorationStyleInterface | undefined
-        if ((decoration_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            decoration_buf = DecorationStyleInterface_serializer.read(valueDeserializer)
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let decorationTmpBuf : DecorationStyleInterface | undefined
+        if ((decorationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            decorationTmpBuf = DecorationStyleInterface_serializer.read(valueDeserializer)
         }
-        const decoration_result : DecorationStyleInterface | undefined = decoration_buf
-        let value : TextDataDetectorConfig = ({types: types_result, onDetectResultUpdate: onDetectResultUpdate_result, color: color_result, decoration: decoration_result} as TextDataDetectorConfig)
+        const decorationTmpResult : DecorationStyleInterface | undefined = decorationTmpBuf
+        let value : TextDataDetectorConfig = ({types: typesTmpResult, onDetectResultUpdate: onDetectResultUpdateTmpResult, color: colorTmpResult, decoration: decorationTmpResult} as TextDataDetectorConfig)
         return value
     }
 }

@@ -1,5 +1,6 @@
+import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +14,6 @@
  * limitations under the License.
  */
 
-import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 import { __context, __id, contextNode, DataNode, memoEntry2, remember, rememberMutableState, scheduleCallback } from "@koalaui/runtime"
 import { hashCodeFromString, int32, KoalaCallsiteKey } from "@koalaui/common"
 import { nullptr, pointer } from "@koalaui/interop";
@@ -159,7 +159,7 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     @memo
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
-) {
+): void {
     let current = rememberMutableState<int32>(-1)
     let mark = rememberMutableState<pointer>(nullptr)
 	let version = rememberMutableState<int32>(0)
@@ -171,11 +171,11 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     let listener = remember<InternalListener>((): InternalListener => new InternalListener(parent.peer.ptr, version))
     const changeIndex = listener.flush(offset) // first item index that's affected by DataChange
 
-    const currentLocal = current.value >= 0 ? Math.max(current.value - offset, 0) as int32 : -1; // translated to local index
+    const currentLocal = current.value >= 0 ? Math.max(current.value - offset, 0).toInt() : -1; // translated to local index
     const visibleRange = new VisibleRange(parent, currentLocal, currentLocal)
     remember<void>((): void => {
         dataSource.registerDataChangeListener(listener)
-        LazyForEachManager.OnRangeUpdate(visibleRange.parent, dataSource.totalCount() as int32, (currentIndex: int32, currentMark: pointer, end: int32) => {
+        LazyForEachManager.OnRangeUpdate(visibleRange.parent, dataSource.totalCount().toInt(), (currentIndex: int32, currentMark: pointer, end: int32) => {
             // console.log(`LazyForEach[${parent}]: current updated to ${currentIndex} ${currentMark} end=${end}`)
             current.value = currentIndex
             mark.value = currentMark
@@ -185,15 +185,15 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     // Subscribe to version changes.
     version.value
 
-    let generator = (element: T, index: number): int32 => keyGenerator ? hashCodeFromString(keyGenerator!(element, index)) : index as int32
-    let index: number = visibleRange.indexUp as number
+    let generator = (element: T, index: number): int32 => keyGenerator ? hashCodeFromString(keyGenerator!(element, index)) : index.toInt()
+    let index: number = visibleRange.indexUp.toDouble()
 
-    LazyForEachManager.Prepare(parent, dataSource.totalCount() as int32, offset)
+    LazyForEachManager.Prepare(parent, dataSource.totalCount().toInt(), offset)
     LazyForEachManager.SetInsertMark(parent, mark.value, false)
 
 	while (index >= 0 && index < dataSource.totalCount()) {
         // console.log(`LazyForEach[${parent}]: index=${index}`)
-        const element: T = dataSource.getData(index as number)
+        const element: T = dataSource.getData(index)
         memoEntry2<T, number, void>(
             __context(),
             generator(element, index),
@@ -215,6 +215,6 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
 	parent.setInsertMark(nullptr, false)
 
     // create DataNode to provide count information to parent
-    const identifier = new LazyForEachIdentifier(__id(), dataSource.totalCount() as int32, visibleRange.activeCount)
+    const identifier = new LazyForEachIdentifier(__id(), dataSource.totalCount().toInt(), visibleRange.activeCount)
     DataNode.attach(LazyForEachType, identifier)
 }

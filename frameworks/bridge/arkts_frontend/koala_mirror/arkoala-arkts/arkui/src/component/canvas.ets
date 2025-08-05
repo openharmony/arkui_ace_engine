@@ -17,9 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
 import { Size_serializer, Size, LengthMetricsUnit, LengthMetrics_serializer, LengthMetrics, LengthMetricsInternal } from "./../generated/arkui.Graphics"
@@ -27,12 +26,14 @@ import { image_PixelMap_serializer, image } from "./../generated/ohos.multimedia
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 import { FrameNode, FrameNodeInternal } from "./../generated/arkui.FrameNode"
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
@@ -165,12 +166,12 @@ export class CanvasPath implements MaterializedBase {
     }
     private arc_serialize(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let counterclockwise_type : int32 = RuntimeType.UNDEFINED
-        counterclockwise_type = runtimeType(counterclockwise)
-        thisSerializer.writeInt8((counterclockwise_type).toChar())
-        if ((counterclockwise_type) != (RuntimeType.UNDEFINED)) {
-            const counterclockwise_value  = counterclockwise!
-            thisSerializer.writeBoolean(counterclockwise_value)
+        if (counterclockwise !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const counterclockwiseTmpValue  = counterclockwise!
+            thisSerializer.writeBoolean(counterclockwiseTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasPath_arc(this.peer!.ptr, x, y, radius, startAngle, endAngle, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -186,12 +187,12 @@ export class CanvasPath implements MaterializedBase {
     }
     private ellipse_serialize(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let counterclockwise_type : int32 = RuntimeType.UNDEFINED
-        counterclockwise_type = runtimeType(counterclockwise)
-        thisSerializer.writeInt8((counterclockwise_type).toChar())
-        if ((counterclockwise_type) != (RuntimeType.UNDEFINED)) {
-            const counterclockwise_value  = counterclockwise!
-            thisSerializer.writeBoolean(counterclockwise_value)
+        if (counterclockwise !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const counterclockwiseTmpValue  = counterclockwise!
+            thisSerializer.writeBoolean(counterclockwiseTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasPath_ellipse(this.peer!.ptr, x, y, radiusX, radiusY, rotation, startAngle, endAngle, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -240,12 +241,12 @@ export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
     }
     private setTransform_serialize(transform?: Matrix2D): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let transform_type : int32 = RuntimeType.UNDEFINED
-        transform_type = runtimeType(transform)
-        thisSerializer.writeInt8((transform_type).toChar())
-        if ((transform_type) != (RuntimeType.UNDEFINED)) {
-            const transform_value  = transform!
-            Matrix2D_serializer.write(thisSerializer, transform_value)
+        if (transform !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const transformTmpValue  = transform!
+            Matrix2D_serializer.write(thisSerializer, transformTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasPattern_setTransform(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -275,12 +276,12 @@ export class DrawingRenderingContext implements MaterializedBase {
     }
     static construct(unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8((unit_type).toChar())
-        if ((unit_type) != (RuntimeType.UNDEFINED)) {
-            const unit_value  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unitTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -347,24 +348,21 @@ export class ImageBitmap implements MaterializedBase {
     }
     static construct(src: image.PixelMap | string, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let src_type : int32 = RuntimeType.UNDEFINED
-        src_type = runtimeType(src)
-        if (RuntimeType.OBJECT == src_type) {
+        if (src instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toChar())
-            const src_0  = src as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, src_0)
-        }
-        else if (RuntimeType.STRING == src_type) {
+            const srcForIdx0  = src as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, srcForIdx0)
+        } else if (src instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const src_1  = src as string
-            thisSerializer.writeString(src_1)
+            const srcForIdx1  = src as string
+            thisSerializer.writeString(srcForIdx1)
         }
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8((unit_type).toChar())
-        if ((unit_type) != (RuntimeType.UNDEFINED)) {
-            const unit_value  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unitTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._ImageBitmap_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -447,19 +445,19 @@ export class ImageData implements MaterializedBase {
     }
     static construct(width: number, height: number, data?: NativeBuffer, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let data_type : int32 = RuntimeType.UNDEFINED
-        data_type = runtimeType(data)
-        thisSerializer.writeInt8((data_type).toChar())
-        if ((data_type) != (RuntimeType.UNDEFINED)) {
-            const data_value  = data!
-            thisSerializer.writeBuffer(data_value)
+        if (data !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const dataTmpValue  = data!
+            thisSerializer.writeBuffer(dataTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8((unit_type).toChar())
-        if ((unit_type) != (RuntimeType.UNDEFINED)) {
-            const unit_value  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unitTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._ImageData_construct(width, height, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -547,12 +545,12 @@ export class OffscreenCanvas implements MaterializedBase {
     }
     static construct(width: number, height: number, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8((unit_type).toChar())
-        if ((unit_type) != (RuntimeType.UNDEFINED)) {
-            const unit_value  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unitTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_construct(width, height, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -594,12 +592,12 @@ export class OffscreenCanvas implements MaterializedBase {
     }
     private getContext2d_serialize(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            RenderingContextSettings_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            RenderingContextSettings_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getContext2d(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -645,12 +643,12 @@ export class RenderingContextSettings implements MaterializedBase {
     }
     static construct(antialias?: boolean): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let antialias_type : int32 = RuntimeType.UNDEFINED
-        antialias_type = runtimeType(antialias)
-        thisSerializer.writeInt8((antialias_type).toChar())
-        if ((antialias_type) != (RuntimeType.UNDEFINED)) {
-            const antialias_value  = antialias!
-            thisSerializer.writeBoolean(antialias_value)
+        if (antialias !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const antialiasTmpValue  = antialias!
+            thisSerializer.writeBoolean(antialiasTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._RenderingContextSettings_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -672,8 +670,7 @@ export class RenderingContextSettings implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : boolean | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult : boolean | undefined = buffer
@@ -681,12 +678,12 @@ export class RenderingContextSettings implements MaterializedBase {
     }
     private setAntialias_serialize(antialias: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let antialias_type : int32 = RuntimeType.UNDEFINED
-        antialias_type = runtimeType(antialias)
-        thisSerializer.writeInt8((antialias_type).toChar())
-        if ((antialias_type) != (RuntimeType.UNDEFINED)) {
-            const antialias_value  = antialias!
-            thisSerializer.writeBoolean(antialias_value)
+        if (antialias !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const antialiasTmpValue  = antialias!
+            thisSerializer.writeBoolean(antialiasTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RenderingContextSettings_setAntialias(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -699,46 +696,40 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCanvasPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Canvas_construct(peerId, flags)
-        const _peer  = new ArkCanvasPeer(_peerPtr, peerId, "Canvas", flags)
+        const _peer  = new ArkCanvasPeer(_peerPtr, peerId, 'Canvas', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setCanvasOptions0Attribute(context?: CanvasRenderingContext2D | DrawingRenderingContext): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let context_type : int32 = RuntimeType.UNDEFINED
-        context_type = runtimeType(context)
-        thisSerializer.writeInt8((context_type).toChar())
-        if ((context_type) != (RuntimeType.UNDEFINED)) {
-            const context_value  = context!
-            let context_value_type : int32 = RuntimeType.UNDEFINED
-            context_value_type = runtimeType(context_value)
-            if (TypeChecker.isCanvasRenderingContext2D(context_value, false, false, false)) {
+        if (context !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contextTmpValue  = context!
+            if (contextTmpValue instanceof CanvasRenderingContext2D) {
                 thisSerializer.writeInt8((0).toChar())
-                const context_value_0  = context_value as CanvasRenderingContext2D
-                CanvasRenderingContext2D_serializer.write(thisSerializer, context_value_0)
-            }
-            else if (TypeChecker.isDrawingRenderingContext(context_value, false)) {
+                const contextTmpValueForIdx0  = contextTmpValue as CanvasRenderingContext2D
+                CanvasRenderingContext2D_serializer.write(thisSerializer, contextTmpValueForIdx0)
+            } else if (contextTmpValue instanceof DrawingRenderingContext) {
                 thisSerializer.writeInt8((1).toChar())
-                const context_value_1  = context_value as DrawingRenderingContext
-                DrawingRenderingContext_serializer.write(thisSerializer, context_value_1)
+                const contextTmpValueForIdx1  = contextTmpValue as DrawingRenderingContext
+                DrawingRenderingContext_serializer.write(thisSerializer, contextTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCanvasOptions1Attribute(context: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions: ImageAIOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let context_type : int32 = RuntimeType.UNDEFINED
-        context_type = runtimeType(context)
-        if (TypeChecker.isCanvasRenderingContext2D(context, false, false, false)) {
+        if (context instanceof CanvasRenderingContext2D) {
             thisSerializer.writeInt8((0).toChar())
-            const context_0  = context as CanvasRenderingContext2D
-            CanvasRenderingContext2D_serializer.write(thisSerializer, context_0)
-        }
-        else if (TypeChecker.isDrawingRenderingContext(context, false)) {
+            const contextForIdx0  = context as CanvasRenderingContext2D
+            CanvasRenderingContext2D_serializer.write(thisSerializer, contextForIdx0)
+        } else if (context instanceof DrawingRenderingContext) {
             thisSerializer.writeInt8((1).toChar())
-            const context_1  = context as DrawingRenderingContext
-            DrawingRenderingContext_serializer.write(thisSerializer, context_1)
+            const contextForIdx1  = context as DrawingRenderingContext
+            DrawingRenderingContext_serializer.write(thisSerializer, contextForIdx1)
         }
         ImageAIOptions_serializer.write(thisSerializer, imageAIOptions)
         ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -746,24 +737,24 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
     }
     setOnReadyAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasAttribute_setOnReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasAttribute_setEnableAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -815,13 +806,6 @@ export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttrib
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: CanvasAttribute): void {
-        super.apply(target)
-        if (this.onReady_value !== undefined)
-            target.onReady(this.onReady_value!)
-        if (this.enableAnalyzer_value !== undefined)
-            target.enableAnalyzer(this.enableAnalyzer_value!)
-    }
 }
 
 export class ArkCanvasComponent extends ArkCommonMethodComponent implements CanvasAttribute {
@@ -862,7 +846,6 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
         return this
     }
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -870,26 +853,6 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
         super.applyAttributesFinish()
     }
 }
-export function withCanvasStyle(receiver: CanvasAttribute, modifier: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkCanvasStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Canvas")
-// export function Canvas(
-//     context?: CanvasRenderingContext2D | DrawingRenderingContext,
-//     @memo
-//     content_?: () => void,
-// ): CanvasAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Canvas(
@@ -905,21 +868,11 @@ export function Canvas(
     NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer): void => {
         receiver.setCanvasOptions(context)
         style?.(receiver)
-        withCanvasStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-// @memo
-// @BuilderLambda("Canvas")
-// export function Canvas(
-//     context: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions: ImageAIOptions,
-//     @memo
-//     content_?: () => void,
-// ): CanvasAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Canvas(
@@ -935,35 +888,108 @@ export function Canvas(
     NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer): void => {
         receiver.setCanvasOptions(context,imageAIOptions)
         style?.(receiver)
-        withCanvasStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkCanvasSet extends ArkCommonMethodSet implements CanvasAttribute {
+export class CanvasModifier extends CommonMethodModifier implements CanvasAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _onReady_flag?: boolean
-    _onReady0_value?: VoidCallback | undefined
-    _enableAnalyzer_flag?: boolean
-    _enableAnalyzer0_value?: boolean | undefined
-    applyModifierPatch(component: CanvasAttribute): void {
-        if (this._onReady_flag)
-            component.onReady((this._onReady0_value as VoidCallback | undefined))
-        if (this._enableAnalyzer_flag)
-            component.enableAnalyzer((this._enableAnalyzer0_value as boolean | undefined))
+    _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onReady_0_0value?: VoidCallback | undefined
+    _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAnalyzer_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkCanvasPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onReady_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnReadyAttribute((this._onReady_0_0value as VoidCallback | undefined));
+                    this._onReady_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onReady_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onReady_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnReadyAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAnalyzerAttribute((this._enableAnalyzer_0_0value as boolean | undefined));
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAnalyzerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public onReady(value: VoidCallback | undefined): this {
-        this._onReady_flag = true
-        this._onReady0_value = value
+    mergeModifier(modifier: CanvasModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onReady_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onReady(modifier._onReady_0_0value);
+                    break;
+                }
+                default: {
+                    this.onReady((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAnalyzer(modifier._enableAnalyzer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAnalyzer((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    onReady(value: VoidCallback | undefined): this {
+        if (((this._onReady_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onReady_0_0value = value
+        } else
+        {
+            this._onReady_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableAnalyzer(value: boolean | undefined): this {
-        this._enableAnalyzer_flag = true
-        this._enableAnalyzer0_value = value
+    enableAnalyzer(value: boolean | undefined): this {
+        if (((this._enableAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAnalyzer_0_0value = value
+        } else
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1028,49 +1054,49 @@ export class Path2D_serializer {
 export class TextMetrics_serializer {
     public static write(buffer: SerializerBase, value: TextMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        const value_actualBoundingBoxAscent  = value.actualBoundingBoxAscent
-        valueSerializer.writeNumber(value_actualBoundingBoxAscent)
-        const value_actualBoundingBoxDescent  = value.actualBoundingBoxDescent
-        valueSerializer.writeNumber(value_actualBoundingBoxDescent)
-        const value_actualBoundingBoxLeft  = value.actualBoundingBoxLeft
-        valueSerializer.writeNumber(value_actualBoundingBoxLeft)
-        const value_actualBoundingBoxRight  = value.actualBoundingBoxRight
-        valueSerializer.writeNumber(value_actualBoundingBoxRight)
-        const value_alphabeticBaseline  = value.alphabeticBaseline
-        valueSerializer.writeNumber(value_alphabeticBaseline)
-        const value_emHeightAscent  = value.emHeightAscent
-        valueSerializer.writeNumber(value_emHeightAscent)
-        const value_emHeightDescent  = value.emHeightDescent
-        valueSerializer.writeNumber(value_emHeightDescent)
-        const value_fontBoundingBoxAscent  = value.fontBoundingBoxAscent
-        valueSerializer.writeNumber(value_fontBoundingBoxAscent)
-        const value_fontBoundingBoxDescent  = value.fontBoundingBoxDescent
-        valueSerializer.writeNumber(value_fontBoundingBoxDescent)
-        const value_hangingBaseline  = value.hangingBaseline
-        valueSerializer.writeNumber(value_hangingBaseline)
-        const value_ideographicBaseline  = value.ideographicBaseline
-        valueSerializer.writeNumber(value_ideographicBaseline)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
+        const valueHolderForActualBoundingBoxAscent  = value.actualBoundingBoxAscent
+        valueSerializer.writeNumber(valueHolderForActualBoundingBoxAscent)
+        const valueHolderForActualBoundingBoxDescent  = value.actualBoundingBoxDescent
+        valueSerializer.writeNumber(valueHolderForActualBoundingBoxDescent)
+        const valueHolderForActualBoundingBoxLeft  = value.actualBoundingBoxLeft
+        valueSerializer.writeNumber(valueHolderForActualBoundingBoxLeft)
+        const valueHolderForActualBoundingBoxRight  = value.actualBoundingBoxRight
+        valueSerializer.writeNumber(valueHolderForActualBoundingBoxRight)
+        const valueHolderForAlphabeticBaseline  = value.alphabeticBaseline
+        valueSerializer.writeNumber(valueHolderForAlphabeticBaseline)
+        const valueHolderForEmHeightAscent  = value.emHeightAscent
+        valueSerializer.writeNumber(valueHolderForEmHeightAscent)
+        const valueHolderForEmHeightDescent  = value.emHeightDescent
+        valueSerializer.writeNumber(valueHolderForEmHeightDescent)
+        const valueHolderForFontBoundingBoxAscent  = value.fontBoundingBoxAscent
+        valueSerializer.writeNumber(valueHolderForFontBoundingBoxAscent)
+        const valueHolderForFontBoundingBoxDescent  = value.fontBoundingBoxDescent
+        valueSerializer.writeNumber(valueHolderForFontBoundingBoxDescent)
+        const valueHolderForHangingBaseline  = value.hangingBaseline
+        valueSerializer.writeNumber(valueHolderForHangingBaseline)
+        const valueHolderForIdeographicBaseline  = value.ideographicBaseline
+        valueSerializer.writeNumber(valueHolderForIdeographicBaseline)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): TextMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        const actualBoundingBoxAscent_result : number = (valueDeserializer.readNumber() as number)
-        const actualBoundingBoxDescent_result : number = (valueDeserializer.readNumber() as number)
-        const actualBoundingBoxLeft_result : number = (valueDeserializer.readNumber() as number)
-        const actualBoundingBoxRight_result : number = (valueDeserializer.readNumber() as number)
-        const alphabeticBaseline_result : number = (valueDeserializer.readNumber() as number)
-        const emHeightAscent_result : number = (valueDeserializer.readNumber() as number)
-        const emHeightDescent_result : number = (valueDeserializer.readNumber() as number)
-        const fontBoundingBoxAscent_result : number = (valueDeserializer.readNumber() as number)
-        const fontBoundingBoxDescent_result : number = (valueDeserializer.readNumber() as number)
-        const hangingBaseline_result : number = (valueDeserializer.readNumber() as number)
-        const ideographicBaseline_result : number = (valueDeserializer.readNumber() as number)
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : TextMetrics = ({actualBoundingBoxAscent: actualBoundingBoxAscent_result, actualBoundingBoxDescent: actualBoundingBoxDescent_result, actualBoundingBoxLeft: actualBoundingBoxLeft_result, actualBoundingBoxRight: actualBoundingBoxRight_result, alphabeticBaseline: alphabeticBaseline_result, emHeightAscent: emHeightAscent_result, emHeightDescent: emHeightDescent_result, fontBoundingBoxAscent: fontBoundingBoxAscent_result, fontBoundingBoxDescent: fontBoundingBoxDescent_result, hangingBaseline: hangingBaseline_result, ideographicBaseline: ideographicBaseline_result, width: width_result, height: height_result} as TextMetrics)
+        const actualBoundingBoxAscentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const actualBoundingBoxDescentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const actualBoundingBoxLeftTmpResult : number = (valueDeserializer.readNumber() as number)
+        const actualBoundingBoxRightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const alphabeticBaselineTmpResult : number = (valueDeserializer.readNumber() as number)
+        const emHeightAscentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const emHeightDescentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const fontBoundingBoxAscentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const fontBoundingBoxDescentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const hangingBaselineTmpResult : number = (valueDeserializer.readNumber() as number)
+        const ideographicBaselineTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : TextMetrics = ({actualBoundingBoxAscent: actualBoundingBoxAscentTmpResult, actualBoundingBoxDescent: actualBoundingBoxDescentTmpResult, actualBoundingBoxLeft: actualBoundingBoxLeftTmpResult, actualBoundingBoxRight: actualBoundingBoxRightTmpResult, alphabeticBaseline: alphabeticBaselineTmpResult, emHeightAscent: emHeightAscentTmpResult, emHeightDescent: emHeightDescentTmpResult, fontBoundingBoxAscent: fontBoundingBoxAscentTmpResult, fontBoundingBoxDescent: fontBoundingBoxDescentTmpResult, hangingBaseline: hangingBaselineTmpResult, ideographicBaseline: ideographicBaselineTmpResult, width: widthTmpResult, height: heightTmpResult} as TextMetrics)
         return value
     }
 }
@@ -1725,51 +1751,42 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private drawImage0_serialize(image: ImageBitmap | image.PixelMap, dx: number, dy: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let image_type : int32 = RuntimeType.UNDEFINED
-        image_type = runtimeType(image)
-        if (TypeChecker.isImageBitmap(image, false, false)) {
+        if (image instanceof ImageBitmap) {
             thisSerializer.writeInt8((0).toChar())
-            const image_0  = image as ImageBitmap
-            ImageBitmap_serializer.write(thisSerializer, image_0)
-        }
-        else if (TypeChecker.isimage_PixelMap(image, false, false)) {
+            const imageForIdx0  = image as ImageBitmap
+            ImageBitmap_serializer.write(thisSerializer, imageForIdx0)
+        } else if (image instanceof image.PixelMap) {
             thisSerializer.writeInt8((1).toChar())
-            const image_1  = image as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, image_1)
+            const imageForIdx1  = image as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, imageForIdx1)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
         thisSerializer.release()
     }
     private drawImage1_serialize(image: ImageBitmap | image.PixelMap, dx: number, dy: number, dw: number, dh: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let image_type : int32 = RuntimeType.UNDEFINED
-        image_type = runtimeType(image)
-        if (TypeChecker.isImageBitmap(image, false, false)) {
+        if (image instanceof ImageBitmap) {
             thisSerializer.writeInt8((0).toChar())
-            const image_0  = image as ImageBitmap
-            ImageBitmap_serializer.write(thisSerializer, image_0)
-        }
-        else if (TypeChecker.isimage_PixelMap(image, false, false)) {
+            const imageForIdx0  = image as ImageBitmap
+            ImageBitmap_serializer.write(thisSerializer, imageForIdx0)
+        } else if (image instanceof image.PixelMap) {
             thisSerializer.writeInt8((1).toChar())
-            const image_1  = image as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, image_1)
+            const imageForIdx1  = image as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, imageForIdx1)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
         thisSerializer.release()
     }
     private drawImage2_serialize(image: ImageBitmap | image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let image_type : int32 = RuntimeType.UNDEFINED
-        image_type = runtimeType(image)
-        if (TypeChecker.isImageBitmap(image, false, false)) {
+        if (image instanceof ImageBitmap) {
             thisSerializer.writeInt8((0).toChar())
-            const image_0  = image as ImageBitmap
-            ImageBitmap_serializer.write(thisSerializer, image_0)
-        }
-        else if (TypeChecker.isimage_PixelMap(image, false, false)) {
+            const imageForIdx0  = image as ImageBitmap
+            ImageBitmap_serializer.write(thisSerializer, imageForIdx0)
+        } else if (image instanceof image.PixelMap) {
             thisSerializer.writeInt8((1).toChar())
-            const image_1  = image as image.PixelMap
-            image_PixelMap_serializer.write(thisSerializer, image_1)
+            const imageForIdx1  = image as image.PixelMap
+            image_PixelMap_serializer.write(thisSerializer, imageForIdx1)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
         thisSerializer.release()
@@ -1779,60 +1796,60 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private clip0_serialize(fillRule?: CanvasFillRule): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillRule_type : int32 = RuntimeType.UNDEFINED
-        fillRule_type = runtimeType(fillRule)
-        thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
-            const fillRule_value  = fillRule!
-            thisSerializer.writeString(fillRule_value)
+        if (fillRule !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fillRuleTmpValue  = fillRule!
+            thisSerializer.writeString(fillRuleTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_clip0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private clip1_serialize(path: Path2D, fillRule?: CanvasFillRule): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillRule_type : int32 = RuntimeType.UNDEFINED
-        fillRule_type = runtimeType(fillRule)
-        thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
-            const fillRule_value  = fillRule!
-            thisSerializer.writeString(fillRule_value)
+        if (fillRule !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fillRuleTmpValue  = fillRule!
+            thisSerializer.writeString(fillRuleTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_clip1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private fill0_serialize(fillRule?: CanvasFillRule): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillRule_type : int32 = RuntimeType.UNDEFINED
-        fillRule_type = runtimeType(fillRule)
-        thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
-            const fillRule_value  = fillRule!
-            thisSerializer.writeString(fillRule_value)
+        if (fillRule !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fillRuleTmpValue  = fillRule!
+            thisSerializer.writeString(fillRuleTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_fill0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private fill1_serialize(path: Path2D, fillRule?: CanvasFillRule): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillRule_type : int32 = RuntimeType.UNDEFINED
-        fillRule_type = runtimeType(fillRule)
-        thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
-            const fillRule_value  = fillRule!
-            thisSerializer.writeString(fillRule_value)
+        if (fillRule !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fillRuleTmpValue  = fillRule!
+            thisSerializer.writeString(fillRuleTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_fill1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private stroke_serialize(path?: Path2D): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let path_type : int32 = RuntimeType.UNDEFINED
-        path_type = runtimeType(path)
-        thisSerializer.writeInt8((path_type).toChar())
-        if ((path_type) != (RuntimeType.UNDEFINED)) {
-            const path_value  = path!
-            Path2D_serializer.write(thisSerializer, path_value)
+        if (path !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const pathTmpValue  = path!
+            Path2D_serializer.write(thisSerializer, pathTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_stroke(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1844,20 +1861,19 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private createPattern_serialize(image: ImageBitmap, repetition: string | undefined): CanvasPattern | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let repetition_type : int32 = RuntimeType.UNDEFINED
-        repetition_type = runtimeType(repetition)
-        thisSerializer.writeInt8((repetition_type).toChar())
-        if ((repetition_type) != (RuntimeType.UNDEFINED)) {
-            const repetition_value  = repetition!
-            thisSerializer.writeString(repetition_value)
+        if (repetition !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const repetitionTmpValue  = repetition!
+            thisSerializer.writeString(repetitionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, toPeerPtr(image), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : CanvasPattern | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (CanvasPattern_serializer.read(retvalDeserializer) as CanvasPattern)
         }
         const returnResult : CanvasPattern | undefined = buffer
@@ -1895,106 +1911,82 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private putImageData0_serialize(imagedata: ImageData, dx: number | string, dy: number | string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let dx_type : int32 = RuntimeType.UNDEFINED
-        dx_type = runtimeType(dx)
-        if (RuntimeType.NUMBER == dx_type) {
+        if (dx instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dx_0  = dx as number
-            thisSerializer.writeNumber(dx_0)
-        }
-        else if (RuntimeType.STRING == dx_type) {
+            const dxForIdx0  = dx as number
+            thisSerializer.writeNumber(dxForIdx0)
+        } else if (dx instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dx_1  = dx as string
-            thisSerializer.writeString(dx_1)
+            const dxForIdx1  = dx as string
+            thisSerializer.writeString(dxForIdx1)
         }
-        let dy_type : int32 = RuntimeType.UNDEFINED
-        dy_type = runtimeType(dy)
-        if (RuntimeType.NUMBER == dy_type) {
+        if (dy instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dy_0  = dy as number
-            thisSerializer.writeNumber(dy_0)
-        }
-        else if (RuntimeType.STRING == dy_type) {
+            const dyForIdx0  = dy as number
+            thisSerializer.writeNumber(dyForIdx0)
+        } else if (dy instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dy_1  = dy as string
-            thisSerializer.writeString(dy_1)
+            const dyForIdx1  = dy as string
+            thisSerializer.writeString(dyForIdx1)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_putImageData0(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private putImageData1_serialize(imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let dx_type : int32 = RuntimeType.UNDEFINED
-        dx_type = runtimeType(dx)
-        if (RuntimeType.NUMBER == dx_type) {
+        if (dx instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dx_0  = dx as number
-            thisSerializer.writeNumber(dx_0)
-        }
-        else if (RuntimeType.STRING == dx_type) {
+            const dxForIdx0  = dx as number
+            thisSerializer.writeNumber(dxForIdx0)
+        } else if (dx instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dx_1  = dx as string
-            thisSerializer.writeString(dx_1)
+            const dxForIdx1  = dx as string
+            thisSerializer.writeString(dxForIdx1)
         }
-        let dy_type : int32 = RuntimeType.UNDEFINED
-        dy_type = runtimeType(dy)
-        if (RuntimeType.NUMBER == dy_type) {
+        if (dy instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dy_0  = dy as number
-            thisSerializer.writeNumber(dy_0)
-        }
-        else if (RuntimeType.STRING == dy_type) {
+            const dyForIdx0  = dy as number
+            thisSerializer.writeNumber(dyForIdx0)
+        } else if (dy instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dy_1  = dy as string
-            thisSerializer.writeString(dy_1)
+            const dyForIdx1  = dy as string
+            thisSerializer.writeString(dyForIdx1)
         }
-        let dirtyX_type : int32 = RuntimeType.UNDEFINED
-        dirtyX_type = runtimeType(dirtyX)
-        if (RuntimeType.NUMBER == dirtyX_type) {
+        if (dirtyX instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dirtyX_0  = dirtyX as number
-            thisSerializer.writeNumber(dirtyX_0)
-        }
-        else if (RuntimeType.STRING == dirtyX_type) {
+            const dirtyXForIdx0  = dirtyX as number
+            thisSerializer.writeNumber(dirtyXForIdx0)
+        } else if (dirtyX instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dirtyX_1  = dirtyX as string
-            thisSerializer.writeString(dirtyX_1)
+            const dirtyXForIdx1  = dirtyX as string
+            thisSerializer.writeString(dirtyXForIdx1)
         }
-        let dirtyY_type : int32 = RuntimeType.UNDEFINED
-        dirtyY_type = runtimeType(dirtyY)
-        if (RuntimeType.NUMBER == dirtyY_type) {
+        if (dirtyY instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dirtyY_0  = dirtyY as number
-            thisSerializer.writeNumber(dirtyY_0)
-        }
-        else if (RuntimeType.STRING == dirtyY_type) {
+            const dirtyYForIdx0  = dirtyY as number
+            thisSerializer.writeNumber(dirtyYForIdx0)
+        } else if (dirtyY instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dirtyY_1  = dirtyY as string
-            thisSerializer.writeString(dirtyY_1)
+            const dirtyYForIdx1  = dirtyY as string
+            thisSerializer.writeString(dirtyYForIdx1)
         }
-        let dirtyWidth_type : int32 = RuntimeType.UNDEFINED
-        dirtyWidth_type = runtimeType(dirtyWidth)
-        if (RuntimeType.NUMBER == dirtyWidth_type) {
+        if (dirtyWidth instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dirtyWidth_0  = dirtyWidth as number
-            thisSerializer.writeNumber(dirtyWidth_0)
-        }
-        else if (RuntimeType.STRING == dirtyWidth_type) {
+            const dirtyWidthForIdx0  = dirtyWidth as number
+            thisSerializer.writeNumber(dirtyWidthForIdx0)
+        } else if (dirtyWidth instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dirtyWidth_1  = dirtyWidth as string
-            thisSerializer.writeString(dirtyWidth_1)
+            const dirtyWidthForIdx1  = dirtyWidth as string
+            thisSerializer.writeString(dirtyWidthForIdx1)
         }
-        let dirtyHeight_type : int32 = RuntimeType.UNDEFINED
-        dirtyHeight_type = runtimeType(dirtyHeight)
-        if (RuntimeType.NUMBER == dirtyHeight_type) {
+        if (dirtyHeight instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const dirtyHeight_0  = dirtyHeight as number
-            thisSerializer.writeNumber(dirtyHeight_0)
-        }
-        else if (RuntimeType.STRING == dirtyHeight_type) {
+            const dirtyHeightForIdx0  = dirtyHeight as number
+            thisSerializer.writeNumber(dirtyHeightForIdx0)
+        } else if (dirtyHeight instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const dirtyHeight_1  = dirtyHeight as string
-            thisSerializer.writeString(dirtyHeight_1)
+            const dirtyHeightForIdx1  = dirtyHeight as string
+            thisSerializer.writeString(dirtyHeightForIdx1)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_putImageData1(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2002,10 +1994,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private getLineDash_serialize(): Array<number> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<number> = new Array<number>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
         }
         const returnResult : Array<number> = buffer
         return returnResult
@@ -2013,9 +2005,9 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setLineDash_serialize(segments: Array<number>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((segments.length).toInt())
-        for (let segments_counter_i = 0; segments_counter_i < segments.length; segments_counter_i++) {
-            const segments_element : number = segments[segments_counter_i]
-            thisSerializer.writeNumber(segments_element)
+        for (let segmentsCounterI = 0; segmentsCounterI < segments.length; segmentsCounterI++) {
+            const segmentsTmpElement : number = segments[segmentsCounterI]
+            thisSerializer.writeNumber(segmentsTmpElement)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineDash(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2037,12 +2029,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private fillText_serialize(text: string, x: number, y: number, maxWidth?: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let maxWidth_type : int32 = RuntimeType.UNDEFINED
-        maxWidth_type = runtimeType(maxWidth)
-        thisSerializer.writeInt8((maxWidth_type).toChar())
-        if ((maxWidth_type) != (RuntimeType.UNDEFINED)) {
-            const maxWidth_value  = maxWidth!
-            thisSerializer.writeNumber(maxWidth_value)
+        if (maxWidth !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const maxWidthTmpValue  = maxWidth!
+            thisSerializer.writeNumber(maxWidthTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_fillText(this.peer!.ptr, text, x, y, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2055,12 +2047,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private strokeText_serialize(text: string, x: number, y: number, maxWidth?: number): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let maxWidth_type : int32 = RuntimeType.UNDEFINED
-        maxWidth_type = runtimeType(maxWidth)
-        thisSerializer.writeInt8((maxWidth_type).toChar())
-        if ((maxWidth_type) != (RuntimeType.UNDEFINED)) {
-            const maxWidth_value  = maxWidth!
-            thisSerializer.writeNumber(maxWidth_value)
+        if (maxWidth !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const maxWidthTmpValue  = maxWidth!
+            thisSerializer.writeNumber(maxWidthTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_strokeText(this.peer!.ptr, text, x, y, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2084,12 +2076,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private setTransform1_serialize(transform?: Matrix2D): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let transform_type : int32 = RuntimeType.UNDEFINED
-        transform_type = runtimeType(transform)
-        thisSerializer.writeInt8((transform_type).toChar())
-        if ((transform_type) != (RuntimeType.UNDEFINED)) {
-            const transform_value  = transform!
-            Matrix2D_serializer.write(thisSerializer, transform_value)
+        if (transform !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const transformTmpValue  = transform!
+            Matrix2D_serializer.write(thisSerializer, transformTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setTransform1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2102,12 +2094,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private setPixelMap_serialize(value?: image.PixelMap): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            image_PixelMap_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            image_PixelMap_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setPixelMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2127,15 +2119,13 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private getLetterSpacing_serialize(): LengthMetrics | string {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLetterSpacing(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_selector : int32 = retvalDeserializer.readInt8()
+        const bufferUnionSelector : int32 = retvalDeserializer.readInt8()
         let buffer : LengthMetrics | string | undefined
-        if (buffer_selector == (0).toChar()) {
+        if (bufferUnionSelector == (0).toChar()) {
             buffer = (LengthMetrics_serializer.read(retvalDeserializer) as LengthMetrics)
-        }
-        else if (buffer_selector == (1).toChar()) {
+        } else if (bufferUnionSelector == (1).toChar()) {
             buffer = (retvalDeserializer.readString() as string)
-        }
-        else {
+        } else {
             throw new Error("One of the branches for buffer has to be chosen through deserialisation.")
         }
         const returnResult : LengthMetrics | string = (buffer as LengthMetrics | string)
@@ -2143,17 +2133,14 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private setLetterSpacing_serialize(letterSpacing: LengthMetrics | string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let letterSpacing_type : int32 = RuntimeType.UNDEFINED
-        letterSpacing_type = runtimeType(letterSpacing)
-        if (RuntimeType.OBJECT == letterSpacing_type) {
+        if (letterSpacing instanceof LengthMetrics) {
             thisSerializer.writeInt8((0).toChar())
-            const letterSpacing_0  = letterSpacing as LengthMetrics
-            LengthMetrics_serializer.write(thisSerializer, letterSpacing_0)
-        }
-        else if (RuntimeType.STRING == letterSpacing_type) {
+            const letterSpacingForIdx0  = letterSpacing as LengthMetrics
+            LengthMetrics_serializer.write(thisSerializer, letterSpacingForIdx0)
+        } else if (letterSpacing instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const letterSpacing_1  = letterSpacing as string
-            thisSerializer.writeString(letterSpacing_1)
+            const letterSpacingForIdx1  = letterSpacing as string
+            thisSerializer.writeString(letterSpacingForIdx1)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setLetterSpacing(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2175,21 +2162,17 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private getFillStyle_serialize(): string | number | CanvasGradient | CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getFillStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_selector : int32 = retvalDeserializer.readInt8()
+        const bufferUnionSelector : int32 = retvalDeserializer.readInt8()
         let buffer : string | number | CanvasGradient | CanvasPattern | undefined
-        if (buffer_selector == (0).toChar()) {
+        if (bufferUnionSelector == (0).toChar()) {
             buffer = (retvalDeserializer.readString() as string)
-        }
-        else if (buffer_selector == (1).toChar()) {
+        } else if (bufferUnionSelector == (1).toChar()) {
             buffer = (retvalDeserializer.readNumber() as number)
-        }
-        else if (buffer_selector == (2).toChar()) {
+        } else if (bufferUnionSelector == (2).toChar()) {
             buffer = (CanvasGradient_serializer.read(retvalDeserializer) as CanvasGradient)
-        }
-        else if (buffer_selector == (3).toChar()) {
+        } else if (bufferUnionSelector == (3).toChar()) {
             buffer = (CanvasPattern_serializer.read(retvalDeserializer) as CanvasPattern)
-        }
-        else {
+        } else {
             throw new Error("One of the branches for buffer has to be chosen through deserialisation.")
         }
         const returnResult : string | number | CanvasGradient | CanvasPattern = (buffer as string | number | CanvasGradient | CanvasPattern)
@@ -2197,27 +2180,22 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private setFillStyle_serialize(fillStyle: string | number | CanvasGradient | CanvasPattern): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fillStyle_type : int32 = RuntimeType.UNDEFINED
-        fillStyle_type = runtimeType(fillStyle)
-        if (RuntimeType.STRING == fillStyle_type) {
+        if (fillStyle instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const fillStyle_0  = fillStyle as string
-            thisSerializer.writeString(fillStyle_0)
-        }
-        else if (RuntimeType.NUMBER == fillStyle_type) {
+            const fillStyleForIdx0  = fillStyle as string
+            thisSerializer.writeString(fillStyleForIdx0)
+        } else if (fillStyle instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const fillStyle_1  = fillStyle as number
-            thisSerializer.writeNumber(fillStyle_1)
-        }
-        else if (TypeChecker.isCanvasGradient(fillStyle)) {
+            const fillStyleForIdx1  = fillStyle as number
+            thisSerializer.writeNumber(fillStyleForIdx1)
+        } else if (fillStyle instanceof CanvasGradient) {
             thisSerializer.writeInt8((2).toChar())
-            const fillStyle_2  = fillStyle as CanvasGradient
-            CanvasGradient_serializer.write(thisSerializer, fillStyle_2)
-        }
-        else if (TypeChecker.isCanvasPattern(fillStyle)) {
+            const fillStyleForIdx2  = fillStyle as CanvasGradient
+            CanvasGradient_serializer.write(thisSerializer, fillStyleForIdx2)
+        } else if (fillStyle instanceof CanvasPattern) {
             thisSerializer.writeInt8((3).toChar())
-            const fillStyle_3  = fillStyle as CanvasPattern
-            CanvasPattern_serializer.write(thisSerializer, fillStyle_3)
+            const fillStyleForIdx3  = fillStyle as CanvasPattern
+            CanvasPattern_serializer.write(thisSerializer, fillStyleForIdx3)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setFillStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2225,21 +2203,17 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private getStrokeStyle_serialize(): string | number | CanvasGradient | CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getStrokeStyle(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_selector : int32 = retvalDeserializer.readInt8()
+        const bufferUnionSelector : int32 = retvalDeserializer.readInt8()
         let buffer : string | number | CanvasGradient | CanvasPattern | undefined
-        if (buffer_selector == (0).toChar()) {
+        if (bufferUnionSelector == (0).toChar()) {
             buffer = (retvalDeserializer.readString() as string)
-        }
-        else if (buffer_selector == (1).toChar()) {
+        } else if (bufferUnionSelector == (1).toChar()) {
             buffer = (retvalDeserializer.readNumber() as number)
-        }
-        else if (buffer_selector == (2).toChar()) {
+        } else if (bufferUnionSelector == (2).toChar()) {
             buffer = (CanvasGradient_serializer.read(retvalDeserializer) as CanvasGradient)
-        }
-        else if (buffer_selector == (3).toChar()) {
+        } else if (bufferUnionSelector == (3).toChar()) {
             buffer = (CanvasPattern_serializer.read(retvalDeserializer) as CanvasPattern)
-        }
-        else {
+        } else {
             throw new Error("One of the branches for buffer has to be chosen through deserialisation.")
         }
         const returnResult : string | number | CanvasGradient | CanvasPattern = (buffer as string | number | CanvasGradient | CanvasPattern)
@@ -2247,27 +2221,22 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private setStrokeStyle_serialize(strokeStyle: string | number | CanvasGradient | CanvasPattern): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let strokeStyle_type : int32 = RuntimeType.UNDEFINED
-        strokeStyle_type = runtimeType(strokeStyle)
-        if (RuntimeType.STRING == strokeStyle_type) {
+        if (strokeStyle instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const strokeStyle_0  = strokeStyle as string
-            thisSerializer.writeString(strokeStyle_0)
-        }
-        else if (RuntimeType.NUMBER == strokeStyle_type) {
+            const strokeStyleForIdx0  = strokeStyle as string
+            thisSerializer.writeString(strokeStyleForIdx0)
+        } else if (strokeStyle instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const strokeStyle_1  = strokeStyle as number
-            thisSerializer.writeNumber(strokeStyle_1)
-        }
-        else if (TypeChecker.isCanvasGradient(strokeStyle)) {
+            const strokeStyleForIdx1  = strokeStyle as number
+            thisSerializer.writeNumber(strokeStyleForIdx1)
+        } else if (strokeStyle instanceof CanvasGradient) {
             thisSerializer.writeInt8((2).toChar())
-            const strokeStyle_2  = strokeStyle as CanvasGradient
-            CanvasGradient_serializer.write(thisSerializer, strokeStyle_2)
-        }
-        else if (TypeChecker.isCanvasPattern(strokeStyle)) {
+            const strokeStyleForIdx2  = strokeStyle as CanvasGradient
+            CanvasGradient_serializer.write(thisSerializer, strokeStyleForIdx2)
+        } else if (strokeStyle instanceof CanvasPattern) {
             thisSerializer.writeInt8((3).toChar())
-            const strokeStyle_3  = strokeStyle as CanvasPattern
-            CanvasPattern_serializer.write(thisSerializer, strokeStyle_3)
+            const strokeStyleForIdx3  = strokeStyle as CanvasPattern
+            CanvasPattern_serializer.write(thisSerializer, strokeStyleForIdx3)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setStrokeStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2447,12 +2416,12 @@ export class Path2D extends CanvasPath implements MaterializedBase {
     }
     private addPath_serialize(path: Path2D, transform?: Matrix2D): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let transform_type : int32 = RuntimeType.UNDEFINED
-        transform_type = runtimeType(transform)
-        thisSerializer.writeInt8((transform_type).toChar())
-        if ((transform_type) != (RuntimeType.UNDEFINED)) {
-            const transform_value  = transform!
-            Matrix2D_serializer.write(thisSerializer, transform_value)
+        if (transform !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const transformTmpValue  = transform!
+            Matrix2D_serializer.write(thisSerializer, transformTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2490,19 +2459,19 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     static construct(settings?: RenderingContextSettings, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let settings_type : int32 = RuntimeType.UNDEFINED
-        settings_type = runtimeType(settings)
-        thisSerializer.writeInt8((settings_type).toChar())
-        if ((settings_type) != (RuntimeType.UNDEFINED)) {
-            const settings_value  = settings!
-            RenderingContextSettings_serializer.write(thisSerializer, settings_value)
+        if (settings !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const settingsTmpValue  = settings!
+            RenderingContextSettings_serializer.write(thisSerializer, settingsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8((unit_type).toChar())
-        if ((unit_type) != (RuntimeType.UNDEFINED)) {
-            const unit_value  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unitTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2576,19 +2545,19 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     private toDataURL_serialize(type?: string, quality?: number): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let type_type : int32 = RuntimeType.UNDEFINED
-        type_type = runtimeType(type)
-        thisSerializer.writeInt8((type_type).toChar())
-        if ((type_type) != (RuntimeType.UNDEFINED)) {
-            const type_value  = type!
-            thisSerializer.writeString(type_value)
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue  = type!
+            thisSerializer.writeString(typeTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let quality_type : int32 = RuntimeType.UNDEFINED
-        quality_type = runtimeType(quality)
-        thisSerializer.writeInt8((quality_type).toChar())
-        if ((quality_type) != (RuntimeType.UNDEFINED)) {
-            const quality_value  = quality!
-            thisSerializer.writeNumber(quality_value)
+        if (quality !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const qualityTmpValue  = quality!
+            thisSerializer.writeNumber(qualityTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2613,12 +2582,12 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     private offOnAttach_serialize(callback_?: (() => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let callback__type : int32 = RuntimeType.UNDEFINED
-        callback__type = runtimeType(callback_)
-        thisSerializer.writeInt8((callback__type).toChar())
-        if ((callback__type) != (RuntimeType.UNDEFINED)) {
-            const callback__value  = callback_!
-            thisSerializer.holdAndWriteCallback(callback__value)
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2631,12 +2600,12 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     private offOnDetach_serialize(callback_?: (() => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let callback__type : int32 = RuntimeType.UNDEFINED
-        callback__type = runtimeType(callback_)
-        thisSerializer.writeInt8((callback__type).toChar())
-        if ((callback__type) != (RuntimeType.UNDEFINED)) {
-            const callback__value  = callback_!
-            thisSerializer.holdAndWriteCallback(callback__value)
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2678,19 +2647,19 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     }
     static construct(width: number, height: number, settings?: RenderingContextSettings, unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let settings_type : int32 = RuntimeType.UNDEFINED
-        settings_type = runtimeType(settings)
-        thisSerializer.writeInt8((settings_type).toChar())
-        if ((settings_type) != (RuntimeType.UNDEFINED)) {
-            const settings_value  = settings!
-            RenderingContextSettings_serializer.write(thisSerializer, settings_value)
+        if (settings !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const settingsTmpValue  = settings!
+            RenderingContextSettings_serializer.write(thisSerializer, settingsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8((unit_type).toChar())
-        if ((unit_type) != (RuntimeType.UNDEFINED)) {
-            const unit_value  = (unit as LengthMetricsUnit)
-            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        if (unit !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const unitTmpValue  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unitTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_construct(width, height, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2709,19 +2678,19 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     }
     private toDataURL_serialize(type?: string, quality?: number): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let type_type : int32 = RuntimeType.UNDEFINED
-        type_type = runtimeType(type)
-        thisSerializer.writeInt8((type_type).toChar())
-        if ((type_type) != (RuntimeType.UNDEFINED)) {
-            const type_value  = type!
-            thisSerializer.writeString(type_value)
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue  = type!
+            thisSerializer.writeString(typeTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let quality_type : int32 = RuntimeType.UNDEFINED
-        quality_type = runtimeType(quality)
-        thisSerializer.writeInt8((quality_type).toChar())
-        if ((quality_type) != (RuntimeType.UNDEFINED)) {
-            const quality_value  = quality!
-            thisSerializer.writeNumber(quality_value)
+        if (quality !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const qualityTmpValue  = quality!
+            thisSerializer.writeNumber(qualityTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

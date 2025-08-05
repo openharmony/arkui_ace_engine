@@ -16,18 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier, Bindable_Number_serializer } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkStepperPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -35,91 +36,85 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkStepperPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Stepper_construct(peerId, flags)
-        const _peer  = new ArkStepperPeer(_peerPtr, peerId, "Stepper", flags)
+        const _peer  = new ArkStepperPeer(_peerPtr, peerId, 'Stepper', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setStepperOptionsAttribute(value?: StepperOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            StepperOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            StepperOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._StepperInterface_setStepperOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnFinishAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._StepperAttribute_setOnFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnSkipAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._StepperAttribute_setOnSkip(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnChangeAttribute(value: ((prevIndex: number,index: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._StepperAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnNextAttribute(value: ((prevIndex: number,index: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._StepperAttribute_setOnNext(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPreviousAttribute(value: ((prevIndex: number,index: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._StepperAttribute_setOnPrevious(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    set_onChangeEvent_indexAttribute(callback_: ((index: number) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._StepperAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export interface StepperOptions {
-    index?: number;
+    index?: number | Bindable<number>;
 }
 export interface StepperAttribute extends CommonMethod {
     onFinish(value: (() => void) | undefined): this {
@@ -136,9 +131,6 @@ export interface StepperAttribute extends CommonMethod {
     }
     onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
         throw new Error("Unimplemented method onPrevious")
-    }
-    _onChangeEvent_index(callback_: ((index: number) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_index")
     }
     attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -166,24 +158,8 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     public onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
         return this
     }
-    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: StepperAttribute): void {
-        super.apply(target)
-        if (this.onFinish_value !== undefined)
-            target.onFinish(this.onFinish_value!)
-        if (this.onSkip_value !== undefined)
-            target.onSkip(this.onSkip_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
-        if (this.onNext_value !== undefined)
-            target.onNext(this.onNext_value!)
-        if (this.onPrevious_value !== undefined)
-            target.onPrevious(this.onPrevious_value!)
     }
 }
 
@@ -239,16 +215,7 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         }
         return this
     }
-    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
-        if (this.checkPriority("_onChangeEvent_index")) {
-            const callback__casted = callback_ as (((index: number) => void))
-            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -256,26 +223,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         super.applyAttributesFinish()
     }
 }
-export function withStepperStyle(receiver: StepperAttribute, modifier: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkStepperStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Stepper")
-// export function Stepper(
-//     value?: StepperOptions,
-//     @memo
-//     content_?: () => void,
-// ): StepperAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Stepper(
@@ -291,67 +238,241 @@ export function Stepper(
     NodeAttach<ArkStepperPeer>((): ArkStepperPeer => ArkStepperPeer.create(receiver), (_: ArkStepperPeer): void => {
         receiver.setStepperOptions(value)
         style?.(receiver)
-        withStepperStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkStepperSet extends ArkCommonMethodSet implements StepperAttribute {
+export class StepperModifier extends CommonMethodModifier implements StepperAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _onFinish_flag?: boolean
-    _onFinish0_value?: (() => void) | undefined
-    _onSkip_flag?: boolean
-    _onSkip0_value?: (() => void) | undefined
-    _onChange_flag?: boolean
-    _onChange0_value?: ((prevIndex: number,index: number) => void) | undefined
-    _onNext_flag?: boolean
-    _onNext0_value?: ((prevIndex: number,index: number) => void) | undefined
-    _onPrevious_flag?: boolean
-    _onPrevious0_value?: ((prevIndex: number,index: number) => void) | undefined
-    __onChangeEvent_index_flag?: boolean
-    __onChangeEvent_index0_value?: ((index: number) => void)
-    applyModifierPatch(component: StepperAttribute): void {
-        if (this._onFinish_flag)
-            component.onFinish((this._onFinish0_value as (() => void) | undefined))
-        if (this._onSkip_flag)
-            component.onSkip((this._onSkip0_value as (() => void) | undefined))
-        if (this._onChange_flag)
-            component.onChange((this._onChange0_value as ((prevIndex: number,index: number) => void) | undefined))
-        if (this._onNext_flag)
-            component.onNext((this._onNext0_value as ((prevIndex: number,index: number) => void) | undefined))
-        if (this._onPrevious_flag)
-            component.onPrevious((this._onPrevious0_value as ((prevIndex: number,index: number) => void) | undefined))
+    _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFinish_0_0value?: (() => void) | undefined
+    _onSkip_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSkip_0_0value?: (() => void) | undefined
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onChange_0_0value?: ((prevIndex: number,index: number) => void) | undefined
+    _onNext_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onNext_0_0value?: ((prevIndex: number,index: number) => void) | undefined
+    _onPrevious_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPrevious_0_0value?: ((prevIndex: number,index: number) => void) | undefined
+    applyModifierPatch(peer: ArkStepperPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFinishAttribute((this._onFinish_0_0value as (() => void) | undefined));
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFinishAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onSkip_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSkip_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSkipAttribute((this._onSkip_0_0value as (() => void) | undefined));
+                    this._onSkip_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSkip_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSkip_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSkipAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((prevIndex: number,index: number) => void) | undefined));
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnChangeAttribute((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onNext_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onNext_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnNextAttribute((this._onNext_0_0value as ((prevIndex: number,index: number) => void) | undefined));
+                    this._onNext_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onNext_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onNext_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnNextAttribute((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onPrevious_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPrevious_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPreviousAttribute((this._onPrevious_0_0value as ((prevIndex: number,index: number) => void) | undefined));
+                    this._onPrevious_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPrevious_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPrevious_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPreviousAttribute((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                }
+            }
+        }
     }
-    public onFinish(value: (() => void) | undefined): this {
-        this._onFinish_flag = true
-        this._onFinish0_value = value
+    mergeModifier(modifier: StepperModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFinish(modifier._onFinish_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFinish((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onSkip_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSkip_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSkip(modifier._onSkip_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSkip((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onChange(modifier._onChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onNext_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onNext_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onNext(modifier._onNext_0_0value);
+                    break;
+                }
+                default: {
+                    this.onNext((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onPrevious_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPrevious_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPrevious(modifier._onPrevious_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPrevious((undefined as ((prevIndex: number,index: number) => void) | undefined));
+                }
+            }
+        }
+    }
+    onFinish(value: (() => void) | undefined): this {
+        if (((this._onFinish_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFinish_0_0value = value
+        } else
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onSkip(value: (() => void) | undefined): this {
-        this._onSkip_flag = true
-        this._onSkip0_value = value
+    onSkip(value: (() => void) | undefined): this {
+        if (((this._onSkip_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSkip_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSkip_0_0value = value
+        } else
+        {
+            this._onSkip_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
-        this._onChange_flag = true
-        this._onChange0_value = value
+    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onChange_0_0value = value
+        } else
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
-        this._onNext_flag = true
-        this._onNext0_value = value
+    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+        if (((this._onNext_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onNext_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onNext_0_0value = value
+        } else
+        {
+            this._onNext_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
-        this._onPrevious_flag = true
-        this._onPrevious0_value = value
+    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+        if (((this._onPrevious_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPrevious_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPrevious_0_0value = value
+        } else
+        {
+            this._onPrevious_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
-    }
-    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -360,25 +481,41 @@ export class ArkStepperSet extends ArkCommonMethodSet implements StepperAttribut
 export class StepperOptions_serializer {
     public static write(buffer: SerializerBase, value: StepperOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_index  = value.index
-        let value_index_type : int32 = RuntimeType.UNDEFINED
-        value_index_type = runtimeType(value_index)
-        valueSerializer.writeInt8((value_index_type).toChar())
-        if ((value_index_type) != (RuntimeType.UNDEFINED)) {
-            const value_index_value  = value_index!
-            valueSerializer.writeNumber(value_index_value)
+        const valueHolderForIndex  = value.index
+        if (valueHolderForIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIndexTmpValue  = valueHolderForIndex!
+            if (valueHolderForIndexTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as number
+                valueSerializer.writeNumber(valueHolderForIndexTmpValueForIdx0)
+            } else if (valueHolderForIndexTmpValue instanceof Bindable<number>) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<number>
+                Bindable_Number_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): StepperOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const index_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let index_buf : number | undefined
-        if ((index_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            index_buf = (valueDeserializer.readNumber() as number)
+        const indexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let indexTmpBuf : number | Bindable<number> | undefined
+        if ((indexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const indexTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let indexTmpBuf_ : number | Bindable<number> | undefined
+            if (indexTmpBuf_UnionSelector == (0).toChar()) {
+                indexTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (indexTmpBuf_UnionSelector == (1).toChar()) {
+                indexTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for indexTmpBuf_ has to be chosen through deserialisation.")
+            }
+            indexTmpBuf = (indexTmpBuf_ as number | Bindable<number>)
         }
-        const index_result : number | undefined = index_buf
-        let value : StepperOptions = ({index: index_result} as StepperOptions)
+        const indexTmpResult : number | Bindable<number> | undefined = indexTmpBuf
+        let value : StepperOptions = ({index: indexTmpResult} as StepperOptions)
         return value
     }
 }

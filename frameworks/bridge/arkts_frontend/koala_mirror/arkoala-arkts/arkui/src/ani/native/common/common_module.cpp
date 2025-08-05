@@ -20,7 +20,6 @@
 #include "load.h"
 
 #include "base/utils/utils.h"
-#include "pixel_map_taihe_ani.h"
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -63,7 +62,6 @@ private:
     ani_vm* vm_ = nullptr;
     ani_ref func_ = nullptr;
 };
-
 ani_object GetHostContext([[maybe_unused]] ani_env* env)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -188,18 +186,7 @@ ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
 void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,
     ani_object pixelMap, ani_int repeat)
 {
-    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
-    if (!pixelMapValue) {
-        return;
-    }
-    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getCommonAniModifier() || !env) {
-        return;
-    }
-    modifier->getCommonAniModifier()->setBackgroundImagePixelMap(
-        env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
+    /** Improve: implement me*/
 }
 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
@@ -254,83 +241,6 @@ void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr)
         return;
     }
     modifier->getCommonAniModifier()->onLayoutInnerLayout(env, ptr);
-}
-
-void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr)
-{
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getCommonAniModifier() || !env) {
-        return;
-    }
-    modifier->getCommonAniModifier()->frameNodeMarkDirtyNode(env, ptr);
-}
-
-void GetAlignmentEnum(ani_env* env, ani_object align, AniOverlayOptions& opt)
-{
-    ani_enum enumType;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/Alignment;", &enumType)) {
-        return;
-    }
-
-    ani_boolean isAlignment = ANI_FALSE;
-    if (ANI_OK != env->Object_InstanceOf(align, enumType, &isAlignment)) {
-        return;
-    }
-
-    if (!isAlignment) {
-        return;
-    }
-
-    ani_enum_item enumItem = static_cast<ani_enum_item>(align);
-    ani_int value;
-    if (ANI_OK != env->EnumItem_GetValue_Int(enumItem, &value)) {
-        return;
-    }
-    opt.alignment = static_cast<int32_t>(value);
-}
-
-void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& opt)
-{
-    ani_boolean isUndefined;
-    env->Reference_IsUndefined(options, &isUndefined);
-    if (isUndefined) {
-        return;
-    }
-    ani_ref align;
-    env->Object_GetPropertyByName_Ref(options, "align", &align);
-    env->Reference_IsUndefined(align, &isUndefined);
-    if (!isUndefined) {
-        GetAlignmentEnum(env, static_cast<ani_object>(align), opt);
-    }
-    ani_ref overlayOffset;
-    env->Object_GetPropertyByName_Ref(options, "offset", &overlayOffset);
-    env->Reference_IsUndefined(overlayOffset, &isUndefined);
-    if (!isUndefined) {
-        ani_object offset = static_cast<ani_object>(overlayOffset);
-        ani_ref x;
-        if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
-            ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":D", &param_value);
-            opt.x = static_cast<float>(param_value);
-        }
-        ani_ref y;
-        if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
-            ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":D", &param_value);
-            opt.y = static_cast<float>(param_value);
-        }
-    }
-}
-
-void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_long buildNodePtr, ani_object options)
-{
-    const auto* modifier = GetNodeAniModifier();
-    if (!env || !modifier) {
-        return;
-    }
-    AniOverlayOptions opt;
-    ParseOverlayOptions(env, options, opt);
-    modifier->getCommonAniModifier()->setOverlayComponent(ptr, buildNodePtr, opt);
 }
 
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
@@ -429,5 +339,126 @@ ani_string GetCustomProperty(
         }
     }
     return nullptr;
+}
+
+void GetAlignmentEnum(ani_env* env, ani_object align, AniOverlayOptions& opt)
+{
+    ani_enum enumType;
+    if (ANI_OK != env->FindEnum("Larkui/component/enums/Alignment;", &enumType)) {
+        return;
+    }
+
+    ani_boolean isAlignment = ANI_FALSE;
+    if (ANI_OK != env->Object_InstanceOf(align, enumType, &isAlignment)) {
+        return;
+    }
+
+    if (!isAlignment) {
+        return;
+    }
+
+    ani_enum_item enumItem = static_cast<ani_enum_item>(align);
+    ani_int value;
+    if (ANI_OK != env->EnumItem_GetValue_Int(enumItem, &value)) {
+        return;
+    }
+    opt.alignment = static_cast<int32_t>(value);
+}
+
+void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& opt)
+{
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(options, &isUndefined);
+    if (isUndefined) {
+        return;
+    }
+    ani_ref align;
+    env->Object_GetPropertyByName_Ref(options, "align", &align);
+    env->Reference_IsUndefined(align, &isUndefined);
+    if (!isUndefined) {
+        GetAlignmentEnum(env, static_cast<ani_object>(align), opt);
+    }
+    ani_ref overlayOffset;
+    env->Object_GetPropertyByName_Ref(options, "offset", &overlayOffset);
+    env->Reference_IsUndefined(overlayOffset, &isUndefined);
+    if (!isUndefined) {
+        ani_object offset = static_cast<ani_object>(overlayOffset);
+        ani_ref x;
+        if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
+            ani_double param_value;
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":D", &param_value);
+            opt.x = static_cast<float>(param_value);
+        }
+        ani_ref y;
+        if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
+            ani_double param_value;
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":D", &param_value);
+            opt.y = static_cast<float>(param_value);
+        }
+    }
+}
+
+void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_long buildNodePtr, ani_object options)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!env || !modifier) {
+        return;
+    }
+    AniOverlayOptions opt;
+    ParseOverlayOptions(env, options, opt);
+    modifier->getCommonAniModifier()->setOverlayComponent(ptr, buildNodePtr, opt);
+}
+ani_double Vp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->vp2px(value, instanceId);
+}
+
+ani_double Px2vp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2vp(value, instanceId);
+}
+
+ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->fp2px(value, instanceId);
+}
+
+ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2fp(value, instanceId);
+}
+
+ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->lpx2px(value, instanceId);
+}
+
+ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
 } // namespace OHOS::Ace::Ani
