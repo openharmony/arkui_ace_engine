@@ -42,7 +42,8 @@ public:
         return ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
 
-    static void setSrcType(ImageSourceInfo& info, SrcType value) {
+    static void setSrcType(ImageSourceInfo& info, SrcType value)
+    {
         info.srcType_ = value;
     };
 
@@ -845,7 +846,7 @@ HWTEST_F(ImageTestNg, ImageFillColor003, TestSize.Level0)
     auto fillColor = Color::BLACK;
     fillColor.SetColorSpace(ColorSpace::SRGB);
     image.SetImageFill(fillColor);
-    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true); // Fill color should be set.
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true);              // Fill color should be set.
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), fillColor); // Verify the fill color is fillColor.
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value().GetColorSpace(),
         ColorSpace::SRGB); // Verify the color space is SRGB.
@@ -1422,8 +1423,8 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
-    ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
-    LoadNotifier(nullptr, nullptr, nullptr));
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
 
     CreateNode();
     auto node = GetNode();
@@ -1543,8 +1544,8 @@ HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
-    ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
-    LoadNotifier(nullptr, nullptr, nullptr));
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
 
     CreateNode();
     auto node = GetNode();
@@ -2399,15 +2400,15 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level0)
 }
 
 /**
-* @tc.name: SetPixelMapMemoryName001
-* @tc.desc: SetPixelMapMemoryName001
-* @tc.type: FUNC
-*/
+ * @tc.name: SetPixelMapMemoryName001
+ * @tc.desc: SetPixelMapMemoryName001
+ * @tc.type: FUNC
+ */
 HWTEST_F(ImageTestNg, SetPixelMapMemoryName001, TestSize.Level0)
 {
     /**
-    * @tc.steps: step1. create Image frameNode.
-    */
+     * @tc.steps: step1. create Image frameNode.
+     */
     RefPtr<PixelMap> pixMap = nullptr;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -2422,23 +2423,23 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName001, TestSize.Level0)
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     EXPECT_NE(imageLayoutProperty, nullptr);
     /**
-    * @tc.steps: step2. call SetPixelMapMemoryName.
-    * @tc.expected: Returned value is false.
-    */
+     * @tc.steps: step2. call SetPixelMapMemoryName.
+     * @tc.expected: Returned value is false.
+     */
     EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), false);
     EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, false);
 }
 
 /**
-* @tc.name: SetPixelMapMemoryName002
-* @tc.desc: SetPixelMapMemoryName002
-* @tc.type: FUNC
-*/
+ * @tc.name: SetPixelMapMemoryName002
+ * @tc.desc: SetPixelMapMemoryName002
+ * @tc.type: FUNC
+ */
 HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
 {
     /**
-    * @tc.steps: step1. create Image frameNode.
-    */
+     * @tc.steps: step1. create Image frameNode.
+     */
     RefPtr<PixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -2454,9 +2455,9 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
     EXPECT_NE(imageLayoutProperty, nullptr);
     frameNode->UpdateInspectorId("123");
     /**
-    * @tc.steps: step2. call SetPixelMapMemoryName.
-    * @tc.expected: Returned value is true.
-    */
+     * @tc.steps: step2. call SetPixelMapMemoryName.
+     * @tc.expected: Returned value is true.
+     */
     EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), true);
     EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, true);
 }
@@ -2870,5 +2871,68 @@ HWTEST_F(ImageTestNg, ImageSafeArea006, TestSize.Level0)
         AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
     EXPECT_EQ(imageFrameSize.Height(), std::nullopt);
     EXPECT_EQ(imageFrameSize.Width(), imageSize->Width());
+}
+
+/**
+ * @tc.name: ImageSafeArea007
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when height and width are set to NO_MATCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea007, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Step 3: Initial check before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Simulate loading the image using loading context.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Constraint sizes are still not resolved directly.
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 5: Get image size and validate.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.matchParent)
+     *     .height(LayoutPolicy.matchParent)
+     */
+
+    // Step 6: Apply WRAP_CONTENT policy and check resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageFrameSize.Height(), 300);
+    EXPECT_EQ(imageFrameSize.Width(), 100);
 }
 } // namespace OHOS::Ace::NG
