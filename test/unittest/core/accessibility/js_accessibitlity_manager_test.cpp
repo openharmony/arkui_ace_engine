@@ -2964,6 +2964,41 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager046, TestSize.Level1)
     jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
 }
 
+/**
+ * @tc.name: JsAccessibilityManager047
+ * @tc.desc: test UpdateAccessibilityVisible nodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode1 = AceType::MakeRefPtr<NG::FrameNode>(V2::PAGE_ETS_TAG, 555, AceType::MakeRefPtr<NG::Pattern>())
+    ASSERT_NE(frameNode1, nullptr);
+    auto frameNode2 = AceType::MakeRefPtr<NG::FrameNode>(V2::PAGE_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>())
+    ASSERT_NE(frameNode2, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+
+    /**
+     * @tc.steps: step2. set accessibility visible
+     */
+    frameNode1->SetAccessibilityVisible(false);
+    frameNode2->SetAccessibilityVisible(true);
+
+    /**
+     * @tc.steps: step3. test UpdateAccessibilityVisible
+     */
+    Accessibility::AccessibilityElementInfo info1;
+    Accessibility::AccessibilityElementInfo info2;
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode1, info1);
+    EXPECT_EQ(info1.GetAccessibilityVisible(), false);
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode2, info2);
+    EXPECT_EQ(info2.GetAccessibilityVisible(), true);
+}
+
 #ifdef WEB_SUPPORTED
 /**
  * @tc.name: GetWebAccessibilityIdBySurfaceId
