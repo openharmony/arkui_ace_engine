@@ -431,7 +431,12 @@ struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
 };
 struct ArkUIAniListModifier {
-    void (*setListChildrenMainSize)(ani_env* env, ani_long ptr, ani_object obj);
+    bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);
+    void (*syncChildrenSize)(ArkUINodeHandle node, double size);
+    void (*notifyChange)(ArkUINodeHandle node, ArkUI_Int32 start,
+        ArkUI_Int32 deleteCount, std::vector<float>& newSizeArr);
+    void (*resizeChildrenSize)(ArkUINodeHandle node, int32_t size);
+    void (*syncChildrenSizeOver)(ArkUINodeHandle node);
 };
 struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(
@@ -548,6 +553,13 @@ struct ArkUIAniCanvasModifier {
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
 };
 
+struct ArkUIAniTraceModifier {
+    void (*traceBegin)(const std::string& traceName);
+    void (*traceEnd)();
+    void (*asyncTraceBegin)(const std::string& traceName, int taskId);
+    void (*asyncTraceEnd)(const std::string& traceName, int taskId);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -574,6 +586,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
+    const ArkUIAniTraceModifier* (*getTraceAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

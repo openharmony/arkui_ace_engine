@@ -41,6 +41,7 @@
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
+#include "utils/ani_trace.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -955,6 +956,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_FrameNode_MarkDirtyNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
+        },
+        ani_native_function {
+            "_TraceBegin",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceBegin)
+        },
+        ani_native_function {
+            "_TraceEnd",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceEnd)
+        },
+        ani_native_function {
+            "_AsyncTraceBegin",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceBegin)
+        },
+        ani_native_function {
+            "_AsyncTraceEnd",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
         },
     };
 

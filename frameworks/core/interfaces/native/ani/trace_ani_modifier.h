@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LIST_MODULE
-#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LIST_MODULE
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_TRACE_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_TRACE_ANI_MODIFIER
 
-#include "ani.h"
 #include "core/interfaces/ani/ani_api.h"
 
-namespace OHOS::Ace::Ani {
-void SetListChildrenMainSize(
-    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object childrenSize);
-void SetChildrenMainSize(
-    ani_env* env, const ani_object& obj, const ArkUIAniListModifier* modifier, ArkUINodeHandle node);
-} // namespace OHOS::Ace::Ani
+namespace OHOS::Ace::NG {
 
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LIST_MODULE
+const ArkUIAniTraceModifier* GetTraceAniModifier();
+
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_TRACE_ANI_MODIFIER
