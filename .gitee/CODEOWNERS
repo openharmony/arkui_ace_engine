@@ -2764,9 +2764,6 @@ frameworks/core/components_ng/render/snapshot_param.h @arkuievent
 frameworks/core/components_ng/token_theme/ @arkuiframework
 frameworks/core/pipeline_ng/ @arkui_architecture
 
-[Native Ani Interfaces]
-frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
-
 [Native Node Interfaces]
 frameworks/core/interfaces/arkoala/arkoala_api.h @arkui_architecture
 frameworks/core/interfaces/native/BUILD.gn @arkui_architecture
@@ -2994,6 +2991,7 @@ frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/node/web_modifier.h @arkwebinarkuireview
+frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @arkuievent
 interfaces/native/drawable_descriptor.h @arkui_image
