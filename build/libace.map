@@ -329,8 +329,6 @@
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
-      OHOS::Ace::NG::UIExtensionStatic::*;
-      OHOS::Ace::NG::SecurityUIExtensionStatic::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
