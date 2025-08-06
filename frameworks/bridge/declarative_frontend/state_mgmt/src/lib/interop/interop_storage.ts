@@ -53,7 +53,10 @@ class InteropStorage extends Map<string, ObservedPropertyAbstract<any>> {
     removeKeyFunc_: (key: string) => void = (key: string) => {
         throw new Error('not implement');
     };
-    clearKeyFunc_: () => void = () => {
+    clearKeyFunc_: () => boolean = () => {
+        throw new Error('not implement');
+    };
+    checkClearKeyFunc_: () => boolean = () => {
         throw new Error('not implement');
     };
 
@@ -138,12 +141,14 @@ function bindStaticAppStorage(
     // call ArkTS1.2 to update interop key map.
     addKeyFunc: (key: string) => void,
     removeKeyFunc: (key: string) => void,
-    clearKeyFunc: () => void,
+    clearKeyFunc: () => boolean,
+    checkClearKeyFunc: () => boolean,
 
     // set callback to ArkTS1.2
     setGetValueFunc: (event: (value: string) => ObservedPropertyAbstract<any> | undefined) => void,
     setRemoveValueFunc: (event: (value: string) => boolean) => void,
-    setClearValueFunc: (event: () => boolean) => void
+    setClearValueFunc: (event: () => boolean) => void,
+    setCheckCanClearValueFunc: (event: () => boolean) => void
 ): void {
     const appStorage = AppStorage._getOrCreateByInterop_();
 
@@ -165,6 +170,7 @@ function bindStaticAppStorage(
     interopStorage.addKeyFunc_ = addKeyFunc;
     interopStorage.removeKeyFunc_ = removeKeyFunc;
     interopStorage.clearKeyFunc_ = clearKeyFunc;
+    interopStorage.checkClearKeyFunc_ = checkClearKeyFunc;
 
     setGetValueFunc((value: string) => {
         return interopStorage.originStorage_.get(value);
@@ -196,6 +202,16 @@ function bindStaticAppStorage(
         storage.clear();
         return true;
     });
+    setCheckCanClearValueFunc(() => {
+        const storage = interopStorage.originStorage_;
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+        }
+        return true;
+    });
 }
 
 function bindStaticLocalStorage(
@@ -207,12 +223,14 @@ function bindStaticLocalStorage(
     // call ArkTS1.2 to update interop key map.
     addKeyFunc: (key: string) => void,
     removeKeyFunc: (key: string) => void,
-    clearKeyFunc: () => void,
+    clearKeyFunc: () => boolean,
+    checkClearKeyFunc: () => boolean,
 
     // set callback to ArkTS1.2
     setGetValueFunc: (event: (value: string) => ObservedPropertyAbstract<any> | undefined) => void,
     setRemoveValueFunc: (event: (value: string) => boolean) => void,
-    setClearValueFunc: (event: () => boolean) => void
+    setClearValueFunc: (event: () => boolean) => void,
+    setCheckCanClearValueFunc:  (event: () => boolean) => void
 ) : LocalStorage {
 
     const localStorage = new LocalStorage();
@@ -235,6 +253,7 @@ function bindStaticLocalStorage(
     interopStorage.addKeyFunc_ = addKeyFunc;
     interopStorage.removeKeyFunc_ = removeKeyFunc;
     interopStorage.clearKeyFunc_ = clearKeyFunc;
+    interopStorage.checkClearKeyFunc_ = checkClearKeyFunc;
 
     setGetValueFunc((value: string) => {
         return interopStorage.originStorage_.get(value);
@@ -264,6 +283,16 @@ function bindStaticLocalStorage(
             state.aboutToBeDeleted();
         }
         storage.clear();
+        return true;
+    });
+    setCheckCanClearValueFunc(() => {
+        const storage = interopStorage.originStorage_;
+        for (let propName of storage.keys()) {
+            let state: ObservedPropertyAbstract<any> = storage.get(propName);
+            if (state.numberOfSubscrbers() > 0) {
+                return false;
+            }
+        }
         return true;
     });
 

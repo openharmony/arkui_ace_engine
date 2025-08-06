@@ -246,6 +246,15 @@ export class StorageBase {
     }
 
     public clear(): boolean {
+        if (!this.checkClear()) {
+            return false;
+        }
+        this.key2Type.clear();
+        this.keySet.clear();
+        return true;
+    }
+
+    public checkClear(): boolean {
         let canDelete: boolean = true;
         if (canDelete) {
             this.repoAllTypes.forEach((sp) => {
@@ -254,12 +263,7 @@ export class StorageBase {
                 }
             });
         }
-        if (!canDelete) {
-            return false;
-        }
-        this.key2Type.clear();
-        this.keySet.clear();
-        return true;
+        return canDelete;
     }
 
     public __getStoragePropUnsafe<T>(key: string): StorageProperty<T> | undefined {
