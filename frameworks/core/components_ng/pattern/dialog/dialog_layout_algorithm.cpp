@@ -219,7 +219,9 @@ void DialogLayoutAlgorithm::UpdateChildMaxSizeHeight(SizeT<float>& maxSize)
 void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
     LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper)
 {
+    CHECK_NULL_VOID(childLayoutWrapper && dialogProp);
     auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
     auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
     auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
     if (NonNegative(dialogHeight.Value())) {
@@ -333,7 +335,10 @@ void DialogLayoutAlgorithm::Distribute(float& scrollHeight, float& listHeight, f
 LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
     LayoutWrapper* layoutWrapper, float height, float width)
 {
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    LayoutConstraintF childConstraint;
+    auto dialogLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(dialogLayoutProperty, childConstraint);
+    childConstraint = dialogLayoutProperty->CreateChildConstraint();
     childConstraint.minSize.SetHeight(height);
     childConstraint.maxSize.SetHeight(height);
     childConstraint.percentReference.SetHeight(height);
