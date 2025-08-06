@@ -13304,9 +13304,9 @@ void JSViewAbstract::ParseDragSpringLoadingConfiguration(
             CHECK_NULL_VOID(setter);
             auto propObj = configuration->GetProperty(propName);
             if (propObj->IsNumber()) {
-                auto value = propObj->ToNumber<int32_t>();
-                if (value > 0) {
-                    setter(config, value);
+                auto value = propObj->ToNumber<double>();
+                if (!std::isnan(value) && value <= INT32_MAX && value >= 0) {
+                    setter(config, static_cast<int32_t>(value));
                 }
             }
         };

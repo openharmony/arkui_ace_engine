@@ -656,18 +656,25 @@ void JsDragSpringLoadingContext::UpdateConfiguration(const JSCallbackInfo& args)
         return;
     }
     CHECK_NULL_VOID(context_);
+
+    auto validateAndSet = [](double value, int32_t defaultValue) -> int32_t {
+        return (std::isnan(value) || value < 0 || value > INT32_MAX) ? defaultValue : static_cast<int32_t>(value);
+    };
+
     auto config = MakeRefPtr<NG::DragSpringLoadingConfiguration>();
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[0]);
-    int32_t stillTimeLimit = jsObj->GetPropertyValue<int32_t>("stillTimeLimit", NG::DEFAULT_STILL_TIME_LIMIT);
-    int32_t updateInterval = jsObj->GetPropertyValue<int32_t>("updateInterval", NG::DEFAULT_UPDATE_INTERVAL);
-    int32_t updateNotifyCount = jsObj->GetPropertyValue<int32_t>("updateNotifyCount", NG::DEFAULT_UPDATE_NOTIFY_COUNT);
-    int32_t updateToFinishInterval =
-        jsObj->GetPropertyValue<int32_t>("updateToFinishInterval", NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL);
-    config->stillTimeLimit = (stillTimeLimit > 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
-    config->updateInterval = (updateInterval > 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
-    config->updateNotifyCount = (updateNotifyCount > 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
+
+    config->stillTimeLimit = validateAndSet(
+        jsObj->GetPropertyValue<double>("stillTimeLimit", NG::DEFAULT_STILL_TIME_LIMIT), NG::DEFAULT_STILL_TIME_LIMIT);
+    config->updateInterval = validateAndSet(
+        jsObj->GetPropertyValue<double>("updateInterval", NG::DEFAULT_UPDATE_INTERVAL), NG::DEFAULT_UPDATE_INTERVAL);
+    config->updateNotifyCount =
+        validateAndSet(jsObj->GetPropertyValue<double>("updateNotifyCount", NG::DEFAULT_UPDATE_NOTIFY_COUNT),
+            NG::DEFAULT_UPDATE_NOTIFY_COUNT);
     config->updateToFinishInterval =
-        (updateToFinishInterval > 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
+        validateAndSet(jsObj->GetPropertyValue<double>("updateToFinishInterval", NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL),
+            NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL);
+
     context_->SetDragSpringLoadingConfiguration(std::move(config));
 }
 
