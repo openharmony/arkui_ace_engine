@@ -29,6 +29,13 @@ class IRemoteObject;
 template<typename T>
 class sptr;
 } // namespace OHOS
+namespace OHOS::Ace {
+class DisplayInfo;
+enum class FoldStatus : uint32_t;
+enum class WindowMode : uint32_t;
+enum class WindowSizeChangeReason : uint32_t;
+}; // namespace OHOS::Ace
+
 namespace OHOS::Ace::Kit {
 
 using Task = std::function<void()>;
@@ -70,6 +77,20 @@ public:
     virtual void UnregisterArkUIObjectLifecycleCallback() = 0;
 
     virtual sptr<IRemoteObject> GetToken() = 0;
+
+    // Display Info
+    virtual RefPtr<DisplayInfo> GetDisplayInfo() = 0;
+    virtual WindowMode GetWindowMode() = 0;
+    virtual bool GetIsMidScene() = 0;
+    virtual bool IsAccessibilityEnabled() = 0;
+
+    virtual int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback) = 0;
+    virtual void UnregisterSurfaceChangedCallback(int32_t callbackId) = 0;
+    virtual int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback) = 0;
+    virtual void UnRegisterFoldStatusChangedCallback(int32_t callbackId) = 0;
+    virtual int32_t RegisterRotationEndCallback(std::function<void()>&& callback) = 0;
+    virtual void UnregisterRotationEndCallback(int32_t callbackId) = 0;
 };
 
 }
