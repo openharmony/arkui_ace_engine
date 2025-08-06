@@ -279,13 +279,13 @@ void FolderStackPattern::UpdateChildAlignment()
         align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
     auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
-    if (controlPartsStackNode) {
+    if (controlPartsStackNode && controlPartsStackNode->GetLayoutProperty()) {
         auto controlPartsLayoutProperty =
             AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
         controlPartsLayoutProperty->UpdateAlignment(align);
     }
     auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
-    if (hoverStackNode) {
+    if (hoverStackNode && hoverStackNode->GetLayoutProperty()) {
         auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
         hoverLayoutProperty->UpdateAlignment(align);
     }

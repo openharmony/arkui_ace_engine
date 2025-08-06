@@ -89,7 +89,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         layoutWrapper->GetGeometryNode()->SetFrameSize((realSize.ConvertToSizeT()));
     }
-    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     CHECK_NULL_VOID(layoutPolicy.has_value());
     auto policySize = MeasureSelfByLayoutPolicy(layoutWrapper, childTotalSize, childMaxSize);
     realSize.UpdateSizeWithCheck(policySize);
@@ -162,7 +162,9 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
     // measure normal node.
     int32_t index = 0;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (child->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        const auto& childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         DisableLayoutPolicy(child);
@@ -198,10 +200,10 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
 
 SizeF LinearSplitLayoutAlgorithm::MeasureChildrenBeforeAPI10(LayoutWrapper* layoutWrapper)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    const auto& maxSize = layoutConstraint->maxSize;
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, {});
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    const auto& maxSize = layoutConstraint->maxSize;
     auto padding = layoutProperty->CreatePaddingAndBorder();
     // Get Max Size for children.
     OptionalSizeF optionalMaxSize;
@@ -273,7 +275,9 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     childrenConstrains_ = std::vector<float>(visibleChildCount_, 0.0f);
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        const auto& childLayoutProperty = item->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         childTotalWidth += item->GetGeometryNode()->GetMarginFrameSize().Width();
@@ -307,12 +311,13 @@ void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(co
 {
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
-    CHECK_NULL_VOID(childNode->GetLayoutProperty());
-    if (!childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+    const auto& childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    if (!childLayoutProperty->IsIgnoreOptsValid()) {
         return;
     }
     auto saeCorrect = originOffset;
-    IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+    IgnoreLayoutSafeAreaOpts& opts = *(childLayoutProperty->GetIgnoreLayoutSafeAreaOpts());
     auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN);
     auto offsetX = sae.left.value_or(0.0f);
     auto offsetY = sae.top.value_or(0.0f);
@@ -343,10 +348,12 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
         if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
             return;
         }
-        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        const auto& childLayoutProperty = item->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
-        auto childMargin = item->GetLayoutProperty()->CreateMargin();
+        auto childMargin = childLayoutProperty->CreateMargin();
         float marginWidth = childMargin.left.value_or(0.f) + childMargin.right.value_or(0.f);
         childrenConstrains_[index] = GetItemMinSize(item, layoutWrapper) + marginWidth;
         if (isFirstSetPos) {
@@ -397,7 +404,9 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
         if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
             return;
         }
-        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        const auto& childLayoutProperty = item->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         ColumnSplitChildConstrain(layoutWrapper, item, index);
@@ -453,6 +462,7 @@ void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(
 std::pair<float, float> LinearSplitLayoutAlgorithm::GetDividerMargin(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<LinearSplitLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(listLayoutProperty, {});
     ColumnSplitDivider divider;
     if (listLayoutProperty->HasDivider()) {
         divider = listLayoutProperty->GetDivider().value();
@@ -628,12 +638,14 @@ float LinearSplitLayoutAlgorithm::GetItemMinSize(const RefPtr<LayoutWrapper>& it
 OptionalSizeF LinearSplitLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper,
     const SizeF& childTotalSize, const SizeF& childMaxSize)
 {
-    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, {});
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     CHECK_NULL_RETURN(layoutPolicy.has_value(), {});
     OptionalSizeF realSize;
     auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
     auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto matchParentSize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
         widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL).ConvertToSizeT();
     realSize.UpdateSizeWithCheck(matchParentSize);
@@ -644,8 +656,8 @@ OptionalSizeF LinearSplitLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrappe
     auto width = splitType_ == SplitType::COLUMN_SPLIT ? childMaxSize.Width() : childTotalSize.Width();
     auto height = splitType_ == SplitType::COLUMN_SPLIT ? childTotalSize.Height() : childMaxSize.Height();
     auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({width, height},
-        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
-        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        layoutProperty->GetCalcLayoutConstraint(),
+        layoutProperty->GetLayoutConstraint()->percentReference);
     if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         realSize.SetWidth(fixIdealSize.Width());
     }
@@ -722,15 +734,17 @@ void LinearSplitLayoutAlgorithm::DisableLayoutPolicy(const RefPtr<LayoutWrapper>
 LayoutConstraintF LinearSplitLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, LayoutConstraintF());
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutConstraintF());
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     const auto& maxSize = layoutConstraint->maxSize;
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     OptionalSizeF optionalMaxSize;
     optionalMaxSize.UpdateIllegalSizeWithCheck(maxSize);
     auto maxSizeT = optionalMaxSize.ConvertToSizeT();
     MinusPaddingToSize(padding, maxSizeT);
 
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto childConstraint = layoutProperty->CreateChildConstraint();
     childConstraint.maxSize = layoutConstraint->selfIdealSize.ConvertToSizeT();
     if (childConstraint.maxSize.Height() < 0.0) {
         childConstraint.maxSize.SetHeight(maxSizeT.Height());

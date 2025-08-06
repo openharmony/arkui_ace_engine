@@ -108,7 +108,7 @@ bool IsHorizontal(FlexDirection direction)
 void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
-    auto childLayoutProperty = child->GetLayoutProperty();
+    const auto& childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
     auto& flexItemProperty = childLayoutProperty->GetFlexItemProperty();
     CHECK_NULL_VOID(flexItemProperty);
@@ -232,7 +232,9 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
      * LinearLayout.
      */
     if (isLinearLayoutFeature_) {
-        bool isVertical = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty())->IsVertical();
+        const auto& linearLayoutProperty = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(linearLayoutProperty);
+        bool isVertical = linearLayoutProperty->IsVertical();
         direction_ = isVertical ? FlexDirection::COLUMN : FlexDirection::ROW;
     }
 }
@@ -281,6 +283,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
             continue;
         }
         const auto& childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
         const auto& childMagicItemProperty = childLayoutProperty->GetMagicItemProperty();
         const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
         MagicLayoutNode node;
@@ -312,7 +315,7 @@ bool FlexLayoutAlgorithm::AddElementIntoLayoutPolicyChildren(LayoutWrapper* layo
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     CHECK_NULL_RETURN(child, false);
-    auto childLayoutProperty = child->GetLayoutProperty();
+    const auto& childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(childLayoutProperty, false);
     auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
     CHECK_NULL_RETURN(layoutPolicy, false);
@@ -522,7 +525,9 @@ void FlexLayoutAlgorithm::PopOutOfDispayMagicNodesInPriorityMode(const std::list
         child.layoutWrapper->SetActive(false);
         --validSizeCount_;
         child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
-        const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& childLayoutProperty = child.layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        const auto& flexItemProperty = childLayoutProperty->GetFlexItemProperty();
         if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
             flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
         }
@@ -849,8 +854,10 @@ void FlexLayoutAlgorithm::CheckIsGrowOrShrink(std::function<float(const RefPtr<L
 {
     if (GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)) {
         getFlex = [](const RefPtr<LayoutWrapper>& item) -> float {
-            const auto& flexItemProperty = item->GetLayoutProperty()->GetFlexItemProperty();
             float ret = 0.0f;
+            const auto& layoutProperty = item->GetLayoutProperty();
+            CHECK_NULL_RETURN(layoutProperty, ret);
+            const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexGrow().value_or(ret);
                 /**
@@ -866,8 +873,10 @@ void FlexLayoutAlgorithm::CheckIsGrowOrShrink(std::function<float(const RefPtr<L
         lastChild = flexItemProperties.lastGrowChild;
     } else {
         getFlex = [isLinearLayoutFeature = isLinearLayoutFeature_](const RefPtr<LayoutWrapper>& item) -> float {
-            const auto& flexItemProperty = item->GetLayoutProperty()->GetFlexItemProperty();
             float ret = isLinearLayoutFeature ? 0.0f : 1.0f;
+            const auto& layoutProperty = item->GetLayoutProperty();
+            CHECK_NULL_RETURN(layoutProperty, ret);
+            const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexShrink().value_or(ret);
                 /**
@@ -905,7 +914,9 @@ bool FlexLayoutAlgorithm::IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayout
 {
     auto child = childLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(child, false);
-    auto layoutPolicy = childLayoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    const auto& childlayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(childlayoutProperty, false);
+    auto layoutPolicy = childlayoutProperty->GetLayoutPolicyProperty();
     bool isFix = IsHorizontal(direction_) ? layoutPolicy.has_value() && layoutPolicy.value().IsWidthFix()
                                           : layoutPolicy.has_value() && layoutPolicy.value().IsHeightFix();
     auto minSize = isFix ? GetMainAxisSizeHelper(childLayoutWrapper->GetGeometryNode()->GetFrameSize(), direction_)
@@ -939,8 +950,9 @@ void FlexLayoutAlgorithm::UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& l
 float FlexLayoutAlgorithm::MainAxisMinValue(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, 0.0f);
-    CHECK_NULL_RETURN(layoutWrapper->GetLayoutProperty(), 0.0f);
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_RETURN(layoutConstraint, 0.0f);
     return IsHorizontal(direction_) ? layoutConstraint->minSize.Width() : layoutConstraint->minSize.Height();
 }
@@ -970,7 +982,9 @@ void FlexLayoutAlgorithm::CheckMainAxisSizeAuto(
                        calcLayoutConstraint->selfIdealSize->IsWidthDimensionUnitAuto();
     bool isHeightAuto = calcLayoutConstraint && calcLayoutConstraint->selfIdealSize &&
                         calcLayoutConstraint->selfIdealSize->IsHeightDimensionUnitAuto();
-    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     bool isWidthWrap = layoutPolicy.has_value() && layoutPolicy.value().IsWidthWrap();
     bool isHeightWrap = layoutPolicy.has_value() && layoutPolicy.value().IsHeightWrap();
     bool isWidthFix = layoutPolicy.has_value() && layoutPolicy.value().IsWidthFix();
@@ -1042,8 +1056,8 @@ void FlexLayoutAlgorithm::SetFinalRealSize(
         fixIdealSize.SetSize(SizeF(finalCrossAxisSize, finalMainAxisSize));
     }
     fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(fixIdealSize,
-        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
-        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        layoutProperty->GetCalcLayoutConstraint(),
+        layoutProperty->GetLayoutConstraint()->percentReference);
     auto mainAxisSizeMin = GetMainAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
@@ -1101,7 +1115,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     mainAxisSize_ = GetMainAxisSizeHelper(realSize, direction_);
     SetInitMainAxisSize(layoutWrapper);
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
     auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
     if (IsHorizontal(direction_)) {
@@ -1373,11 +1387,13 @@ float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const Re
     CHECK_NULL_RETURN(host, 0.0f);
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(childNode, 0.0f);
-    if (!childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+    const auto& childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(childLayoutProperty, 0.0f);
+    if (!childLayoutProperty->IsIgnoreOptsValid()) {
         return 0.0f;
     }
-    auto isExpandConstraintNeeded = childNode->GetLayoutProperty()->IsExpandConstraintNeeded();
-    IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+    auto isExpandConstraintNeeded = childLayoutProperty->IsExpandConstraintNeeded();
+    IgnoreLayoutSafeAreaOpts& opts = *(childLayoutProperty->GetIgnoreLayoutSafeAreaOpts());
     auto sae = host->GetAccumulatedSafeAreaExpand(true, opts);
     float offsetX = 0.0f;
     float offsetY = 0.0f;
