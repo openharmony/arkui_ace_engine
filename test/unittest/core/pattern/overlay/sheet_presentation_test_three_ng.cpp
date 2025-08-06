@@ -2340,4 +2340,61 @@ HWTEST_F(SheetPresentationTestThreeNg, SheetWidthNeedChanged001, TestSize.Level1
     EXPECT_EQ(sheetPattern->SheetWidthNeedChanged(), true);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: UpdateSheetBackgroundColor001
+ * @tc.desc: Branch: if (sheetStyle.backgroundColor.has_value()).
+ *           Condition: 1.sheetStyle.backgroundColor.has_value()=>true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "UpdateSheetBackgroundColor".
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("sheetNode", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("scrollNode", 003, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("sheetContentNode", 004,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern, before test "UpdateSheetBackgroundColor".
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle, before test "UpdateSheetBackgroundColor".
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    sheetStyle.backgroundColor = Color::BLUE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test "UpdateSheetBackgroundColor",
+     * @tc.expected: GetBackgroundColorValue = Color::BLUE.
+     */
+    sheetPattern->UpdateSheetBackgroundColor();
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto hasBackgroundColor = renderContext->HasBackgroundColor();
+    EXPECT_EQ(hasBackgroundColor, false);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG
