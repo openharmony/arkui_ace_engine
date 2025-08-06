@@ -1133,10 +1133,10 @@ void WebPattern::OnAttachToFrameNode()
     UpdateTransformHintChangedCallbackId(callbackId);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
-        auto callback = [](int64_t accessibilityId, const std::string data) {
-            UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
-        };
-        RegisterTextBlurCallback(callback);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToFrameNode, register event report callback");
+        auto report = GetAccessibilityEventReport();
+        CHECK_NULL_VOID(report);
+        report->RegisterAllReportEventCallBack();
     }
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
     EventRecorder::Get().OnAttachWeb(host);
@@ -1162,7 +1162,10 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
-        UnRegisterTextBlurCallback();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnDetachFromFrameNode UnRegisterCallback");
+        auto report = GetAccessibilityEventReport();
+        CHECK_NULL_VOID(report);
+        report->UnRegisterCallback();
     }
     pipeline->UnRegisterListenerForTranslate(id);
     EventRecorder::Get().OnDetachWeb(id);
@@ -7831,21 +7834,6 @@ int64_t WebPattern::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceI
     return delegate_->GetWebAccessibilityIdBySurfaceId(surfaceId);
 }
 
-void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
-{
-    CHECK_NULL_VOID(callback);
-    textBlurCallback_ = std::move(callback);
-    textBlurAccessibilityEnable_ = true;
-    SetAccessibilityState(true);
-}
-
-void WebPattern::UnRegisterTextBlurCallback()
-{
-    textBlurCallback_ = nullptr;
-    textBlurAccessibilityEnable_ = false;
-    SetAccessibilityState(false);
-}
-
 void WebPattern::InitMagnifier()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "InitMagnifier");
@@ -8310,6 +8298,19 @@ void WebPattern::RecoverToTopLeft()
     if (renderContextForSurface_) {
         renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
     }
+}
+
+RefPtr<WebAccessibilityEventReport> WebPattern::GetAccessibilityEventReport()
+{
+    if (!webAccessibilityEventReport_) {
+        webAccessibilityEventReport_ = AceType::MakeRefPtr<WebAccessibilityEventReport>(WeakClaim(this));
+    }
+    return webAccessibilityEventReport_;
+}
+
+void WebPattern::SetTextEventAccessibilityEnable(bool enable)
+{
+    textBlurAccessibilityEnable_ = enable;
 }
 
 RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()
