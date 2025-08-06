@@ -474,6 +474,14 @@ FrameNode::FrameNode(
     paintProperty_->SetHost(WeakClaim(this));
 }
 
+
+void FrameNode::OnDelete()
+{
+    frameProxy_.reset();
+    nodeAnimatablePropertyMap_.clear();
+    UINode::OnDelete();
+}
+
 FrameNode::~FrameNode()
 {
     ResetPredictNodes();

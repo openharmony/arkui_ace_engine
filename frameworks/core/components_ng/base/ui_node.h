@@ -99,6 +99,9 @@ public:
     UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
+    void RegisterReleaseFunc(bool enableRegister);
+    virtual void OnDelete();
+
     // atomic node is like button, image, custom node and so on.
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
@@ -1278,6 +1281,8 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+
+    bool uiNodeGcEnable_ = false;
 };
 
 } // namespace OHOS::Ace::NG

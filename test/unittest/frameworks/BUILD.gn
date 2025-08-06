@@ -20,5 +20,6 @@ group("frameworks_unittest") {
     "base/ressched:ressched_report_test",
     "core/common:color_inverter_test",
     "core/common:container_scope_test",
+    "core/components_ng:ui_node_gc_test",
   ]
 }

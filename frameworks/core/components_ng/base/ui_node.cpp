@@ -16,8 +16,10 @@
 
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
+#include "base/utils/feature_param.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/builder_util.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
@@ -61,6 +63,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         auto currentContainer = Container::GetContainer(instanceId_);
         isDarkMode_ = currentContainer ? (currentContainer->GetColorMode() == ColorMode::DARK) : false;
     }
+    uiNodeGcEnable_ = FeatureParam::IsUINodeGcEnabled();
 }
 
 UINode::~UINode()
@@ -103,6 +106,10 @@ UINode::~UINode()
 bool UINode::MaybeRelease()
 {
     if (!isThreadSafeNode_ || MultiThreadBuildManager::IsOnUIThread()) {
+        if (uiNodeGcEnable_) {
+            UiNodeGc::OnReleaseFunc(this);
+            return false;
+        }
         return true;
     }
     auto pipeline = GetContext();
@@ -110,6 +117,17 @@ bool UINode::MaybeRelease()
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(executor, true);
     return !executor->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyUINode");
+}
+
+void UINode::RegisterReleaseFunc(bool enableRegister)
+{
+    uiNodeGcEnable_ = enableRegister;
+}
+
+void UINode::OnDelete()
+{
+    disappearingChildren_.clear();
+    children_.clear();
 }
 
 void UINode::AttachContext(PipelineContext* context, bool recursive)
