@@ -109,6 +109,13 @@ inline void parseDimension(const InteropString &string, InteropLength *result)
   char *suffixPtr = nullptr;
   float value = std::strtof(string.chars, &suffixPtr);
 
+  int autoUnitValue = 5;
+  if (suffixPtr[0] == 'a' && suffixPtr[1] == 'u' && suffixPtr[2] == 't' && suffixPtr[3] == 'o')
+  {
+      result->unit = autoUnitValue;
+      return;
+  }
+
   if (!suffixPtr || suffixPtr == string.chars)
   {
     // not a numeric value
