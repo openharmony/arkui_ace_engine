@@ -54,7 +54,9 @@ export function disposeContentBackward<Type extends Disposable>(array: ReadonlyA
 export function disposeContent<Type extends Disposable>(it: IterableIterator<Type | undefined>) {
     while (true) {
         const result = it.next()
-        if (result.done) break
+        if (result.done) {
+            break
+        }
         result.value?.dispose()
     }
 }

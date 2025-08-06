@@ -83,7 +83,9 @@ export function constAnimation<Value>(value: Value): TimeAnimation<Value> {
  * @returns simple time-based animation that starts with 0
  */
 export function timeAnimation<Value>(compute: (time: int64) => Value, initialTime: int64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(initialTime)) throw new Error("illegal initial time: " + initialTime)
+    if (!isFiniteNumber(initialTime)) {
+        throw new Error("illegal initial time: " + initialTime)
+    }
     return new TimeAnimationImpl<Value>(compute, initialTime)
 }
 
@@ -97,9 +99,14 @@ export function timeAnimation<Value>(compute: (time: int64) => Value, initialTim
  * @returns animated value in 0.0 to 1.0 range
  */
 export function smoothAnimation(period: uint32, from: float64 = 0.0, to: float64 = 1.0): TimeAnimation<float64> {
-    if (!isFiniteNumber(period) || (period < 1)) throw new Error("illegal period: " + period)
-    if (from >= to) throw new Error("`from` must be smaller than `to`")
-    return new TimeAnimationImpl<float64>((time: int64): float64 => (1 - Math.cos(time / period * Math.PI)) / 2 * (to - from) + from)
+    if (!isFiniteNumber(period) || (period < 1)) {
+        throw new Error("illegal period: " + period)
+    }
+    if (from >= to) {
+        throw new Error("`from` must be smaller than `to`")
+    }
+    return new TimeAnimationImpl<float64>(
+        (time: int64): float64 => (1 - Math.cos(time / period * Math.PI)) / 2 * (to - from) + from)
 }
 
 /**
@@ -126,9 +133,17 @@ export function countAnimation(period: uint32, initialCount: int64 = 0): TimeAni
  * @param initialCount - initial counter value of the animation
  * @returns animation of integer value that is computed periodically from counter
  */
-export function periodicAnimation<Value>(period: uint32, compute: (count: int64) => Value, initialCount: int64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(period) || (period < 1)) throw new Error("illegal time period: " + period)
-    if (!isFiniteNumber(initialCount)) throw new Error("illegal initial count: " + initialCount)
+export function periodicAnimation<Value>(
+    period: uint32,
+    compute: (count: int64) => Value,
+    initialCount: int64 = 0
+): TimeAnimation<Value> {
+    if (!isFiniteNumber(period) || (period < 1)) {
+        throw new Error("illegal time period: " + period)
+    }
+    if (!isFiniteNumber(initialCount)) {
+        throw new Error("illegal initial count: " + initialCount)
+    }
     return new PeriodicAnimationImpl<Value>(0, period, compute, initialCount)
 }
 
@@ -152,14 +167,19 @@ export function periodicAnimationWithDelay<Value>(delay: uint32, period: uint32,
  * @param compute - value supplier to be computed when frame index is changed
  * @returns frame-based animation
  */
-export function frameAnimation<Value>(frameTime: ReadonlyArray<uint32>, compute: (index: int64) => Value): TimeAnimation<Value> {
+export function frameAnimation<Value>(
+    frameTime: ReadonlyArray<uint32>,
+    compute: (index: int64) => Value
+): TimeAnimation<Value> {
     const count = frameTime.length
     if (count == 1) return constAnimation<Value>(compute(0))
     if (count < 2) throw new Error("illegal frames count: " + count)
     const time = new Array<uint32>(count)
     for (let index = 0; index < count; index++) {
         const value = frameTime[index]
-        if (!isFiniteNumber(value) || (value < 1)) throw new Error("illegal time of frame " + index + ": " + value)
+        if (!isFiniteNumber(value) || (value < 1)) {
+            throw new Error("illegal time of frame " + index + ": " + value)
+        }
         time[index] = index > 0 ? time[index - 1] + value : value
     }
     return new FrameAnimationImpl<Value>(time, compute)
@@ -172,7 +192,11 @@ export function frameAnimation<Value>(frameTime: ReadonlyArray<uint32>, compute:
  * @param to - a second base array that corresponds to the `1` state
  * @returns duration-based animation of number value
  */
-export function numberAnimation(spec: Partial<AnimationSpec>, to: float64 = 1.0, from: float64 = 0.0): TimeAnimation<float64> {
+export function numberAnimation(
+    spec: Partial<AnimationSpec>,
+    to: float64 = 1.0,
+    from: float64 = 0.0
+): TimeAnimation<float64> {
     return animation<float64>(spec, NumberAnimationRange(from, to))
 }
 
@@ -182,17 +206,29 @@ export function numberAnimation(spec: Partial<AnimationSpec>, to: float64 = 1.0,
  * @param initialState - initial inner state of the animation (-1..1]
  * @returns duration-based animation
  */
-export function animation<Value>(spec: Partial<AnimationSpec>, compute: AnimationRange<Value>, initialState: float64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(initialState) || (initialState <= -1) || (initialState > 1)) throw new Error("illegal initial state: " + initialState)
+export function animation<Value>(
+    spec: Partial<AnimationSpec>,
+    compute: AnimationRange<Value>,
+    initialState: float64 = 0
+): TimeAnimation<Value> {
+    if (!isFiniteNumber(initialState) || (initialState <= -1) || (initialState > 1)) {
+        throw new Error("illegal initial state: " + initialState)
+    }
     let duration: uint32 = spec?.duration ?? DEFAULT_ANIMATION_DURATION
-    if (!isFiniteNumber(duration) || (duration < 0)) throw new Error("duration must not be negative, but is " + spec.duration)
+    if (!isFiniteNumber(duration) || (duration < 0)) {
+        throw new Error("duration must not be negative, but is " + spec.duration)
+    }
     let delay: uint32 = spec?.delay ?? 0
-    if (!isFiniteNumber(delay) || (delay < 0)) throw new Error("delay must not be negative, but is " + spec.delay)
+    if (!isFiniteNumber(delay) || (delay < 0)) {
+        throw new Error("delay must not be negative, but is " + spec.delay)
+    }
     let easing = spec.easing ?? Easing.Linear
     let onEdge: OnEdge = spec?.onEdge ?? OnEdge.Nothing
     let iterations: int32 | undefined = spec?.iterations
     if (iterations !== undefined) {
-        if (!Number.isInteger(iterations) || (iterations < 1)) throw new Error("iterations must be positive integer, but is " + spec.iterations)
+        if (!Number.isInteger(iterations) || (iterations < 1)) {
+            throw new Error("iterations must be positive integer, but is " + spec.iterations)
+        }
         if (onEdge == OnEdge.Reverse) {
             easing = Easing.thereAndBackAgain(easing)
             duration *= 2
@@ -234,7 +270,11 @@ export function transition<Value>(duration: uint32, easing: EasingCurve, compute
  * @param initialState - initial inner state of the animation (-1..1]
  * @returns duration-based value transition
  */
-export function linearTransition<Value>(duration: uint32, compute: AnimationRange<Value>, initialState: int64 = 0): TimeAnimation<Value> {
+export function linearTransition<Value>(
+    duration: uint32,
+    compute: AnimationRange<Value>,
+    initialState: int64 = 0
+): TimeAnimation<Value> {
     return transition<Value>(duration, Easing.Linear, compute, initialState)
 }
 
@@ -267,10 +307,16 @@ class TimeAnimationImpl<Value> implements TimeAnimation<Value> {
 
     getValue(time: int64): Value {
         const startTime = this.startTime
-        if (startTime === undefined) return this.lastValue // paused
-        if (startTime >= time) return this.lastValue // delayed
+        if (startTime === undefined) {
+            return this.lastValue // paused
+        }
+        if (startTime >= time) {
+            return this.lastValue // delayed
+        }
         const state = this.getState(startTime, time)
-        if (this.lastState == state) return this.lastValue // not changed
+        if (this.lastState == state) {
+            return this.lastValue // not changed
+        }
         this.lastState = state
         this.lastValue = this.compute(state)
         return this.lastValue
@@ -325,10 +371,16 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
 
     getValue(time: int64): Value {
         const startTime = this.startTime
-        if (startTime === undefined) return this.lastValue // paused
-        if (startTime >= time) return this.lastValue // delayed
+        if (startTime === undefined) {
+            return this.lastValue // paused
+        }
+        if (startTime >= time) {
+            return this.lastValue // delayed
+        }
         const state = this.getState(startTime, time)
-        if (this.lastState == state) return this.lastValue // not changed
+        if (this.lastState == state) {
+            return this.lastValue // not changed
+        }
         this.lastState = state
         this.lastValue = this.compute(state)
         return this.lastValue
@@ -398,17 +450,25 @@ class FrameAnimationImpl<Value> implements TimeAnimation<Value> {
             this.running = true
         }
         for (let index = 0; index < this.time.length; index++) {
-            if (passedTime < this.time[index]) return index
+            if (passedTime < this.time[index]) {
+                return index
+            }
         }
         return 0
     }
 
     getValue(time: int64): Value {
         const startTime = this.startTime
-        if (startTime === undefined) return this.lastValue // paused
-        if (startTime >= time) return this.lastValue // delayed
+        if (startTime === undefined) {
+            return this.lastValue // paused
+        }
+        if (startTime >= time) {
+            return this.lastValue // delayed
+        }
         const state = this.getState(startTime, time)
-        if (this.lastState == state) return this.lastValue // not changed
+        if (this.lastState == state) {
+            return this.lastValue // not changed
+        }
         this.lastState = state
         this.lastValue = this.compute(state)
         return this.lastValue
@@ -468,8 +528,12 @@ class AnimationImpl<Value> implements TimeAnimation<Value> {
 
     getState(startTime: int64, currentTime: int64): float64 {
         const onPause = this.isPauseRequested ? this.onPausePolicy : OnPause.Nothing
-        if (onPause == OnPause.Reset) return this.onPauseReset() // pause
-        if (this.duration == 0) return this.onEdgeReached() // stop immediately
+        if (onPause == OnPause.Reset) {
+            return this.onPauseReset() // pause
+        }
+        if (this.duration == 0) {
+            return this.onEdgeReached() // stop immediately
+        }
 
         const cycleTime: int64 = onPause == OnPause.Fade || this.onEdgePolicy == OnEdge.Reverse
             ? this.duration * 2
@@ -477,8 +541,12 @@ class AnimationImpl<Value> implements TimeAnimation<Value> {
 
         let passedTime = currentTime - startTime
         if (passedTime > cycleTime) {
-            if (onPause == OnPause.Fade) return this.onPauseReset() // fade stopped
-            if (this.onEdgePolicy == OnEdge.Nothing) return this.onEdgeReached() // stop on the edge
+            if (onPause == OnPause.Fade) {
+                return this.onPauseReset() // fade stopped
+            }
+            if (this.onEdgePolicy == OnEdge.Nothing) {
+                return this.onEdgeReached() // stop on the edge
+            }
             passedTime = passedTime % cycleTime
             // tune start time for long animations
             this.running = true
@@ -490,10 +558,16 @@ class AnimationImpl<Value> implements TimeAnimation<Value> {
 
     getValue(time: int64): Value {
         const startTime = this.startTime
-        if (startTime === undefined) return this.lastValue // paused
-        if (startTime >= time) return this.lastValue // delayed
+        if (startTime === undefined) {
+            return this.lastValue // paused
+        }
+        if (startTime >= time) {
+            return this.lastValue // delayed
+        }
         const state = this.getState(startTime, time)
-        if (this.lastState == state) return this.lastValue // not changed
+        if (this.lastState == state) {
+            return this.lastValue // not changed
+        }
         this.lastState = state
         this.lastValue = this.compute(state)
         return this.lastValue
