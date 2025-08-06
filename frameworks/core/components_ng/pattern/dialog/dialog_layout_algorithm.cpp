@@ -160,6 +160,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void DialogLayoutAlgorithm::AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(expandDisplay_);
     auto pattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(pattern);
     auto dialogProp = DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());

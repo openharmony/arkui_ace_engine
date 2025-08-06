@@ -9060,7 +9060,8 @@ bool OverlayManager::IsNeedAvoidFoldCrease(
         }
     }
     // Check is half fold status
-    auto halfFoldStatus = container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD;
+    auto halfFoldStatus = expandDisplay ? container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD
+                                        : pipeline->IsHalfFoldHoverStatus();
     // Check is waterfall window
     auto isWaterfallWindow = container->IsWaterfallWindow();
     // Check whether the senboard scenario needs to be filtered for crease avoidance
