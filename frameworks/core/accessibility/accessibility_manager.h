@@ -56,6 +56,7 @@ struct RotateTransform {
 };
 
 class ComposedElement;
+class PipelineBase;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
