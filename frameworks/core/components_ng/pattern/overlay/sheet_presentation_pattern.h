@@ -372,10 +372,11 @@ public:
     bool GetWindowButtonRect(NG::RectF& floatButtons);
     bool GetWindowButtonRectForAllAPI(NG::RectF& floatButtons);
 
+    bool IsPcOrPadFreeMultiWindowMode() const;
+
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
-        DeviceType deviceType = SystemProperties::GetDeviceType();
-        if (deviceType != DeviceType::TWO_IN_ONE) {
+        if (!IsPcOrPadFreeMultiWindowMode()) {
             TAG_LOGI(AceLogTag::ACE_SHEET, "Bottom offset invalid");
             return;
         }

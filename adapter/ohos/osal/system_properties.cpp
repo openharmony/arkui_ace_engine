@@ -755,6 +755,7 @@ int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPoint
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
+bool SystemProperties::isPCMode_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -932,6 +933,7 @@ void SystemProperties::InitDeviceInfo(
     }
     InitDeviceTypeBySystemProperty();
     GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
+    isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1054,6 +1056,11 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetResourceDecoupling()
 {
     return resourceDecoupling_;
+}
+
+bool SystemProperties::IsPCMode()
+{
+    return isPCMode_;
 }
 
 bool SystemProperties::ConfigChangePerform()

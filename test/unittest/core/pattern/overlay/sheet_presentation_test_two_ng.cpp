@@ -1840,6 +1840,47 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SheetOffset007
+ * @tc.desc: Test SetBottomOffset when in pc mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, SheetOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set up bind sheet and theme.
+     */
+    SetOnBindSheet();
+    SystemProperties::SetDeviceType(DeviceType::TABLET);
+    SystemProperties::isPCMode_ = true;
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. sheet is center style.
+     * @tc.expected: bottom offsets are zero when style is center.
+     */
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    sheetStyle.bottomOffset = { 10.0f, -10.0f };
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    sheetPattern->SetBottomOffset(sheetStyle);
+    EXPECT_EQ(sheetPattern->bottomOffsetX_, 0.0f);
+    EXPECT_EQ(sheetPattern->bottomOffsetY_, 0.0f);
+
+    /**
+     * @tc.steps: step3. sheet is bottom style.
+     * @tc.expected: bottom offsets are valid when style is Bottom.
+     */
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetPattern->SetBottomOffset(sheetStyle);
+    EXPECT_FLOAT_EQ(sheetPattern->bottomOffsetX_, 10.0f);
+    EXPECT_FLOAT_EQ(sheetPattern->bottomOffsetY_, -10.0f);
+}
+
+/**
  * @tc.name: SheetHoverStatus001
  * @tc.desc: Test InitFoldCreaseRegion function.
  * @tc.type: FUNC
