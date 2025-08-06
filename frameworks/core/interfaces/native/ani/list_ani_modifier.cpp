@@ -14,25 +14,91 @@
  */
 #include "list_ani_modifier.h"
 
-#include <memory>
-#include <vector>
-
-#include "frameworks/bridge/arkts_frontend/ani_list_module.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_model_static.h"
+#include "core/components_ng/pattern/list/list_item_group_model_static.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 
 namespace OHOS::Ace::NG {
-void SetListChildrenMainSize(ani_env* env, ani_long ptr, ani_object obj)
+bool UpdateDefaultSizeAndGetNeedSync(ArkUINodeHandle node, double defaultSize)
 {
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    const auto& nodeTag = frameNode->GetHostTag();
+    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+        NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
+        NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
+    CHECK_NULL_RETURN(listChildrenMainSize, false);
+    listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
+    return listChildrenMainSize->NeedSync();
+}
+
+void SyncChildrenSize(ArkUINodeHandle node, double size)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Framework::AniListModule::SetListChildrenMainSize(env, ptr, obj);
+    const auto& nodeTag = frameNode->GetHostTag();
+    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+        NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
+        NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
+    CHECK_NULL_VOID(listChildrenMainSize);
+    float parseSize = Negative(size) ? -1.0f : Dimension(size, DimensionUnit::VP).ConvertToPx();
+    listChildrenMainSize->SyncChildrenSize(parseSize);
+}
+
+void NotifyChange(ArkUINodeHandle node, ArkUI_Int32 start,
+    ArkUI_Int32 deleteCount, std::vector<float>& newSizeArr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto& nodeTag = frameNode->GetHostTag();
+    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+        NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
+        NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
+    CHECK_NULL_VOID(listChildrenMainSize);
+    for (float& size : newSizeArr) {
+        if (Negative(size)) {
+            size = -1.0f;
+        } else {
+            size = Dimension(size, DimensionUnit::VP).ConvertToPx();
+        }
+    }
+    listChildrenMainSize->ChangeData(start, deleteCount, newSizeArr);
+}
+
+void ResizeChildrenSize(ArkUINodeHandle node, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto& nodeTag = frameNode->GetHostTag();
+    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+        NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
+        NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
+    CHECK_NULL_VOID(listChildrenMainSize);
+    listChildrenMainSize->ResizeChildrenSize(size);
+}
+
+void SyncChildrenSizeOver(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto& nodeTag = frameNode->GetHostTag();
+    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+        NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
+        NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
+    CHECK_NULL_VOID(listChildrenMainSize);
+    listChildrenMainSize->SyncChildrenSizeOver();
 }
 
 const ArkUIAniListModifier* GetArkUIAniListModifier()
 {
     static const ArkUIAniListModifier impl = {
-        .setListChildrenMainSize = OHOS::Ace::NG::SetListChildrenMainSize,
+        .updateDefaultSizeAndGetNeedSync = OHOS::Ace::NG::UpdateDefaultSizeAndGetNeedSync,
+        .syncChildrenSize = OHOS::Ace::NG::SyncChildrenSize,
+        .notifyChange = OHOS::Ace::NG::NotifyChange,
+        .resizeChildrenSize = OHOS::Ace::NG::ResizeChildrenSize,
+        .syncChildrenSizeOver = OHOS::Ace::NG::SyncChildrenSizeOver,
     };
     return &impl;
 }
