@@ -2626,7 +2626,7 @@ HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = [this](
