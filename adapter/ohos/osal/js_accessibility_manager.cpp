@@ -2101,6 +2101,12 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
 void JsAccessibilityManager::UpdateAccessibilityVisible(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
+    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
+        UpdateAccessibilityVisibleToRoot(node);
+        nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
+        return;
+    }
+
     auto parentNode = node->GetParentFrameNode();
     UpdateElementInfoTreeId(nodeInfo);
 
