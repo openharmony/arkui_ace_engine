@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/view_abstract_model_static.h"
 
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
 #include "core/common/vibrator/vibrator_utils.h"

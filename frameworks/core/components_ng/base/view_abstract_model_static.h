@@ -25,6 +25,7 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
