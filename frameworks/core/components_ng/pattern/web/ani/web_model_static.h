@@ -88,7 +88,7 @@ public:
     static void SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption);
     static void SetEditMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
-        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback == nullptr);
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr);
     static void SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle);
     static void SetPreviewSelectionMenu(
         FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
