@@ -1435,4 +1435,20 @@ HWTEST_F(EventRecorderTest, AddApiTest002, TestSize.Level1)
     Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params2);
     EXPECT_EQ(builder.params_->empty(), false);
 }
+
+/**
+ * @tc.name: EventRecorderTest016
+ * @tc.desc: Test builder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, EventRecorderTest016, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder;
+    string value = "";
+    builder.params_->emplace(KEY_TEXT, value);
+    auto pageNode = CreatePageNode("pages/Index");
+    builder.eventType_ = Recorder::EventType::CLICK;
+    builder.SetHost(pageNode);
+    EXPECT_EQ(builder.params_->empty(), false);
+}
 } // namespace OHOS::Ace

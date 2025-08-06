@@ -1470,6 +1470,11 @@ std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
     return nullptr;
 }
 
+std::string NG::PipelineContext::GetCurrentPageNameCallback()
+{
+    return "";
+}
+
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
 {
     vsyncListener_ = std::move(vsync);

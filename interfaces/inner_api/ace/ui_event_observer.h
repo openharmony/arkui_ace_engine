@@ -57,6 +57,7 @@ struct ACE_FORCE_EXPORT TreeParams {
     InspectorInfoType infoType { InspectorInfoType::CONTENT };
     int32_t webId = 0;
     bool enableCacheNode = false;
+    bool webAccessibility = false;
 };
 
 class ACE_FORCE_EXPORT UIEventObserver {
