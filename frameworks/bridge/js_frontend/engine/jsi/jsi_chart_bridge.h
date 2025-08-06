@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiChartBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(JsiChartBridge, AceType)
+    DECLARE_ACE_TYPE(JsiChartBridge, AceType);
 
 public:
     void GetAttrOptionsObject(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& valObject);

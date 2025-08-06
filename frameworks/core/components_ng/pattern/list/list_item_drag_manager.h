@@ -31,7 +31,7 @@ enum class ListItemDragState {
     DRAGGING,
 };
 class ListItemDragManager : public AceType {
-    DECLARE_ACE_TYPE(ListItemDragManager, AceType)
+    DECLARE_ACE_TYPE(ListItemDragManager, AceType);
 
 public:
     struct ScaleResult {

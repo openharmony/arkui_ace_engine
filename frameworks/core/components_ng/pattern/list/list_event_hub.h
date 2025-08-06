@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t INVALID_IDX = -1;
 class ListEventHub : public ScrollableEventHub {
-    DECLARE_ACE_TYPE(ListEventHub, ScrollableEventHub)
+    DECLARE_ACE_TYPE(ListEventHub, ScrollableEventHub);
 
 public:
     ListEventHub() = default;

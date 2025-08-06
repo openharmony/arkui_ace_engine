@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 
 class PieceElement : public RenderElement, public FocusNode {
-    DECLARE_ACE_TYPE(PieceElement, RenderElement, FocusNode)
+    DECLARE_ACE_TYPE(PieceElement, RenderElement, FocusNode);
 
 public:
     void PerformBuild() override;

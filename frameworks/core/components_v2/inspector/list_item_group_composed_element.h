@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ListItemGroupComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ListItemGroupComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ListItemGroupComposedElement, InspectorComposedElement);
 
 public:
     explicit ListItemGroupComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
