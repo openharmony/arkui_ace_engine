@@ -2305,6 +2305,34 @@ HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Lev
 }
 
 /**
+ * @tc.name: ShouldSkipAffineTransformation002
+ * @tc.desc: Test ShouldSkipAffineTransformation Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, -1.0f, 1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, -1.0f, 1.0f));
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, 1.0f, -1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, -1.0f));
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, 1.0f, 1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, 1.0f));
+    rosenRenderContext->rsNode_ = nullptr;
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
  * @tc.name: RSUIContext001
  * @tc.desc: Test RSUIContext001 Func.
  * @tc.type: FUNC

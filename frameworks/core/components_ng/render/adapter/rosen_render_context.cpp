@@ -2269,7 +2269,8 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
 
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    if (ShouldSkipAffineTransformation(rsNode_)) {
+    // when the width and height of rect is -1, the func SkewRect will change to 1
+    if (ShouldSkipAffineTransformation(rsNode_) && rect.Width() != -1 && rect.Height() != -1) {
         gRect = rect;
         return rect;
     }
@@ -2565,7 +2566,8 @@ RectF RosenRenderContext::GetPaintRectWithTransformWithoutDegree()
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    if (ShouldSkipAffineTransformation(rsNode_)) {
+    // when the width and height of rect is -1, the func SkewRect will change to 1
+    if (ShouldSkipAffineTransformation(rsNode_) && rect.Width() != -1 && rect.Height() != -1) {
         return rect;
     }
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
