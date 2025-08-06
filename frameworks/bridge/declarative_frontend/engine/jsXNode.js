@@ -382,12 +382,14 @@ class JSBuilderNode extends BaseNode {
         stateMgmtProfiler.begin('BuilderNode.setActive');
         if (!isReuse) {
             this.activeCount_ += active ? 1 : -1;
-            if (this.isBuilderNodeActive() && this.isFreeze && this.updateParams_ !== null) {
+            if (this.isBuilderNodeActive()) {
                 this.isFreeze = false;
+            } else {
+                this.isFreeze = this.allowFreezeWhenInactive;
+            }
+            if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
                 this.update(this.updateParams_);
                 this.updateParams_ = null;
-            } else if (!this.isBuilderNodeActive()) {
-                this.isFreeze = this.allowFreezeWhenInactive;
             }
         }
         if (this.inheritFreeze) {
