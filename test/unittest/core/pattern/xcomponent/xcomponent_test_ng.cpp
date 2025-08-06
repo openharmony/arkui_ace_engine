@@ -765,6 +765,35 @@ HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnDetachFromFrameNodeMultiThread006
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    pattern->isNativeXComponent_ = false;
+    EXPECT_TRUE(pattern->accessibilityChildTreeCallback_);
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: Child tree callback is released
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->accessibilityChildTreeCallback_);
+}
+
+/**
  * @tc.name: XComponentEventTest002
  * @tc.desc: Test XComponent onLoad and onDestroy event.
  * @tc.type: FUNC
