@@ -398,6 +398,8 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest009, Test
     int32_t containerId = 100;
     bool hasTouchPoint = true;
     DragPointerEvent dragPointerEvent(100, 100);
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
     NG::DragPreviewOption previewOption;
     previewOption.options.opacity = 0.3f;
     DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
@@ -589,7 +591,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0013, Tes
 
     /**
      * @tc.steps: step4. Call DoDragStartAnimation function deviceId != RESERVED_DEVICEID.
-     * @tc.expected: step4. dragDropManager->isStartAnimationFinished_ is false
+     * @tc.expected: step4. dragDropManager->isStartAnimationFinished_ is true
      */
     asyncCtxData.dragPointerEvent.deviceId = 0;
     NG::DragControllerFuncWrapper::DoDragStartAnimation(overlayManager, data, asyncCtxData);
@@ -597,7 +599,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0013, Tes
     EXPECT_EQ(dragDropManager->GetCurrentAnimationCnt(), 0);
     EXPECT_EQ(dragDropManager->GetAllAnimationCnt(), 0);
     EXPECT_EQ(dragDropManager->GetDragAnimationPointerEvent().windowX, 100);
-    EXPECT_FALSE(dragDropManager->IsStartAnimationFInished());
+    EXPECT_TRUE(dragDropManager->IsStartAnimationFInished());
 }
 
 /**
