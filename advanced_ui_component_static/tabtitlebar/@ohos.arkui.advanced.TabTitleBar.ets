@@ -24,7 +24,7 @@ import {
   ConstraintSizeOptions, focusControl, BorderOptions ,HitTestMode, SymbolEffect, ImageCompleteEvent, Resource,
   Image, Callback ,ImageFit, VerticalAlign, TextOverflow, TextAlign, ShadowStyle, BlurStyle,Margin, Padding,
   CommonMethod, ButtonOptions, ImageError, ImageOnCompleteCallback, ImageErrorCallback, SymbolGlyphModifier,
-
+  ClassCastError, ClickEvent
 } from "@ohos.arkui.component";
 import { State, Observed, PropRef, StorageLink, StorageProp, Watch } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from "@ohos.arkui.UIContext";
@@ -98,13 +98,16 @@ export struct TabTitleBar {
   @State tabWidth: number = 0;
   @State currentIndex: number = 0;
   @State fontSize: number = 1;
+
   static readonly totalHeight: number = 56;
-  static readonly correctionOffset: number = 1;
+  static readonly correctionOffset: number = -40.0;
   static readonly gradientMaskWidth: number = 24;
   private static instanceCount: number = 0;
+
   private menuSectionWidth: number = 0;
   private tabOffsets: Array<number> = new Array<number>();
   private imageWidths: Array<number> = new Array<number>();
+
   private scroller: Scroller = new Scroller();
   private swiperController: SwiperController = new SwiperController();
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
@@ -153,14 +156,13 @@ export struct TabTitleBar {
 
     this.tabItems.forEach((tabItem: TabTitleBarTabItem, index: number) => {
       if (tabItem.icon !== undefined || tabItem.symbolStyle !== undefined) {
-        if (Math.abs(this.imageWidths[Double.toInt(index)]) > TabContentItem.imageHotZoneWidth) {
-          tabOffset += this.imageWidths[Double.toInt(index)];
+        if (Math.abs(this.imageWidths[Math.floor(index)]) > TabContentItem.imageHotZoneWidth) {
+          tabOffset += this.imageWidths[Math.floor(index)];
         } else {
           tabOffset += TabContentItem.imageHotZoneWidth;
         }
       } else {
         tabOffset += TabContentItem.paddingLeft;
-        let uiContent: UIContext = this.getUIContext();
         let uiContextMeasure: MeasureUtils = this.getUIContext().getMeasureUtils();
         tabOffset += px2vp(uiContextMeasure.measureText({
           textContent: tabItem.title.toString(),
@@ -183,12 +185,10 @@ export struct TabTitleBar {
           Stack({ alignContent: Alignment.Start }) {
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
-
                 ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: number) => {
                   ListItem() {
-
                     TabContentItem({
-                      item: this.tabItems[index],
+                      item: tabItem,
                       index: index,
                       maxIndex: this.tabItems.length - 1,
                       currentIndex: this.currentIndex,
@@ -210,11 +210,9 @@ export struct TabTitleBar {
               .listDirection(Axis.Horizontal)
               .scrollBar(BarState.Off)
             }
-
             this.GradientMask(this.leftContext2D, 0, TabTitleBar.totalHeight / 2,
               TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2);
           }
-
           this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
             TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2);
         }
@@ -272,8 +270,7 @@ struct CollapsibleMenuSection {
   height: number = 0;
   item: TabTitleBarMenuItem = {
     value: PUBLIC_MORE,
-    // symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE) as SymbolGlyphModifier,
-    symbolStyle: undefined,
+    symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE) as SymbolGlyphModifier,
     label: $r('sys.string.ohos_toolbar_more'),
     action: (): void => {
       throw new Error('Function not implemented.');
@@ -283,15 +280,18 @@ struct CollapsibleMenuSection {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
+
   static readonly maxCountOfVisibleItems: number = 1;
   private static readonly focusPadding: number = 4;
   private static readonly marginsNum: number = 2;
   private firstFocusableIndex: number = -1;
+
   @State isPopupShown: boolean = false;
   @State isMoreIconOnFocus: boolean = false;
   @State isMoreIconOnHover: boolean = false;
   @State isMoreIconOnClick: boolean = false;
   @PropRef @Watch('onFontSizeUpdated') fontSize: number = 1;
+
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: TabTitleBarDialog({
       cancel: () => {
@@ -306,6 +306,7 @@ struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   });
+
   @Observed
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
@@ -325,6 +326,26 @@ struct CollapsibleMenuSection {
     }
   }
 
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+        let code: number | undefined = (exception as ClassCastError)?.code;
+        let message: string | undefined = (exception as ClassCastError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+
+    }
+    this.menuItems.forEach((item, index) => {
+      if (item.isEnabled && this.firstFocusableIndex === -1 &&
+        index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + index + 1
+      }
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
   decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
     if (uiContent.getHostContext()) {
@@ -334,26 +355,6 @@ struct CollapsibleMenuSection {
       return 1;
     }
     return Math.min(Number(this.systemFontScale), Number(this.maxFontScale));
-  }
-
-  aboutToAppear() {
-    try {
-      let uiContent: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-      this.maxFontScale = uiContent.getMaxFontScale();
-    } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
-    }
-    this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex === -1 &&
-        index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + index + 1
-      }
-    })
-    this.fontSize = 1
-    this.decideFontScale();
   }
 
   onFontSizeUpdated(flag: String): void {
@@ -372,6 +373,7 @@ struct CollapsibleMenuSection {
             (item: TabTitleBarMenuItem, index: number) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
             })
+
           Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
             SymbolGlyph(PUBLIC_MORE)
               .fontSize(TabContentItem.symbolSize)
@@ -410,9 +412,9 @@ struct CollapsibleMenuSection {
           .onHover((isOn: boolean, event: HoverEvent) => {
             this.isMoreIconOnHover = isOn;
           })
-          .onKeyEvent((event: KeyEvent) => {
+          .onKeyEvent((event: KeyEvent): boolean =>  {
             if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-              return;
+              return false;
             }
             if (event.type === KeyType.Down) {
               this.isMoreIconOnClick = true;
@@ -420,7 +422,8 @@ struct CollapsibleMenuSection {
             if (event.type === KeyType.Up) {
               this.isMoreIconOnClick = false;
             }
-          })
+            return true;
+          } as Callback<KeyEvent, boolean>)
           .onTouch((event: TouchEvent) => {
             if (event.type === TouchType.Down) {
               this.isMoreIconOnClick = true;
@@ -432,9 +435,9 @@ struct CollapsibleMenuSection {
               }
             }
           })
-          .onClick(() => {
+          .onClick((event: ClickEvent) => {
             this.isPopupShown = true;
-          } as () => void)
+          })
           .gestureModifier(this.buttonGestureModifier)
           .bindPopup(this.isPopupShown as boolean, {
             builder: this.popupBuilder,
@@ -488,11 +491,14 @@ struct TabContentItem {
   maxIndex: number = 0;
   onCustomClick?: (index: number) => void;
   onImageComplete?: (width: number) => void;
+
   @PropRef currentIndex: number;
+
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
   @State tabWidth: number = 0;
+
   @State imageWidth: number = 24;
   @State imageHeight: number = 24;
   static readonly imageSize: number = 24;
@@ -535,12 +541,13 @@ struct TabContentItem {
     return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
   }
 
-  completeCallback: ImageOnCompleteCallback | undefined = (info?: ImageCompleteEvent) => {
+  private completeCallback: ImageOnCompleteCallback | undefined = (info?: ImageCompleteEvent) => {
     let onImageCompleteValue: number =
       px2vp(info?.componentWidth as number) + TabContentItem.paddingLeft + TabContentItem.paddingRight;
     this.onImageComplete?.(onImageCompleteValue);
   }
-  onErrorCallback: ImageErrorCallback | undefined = (event: ImageError) => {
+
+  private onErrorCallback: ImageErrorCallback | undefined = (event: ImageError) => {
     if (!this.onImageComplete) {
       return;
     }
@@ -573,10 +580,15 @@ struct TabContentItem {
         Column() {
           if (this.item.icon === undefined && this.item.symbolStyle === undefined) {
             Text(this.item.title)
-              .fontSize(this.index === this.currentIndex ? 24 : 15)
-              .fontColor(this.index === this.currentIndex ? Color.Red : Color.Blue)
+              .fontSize(this.index === this.currentIndex
+                ? $r('sys.float.ohos_id_text_size_headline7')
+                : $r('sys.float.ohos_id_text_size_headline9'))
+              .fontColor(this.index === this.currentIndex
+                ? $r('sys.color.ohos_id_color_titlebar_text')
+                : $r('sys.color.ohos_id_color_titlebar_text_off'))
               .fontWeight(FontWeight.Medium)
-              .focusable(true)// .animation({ duration: 300 })
+              .focusable(true)
+              .animation({ duration: 300 })
               .padding({
                 top: this.index === this.currentIndex ? 6 : 10,
                 left: TabContentItem.paddingLeft,
@@ -592,9 +604,9 @@ struct TabContentItem {
               .onHover((isOn: boolean, event: HoverEvent) => {
                 this.isOnHover = isOn;
               })
-              .onKeyEvent((event: KeyEvent) => {
+              .onKeyEvent((event: KeyEvent): boolean => {
                 if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                  return;
+                  return false;
                 }
                 if (event.type === KeyType.Down) {
                   this.isOnClick = true;
@@ -602,7 +614,8 @@ struct TabContentItem {
                 if (event.type === KeyType.Up) {
                   this.isOnClick = false;
                 }
-              })
+                return true;
+              } as Callback<KeyEvent, boolean>)
               .onTouch((event: TouchEvent) => {
                 if (event.type === TouchType.Down) {
                   this.isOnClick = true;
@@ -669,8 +682,8 @@ struct TabContentItem {
                 }
               }
             }
-            .width(this.getImageLayoutWidth() * this.getImageScaleFactor() + TabContentItem.paddingLeft +
-            TabContentItem.paddingRight)
+            .width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
+            TabContentItem.paddingLeft + TabContentItem.paddingRight)
             .constraintSize({
               minWidth: TabContentItem.imageHotZoneWidth,
               minHeight: TabContentItem.imageHotZoneWidth
@@ -686,9 +699,9 @@ struct TabContentItem {
             .onHover((isOn: boolean, event: HoverEvent) => {
               this.isOnHover = isOn;
             })
-            .onKeyEvent((event: KeyEvent) => {
+            .onKeyEvent((event: KeyEvent): boolean => {
               if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                return;
+                return false;
               }
               if (event.type === KeyType.Down) {
                 this.isOnClick = true;
@@ -696,7 +709,8 @@ struct TabContentItem {
               if (event.type === KeyType.Up) {
                 this.isOnClick = false;
               }
-            })
+              return true;
+            } as Callback<KeyEvent, boolean>)
             .onTouch((event: TouchEvent) => {
               if (event.type === TouchType.Down) {
                 this.isOnClick = true;
@@ -710,7 +724,6 @@ struct TabContentItem {
                 this.onCustomClick?.(this.index as number);
               }
             } as () => void)
-
             // .accessibilitySelected(this.index === this.currentIndex)
           }
         }
@@ -754,18 +767,17 @@ struct TabContentItem {
 @Component
 struct ImageMenuItem {
   item: TabTitleBarMenuItem = {
-    value: '',
-    action: (): void => {
-      throw new Error('Function not implemented.');
-    }
+    value: ''
   } as TabTitleBarMenuItem;
   index: number = 0;
+
   static readonly imageSize: number = 24;
   static readonly imageHotZoneWidth: number = 48;
   static readonly buttonBorderRadius: number = 8;
   static readonly focusBorderWidth: number = 2;
   static readonly disabledImageOpacity: number = 0.4;
   static readonly focusablePrefix: string = "Id-TabTitleBar-ImageMenuItem-";
+
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
@@ -852,7 +864,6 @@ struct ImageMenuItem {
     .borderRadius(ImageMenuItem.buttonBorderRadius)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-
     .enabled(this.item.isEnabled ? this.item.isEnabled : false)
     .stateStyles({
       focused: (instance: CommonMethod) => {
@@ -884,12 +895,12 @@ struct ImageMenuItem {
         this.isOnHover = isOn;
       }
     })
-    .onKeyEvent((event: KeyEvent) => {
+    .onKeyEvent((event: KeyEvent): boolean => {
       if (!this.item.isEnabled) {
-        return;
+        return false;
       }
       if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return;
+        return false;
       }
       if (event.type === KeyType.Down) {
         this.isOnClick = true;
@@ -897,7 +908,8 @@ struct ImageMenuItem {
       if (event.type === KeyType.Up) {
         this.isOnClick = false;
       }
-    })
+      return true;
+    } as Callback<KeyEvent, boolean>)
     .onTouch((event: TouchEvent) => {
       if (!this.item.isEnabled) {
         return;
@@ -1037,14 +1049,20 @@ export struct TabTitleBarDialog {
   }
 
   aboutToAppear(): void {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (exception) {
+      let code: number | undefined = (exception as ClassCastError)?.code;
+      let message: string | undefined = (exception as ClassCastError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }
