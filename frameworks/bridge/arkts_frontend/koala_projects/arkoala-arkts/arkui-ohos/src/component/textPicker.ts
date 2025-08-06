@@ -373,7 +373,9 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeDividerOptions({ strokeWidth: 0.0 } as DividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeDividerOptions(value_value)
         }
@@ -385,7 +387,9 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeDividerOptions({ strokeWidth: 0.0 } as DividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeDividerOptions(value_value)
         }
