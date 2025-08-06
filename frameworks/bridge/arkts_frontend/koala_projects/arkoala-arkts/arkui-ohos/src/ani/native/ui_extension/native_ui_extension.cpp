@@ -20,7 +20,6 @@
 // #include "base/log/log_wrapper.h"
 // #ifdef WINDOW_SCENE_SUPPORTED
 // #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.h"
 // #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 // #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 // #endif //WINDOW_SCENE_SUPPORTED
