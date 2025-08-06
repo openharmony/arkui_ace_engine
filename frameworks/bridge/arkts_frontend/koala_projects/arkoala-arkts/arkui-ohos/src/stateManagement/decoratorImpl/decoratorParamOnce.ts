@@ -18,6 +18,7 @@ import { FactoryInternal } from '../base/iFactoryInternal';
 import { IParamOnceDecoratedVariable } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
+import { uiUtils } from '../base/uiUtilsImpl';
 export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamOnceDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T) {
@@ -35,7 +36,7 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase imple
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
+        if (this.backing_.set(uiUtils.makeObserved(newValue, true) as T)) {
         }
     }
 }

@@ -24,6 +24,7 @@ import { DecoratedV1VariableBase } from './decoratorBase';
 import { WatchFunc } from './decoratorWatch';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
+import { uiUtils } from '../base/uiUtilsImpl';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
     sourceValue: IBackingValue<T>;
@@ -52,7 +53,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (oldValue === newValue) {
             return;
         }
-        const value = UIUtils.makeObserved(newValue);
+        const value = uiUtils.makeObserved(newValue);
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(value);
         if (this.localValue.set(value)) {
@@ -64,7 +65,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const sourceValue = this.sourceValue.get(false);
         if (sourceValue !== newValue || this.isForceRender) {
             this.isForceRender = false;
-            const value = UIUtils.makeObserved(newValue);
+            const value = uiUtils.makeObserved(newValue);
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(value);
             this.sourceValue.setSilently(value);

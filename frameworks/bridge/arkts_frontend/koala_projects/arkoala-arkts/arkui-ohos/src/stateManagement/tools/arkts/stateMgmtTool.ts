@@ -32,6 +32,7 @@ import { StateManager, GlobalStateManager } from '@koalaui/runtime';
 import { UIContextUtil } from '../../../handwritten/UIContextUtil';
 import { UIContextImpl } from '../../../handwritten/UIContextImpl';
 import { StateMgmtConsole } from '../stateMgmtDFX';
+import { int32 } from '@koalaui/common';
 export class StateMgmtTool {
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
@@ -81,8 +82,8 @@ export class StateMgmtTool {
             ? (proxy.Proxy.tryGetHandler(value) as NullableObject) // a very slow call so need to judge proxy first
             : undefined;
     }
-    static createProxy<T extends Object>(value: T): T {
-        return proxy.Proxy.create(value, new InterfaceProxyHandler<T>()) as T;
+    static createProxy<T extends Object>(value: T, allowDeep: boolean = false): T {
+        return proxy.Proxy.create(value, new InterfaceProxyHandler<T>(allowDeep)) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);
