@@ -534,6 +534,7 @@ protected:
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
+    void ResetScrollToIndexParams();
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
