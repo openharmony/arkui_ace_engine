@@ -293,6 +293,12 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         return ret;
     }
 
+    public push(...val: T[]): number {
+        return this.pushArray(...val);
+    }
+
+    overload push { push, pushOne, pushArray }
+
     /**
      * Adds the specified elements to the end of an array and returns the new length of the array.
      *
