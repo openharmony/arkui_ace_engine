@@ -25,7 +25,8 @@ public:
     static constexpr uint8_t RADIUS_POINTS_SIZE = 4;
     static std::unique_ptr<RSPoint[]> ToRSRadius(const BorderRadiusArray& radiusXY);
     static void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
-    static void AddFilter(RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config);
+    static void AddFilter(
+        RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config, bool isHdr = false);
 };
 } // namespace OHOS::Ace::NG
 
