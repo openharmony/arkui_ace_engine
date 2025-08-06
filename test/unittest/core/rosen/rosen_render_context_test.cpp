@@ -2347,4 +2347,39 @@ HWTEST_F(RosenRenderContextTest, RSUIContext001, TestSize.Level1)
     auto rsUIContext = snapshot.GetRSUIContext(pipeline);
     EXPECT_EQ(rsUIContext, nullptr);
 }
+
+/**
+ * @tc.name: OnZindexUpdate001
+ * @tc.desc: Test OnZindexUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnZindexUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Set zIndex.
+     * @tc.expected: step1. zIndex set success.
+     */
+    rosenRenderContext->OnZIndexUpdate(2);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto positionZ = stagingProperties.GetPositionZ();
+    EXPECT_EQ(positionZ, 2);
+
+    /**
+     * @tc.steps: step2. Set Layouting and zIndex.
+     * @tc.expected: step2. zIndex set success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetIsLayouting(true);
+    rosenRenderContext->OnZIndexUpdate(3);
+    pipeline->taskScheduler_->FlushTask();
+    positionZ = stagingProperties.GetPositionZ();
+    EXPECT_EQ(positionZ, 3);
+}
 } // namespace OHOS::Ace::NG

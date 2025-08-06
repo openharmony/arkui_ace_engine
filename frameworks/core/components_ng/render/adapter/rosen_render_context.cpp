@@ -4003,7 +4003,18 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
+    auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
+        auto parent = weak.Upgrade();
+        CHECK_NULL_VOID(parent);
+        parent->RebuildRenderContextTree();
+    };
+    auto pipeline = parent->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->IsLayouting()) {
+        pipeline->AddAfterLayoutTask(std::move(task));
+        return;
+    }
+    task();
 }
 
 void RosenRenderContext::ResetBlendBgColor()
