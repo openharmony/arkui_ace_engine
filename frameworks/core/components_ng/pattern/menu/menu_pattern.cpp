@@ -187,29 +187,6 @@ void MenuPattern::OnAttachToFrameNode()
     InitTheme(host);
     auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-    CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
-    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
-                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
-                                              const OffsetF& /* origin */) {
-        auto menuNode = menuNodeWk.Upgrade();
-        CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        auto menuWarpper = menuPattern->GetMenuWrapper();
-        CHECK_NULL_VOID(menuWarpper);
-        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(warpperPattern);
-        auto isMenuHide = warpperPattern->IsHide();
-        TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
-        if (!isMenuHide) {
-            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    };
-    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
     auto foldStatusChangeCallback = [weak = WeakClaim(this)](FoldStatus foldStatus) {
         TAG_LOGI(AceLogTag::ACE_MENU, "foldStatus is changed: %{public}d", foldStatus);
@@ -260,12 +237,6 @@ int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
 void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-    CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
-
     if (foldStatusChangedCallbackId_.has_value()) {
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -2805,8 +2776,49 @@ void MenuPattern::UpdateMenuPathParams(std::optional<MenuPathParams> pathParams)
     pattern->RequestPathRender();
 }
 
+void MenuPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                              const OffsetF& /* origin */) {
+        auto menuNode = menuNodeWk.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        auto isMenuHide = warpperPattern->IsHide();
+        TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
+        if (!isMenuHide) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+}
+
 void MenuPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (halfFoldHoverCallbackId_.has_value()) {
+        context->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_.value());
+    }
     auto wrapperNode = GetMenuWrapper();
     CHECK_NULL_VOID(wrapperNode);
     auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();

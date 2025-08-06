@@ -99,6 +99,7 @@ public:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
+    void CreateWrapperAndTargetNode(RefPtr<FrameNode>& menuWrapperNode, RefPtr<FrameNode>& targetNode);
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -201,6 +202,20 @@ RefPtr<FrameNode> MenuPatternTestNg::GetPreviewMenuWrapper(
     auto menuWrapperNode =
         MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
     return menuWrapperNode;
+}
+
+void MenuPatternTestNg::CreateWrapperAndTargetNode(RefPtr<FrameNode>& menuWrapperNode, RefPtr<FrameNode>& targetNode)
+{
+    targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuWrapperNode = MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
 }
 
 /**
@@ -1896,5 +1911,48 @@ HWTEST_F(MenuPatternTestNg, UpdateSelectOptionIconByIndex, TestSize.Level1)
     parentPattern->UpdateSelectOptionIconByIndex(0, icon);
     ret = childPattern->GetIcon();
     EXPECT_EQ(icon, ret);
+}
+
+/**
+ * @tc.name: UpdateSelectOptionIconByIndex
+ * @tc.desc: Test UpdateSelectOptionIconByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuAreaChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create parent and child frame nodes.
+     * @tc.expected: step1. wrapper and menu nodes are not null.
+     */
+    RefPtr<FrameNode> menuWrapperNode;
+    RefPtr<FrameNode> targetNode;
+    CreateWrapperAndTargetNode(menuWrapperNode, targetNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_NE(targetNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get the target node call menu OnAttachToMainTree.
+     * @tc.expected: step2. halfFoldHoverCallbackId_ will init.
+     */
+    pattern->OnDetachFromMainTree();
+    pattern->OnAttachToMainTree();
+    EXPECT_NE(pattern->halfFoldHoverCallbackId_, std::nullopt);
+    /**
+     * @tc.steps: step3. set menu status and call FireInnerOnAreaChanged.
+     * @tc.expected: step3. the hasInnerAreaChangeUntriggered_ in eventHub can clear.
+     */
+    auto wrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireInnerOnAreaChanged(RectF(), OffsetF(), RectF(), OffsetF());
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    eventHub->FireInnerOnAreaChanged(RectF(), OffsetF(), RectF(), OffsetF());
+    EXPECT_TRUE(eventHub->hasInnerAreaChangeUntriggered_.empty());
+    pattern->OnDetachFromMainTree();
 }
 } // namespace OHOS::Ace::NG
