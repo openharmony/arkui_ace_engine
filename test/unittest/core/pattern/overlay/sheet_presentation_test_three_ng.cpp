@@ -2367,7 +2367,7 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundColor001, TestSize.L
 
     /**
      * @tc.steps: step4. test "UpdateSheetBackgroundColor",
-     * @tc.expected: GetBackgroundColorValue = Color::BLUE.
+     * @tc.expected: HasBackgroundColor = false.
      */
     sheetPattern->UpdateSheetBackgroundColor();
     auto renderContext = sheetNode->GetRenderContext();

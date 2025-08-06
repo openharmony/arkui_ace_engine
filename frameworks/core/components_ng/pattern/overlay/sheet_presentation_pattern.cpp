@@ -1481,6 +1481,7 @@ void SheetPresentationPattern::UpdateSheetCloseIcon()
         CHECK_NULL_VOID(imagePaintProperty);
         imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
     }
+    iconNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetPresentationPattern::UpdateSheetBackgroundColor()
