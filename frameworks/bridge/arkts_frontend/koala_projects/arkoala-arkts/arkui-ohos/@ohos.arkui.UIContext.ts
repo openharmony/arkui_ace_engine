@@ -397,7 +397,7 @@ export class UIContext {
         return node;
     }
     getHostContext(): Context | undefined {
-        return ArkUIAniModule._Common_GetHostContext();
+        return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
     
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {

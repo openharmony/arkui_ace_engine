@@ -19,7 +19,7 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
-ani_object GetHostContext([[maybe_unused]] ani_env* env);
+ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key);
 void SyncInstanceId(ani_env* env, ani_object obj, ani_int id);
 void RestoreInstanceId(ani_env* env);
 void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj);
