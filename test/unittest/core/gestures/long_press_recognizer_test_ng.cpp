@@ -816,6 +816,50 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureCreateRecognizerTest002, Tes
 }
 
 /**
+ * @tc.name: LongPressGestureCreateRecognizerTest003
+ * @tc.desc: Test LongPressGesture CreateRecognizer function
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressGestureCreateRecognizerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressGesture.
+     */
+    LongPressGestureModelNG longPressGestureModelNG;
+    longPressGestureModelNG.Create(FINGER_NUMBER, false, LONG_PRESS_DURATION);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto longPressGestureNG = AceType::DynamicCast<NG::LongPressGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(longPressGestureNG->duration_, LONG_PRESS_DURATION);
+
+    LongPressGesture longPressGesture = LongPressGesture(FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false);
+    EXPECT_EQ(longPressGesture.repeat_, false);
+    EXPECT_EQ(longPressGesture.duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressGesture.isForDrag_, false);
+    EXPECT_EQ(longPressGesture.isDisableMouseLeft_, false);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionCancelId not existed
+     */
+    longPressGesture.fingers_ = FINGER_NUMBER_OVER_MAX;
+    longPressGesture.duration_ = 0;
+    auto onActionCancel = [](GestureEvent& info) { return true; };
+    longPressGesture.SetOnActionCancelId(onActionCancel);
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step3. call CreateRecognizer function and compare result
+     * @tc.steps: case2: onActionCancelId existed
+     */
+    longPressGesture.fingers_ = SINGLE_FINGER_NUMBER;
+    longPressGesture.duration_ = 200;
+    longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+}
+
+/**
  * @tc.name: LongPressRecognizerHandleTouchUpEventTest009
  * @tc.desc: Test LongPressRecognizer function: HandleTouchUpEvent
  * @tc.type: FUNC
