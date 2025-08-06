@@ -926,6 +926,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
         properties.borderRadius = dialogRadius;
     }
+
+    properties.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
     JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
     JSViewAbstract::SetDialogEffectOption(paramObj, properties);

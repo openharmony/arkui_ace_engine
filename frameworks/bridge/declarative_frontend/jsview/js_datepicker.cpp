@@ -273,6 +273,7 @@ void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObje
     }
 
     auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    pickerDialog.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     if (hoverModeAreaValue->IsNumber()) {
         auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
