@@ -435,6 +435,13 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
 
 void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    auto isDragging = GetIsHandleDragging();
+    if (isDragging) {
+        auto scrollableParent = FindScrollableParent();
+        if (scrollableParent) {
+            TriggerScrollableParentToScroll(scrollableParent, Offset(), true)
+        }
+    }
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);

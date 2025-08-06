@@ -254,34 +254,40 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
         return;
     }
     std::string ownerInfo = GetOwnerDebugInfo();
-    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback)), ownerInfo](
-                                 const GestureEvent& event, bool isFirst) {
+    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback)), ownerInfo,
+                                 weakManager = WeakClaim(this)](const GestureEvent& event, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
-        TAG_LOGI(
-            AceLogTag::ACE_SELECT_OVERLAY, "Start move %{public}d handle - %{public}s", isFirst, ownerInfo.c_str());
-        overlayCallback->OnHandleMoveStart(event, isFirst);
+        auto manager = weakManager.Upgrade();
+        if (manager && manager->IsOpen()) {
+            TAG_LOGI(
+                AceLogTag::ACE_SELECT_OVERLAY, "Start move %{public}d handle - %{public}s", isFirst, ownerInfo.c_str());
+            overlayCallback->OnHandleMoveStart(event, isFirst);
+        }
     };
     info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this)](
                             const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
         auto handle = rect;
-        if (weakManager.Upgrade()) {
-            weakManager.Upgrade()->RevertRectRelativeToRoot(handle);
+        auto manager = weakManager.Upgrade();
+        if (manager && manager->IsOpen()) {
+            manager->RevertRectRelativeToRoot(handle);
+            overlayCallback->OnHandleMove(handle, isFirst);
         }
-        overlayCallback->OnHandleMove(handle, isFirst);
     };
     info.onHandleMoveDone = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this),
                                 ownerInfo](const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
         auto handle = rect;
-        if (weakManager.Upgrade()) {
-            weakManager.Upgrade()->RevertRectRelativeToRoot(handle);
+        auto manager = weakManager.Upgrade();
+        if (manager && manager->IsOpen()) {
+            manager->RevertRectRelativeToRoot(handle);
+            TAG_LOGI(
+                AceLogTag::ACE_SELECT_OVERLAY, "Stop move %{public}d handle %{public}s", isFirst, ownerInfo.c_str());
+            overlayCallback->OnHandleMoveDone(rect, isFirst);
         }
-        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Stop move %{public}d handle %{public}s", isFirst, ownerInfo.c_str());
-        overlayCallback->OnHandleMoveDone(rect, isFirst);
     };
     info.onHandleReverse = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isReverse) {
         auto overlayCallback = weakCallback.Upgrade();
