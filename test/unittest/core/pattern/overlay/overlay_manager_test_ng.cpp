@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -4534,7 +4535,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     style.sheetSubtitle = MESSAGE;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. call Measure function.
      * @tc.expected: sheetHeight_ equal 320.
