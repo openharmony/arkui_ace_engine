@@ -585,9 +585,10 @@ void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
 
 ArkUI_CharPtr GetNodeTypeInRenderNode(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
+    auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, "");
-    return currentNode->GetTag().c_str();
+    static std::string nodeType = currentNode->GetTag();
+    return nodeType.c_str();
 }
 
 namespace NodeModifier {
