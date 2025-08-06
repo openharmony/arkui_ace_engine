@@ -173,6 +173,18 @@ export class ColorMetrics implements MaterializedBase {
     private blue_: number | undefined = undefined;
     private alpha_: number | undefined = undefined;
     private resourceId_: number = -1;
+    static readonly WHITE: int32 = 0xffffffff;
+    static readonly BLACK: int32 = 0xff000000;
+    static readonly BLUE: int32 = 0xff0000ff;
+    static readonly BROWN: int32 = 0xffa52a2a;
+    static readonly GRAY: int32 = 0xff808080;
+    static readonly GREEN: int32 = 0xff008000;
+    static readonly GREY: int32 = 0xff808080;
+    static readonly ORANGE: int32 = 0xffffa500;
+    static readonly PINK: int32 = 0xffffc0cb;
+    static readonly RED: int32 = 0xffff0000;
+    static readonly YELLOW: int32 = 0xffffff00;
+    static readonly TRANSPARENT: string = '#00000000';
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
