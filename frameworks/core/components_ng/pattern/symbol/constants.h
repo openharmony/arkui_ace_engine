@@ -30,8 +30,8 @@ enum class SymbolEffectType {
     BOUNCE,
     PULSE,
     REPLACE,
-    Disable,
-    QuickReplace,
+    DISABLE,
+    QUICK_REPLACE,
 };
 
 enum class CommonSubType {
