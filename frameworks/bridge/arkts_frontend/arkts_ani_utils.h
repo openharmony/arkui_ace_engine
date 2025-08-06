@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <type_traits>
 #include <string>
-#include "ui/base/macros.h"
 
 #include "ui/base/macros.h"
 
@@ -89,11 +88,6 @@ public:
      * Get std/core/Double by float.
      */
     static ani_object FloatToNumberObject(ani_env* env, const float& value);
-
-    /**
-     * Get std::string from std/core/String.
-     */
-    static std::string ANIStringToStdString(ani_env* env, ani_string ani_str);
 };
 } // namespace OHOS::Ace
 
