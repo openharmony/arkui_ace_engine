@@ -68,7 +68,6 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_DestroyClonedEvent003, TestSize
 
         auto result = OH_ArkUI_PointerEvent_DestroyClonedEvent(event);
         EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR) << "Failed for event type: " << static_cast<int>(eventTypeId);
-        delete event; // Clean up the allocated memory
     }
 }
 
