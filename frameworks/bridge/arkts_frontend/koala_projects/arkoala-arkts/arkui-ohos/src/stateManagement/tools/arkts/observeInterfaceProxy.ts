@@ -22,9 +22,9 @@ import { OBSERVE } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
 
-export class InterfaceProxyHandler<T extends Object>
-    implements proxy.ProxyHandler<T>, IObservedObject, ISubscribedWatches
-{
+export class InterfaceProxyHandler<T extends Object> 
+    extends proxy.DefaultProxyHandler<T>
+    implements IObservedObject, ISubscribedWatches {
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
 
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
@@ -47,15 +47,15 @@ export class InterfaceProxyHandler<T extends Object>
         return OBSERVE.shouldAddRef(this.____V1RenderId);
     }
     public get(target: T, name: string): Any {
-        const value = Reflect.get(target, name) as Any;
+        const value = super.get(target, name)
         if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
         return UIUtils.makeObserved(value);
     }
     public set(target: T, name: string, newValue: Any): boolean {
-        if (Reflect.get(target, name) !== newValue) {
-            const result = Reflect.set(target, name, newValue);
+        if (super.get(target, name) !== newValue) {
+            const result = super.set(target, name, newValue);
             this.__meta.fireChange();
             this.executeOnSubscribingWatches(name);
             return result;

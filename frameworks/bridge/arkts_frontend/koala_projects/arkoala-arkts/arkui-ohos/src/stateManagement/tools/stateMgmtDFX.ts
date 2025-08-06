@@ -55,7 +55,7 @@ export class StateMgmtDFX {
                     return varName.startsWith('__backing');
                 })
                 .forEach((varName) => {
-                    const value = Reflect.get(view, varName);
+                    const value = (reflect.Value.of(view) as ClassValue).getFieldByName(varName).getData()
                     if (value && value instanceof DecoratedV1VariableBase) {
                         dumpInfo.observedPropertiesInfo.push({
                             decorator: value.decorator,
