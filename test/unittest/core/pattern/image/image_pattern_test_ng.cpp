@@ -475,6 +475,41 @@ HWTEST_F(ImagePatternTestNg, InitCopy001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: InitCopy002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, InitCopy002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call mouseEvent_.
+     * @tc.expected:
+     */
+    imagePattern->InitCopy();
+    ASSERT_NE(imagePattern->mouseEvent_, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    imagePattern->OpenSelectOverlay();
+    SelectOverlayInfo& info1 = pipeline->GetSelectOverlayManager()->selectOverlayInfo_;
+    RectF rect(0.0f, 0.0f, 1.0f, 1.0f);
+    bool isFirst = false;
+    info1.onHandleMoveDone(rect, isFirst);
+    imagePattern->HandleMoveDone(isFirst);
+    EXPECT_TRUE(imagePattern->isSelected_);
+    bool closedByGlobalEvent = true;
+    info1.onClose(closedByGlobalEvent);
+    EXPECT_FALSE(imagePattern->isSelected_);
+}
+
+/**
  * @tc.name: ToJsonValue001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC

@@ -475,6 +475,7 @@ private:
     void InitCopy();
     void HandleCopy();
     void OpenSelectOverlay();
+    void HandleMoveDone(bool isFirst);
     void CloseSelectOverlay();
 
     void TriggerFirstVisibleAreaChange();
