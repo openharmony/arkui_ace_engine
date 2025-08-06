@@ -10915,10 +10915,10 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    JsiRef<JsiValue> secondeArg =
+    JsiRef<JsiValue> secondArg =
         JsiRef<JsiValue>::FastMake(runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(NUM_1));
-
-    auto ratioArray = JSRef<JSArray>::Cast(secondeArg);
+    CHECK_NULL_RETURN(secondArg->IsArray(), panda::JSValueRef::Undefined(vm));
+    auto ratioArray = JSRef<JSArray>::Cast(secondArg);
     size_t size = ratioArray->Length();
     std::vector<double> ratioList;
     for (size_t i = 0; i < size; i++) {
