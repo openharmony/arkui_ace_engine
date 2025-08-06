@@ -161,7 +161,7 @@ void ImageModelStatic::SetImageInterpolation(
 
 void ImageModelStatic::SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation)
 {
-    const auto orientationValue = orientation.value_or(ImageRotateOrientation::AUTO);
+    const auto orientationValue = orientation.value_or(ImageRotateOrientation::UP);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientationValue, frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);

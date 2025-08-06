@@ -31,10 +31,10 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetItemMinWidth(FrameNode* frameNode, const std::optional<Dimension>& minWidth);
-    static void SetItemMaxWidth(FrameNode* frameNode, const std::optional<Dimension>& maxWidth);
-    static void SetItemMinHeight(FrameNode* frameNode, const std::optional<Dimension>& minHeight);
-    static void SetItemMaxHeight(FrameNode* frameNode, const std::optional<Dimension>& maxHeight);
+    static void SetItemMinWidth(FrameNode* frameNode, const std::optional<CalcLength>& minWidth);
+    static void SetItemMaxWidth(FrameNode* frameNode, const std::optional<CalcLength>& maxWidth);
+    static void SetItemMinHeight(FrameNode* frameNode, const std::optional<CalcLength>& minHeight);
+    static void SetItemMaxHeight(FrameNode* frameNode, const std::optional<CalcLength>& maxHeight);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& value);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);

@@ -326,19 +326,7 @@ int32_t TextPickerModelStatic::GetCanLoop(FrameNode* frameNode)
     return textPickerPattern->GetCanLoop();
 }
 
-void TextPickerModelStatic::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
-{
-    if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
-        return;
-    }
-    CHECK_NULL_VOID(frameNode);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_VOID(textPickerPattern);
-    textPickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
-}
-
-void TextPickerModelStatic::SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& valueOpt)
+void TextPickerModelStatic::SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& valueOpt)
 {
     if (valueOpt) {
         if (valueOpt.value() < CROWN_SENSITIVITY_MIN || valueOpt.value() > CROWN_SENSITIVITY_MAX) {
@@ -575,7 +563,7 @@ void TextPickerModelStatic::SetCascadeColumnsNode(FrameNode* frameNode,
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     std::vector<NG::TextCascadePickerOptions> reOptions;
-    // Caculate max depth
+    // Calculate max depth
     size_t columnCount = options.empty()? 0 : 1;
     for (size_t i = 0; i < options.size(); i++) {
         size_t tmp  = textPickerPattern->ProcessCascadeOptionDepth(options[i]);
