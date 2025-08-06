@@ -53,6 +53,9 @@ class ObserveV2 {
   // meta data about decorated variable inside prototype
   public static readonly V2_DECO_META = Symbol('__v2_deco_meta__');
 
+  // meta data about decorated accessor and method: @Computed and @Monitor
+  public static readonly V2_DECO_METHOD_META = Symbol('__v2_deco_method_meta__');
+
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
@@ -1190,9 +1193,10 @@ class ObserveV2 {
 
   /**
    * Helper function to add meta data about decorator to ViewPU or ViewV2
-   * @param proto prototype object of application class derived from  ViewPU or ViewV2
+   * @param proto prototype object of application class derived from  ViewPU or ViewV2 or `@ObservedV2` class
    * @param varName decorated variable
-   * @param deco '@Local', '@Event', etc 
+   * @param deco '@Local', '@Event', etc
+   *              Excludes `@Computed` and `@Monitor`
    */
   public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
     // add decorator meta data
@@ -1207,8 +1211,25 @@ class ObserveV2 {
     Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
-    }
-    );
+    });
+  }
+
+    /**
+   * Helper function to add meta data about for `@Computed` and `@Monitor`
+   * @param proto prototype object of application class derived from  ViewPU or ViewV2 or `@ObservedV2` class
+   * @param varName decorated variable
+   * @param deco `@Computed` and `@Monitor`
+   */
+  public static addMethodDecoMeta(proto: Object, varName: string, deco: string): void {
+    // add decorator meta data
+    const meta = proto[ObserveV2.V2_DECO_METHOD_META] ??= {};
+    meta[varName] = {};
+    meta[varName].deco = deco;
+
+    Reflect.defineProperty(proto, 'isViewV2', {
+      get() { return true; },
+      enumerable: false
+    });
   }
 
 
@@ -1257,11 +1278,16 @@ class ObserveV2 {
    */
   public getDecoratorInfo(target: object, attrName: string): string {
     const meta = target[ObserveV2.V2_DECO_META];
-    if (!meta) {
+    const metaMethod = target[ObserveV2.V2_DECO_METHOD_META];
+    const decorator = meta?.[attrName] ?? metaMethod?.[attrName];
+    return this.parseDecorator(decorator);
+  }
+
+  public parseDecorator(decorator: any): string {
+    if (!decorator) {
       return '';
     }
-    const decorator = meta[attrName];
-    if (!decorator) {
+    if (typeof decorator !== 'object') {
       return '';
     }
     let decoratorInfo: string = '';
