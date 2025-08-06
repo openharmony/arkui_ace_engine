@@ -20142,7 +20142,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
@@ -24137,7 +24137,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
@@ -25604,7 +25604,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
@@ -25881,7 +25881,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
