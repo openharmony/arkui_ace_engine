@@ -357,6 +357,7 @@ export class Application {
         if (this.withLog) InteropNativeModule._NativeLog("ARKTS: render")
     }
     enter(arg0: int32, arg1: int32, foreignContext: pointer): boolean {
+        StateUpdateLoop.canRequestFrame = true;
         enterForeignContext(foreignContext)
         if (this.withLog) UserView.startNativeLog(1)
 

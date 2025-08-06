@@ -29,16 +29,17 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     private ____V1RenderId: RenderIdType = 0;
+    private allowDeep_: boolean;
 
     /**
      * Constructs a Date from another Date
      * @param date another Date
      */
-    constructor(date: Date) {
+    constructor(date: Date, allowDeep: boolean) {
         // Create without parameters to avoid call back to WrappedMap before "this" is fully constructed!
         super();
-
         this.store_ = date;
+        this.allowDeep_ = allowDeep;
         this.meta_ = FactoryInternal.mkMutableStateMeta('');
     }
 
@@ -63,7 +64,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     }
 
     public shouldAddRef(): boolean {
-        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     /**

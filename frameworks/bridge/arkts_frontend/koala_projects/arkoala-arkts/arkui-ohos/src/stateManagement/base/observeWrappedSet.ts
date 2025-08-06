@@ -35,15 +35,15 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     private ____V1RenderId: RenderIdType = 0;
-
+    private allowDeep_: boolean;
     /**
      * Constructs a Set from another Set
      * @param set another Set
      */
-    constructor(set: Set<K>) {
+    constructor(set: Set<K>, allowDeep: boolean) {
         super();
-
         this.store_ = set;
+        this.allowDeep_ = allowDeep;
         this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedSet');
     }
 
@@ -68,7 +68,7 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     }
 
     public shouldAddRef(): boolean {
-        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return this.allowDeep_ || ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     public toString(): String {

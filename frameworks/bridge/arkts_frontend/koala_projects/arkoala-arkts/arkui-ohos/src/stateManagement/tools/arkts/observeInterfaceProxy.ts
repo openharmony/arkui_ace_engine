@@ -21,37 +21,39 @@ import { STATE_MGMT_FACTORY } from '../../decorator';
 import { OBSERVE } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
+import { uiUtils } from '../../base/uiUtilsImpl';
 
 export class InterfaceProxyHandler<T extends Object>
     implements proxy.ProxyHandler<T>, IObservedObject, ISubscribedWatches
 {
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
-
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
+    private ____V1RenderId: RenderIdType = 0;
+    private allowDeep_: boolean;
+    constructor(allowDeep: boolean) {
+        this.allowDeep_ = allowDeep;
+    }
     public addWatchSubscriber(watchId: WatchIdType): void {
         this.subscribedWatches.addWatchSubscriber(watchId);
     }
     public removeWatchSubscriber(watchId: WatchIdType): boolean {
         return this.subscribedWatches.removeWatchSubscriber(watchId);
     }
-
     public executeOnSubscribingWatches(propertyName: string): void {
         this.subscribedWatches.executeOnSubscribingWatches(propertyName);
     }
-
-    private ____V1RenderId: RenderIdType = 0;
     public setV1RenderId(renderId: RenderIdType): void {
         this.____V1RenderId = renderId;
     }
     public shouldAddRef(): boolean {
-        return OBSERVE.shouldAddRef(this.____V1RenderId);
+        return this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId);
     }
     public get(target: T, name: string): Any {
         const value = Reflect.get(target, name) as Any;
         if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
-        return UIUtils.makeObserved(value);
+        return uiUtils.makeObserved(value, this.allowDeep_);
     }
     public set(target: T, name: string, newValue: Any): boolean {
         if (Reflect.get(target, name) !== newValue) {

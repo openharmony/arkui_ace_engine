@@ -23,6 +23,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { WatchFuncType } from '../decorator';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
+import { uiUtils } from '../base/uiUtilsImpl';
 /**
  * implementation of V1 @ObjectLink
  * @ObjectLink has no local inot
@@ -67,7 +68,7 @@ export class ObjectLinkDecoratedVariable<T>
         if (oldValue === newValue) {
             return;
         }
-        const value = UIUtils.makeObserved(newValue) as T;
+        const value = uiUtils.makeObserved(newValue) as T;
         StateUpdateLoop.add(() => {
             if (this.backing_.set(value)) {
                 this.unregisterWatchFromObservedObjectChanges(oldValue);

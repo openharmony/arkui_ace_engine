@@ -26,7 +26,7 @@ import {
     LinkDecoratedVariable, 
     ConsumeDecoratedVariable, 
     WatchFunc,
-    UIUtils,
+    uiUtils,
     IObservedObject,
     OBSERVE,
     ObserveSingleton
@@ -253,7 +253,7 @@ export function registerCreateWatchFuncCallback(): void {
 
 export function registerCreateStaticObservedCallback(): void {
     const makeObservedcallback = (value: Object): Object => {
-        return UIUtils.makeObserved(value) as Object;
+        return uiUtils.makeObserved(value) as Object;
     }
     let global = ESValue.getGlobal();
     let registerCallback = global.getProperty('registerCallbackForMakeObserved');
