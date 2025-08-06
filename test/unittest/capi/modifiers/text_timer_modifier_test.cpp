@@ -1269,7 +1269,7 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillInvalidValues, Te
 HWTEST_F(TextTimerModifierTest, setOnTimerTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextTimerEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;

@@ -225,7 +225,7 @@ HWTEST_F(TextClockModifierTest, setOnDateChange, TestSize.Level1)
     ASSERT_NE(modifier_->setOnDateChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

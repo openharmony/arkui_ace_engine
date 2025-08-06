@@ -444,7 +444,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_SetOnKeyEventDispatchTest, TestSiz
     ASSERT_NE(modifier_->setOnKeyEventDispatch, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);

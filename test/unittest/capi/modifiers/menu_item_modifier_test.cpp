@@ -733,7 +733,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest5, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -778,7 +778,7 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

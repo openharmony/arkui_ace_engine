@@ -692,7 +692,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SlidingPanelEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -725,7 +725,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnHeightChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SlidingPanelEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -753,7 +753,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnHeightChangeTest, TestSize.Level1)
 HWTEST_F(PanelModifierTest, setOnChangeEventModeImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

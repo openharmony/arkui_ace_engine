@@ -317,7 +317,7 @@ public:
     {
         auto containerId = Container::CurrentId();
         auto frameNode = reinterpret_cast<FrameNode*>(node);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         ASSERT_TRUE(eventHub);
         auto focusHub = eventHub->GetFocusHub();
         ASSERT_TRUE(focusHub);
@@ -336,7 +336,7 @@ public:
     {
         auto containerId = Container::CurrentId();
         auto frameNode = reinterpret_cast<FrameNode*>(node);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         ASSERT_TRUE(eventHub);
         auto gestureEventHub = eventHub->GetGestureEventHub();
         ASSERT_TRUE(gestureEventHub);
@@ -359,7 +359,7 @@ public:
         previewTransition->Reset();
         previewTransition = std::nullopt;
         auto frameNode = reinterpret_cast<FrameNode*>(node);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         SubwindowManager::GetInstance()->RemoveSubwindow(containerId, SubwindowType::TYPE_MENU);
         GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(effect);
         effect = nullptr;

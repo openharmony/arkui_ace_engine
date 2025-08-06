@@ -145,7 +145,7 @@ HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireFinishEvent(indexArg);
@@ -177,7 +177,7 @@ HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireSkipEvent(indexArg);
@@ -213,7 +213,7 @@ HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(firstArg, secondArg);
@@ -251,7 +251,7 @@ HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireNextEvent(firstArg, secondArg);
@@ -289,7 +289,7 @@ HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FirePreviousEvent(firstArg, secondArg);
@@ -308,7 +308,7 @@ HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
 HWTEST_F(StepperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

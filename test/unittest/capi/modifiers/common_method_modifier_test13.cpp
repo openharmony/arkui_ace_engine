@@ -1786,7 +1786,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnStateChange
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
     
-    auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+    auto eventHub = popupInfo.popupNode->GetOrCreateEventHub<BubbleEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);
@@ -1880,7 +1880,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsPrimaryButton
 
     auto frameNode = AceType::DynamicCast<FrameNode>(firstButtonNode);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
@@ -1944,7 +1944,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsSecondaryButt
 
     auto frameNode = AceType::DynamicCast<FrameNode>(secondButtonNode);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);

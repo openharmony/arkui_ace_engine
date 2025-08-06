@@ -147,7 +147,7 @@ public:
     RefPtr<GestureEventHub> GetGestureEventHub()
     {
         if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
-            if (auto eventHub = fnode->GetEventHub<NG::EventHub>(); eventHub) {
+            if (auto eventHub = fnode->GetOrCreateEventHub<NG::EventHub>(); eventHub) {
                 return eventHub->GetOrCreateGestureEventHub();
             }
         }
@@ -346,7 +346,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyPreImeTest, TestSize.Level1
     ASSERT_NE(modifier_->setOnKeyPreIme, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -397,7 +397,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
     ASSERT_NE(modifier_->setOnKeyEvent0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -445,7 +445,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1
     ASSERT_NE(modifier_->setOnKeyEvent1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -2339,7 +2339,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestFocusScopeIdValidValues, 
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -2376,7 +2376,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsGroupValidValues, TestS
             << "Input value is: " << input << ", method: setFocusScopeId, attribute: isGroup";
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -2417,7 +2417,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestIsArrowStepOutVa
             << "Input value is: " << input << ", method: setFocusScopeId, attribute: arrowStepOut";
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);

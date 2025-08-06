@@ -461,7 +461,7 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
@@ -502,7 +502,7 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
     auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
@@ -543,7 +543,7 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
@@ -584,7 +584,7 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
