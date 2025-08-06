@@ -714,34 +714,25 @@ void BubblePattern::ResetToInvisible()
 
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
-    switch (type) {
-        case WindowSizeChangeReason::UNDEFINED:
-        case WindowSizeChangeReason::MOVE:
-        case WindowSizeChangeReason::RESIZE:
-        case WindowSizeChangeReason::DRAG_START:
-        case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END:
-        case WindowSizeChangeReason::OCCUPIED_AREA_CHANGE: {
-            break;
-        }
-        default: {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto pipelineNg = host->GetContextRefPtr();
-            CHECK_NULL_VOID(pipelineNg);
-            auto overlayManager = pipelineNg->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->HideAllPopups();
-            auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
-            CHECK_NULL_VOID(layoutProp);
-            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-            if (showInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-                    pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
-                CHECK_NULL_VOID(subwindow);
-                subwindow->HidePopupNG(targetNodeId_);
-            }
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %{public}d", type);
+    if (type == WindowSizeChangeReason::MAXIMIZE || type == WindowSizeChangeReason::RECOVER ||
+        type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::HIDE ||
+        type == WindowSizeChangeReason::TRANSFORM || type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineNg = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineNg);
+        auto overlayManager = pipelineNg->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->HideAllPopups();
+        auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+        CHECK_NULL_VOID(layoutProp);
+        auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+        if (showInSubWindow) {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
+            CHECK_NULL_VOID(subwindow);
+            subwindow->HidePopupNG(targetNodeId_);
         }
     }
 }
