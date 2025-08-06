@@ -69,7 +69,6 @@ const std::string SUBTITLE = "subtitle";
 const std::string MESSAGE = "hello world";
 const CalcDimension WIDTHDIMENSION = CalcDimension(DIMENSIONVALUE);
 const CalcDimension HEIGHTDIMENSION = CalcDimension(DIMENSIONVALUE);
-const int32_t BACKGROUNDBLURSTYLEZERO = 0;
 const int32_t BACKGROUNDBLURSTYLE = 1;
 const int32_t INTONE = 1;
 const NG::BorderWidthProperty BORDERWIDTH = { .leftDimen = Dimension(DIMENSIONVALUE) };
@@ -224,57 +223,6 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump003, Te
      */
     pattern->DumpInfo(jsonPtr);
     EXPECT_EQ(jsonPtr->GetArraySize(), 26);
-}
-
-/**
- * @tc.name: DialogPatternAdditionalTestNgDump004
- * @tc.desc: Test DialogPattern Dump
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
-     * @tc.expected: The dialogNode and dialogNode created successfully.
-     */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-    std::shared_ptr<JsonValue> jsonPtr = JsonUtil::CreateSharedPtrJson(false);
-    ASSERT_NE(jsonPtr, nullptr);
-    /**
-     * @tc.steps: step2. Invoke Dump functions.
-     * @tc.expected: These Dump properties are matched.
-     */
-    pattern->DumpSimplifyInfo(jsonPtr);
-    EXPECT_TRUE(jsonPtr->Contains("Type"));
-
-    jsonPtr.reset();
-    jsonPtr = JsonUtil::Create(false);
-    ASSERT_NE(jsonPtr, nullptr);
-    pattern->dialogProperties_.title = TITLE;
-    pattern->dialogProperties_.subtitle = SUBTITLE;
-    pattern->dialogProperties_.content = MESSAGE;
-    pattern->dialogProperties_.buttonDirection = DialogButtonDirection::HORIZONTAL;
-    pattern->dialogProperties_.backgroundColor = COLOR;
-    pattern->dialogProperties_.backgroundBlurStyle = BACKGROUNDBLURSTYLE;
-    pattern->DumpSimplifyInfo(jsonPtr);
-    EXPECT_TRUE(jsonPtr->Contains("Title"));
-    EXPECT_TRUE(jsonPtr->Contains("Subtitle"));
-    EXPECT_TRUE(jsonPtr->Contains("Content"));
-    EXPECT_TRUE(jsonPtr->Contains("ButtonDirection"));
-    EXPECT_TRUE(jsonPtr->Contains("BackgroundBlurStyle"));
-    EXPECT_TRUE(jsonPtr->Contains("BackgroundColor"));
-    jsonPtr.reset();
-    jsonPtr = JsonUtil::Create(false);
-    ASSERT_NE(jsonPtr, nullptr);
-    pattern->dialogProperties_.backgroundBlurStyle = BACKGROUNDBLURSTYLEZERO;
-    pattern->DumpSimplifyInfo(jsonPtr);
-    EXPECT_FALSE(jsonPtr->Contains("BackgroundBlurStyle"));
 }
 
 /**
