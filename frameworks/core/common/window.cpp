@@ -125,6 +125,10 @@ WidthBreakpoint GetCalcWidthBreakpoint(
 WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint &layoutBreakpoints) const
 {
     auto width = GetCurrentWindowRect().Width();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    if (pipeline) {
+        width = pipeline->CalcPageWidth(width);
+    }
     double density = PipelineBase::GetCurrentDensity();
     return GetCalcWidthBreakpoint(layoutBreakpoints, density, width);
 }
@@ -132,6 +136,10 @@ WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint &layoutBr
 HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const
 {
     auto width = GetCurrentWindowRect().Width();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    if (pipeline) {
+        width = pipeline->CalcPageWidth(width);
+    }
     auto height = GetCurrentWindowRect().Height();
     auto aspectRatio = 0.0;
     if (NearZero(width)) {
