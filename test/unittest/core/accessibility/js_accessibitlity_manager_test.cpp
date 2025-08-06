@@ -2394,6 +2394,35 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest002, TestSize.L
 }
 
 /**
+* @tc.name: DeleteFromPageEventController001
+* @tc.desc: IsSendAccessibilityEvent in UIExtensionWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, DeleteFromPageEventController001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->AddToPageEventController(root);
+    auto result = jsAccessibilityManager->DeleteFromPageEventController(root);
+
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    EXPECT_EQ(result, true);
+}
+
+/**
 * @tc.name: IsSendAccessibilityEventTest003
 * @tc.desc: IsSendAccessibilityEvent
 * @tc.type: FUNC

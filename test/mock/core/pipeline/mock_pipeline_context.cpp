@@ -100,7 +100,8 @@ public:
 #ifdef WEB_SUPPORTED
     MOCK_METHOD(bool, RegisterWebInteractionOperationAsChildTree,
         (int64_t accessibilityId, const WeakPtr<NG::WebPattern>& webPattern), (override));
-    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
+    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree,
+        (int32_t treeId, const WeakPtr<NG::WebPattern>& webPattern), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
         int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override

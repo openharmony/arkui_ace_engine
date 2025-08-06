@@ -313,7 +313,8 @@ public:
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action,
         const std::map<std::string, std::string>& actionArguments, const RefPtr<NG::WebPattern>& webPattern);
 
-    bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
+    bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID,
+        const WeakPtr<NG::WebPattern>& webPattern) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
     void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
@@ -404,6 +405,7 @@ public:
         bool releaseAll = false) override;
 
     void AddToPageEventController(const RefPtr<NG::FrameNode>& node) override;
+    bool DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node) override;
     bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) override;
 
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
