@@ -548,6 +548,13 @@ struct ArkUIAniCanvasModifier {
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
 };
 
+struct ArkUIAniTraceModifier {
+    void (*traceBegin)(const std::string& traceName);
+    void (*traceEnd)();
+    void (*asyncTraceBegin)(const std::string& traceName, int taskId);
+    void (*asyncTraceEnd)(const std::string& traceName, int taskId);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -574,6 +581,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
+    const ArkUIAniTraceModifier* (*getTraceAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

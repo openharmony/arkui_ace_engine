@@ -275,4 +275,8 @@ export class ArkUIAniModule {
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
 
     native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
+    native static _TraceBegin(traceName: string): void
+    native static _TraceEnd(): void
+    native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
+    native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
 }

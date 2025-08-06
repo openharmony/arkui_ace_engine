@@ -37,6 +37,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.overlayManager.ets",
   "arkui-preprocessed/@ohos.promptAction.ets",
   "arkui-preprocessed/@ohos.router.ets",
+  "arkui-preprocessed/arkui/AceTrace.ets",
   "arkui-preprocessed/arkui/Application.ets",
   "arkui-preprocessed/arkui/ArkComponentRoot.ets",
   "arkui-preprocessed/arkui/ArkCustomComponent.ets",

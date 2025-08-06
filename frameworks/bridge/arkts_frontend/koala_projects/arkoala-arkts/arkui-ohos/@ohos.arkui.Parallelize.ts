@@ -1,5 +1,5 @@
 
-import { int32, KoalaCallsiteKey, observableProxy, Utils } from "@koalaui/common"
+import { int32, KoalaCallsiteKey, observableProxy } from "@koalaui/common"
 import { MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry, __id, StateManager, ComputableState, NodeAttach } from "@koalaui/runtime"
 import { PeerNode } from "arkui/PeerNode";
 import { ArkContentSlotPeer } from "arkui/component";
@@ -80,7 +80,6 @@ export class ParallelNode {
             this.manager!.updateSnapshot()
             this.rootState!.value
         });
-        Utils.traceEnd();
     }
 
     dispose(): void {
