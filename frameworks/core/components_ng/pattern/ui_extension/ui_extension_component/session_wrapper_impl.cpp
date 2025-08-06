@@ -1213,10 +1213,10 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     if (window) {
         rsUIDirector = window->GetRSUIDirector();
     }
-    bool isRotation = reason == Rosen::SizeChangeReason::ROTATION ||
+    bool isNeedSyncTransaction = reason == Rosen::SizeChangeReason::ROTATION ||
         reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION;
     if (!rsUIDirector) {
-        if (isRotation) {
+        if (isNeedSyncTransaction) {
             if (transaction_.lock()) {
                 transaction = transaction_.lock();
                 transaction_.reset();
@@ -1230,7 +1230,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         }
     } else {
         auto rsUIContext = rsUIDirector->GetRSUIContext();
-        if (isRotation) {
+        if (isNeedSyncTransaction) {
             if (transaction_.lock()) {
                 transaction = transaction_.lock();
                 transaction_.reset();
