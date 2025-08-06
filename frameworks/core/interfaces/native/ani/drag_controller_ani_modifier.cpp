@@ -894,6 +894,26 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
+bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
+{
+    auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
+    CHECK_NULL_RETURN(dragAsyncContext, false);
+    dragAsyncContext->instanceId = Ace::Container::CurrentIdSafely();
+    GetCurrentDipScale(dragAsyncContext);
+    auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
+    CHECK_NULL_RETURN(container, false);
+    if (CheckDragging(container)) {
+        LOGE("AceDrag, only one drag is allowed at the same time.");
+        return false;
+    }
+    auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
+    if (!getPointSuccess) {
+        LOGE("AceDrag, confirm current point info failed.");
+        return false;
+    }
+    return true;
+}
+
 bool ANIHandleDragActionStartDrag(ArkUIDragControllerAsync& asyncCtx)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
@@ -980,6 +1000,7 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
     static const ArkUIAniDragControllerModifier impl = {
         .aniHandleExecuteDrag = NG::ANIHandleExecuteDrag,
+        .aniHandleDragAction = NG::ANIHandleDragAction,
         .aniHandleDragActionStartDrag = NG::ANIHandleDragActionStartDrag,
         .createDragEventPeer = NG::CreateDragEventPeer,
         .aniGetDragPreview = NG::ANIGetDragPreview,
