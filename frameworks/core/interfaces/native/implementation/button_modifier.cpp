@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/button/button_request_data.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
@@ -128,6 +129,22 @@ void SetButtonOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(label);
+    if (auto buttonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options); buttonOptions) {
+        SetButtonOptions1Impl(node, &buttonOptions.value());
+    }
+    Converter::VisitUnion(*label,
+        [node](const Ark_ButtonOptions& value) {
+            SetButtonOptions1Impl(node, &value);
+        },
+        [frameNode](const Ark_ResourceStr& value) {
+            auto labelString = Converter::OptConvert<std::string>(value);
+            if (labelString) {
+                ButtonModelStatic::SetLabel(frameNode, labelString->c_str());
+            }
+        },
+        []() {}
+    );
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
