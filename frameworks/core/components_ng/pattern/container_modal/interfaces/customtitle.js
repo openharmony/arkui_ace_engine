@@ -1161,6 +1161,7 @@ class c3 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: this.buttonSpacing });
             Row.id('containerModalButtonRowId');
+            Row.visibility(this.rowVisibility);
             Row.height('100%');
             Row.padding({ left: m, right: this.buttonRightOffset + 'vp' });
             Row.onAreaChange((oldValue, newValue) => {
