@@ -1467,6 +1467,8 @@ private:
     bool isIndicatorInteractive_ = true;
     bool nextMarginIgnoreBlank_ = false;
     bool prevMarginIgnoreBlank_ = false;
+    bool fastAnimationRunning_ = false;
+    bool fastAnimationChange_ = false;
     float ignoreBlankOffset_ = 0.0f;
     int32_t swiperId_ = -1;
     float animationCurveStiffness_ = SWIPER_CURVE_STIFFNESS;
