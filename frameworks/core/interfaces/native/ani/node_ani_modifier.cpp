@@ -21,6 +21,7 @@
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "image_span_ani_modifier.h"
+#include "search_ani_modifier.h"
 #include "styled_string_ani_modifier.h"
 #include "trace_ani_modifier.h"
 #include "web_ani_modifier.h"
@@ -58,6 +59,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,
+        .getSearchAniModifier = OHOS::Ace::NG::GetSearchAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,

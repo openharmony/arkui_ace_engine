@@ -22,6 +22,9 @@
 #include <optional>
 #include <string>
 
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -492,6 +495,10 @@ struct ArkUIAniImageSpanModifier {
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
+struct ArkUIAniSearchModifier {
+    void (*setSearchIconSymbol)(ArkUINodeHandle node,
+        std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& symbolApply);
+};
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);
     void* (*getPixelMap)(ArkUIStyledString peer);
@@ -577,6 +584,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();
+    const ArkUIAniSearchModifier* (*getSearchAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
