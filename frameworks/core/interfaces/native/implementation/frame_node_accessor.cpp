@@ -632,6 +632,13 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
         { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
         { "Text", GENERATED_ARKUI_TEXT },
         { "XComponent", GENERATED_ARKUI_XCOMPONENT },
+        { "QRCode", GENERATED_ARKUI_QRCODE },
+        { "Badge", GENERATED_ARKUI_BADGE },
+        { "Progress", GENERATED_ARKUI_PROGRESS },
+        { "LoadingProgress", GENERATED_ARKUI_LOADING_PROGRESS },
+        { "TextClock", GENERATED_ARKUI_TEXT_CLOCK },
+        { "TextTimer", GENERATED_ARKUI_TEXT_TIMER },
+        { "Image", GENERATED_ARKUI_IMAGE },
     };
     GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
     auto iter = typeMap.find(type);
