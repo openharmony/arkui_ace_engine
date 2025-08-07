@@ -95,6 +95,13 @@ public:
     static void Mock(const JSCallbackInfo& info);
 };
 
+class JSPreviewUIExtension : public JSViewAbstract, public JSInteractableView {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
+    static void Mock(const JSCallbackInfo& info);
+};
+
 class JSSecurityUIExtension : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);

@@ -451,6 +451,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
+    JSPreviewUIExtension::JSBind(globalObj);
     JSSecurityUIExtensionProxy::JSBind(globalObj);
     JSSecurityUIExtension::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
