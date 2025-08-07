@@ -80,6 +80,7 @@ void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, Optiona
     }
 
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
         auto isVertical = axis_ == Axis::VERTICAL;
