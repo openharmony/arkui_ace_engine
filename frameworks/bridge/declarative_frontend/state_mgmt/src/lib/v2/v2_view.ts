@@ -645,7 +645,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.monitorIdsDelayedUpdateForAddMonitor_.add(watchId);
     }
 
-    public addDelayedComputedIds(watchId: number) {
+    public addDelayedComputedIds(watchId: number): void {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
         this.computedIdsDelayedUpdate.add(watchId);
     }

@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 
 class MouseStyleOhos : public MouseStyle {
-    DECLARE_ACE_TYPE(MouseStyleOhos, MouseStyle)
+    DECLARE_ACE_TYPE(MouseStyleOhos, MouseStyle);
 
 public:
     MouseStyleOhos() = default;

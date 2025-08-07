@@ -369,8 +369,7 @@ private:
     RefPtr<StagePkgContextInfo> PkgContextInfo_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::unordered_set<std::string> resAdapterRecord_;
-    CrownEventCallback crownEventCallback_;
-
+    
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;
 
@@ -379,6 +378,7 @@ private:
     int32_t labelId_;
     static bool isComponentMode_;
     std::string containerSdkPath_;
+    CrownEventCallback crownEventCallback_;
     friend class WindowFreeContainer;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
