@@ -4349,7 +4349,6 @@ void AccessibilityUseSamePageImpl(Ark_NativePointer node,
         ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
         return;
     }
-    auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
     ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
@@ -4380,7 +4379,6 @@ void AccessibilityRoleImpl(Ark_NativePointer node,
         return;
     }
     auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
-    role = AccessibilityUtils::GetRoleByType(roleType);
     if (role.empty()) {
         resetValue = true;
     }
@@ -4734,7 +4732,6 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     int32_t drawLevel = 0;
     auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
     if (convValue.has_value()) {
-        drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
         if (drawLevel == -1) {
             drawLevel = 0;
         }
