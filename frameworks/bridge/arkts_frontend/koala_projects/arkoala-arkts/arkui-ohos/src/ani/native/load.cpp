@@ -26,14 +26,20 @@ using GetArkUIModifiersFunc = const ArkUIAniModifiers* (*)();
 
 const ArkUIAniModifiers* GetNodeAniModifier()
 {
-    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    static void* handle = nullptr;
+    static bool initialized = false;
+
+    if (!initialized) {
+        handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+        initialized = true;
+    }
+
     if (handle == nullptr) {
         return nullptr;
     }
 
     auto entry = reinterpret_cast<GetArkUIModifiersFunc>(dlsym(handle, ARKUI_ANI_MODIFIER_FUNCTION_NAME));
     if (entry == nullptr) {
-        dlclose(handle);
         return nullptr;
     }
 
