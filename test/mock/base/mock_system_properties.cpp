@@ -371,17 +371,17 @@ bool SystemProperties::IsWhiteBlockEnabled()
 
 bool SystemProperties::IsWhiteBlockIdleChange()
 {
-    return false;
+    return true;
 }
 
 int32_t SystemProperties::GetWhiteBlockIndexValue()
 {
-    return 0;
+    return 1;
 }
 
 int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 {
-    return 0;
+    return 1;
 }
 
 std::string SystemProperties::GetMapSearchPrefix()

@@ -3143,6 +3143,10 @@ void ScrollablePattern::FireObserverOnScrollStop()
 
 void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
 {
+    CHECK_NULL_VOID(positionController_);
+    auto obsMgr = positionController_->GetObserverManager();
+    auto observer = positionController_->GetObserver();
+    CHECK_NULL_VOID(obsMgr || observer.onDidScrollEvent);
     OnScrollEvent onScroll = [weak = WeakClaim(this)](Dimension dimension, ScrollState state) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern && pattern->positionController_);
