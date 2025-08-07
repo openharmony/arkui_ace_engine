@@ -14,11 +14,10 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { getCustomComponentOptionsName, Importer, InternalAnnotations } from "./utils"
+import { getCustomComponentOptionsName, Importer, InternalAnnotations, DecoratorNames } from "./utils"
 import { fieldOf } from "./property-transformers"
 import { annotation, backingField } from "./common/arkts-utils"
-import { StructDescriptor, StructsResolver, StructTable } from "./struct-recorder";
-import { DecoratorNames } from "./property-translators/utils";
+import { StructDescriptor, StructTable } from "./struct-recorder";
 
 export class StructCallRewriter extends arkts.AbstractVisitor {
     currentStructRewritten: StructDescriptor | undefined = undefined

@@ -65,14 +65,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
-    override get length(): number {
+    override get length(): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }
         return this.store_.length;
     }
 
-    override set length(newLen: number) {
+    override set length(newLen: int) {
         const len = this.store_.length;
         if (len !== newLen) {
             this.store_.length;

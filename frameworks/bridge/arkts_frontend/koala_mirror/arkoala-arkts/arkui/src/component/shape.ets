@@ -16,14 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { image_PixelMap_serializer, image } from "./../generated/ohos.multimedia.image"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ResourceColor, Length } from "./units"
 import { Color, LineCapStyle, LineJoinStyle } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
@@ -32,6 +32,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkShapePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -39,334 +40,300 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkShapePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Shape_construct(peerId, flags)
-        const _peer  = new ArkShapePeer(_peerPtr, peerId, "Shape", flags)
+        const _peer  = new ArkShapePeer(_peerPtr, peerId, 'Shape', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setShapeOptionsAttribute(value?: image.PixelMap): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            image_PixelMap_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            image_PixelMap_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeInterface_setShapeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setViewPortAttribute(value: ViewportRect | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ViewportRect_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ViewportRect_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setViewPort(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStroke(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFillAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setFill(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeDashOffsetAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeDashOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeDashArrayAttribute(value: Array<Length> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : Length = value_value[value_value_counter_i]
-                let value_value_element_type : int32 = RuntimeType.UNDEFINED
-                value_value_element_type = runtimeType(value_value_element)
-                if (RuntimeType.STRING == value_value_element_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : Length = valueTmpValue[valueTmpValueCounterI]
+                if (valueTmpValueTmpElement instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_element_0  = value_value_element as string
-                    thisSerializer.writeString(value_value_element_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_element_type) {
+                    const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as string
+                    thisSerializer.writeString(valueTmpValueTmpElementForIdx0)
+                } else if (valueTmpValueTmpElement instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_element_1  = value_value_element as number
-                    thisSerializer.writeNumber(value_value_element_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_element_type) {
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as number
+                    thisSerializer.writeNumber(valueTmpValueTmpElementForIdx1)
+                } else if (valueTmpValueTmpElement instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_element_2  = value_value_element as Resource
-                    Resource_serializer.write(thisSerializer, value_value_element_2)
+                    const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx2)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeDashArray(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeLineCapAttribute(value: LineCapStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as LineCapStyle)
-            thisSerializer.writeInt32(TypeChecker.LineCapStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as LineCapStyle)
+            thisSerializer.writeInt32(TypeChecker.LineCapStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeLineCap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeLineJoinAttribute(value: LineJoinStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as LineJoinStyle)
-            thisSerializer.writeInt32(TypeChecker.LineJoinStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as LineJoinStyle)
+            thisSerializer.writeInt32(TypeChecker.LineJoinStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeLineJoin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeMiterLimitAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeMiterLimit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeOpacityAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFillOpacityAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setFillOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAntiAliasAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setAntiAlias(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMeshAttribute(value: Array<number> | undefined, column: number | undefined, row: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : number = value_value[value_value_counter_i]
-                thisSerializer.writeNumber(value_value_element)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : number = valueTmpValue[valueTmpValueCounterI]
+                thisSerializer.writeNumber(valueTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let column_type : int32 = RuntimeType.UNDEFINED
-        column_type = runtimeType(column)
-        thisSerializer.writeInt8((column_type).toChar())
-        if ((column_type) != (RuntimeType.UNDEFINED)) {
-            const column_value  = column!
-            thisSerializer.writeNumber(column_value)
+        if (column !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const columnTmpValue  = column!
+            thisSerializer.writeNumber(columnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let row_type : int32 = RuntimeType.UNDEFINED
-        row_type = runtimeType(row)
-        thisSerializer.writeInt8((row_type).toChar())
-        if ((row_type) != (RuntimeType.UNDEFINED)) {
-            const row_value  = row!
-            thisSerializer.writeNumber(row_value)
+        if (row !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const rowTmpValue  = row!
+            thisSerializer.writeNumber(rowTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ShapeAttribute_setMesh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -477,33 +444,6 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: ShapeAttribute): void {
-        super.apply(target)
-        if (this.viewPort_value !== undefined)
-            target.viewPort(this.viewPort_value!)
-        if (this.stroke_value !== undefined)
-            target.stroke(this.stroke_value!)
-        if (this.fill_value !== undefined)
-            target.fill(this.fill_value!)
-        if (this.strokeDashOffset_value !== undefined)
-            target.strokeDashOffset(this.strokeDashOffset_value!)
-        if (this.strokeDashArray_value !== undefined)
-            target.strokeDashArray(this.strokeDashArray_value!)
-        if (this.strokeLineCap_value !== undefined)
-            target.strokeLineCap(this.strokeLineCap_value!)
-        if (this.strokeLineJoin_value !== undefined)
-            target.strokeLineJoin(this.strokeLineJoin_value!)
-        if (this.strokeMiterLimit_value !== undefined)
-            target.strokeMiterLimit(this.strokeMiterLimit_value!)
-        if (this.strokeOpacity_value !== undefined)
-            target.strokeOpacity(this.strokeOpacity_value!)
-        if (this.fillOpacity_value !== undefined)
-            target.fillOpacity(this.fillOpacity_value!)
-        if (this.strokeWidth_value !== undefined)
-            target.strokeWidth(this.strokeWidth_value!)
-        if (this.antiAlias_value !== undefined)
-            target.antiAlias(this.antiAlias_value!)
     }
 }
 
@@ -626,7 +566,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -634,26 +573,6 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         super.applyAttributesFinish()
     }
 }
-export function withShapeStyle(receiver: ShapeAttribute, modifier: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkShapeStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Shape")
-// export function Shape(
-//     value?: image.PixelMap,
-//     @memo
-//     content_?: () => void,
-// ): ShapeAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Shape(
@@ -669,138 +588,596 @@ export function Shape(
     NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (_: ArkShapePeer): void => {
         receiver.setShapeOptions(value)
         style?.(receiver)
-        withShapeStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkShapeSet extends ArkCommonMethodSet implements ShapeAttribute {
+export class ShapeModifier extends CommonMethodModifier implements ShapeAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _viewPort_flag?: boolean
-    _viewPort0_value?: ViewportRect | undefined
-    _stroke_flag?: boolean
-    _stroke0_value?: ResourceColor | undefined
-    _fill_flag?: boolean
-    _fill0_value?: ResourceColor | undefined
-    _strokeDashOffset_flag?: boolean
-    _strokeDashOffset0_value?: Length | undefined
-    _strokeDashArray_flag?: boolean
-    _strokeDashArray0_value?: Array<Length> | undefined
-    _strokeLineCap_flag?: boolean
-    _strokeLineCap0_value?: LineCapStyle | undefined
-    _strokeLineJoin_flag?: boolean
-    _strokeLineJoin0_value?: LineJoinStyle | undefined
-    _strokeMiterLimit_flag?: boolean
-    _strokeMiterLimit0_value?: Length | undefined
-    _strokeOpacity_flag?: boolean
-    _strokeOpacity0_value?: number | string | Resource | undefined
-    _fillOpacity_flag?: boolean
-    _fillOpacity0_value?: number | string | Resource | undefined
-    _strokeWidth_flag?: boolean
-    _strokeWidth0_value?: Length | undefined
-    _antiAlias_flag?: boolean
-    _antiAlias0_value?: boolean | undefined
-    _mesh_flag?: boolean
-    _mesh0_value?: Array<number> | undefined
-    _mesh1_value?: number | undefined
-    _mesh2_value?: number | undefined
-    applyModifierPatch(component: ShapeAttribute): void {
-        if (this._viewPort_flag)
-            component.viewPort((this._viewPort0_value as ViewportRect | undefined))
-        if (this._stroke_flag)
-            component.stroke((this._stroke0_value as ResourceColor | undefined))
-        if (this._fill_flag)
-            component.fill((this._fill0_value as ResourceColor | undefined))
-        if (this._strokeDashOffset_flag)
-            component.strokeDashOffset((this._strokeDashOffset0_value as Length | undefined))
-        if (this._strokeDashArray_flag)
-            component.strokeDashArray((this._strokeDashArray0_value as Array<Length> | undefined))
-        if (this._strokeLineCap_flag)
-            component.strokeLineCap((this._strokeLineCap0_value as LineCapStyle | undefined))
-        if (this._strokeLineJoin_flag)
-            component.strokeLineJoin((this._strokeLineJoin0_value as LineJoinStyle | undefined))
-        if (this._strokeMiterLimit_flag)
-            component.strokeMiterLimit((this._strokeMiterLimit0_value as Length | undefined))
-        if (this._strokeOpacity_flag)
-            component.strokeOpacity((this._strokeOpacity0_value as number | string | Resource | undefined))
-        if (this._fillOpacity_flag)
-            component.fillOpacity((this._fillOpacity0_value as number | string | Resource | undefined))
-        if (this._strokeWidth_flag)
-            component.strokeWidth((this._strokeWidth0_value as Length | undefined))
-        if (this._antiAlias_flag)
-            component.antiAlias((this._antiAlias0_value as boolean | undefined))
-        if (this._mesh_flag)
-            component.mesh((this._mesh0_value as Array<number> | undefined), (this._mesh1_value as number | undefined), (this._mesh2_value as number | undefined))
+    _viewPort_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _viewPort_0_0value?: ViewportRect | undefined
+    _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _stroke_0_0value?: ResourceColor | undefined
+    _fill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fill_0_0value?: ResourceColor | undefined
+    _strokeDashOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeDashOffset_0_0value?: Length | undefined
+    _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeDashArray_0_0value?: Array<Length> | undefined
+    _strokeLineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeLineCap_0_0value?: LineCapStyle | undefined
+    _strokeLineJoin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeLineJoin_0_0value?: LineJoinStyle | undefined
+    _strokeMiterLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeMiterLimit_0_0value?: Length | undefined
+    _strokeOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeOpacity_0_0value?: number | string | Resource | undefined
+    _fillOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fillOpacity_0_0value?: number | string | Resource | undefined
+    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeWidth_0_0value?: Length | undefined
+    _antiAlias_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _antiAlias_0_0value?: boolean | undefined
+    _mesh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _mesh_0_0value?: Array<number> | undefined
+    _mesh_0_1value?: number | undefined
+    _mesh_0_2value?: number | undefined
+    applyModifierPatch(peer: ArkShapePeer): void {
+        super.applyModifierPatch(peer)
+        if (this._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._viewPort_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setViewPortAttribute((this._viewPort_0_0value as ViewportRect | undefined));
+                    this._viewPort_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._viewPort_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._viewPort_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setViewPortAttribute((undefined as ViewportRect | undefined));
+                }
+            }
+        }
+        if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._stroke_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeAttribute((this._stroke_0_0value as ResourceColor | undefined));
+                    this._stroke_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._stroke_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._stroke_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._fill_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fill_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFillAttribute((this._fill_0_0value as ResourceColor | undefined));
+                    this._fill_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fill_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fill_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFillAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._strokeDashOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeDashOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeDashOffsetAttribute((this._strokeDashOffset_0_0value as Length | undefined));
+                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeDashOffsetAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._strokeDashArray_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeDashArray_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeDashArrayAttribute((this._strokeDashArray_0_0value as Array<Length> | undefined));
+                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeDashArrayAttribute((undefined as Array<Length> | undefined));
+                }
+            }
+        }
+        if (this._strokeLineCap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeLineCap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeLineCapAttribute((this._strokeLineCap_0_0value as LineCapStyle | undefined));
+                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeLineCapAttribute((undefined as LineCapStyle | undefined));
+                }
+            }
+        }
+        if (this._strokeLineJoin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeLineJoin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeLineJoinAttribute((this._strokeLineJoin_0_0value as LineJoinStyle | undefined));
+                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeLineJoinAttribute((undefined as LineJoinStyle | undefined));
+                }
+            }
+        }
+        if (this._strokeMiterLimit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeMiterLimit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeMiterLimitAttribute((this._strokeMiterLimit_0_0value as Length | undefined));
+                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeMiterLimitAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._strokeOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeOpacity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeOpacityAttribute((this._strokeOpacity_0_0value as number | string | Resource | undefined));
+                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeOpacityAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._fillOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fillOpacity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFillOpacityAttribute((this._fillOpacity_0_0value as number | string | Resource | undefined));
+                    this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fillOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFillOpacityAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as Length | undefined));
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeWidthAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._antiAlias_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._antiAlias_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAntiAliasAttribute((this._antiAlias_0_0value as boolean | undefined));
+                    this._antiAlias_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._antiAlias_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._antiAlias_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAntiAliasAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._mesh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._mesh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMeshAttribute((this._mesh_0_0value as Array<number> | undefined), (this._mesh_0_1value as number | undefined), (this._mesh_0_2value as number | undefined));
+                    this._mesh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._mesh_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._mesh_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMeshAttribute((undefined as Array<number> | undefined), (undefined as number | undefined), (undefined as number | undefined));
+                }
+            }
+        }
     }
-    public viewPort(value: ViewportRect | undefined): this {
-        this._viewPort_flag = true
-        this._viewPort0_value = value
+    mergeModifier(modifier: ShapeModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._viewPort_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.viewPort(modifier._viewPort_0_0value);
+                    break;
+                }
+                default: {
+                    this.viewPort((undefined as ViewportRect | undefined));
+                }
+            }
+        }
+        if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._stroke_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.stroke(modifier._stroke_0_0value);
+                    break;
+                }
+                default: {
+                    this.stroke((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._fill_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fill_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fill(modifier._fill_0_0value);
+                    break;
+                }
+                default: {
+                    this.fill((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._strokeDashOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeDashOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeDashOffset(modifier._strokeDashOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeDashOffset((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._strokeDashArray_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeDashArray_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeDashArray(modifier._strokeDashArray_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeDashArray((undefined as Array<Length> | undefined));
+                }
+            }
+        }
+        if (modifier._strokeLineCap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeLineCap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeLineCap(modifier._strokeLineCap_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeLineCap((undefined as LineCapStyle | undefined));
+                }
+            }
+        }
+        if (modifier._strokeLineJoin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeLineJoin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeLineJoin(modifier._strokeLineJoin_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeLineJoin((undefined as LineJoinStyle | undefined));
+                }
+            }
+        }
+        if (modifier._strokeMiterLimit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeMiterLimit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeMiterLimit(modifier._strokeMiterLimit_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeMiterLimit((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._strokeOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeOpacity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeOpacity(modifier._strokeOpacity_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeOpacity((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._fillOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fillOpacity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fillOpacity(modifier._fillOpacity_0_0value);
+                    break;
+                }
+                default: {
+                    this.fillOpacity((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeWidth(modifier._strokeWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeWidth((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._antiAlias_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._antiAlias_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.antiAlias(modifier._antiAlias_0_0value);
+                    break;
+                }
+                default: {
+                    this.antiAlias((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._mesh_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._mesh_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.mesh(modifier._mesh_0_0value, modifier._mesh_0_1value, modifier._mesh_0_2value);
+                    break;
+                }
+                default: {
+                    this.mesh((undefined as Array<number> | undefined), (undefined as number | undefined), (undefined as number | undefined));
+                }
+            }
+        }
+    }
+    viewPort(value: ViewportRect | undefined): this {
+        if (((this._viewPort_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._viewPort_0_flag = AttributeUpdaterFlag.UPDATE
+            this._viewPort_0_0value = value
+        } else
+        {
+            this._viewPort_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public stroke(value: ResourceColor | undefined): this {
-        this._stroke_flag = true
-        this._stroke0_value = value
+    stroke(value: ResourceColor | undefined): this {
+        if (((this._stroke_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
+            this._stroke_0_0value = value
+        } else
+        {
+            this._stroke_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fill(value: ResourceColor | undefined): this {
-        this._fill_flag = true
-        this._fill0_value = value
+    fill(value: ResourceColor | undefined): this {
+        if (((this._fill_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fill_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fill_0_0value = value
+        } else
+        {
+            this._fill_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeDashOffset(value: Length | undefined): this {
-        this._strokeDashOffset_flag = true
-        this._strokeDashOffset0_value = value
+    strokeDashOffset(value: Length | undefined): this {
+        if (((this._strokeDashOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeDashOffset_0_0value = value
+        } else
+        {
+            this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeDashArray(value: Array<Length> | undefined): this {
-        this._strokeDashArray_flag = true
-        this._strokeDashArray0_value = value
+    strokeDashArray(value: Array<Length> | undefined): this {
+        if (((this._strokeDashArray_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeDashArray_0_0value = value
+        } else
+        {
+            this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeLineCap(value: LineCapStyle | undefined): this {
-        this._strokeLineCap_flag = true
-        this._strokeLineCap0_value = value
+    strokeLineCap(value: LineCapStyle | undefined): this {
+        if (((this._strokeLineCap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeLineCap_0_0value = value
+        } else
+        {
+            this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeLineJoin(value: LineJoinStyle | undefined): this {
-        this._strokeLineJoin_flag = true
-        this._strokeLineJoin0_value = value
+    strokeLineJoin(value: LineJoinStyle | undefined): this {
+        if (((this._strokeLineJoin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeLineJoin_0_0value = value
+        } else
+        {
+            this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeMiterLimit(value: Length | undefined): this {
-        this._strokeMiterLimit_flag = true
-        this._strokeMiterLimit0_value = value
+    strokeMiterLimit(value: Length | undefined): this {
+        if (((this._strokeMiterLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeMiterLimit_0_0value = value
+        } else
+        {
+            this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeOpacity(value: number | string | Resource | undefined): this {
-        this._strokeOpacity_flag = true
-        this._strokeOpacity0_value = value
+    strokeOpacity(value: number | string | Resource | undefined): this {
+        if (((this._strokeOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeOpacity_0_0value = value
+        } else
+        {
+            this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fillOpacity(value: number | string | Resource | undefined): this {
-        this._fillOpacity_flag = true
-        this._fillOpacity0_value = value
+    fillOpacity(value: number | string | Resource | undefined): this {
+        if (((this._fillOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fillOpacity_0_0value = value
+        } else
+        {
+            this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeWidth(value: Length | undefined): this {
-        this._strokeWidth_flag = true
-        this._strokeWidth0_value = value
+    strokeWidth(value: Length | undefined): this {
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeWidth_0_0value = value
+        } else
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public antiAlias(value: boolean | undefined): this {
-        this._antiAlias_flag = true
-        this._antiAlias0_value = value
+    antiAlias(value: boolean | undefined): this {
+        if (((this._antiAlias_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._antiAlias_0_0value) !== (value)))
+        {
+            this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
+            this._antiAlias_0_0value = value
+        } else
+        {
+            this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
-        this._mesh_flag = true
-        this._mesh0_value = value
-        this._mesh1_value = column
-        this._mesh2_value = row
+    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+        if (((this._mesh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._mesh_0_0value) !== (value)) || ((this._mesh_0_1value) !== (column)) || ((this._mesh_0_2value) !== (row)))
+        {
+            this._mesh_0_flag = AttributeUpdaterFlag.UPDATE
+            this._mesh_0_0value = value
+            this._mesh_0_1value = column
+            this._mesh_0_2value = row
+        } else
+        {
+            this._mesh_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -810,190 +1187,158 @@ export class ArkShapeSet extends ArkCommonMethodSet implements ShapeAttribute {
 export class ViewportRect_serializer {
     public static write(buffer: SerializerBase, value: ViewportRect): void {
         let valueSerializer : SerializerBase = buffer
-        const value_x  = value.x
-        let value_x_type : int32 = RuntimeType.UNDEFINED
-        value_x_type = runtimeType(value_x)
-        valueSerializer.writeInt8((value_x_type).toChar())
-        if ((value_x_type) != (RuntimeType.UNDEFINED)) {
-            const value_x_value  = value_x!
-            let value_x_value_type : int32 = RuntimeType.UNDEFINED
-            value_x_value_type = runtimeType(value_x_value)
-            if (RuntimeType.STRING == value_x_value_type) {
+        const valueHolderForX  = value.x
+        if (valueHolderForX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForXTmpValue  = valueHolderForX!
+            if (valueHolderForXTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_x_value_0  = value_x_value as string
-                valueSerializer.writeString(value_x_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_x_value_type) {
+                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as string
+                valueSerializer.writeString(valueHolderForXTmpValueForIdx0)
+            } else if (valueHolderForXTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_x_value_1  = value_x_value as number
-                valueSerializer.writeNumber(value_x_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_x_value_type) {
+                const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as number
+                valueSerializer.writeNumber(valueHolderForXTmpValueForIdx1)
+            } else if (valueHolderForXTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_x_value_2  = value_x_value as Resource
-                Resource_serializer.write(valueSerializer, value_x_value_2)
+                const valueHolderForXTmpValueForIdx2  = valueHolderForXTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_y  = value.y
-        let value_y_type : int32 = RuntimeType.UNDEFINED
-        value_y_type = runtimeType(value_y)
-        valueSerializer.writeInt8((value_y_type).toChar())
-        if ((value_y_type) != (RuntimeType.UNDEFINED)) {
-            const value_y_value  = value_y!
-            let value_y_value_type : int32 = RuntimeType.UNDEFINED
-            value_y_value_type = runtimeType(value_y_value)
-            if (RuntimeType.STRING == value_y_value_type) {
+        const valueHolderForY  = value.y
+        if (valueHolderForY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForYTmpValue  = valueHolderForY!
+            if (valueHolderForYTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_y_value_0  = value_y_value as string
-                valueSerializer.writeString(value_y_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_y_value_type) {
+                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as string
+                valueSerializer.writeString(valueHolderForYTmpValueForIdx0)
+            } else if (valueHolderForYTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_y_value_1  = value_y_value as number
-                valueSerializer.writeNumber(value_y_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_y_value_type) {
+                const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as number
+                valueSerializer.writeNumber(valueHolderForYTmpValueForIdx1)
+            } else if (valueHolderForYTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_y_value_2  = value_y_value as Resource
-                Resource_serializer.write(valueSerializer, value_y_value_2)
+                const valueHolderForYTmpValueForIdx2  = valueHolderForYTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.STRING == value_width_value_type) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as string
-                valueSerializer.writeString(value_width_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_width_value_2  = value_width_value as Resource
-                Resource_serializer.write(valueSerializer, value_width_value_2)
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.STRING == value_height_value_type) {
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as string
-                valueSerializer.writeString(value_height_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_height_value_2  = value_height_value as Resource
-                Resource_serializer.write(valueSerializer, value_height_value_2)
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ViewportRect {
         let valueDeserializer : DeserializerBase = buffer
-        const x_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let x_buf : Length | undefined
-        if ((x_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const x_buf__selector : int32 = valueDeserializer.readInt8()
-            let x_buf_ : string | number | Resource | undefined
-            if (x_buf__selector == (0).toChar()) {
-                x_buf_ = (valueDeserializer.readString() as string)
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let xTmpBuf : Length | undefined
+        if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const xTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let xTmpBuf_ : string | number | Resource | undefined
+            if (xTmpBuf_UnionSelector == (0).toChar()) {
+                xTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (xTmpBuf_UnionSelector == (1).toChar()) {
+                xTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (xTmpBuf_UnionSelector == (2).toChar()) {
+                xTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for xTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (x_buf__selector == (1).toChar()) {
-                x_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (x_buf__selector == (2).toChar()) {
-                x_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for x_buf_ has to be chosen through deserialisation.")
-            }
-            x_buf = (x_buf_ as string | number | Resource)
+            xTmpBuf = (xTmpBuf_ as string | number | Resource)
         }
-        const x_result : Length | undefined = x_buf
-        const y_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let y_buf : Length | undefined
-        if ((y_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const y_buf__selector : int32 = valueDeserializer.readInt8()
-            let y_buf_ : string | number | Resource | undefined
-            if (y_buf__selector == (0).toChar()) {
-                y_buf_ = (valueDeserializer.readString() as string)
+        const xTmpResult : Length | undefined = xTmpBuf
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let yTmpBuf : Length | undefined
+        if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const yTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let yTmpBuf_ : string | number | Resource | undefined
+            if (yTmpBuf_UnionSelector == (0).toChar()) {
+                yTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (yTmpBuf_UnionSelector == (1).toChar()) {
+                yTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (yTmpBuf_UnionSelector == (2).toChar()) {
+                yTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for yTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (y_buf__selector == (1).toChar()) {
-                y_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (y_buf__selector == (2).toChar()) {
-                y_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for y_buf_ has to be chosen through deserialisation.")
-            }
-            y_buf = (y_buf_ as string | number | Resource)
+            yTmpBuf = (yTmpBuf_ as string | number | Resource)
         }
-        const y_result : Length | undefined = y_buf
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : Length | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : string | number | Resource | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
+        const yTmpResult : Length | undefined = yTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : Length | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : string | number | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (2).toChar()) {
-                width_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
         }
-        const width_result : Length | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : Length | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : string | number | Resource | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
+        const widthTmpResult : Length | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : Length | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : string | number | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBuf_UnionSelector == (2).toChar()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (height_buf__selector == (2).toChar()) {
-                height_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as string | number | Resource)
+            heightTmpBuf = (heightTmpBuf_ as string | number | Resource)
         }
-        const height_result : Length | undefined = height_buf
-        let value : ViewportRect = ({x: x_result, y: y_result, width: width_result, height: height_result} as ViewportRect)
+        const heightTmpResult : Length | undefined = heightTmpBuf
+        let value : ViewportRect = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as ViewportRect)
         return value
     }
 }

@@ -15,7 +15,7 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { getDeclResolveGensym, isMemoCall, MemoFunctionKind, RuntimeNames } from "../utils"
-import { getName, isMemo, isMemoizable } from "../api-utils"
+import { getName, getReturnTypeAnnotation, isMemo, isMemoizable } from "../api-utils"
 import { ScopedVisitor } from "./ScopedVisitor"
 import { Reporter } from "./Reporter"
 import { toArray } from "./ToArrayVisitor"
@@ -69,7 +69,7 @@ export class DiagnosticVisitor extends ScopedVisitor {
         const kind = this.scriptFunctions.get(node.originalPeer)
         if (kind === undefined) return
         if (kind === MemoFunctionKind.NONE) return
-        if (node.returnTypeAnnotation !== undefined) return
+        if (getReturnTypeAnnotation(node) !== undefined) return
         Reporter.reportMemoFunctionIsNotExplicitlyTyped(node?.id?.name)
     }
 

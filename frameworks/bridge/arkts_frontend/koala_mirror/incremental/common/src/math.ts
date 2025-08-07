@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { asFloat64, asString, float64 } from "@koalaui/compat"
+import { asFloat64, float64 } from "@koalaui/compat"
 
 /**
  * Computes the linear interpolation between `source` and `target` based on `weight`.
@@ -67,7 +67,7 @@ export function parseNumber(str: string, name: string = "number", verify: boolea
         // ArkTS does not support NaN, isNaN, parseFloat
         const value = asFloat64(str)
         if (verify) {
-            const reverseStr = asString(value)
+            const reverseStr = value.toString()
             if (reverseStr !== undefined && reverseStr?.length == str.length && reverseStr == str) {
                 return value
             }

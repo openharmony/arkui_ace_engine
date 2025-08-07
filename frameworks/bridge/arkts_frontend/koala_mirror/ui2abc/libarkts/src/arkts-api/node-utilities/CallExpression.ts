@@ -17,27 +17,6 @@ import { BlockStatement, CallExpression, Expression, TSTypeParameterInstantiatio
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 
-export function createCallExpression(
-    callee: Expression | undefined,
-    _arguments: readonly Expression[],
-    typeParams: TSTypeParameterInstantiation | undefined,
-    optional_arg: boolean = false,
-    trailingComma: boolean = false,
-    trailingBlock: BlockStatement | undefined = undefined,
-): CallExpression {
-    const res = CallExpression.createCallExpression(
-        callee,
-        _arguments,
-        typeParams,
-        optional_arg,
-        trailingComma,
-    )
-    if (trailingBlock) {
-        res.setTrailingBlock(trailingBlock)
-    }
-    return res
-}
-
 export function updateCallExpression(
     original: CallExpression,
     callee: Expression | undefined,
@@ -57,7 +36,7 @@ export function updateCallExpression(
         return original
     }
     return updateNodeByNode(
-        createCallExpression(callee, _arguments, typeParams, optional_arg, trailingComma, trailingBlock),
+        CallExpression.createCallExpression(callee, _arguments, typeParams, optional_arg, trailingComma, trailingBlock),
         original
     )
 }

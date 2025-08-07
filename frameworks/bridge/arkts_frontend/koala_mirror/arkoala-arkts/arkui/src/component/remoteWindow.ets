@@ -16,18 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkRemoteWindowPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -35,7 +36,7 @@ export class ArkRemoteWindowPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRemoteWindowPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._RemoteWindow_construct(peerId, flags)
-        const _peer  = new ArkRemoteWindowPeer(_peerPtr, peerId, "RemoteWindow", flags)
+        const _peer  = new ArkRemoteWindowPeer(_peerPtr, peerId, 'RemoteWindow', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -69,9 +70,6 @@ export class ArkRemoteWindowStyle extends ArkCommonMethodStyle implements Remote
     public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: RemoteWindowAttribute): void {
-        super.apply(target)
-    }
 }
 
 export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implements RemoteWindowAttribute {
@@ -87,7 +85,6 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -95,26 +92,6 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         super.applyAttributesFinish()
     }
 }
-export function withRemoteWindowStyle(receiver: RemoteWindowAttribute, modifier: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkRemoteWindowStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("RemoteWindow")
-// export function RemoteWindow(
-//     target: WindowAnimationTarget,
-//     @memo
-//     content_?: () => void,
-// ): RemoteWindowAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function RemoteWindow(
@@ -130,18 +107,21 @@ export function RemoteWindow(
     NodeAttach<ArkRemoteWindowPeer>((): ArkRemoteWindowPeer => ArkRemoteWindowPeer.create(receiver), (_: ArkRemoteWindowPeer): void => {
         receiver.setRemoteWindowOptions(target)
         style?.(receiver)
-        withRemoteWindowStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkRemoteWindowSet extends ArkCommonMethodSet implements RemoteWindowAttribute {
+export class RemoteWindowModifier extends CommonMethodModifier implements RemoteWindowAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: RemoteWindowAttribute): void {
+    applyModifierPatch(peer: ArkRemoteWindowPeer): void {
+        super.applyModifierPatch(peer)
+    }
+    mergeModifier(modifier: RemoteWindowModifier): void {
+        super.mergeModifier(modifier)
     }
     public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -150,47 +130,47 @@ export class ArkRemoteWindowSet extends ArkCommonMethodSet implements RemoteWind
 export class RRect_serializer {
     public static write(buffer: SerializerBase, value: RRect): void {
         let valueSerializer : SerializerBase = buffer
-        const value_left  = value.left
-        valueSerializer.writeNumber(value_left)
-        const value_top  = value.top
-        valueSerializer.writeNumber(value_top)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
-        const value_radius  = value.radius
-        valueSerializer.writeNumber(value_radius)
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeNumber(valueHolderForLeft)
+        const valueHolderForTop  = value.top
+        valueSerializer.writeNumber(valueHolderForTop)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
+        const valueHolderForRadius  = value.radius
+        valueSerializer.writeNumber(valueHolderForRadius)
     }
     public static read(buffer: DeserializerBase): RRect {
         let valueDeserializer : DeserializerBase = buffer
-        const left_result : number = (valueDeserializer.readNumber() as number)
-        const top_result : number = (valueDeserializer.readNumber() as number)
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        const radius_result : number = (valueDeserializer.readNumber() as number)
-        let value : RRect = ({left: left_result, top: top_result, width: width_result, height: height_result, radius: radius_result} as RRect)
+        const leftTmpResult : number = (valueDeserializer.readNumber() as number)
+        const topTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : RRect = ({left: leftTmpResult, top: topTmpResult, width: widthTmpResult, height: heightTmpResult, radius: radiusTmpResult} as RRect)
         return value
     }
 }
 export class WindowAnimationTarget_serializer {
     public static write(buffer: SerializerBase, value: WindowAnimationTarget): void {
         let valueSerializer : SerializerBase = buffer
-        const value_bundleName  = value.bundleName
-        valueSerializer.writeString(value_bundleName)
-        const value_abilityName  = value.abilityName
-        valueSerializer.writeString(value_abilityName)
-        const value_windowBounds  = value.windowBounds
-        RRect_serializer.write(valueSerializer, value_windowBounds)
-        const value_missionId  = value.missionId
-        valueSerializer.writeNumber(value_missionId)
+        const valueHolderForBundleName  = value.bundleName
+        valueSerializer.writeString(valueHolderForBundleName)
+        const valueHolderForAbilityName  = value.abilityName
+        valueSerializer.writeString(valueHolderForAbilityName)
+        const valueHolderForWindowBounds  = value.windowBounds
+        RRect_serializer.write(valueSerializer, valueHolderForWindowBounds)
+        const valueHolderForMissionId  = value.missionId
+        valueSerializer.writeNumber(valueHolderForMissionId)
     }
     public static read(buffer: DeserializerBase): WindowAnimationTarget {
         let valueDeserializer : DeserializerBase = buffer
-        const bundleName_result : string = (valueDeserializer.readString() as string)
-        const abilityName_result : string = (valueDeserializer.readString() as string)
-        const windowBounds_result : RRect = RRect_serializer.read(valueDeserializer)
-        const missionId_result : number = (valueDeserializer.readNumber() as number)
-        let value : WindowAnimationTarget = ({bundleName: bundleName_result, abilityName: abilityName_result, windowBounds: windowBounds_result, missionId: missionId_result} as WindowAnimationTarget)
+        const bundleNameTmpResult : string = (valueDeserializer.readString() as string)
+        const abilityNameTmpResult : string = (valueDeserializer.readString() as string)
+        const windowBoundsTmpResult : RRect = RRect_serializer.read(valueDeserializer)
+        const missionIdTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : WindowAnimationTarget = ({bundleName: bundleNameTmpResult, abilityName: abilityNameTmpResult, windowBounds: windowBoundsTmpResult, missionId: missionIdTmpResult} as WindowAnimationTarget)
         return value
     }
 }

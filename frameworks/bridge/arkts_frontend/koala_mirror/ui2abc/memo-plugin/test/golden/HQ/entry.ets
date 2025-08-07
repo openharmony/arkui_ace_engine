@@ -5,7 +5,7 @@ import { memo as memo, memo_entry as memo_entry } from "@koalaui/runtime/annotat
 
 import { __context as __context, __id as __id, __memo_context_type as __memo_context_type, __memo_id_type as __memo_id_type } from "@koalaui/runtime";
 
-function main(): void {}
+function main() {}
 
 
 
@@ -20,7 +20,7 @@ class Test {
     {
       const __memo_context = getContext();
       const __memo_id = getId();
-      return entry(__memo_context, ((__memo_id) + (__hash("id_entry_@test/HQ/entry.ets"))));
+      return entry(__memo_context, ((__memo_id) + (__hash("id_entry_@test/input/HQ/entry.ets"))));
     }
   }
   

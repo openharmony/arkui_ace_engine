@@ -16,12 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -31,6 +31,7 @@ import { ResourceColor, ResourceStr, Length, Position, Position_serializer } fro
 import { Color, FontWeight } from "./enums"
 import { Resource, Resource_serializer } from "./../generated/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkBadgePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,7 +39,7 @@ export class ArkBadgePeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkBadgePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Badge_construct(peerId, flags)
-        const _peer  = new ArkBadgePeer(_peerPtr, peerId, "Badge", flags)
+        const _peer  = new ArkBadgePeer(_peerPtr, peerId, 'Badge', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -93,9 +94,6 @@ export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribut
     public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: BadgeAttribute): void {
-        super.apply(target)
-    }
 }
 
 export class ArkBadgeComponent extends ArkCommonMethodComponent implements BadgeAttribute {
@@ -119,7 +117,6 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
         return this
     }
     public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -127,26 +124,6 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
         super.applyAttributesFinish()
     }
 }
-export function withBadgeStyle(receiver: BadgeAttribute, modifier: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkBadgeStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Badge")
-// export function Badge(
-//     value: BadgeParamWithNumber,
-//     @memo
-//     content_?: () => void,
-// ): BadgeAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Badge(
@@ -162,21 +139,11 @@ export function Badge(
     NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer): void => {
         receiver.setBadgeOptions(value)
         style?.(receiver)
-        withBadgeStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-// @memo
-// @BuilderLambda("Badge")
-// export function Badge(
-//     value: BadgeParamWithString,
-//     @memo
-//     content_?: () => void,
-// ): BadgeAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Badge(
@@ -192,18 +159,21 @@ export function Badge(
     NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer): void => {
         receiver.setBadgeOptions(value)
         style?.(receiver)
-        withBadgeStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkBadgeSet extends ArkCommonMethodSet implements BadgeAttribute {
+export class BadgeModifier extends CommonMethodModifier implements BadgeAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: BadgeAttribute): void {
+    applyModifierPatch(peer: ArkBadgePeer): void {
+        super.applyModifierPatch(peer)
+    }
+    mergeModifier(modifier: BadgeModifier): void {
+        super.mergeModifier(modifier)
     }
     public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -212,542 +182,451 @@ export class ArkBadgeSet extends ArkCommonMethodSet implements BadgeAttribute {
 export class BadgeStyle_serializer {
     public static write(buffer: SerializerBase, value: BadgeStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (TypeChecker.isColor(value_color_value)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorTmpValueForIdx0))
+            } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_color_value_1  = value_color_value as number
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_color_value_2  = value_color_value as string
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_color_value_3  = value_color_value as Resource
-                Resource_serializer.write(valueSerializer, value_color_value_3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontSize  = value.fontSize
-        let value_fontSize_type : int32 = RuntimeType.UNDEFINED
-        value_fontSize_type = runtimeType(value_fontSize)
-        valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontSize_value  = value_fontSize!
-            let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_fontSize_value_type = runtimeType(value_fontSize_value)
-            if (RuntimeType.NUMBER == value_fontSize_value_type) {
+        const valueHolderForFontSize  = value.fontSize
+        if (valueHolderForFontSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
+            if (valueHolderForFontSizeTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_fontSize_value_0  = value_fontSize_value as number
-                valueSerializer.writeNumber(value_fontSize_value_0)
-            }
-            else if ((RuntimeType.STRING == value_fontSize_value_type) || (RuntimeType.OBJECT == value_fontSize_value_type)) {
+                const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as number
+                valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx0)
+            } else if (valueHolderForFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_fontSize_value_1  = value_fontSize_value as ResourceStr
-                let value_fontSize_value_1_type : int32 = RuntimeType.UNDEFINED
-                value_fontSize_value_1_type = runtimeType(value_fontSize_value_1)
-                if (RuntimeType.STRING == value_fontSize_value_1_type) {
+                const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as ResourceStr
+                if (valueHolderForFontSizeTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_fontSize_value_1_0  = value_fontSize_value_1 as string
-                    valueSerializer.writeString(value_fontSize_value_1_0)
-                }
-                else if (RuntimeType.OBJECT == value_fontSize_value_1_type) {
+                    const valueHolderForFontSizeTmpValueForIdx1ForIdx0  = valueHolderForFontSizeTmpValueForIdx1 as string
+                    valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx1ForIdx0)
+                } else if (valueHolderForFontSizeTmpValueForIdx1 instanceof Resource) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_fontSize_value_1_1  = value_fontSize_value_1 as Resource
-                    Resource_serializer.write(valueSerializer, value_fontSize_value_1_1)
+                    const valueHolderForFontSizeTmpValueForIdx1ForIdx1  = valueHolderForFontSizeTmpValueForIdx1 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx1ForIdx1)
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_badgeSize  = value.badgeSize
-        let value_badgeSize_type : int32 = RuntimeType.UNDEFINED
-        value_badgeSize_type = runtimeType(value_badgeSize)
-        valueSerializer.writeInt8((value_badgeSize_type).toChar())
-        if ((value_badgeSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_badgeSize_value  = value_badgeSize!
-            let value_badgeSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_badgeSize_value_type = runtimeType(value_badgeSize_value)
-            if (RuntimeType.NUMBER == value_badgeSize_value_type) {
+        const valueHolderForBadgeSize  = value.badgeSize
+        if (valueHolderForBadgeSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBadgeSizeTmpValue  = valueHolderForBadgeSize!
+            if (valueHolderForBadgeSizeTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_badgeSize_value_0  = value_badgeSize_value as number
-                valueSerializer.writeNumber(value_badgeSize_value_0)
-            }
-            else if ((RuntimeType.STRING == value_badgeSize_value_type) || (RuntimeType.OBJECT == value_badgeSize_value_type)) {
+                const valueHolderForBadgeSizeTmpValueForIdx0  = valueHolderForBadgeSizeTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBadgeSizeTmpValueForIdx0)
+            } else if (valueHolderForBadgeSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_badgeSize_value_1  = value_badgeSize_value as ResourceStr
-                let value_badgeSize_value_1_type : int32 = RuntimeType.UNDEFINED
-                value_badgeSize_value_1_type = runtimeType(value_badgeSize_value_1)
-                if (RuntimeType.STRING == value_badgeSize_value_1_type) {
+                const valueHolderForBadgeSizeTmpValueForIdx1  = valueHolderForBadgeSizeTmpValue as ResourceStr
+                if (valueHolderForBadgeSizeTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_badgeSize_value_1_0  = value_badgeSize_value_1 as string
-                    valueSerializer.writeString(value_badgeSize_value_1_0)
-                }
-                else if (RuntimeType.OBJECT == value_badgeSize_value_1_type) {
+                    const valueHolderForBadgeSizeTmpValueForIdx1ForIdx0  = valueHolderForBadgeSizeTmpValueForIdx1 as string
+                    valueSerializer.writeString(valueHolderForBadgeSizeTmpValueForIdx1ForIdx0)
+                } else if (valueHolderForBadgeSizeTmpValueForIdx1 instanceof Resource) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_badgeSize_value_1_1  = value_badgeSize_value_1 as Resource
-                    Resource_serializer.write(valueSerializer, value_badgeSize_value_1_1)
+                    const valueHolderForBadgeSizeTmpValueForIdx1ForIdx1  = valueHolderForBadgeSizeTmpValueForIdx1 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForBadgeSizeTmpValueForIdx1ForIdx1)
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_badgeColor  = value.badgeColor
-        let value_badgeColor_type : int32 = RuntimeType.UNDEFINED
-        value_badgeColor_type = runtimeType(value_badgeColor)
-        valueSerializer.writeInt8((value_badgeColor_type).toChar())
-        if ((value_badgeColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_badgeColor_value  = value_badgeColor!
-            let value_badgeColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_badgeColor_value_type = runtimeType(value_badgeColor_value)
-            if (TypeChecker.isColor(value_badgeColor_value)) {
+        const valueHolderForBadgeColor  = value.badgeColor
+        if (valueHolderForBadgeColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBadgeColorTmpValue  = valueHolderForBadgeColor!
+            if (valueHolderForBadgeColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_badgeColor_value_0  = value_badgeColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_badgeColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_badgeColor_value_type) {
+                const valueHolderForBadgeColorTmpValueForIdx0  = valueHolderForBadgeColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBadgeColorTmpValueForIdx0))
+            } else if (valueHolderForBadgeColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_badgeColor_value_1  = value_badgeColor_value as number
-                valueSerializer.writeNumber(value_badgeColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_badgeColor_value_type) {
+                const valueHolderForBadgeColorTmpValueForIdx1  = valueHolderForBadgeColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBadgeColorTmpValueForIdx1)
+            } else if (valueHolderForBadgeColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_badgeColor_value_2  = value_badgeColor_value as string
-                valueSerializer.writeString(value_badgeColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_badgeColor_value_type) {
+                const valueHolderForBadgeColorTmpValueForIdx2  = valueHolderForBadgeColorTmpValue as string
+                valueSerializer.writeString(valueHolderForBadgeColorTmpValueForIdx2)
+            } else if (valueHolderForBadgeColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_badgeColor_value_3  = value_badgeColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_badgeColor_value_3)
+                const valueHolderForBadgeColorTmpValueForIdx3  = valueHolderForBadgeColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBadgeColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_borderColor  = value.borderColor
-        let value_borderColor_type : int32 = RuntimeType.UNDEFINED
-        value_borderColor_type = runtimeType(value_borderColor)
-        valueSerializer.writeInt8((value_borderColor_type).toChar())
-        if ((value_borderColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_borderColor_value  = value_borderColor!
-            let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if (TypeChecker.isColor(value_borderColor_value)) {
+        const valueHolderForBorderColor  = value.borderColor
+        if (valueHolderForBorderColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
+            if (valueHolderForBorderColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_borderColor_value_0  = value_borderColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_borderColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_borderColor_value_type) {
+                const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBorderColorTmpValueForIdx0))
+            } else if (valueHolderForBorderColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_borderColor_value_1  = value_borderColor_value as number
-                valueSerializer.writeNumber(value_borderColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_borderColor_value_type) {
+                const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx1)
+            } else if (valueHolderForBorderColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_borderColor_value_2  = value_borderColor_value as string
-                valueSerializer.writeString(value_borderColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_borderColor_value_type) {
+                const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as string
+                valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx2)
+            } else if (valueHolderForBorderColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_borderColor_value_3  = value_borderColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_borderColor_value_3)
+                const valueHolderForBorderColorTmpValueForIdx3  = valueHolderForBorderColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_borderWidth  = value.borderWidth
-        let value_borderWidth_type : int32 = RuntimeType.UNDEFINED
-        value_borderWidth_type = runtimeType(value_borderWidth)
-        valueSerializer.writeInt8((value_borderWidth_type).toChar())
-        if ((value_borderWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_borderWidth_value  = value_borderWidth!
-            let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (RuntimeType.STRING == value_borderWidth_value_type) {
+        const valueHolderForBorderWidth  = value.borderWidth
+        if (valueHolderForBorderWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderWidthTmpValue  = valueHolderForBorderWidth!
+            if (valueHolderForBorderWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_borderWidth_value_0  = value_borderWidth_value as string
-                valueSerializer.writeString(value_borderWidth_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_borderWidth_value_type) {
+                const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0)
+            } else if (valueHolderForBorderWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_borderWidth_value_1  = value_borderWidth_value as number
-                valueSerializer.writeNumber(value_borderWidth_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_borderWidth_value_type) {
+                const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx1)
+            } else if (valueHolderForBorderWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_borderWidth_value_2  = value_borderWidth_value as Resource
-                Resource_serializer.write(valueSerializer, value_borderWidth_value_2)
+                const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontWeight  = value.fontWeight
-        let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
-        value_fontWeight_type = runtimeType(value_fontWeight)
-        valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontWeight_value  = value_fontWeight!
-            let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_fontWeight_value_type = runtimeType(value_fontWeight_value)
-            if (RuntimeType.NUMBER == value_fontWeight_value_type) {
+        const valueHolderForFontWeight  = value.fontWeight
+        if (valueHolderForFontWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
+            if (valueHolderForFontWeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_fontWeight_value_0  = value_fontWeight_value as number
-                valueSerializer.writeNumber(value_fontWeight_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
+                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx0)
+            } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_fontWeight_value_1))
-            }
-            else if ((RuntimeType.STRING == value_fontWeight_value_type) || (RuntimeType.OBJECT == value_fontWeight_value_type)) {
+                const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
+                valueSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(valueHolderForFontWeightTmpValueForIdx1))
+            } else if (valueHolderForFontWeightTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_fontWeight_value_2  = value_fontWeight_value as ResourceStr
-                let value_fontWeight_value_2_type : int32 = RuntimeType.UNDEFINED
-                value_fontWeight_value_2_type = runtimeType(value_fontWeight_value_2)
-                if (RuntimeType.STRING == value_fontWeight_value_2_type) {
+                const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as ResourceStr
+                if (valueHolderForFontWeightTmpValueForIdx2 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_fontWeight_value_2_0  = value_fontWeight_value_2 as string
-                    valueSerializer.writeString(value_fontWeight_value_2_0)
-                }
-                else if (RuntimeType.OBJECT == value_fontWeight_value_2_type) {
+                    const valueHolderForFontWeightTmpValueForIdx2ForIdx0  = valueHolderForFontWeightTmpValueForIdx2 as string
+                    valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2ForIdx0)
+                } else if (valueHolderForFontWeightTmpValueForIdx2 instanceof Resource) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_fontWeight_value_2_1  = value_fontWeight_value_2 as Resource
-                    Resource_serializer.write(valueSerializer, value_fontWeight_value_2_1)
+                    const valueHolderForFontWeightTmpValueForIdx2ForIdx1  = valueHolderForFontWeightTmpValueForIdx2 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForFontWeightTmpValueForIdx2ForIdx1)
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): BadgeStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : ResourceColor | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | number | string | Resource | undefined
-            if (color_buf__selector == (0).toChar()) {
-                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (color_buf__selector == (1).toChar()) {
-                color_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (color_buf__selector == (2).toChar()) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == (3).toChar()) {
-                color_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
         }
-        const color_result : ResourceColor | undefined = color_buf
-        const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSize_buf : number | ResourceStr | undefined
-        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let fontSize_buf_ : number | ResourceStr | undefined
-            if (fontSize_buf__selector == (0).toChar()) {
-                fontSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (fontSize_buf__selector == (1).toChar()) {
-                const fontSize_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let fontSize_buf__u : string | Resource | undefined
-                if (fontSize_buf__u_selector == (0).toChar()) {
-                    fontSize_buf__u = (valueDeserializer.readString() as string)
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontSizeTmpBuf : number | ResourceStr | undefined
+        if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let fontSizeTmpBuf_ : number | ResourceStr | undefined
+            if (fontSizeTmpBuf_UnionSelector == (0).toChar()) {
+                fontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (fontSizeTmpBuf_UnionSelector == (1).toChar()) {
+                const fontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let fontSizeTmpBuf_BufU : string | Resource | undefined
+                if (fontSizeTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    fontSizeTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (fontSizeTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    fontSizeTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for fontSizeTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else if (fontSize_buf__u_selector == (1).toChar()) {
-                    fontSize_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for fontSize_buf__u has to be chosen through deserialisation.")
-                }
-                fontSize_buf_ = (fontSize_buf__u as string | Resource)
+                fontSizeTmpBuf_ = (fontSizeTmpBuf_BufU as string | Resource)
+            } else {
+                throw new Error("One of the branches for fontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            else {
-                throw new Error("One of the branches for fontSize_buf_ has to be chosen through deserialisation.")
-            }
-            fontSize_buf = (fontSize_buf_ as number | ResourceStr)
+            fontSizeTmpBuf = (fontSizeTmpBuf_ as number | ResourceStr)
         }
-        const fontSize_result : number | ResourceStr | undefined = fontSize_buf
-        const badgeSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let badgeSize_buf : number | ResourceStr | undefined
-        if ((badgeSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const badgeSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let badgeSize_buf_ : number | ResourceStr | undefined
-            if (badgeSize_buf__selector == (0).toChar()) {
-                badgeSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (badgeSize_buf__selector == (1).toChar()) {
-                const badgeSize_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let badgeSize_buf__u : string | Resource | undefined
-                if (badgeSize_buf__u_selector == (0).toChar()) {
-                    badgeSize_buf__u = (valueDeserializer.readString() as string)
+        const fontSizeTmpResult : number | ResourceStr | undefined = fontSizeTmpBuf
+        const badgeSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let badgeSizeTmpBuf : number | ResourceStr | undefined
+        if ((badgeSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const badgeSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let badgeSizeTmpBuf_ : number | ResourceStr | undefined
+            if (badgeSizeTmpBuf_UnionSelector == (0).toChar()) {
+                badgeSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (badgeSizeTmpBuf_UnionSelector == (1).toChar()) {
+                const badgeSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let badgeSizeTmpBuf_BufU : string | Resource | undefined
+                if (badgeSizeTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    badgeSizeTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (badgeSizeTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    badgeSizeTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for badgeSizeTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else if (badgeSize_buf__u_selector == (1).toChar()) {
-                    badgeSize_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for badgeSize_buf__u has to be chosen through deserialisation.")
-                }
-                badgeSize_buf_ = (badgeSize_buf__u as string | Resource)
+                badgeSizeTmpBuf_ = (badgeSizeTmpBuf_BufU as string | Resource)
+            } else {
+                throw new Error("One of the branches for badgeSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            else {
-                throw new Error("One of the branches for badgeSize_buf_ has to be chosen through deserialisation.")
-            }
-            badgeSize_buf = (badgeSize_buf_ as number | ResourceStr)
+            badgeSizeTmpBuf = (badgeSizeTmpBuf_ as number | ResourceStr)
         }
-        const badgeSize_result : number | ResourceStr | undefined = badgeSize_buf
-        const badgeColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let badgeColor_buf : ResourceColor | undefined
-        if ((badgeColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const badgeColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let badgeColor_buf_ : Color | number | string | Resource | undefined
-            if (badgeColor_buf__selector == (0).toChar()) {
-                badgeColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const badgeSizeTmpResult : number | ResourceStr | undefined = badgeSizeTmpBuf
+        const badgeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let badgeColorTmpBuf : ResourceColor | undefined
+        if ((badgeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const badgeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let badgeColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (badgeColorTmpBuf_UnionSelector == (0).toChar()) {
+                badgeColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (badgeColorTmpBuf_UnionSelector == (1).toChar()) {
+                badgeColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (badgeColorTmpBuf_UnionSelector == (2).toChar()) {
+                badgeColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (badgeColorTmpBuf_UnionSelector == (3).toChar()) {
+                badgeColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for badgeColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (badgeColor_buf__selector == (1).toChar()) {
-                badgeColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (badgeColor_buf__selector == (2).toChar()) {
-                badgeColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (badgeColor_buf__selector == (3).toChar()) {
-                badgeColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for badgeColor_buf_ has to be chosen through deserialisation.")
-            }
-            badgeColor_buf = (badgeColor_buf_ as Color | number | string | Resource)
+            badgeColorTmpBuf = (badgeColorTmpBuf_ as Color | number | string | Resource)
         }
-        const badgeColor_result : ResourceColor | undefined = badgeColor_buf
-        const borderColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderColor_buf : ResourceColor | undefined
-        if ((borderColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const borderColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderColor_buf_ : Color | number | string | Resource | undefined
-            if (borderColor_buf__selector == (0).toChar()) {
-                borderColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const badgeColorTmpResult : ResourceColor | undefined = badgeColorTmpBuf
+        const borderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderColorTmpBuf : ResourceColor | undefined
+        if ((borderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
+                borderColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
+                borderColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {
+                borderColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (borderColorTmpBuf_UnionSelector == (3).toChar()) {
+                borderColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (borderColor_buf__selector == (1).toChar()) {
-                borderColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (borderColor_buf__selector == (2).toChar()) {
-                borderColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (borderColor_buf__selector == (3).toChar()) {
-                borderColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for borderColor_buf_ has to be chosen through deserialisation.")
-            }
-            borderColor_buf = (borderColor_buf_ as Color | number | string | Resource)
+            borderColorTmpBuf = (borderColorTmpBuf_ as Color | number | string | Resource)
         }
-        const borderColor_result : ResourceColor | undefined = borderColor_buf
-        const borderWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderWidth_buf : Length | undefined
-        if ((borderWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const borderWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderWidth_buf_ : string | number | Resource | undefined
-            if (borderWidth_buf__selector == (0).toChar()) {
-                borderWidth_buf_ = (valueDeserializer.readString() as string)
+        const borderColorTmpResult : ResourceColor | undefined = borderColorTmpBuf
+        const borderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderWidthTmpBuf : Length | undefined
+        if ((borderWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderWidthTmpBuf_ : string | number | Resource | undefined
+            if (borderWidthTmpBuf_UnionSelector == (0).toChar()) {
+                borderWidthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (borderWidthTmpBuf_UnionSelector == (1).toChar()) {
+                borderWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (borderWidthTmpBuf_UnionSelector == (2).toChar()) {
+                borderWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (borderWidth_buf__selector == (1).toChar()) {
-                borderWidth_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (borderWidth_buf__selector == (2).toChar()) {
-                borderWidth_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for borderWidth_buf_ has to be chosen through deserialisation.")
-            }
-            borderWidth_buf = (borderWidth_buf_ as string | number | Resource)
+            borderWidthTmpBuf = (borderWidthTmpBuf_ as string | number | Resource)
         }
-        const borderWidth_result : Length | undefined = borderWidth_buf
-        const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeight_buf : number | FontWeight | ResourceStr | undefined
-        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let fontWeight_buf_ : number | FontWeight | ResourceStr | undefined
-            if (fontWeight_buf__selector == (0).toChar()) {
-                fontWeight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (fontWeight_buf__selector == (1).toChar()) {
-                fontWeight_buf_ = TypeChecker.FontWeight_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (fontWeight_buf__selector == (2).toChar()) {
-                const fontWeight_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let fontWeight_buf__u : string | Resource | undefined
-                if (fontWeight_buf__u_selector == (0).toChar()) {
-                    fontWeight_buf__u = (valueDeserializer.readString() as string)
+        const borderWidthTmpResult : Length | undefined = borderWidthTmpBuf
+        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontWeightTmpBuf : number | FontWeight | ResourceStr | undefined
+        if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontWeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let fontWeightTmpBuf_ : number | FontWeight | ResourceStr | undefined
+            if (fontWeightTmpBuf_UnionSelector == (0).toChar()) {
+                fontWeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (fontWeightTmpBuf_UnionSelector == (1).toChar()) {
+                fontWeightTmpBuf_ = TypeChecker.FontWeight_FromNumeric(valueDeserializer.readInt32())
+            } else if (fontWeightTmpBuf_UnionSelector == (2).toChar()) {
+                const fontWeightTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let fontWeightTmpBuf_BufU : string | Resource | undefined
+                if (fontWeightTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    fontWeightTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (fontWeightTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    fontWeightTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for fontWeightTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else if (fontWeight_buf__u_selector == (1).toChar()) {
-                    fontWeight_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for fontWeight_buf__u has to be chosen through deserialisation.")
-                }
-                fontWeight_buf_ = (fontWeight_buf__u as string | Resource)
+                fontWeightTmpBuf_ = (fontWeightTmpBuf_BufU as string | Resource)
+            } else {
+                throw new Error("One of the branches for fontWeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else {
-                throw new Error("One of the branches for fontWeight_buf_ has to be chosen through deserialisation.")
-            }
-            fontWeight_buf = (fontWeight_buf_ as number | FontWeight | ResourceStr)
+            fontWeightTmpBuf = (fontWeightTmpBuf_ as number | FontWeight | ResourceStr)
         }
-        const fontWeight_result : number | FontWeight | ResourceStr | undefined = fontWeight_buf
-        let value : BadgeStyle = ({color: color_result, fontSize: fontSize_result, badgeSize: badgeSize_result, badgeColor: badgeColor_result, borderColor: borderColor_result, borderWidth: borderWidth_result, fontWeight: fontWeight_result} as BadgeStyle)
+        const fontWeightTmpResult : number | FontWeight | ResourceStr | undefined = fontWeightTmpBuf
+        let value : BadgeStyle = ({color: colorTmpResult, fontSize: fontSizeTmpResult, badgeSize: badgeSizeTmpResult, badgeColor: badgeColorTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, fontWeight: fontWeightTmpResult} as BadgeStyle)
         return value
     }
 }
 export class BadgeParamWithNumber_serializer {
     public static write(buffer: SerializerBase, value: BadgeParamWithNumber): void {
         let valueSerializer : SerializerBase = buffer
-        const value_position  = value.position
-        let value_position_type : int32 = RuntimeType.UNDEFINED
-        value_position_type = runtimeType(value_position)
-        valueSerializer.writeInt8((value_position_type).toChar())
-        if ((value_position_type) != (RuntimeType.UNDEFINED)) {
-            const value_position_value  = value_position!
-            let value_position_value_type : int32 = RuntimeType.UNDEFINED
-            value_position_value_type = runtimeType(value_position_value)
-            if (TypeChecker.isBadgePosition(value_position_value)) {
+        const valueHolderForPosition  = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue  = valueHolderForPosition!
+            if (valueHolderForPositionTmpValue instanceof BadgePosition) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_position_value_0  = value_position_value as BadgePosition
-                valueSerializer.writeInt32(TypeChecker.BadgePosition_ToNumeric(value_position_value_0))
-            }
-            else if (RuntimeType.OBJECT == value_position_value_type) {
+                const valueHolderForPositionTmpValueForIdx0  = valueHolderForPositionTmpValue as BadgePosition
+                valueSerializer.writeInt32(TypeChecker.BadgePosition_ToNumeric(valueHolderForPositionTmpValueForIdx0))
+            } else if (valueHolderForPositionTmpValue instanceof Position) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_position_value_1  = value_position_value as Position
-                Position_serializer.write(valueSerializer, value_position_value_1)
+                const valueHolderForPositionTmpValueForIdx1  = valueHolderForPositionTmpValue as Position
+                Position_serializer.write(valueSerializer, valueHolderForPositionTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_style  = value.style
-        BadgeStyle_serializer.write(valueSerializer, value_style)
-        const value_count  = value.count
-        valueSerializer.writeNumber(value_count)
-        const value_maxCount  = value.maxCount
-        let value_maxCount_type : int32 = RuntimeType.UNDEFINED
-        value_maxCount_type = runtimeType(value_maxCount)
-        valueSerializer.writeInt8((value_maxCount_type).toChar())
-        if ((value_maxCount_type) != (RuntimeType.UNDEFINED)) {
-            const value_maxCount_value  = value_maxCount!
-            valueSerializer.writeNumber(value_maxCount_value)
+        const valueHolderForStyle  = value.style
+        BadgeStyle_serializer.write(valueSerializer, valueHolderForStyle)
+        const valueHolderForCount  = value.count
+        valueSerializer.writeNumber(valueHolderForCount)
+        const valueHolderForMaxCount  = value.maxCount
+        if (valueHolderForMaxCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxCountTmpValue  = valueHolderForMaxCount!
+            valueSerializer.writeNumber(valueHolderForMaxCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): BadgeParamWithNumber {
         let valueDeserializer : DeserializerBase = buffer
-        const position_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let position_buf : BadgePosition | Position | undefined
-        if ((position_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const position_buf__selector : int32 = valueDeserializer.readInt8()
-            let position_buf_ : BadgePosition | Position | undefined
-            if (position_buf__selector == (0).toChar()) {
-                position_buf_ = TypeChecker.BadgePosition_FromNumeric(valueDeserializer.readInt32())
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let positionTmpBuf : BadgePosition | Position | undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const positionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let positionTmpBuf_ : BadgePosition | Position | undefined
+            if (positionTmpBuf_UnionSelector == (0).toChar()) {
+                positionTmpBuf_ = TypeChecker.BadgePosition_FromNumeric(valueDeserializer.readInt32())
+            } else if (positionTmpBuf_UnionSelector == (1).toChar()) {
+                positionTmpBuf_ = Position_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for positionTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (position_buf__selector == (1).toChar()) {
-                position_buf_ = Position_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for position_buf_ has to be chosen through deserialisation.")
-            }
-            position_buf = (position_buf_ as BadgePosition | Position)
+            positionTmpBuf = (positionTmpBuf_ as BadgePosition | Position)
         }
-        const position_result : BadgePosition | Position | undefined = position_buf
-        const style_result : BadgeStyle = BadgeStyle_serializer.read(valueDeserializer)
-        const count_result : number = (valueDeserializer.readNumber() as number)
-        const maxCount_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxCount_buf : number | undefined
-        if ((maxCount_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            maxCount_buf = (valueDeserializer.readNumber() as number)
+        const positionTmpResult : BadgePosition | Position | undefined = positionTmpBuf
+        const styleTmpResult : BadgeStyle = BadgeStyle_serializer.read(valueDeserializer)
+        const countTmpResult : number = (valueDeserializer.readNumber() as number)
+        const maxCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maxCountTmpBuf : number | undefined
+        if ((maxCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxCountTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const maxCount_result : number | undefined = maxCount_buf
-        let value : BadgeParamWithNumber = ({position: position_result, style: style_result, count: count_result, maxCount: maxCount_result} as BadgeParamWithNumber)
+        const maxCountTmpResult : number | undefined = maxCountTmpBuf
+        let value : BadgeParamWithNumber = ({position: positionTmpResult, style: styleTmpResult, count: countTmpResult, maxCount: maxCountTmpResult} as BadgeParamWithNumber)
         return value
     }
 }
 export class BadgeParamWithString_serializer {
     public static write(buffer: SerializerBase, value: BadgeParamWithString): void {
         let valueSerializer : SerializerBase = buffer
-        const value_position  = value.position
-        let value_position_type : int32 = RuntimeType.UNDEFINED
-        value_position_type = runtimeType(value_position)
-        valueSerializer.writeInt8((value_position_type).toChar())
-        if ((value_position_type) != (RuntimeType.UNDEFINED)) {
-            const value_position_value  = value_position!
-            let value_position_value_type : int32 = RuntimeType.UNDEFINED
-            value_position_value_type = runtimeType(value_position_value)
-            if (TypeChecker.isBadgePosition(value_position_value)) {
+        const valueHolderForPosition  = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue  = valueHolderForPosition!
+            if (valueHolderForPositionTmpValue instanceof BadgePosition) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_position_value_0  = value_position_value as BadgePosition
-                valueSerializer.writeInt32(TypeChecker.BadgePosition_ToNumeric(value_position_value_0))
-            }
-            else if (RuntimeType.OBJECT == value_position_value_type) {
+                const valueHolderForPositionTmpValueForIdx0  = valueHolderForPositionTmpValue as BadgePosition
+                valueSerializer.writeInt32(TypeChecker.BadgePosition_ToNumeric(valueHolderForPositionTmpValueForIdx0))
+            } else if (valueHolderForPositionTmpValue instanceof Position) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_position_value_1  = value_position_value as Position
-                Position_serializer.write(valueSerializer, value_position_value_1)
+                const valueHolderForPositionTmpValueForIdx1  = valueHolderForPositionTmpValue as Position
+                Position_serializer.write(valueSerializer, valueHolderForPositionTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_style  = value.style
-        BadgeStyle_serializer.write(valueSerializer, value_style)
-        const value_value  = value.value
-        let value_value_type : int32 = RuntimeType.UNDEFINED
-        value_value_type = runtimeType(value_value)
-        if (RuntimeType.STRING == value_value_type) {
+        const valueHolderForStyle  = value.style
+        BadgeStyle_serializer.write(valueSerializer, valueHolderForStyle)
+        const valueHolderForValue  = value.value
+        if (valueHolderForValue instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_value_0  = value_value as string
-            valueSerializer.writeString(value_value_0)
-        }
-        else if (RuntimeType.OBJECT == value_value_type) {
+            const valueHolderForValueForIdx0  = valueHolderForValue as string
+            valueSerializer.writeString(valueHolderForValueForIdx0)
+        } else if (valueHolderForValue instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_value_1  = value_value as Resource
-            Resource_serializer.write(valueSerializer, value_value_1)
+            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
     }
     public static read(buffer: DeserializerBase): BadgeParamWithString {
         let valueDeserializer : DeserializerBase = buffer
-        const position_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let position_buf : BadgePosition | Position | undefined
-        if ((position_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const position_buf__selector : int32 = valueDeserializer.readInt8()
-            let position_buf_ : BadgePosition | Position | undefined
-            if (position_buf__selector == (0).toChar()) {
-                position_buf_ = TypeChecker.BadgePosition_FromNumeric(valueDeserializer.readInt32())
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let positionTmpBuf : BadgePosition | Position | undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const positionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let positionTmpBuf_ : BadgePosition | Position | undefined
+            if (positionTmpBuf_UnionSelector == (0).toChar()) {
+                positionTmpBuf_ = TypeChecker.BadgePosition_FromNumeric(valueDeserializer.readInt32())
+            } else if (positionTmpBuf_UnionSelector == (1).toChar()) {
+                positionTmpBuf_ = Position_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for positionTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (position_buf__selector == (1).toChar()) {
-                position_buf_ = Position_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for position_buf_ has to be chosen through deserialisation.")
-            }
-            position_buf = (position_buf_ as BadgePosition | Position)
+            positionTmpBuf = (positionTmpBuf_ as BadgePosition | Position)
         }
-        const position_result : BadgePosition | Position | undefined = position_buf
-        const style_result : BadgeStyle = BadgeStyle_serializer.read(valueDeserializer)
-        const value_buf_selector : int32 = valueDeserializer.readInt8()
-        let value_buf : string | Resource | undefined
-        if (value_buf_selector == (0).toChar()) {
-            value_buf = (valueDeserializer.readString() as string)
+        const positionTmpResult : BadgePosition | Position | undefined = positionTmpBuf
+        const styleTmpResult : BadgeStyle = BadgeStyle_serializer.read(valueDeserializer)
+        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let valueTmpBuf : string | Resource | undefined
+        if (valueTmpBufUnionSelector == (0).toChar()) {
+            valueTmpBuf = (valueDeserializer.readString() as string)
+        } else if (valueTmpBufUnionSelector == (1).toChar()) {
+            valueTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
         }
-        else if (value_buf_selector == (1).toChar()) {
-            value_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
-        }
-        const value_result : ResourceStr = (value_buf as string | Resource)
-        let value : BadgeParamWithString = ({position: position_result, style: style_result, value: value_result} as BadgeParamWithString)
+        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
+        let value : BadgeParamWithString = ({position: positionTmpResult, style: styleTmpResult, value: valueTmpResult} as BadgeParamWithString)
         return value
     }
 }

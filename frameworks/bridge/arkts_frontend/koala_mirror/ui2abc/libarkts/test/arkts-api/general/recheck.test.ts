@@ -37,7 +37,7 @@ class RenameTestFunction extends arkts.AbstractVisitor {
     visitor(node: arkts.BlockStatement): arkts.BlockStatement
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
-        // Don't change name at checked stage, add another import
+        // Don't change name at checked state, add another import
         if (arkts.isImportDeclaration(node)) return node
         if (arkts.isIdentifier(node) && node.name == "testFunction") {
             return arkts.factory.createIdentifier("testFunctionChanged")
@@ -50,7 +50,7 @@ class RenameTestFunction extends arkts.AbstractVisitor {
 suite(util.basename(__filename), () => {
 
 
-    test("add import at parsed stage and proceed to checked", function() {
+    test("add import at parsed state and proceed to checked", function() {
         createConfig()
 
         const code =

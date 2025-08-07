@@ -12,7 +12,7 @@
         "plugins": [
             {
                 "transform": "../memo-plugin",
-                "stage": "checked",
+                "state": "checked",
                 "name": "memo"
             }
         ]

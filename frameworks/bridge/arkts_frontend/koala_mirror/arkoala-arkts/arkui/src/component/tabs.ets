@@ -17,20 +17,21 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier, Bindable_Number_serializer } from "./common"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Length, ResourceColor, Dimension } from "./units"
 import { EdgeEffect, Color, PageFlipMode } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export interface TabContentTransitionProxy {
     from: number
     to: number
@@ -154,16 +155,16 @@ export class TabsController implements MaterializedBase {
     }
     private preloadItems_serialize(indices: Array<number> | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let indices_type : int32 = RuntimeType.UNDEFINED
-        indices_type = runtimeType(indices)
-        thisSerializer.writeInt8((indices_type).toChar())
-        if ((indices_type) != (RuntimeType.UNDEFINED)) {
-            const indices_value  = indices!
-            thisSerializer.writeInt32((indices_value.length).toInt())
-            for (let indices_value_counter_i = 0; indices_value_counter_i < indices_value.length; indices_value_counter_i++) {
-                const indices_value_element : number = indices_value[indices_value_counter_i]
-                thisSerializer.writeNumber(indices_value_element)
+        if (indices !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const indicesTmpValue  = indices!
+            thisSerializer.writeInt32((indicesTmpValue.length).toInt())
+            for (let indicesTmpValueCounterI = 0; indicesTmpValueCounterI < indicesTmpValue.length; indicesTmpValueCounterI++) {
+                const indicesTmpValueTmpElement : number = indicesTmpValue[indicesTmpValueCounterI]
+                thisSerializer.writeNumber(indicesTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._TabsController_preloadItems(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -187,436 +188,417 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTabsPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Tabs_construct(peerId, flags)
-        const _peer  = new ArkTabsPeer(_peerPtr, peerId, "Tabs", flags)
+        const _peer  = new ArkTabsPeer(_peerPtr, peerId, 'Tabs', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setTabsOptionsAttribute(options?: TabsOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            TabsOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            TabsOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsInterface_setTabsOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setVerticalAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setVertical(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarPositionAttribute(value: BarPosition | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as BarPosition)
-            thisSerializer.writeInt32(TypeChecker.BarPosition_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as BarPosition)
+            thisSerializer.writeInt32(TypeChecker.BarPosition_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setScrollableAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setScrollable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarHeightAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAnimationDurationAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setAnimationDuration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAnimationModeAttribute(value: AnimationMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as AnimationMode)
-            thisSerializer.writeInt32(TypeChecker.AnimationMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as AnimationMode)
+            thisSerializer.writeInt32(TypeChecker.AnimationMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setAnimationMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEdgeEffectAttribute(value: EdgeEffect | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as EdgeEffect)
-            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as EdgeEffect)
+            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setEdgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnChangeAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnSelectedAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnTabBarClickAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnTabBarClick(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnUnselectedAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnUnselected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAnimationStartAttribute(value: OnTabsAnimationStartCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnAnimationStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAnimationEndAttribute(value: OnTabsAnimationEndCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnAnimationEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnGestureSwipeAttribute(value: OnTabsGestureSwipeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnGestureSwipe(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFadingEdgeAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setFadingEdge(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDividerAttribute(value: DividerStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DividerStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DividerStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarOverlapAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarOverlap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarGridAlignAttribute(value: BarGridColumnOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            BarGridColumnOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            BarGridColumnOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarGridAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCustomContentTransitionAttribute(value: TabsCustomContentTransitionCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setCustomContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarBackgroundBlurStyle0Attribute(value: BlurStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as BlurStyle)
-            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPageFlipModeAttribute(value: PageFlipMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as PageFlipMode)
-            thisSerializer.writeInt32(TypeChecker.PageFlipMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as PageFlipMode)
+            thisSerializer.writeInt32(TypeChecker.PageFlipMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setPageFlipMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarBackgroundEffectAttribute(value: BackgroundEffectOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            BackgroundEffectOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            BackgroundEffectOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnContentWillChangeAttribute(value: OnTabsContentWillChangeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnContentWillChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarModeAttribute(value: BarMode | undefined, options?: ScrollableBarModeOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as BarMode)
-            thisSerializer.writeInt32(TypeChecker.BarMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as BarMode)
+            thisSerializer.writeInt32(TypeChecker.BarMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            ScrollableBarModeOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            ScrollableBarModeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarBackgroundBlurStyle1Attribute(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let style_type : int32 = RuntimeType.UNDEFINED
-        style_type = runtimeType(style)
-        thisSerializer.writeInt8((style_type).toChar())
-        if ((style_type) != (RuntimeType.UNDEFINED)) {
-            const style_value  = (style as BlurStyle)
-            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(style_value))
+        if (style !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const styleTmpValue  = (style as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(styleTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            BackgroundBlurStyleOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            BackgroundBlurStyleOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundBlurStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCachedMaxCountAttribute(count: number | undefined, mode: TabsCacheMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let count_type : int32 = RuntimeType.UNDEFINED
-        count_type = runtimeType(count)
-        thisSerializer.writeInt8((count_type).toChar())
-        if ((count_type) != (RuntimeType.UNDEFINED)) {
-            const count_value  = count!
-            thisSerializer.writeNumber(count_value)
+        if (count !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const countTmpValue  = count!
+            thisSerializer.writeNumber(countTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let mode_type : int32 = RuntimeType.UNDEFINED
-        mode_type = runtimeType(mode)
-        thisSerializer.writeInt8((mode_type).toChar())
-        if ((mode_type) != (RuntimeType.UNDEFINED)) {
-            const mode_value  = (mode as TabsCacheMode)
-            thisSerializer.writeInt32(TypeChecker.TabsCacheMode_ToNumeric(mode_value))
+        if (mode !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const modeTmpValue  = (mode as TabsCacheMode)
+            thisSerializer.writeInt32(TypeChecker.TabsCacheMode_ToNumeric(modeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setCachedMaxCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_indexAttribute(callback_: ((value0: number) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._TabsAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -650,7 +632,7 @@ export enum TabsCacheMode {
 }
 export interface TabsOptions {
     barPosition?: BarPosition;
-    index?: number;
+    index?: number | Bindable<number>;
     controller?: TabsController;
 }
 export interface TabsAnimationEvent {
@@ -758,9 +740,6 @@ export interface TabsAttribute extends CommonMethod {
     }
     cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
         throw new Error("Unimplemented method cachedMaxCount")
-    }
-    _onChangeEvent_index(callback_: ((value0: number) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_index")
     }
     attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -877,64 +856,8 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
         return this
     }
-    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: TabsAttribute): void {
-        super.apply(target)
-        if (this.vertical_value !== undefined)
-            target.vertical(this.vertical_value!)
-        if (this.barPosition_value !== undefined)
-            target.barPosition(this.barPosition_value!)
-        if (this.scrollable_value !== undefined)
-            target.scrollable(this.scrollable_value!)
-        if (this.barWidth_value !== undefined)
-            target.barWidth(this.barWidth_value!)
-        if (this.barHeight_value !== undefined)
-            target.barHeight(this.barHeight_value!)
-        if (this.animationDuration_value !== undefined)
-            target.animationDuration(this.animationDuration_value!)
-        if (this.animationMode_value !== undefined)
-            target.animationMode(this.animationMode_value!)
-        if (this.edgeEffect_value !== undefined)
-            target.edgeEffect(this.edgeEffect_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
-        if (this.onSelected_value !== undefined)
-            target.onSelected(this.onSelected_value!)
-        if (this.onTabBarClick_value !== undefined)
-            target.onTabBarClick(this.onTabBarClick_value!)
-        if (this.onUnselected_value !== undefined)
-            target.onUnselected(this.onUnselected_value!)
-        if (this.onAnimationStart_value !== undefined)
-            target.onAnimationStart(this.onAnimationStart_value!)
-        if (this.onAnimationEnd_value !== undefined)
-            target.onAnimationEnd(this.onAnimationEnd_value!)
-        if (this.onGestureSwipe_value !== undefined)
-            target.onGestureSwipe(this.onGestureSwipe_value!)
-        if (this.fadingEdge_value !== undefined)
-            target.fadingEdge(this.fadingEdge_value!)
-        if (this.divider_value !== undefined)
-            target.divider(this.divider_value!)
-        if (this.barOverlap_value !== undefined)
-            target.barOverlap(this.barOverlap_value!)
-        if (this.barBackgroundColor_value !== undefined)
-            target.barBackgroundColor(this.barBackgroundColor_value!)
-        if (this.barGridAlign_value !== undefined)
-            target.barGridAlign(this.barGridAlign_value!)
-        if (this.customContentTransition_value !== undefined)
-            target.customContentTransition(this.customContentTransition_value!)
-        if (this.barBackgroundBlurStyle_value !== undefined)
-            target.barBackgroundBlurStyle(this.barBackgroundBlurStyle_value!)
-        if (this.pageFlipMode_value !== undefined)
-            target.pageFlipMode(this.pageFlipMode_value!)
-        if (this.barBackgroundEffect_value !== undefined)
-            target.barBackgroundEffect(this.barBackgroundEffect_value!)
-        if (this.onContentWillChange_value !== undefined)
-            target.onContentWillChange(this.onContentWillChange_value!)
     }
 }
 export interface TabContentAnimatedTransition {
@@ -1181,16 +1104,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
-        if (this.checkPriority("_onChangeEvent_index")) {
-            const callback__casted = callback_ as (((value0: number) => void))
-            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -1198,26 +1112,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         super.applyAttributesFinish()
     }
 }
-export function withTabsStyle(receiver: TabsAttribute, modifier: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkTabsStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Tabs")
-// export function Tabs(
-//     options?: TabsOptions,
-//     @memo
-//     content_?: () => void,
-// ): TabsAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Tabs(
@@ -1233,271 +1127,1259 @@ export function Tabs(
     NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (_: ArkTabsPeer): void => {
         receiver.setTabsOptions(options)
         style?.(receiver)
-        withTabsStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
+export class TabsModifier extends CommonMethodModifier implements TabsAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _vertical_flag?: boolean
-    _vertical0_value?: boolean | undefined
-    _barPosition_flag?: boolean
-    _barPosition0_value?: BarPosition | undefined
-    _scrollable_flag?: boolean
-    _scrollable0_value?: boolean | undefined
-    _barWidth_flag?: boolean
-    _barWidth0_value?: Length | undefined
-    _barHeight_flag?: boolean
-    _barHeight0_value?: Length | undefined
-    _animationDuration_flag?: boolean
-    _animationDuration0_value?: number | undefined
-    _animationMode_flag?: boolean
-    _animationMode0_value?: AnimationMode | undefined
-    _edgeEffect_flag?: boolean
-    _edgeEffect0_value?: EdgeEffect | undefined
-    _onChange_flag?: boolean
-    _onChange0_value?: ((value0: number) => void) | undefined
-    _onSelected_flag?: boolean
-    _onSelected0_value?: ((value0: number) => void) | undefined
-    _onTabBarClick_flag?: boolean
-    _onTabBarClick0_value?: ((value0: number) => void) | undefined
-    _onUnselected_flag?: boolean
-    _onUnselected0_value?: ((value0: number) => void) | undefined
-    _onAnimationStart_flag?: boolean
-    _onAnimationStart0_value?: OnTabsAnimationStartCallback | undefined
-    _onAnimationEnd_flag?: boolean
-    _onAnimationEnd0_value?: OnTabsAnimationEndCallback | undefined
-    _onGestureSwipe_flag?: boolean
-    _onGestureSwipe0_value?: OnTabsGestureSwipeCallback | undefined
-    _fadingEdge_flag?: boolean
-    _fadingEdge0_value?: boolean | undefined
-    _divider_flag?: boolean
-    _divider0_value?: DividerStyle | undefined
-    _barOverlap_flag?: boolean
-    _barOverlap0_value?: boolean | undefined
-    _barBackgroundColor_flag?: boolean
-    _barBackgroundColor0_value?: ResourceColor | undefined
-    _barGridAlign_flag?: boolean
-    _barGridAlign0_value?: BarGridColumnOptions | undefined
-    _customContentTransition_flag?: boolean
-    _customContentTransition0_value?: TabsCustomContentTransitionCallback | undefined
-    _barBackgroundBlurStyle_flag?: boolean
-    _barBackgroundBlurStyle0_value?: BlurStyle | undefined
-    _barBackgroundBlurStyle1_value?: BackgroundBlurStyleOptions | undefined
-    _pageFlipMode_flag?: boolean
-    _pageFlipMode0_value?: PageFlipMode | undefined
-    _barBackgroundEffect_flag?: boolean
-    _barBackgroundEffect0_value?: BackgroundEffectOptions | undefined
-    _onContentWillChange_flag?: boolean
-    _onContentWillChange0_value?: OnTabsContentWillChangeCallback | undefined
-    _barMode_flag?: boolean
-    _barMode0_value?: BarMode | undefined
-    _barMode1_value?: ScrollableBarModeOptions | undefined
-    _cachedMaxCount_flag?: boolean
-    _cachedMaxCount0_value?: number | undefined
-    _cachedMaxCount1_value?: TabsCacheMode | undefined
-    __onChangeEvent_index_flag?: boolean
-    __onChangeEvent_index0_value?: ((value0: number) => void)
-    applyModifierPatch(component: TabsAttribute): void {
-        if (this._vertical_flag)
-            component.vertical((this._vertical0_value as boolean | undefined))
-        if (this._barPosition_flag)
-            component.barPosition((this._barPosition0_value as BarPosition | undefined))
-        if (this._scrollable_flag)
-            component.scrollable((this._scrollable0_value as boolean | undefined))
-        if (this._barWidth_flag)
-            component.barWidth((this._barWidth0_value as Length | undefined))
-        if (this._barHeight_flag)
-            component.barHeight((this._barHeight0_value as Length | undefined))
-        if (this._animationDuration_flag)
-            component.animationDuration((this._animationDuration0_value as number | undefined))
-        if (this._animationMode_flag)
-            component.animationMode((this._animationMode0_value as AnimationMode | undefined))
-        if (this._edgeEffect_flag)
-            component.edgeEffect((this._edgeEffect0_value as EdgeEffect | undefined))
-        if (this._onChange_flag)
-            component.onChange((this._onChange0_value as ((value0: number) => void) | undefined))
-        if (this._onSelected_flag)
-            component.onSelected((this._onSelected0_value as ((value0: number) => void) | undefined))
-        if (this._onTabBarClick_flag)
-            component.onTabBarClick((this._onTabBarClick0_value as ((value0: number) => void) | undefined))
-        if (this._onUnselected_flag)
-            component.onUnselected((this._onUnselected0_value as ((value0: number) => void) | undefined))
-        if (this._onAnimationStart_flag)
-            component.onAnimationStart((this._onAnimationStart0_value as OnTabsAnimationStartCallback | undefined))
-        if (this._onAnimationEnd_flag)
-            component.onAnimationEnd((this._onAnimationEnd0_value as OnTabsAnimationEndCallback | undefined))
-        if (this._onGestureSwipe_flag)
-            component.onGestureSwipe((this._onGestureSwipe0_value as OnTabsGestureSwipeCallback | undefined))
-        if (this._fadingEdge_flag)
-            component.fadingEdge((this._fadingEdge0_value as boolean | undefined))
-        if (this._divider_flag)
-            component.divider((this._divider0_value as DividerStyle | undefined))
-        if (this._barOverlap_flag)
-            component.barOverlap((this._barOverlap0_value as boolean | undefined))
-        if (this._barBackgroundColor_flag)
-            component.barBackgroundColor((this._barBackgroundColor0_value as ResourceColor | undefined))
-        if (this._barGridAlign_flag)
-            component.barGridAlign((this._barGridAlign0_value as BarGridColumnOptions | undefined))
-        if (this._customContentTransition_flag)
-            component.customContentTransition((this._customContentTransition0_value as TabsCustomContentTransitionCallback | undefined))
-        if (this._barBackgroundBlurStyle_flag)
-            component.barBackgroundBlurStyle((this._barBackgroundBlurStyle0_value as BlurStyle | undefined), (this._barBackgroundBlurStyle1_value as BackgroundBlurStyleOptions | undefined))
-        if (this._pageFlipMode_flag)
-            component.pageFlipMode((this._pageFlipMode0_value as PageFlipMode | undefined))
-        if (this._barBackgroundEffect_flag)
-            component.barBackgroundEffect((this._barBackgroundEffect0_value as BackgroundEffectOptions | undefined))
-        if (this._onContentWillChange_flag)
-            component.onContentWillChange((this._onContentWillChange0_value as OnTabsContentWillChangeCallback | undefined))
-        if (this._barMode_flag)
-            component.barMode((this._barMode0_value as BarMode | undefined), (this._barMode1_value as ScrollableBarModeOptions | undefined))
-        if (this._cachedMaxCount_flag)
-            component.cachedMaxCount((this._cachedMaxCount0_value as number | undefined), (this._cachedMaxCount1_value as TabsCacheMode | undefined))
+    _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _vertical_0_0value?: boolean | undefined
+    _barPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barPosition_0_0value?: BarPosition | undefined
+    _scrollable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollable_0_0value?: boolean | undefined
+    _barWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barWidth_0_0value?: Length | undefined
+    _barHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barHeight_0_0value?: Length | undefined
+    _animationDuration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _animationDuration_0_0value?: number | undefined
+    _animationMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _animationMode_0_0value?: AnimationMode | undefined
+    _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _edgeEffect_0_0value?: EdgeEffect | undefined
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onChange_0_0value?: ((value0: number) => void) | undefined
+    _onSelected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSelected_0_0value?: ((value0: number) => void) | undefined
+    _onTabBarClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onTabBarClick_0_0value?: ((value0: number) => void) | undefined
+    _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onUnselected_0_0value?: ((value0: number) => void) | undefined
+    _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAnimationStart_0_0value?: OnTabsAnimationStartCallback | undefined
+    _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAnimationEnd_0_0value?: OnTabsAnimationEndCallback | undefined
+    _onGestureSwipe_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onGestureSwipe_0_0value?: OnTabsGestureSwipeCallback | undefined
+    _fadingEdge_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fadingEdge_0_0value?: boolean | undefined
+    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _divider_0_0value?: DividerStyle | undefined
+    _barOverlap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barOverlap_0_0value?: boolean | undefined
+    _barBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barBackgroundColor_0_0value?: ResourceColor | undefined
+    _barGridAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barGridAlign_0_0value?: BarGridColumnOptions | undefined
+    _customContentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _customContentTransition_0_0value?: TabsCustomContentTransitionCallback | undefined
+    _barBackgroundBlurStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barBackgroundBlurStyle_0_0value?: BlurStyle | undefined
+    _pageFlipMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pageFlipMode_0_0value?: PageFlipMode | undefined
+    _barBackgroundEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barBackgroundEffect_0_0value?: BackgroundEffectOptions | undefined
+    _onContentWillChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onContentWillChange_0_0value?: OnTabsContentWillChangeCallback | undefined
+    _barMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barMode_0_0value?: BarMode | undefined
+    _barMode_0_1value?: ScrollableBarModeOptions | undefined
+    _barBackgroundBlurStyle_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
+    _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
+    _cachedMaxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cachedMaxCount_0_0value?: number | undefined
+    _cachedMaxCount_0_1value?: TabsCacheMode | undefined
+    applyModifierPatch(peer: ArkTabsPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setVerticalAttribute((this._vertical_0_0value as boolean | undefined));
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setVerticalAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._barPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarPositionAttribute((this._barPosition_0_0value as BarPosition | undefined));
+                    this._barPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarPositionAttribute((undefined as BarPosition | undefined));
+                }
+            }
+        }
+        if (this._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollableAttribute((this._scrollable_0_0value as boolean | undefined));
+                    this._scrollable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollableAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._barWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarWidthAttribute((this._barWidth_0_0value as Length | undefined));
+                    this._barWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarWidthAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarHeightAttribute((this._barHeight_0_0value as Length | undefined));
+                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarHeightAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._animationDuration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._animationDuration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAnimationDurationAttribute((this._animationDuration_0_0value as number | undefined));
+                    this._animationDuration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._animationDuration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._animationDuration_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAnimationDurationAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._animationMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._animationMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAnimationModeAttribute((this._animationMode_0_0value as AnimationMode | undefined));
+                    this._animationMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._animationMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._animationMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAnimationModeAttribute((undefined as AnimationMode | undefined));
+                }
+            }
+        }
+        if (this._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._edgeEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined));
+                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._edgeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined));
+                }
+            }
+        }
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: number) => void) | undefined));
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onSelected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSelected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: number) => void) | undefined));
+                    this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSelected_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSelectedAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onTabBarClick_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onTabBarClick_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnTabBarClickAttribute((this._onTabBarClick_0_0value as ((value0: number) => void) | undefined));
+                    this._onTabBarClick_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onTabBarClick_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onTabBarClick_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnTabBarClickAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onUnselected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onUnselected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: number) => void) | undefined));
+                    this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnUnselectedAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAnimationStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAnimationStartAttribute((this._onAnimationStart_0_0value as OnTabsAnimationStartCallback | undefined));
+                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAnimationStartAttribute((undefined as OnTabsAnimationStartCallback | undefined));
+                }
+            }
+        }
+        if (this._onAnimationEnd_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAnimationEnd_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAnimationEndAttribute((this._onAnimationEnd_0_0value as OnTabsAnimationEndCallback | undefined));
+                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAnimationEndAttribute((undefined as OnTabsAnimationEndCallback | undefined));
+                }
+            }
+        }
+        if (this._onGestureSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onGestureSwipe_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnGestureSwipeAttribute((this._onGestureSwipe_0_0value as OnTabsGestureSwipeCallback | undefined));
+                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnGestureSwipeAttribute((undefined as OnTabsGestureSwipeCallback | undefined));
+                }
+            }
+        }
+        if (this._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fadingEdge_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined));
+                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fadingEdge_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFadingEdgeAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerAttribute((this._divider_0_0value as DividerStyle | undefined));
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerAttribute((undefined as DividerStyle | undefined));
+                }
+            }
+        }
+        if (this._barOverlap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barOverlap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarOverlapAttribute((this._barOverlap_0_0value as boolean | undefined));
+                    this._barOverlap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barOverlap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barOverlap_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarOverlapAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._barBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarBackgroundColorAttribute((this._barBackgroundColor_0_0value as ResourceColor | undefined));
+                    this._barBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._barGridAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barGridAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarGridAlignAttribute((this._barGridAlign_0_0value as BarGridColumnOptions | undefined));
+                    this._barGridAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barGridAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barGridAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarGridAlignAttribute((undefined as BarGridColumnOptions | undefined));
+                }
+            }
+        }
+        if (this._customContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._customContentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCustomContentTransitionAttribute((this._customContentTransition_0_0value as TabsCustomContentTransitionCallback | undefined));
+                    this._customContentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._customContentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._customContentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCustomContentTransitionAttribute((undefined as TabsCustomContentTransitionCallback | undefined));
+                }
+            }
+        }
+        if (this._barBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barBackgroundBlurStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarBackgroundBlurStyle0Attribute((this._barBackgroundBlurStyle_0_0value as BlurStyle | undefined));
+                    this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarBackgroundBlurStyle0Attribute((undefined as BlurStyle | undefined));
+                }
+            }
+        }
+        if (this._pageFlipMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pageFlipMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPageFlipModeAttribute((this._pageFlipMode_0_0value as PageFlipMode | undefined));
+                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPageFlipModeAttribute((undefined as PageFlipMode | undefined));
+                }
+            }
+        }
+        if (this._barBackgroundEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barBackgroundEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarBackgroundEffectAttribute((this._barBackgroundEffect_0_0value as BackgroundEffectOptions | undefined));
+                    this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarBackgroundEffectAttribute((undefined as BackgroundEffectOptions | undefined));
+                }
+            }
+        }
+        if (this._onContentWillChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onContentWillChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnContentWillChangeAttribute((this._onContentWillChange_0_0value as OnTabsContentWillChangeCallback | undefined));
+                    this._onContentWillChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onContentWillChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onContentWillChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnContentWillChangeAttribute((undefined as OnTabsContentWillChangeCallback | undefined));
+                }
+            }
+        }
+        if (this._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined));
+                    this._barMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarModeAttribute((undefined as BarMode | undefined), (undefined as ScrollableBarModeOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._barBackgroundBlurStyle_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barBackgroundBlurStyle_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarBackgroundBlurStyle1Attribute((this._barBackgroundBlurStyle_1_0value as BlurStyle | undefined), (this._barBackgroundBlurStyle_1_1value as BackgroundBlurStyleOptions | undefined));
+                    this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarBackgroundBlurStyle1Attribute((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined));
+                }
+            }
+        }
+        if (this._cachedMaxCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cachedMaxCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCachedMaxCountAttribute((this._cachedMaxCount_0_0value as number | undefined), (this._cachedMaxCount_0_1value as TabsCacheMode | undefined));
+                    this._cachedMaxCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cachedMaxCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cachedMaxCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCachedMaxCountAttribute((undefined as number | undefined), (undefined as TabsCacheMode | undefined));
+                }
+            }
+        }
     }
-    public vertical(value: boolean | undefined): this {
-        this._vertical_flag = true
-        this._vertical0_value = value
+    mergeModifier(modifier: TabsModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.vertical(modifier._vertical_0_0value);
+                    break;
+                }
+                default: {
+                    this.vertical((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._barPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barPosition(modifier._barPosition_0_0value);
+                    break;
+                }
+                default: {
+                    this.barPosition((undefined as BarPosition | undefined));
+                }
+            }
+        }
+        if (modifier._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollable(modifier._scrollable_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollable((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._barWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barWidth(modifier._barWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.barWidth((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barHeight(modifier._barHeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.barHeight((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._animationDuration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._animationDuration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.animationDuration(modifier._animationDuration_0_0value);
+                    break;
+                }
+                default: {
+                    this.animationDuration((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._animationMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._animationMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.animationMode(modifier._animationMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.animationMode((undefined as AnimationMode | undefined));
+                }
+            }
+        }
+        if (modifier._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._edgeEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.edgeEffect(modifier._edgeEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.edgeEffect((undefined as EdgeEffect | undefined));
+                }
+            }
+        }
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onChange(modifier._onChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onSelected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSelected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSelected(modifier._onSelected_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSelected((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onTabBarClick_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onTabBarClick_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onTabBarClick(modifier._onTabBarClick_0_0value);
+                    break;
+                }
+                default: {
+                    this.onTabBarClick((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onUnselected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onUnselected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onUnselected(modifier._onUnselected_0_0value);
+                    break;
+                }
+                default: {
+                    this.onUnselected((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAnimationStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAnimationStart(modifier._onAnimationStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAnimationStart((undefined as OnTabsAnimationStartCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onAnimationEnd_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAnimationEnd_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAnimationEnd(modifier._onAnimationEnd_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAnimationEnd((undefined as OnTabsAnimationEndCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onGestureSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onGestureSwipe_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onGestureSwipe(modifier._onGestureSwipe_0_0value);
+                    break;
+                }
+                default: {
+                    this.onGestureSwipe((undefined as OnTabsGestureSwipeCallback | undefined));
+                }
+            }
+        }
+        if (modifier._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fadingEdge_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fadingEdge(modifier._fadingEdge_0_0value);
+                    break;
+                }
+                default: {
+                    this.fadingEdge((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.divider(modifier._divider_0_0value);
+                    break;
+                }
+                default: {
+                    this.divider((undefined as DividerStyle | undefined));
+                }
+            }
+        }
+        if (modifier._barOverlap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barOverlap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barOverlap(modifier._barOverlap_0_0value);
+                    break;
+                }
+                default: {
+                    this.barOverlap((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._barBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barBackgroundColor(modifier._barBackgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.barBackgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._barGridAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barGridAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barGridAlign(modifier._barGridAlign_0_0value);
+                    break;
+                }
+                default: {
+                    this.barGridAlign((undefined as BarGridColumnOptions | undefined));
+                }
+            }
+        }
+        if (modifier._customContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._customContentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.customContentTransition(modifier._customContentTransition_0_0value);
+                    break;
+                }
+                default: {
+                    this.customContentTransition((undefined as TabsCustomContentTransitionCallback | undefined));
+                }
+            }
+        }
+        if (modifier._barBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barBackgroundBlurStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barBackgroundBlurStyle(modifier._barBackgroundBlurStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.barBackgroundBlurStyle((undefined as BlurStyle | undefined));
+                }
+            }
+        }
+        if (modifier._pageFlipMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pageFlipMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pageFlipMode(modifier._pageFlipMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.pageFlipMode((undefined as PageFlipMode | undefined));
+                }
+            }
+        }
+        if (modifier._barBackgroundEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barBackgroundEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barBackgroundEffect(modifier._barBackgroundEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.barBackgroundEffect((undefined as BackgroundEffectOptions | undefined));
+                }
+            }
+        }
+        if (modifier._onContentWillChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onContentWillChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onContentWillChange(modifier._onContentWillChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onContentWillChange((undefined as OnTabsContentWillChangeCallback | undefined));
+                }
+            }
+        }
+        if (modifier._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barMode(modifier._barMode_0_0value, modifier._barMode_0_1value);
+                    break;
+                }
+                default: {
+                    this.barMode((undefined as BarMode | undefined), (undefined as ScrollableBarModeOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._barBackgroundBlurStyle_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barBackgroundBlurStyle_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barBackgroundBlurStyle(modifier._barBackgroundBlurStyle_1_0value, modifier._barBackgroundBlurStyle_1_1value);
+                    break;
+                }
+                default: {
+                    this.barBackgroundBlurStyle((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined));
+                }
+            }
+        }
+        if (modifier._cachedMaxCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cachedMaxCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cachedMaxCount(modifier._cachedMaxCount_0_0value, modifier._cachedMaxCount_0_1value);
+                    break;
+                }
+                default: {
+                    this.cachedMaxCount((undefined as number | undefined), (undefined as TabsCacheMode | undefined));
+                }
+            }
+        }
+    }
+    vertical(value: boolean | undefined): this {
+        if (((this._vertical_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._vertical_0_0value) !== (value)))
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
+            this._vertical_0_0value = value
+        } else
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barPosition(value: BarPosition | undefined): this {
-        this._barPosition_flag = true
-        this._barPosition0_value = value
+    barPosition(value: BarPosition | undefined): this {
+        if (((this._barPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barPosition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barPosition_0_0value = value
+        } else
+        {
+            this._barPosition_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public scrollable(value: boolean | undefined): this {
-        this._scrollable_flag = true
-        this._scrollable0_value = value
+    scrollable(value: boolean | undefined): this {
+        if (((this._scrollable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollable_0_0value) !== (value)))
+        {
+            this._scrollable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollable_0_0value = value
+        } else
+        {
+            this._scrollable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barWidth(value: Length | undefined): this {
-        this._barWidth_flag = true
-        this._barWidth0_value = value
+    barWidth(value: Length | undefined): this {
+        if (((this._barWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barWidth_0_0value = value
+        } else
+        {
+            this._barWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barHeight(value: Length | undefined): this {
-        this._barHeight_flag = true
-        this._barHeight0_value = value
+    barHeight(value: Length | undefined): this {
+        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barHeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barHeight_0_0value = value
+        } else
+        {
+            this._barHeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public animationDuration(value: number | undefined): this {
-        this._animationDuration_flag = true
-        this._animationDuration0_value = value
+    animationDuration(value: number | undefined): this {
+        if (((this._animationDuration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._animationDuration_0_0value) !== (value)))
+        {
+            this._animationDuration_0_flag = AttributeUpdaterFlag.UPDATE
+            this._animationDuration_0_0value = value
+        } else
+        {
+            this._animationDuration_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public animationMode(value: AnimationMode | undefined): this {
-        this._animationMode_flag = true
-        this._animationMode0_value = value
+    animationMode(value: AnimationMode | undefined): this {
+        if (((this._animationMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._animationMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._animationMode_0_0value = value
+        } else
+        {
+            this._animationMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public edgeEffect(value: EdgeEffect | undefined): this {
-        this._edgeEffect_flag = true
-        this._edgeEffect0_value = value
+    edgeEffect(value: EdgeEffect | undefined): this {
+        if (((this._edgeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._edgeEffect_0_0value = value
+        } else
+        {
+            this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
-        this._onChange_flag = true
-        this._onChange0_value = value
+    onChange(value: ((value0: number) => void) | undefined): this {
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onChange_0_0value = value
+        } else
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onSelected(value: ((value0: number) => void) | undefined): this {
-        this._onSelected_flag = true
-        this._onSelected0_value = value
+    onSelected(value: ((value0: number) => void) | undefined): this {
+        if (((this._onSelected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSelected_0_0value = value
+        } else
+        {
+            this._onSelected_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onTabBarClick(value: ((value0: number) => void) | undefined): this {
-        this._onTabBarClick_flag = true
-        this._onTabBarClick0_value = value
+    onTabBarClick(value: ((value0: number) => void) | undefined): this {
+        if (((this._onTabBarClick_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onTabBarClick_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onTabBarClick_0_0value = value
+        } else
+        {
+            this._onTabBarClick_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onUnselected(value: ((value0: number) => void) | undefined): this {
-        this._onUnselected_flag = true
-        this._onUnselected0_value = value
+    onUnselected(value: ((value0: number) => void) | undefined): this {
+        if (((this._onUnselected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onUnselected_0_0value = value
+        } else
+        {
+            this._onUnselected_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
-        this._onAnimationStart_flag = true
-        this._onAnimationStart0_value = value
+    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
+        if (((this._onAnimationStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAnimationStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAnimationStart_0_0value = value
+        } else
+        {
+            this._onAnimationStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
-        this._onAnimationEnd_flag = true
-        this._onAnimationEnd0_value = value
+    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
+        if (((this._onAnimationEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAnimationEnd_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAnimationEnd_0_0value = value
+        } else
+        {
+            this._onAnimationEnd_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
-        this._onGestureSwipe_flag = true
-        this._onGestureSwipe0_value = value
+    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
+        if (((this._onGestureSwipe_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onGestureSwipe_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onGestureSwipe_0_0value = value
+        } else
+        {
+            this._onGestureSwipe_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fadingEdge(value: boolean | undefined): this {
-        this._fadingEdge_flag = true
-        this._fadingEdge0_value = value
+    fadingEdge(value: boolean | undefined): this {
+        if (((this._fadingEdge_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fadingEdge_0_0value) !== (value)))
+        {
+            this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fadingEdge_0_0value = value
+        } else
+        {
+            this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
-        this._divider_flag = true
-        this._divider0_value = value
+    divider(value: DividerStyle | undefined): this {
+        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+            this._divider_0_0value = value
+        } else
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barOverlap(value: boolean | undefined): this {
-        this._barOverlap_flag = true
-        this._barOverlap0_value = value
+    barOverlap(value: boolean | undefined): this {
+        if (((this._barOverlap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._barOverlap_0_0value) !== (value)))
+        {
+            this._barOverlap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barOverlap_0_0value = value
+        } else
+        {
+            this._barOverlap_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barBackgroundColor(value: ResourceColor | undefined): this {
-        this._barBackgroundColor_flag = true
-        this._barBackgroundColor0_value = value
+    barBackgroundColor(value: ResourceColor | undefined): this {
+        if (((this._barBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barBackgroundColor_0_0value = value
+        } else
+        {
+            this._barBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barGridAlign(value: BarGridColumnOptions | undefined): this {
-        this._barGridAlign_flag = true
-        this._barGridAlign0_value = value
+    barGridAlign(value: BarGridColumnOptions | undefined): this {
+        if (((this._barGridAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barGridAlign_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barGridAlign_0_0value = value
+        } else
+        {
+            this._barGridAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
-        this._customContentTransition_flag = true
-        this._customContentTransition0_value = value
+    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
+        if (((this._customContentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._customContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._customContentTransition_0_0value = value
+        } else
+        {
+            this._customContentTransition_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
-        this._barBackgroundBlurStyle_flag = true
-        this._barBackgroundBlurStyle0_value = style
-        this._barBackgroundBlurStyle1_value = options
+    barBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        if (((this._barBackgroundBlurStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barBackgroundBlurStyle_0_0value = value
+        } else
+        {
+            this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pageFlipMode(value: PageFlipMode | undefined): this {
-        this._pageFlipMode_flag = true
-        this._pageFlipMode0_value = value
+    pageFlipMode(value: PageFlipMode | undefined): this {
+        if (((this._pageFlipMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._pageFlipMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pageFlipMode_0_0value = value
+        } else
+        {
+            this._pageFlipMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
-        this._barBackgroundEffect_flag = true
-        this._barBackgroundEffect0_value = value
+    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        if (((this._barBackgroundEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barBackgroundEffect_0_0value = value
+        } else
+        {
+            this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
-        this._onContentWillChange_flag = true
-        this._onContentWillChange0_value = value
+    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
+        if (((this._onContentWillChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onContentWillChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onContentWillChange_0_0value = value
+        } else
+        {
+            this._onContentWillChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
-        this._barMode_flag = true
-        this._barMode0_value = value
-        this._barMode1_value = options
+    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
+        if (((this._barMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._barMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barMode_0_0value = value
+            this._barMode_0_1value = options
+        } else
+        {
+            this._barMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
-        this._cachedMaxCount_flag = true
-        this._cachedMaxCount0_value = count
-        this._cachedMaxCount1_value = mode
+    barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
+        if (((this._barBackgroundBlurStyle_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.UPDATE
+            this._barBackgroundBlurStyle_1_0value = style
+            this._barBackgroundBlurStyle_1_1value = options
+        } else
+        {
+            this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+        if (((this._cachedMaxCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedMaxCount_0_0value) !== (count)) || (true))
+        {
+            this._cachedMaxCount_0_flag = AttributeUpdaterFlag.UPDATE
+            this._cachedMaxCount_0_0value = count
+            this._cachedMaxCount_0_1value = mode
+        } else
+        {
+            this._cachedMaxCount_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1517,19 +2399,19 @@ export class TabContentTransitionProxy_serializer {
 export class TabsAnimationEvent_serializer {
     public static write(buffer: SerializerBase, value: TabsAnimationEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const value_currentOffset  = value.currentOffset
-        valueSerializer.writeNumber(value_currentOffset)
-        const value_targetOffset  = value.targetOffset
-        valueSerializer.writeNumber(value_targetOffset)
-        const value_velocity  = value.velocity
-        valueSerializer.writeNumber(value_velocity)
+        const valueHolderForCurrentOffset  = value.currentOffset
+        valueSerializer.writeNumber(valueHolderForCurrentOffset)
+        const valueHolderForTargetOffset  = value.targetOffset
+        valueSerializer.writeNumber(valueHolderForTargetOffset)
+        const valueHolderForVelocity  = value.velocity
+        valueSerializer.writeNumber(valueHolderForVelocity)
     }
     public static read(buffer: DeserializerBase): TabsAnimationEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const currentOffset_result : number = (valueDeserializer.readNumber() as number)
-        const targetOffset_result : number = (valueDeserializer.readNumber() as number)
-        const velocity_result : number = (valueDeserializer.readNumber() as number)
-        let value : TabsAnimationEvent = ({currentOffset: currentOffset_result, targetOffset: targetOffset_result, velocity: velocity_result} as TabsAnimationEvent)
+        const currentOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const targetOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const velocityTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : TabsAnimationEvent = ({currentOffset: currentOffsetTmpResult, targetOffset: targetOffsetTmpResult, velocity: velocityTmpResult} as TabsAnimationEvent)
         return value
     }
 }
@@ -1547,309 +2429,295 @@ export class TabsController_serializer {
 export class TabContentAnimatedTransition_serializer {
     public static write(buffer: SerializerBase, value: TabContentAnimatedTransition): void {
         let valueSerializer : SerializerBase = buffer
-        const value_timeout  = value.timeout
-        let value_timeout_type : int32 = RuntimeType.UNDEFINED
-        value_timeout_type = runtimeType(value_timeout)
-        valueSerializer.writeInt8((value_timeout_type).toChar())
-        if ((value_timeout_type) != (RuntimeType.UNDEFINED)) {
-            const value_timeout_value  = value_timeout!
-            valueSerializer.writeNumber(value_timeout_value)
+        const valueHolderForTimeout  = value.timeout
+        if (valueHolderForTimeout !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTimeoutTmpValue  = valueHolderForTimeout!
+            valueSerializer.writeNumber(valueHolderForTimeoutTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_transition  = value.transition
-        valueSerializer.holdAndWriteCallback(value_transition)
+        const valueHolderForTransition  = value.transition
+        valueSerializer.holdAndWriteCallback(valueHolderForTransition)
     }
     public static read(buffer: DeserializerBase): TabContentAnimatedTransition {
         let valueDeserializer : DeserializerBase = buffer
-        const timeout_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let timeout_buf : number | undefined
-        if ((timeout_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            timeout_buf = (valueDeserializer.readNumber() as number)
+        const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let timeoutTmpBuf : number | undefined
+        if ((timeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            timeoutTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const timeout_result : number | undefined = timeout_buf
-        const transition_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const transition_buf_call : KPointer = valueDeserializer.readPointer()
-        const transition_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const transition_result : ((value0: TabContentTransitionProxy) => void) = (value0: TabContentTransitionProxy):void => { 
-    const transition_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    transition_buf_argsSerializer.writeInt32(transition_buf_resource.resourceId);
-    transition_buf_argsSerializer.writePointer(transition_buf_call);
-    transition_buf_argsSerializer.writePointer(transition_buf_callSync);
-    TabContentTransitionProxy_serializer.write(transition_buf_argsSerializer, value0);
-    InteropNativeModule._CallCallback(-1223938478, transition_buf_argsSerializer.asBuffer(), transition_buf_argsSerializer.length());
-    transition_buf_argsSerializer.release();
-    return; }
-        let value : TabContentAnimatedTransition = ({timeout: timeout_result, transition: transition_result} as TabContentAnimatedTransition)
+        const timeoutTmpResult : number | undefined = timeoutTmpBuf
+        const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const transitionTmpResult : ((value0: TabContentTransitionProxy) => void) = (value0: TabContentTransitionProxy):void => {
+            const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
+            transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
+            transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
+            TabContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, value0);
+            InteropNativeModule._CallCallback(-1223938478, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            transitionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : TabContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as TabContentAnimatedTransition)
         return value
     }
 }
 export class TabsOptions_serializer {
     public static write(buffer: SerializerBase, value: TabsOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_barPosition  = value.barPosition
-        let value_barPosition_type : int32 = RuntimeType.UNDEFINED
-        value_barPosition_type = runtimeType(value_barPosition)
-        valueSerializer.writeInt8((value_barPosition_type).toChar())
-        if ((value_barPosition_type) != (RuntimeType.UNDEFINED)) {
-            const value_barPosition_value  = (value_barPosition as BarPosition)
-            valueSerializer.writeInt32(TypeChecker.BarPosition_ToNumeric(value_barPosition_value))
+        const valueHolderForBarPosition  = value.barPosition
+        if (valueHolderForBarPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBarPositionTmpValue  = (valueHolderForBarPosition as BarPosition)
+            valueSerializer.writeInt32(TypeChecker.BarPosition_ToNumeric(valueHolderForBarPositionTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_index  = value.index
-        let value_index_type : int32 = RuntimeType.UNDEFINED
-        value_index_type = runtimeType(value_index)
-        valueSerializer.writeInt8((value_index_type).toChar())
-        if ((value_index_type) != (RuntimeType.UNDEFINED)) {
-            const value_index_value  = value_index!
-            valueSerializer.writeNumber(value_index_value)
+        const valueHolderForIndex  = value.index
+        if (valueHolderForIndex !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIndexTmpValue  = valueHolderForIndex!
+            if (valueHolderForIndexTmpValue instanceof number) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as number
+                valueSerializer.writeNumber(valueHolderForIndexTmpValueForIdx0)
+            } else if (valueHolderForIndexTmpValue instanceof Bindable<number>) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<number>
+                Bindable_Number_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
-            const value_controller_value  = value_controller!
-            TabsController_serializer.write(valueSerializer, value_controller_value)
+        const valueHolderForController  = value.controller
+        if (valueHolderForController !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForControllerTmpValue  = valueHolderForController!
+            TabsController_serializer.write(valueSerializer, valueHolderForControllerTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TabsOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const barPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let barPosition_buf : BarPosition | undefined
-        if ((barPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            barPosition_buf = TypeChecker.BarPosition_FromNumeric(valueDeserializer.readInt32())
+        const barPositionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let barPositionTmpBuf : BarPosition | undefined
+        if ((barPositionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            barPositionTmpBuf = TypeChecker.BarPosition_FromNumeric(valueDeserializer.readInt32())
         }
-        const barPosition_result : BarPosition | undefined = barPosition_buf
-        const index_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let index_buf : number | undefined
-        if ((index_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            index_buf = (valueDeserializer.readNumber() as number)
+        const barPositionTmpResult : BarPosition | undefined = barPositionTmpBuf
+        const indexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let indexTmpBuf : number | Bindable<number> | undefined
+        if ((indexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const indexTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let indexTmpBuf_ : number | Bindable<number> | undefined
+            if (indexTmpBuf_UnionSelector == (0).toChar()) {
+                indexTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (indexTmpBuf_UnionSelector == (1).toChar()) {
+                indexTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for indexTmpBuf_ has to be chosen through deserialisation.")
+            }
+            indexTmpBuf = (indexTmpBuf_ as number | Bindable<number>)
         }
-        const index_result : number | undefined = index_buf
-        const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let controller_buf : TabsController | undefined
-        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            controller_buf = (TabsController_serializer.read(valueDeserializer) as TabsController)
+        const indexTmpResult : number | Bindable<number> | undefined = indexTmpBuf
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let controllerTmpBuf : TabsController | undefined
+        if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            controllerTmpBuf = (TabsController_serializer.read(valueDeserializer) as TabsController)
         }
-        const controller_result : TabsController | undefined = controller_buf
-        let value : TabsOptions = ({barPosition: barPosition_result, index: index_result, controller: controller_result} as TabsOptions)
+        const controllerTmpResult : TabsController | undefined = controllerTmpBuf
+        let value : TabsOptions = ({barPosition: barPositionTmpResult, index: indexTmpResult, controller: controllerTmpResult} as TabsOptions)
         return value
     }
 }
 export class BarGridColumnOptions_serializer {
     public static write(buffer: SerializerBase, value: BarGridColumnOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_sm  = value.sm
-        let value_sm_type : int32 = RuntimeType.UNDEFINED
-        value_sm_type = runtimeType(value_sm)
-        valueSerializer.writeInt8((value_sm_type).toChar())
-        if ((value_sm_type) != (RuntimeType.UNDEFINED)) {
-            const value_sm_value  = value_sm!
-            valueSerializer.writeNumber(value_sm_value)
+        const valueHolderForSm  = value.sm
+        if (valueHolderForSm !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSmTmpValue  = valueHolderForSm!
+            valueSerializer.writeNumber(valueHolderForSmTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_md  = value.md
-        let value_md_type : int32 = RuntimeType.UNDEFINED
-        value_md_type = runtimeType(value_md)
-        valueSerializer.writeInt8((value_md_type).toChar())
-        if ((value_md_type) != (RuntimeType.UNDEFINED)) {
-            const value_md_value  = value_md!
-            valueSerializer.writeNumber(value_md_value)
+        const valueHolderForMd  = value.md
+        if (valueHolderForMd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMdTmpValue  = valueHolderForMd!
+            valueSerializer.writeNumber(valueHolderForMdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_lg  = value.lg
-        let value_lg_type : int32 = RuntimeType.UNDEFINED
-        value_lg_type = runtimeType(value_lg)
-        valueSerializer.writeInt8((value_lg_type).toChar())
-        if ((value_lg_type) != (RuntimeType.UNDEFINED)) {
-            const value_lg_value  = value_lg!
-            valueSerializer.writeNumber(value_lg_value)
+        const valueHolderForLg  = value.lg
+        if (valueHolderForLg !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLgTmpValue  = valueHolderForLg!
+            valueSerializer.writeNumber(valueHolderForLgTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_margin  = value.margin
-        let value_margin_type : int32 = RuntimeType.UNDEFINED
-        value_margin_type = runtimeType(value_margin)
-        valueSerializer.writeInt8((value_margin_type).toChar())
-        if ((value_margin_type) != (RuntimeType.UNDEFINED)) {
-            const value_margin_value  = value_margin!
-            let value_margin_value_type : int32 = RuntimeType.UNDEFINED
-            value_margin_value_type = runtimeType(value_margin_value)
-            if (RuntimeType.STRING == value_margin_value_type) {
+        const valueHolderForMargin  = value.margin
+        if (valueHolderForMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarginTmpValue  = valueHolderForMargin!
+            if (valueHolderForMarginTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_margin_value_0  = value_margin_value as string
-                valueSerializer.writeString(value_margin_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_margin_value_type) {
+                const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as string
+                valueSerializer.writeString(valueHolderForMarginTmpValueForIdx0)
+            } else if (valueHolderForMarginTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_margin_value_1  = value_margin_value as number
-                valueSerializer.writeNumber(value_margin_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_margin_value_type) {
+                const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as number
+                valueSerializer.writeNumber(valueHolderForMarginTmpValueForIdx1)
+            } else if (valueHolderForMarginTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_margin_value_2  = value_margin_value as Resource
-                Resource_serializer.write(valueSerializer, value_margin_value_2)
+                const valueHolderForMarginTmpValueForIdx2  = valueHolderForMarginTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_gutter  = value.gutter
-        let value_gutter_type : int32 = RuntimeType.UNDEFINED
-        value_gutter_type = runtimeType(value_gutter)
-        valueSerializer.writeInt8((value_gutter_type).toChar())
-        if ((value_gutter_type) != (RuntimeType.UNDEFINED)) {
-            const value_gutter_value  = value_gutter!
-            let value_gutter_value_type : int32 = RuntimeType.UNDEFINED
-            value_gutter_value_type = runtimeType(value_gutter_value)
-            if (RuntimeType.STRING == value_gutter_value_type) {
+        const valueHolderForGutter  = value.gutter
+        if (valueHolderForGutter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGutterTmpValue  = valueHolderForGutter!
+            if (valueHolderForGutterTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_gutter_value_0  = value_gutter_value as string
-                valueSerializer.writeString(value_gutter_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_gutter_value_type) {
+                const valueHolderForGutterTmpValueForIdx0  = valueHolderForGutterTmpValue as string
+                valueSerializer.writeString(valueHolderForGutterTmpValueForIdx0)
+            } else if (valueHolderForGutterTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_gutter_value_1  = value_gutter_value as number
-                valueSerializer.writeNumber(value_gutter_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_gutter_value_type) {
+                const valueHolderForGutterTmpValueForIdx1  = valueHolderForGutterTmpValue as number
+                valueSerializer.writeNumber(valueHolderForGutterTmpValueForIdx1)
+            } else if (valueHolderForGutterTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_gutter_value_2  = value_gutter_value as Resource
-                Resource_serializer.write(valueSerializer, value_gutter_value_2)
+                const valueHolderForGutterTmpValueForIdx2  = valueHolderForGutterTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForGutterTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): BarGridColumnOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const sm_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let sm_buf : number | undefined
-        if ((sm_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            sm_buf = (valueDeserializer.readNumber() as number)
+        const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let smTmpBuf : number | undefined
+        if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            smTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const sm_result : number | undefined = sm_buf
-        const md_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let md_buf : number | undefined
-        if ((md_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            md_buf = (valueDeserializer.readNumber() as number)
+        const smTmpResult : number | undefined = smTmpBuf
+        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mdTmpBuf : number | undefined
+        if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            mdTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const md_result : number | undefined = md_buf
-        const lg_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lg_buf : number | undefined
-        if ((lg_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            lg_buf = (valueDeserializer.readNumber() as number)
+        const mdTmpResult : number | undefined = mdTmpBuf
+        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let lgTmpBuf : number | undefined
+        if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            lgTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const lg_result : number | undefined = lg_buf
-        const margin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let margin_buf : Dimension | undefined
-        if ((margin_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const margin_buf__selector : int32 = valueDeserializer.readInt8()
-            let margin_buf_ : string | number | Resource | undefined
-            if (margin_buf__selector == (0).toChar()) {
-                margin_buf_ = (valueDeserializer.readString() as string)
+        const lgTmpResult : number | undefined = lgTmpBuf
+        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marginTmpBuf : Dimension | undefined
+        if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const marginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let marginTmpBuf_ : string | number | Resource | undefined
+            if (marginTmpBuf_UnionSelector == (0).toChar()) {
+                marginTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (marginTmpBuf_UnionSelector == (1).toChar()) {
+                marginTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (marginTmpBuf_UnionSelector == (2).toChar()) {
+                marginTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for marginTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (margin_buf__selector == (1).toChar()) {
-                margin_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (margin_buf__selector == (2).toChar()) {
-                margin_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for margin_buf_ has to be chosen through deserialisation.")
-            }
-            margin_buf = (margin_buf_ as string | number | Resource)
+            marginTmpBuf = (marginTmpBuf_ as string | number | Resource)
         }
-        const margin_result : Dimension | undefined = margin_buf
-        const gutter_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gutter_buf : Dimension | undefined
-        if ((gutter_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const gutter_buf__selector : int32 = valueDeserializer.readInt8()
-            let gutter_buf_ : string | number | Resource | undefined
-            if (gutter_buf__selector == (0).toChar()) {
-                gutter_buf_ = (valueDeserializer.readString() as string)
+        const marginTmpResult : Dimension | undefined = marginTmpBuf
+        const gutterTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let gutterTmpBuf : Dimension | undefined
+        if ((gutterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const gutterTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let gutterTmpBuf_ : string | number | Resource | undefined
+            if (gutterTmpBuf_UnionSelector == (0).toChar()) {
+                gutterTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (gutterTmpBuf_UnionSelector == (1).toChar()) {
+                gutterTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (gutterTmpBuf_UnionSelector == (2).toChar()) {
+                gutterTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for gutterTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (gutter_buf__selector == (1).toChar()) {
-                gutter_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (gutter_buf__selector == (2).toChar()) {
-                gutter_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for gutter_buf_ has to be chosen through deserialisation.")
-            }
-            gutter_buf = (gutter_buf_ as string | number | Resource)
+            gutterTmpBuf = (gutterTmpBuf_ as string | number | Resource)
         }
-        const gutter_result : Dimension | undefined = gutter_buf
-        let value : BarGridColumnOptions = ({sm: sm_result, md: md_result, lg: lg_result, margin: margin_result, gutter: gutter_result} as BarGridColumnOptions)
+        const gutterTmpResult : Dimension | undefined = gutterTmpBuf
+        let value : BarGridColumnOptions = ({sm: smTmpResult, md: mdTmpResult, lg: lgTmpResult, margin: marginTmpResult, gutter: gutterTmpResult} as BarGridColumnOptions)
         return value
     }
 }
 export class ScrollableBarModeOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollableBarModeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_margin  = value.margin
-        let value_margin_type : int32 = RuntimeType.UNDEFINED
-        value_margin_type = runtimeType(value_margin)
-        valueSerializer.writeInt8((value_margin_type).toChar())
-        if ((value_margin_type) != (RuntimeType.UNDEFINED)) {
-            const value_margin_value  = value_margin!
-            let value_margin_value_type : int32 = RuntimeType.UNDEFINED
-            value_margin_value_type = runtimeType(value_margin_value)
-            if (RuntimeType.STRING == value_margin_value_type) {
+        const valueHolderForMargin  = value.margin
+        if (valueHolderForMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarginTmpValue  = valueHolderForMargin!
+            if (valueHolderForMarginTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_margin_value_0  = value_margin_value as string
-                valueSerializer.writeString(value_margin_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_margin_value_type) {
+                const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as string
+                valueSerializer.writeString(valueHolderForMarginTmpValueForIdx0)
+            } else if (valueHolderForMarginTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_margin_value_1  = value_margin_value as number
-                valueSerializer.writeNumber(value_margin_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_margin_value_type) {
+                const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as number
+                valueSerializer.writeNumber(valueHolderForMarginTmpValueForIdx1)
+            } else if (valueHolderForMarginTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_margin_value_2  = value_margin_value as Resource
-                Resource_serializer.write(valueSerializer, value_margin_value_2)
+                const valueHolderForMarginTmpValueForIdx2  = valueHolderForMarginTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_nonScrollableLayoutStyle  = value.nonScrollableLayoutStyle
-        let value_nonScrollableLayoutStyle_type : int32 = RuntimeType.UNDEFINED
-        value_nonScrollableLayoutStyle_type = runtimeType(value_nonScrollableLayoutStyle)
-        valueSerializer.writeInt8((value_nonScrollableLayoutStyle_type).toChar())
-        if ((value_nonScrollableLayoutStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_nonScrollableLayoutStyle_value  = (value_nonScrollableLayoutStyle as LayoutStyle)
-            valueSerializer.writeInt32(TypeChecker.LayoutStyle_ToNumeric(value_nonScrollableLayoutStyle_value))
+        const valueHolderForNonScrollableLayoutStyle  = value.nonScrollableLayoutStyle
+        if (valueHolderForNonScrollableLayoutStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNonScrollableLayoutStyleTmpValue  = (valueHolderForNonScrollableLayoutStyle as LayoutStyle)
+            valueSerializer.writeInt32(TypeChecker.LayoutStyle_ToNumeric(valueHolderForNonScrollableLayoutStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollableBarModeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const margin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let margin_buf : Dimension | undefined
-        if ((margin_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const margin_buf__selector : int32 = valueDeserializer.readInt8()
-            let margin_buf_ : string | number | Resource | undefined
-            if (margin_buf__selector == (0).toChar()) {
-                margin_buf_ = (valueDeserializer.readString() as string)
+        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marginTmpBuf : Dimension | undefined
+        if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const marginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let marginTmpBuf_ : string | number | Resource | undefined
+            if (marginTmpBuf_UnionSelector == (0).toChar()) {
+                marginTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (marginTmpBuf_UnionSelector == (1).toChar()) {
+                marginTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (marginTmpBuf_UnionSelector == (2).toChar()) {
+                marginTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for marginTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (margin_buf__selector == (1).toChar()) {
-                margin_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (margin_buf__selector == (2).toChar()) {
-                margin_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for margin_buf_ has to be chosen through deserialisation.")
-            }
-            margin_buf = (margin_buf_ as string | number | Resource)
+            marginTmpBuf = (marginTmpBuf_ as string | number | Resource)
         }
-        const margin_result : Dimension | undefined = margin_buf
-        const nonScrollableLayoutStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let nonScrollableLayoutStyle_buf : LayoutStyle | undefined
-        if ((nonScrollableLayoutStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            nonScrollableLayoutStyle_buf = TypeChecker.LayoutStyle_FromNumeric(valueDeserializer.readInt32())
+        const marginTmpResult : Dimension | undefined = marginTmpBuf
+        const nonScrollableLayoutStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let nonScrollableLayoutStyleTmpBuf : LayoutStyle | undefined
+        if ((nonScrollableLayoutStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            nonScrollableLayoutStyleTmpBuf = TypeChecker.LayoutStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const nonScrollableLayoutStyle_result : LayoutStyle | undefined = nonScrollableLayoutStyle_buf
-        let value : ScrollableBarModeOptions = ({margin: margin_result, nonScrollableLayoutStyle: nonScrollableLayoutStyle_result} as ScrollableBarModeOptions)
+        const nonScrollableLayoutStyleTmpResult : LayoutStyle | undefined = nonScrollableLayoutStyleTmpBuf
+        let value : ScrollableBarModeOptions = ({margin: marginTmpResult, nonScrollableLayoutStyle: nonScrollableLayoutStyleTmpResult} as ScrollableBarModeOptions)
         return value
     }
 }

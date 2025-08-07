@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Assert as assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 
 function checkKind(actual: string, expected: string) {
     assert.equal(actual, expected)

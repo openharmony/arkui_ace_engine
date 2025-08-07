@@ -16,19 +16,20 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { LengthMetrics, ColorMetrics, LengthMetrics_serializer, ColorMetrics_serializer } from "./../generated/arkui.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class LinearIndicatorControllerInternal {
     public static fromPtr(ptr: KPointer): LinearIndicatorController {
         return new LinearIndicatorController(ptr)
@@ -76,12 +77,12 @@ export class LinearIndicatorController implements MaterializedBase {
     }
     private start_serialize(options?: LinearIndicatorStartOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            LinearIndicatorStartOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            LinearIndicatorStartOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LinearIndicatorController_start(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -100,61 +101,61 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkLinearIndicatorPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._LinearIndicator_construct(peerId, flags)
-        const _peer  = new ArkLinearIndicatorPeer(_peerPtr, peerId, "LinearIndicator", flags)
+        const _peer  = new ArkLinearIndicatorPeer(_peerPtr, peerId, 'LinearIndicator', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setLinearIndicatorOptionsAttribute(count?: number, controller?: LinearIndicatorController): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let count_type : int32 = RuntimeType.UNDEFINED
-        count_type = runtimeType(count)
-        thisSerializer.writeInt8((count_type).toChar())
-        if ((count_type) != (RuntimeType.UNDEFINED)) {
-            const count_value  = count!
-            thisSerializer.writeNumber(count_value)
+        if (count !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const countTmpValue  = count!
+            thisSerializer.writeNumber(countTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let controller_type : int32 = RuntimeType.UNDEFINED
-        controller_type = runtimeType(controller)
-        thisSerializer.writeInt8((controller_type).toChar())
-        if ((controller_type) != (RuntimeType.UNDEFINED)) {
-            const controller_value  = controller!
-            LinearIndicatorController_serializer.write(thisSerializer, controller_value)
+        if (controller !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const controllerTmpValue  = controller!
+            LinearIndicatorController_serializer.write(thisSerializer, controllerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LinearIndicatorInterface_setLinearIndicatorOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIndicatorStyleAttribute(value: LinearIndicatorStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            LinearIndicatorStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LinearIndicatorStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LinearIndicatorAttribute_setIndicatorStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIndicatorLoopAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LinearIndicatorAttribute_setIndicatorLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnChangeAttribute(value: OnLinearIndicatorChangeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LinearIndicatorAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -202,15 +203,6 @@ export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements Lin
     public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: LinearIndicatorAttribute): void {
-        super.apply(target)
-        if (this.indicatorStyle_value !== undefined)
-            target.indicatorStyle(this.indicatorStyle_value!)
-        if (this.indicatorLoop_value !== undefined)
-            target.indicatorLoop(this.indicatorLoop_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
-    }
 }
 export type OnLinearIndicatorChangeCallback = (index: number, progress: number) => void;
 
@@ -252,7 +244,6 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -260,26 +251,6 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         super.applyAttributesFinish()
     }
 }
-export function withLinearIndicatorStyle(receiver: LinearIndicatorAttribute, modifier: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkLinearIndicatorStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("LinearIndicator")
-// export function LinearIndicator(
-//     count?: number, controller?: LinearIndicatorController,
-//     @memo
-//     content_?: () => void,
-// ): LinearIndicatorAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function LinearIndicator(
@@ -295,44 +266,152 @@ export function LinearIndicator(
     NodeAttach<ArkLinearIndicatorPeer>((): ArkLinearIndicatorPeer => ArkLinearIndicatorPeer.create(receiver), (_: ArkLinearIndicatorPeer): void => {
         receiver.setLinearIndicatorOptions(count,controller)
         style?.(receiver)
-        withLinearIndicatorStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkLinearIndicatorSet extends ArkCommonMethodSet implements LinearIndicatorAttribute {
+export class LinearIndicatorModifier extends CommonMethodModifier implements LinearIndicatorAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _indicatorStyle_flag?: boolean
-    _indicatorStyle0_value?: LinearIndicatorStyle | undefined
-    _indicatorLoop_flag?: boolean
-    _indicatorLoop0_value?: boolean | undefined
-    _onChange_flag?: boolean
-    _onChange0_value?: OnLinearIndicatorChangeCallback | undefined
-    applyModifierPatch(component: LinearIndicatorAttribute): void {
-        if (this._indicatorStyle_flag)
-            component.indicatorStyle((this._indicatorStyle0_value as LinearIndicatorStyle | undefined))
-        if (this._indicatorLoop_flag)
-            component.indicatorLoop((this._indicatorLoop0_value as boolean | undefined))
-        if (this._onChange_flag)
-            component.onChange((this._onChange0_value as OnLinearIndicatorChangeCallback | undefined))
+    _indicatorStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _indicatorStyle_0_0value?: LinearIndicatorStyle | undefined
+    _indicatorLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _indicatorLoop_0_0value?: boolean | undefined
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onChange_0_0value?: OnLinearIndicatorChangeCallback | undefined
+    applyModifierPatch(peer: ArkLinearIndicatorPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._indicatorStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._indicatorStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIndicatorStyleAttribute((this._indicatorStyle_0_0value as LinearIndicatorStyle | undefined));
+                    this._indicatorStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._indicatorStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._indicatorStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIndicatorStyleAttribute((undefined as LinearIndicatorStyle | undefined));
+                }
+            }
+        }
+        if (this._indicatorLoop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._indicatorLoop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIndicatorLoopAttribute((this._indicatorLoop_0_0value as boolean | undefined));
+                    this._indicatorLoop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._indicatorLoop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._indicatorLoop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIndicatorLoopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as OnLinearIndicatorChangeCallback | undefined));
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnChangeAttribute((undefined as OnLinearIndicatorChangeCallback | undefined));
+                }
+            }
+        }
     }
-    public indicatorStyle(value: LinearIndicatorStyle | undefined): this {
-        this._indicatorStyle_flag = true
-        this._indicatorStyle0_value = value
+    mergeModifier(modifier: LinearIndicatorModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._indicatorStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._indicatorStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.indicatorStyle(modifier._indicatorStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.indicatorStyle((undefined as LinearIndicatorStyle | undefined));
+                }
+            }
+        }
+        if (modifier._indicatorLoop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._indicatorLoop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.indicatorLoop(modifier._indicatorLoop_0_0value);
+                    break;
+                }
+                default: {
+                    this.indicatorLoop((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onChange(modifier._onChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as OnLinearIndicatorChangeCallback | undefined));
+                }
+            }
+        }
+    }
+    indicatorStyle(value: LinearIndicatorStyle | undefined): this {
+        if (((this._indicatorStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._indicatorStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._indicatorStyle_0_0value = value
+        } else
+        {
+            this._indicatorStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public indicatorLoop(value: boolean | undefined): this {
-        this._indicatorLoop_flag = true
-        this._indicatorLoop0_value = value
+    indicatorLoop(value: boolean | undefined): this {
+        if (((this._indicatorLoop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._indicatorLoop_0_0value) !== (value)))
+        {
+            this._indicatorLoop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._indicatorLoop_0_0value = value
+        } else
+        {
+            this._indicatorLoop_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
-        this._onChange_flag = true
-        this._onChange0_value = value
+    onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onChange_0_0value = value
+        } else
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -353,125 +432,118 @@ export class LinearIndicatorController_serializer {
 export class LinearIndicatorStartOptions_serializer {
     public static write(buffer: SerializerBase, value: LinearIndicatorStartOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_interval  = value.interval
-        let value_interval_type : int32 = RuntimeType.UNDEFINED
-        value_interval_type = runtimeType(value_interval)
-        valueSerializer.writeInt8((value_interval_type).toChar())
-        if ((value_interval_type) != (RuntimeType.UNDEFINED)) {
-            const value_interval_value  = value_interval!
-            valueSerializer.writeNumber(value_interval_value)
+        const valueHolderForInterval  = value.interval
+        if (valueHolderForInterval !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIntervalTmpValue  = valueHolderForInterval!
+            valueSerializer.writeNumber(valueHolderForIntervalTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_duration  = value.duration
-        let value_duration_type : int32 = RuntimeType.UNDEFINED
-        value_duration_type = runtimeType(value_duration)
-        valueSerializer.writeInt8((value_duration_type).toChar())
-        if ((value_duration_type) != (RuntimeType.UNDEFINED)) {
-            const value_duration_value  = value_duration!
-            valueSerializer.writeNumber(value_duration_value)
+        const valueHolderForDuration  = value.duration
+        if (valueHolderForDuration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDurationTmpValue  = valueHolderForDuration!
+            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): LinearIndicatorStartOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const interval_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let interval_buf : number | undefined
-        if ((interval_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            interval_buf = (valueDeserializer.readNumber() as number)
+        const intervalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let intervalTmpBuf : number | undefined
+        if ((intervalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            intervalTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const interval_result : number | undefined = interval_buf
-        const duration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let duration_buf : number | undefined
-        if ((duration_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            duration_buf = (valueDeserializer.readNumber() as number)
+        const intervalTmpResult : number | undefined = intervalTmpBuf
+        const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let durationTmpBuf : number | undefined
+        if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            durationTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const duration_result : number | undefined = duration_buf
-        let value : LinearIndicatorStartOptions = ({interval: interval_result, duration: duration_result} as LinearIndicatorStartOptions)
+        const durationTmpResult : number | undefined = durationTmpBuf
+        let value : LinearIndicatorStartOptions = ({interval: intervalTmpResult, duration: durationTmpResult} as LinearIndicatorStartOptions)
         return value
     }
 }
 export class LinearIndicatorStyle_serializer {
     public static write(buffer: SerializerBase, value: LinearIndicatorStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_space  = value.space
-        let value_space_type : int32 = RuntimeType.UNDEFINED
-        value_space_type = runtimeType(value_space)
-        valueSerializer.writeInt8((value_space_type).toChar())
-        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
-            const value_space_value  = value_space!
-            LengthMetrics_serializer.write(valueSerializer, value_space_value)
+        const valueHolderForSpace  = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue  = valueHolderForSpace!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForSpaceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_strokeWidth  = value.strokeWidth
-        let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
-        value_strokeWidth_type = runtimeType(value_strokeWidth)
-        valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_strokeWidth_value  = value_strokeWidth!
-            LengthMetrics_serializer.write(valueSerializer, value_strokeWidth_value)
+        const valueHolderForStrokeWidth  = value.strokeWidth
+        if (valueHolderForStrokeWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_strokeRadius  = value.strokeRadius
-        let value_strokeRadius_type : int32 = RuntimeType.UNDEFINED
-        value_strokeRadius_type = runtimeType(value_strokeRadius)
-        valueSerializer.writeInt8((value_strokeRadius_type).toChar())
-        if ((value_strokeRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_strokeRadius_value  = value_strokeRadius!
-            LengthMetrics_serializer.write(valueSerializer, value_strokeRadius_value)
+        const valueHolderForStrokeRadius  = value.strokeRadius
+        if (valueHolderForStrokeRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeRadiusTmpValue  = valueHolderForStrokeRadius!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_trackBackgroundColor  = value.trackBackgroundColor
-        let value_trackBackgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_trackBackgroundColor_type = runtimeType(value_trackBackgroundColor)
-        valueSerializer.writeInt8((value_trackBackgroundColor_type).toChar())
-        if ((value_trackBackgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_trackBackgroundColor_value  = value_trackBackgroundColor!
-            ColorMetrics_serializer.write(valueSerializer, value_trackBackgroundColor_value)
+        const valueHolderForTrackBackgroundColor  = value.trackBackgroundColor
+        if (valueHolderForTrackBackgroundColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTrackBackgroundColorTmpValue  = valueHolderForTrackBackgroundColor!
+            ColorMetrics_serializer.write(valueSerializer, valueHolderForTrackBackgroundColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_trackColor  = value.trackColor
-        let value_trackColor_type : int32 = RuntimeType.UNDEFINED
-        value_trackColor_type = runtimeType(value_trackColor)
-        valueSerializer.writeInt8((value_trackColor_type).toChar())
-        if ((value_trackColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_trackColor_value  = value_trackColor!
-            ColorMetrics_serializer.write(valueSerializer, value_trackColor_value)
+        const valueHolderForTrackColor  = value.trackColor
+        if (valueHolderForTrackColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTrackColorTmpValue  = valueHolderForTrackColor!
+            ColorMetrics_serializer.write(valueSerializer, valueHolderForTrackColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): LinearIndicatorStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let space_buf : LengthMetrics | undefined
-        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            space_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spaceTmpBuf : LengthMetrics | undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spaceTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const space_result : LengthMetrics | undefined = space_buf
-        const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeWidth_buf : LengthMetrics | undefined
-        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            strokeWidth_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const spaceTmpResult : LengthMetrics | undefined = spaceTmpBuf
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeWidthTmpBuf : LengthMetrics | undefined
+        if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeWidthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const strokeWidth_result : LengthMetrics | undefined = strokeWidth_buf
-        const strokeRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeRadius_buf : LengthMetrics | undefined
-        if ((strokeRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            strokeRadius_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
+        const strokeRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeRadiusTmpBuf : LengthMetrics | undefined
+        if ((strokeRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeRadiusTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const strokeRadius_result : LengthMetrics | undefined = strokeRadius_buf
-        const trackBackgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let trackBackgroundColor_buf : ColorMetrics | undefined
-        if ((trackBackgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            trackBackgroundColor_buf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+        const strokeRadiusTmpResult : LengthMetrics | undefined = strokeRadiusTmpBuf
+        const trackBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let trackBackgroundColorTmpBuf : ColorMetrics | undefined
+        if ((trackBackgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            trackBackgroundColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
         }
-        const trackBackgroundColor_result : ColorMetrics | undefined = trackBackgroundColor_buf
-        const trackColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let trackColor_buf : ColorMetrics | undefined
-        if ((trackColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            trackColor_buf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+        const trackBackgroundColorTmpResult : ColorMetrics | undefined = trackBackgroundColorTmpBuf
+        const trackColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let trackColorTmpBuf : ColorMetrics | undefined
+        if ((trackColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            trackColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
         }
-        const trackColor_result : ColorMetrics | undefined = trackColor_buf
-        let value : LinearIndicatorStyle = ({space: space_result, strokeWidth: strokeWidth_result, strokeRadius: strokeRadius_result, trackBackgroundColor: trackBackgroundColor_result, trackColor: trackColor_result} as LinearIndicatorStyle)
+        const trackColorTmpResult : ColorMetrics | undefined = trackColorTmpBuf
+        let value : LinearIndicatorStyle = ({space: spaceTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult, trackBackgroundColor: trackBackgroundColorTmpResult, trackColor: trackColorTmpResult} as LinearIndicatorStyle)
         return value
     }
 }

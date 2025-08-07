@@ -33,7 +33,7 @@ export const options = program
     .option('--link-name <path>', 'Path to final linked file', "all")
 
     .option('--group-by <size>', 'Group files by groups before passing them to compiler')
-    .option('--restart-stages', 'Compilation with plugins and compiler restarting')
+    .option('--restart-states', 'Compilation with plugins and compiler restarting')
     .option('--cache', 'Enable AST cache in the compiler')
     .option('--simultaneous', 'Use simultaneous compilation')
 
@@ -189,7 +189,6 @@ function main(configPath: string, linkName: string) {
 
     fs.mkdirSync(outDir, { recursive: true })
     const [firstConfigPath, intermediateOutDirs] = resolveConfig(configPath, options.restartStages)
-    section()
     const linkPath = path.resolve(process.cwd(), linkName)
     log(`computed location of linked .abc: ${linkPath}`)
 

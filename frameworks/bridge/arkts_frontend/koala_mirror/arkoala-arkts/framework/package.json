@@ -8,8 +8,7 @@
         "build/src/**/*.js",
         "build/src/**/*.d.ts",
         "build/*.node",
-        "build/*.so",
-        "oh-package.json5"
+        "build/*.so"
     ],
     "engines": {
         "npm": ">= 8",
@@ -34,6 +33,8 @@
         "compile:native-hzvm-host": "npm run configure:native-hzvm-host && cd native && meson compile -C build-hzvm-host && meson install -C build-hzvm-host",
         "configure:native-panda-host": "cd native && meson setup -D vm_kind=panda build-panda-host",
         "compile:native-panda-host": "npm run configure:native-panda-host && cd native && meson compile -C build-panda-host && meson install -C build-panda-host",
+        "configure:native-kotlin-host": "cd native && meson setup -D vm_kind=kotlin build-kotlin-host",
+        "compile:native-kotlin-host": "npm run configure:native-kotlin-host && cd native && meson compile -C build-kotlin-host && meson install -C build-kotlin-host",
 
         "configure:native-panda-linux-x64": "cd native && node ../scripts/configure.mjs panda-linux-x64",
         "compile:native-panda-linux-x64": "npm run configure:native-panda-linux-x64 && cd native && meson compile -C build-panda-linux-x64 && meson install -C build-panda-linux-x64",
@@ -59,7 +60,7 @@
         "configure:native-panda-ohos-arm32": "npm run prepare:arm32 && cd native && node ../scripts/configure.mjs panda-ohos-arm32",
         "compile:native-panda-ohos-arm32": "npm run configure:native-panda-ohos-arm32 && cd native && meson compile -C build-panda-ohos-arm32 && meson install -C build-panda-ohos-arm32",
         "configure:native-panda-with-node-host": "npm run configure:native-panda-host && cd native && meson setup -D vm_kind=node -D vmloader=true -D arkoala=false build-node-host-vmloader",
-        "compile:native-panda-with-node-host": "npm run configure:native-panda-with-node-host && cd native && npm run compile:native-panda-host && npm run compile:native-panda-host && meson compile -C build-node-host-vmloader && meson install -C build-node-host-vmloader",
+        "compile:native-panda-with-node-host": "npm run configure:native-panda-with-node-host && cd native && npm run compile:native-panda-host && meson compile -C build-node-host-vmloader && meson install -C build-node-host-vmloader",
         "configure:native-panda-with-hzvm-ohos-arm64": "npm run configure:native-panda-ohos-arm64 && cd native && node ../scripts/configure.mjs hzvm-ohos-arm64-vmloader",
         "compile:native-panda-with-hzvm-ohos-arm64": "npm run configure:native-panda-with-hzvm-ohos-arm64 && npm run compile:native-panda-ohos-arm64 && cd native && meson compile -C build-hzvm-ohos-arm64-vmloader && meson install -C build-hzvm-ohos-arm64-vmloader && npm run copy:libcpp:arm64 --prefix ../../tools/compiler",
         "configure:native-panda-with-hzvm-ohos-arm32": "npm run configure:native-panda-ohos-arm32 && cd native && node ../scripts/configure.mjs hzvm-ohos-arm32-vmloader",
@@ -67,6 +68,8 @@
         "compile:node-host": "ets-tsc -b . && npm run compile:native-node-host",
         "compile": "npm run compile:node-host",
         "compile:hzvm-host": "ets-tsc -b . && npm run compile:native-hzvm-host",
-        "compile:hzvm-ohos": "ets-tsc -b . && npm run compile:native-hzvm-ohos"
+        "compile:hzvm-ohos": "ets-tsc -b . && npm run compile:native-hzvm-ohos",
+        "configure:native-kotlin-with-node-host": "cd native && meson setup -D vm_kind=node -D vmloader=true -D arkoala=false -D vmloader_apis=kotlin build-node-host-vmloader-kotlin",
+        "compile:native-kotlin-with-node-host": "npm run compile:native-kotlin-host && npm run configure:native-kotlin-with-node-host && cd native && meson compile -C build-node-host-vmloader-kotlin && meson install -C build-node-host-vmloader-kotlin"
     }
 }

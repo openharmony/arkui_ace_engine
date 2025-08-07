@@ -18,27 +18,6 @@ import { Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
 
-export function createClassProperty(
-    key: Expression | undefined,
-    value: Expression | undefined,
-    typeAnnotation: TypeNode | undefined,
-    modifiers: Es2pandaModifierFlags,
-    isComputed: boolean,
-    annotations?: readonly AnnotationUsage[],
-): ClassProperty {
-    const res = ClassProperty.createClassProperty(
-        key,
-        value,
-        typeAnnotation,
-        modifiers,
-        isComputed,
-    )
-    if (annotations) {
-        res.setAnnotations(annotations)
-    }
-    return res
-}
-
 export function updateClassProperty(
     original: ClassProperty,
     key: Expression | undefined,
@@ -58,7 +37,7 @@ export function updateClassProperty(
         return original
     }
     return updateNodeByNode(
-        createClassProperty(key, value, typeAnnotation, modifiers, isComputed, annotations),
+        ClassProperty.createClassProperty(key, value, typeAnnotation, modifiers, isComputed, annotations),
         original
     )
 }

@@ -25,8 +25,13 @@ export function loadNativeLibrary(name: string): Record<string, object> {
         `${nameWithoutSuffix}_${os.arch()}.node`,
         `${nameWithoutSuffix}_${os.platform()}_${os.arch()}.node`,
     ]
+    const errors: { candidate: string, command: string, error: any }[] = []
     if (!isHZVM)
-        try { candidates.push(eval(`require.resolve("${nameWithoutSuffix}.node")`)) } catch (_) {}
+        try {
+            candidates.push(eval(`require.resolve("${nameWithoutSuffix}.node")`))
+        } catch (e) {
+            errors.push({ candidate: `${nameWithoutSuffix}.node`, command: `resolve(...)`, error: e })
+        }
 
     for (const candidate of candidates) {
         try {
@@ -34,8 +39,13 @@ export function loadNativeLibrary(name: string): Record<string, object> {
                 return (globalThis as any).requireNapi(candidate, true)
             else
                 return eval(`let exports = {}; process.dlopen({ exports }, "${candidate}", 2); exports`)
-        } catch (_) {}
+        } catch (e) {
+            errors.push({ candidate: candidate, command: `dlopen`, error: e })
+        }
     }
+    errors.forEach((e, i) => {
+        console.error(`Error ${i} of ${errors.length} command: ${e.command}, candidate: ${e.candidate}, message: ${e.error}`)
+    })
     throw new Error(`Failed to load native library ${name}. dlopen candidates: ${candidates.join(":")}`)
 }
 

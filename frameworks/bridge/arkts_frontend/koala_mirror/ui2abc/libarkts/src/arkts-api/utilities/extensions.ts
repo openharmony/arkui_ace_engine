@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+import { KNativePointer } from "@koalaui/interop"
 import type {
     ETSModule,
-    MethodDefinition
+    MethodDefinition,
+    ScriptFunction,
 } from "../../generated"
 import { Es2pandaModuleFlag } from "../../generated/Es2pandaEnums"
-import { global } from "../../reexport-for-generated"
+import { global } from "../static/global"
 
 export function extension_ETSModuleGetNamespaceFlag(this: ETSModule): Es2pandaModuleFlag {
     return (this.isETSScript ? Es2pandaModuleFlag.MODULE_FLAG_ETSSCRIPT : 0)
@@ -45,4 +47,21 @@ export function extension_MethodDefinitionOnUpdate(this: MethodDefinition, origi
     if (originalBase) {
         this.setBaseOverloadMethod(originalBase)
     }
+}
+
+export function extension_ScriptFunctionGetSignaturePointer(this: ScriptFunction): KNativePointer {
+    return global.es2panda._Checker_ScriptFunctionSignature(global.context, this.peer)
+}
+
+export function extension_ScriptFunctionSetSignaturePointer(this: ScriptFunction, signaturePointer: KNativePointer): void {
+    global.es2panda._Checker_ScriptFunctionSetSignature(global.context, this.peer, signaturePointer)
+}
+
+// Improve: perhaps "preferredReturnType" stuff can be removed later if "signature" is always enough
+export function extension_ScriptFunctionGetPreferredReturnTypePointer(this: ScriptFunction): KNativePointer {
+    return global.es2panda._Checker_ScriptFunctionGetPreferredReturnType(global.context, this.peer)
+}
+
+export function extension_ScriptFunctionSetPreferredReturnTypePointer(this: ScriptFunction, typePointer: KNativePointer): void {
+    global.es2panda._Checker_ScriptFunctionSetPreferredReturnType(global.context, this.peer, typePointer)
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Assert as assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { Easing, EasingCurve, EasingStepJump } from "../../src/animation/Easing"
 
 function assertEasing(easing: EasingCurve, ...expected: number[]) {

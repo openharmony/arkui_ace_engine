@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DecoratorNames, hasDecorator, hasBuilderDecorator, replaceDecorator } from "./property-translators/utils"
+import { DecoratorNames, hasDecorator, hasBuilderDecorator, replaceDecorator } from "./utils"
 import { annotation } from "./common/arkts-utils"
 import { CustomComponentNames, InternalAnnotations } from "./utils"
 

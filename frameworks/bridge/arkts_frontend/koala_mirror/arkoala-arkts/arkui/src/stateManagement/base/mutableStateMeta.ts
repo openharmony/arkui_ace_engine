@@ -60,8 +60,10 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     }
 
     public addRef(): void {
-        if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor
-             || ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed) {
+        if (
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed
+        ) {
             this.bindingRefs_.add(ObserveSingleton.instance.renderingComponentRef!.weakThis);
             ObserveSingleton.instance.renderingComponentRef!.reverseBindings.add(this.weakThis);
         } else {
@@ -71,7 +73,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 
     public fireChange(): void {
         if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed) {
-            throw new Error("Attempt to modify state variables from @Computed function");
+            throw new Error('Attempt to modify state variables from @Computed function');
         }
         this.bindingRefs_.forEach((listener: WeakRef<ITrackedDecoratorRef>) => {
             let trackedObject = listener.deref();
@@ -81,11 +83,19 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
                 this.clearBindingRefs(listener);
             }
         });
-        this.__metaDependency!.value += 1;
+        if (this.shouldFireChange()) {
+        	this.__metaDependency!.value += 1;
+		}
     }
 
     clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void {
         this.bindingRefs_.delete(listener);
+    }
+
+    shouldFireChange(): boolean {
+//        const dependency = (this.__metaDependency as StateImpl<int32>).dependencies;
+//        return !!(dependency && !dependency.empty);
+        return true // TODO:SAM - DO NOT MAKE PRIVATE IMPLEMENTATION PUBLIC !!!
     }
 }
 

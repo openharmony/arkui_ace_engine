@@ -20,6 +20,7 @@ project(
         'buildtype=release',
     ],
 )
+is_cross = get_option('cross_compile')
 
 sources = [
     './src/common.cc',
@@ -38,14 +39,12 @@ cflags = [
     '-DKOALA_NAPI',
 ]
 
-if (target_machine.system() == 'windows')
+if (host_machine.system() == 'windows')
     cflags += ['-DKOALA_WINDOWS']
-    if (meson.get_compiler('cpp').get_id() == 'msvc')
-        # apply node.exe symbol loading hook
-        sources += [
-            get_option('interop_src_dir') / 'napi/win-dynamic-node.cc'
-        ]
-    endif
+    # apply node.exe symbol loading hook
+    sources += [
+        get_option('interop_src_dir') / 'napi/win-dynamic-node.cc'
+    ]
 else
     cflags += ['-DKOALA_LINUX']
 endif
@@ -62,17 +61,17 @@ arch = archs.get(arch, arch)
 
 cflags_cross = []
 cflags_host = []
-suffix_host = '_' + arch
+suffix_host = '_' + os + '_' + arch
 suffix_cross = ''
 
 if get_option('cross_compile')
 if arch == 'arm64'
 cflags_cross = ['--target=x86_64-linux-gnu']
-suffix_cross = '_x64'
+suffix_cross = '_' + os + '_x64'
 endif
 if arch == 'x64'
 cflags_cross = ['--target=aarch64-linux-gnu']
-suffix_cross = '_arm64'
+suffix_cross = '_' + os + '_arm64'
 endif
 endif
 
@@ -100,7 +99,7 @@ shared_library(
     dependencies: []
 )
 
-if get_option('cross_compile')
+if is_cross
     # sudo apt install g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
     shared_library(
         get_option('lib_name') + suffix_cross,

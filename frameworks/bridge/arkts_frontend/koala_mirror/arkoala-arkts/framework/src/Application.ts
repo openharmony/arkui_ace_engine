@@ -49,7 +49,7 @@ function withControl(
     ui: () => void,
     control: ArkoalaControl
 ) {
-    contextLocalScope(CURRENT_CONTROL, control, () => {
+    contextLocalScope(CURRENT_CONTROL, control, (): void => {
         ui()
     })
 }

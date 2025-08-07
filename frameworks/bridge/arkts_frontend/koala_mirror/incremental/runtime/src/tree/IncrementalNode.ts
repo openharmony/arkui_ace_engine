@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
  * It allows nodes to be added or removed incrementally using the state manager.
  */
 export class IncrementalNode implements Disposable, ReadonlyTreeNode {
+    private _disposing = false
     private _disposed = false
     private _child: IncrementalNode | undefined = undefined
     private _prev: IncrementalNode | undefined = undefined
@@ -82,6 +83,20 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      */
     recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
+    }
+
+    /**
+     * @returns `true` if this node is removing from the hierarchy
+     */
+    get disposing(): boolean {
+        return this._disposing
+    }
+
+    /**
+     * This method is called to mark this node as being removed
+     */
+    set disposing(value: boolean) {
+        this._disposing = value
     }
 
     /**
@@ -212,11 +227,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
                 this._parent = parent
                 if (next) next._prev = this
                 if (prev) prev._next = this
-                else parent._child = this;
-
-                // TODO: this is to workaround ast dumper bug #24055
-                if (0) {} else {}
-
+                else parent._child = this
                 parent.onChildInserted?.(this)
             }
         }

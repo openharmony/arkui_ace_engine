@@ -26,6 +26,7 @@ import { AstNode } from "../peers/AstNode"
 import { Es2pandaModifierFlags, Es2pandaScriptFunctionFlags } from "../../generated/Es2pandaEnums"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
+import { KNativePointer } from "@koalaui/interop"
 
 export function createScriptFunction(
     databody: AstNode | undefined,
@@ -37,6 +38,8 @@ export function createScriptFunction(
     dataflags: Es2pandaModifierFlags,
     ident: Identifier | undefined,
     annotations: readonly AnnotationUsage[] | undefined,
+    signaturePointer?: KNativePointer,
+    preferredReturnTypePointer?: KNativePointer,
 ) {
     const res = ScriptFunction.createScriptFunction(
         databody,
@@ -47,13 +50,15 @@ export function createScriptFunction(
             hasReceiver,
         ),
         datafuncFlags,
-        dataflags
+        dataflags,
+        ident,
+        annotations,
     )
-    if (ident) {
-        res.setIdent(ident)
+    if (signaturePointer) {
+        res.setSignaturePointer(signaturePointer)
     }
-    if (annotations) {
-        res.setAnnotations(annotations)
+    if (preferredReturnTypePointer) {
+        res.setPreferredReturnTypePointer(preferredReturnTypePointer)
     }
     return res
 }
@@ -69,6 +74,8 @@ export function updateScriptFunction(
     dataflags: Es2pandaModifierFlags,
     ident: Identifier | undefined,
     annotations: readonly AnnotationUsage[] | undefined,
+    signaturePointer?: KNativePointer,
+    preferredReturnTypePointer?: KNativePointer,
 ) {
     if (isSameNativeObject(databody, original.body)
         && isSameNativeObject(typeParams, original.typeParams)
@@ -79,6 +86,8 @@ export function updateScriptFunction(
         && isSameNativeObject(dataflags, original.modifierFlags)
         && isSameNativeObject(ident, original.id)
         && isSameNativeObject(annotations, original.annotations)
+        && signaturePointer == original.getSignaturePointer()
+        && preferredReturnTypePointer == original.getPreferredReturnTypePointer()
     ) {
         return original
     }
@@ -92,7 +101,9 @@ export function updateScriptFunction(
             datafuncFlags,
             dataflags,
             ident,
-            annotations
+            annotations,
+            signaturePointer,
+            preferredReturnTypePointer,
         ),
         original
     )

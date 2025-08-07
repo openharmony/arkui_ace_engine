@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ResourceColor, ResourceStr } from "./units"
 import { Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
@@ -31,6 +31,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkQRCodePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,112 +39,96 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkQRCodePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._QRCode_construct(peerId, flags)
-        const _peer  = new ArkQRCodePeer(_peerPtr, peerId, "QRCode", flags)
+        const _peer  = new ArkQRCodePeer(_peerPtr, peerId, 'QRCode', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setQRCodeOptionsAttribute(value: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        if (RuntimeType.STRING == value_type) {
+        if (value instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const value_0  = value as string
-            thisSerializer.writeString(value_0)
-        }
-        else if (RuntimeType.OBJECT == value_type) {
+            const valueForIdx0  = value as string
+            thisSerializer.writeString(valueForIdx0)
+        } else if (value instanceof Resource) {
             thisSerializer.writeInt8((1).toChar())
-            const value_1  = value as Resource
-            Resource_serializer.write(thisSerializer, value_1)
+            const valueForIdx1  = value as Resource
+            Resource_serializer.write(thisSerializer, valueForIdx1)
         }
         ArkUIGeneratedNativeModule._QRCodeInterface_setQRCodeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._QRCodeAttribute_setColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._QRCodeAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setContentOpacityAttribute(value: number | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._QRCodeAttribute_setContentOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -177,15 +162,6 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
     }
     public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: QRCodeAttribute): void {
-        super.apply(target)
-        if (this.color_value !== undefined)
-            target.color(this.color_value!)
-        if (this.backgroundColor_value !== undefined)
-            target.backgroundColor(this.backgroundColor_value!)
-        if (this.contentOpacity_value !== undefined)
-            target.contentOpacity(this.contentOpacity_value!)
     }
 }
 
@@ -226,7 +202,6 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
         return this
     }
     public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -234,26 +209,6 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
         super.applyAttributesFinish()
     }
 }
-export function withQRCodeStyle(receiver: QRCodeAttribute, modifier: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkQRCodeStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("QRCode")
-// export function QRCode(
-//     value: ResourceStr,
-//     @memo
-//     content_?: () => void,
-// ): QRCodeAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function QRCode(
@@ -269,44 +224,152 @@ export function QRCode(
     NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (_: ArkQRCodePeer): void => {
         receiver.setQRCodeOptions(value)
         style?.(receiver)
-        withQRCodeStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkQRCodeSet extends ArkCommonMethodSet implements QRCodeAttribute {
+export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _color_flag?: boolean
-    _color0_value?: ResourceColor | undefined
-    _backgroundColor_flag?: boolean
-    _backgroundColor0_value?: ResourceColor | undefined
-    _contentOpacity_flag?: boolean
-    _contentOpacity0_value?: number | Resource | undefined
-    applyModifierPatch(component: QRCodeAttribute): void {
-        if (this._color_flag)
-            component.color((this._color0_value as ResourceColor | undefined))
-        if (this._backgroundColor_flag)
-            component.backgroundColor((this._backgroundColor0_value as ResourceColor | undefined))
-        if (this._contentOpacity_flag)
-            component.contentOpacity((this._contentOpacity0_value as number | Resource | undefined))
+    _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _color_0_0value?: ResourceColor | undefined
+    _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backgroundColor_0_0value?: ResourceColor | undefined
+    _contentOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentOpacity_0_0value?: number | Resource | undefined
+    applyModifierPatch(peer: ArkQRCodePeer): void {
+        super.applyModifierPatch(peer)
+        if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColorAttribute((this._color_0_0value as ResourceColor | undefined));
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._color_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | undefined));
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._contentOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentOpacity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentOpacityAttribute((this._contentOpacity_0_0value as number | Resource | undefined));
+                    this._contentOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentOpacityAttribute((undefined as number | Resource | undefined));
+                }
+            }
+        }
     }
-    public color(value: ResourceColor | undefined): this {
-        this._color_flag = true
-        this._color0_value = value
+    mergeModifier(modifier: QRCodeModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.color(modifier._color_0_0value);
+                    break;
+                }
+                default: {
+                    this.color((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backgroundColor(modifier._backgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.backgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._contentOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentOpacity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentOpacity(modifier._contentOpacity_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentOpacity((undefined as number | Resource | undefined));
+                }
+            }
+        }
+    }
+    color(value: ResourceColor | undefined): this {
+        if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._color_0_flag = AttributeUpdaterFlag.UPDATE
+            this._color_0_0value = value
+        } else
+        {
+            this._color_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
-        this._backgroundColor_flag = true
-        this._backgroundColor0_value = value
+    backgroundColor(value: ResourceColor | undefined): this {
+        if (((this._backgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backgroundColor_0_0value = value
+        } else
+        {
+            this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public contentOpacity(value: number | Resource | undefined): this {
-        this._contentOpacity_flag = true
-        this._contentOpacity0_value = value
+    contentOpacity(value: number | Resource | undefined): this {
+        if (((this._contentOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentOpacity_0_0value = value
+        } else
+        {
+            this._contentOpacity_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {

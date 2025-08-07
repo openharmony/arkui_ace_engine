@@ -48,6 +48,9 @@ export class Es2pandaNativeModule {
     _ContextErrorMessage(context: KPtr): KPtr {
         throw new Error("Not implemented")
     }
+    _GetAllErrorMessages(context: KPtr): KPtr {
+        throw new Error("Not implemented")
+    }
     _AstNodeChildren(context: KPtr, node: KPtr): KPtr {
         throw new Error("Not implemented")
     }
@@ -158,6 +161,30 @@ export class Es2pandaNativeModule {
     }
     _OptionsArkTsConfig(context: KNativePointer, options: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionSignature(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionSetSignature(context: KNativePointer, node: KNativePointer, signature: KNativePointer): void {
+        throw new Error("Not implemented");
+    }
+    _Checker_SignatureReturnType(context: KNativePointer, signature: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionGetPreferredReturnType(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionSetPreferredReturnType(context: KNativePointer, node: KNativePointer, type: KNativePointer): void {
+        throw new Error("Not implemented");
+    }
+    _Checker_TypeToString(context: KNativePointer, type: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_TypeNodeGetType(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _JsdocStringFromDeclaration(context: KPtr, node: KPtr): KPtr {
+        throw new Error("Not implemented")
     }
 
     // From koala-wrapper

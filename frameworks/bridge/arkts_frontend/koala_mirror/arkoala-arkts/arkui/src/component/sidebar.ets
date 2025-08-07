@@ -16,9 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Bindable_Boolean_serializer, Bindable_Number_serializer, DividerStyle_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, DividerStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { Resource_serializer, Resource } from "./../generated/resource"
-import { DividerStyle_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -31,6 +31,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { image, image_PixelMap_serializer } from "./../generated/ohos.multimedia.image"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,258 +39,252 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSideBarContainerPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._SideBarContainer_construct(peerId, flags)
-        const _peer  = new ArkSideBarContainerPeer(_peerPtr, peerId, "SideBarContainer", flags)
+        const _peer  = new ArkSideBarContainerPeer(_peerPtr, peerId, 'SideBarContainer', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setSideBarContainerOptionsAttribute(type?: SideBarContainerType): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let type_type : int32 = RuntimeType.UNDEFINED
-        type_type = runtimeType(type)
-        thisSerializer.writeInt8((type_type).toChar())
-        if ((type_type) != (RuntimeType.UNDEFINED)) {
-            const type_value  = (type as SideBarContainerType)
-            thisSerializer.writeInt32(TypeChecker.SideBarContainerType_ToNumeric(type_value))
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue  = (type as SideBarContainerType)
+            thisSerializer.writeInt32(TypeChecker.SideBarContainerType_ToNumeric(typeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerInterface_setSideBarContainerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setShowSideBarAttribute(value: boolean | undefined): void {
+    setShowSideBarAttribute(value: boolean | Bindable<boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as boolean
+                thisSerializer.writeBoolean(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable<boolean>) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setShowSideBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setControlButtonAttribute(value: ButtonStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ButtonStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ButtonStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setControlButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setShowControlButtonAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setShowControlButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnChangeAttribute(value: ((value: boolean) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSideBarWidth0Attribute(value: number | undefined): void {
+    setSideBarWidth0Attribute(value: number | Bindable<number> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable<number>) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<number>
+                Bindable_Number_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinSideBarWidth0Attribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxSideBarWidth0Attribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSideBarWidth1Attribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinSideBarWidth1Attribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxSideBarWidth1Attribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoHideAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setAutoHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSideBarPositionAttribute(value: SideBarPosition | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as SideBarPosition)
-            thisSerializer.writeInt32(TypeChecker.SideBarPosition_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as SideBarPosition)
+            thisSerializer.writeInt32(TypeChecker.SideBarPosition_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDividerAttribute(value: DividerStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DividerStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DividerStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinContentWidthAttribute(value: Dimension | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_showSideBarAttribute(callback_: ((showSideBar: boolean | undefined) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_set_onChangeEvent_showSideBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -319,7 +314,7 @@ export interface ButtonStyle {
     icons?: ButtonIconOptions;
 }
 export interface SideBarContainerAttribute extends CommonMethod {
-    showSideBar(value: boolean | undefined): this {
+    showSideBar(value: boolean | Bindable<boolean> | undefined): this {
         throw new Error("Unimplemented method showSideBar")
     }
     controlButton(value: ButtonStyle | undefined): this {
@@ -331,7 +326,7 @@ export interface SideBarContainerAttribute extends CommonMethod {
     onChange(value: ((value: boolean) => void) | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
-    sideBarWidth(value: number | undefined): this {
+    sideBarWidth(value: number | Bindable<number> | undefined): this {
         throw new Error("Unimplemented method sideBarWidth")
     }
     minSideBarWidth(value: number | undefined): this {
@@ -361,19 +356,16 @@ export interface SideBarContainerAttribute extends CommonMethod {
     minContentWidth(value: Dimension | undefined): this {
         throw new Error("Unimplemented method minContentWidth")
     }
-    _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_showSideBar")
-    }
     attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
-    showSideBar_value?: boolean | undefined
+    showSideBar_value?: boolean | Bindable<boolean> | undefined
     controlButton_value?: ButtonStyle | undefined
     showControlButton_value?: boolean | undefined
     onChange_value?: ((value: boolean) => void) | undefined
-    sideBarWidth_value?: number | undefined
+    sideBarWidth_value?: number | Bindable<number> | undefined
     minSideBarWidth_value?: number | undefined
     maxSideBarWidth_value?: number | undefined
     autoHide_value?: boolean | undefined
@@ -381,7 +373,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     divider_value?: DividerStyle | undefined
     minContentWidth_value?: Dimension | undefined
     attributeModifier_value?: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public showSideBar(value: boolean | undefined): this {
+    public showSideBar(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public controlButton(value: ButtonStyle | undefined): this {
@@ -393,7 +385,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     public onChange(value: ((value: boolean) => void) | undefined): this {
         return this
     }
-    public sideBarWidth(value: number | undefined): this {
+    public sideBarWidth(value: number | Bindable<number> | undefined): this {
         return this
     }
     public minSideBarWidth(value: number | undefined): this {
@@ -423,36 +415,8 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     public minContentWidth(value: Dimension | undefined): this {
         return this
     }
-    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: SideBarContainerAttribute): void {
-        super.apply(target)
-        if (this.showSideBar_value !== undefined)
-            target.showSideBar(this.showSideBar_value!)
-        if (this.controlButton_value !== undefined)
-            target.controlButton(this.controlButton_value!)
-        if (this.showControlButton_value !== undefined)
-            target.showControlButton(this.showControlButton_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
-        if (this.sideBarWidth_value !== undefined)
-            target.sideBarWidth(this.sideBarWidth_value!)
-        if (this.minSideBarWidth_value !== undefined)
-            target.minSideBarWidth(this.minSideBarWidth_value!)
-        if (this.maxSideBarWidth_value !== undefined)
-            target.maxSideBarWidth(this.maxSideBarWidth_value!)
-        if (this.autoHide_value !== undefined)
-            target.autoHide(this.autoHide_value!)
-        if (this.sideBarPosition_value !== undefined)
-            target.sideBarPosition(this.sideBarPosition_value!)
-        if (this.divider_value !== undefined)
-            target.divider(this.divider_value!)
-        if (this.minContentWidth_value !== undefined)
-            target.minContentWidth(this.minContentWidth_value!)
     }
 }
 
@@ -468,9 +432,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    public showSideBar(value: boolean | undefined): this {
+    public showSideBar(value: boolean | Bindable<boolean> | undefined): this {
         if (this.checkPriority("showSideBar")) {
-            const value_casted = value as (boolean | undefined)
+            const value_casted = value as (boolean | Bindable<boolean> | undefined)
             this.getPeer()?.setShowSideBarAttribute(value_casted)
             return this
         }
@@ -500,9 +464,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    public sideBarWidth(value: number | undefined): this {
+    public sideBarWidth(value: number | Bindable<number> | undefined): this {
         if (this.checkPriority("sideBarWidth")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (number | Bindable<number> | undefined)
             this.getPeer()?.setSideBarWidth0Attribute(value_casted)
             return this
         }
@@ -580,16 +544,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
-        if (this.checkPriority("_onChangeEvent_showSideBar")) {
-            const callback__casted = callback_ as (((showSideBar: boolean | undefined) => void))
-            this.getPeer()?.set_onChangeEvent_showSideBarAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -597,26 +552,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         super.applyAttributesFinish()
     }
 }
-export function withSideBarContainerStyle(receiver: SideBarContainerAttribute, modifier: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkSideBarContainerStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("SideBarContainer")
-// export function SideBarContainer(
-//     type?: SideBarContainerType,
-//     @memo
-//     content_?: () => void,
-// ): SideBarContainerAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function SideBarContainer(
@@ -632,121 +567,637 @@ export function SideBarContainer(
     NodeAttach<ArkSideBarContainerPeer>((): ArkSideBarContainerPeer => ArkSideBarContainerPeer.create(receiver), (_: ArkSideBarContainerPeer): void => {
         receiver.setSideBarContainerOptions(type)
         style?.(receiver)
-        withSideBarContainerStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkSideBarContainerSet extends ArkCommonMethodSet implements SideBarContainerAttribute {
+export class SideBarContainerModifier extends CommonMethodModifier implements SideBarContainerAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _showSideBar_flag?: boolean
-    _showSideBar0_value?: boolean | undefined
-    _controlButton_flag?: boolean
-    _controlButton0_value?: ButtonStyle | undefined
-    _showControlButton_flag?: boolean
-    _showControlButton0_value?: boolean | undefined
-    _onChange_flag?: boolean
-    _onChange0_value?: ((value: boolean) => void) | undefined
-    _sideBarWidth_flag?: boolean
-    _sideBarWidth0_value?: Length | undefined
-    _minSideBarWidth_flag?: boolean
-    _minSideBarWidth0_value?: Length | undefined
-    _maxSideBarWidth_flag?: boolean
-    _maxSideBarWidth0_value?: Length | undefined
-    _autoHide_flag?: boolean
-    _autoHide0_value?: boolean | undefined
-    _sideBarPosition_flag?: boolean
-    _sideBarPosition0_value?: SideBarPosition | undefined
-    _divider_flag?: boolean
-    _divider0_value?: DividerStyle | undefined
-    _minContentWidth_flag?: boolean
-    _minContentWidth0_value?: Dimension | undefined
-    __onChangeEvent_showSideBar_flag?: boolean
-    __onChangeEvent_showSideBar0_value?: ((showSideBar: boolean | undefined) => void)
-    applyModifierPatch(component: SideBarContainerAttribute): void {
-        if (this._showSideBar_flag)
-            component.showSideBar((this._showSideBar0_value as boolean | undefined))
-        if (this._controlButton_flag)
-            component.controlButton((this._controlButton0_value as ButtonStyle | undefined))
-        if (this._showControlButton_flag)
-            component.showControlButton((this._showControlButton0_value as boolean | undefined))
-        if (this._onChange_flag)
-            component.onChange((this._onChange0_value as ((value: boolean) => void) | undefined))
-        if (this._sideBarWidth_flag)
-            component.sideBarWidth((this._sideBarWidth0_value as Length | undefined))
-        if (this._minSideBarWidth_flag)
-            component.minSideBarWidth((this._minSideBarWidth0_value as Length | undefined))
-        if (this._maxSideBarWidth_flag)
-            component.maxSideBarWidth((this._maxSideBarWidth0_value as Length | undefined))
-        if (this._autoHide_flag)
-            component.autoHide((this._autoHide0_value as boolean | undefined))
-        if (this._sideBarPosition_flag)
-            component.sideBarPosition((this._sideBarPosition0_value as SideBarPosition | undefined))
-        if (this._divider_flag)
-            component.divider((this._divider0_value as DividerStyle | undefined))
-        if (this._minContentWidth_flag)
-            component.minContentWidth((this._minContentWidth0_value as Dimension | undefined))
+    _showSideBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showSideBar_0_0value?: boolean | Bindable<boolean> | undefined
+    _controlButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _controlButton_0_0value?: ButtonStyle | undefined
+    _showControlButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _showControlButton_0_0value?: boolean | undefined
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onChange_0_0value?: ((value: boolean) => void) | undefined
+    _sideBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _sideBarWidth_0_0value?: number | Bindable<number> | undefined
+    _minSideBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minSideBarWidth_0_0value?: number | undefined
+    _maxSideBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxSideBarWidth_0_0value?: number | undefined
+    _sideBarWidth_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _sideBarWidth_1_0value?: Length | undefined
+    _minSideBarWidth_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minSideBarWidth_1_0value?: Length | undefined
+    _maxSideBarWidth_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxSideBarWidth_1_0value?: Length | undefined
+    _autoHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoHide_0_0value?: boolean | undefined
+    _sideBarPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _sideBarPosition_0_0value?: SideBarPosition | undefined
+    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _divider_0_0value?: DividerStyle | undefined
+    _minContentWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minContentWidth_0_0value?: Dimension | undefined
+    applyModifierPatch(peer: ArkSideBarContainerPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showSideBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowSideBarAttribute((this._showSideBar_0_0value as boolean | Bindable<boolean> | undefined));
+                    this._showSideBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showSideBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showSideBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowSideBarAttribute((undefined as boolean | Bindable<boolean> | undefined));
+                }
+            }
+        }
+        if (this._controlButton_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._controlButton_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setControlButtonAttribute((this._controlButton_0_0value as ButtonStyle | undefined));
+                    this._controlButton_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._controlButton_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._controlButton_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setControlButtonAttribute((undefined as ButtonStyle | undefined));
+                }
+            }
+        }
+        if (this._showControlButton_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._showControlButton_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setShowControlButtonAttribute((this._showControlButton_0_0value as boolean | undefined));
+                    this._showControlButton_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._showControlButton_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._showControlButton_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setShowControlButtonAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value: boolean) => void) | undefined));
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnChangeAttribute((undefined as ((value: boolean) => void) | undefined));
+                }
+            }
+        }
+        if (this._sideBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._sideBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSideBarWidth0Attribute((this._sideBarWidth_0_0value as number | Bindable<number> | undefined));
+                    this._sideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._sideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._sideBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSideBarWidth0Attribute((undefined as number | Bindable<number> | undefined));
+                }
+            }
+        }
+        if (this._minSideBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minSideBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinSideBarWidth0Attribute((this._minSideBarWidth_0_0value as number | undefined));
+                    this._minSideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minSideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minSideBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinSideBarWidth0Attribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._maxSideBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxSideBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxSideBarWidth0Attribute((this._maxSideBarWidth_0_0value as number | undefined));
+                    this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxSideBarWidth0Attribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._sideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._sideBarWidth_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSideBarWidth1Attribute((this._sideBarWidth_1_0value as Length | undefined));
+                    this._sideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._sideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._sideBarWidth_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSideBarWidth1Attribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._minSideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minSideBarWidth_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinSideBarWidth1Attribute((this._minSideBarWidth_1_0value as Length | undefined));
+                    this._minSideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minSideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minSideBarWidth_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinSideBarWidth1Attribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._maxSideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxSideBarWidth_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxSideBarWidth1Attribute((this._maxSideBarWidth_1_0value as Length | undefined));
+                    this._maxSideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxSideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxSideBarWidth_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxSideBarWidth1Attribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._autoHide_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._autoHide_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAutoHideAttribute((this._autoHide_0_0value as boolean | undefined));
+                    this._autoHide_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._autoHide_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._autoHide_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoHideAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._sideBarPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._sideBarPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSideBarPositionAttribute((this._sideBarPosition_0_0value as SideBarPosition | undefined));
+                    this._sideBarPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._sideBarPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._sideBarPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSideBarPositionAttribute((undefined as SideBarPosition | undefined));
+                }
+            }
+        }
+        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerAttribute((this._divider_0_0value as DividerStyle | undefined));
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerAttribute((undefined as DividerStyle | undefined));
+                }
+            }
+        }
+        if (this._minContentWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minContentWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinContentWidthAttribute((this._minContentWidth_0_0value as Dimension | undefined));
+                    this._minContentWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minContentWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minContentWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinContentWidthAttribute((undefined as Dimension | undefined));
+                }
+            }
+        }
     }
-    public showSideBar(value: boolean | undefined): this {
-        this._showSideBar_flag = true
-        this._showSideBar0_value = value
+    mergeModifier(modifier: SideBarContainerModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showSideBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showSideBar(modifier._showSideBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.showSideBar((undefined as boolean | Bindable<boolean> | undefined));
+                }
+            }
+        }
+        if (modifier._controlButton_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._controlButton_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.controlButton(modifier._controlButton_0_0value);
+                    break;
+                }
+                default: {
+                    this.controlButton((undefined as ButtonStyle | undefined));
+                }
+            }
+        }
+        if (modifier._showControlButton_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._showControlButton_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.showControlButton(modifier._showControlButton_0_0value);
+                    break;
+                }
+                default: {
+                    this.showControlButton((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onChange(modifier._onChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as ((value: boolean) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._sideBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._sideBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.sideBarWidth(modifier._sideBarWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.sideBarWidth((undefined as number | Bindable<number> | undefined));
+                }
+            }
+        }
+        if (modifier._minSideBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minSideBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minSideBarWidth(modifier._minSideBarWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.minSideBarWidth((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._maxSideBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxSideBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxSideBarWidth(modifier._maxSideBarWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxSideBarWidth((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._sideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._sideBarWidth_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.sideBarWidth(modifier._sideBarWidth_1_0value);
+                    break;
+                }
+                default: {
+                    this.sideBarWidth((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._minSideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minSideBarWidth_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minSideBarWidth(modifier._minSideBarWidth_1_0value);
+                    break;
+                }
+                default: {
+                    this.minSideBarWidth((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._maxSideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxSideBarWidth_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxSideBarWidth(modifier._maxSideBarWidth_1_0value);
+                    break;
+                }
+                default: {
+                    this.maxSideBarWidth((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._autoHide_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._autoHide_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.autoHide(modifier._autoHide_0_0value);
+                    break;
+                }
+                default: {
+                    this.autoHide((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._sideBarPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._sideBarPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.sideBarPosition(modifier._sideBarPosition_0_0value);
+                    break;
+                }
+                default: {
+                    this.sideBarPosition((undefined as SideBarPosition | undefined));
+                }
+            }
+        }
+        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.divider(modifier._divider_0_0value);
+                    break;
+                }
+                default: {
+                    this.divider((undefined as DividerStyle | undefined));
+                }
+            }
+        }
+        if (modifier._minContentWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minContentWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minContentWidth(modifier._minContentWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.minContentWidth((undefined as Dimension | undefined));
+                }
+            }
+        }
+    }
+    showSideBar(value: boolean | Bindable<boolean> | undefined): this {
+        if (((this._showSideBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._showSideBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._showSideBar_0_0value = value
+        } else
+        {
+            this._showSideBar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public controlButton(value: ButtonStyle | undefined): this {
-        this._controlButton_flag = true
-        this._controlButton0_value = value
+    controlButton(value: ButtonStyle | undefined): this {
+        if (((this._controlButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._controlButton_0_flag = AttributeUpdaterFlag.UPDATE
+            this._controlButton_0_0value = value
+        } else
+        {
+            this._controlButton_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public showControlButton(value: boolean | undefined): this {
-        this._showControlButton_flag = true
-        this._showControlButton0_value = value
+    showControlButton(value: boolean | undefined): this {
+        if (((this._showControlButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._showControlButton_0_0value) !== (value)))
+        {
+            this._showControlButton_0_flag = AttributeUpdaterFlag.UPDATE
+            this._showControlButton_0_0value = value
+        } else
+        {
+            this._showControlButton_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onChange(value: ((value: boolean) => void) | undefined): this {
-        this._onChange_flag = true
-        this._onChange0_value = value
+    onChange(value: ((value: boolean) => void) | undefined): this {
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onChange_0_0value = value
+        } else
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public sideBarWidth(value: Length | undefined): this {
-        this._sideBarWidth_flag = true
-        this._sideBarWidth0_value = value
+    sideBarWidth(value: number | Bindable<number> | undefined): this {
+        if (((this._sideBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._sideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._sideBarWidth_0_0value = value
+        } else
+        {
+            this._sideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minSideBarWidth(value: Length | undefined): this {
-        this._minSideBarWidth_flag = true
-        this._minSideBarWidth0_value = value
+    minSideBarWidth(value: number | undefined): this {
+        if (((this._minSideBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minSideBarWidth_0_0value) !== (value)))
+        {
+            this._minSideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minSideBarWidth_0_0value = value
+        } else
+        {
+            this._minSideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public maxSideBarWidth(value: Length | undefined): this {
-        this._maxSideBarWidth_flag = true
-        this._maxSideBarWidth0_value = value
+    maxSideBarWidth(value: number | undefined): this {
+        if (((this._maxSideBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxSideBarWidth_0_0value) !== (value)))
+        {
+            this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxSideBarWidth_0_0value = value
+        } else
+        {
+            this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public autoHide(value: boolean | undefined): this {
-        this._autoHide_flag = true
-        this._autoHide0_value = value
+    sideBarWidth(value: Length | undefined): this {
+        if (((this._sideBarWidth_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._sideBarWidth_1_flag = AttributeUpdaterFlag.UPDATE
+            this._sideBarWidth_1_0value = value
+        } else
+        {
+            this._sideBarWidth_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public sideBarPosition(value: SideBarPosition | undefined): this {
-        this._sideBarPosition_flag = true
-        this._sideBarPosition0_value = value
+    minSideBarWidth(value: Length | undefined): this {
+        if (((this._minSideBarWidth_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minSideBarWidth_1_flag = AttributeUpdaterFlag.UPDATE
+            this._minSideBarWidth_1_0value = value
+        } else
+        {
+            this._minSideBarWidth_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
-        this._divider_flag = true
-        this._divider0_value = value
+    maxSideBarWidth(value: Length | undefined): this {
+        if (((this._maxSideBarWidth_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._maxSideBarWidth_1_flag = AttributeUpdaterFlag.UPDATE
+            this._maxSideBarWidth_1_0value = value
+        } else
+        {
+            this._maxSideBarWidth_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minContentWidth(value: Dimension | undefined): this {
-        this._minContentWidth_flag = true
-        this._minContentWidth0_value = value
+    autoHide(value: boolean | undefined): this {
+        if (((this._autoHide_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoHide_0_0value) !== (value)))
+        {
+            this._autoHide_0_flag = AttributeUpdaterFlag.UPDATE
+            this._autoHide_0_0value = value
+        } else
+        {
+            this._autoHide_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+    sideBarPosition(value: SideBarPosition | undefined): this {
+        if (((this._sideBarPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._sideBarPosition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._sideBarPosition_0_0value = value
+        } else
+        {
+            this._sideBarPosition_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    divider(value: DividerStyle | undefined): this {
+        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+            this._divider_0_0value = value
+        } else
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    minContentWidth(value: Dimension | undefined): this {
+        if (((this._minContentWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minContentWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minContentWidth_0_0value = value
+        } else
+        {
+            this._minContentWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -755,206 +1206,179 @@ export class ArkSideBarContainerSet extends ArkCommonMethodSet implements SideBa
 export class ButtonIconOptions_serializer {
     public static write(buffer: SerializerBase, value: ButtonIconOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_shown  = value.shown
-        let value_shown_type : int32 = RuntimeType.UNDEFINED
-        value_shown_type = runtimeType(value_shown)
-        if (RuntimeType.STRING == value_shown_type) {
+        const valueHolderForShown  = value.shown
+        if (valueHolderForShown instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_shown_0  = value_shown as string
-            valueSerializer.writeString(value_shown_0)
-        }
-        else if (TypeChecker.isimage_PixelMap(value_shown, false, false)) {
+            const valueHolderForShownForIdx0  = valueHolderForShown as string
+            valueSerializer.writeString(valueHolderForShownForIdx0)
+        } else if (valueHolderForShown instanceof image.PixelMap) {
             valueSerializer.writeInt8((1).toChar())
-            const value_shown_1  = value_shown as image.PixelMap
-            image_PixelMap_serializer.write(valueSerializer, value_shown_1)
-        }
-        else if (TypeChecker.isResource(value_shown, false, false, false, false, false)) {
+            const valueHolderForShownForIdx1  = valueHolderForShown as image.PixelMap
+            image_PixelMap_serializer.write(valueSerializer, valueHolderForShownForIdx1)
+        } else if (valueHolderForShown instanceof Resource) {
             valueSerializer.writeInt8((2).toChar())
-            const value_shown_2  = value_shown as Resource
-            Resource_serializer.write(valueSerializer, value_shown_2)
+            const valueHolderForShownForIdx2  = valueHolderForShown as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForShownForIdx2)
         }
-        const value_hidden  = value.hidden
-        let value_hidden_type : int32 = RuntimeType.UNDEFINED
-        value_hidden_type = runtimeType(value_hidden)
-        if (RuntimeType.STRING == value_hidden_type) {
+        const valueHolderForHidden  = value.hidden
+        if (valueHolderForHidden instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_hidden_0  = value_hidden as string
-            valueSerializer.writeString(value_hidden_0)
-        }
-        else if (TypeChecker.isimage_PixelMap(value_hidden, false, false)) {
+            const valueHolderForHiddenForIdx0  = valueHolderForHidden as string
+            valueSerializer.writeString(valueHolderForHiddenForIdx0)
+        } else if (valueHolderForHidden instanceof image.PixelMap) {
             valueSerializer.writeInt8((1).toChar())
-            const value_hidden_1  = value_hidden as image.PixelMap
-            image_PixelMap_serializer.write(valueSerializer, value_hidden_1)
-        }
-        else if (TypeChecker.isResource(value_hidden, false, false, false, false, false)) {
+            const valueHolderForHiddenForIdx1  = valueHolderForHidden as image.PixelMap
+            image_PixelMap_serializer.write(valueSerializer, valueHolderForHiddenForIdx1)
+        } else if (valueHolderForHidden instanceof Resource) {
             valueSerializer.writeInt8((2).toChar())
-            const value_hidden_2  = value_hidden as Resource
-            Resource_serializer.write(valueSerializer, value_hidden_2)
+            const valueHolderForHiddenForIdx2  = valueHolderForHidden as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForHiddenForIdx2)
         }
-        const value_switching  = value.switching
-        let value_switching_type : int32 = RuntimeType.UNDEFINED
-        value_switching_type = runtimeType(value_switching)
-        valueSerializer.writeInt8((value_switching_type).toChar())
-        if ((value_switching_type) != (RuntimeType.UNDEFINED)) {
-            const value_switching_value  = value_switching!
-            let value_switching_value_type : int32 = RuntimeType.UNDEFINED
-            value_switching_value_type = runtimeType(value_switching_value)
-            if (RuntimeType.STRING == value_switching_value_type) {
+        const valueHolderForSwitching  = value.switching
+        if (valueHolderForSwitching !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSwitchingTmpValue  = valueHolderForSwitching!
+            if (valueHolderForSwitchingTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_switching_value_0  = value_switching_value as string
-                valueSerializer.writeString(value_switching_value_0)
-            }
-            else if (TypeChecker.isimage_PixelMap(value_switching_value, false, false)) {
+                const valueHolderForSwitchingTmpValueForIdx0  = valueHolderForSwitchingTmpValue as string
+                valueSerializer.writeString(valueHolderForSwitchingTmpValueForIdx0)
+            } else if (valueHolderForSwitchingTmpValue instanceof image.PixelMap) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_switching_value_1  = value_switching_value as image.PixelMap
-                image_PixelMap_serializer.write(valueSerializer, value_switching_value_1)
-            }
-            else if (TypeChecker.isResource(value_switching_value, false, false, false, false, false)) {
+                const valueHolderForSwitchingTmpValueForIdx1  = valueHolderForSwitchingTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(valueSerializer, valueHolderForSwitchingTmpValueForIdx1)
+            } else if (valueHolderForSwitchingTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_switching_value_2  = value_switching_value as Resource
-                Resource_serializer.write(valueSerializer, value_switching_value_2)
+                const valueHolderForSwitchingTmpValueForIdx2  = valueHolderForSwitchingTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSwitchingTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ButtonIconOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const shown_buf_selector : int32 = valueDeserializer.readInt8()
-        let shown_buf : string | image.PixelMap | Resource | undefined
-        if (shown_buf_selector == (0).toChar()) {
-            shown_buf = (valueDeserializer.readString() as string)
+        const shownTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let shownTmpBuf : string | image.PixelMap | Resource | undefined
+        if (shownTmpBufUnionSelector == (0).toChar()) {
+            shownTmpBuf = (valueDeserializer.readString() as string)
+        } else if (shownTmpBufUnionSelector == (1).toChar()) {
+            shownTmpBuf = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+        } else if (shownTmpBufUnionSelector == (2).toChar()) {
+            shownTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for shownTmpBuf has to be chosen through deserialisation.")
         }
-        else if (shown_buf_selector == (1).toChar()) {
-            shown_buf = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+        const shownTmpResult : string | image.PixelMap | Resource = (shownTmpBuf as string | image.PixelMap | Resource)
+        const hiddenTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let hiddenTmpBuf : string | image.PixelMap | Resource | undefined
+        if (hiddenTmpBufUnionSelector == (0).toChar()) {
+            hiddenTmpBuf = (valueDeserializer.readString() as string)
+        } else if (hiddenTmpBufUnionSelector == (1).toChar()) {
+            hiddenTmpBuf = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+        } else if (hiddenTmpBufUnionSelector == (2).toChar()) {
+            hiddenTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for hiddenTmpBuf has to be chosen through deserialisation.")
         }
-        else if (shown_buf_selector == (2).toChar()) {
-            shown_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for shown_buf has to be chosen through deserialisation.")
-        }
-        const shown_result : string | image.PixelMap | Resource = (shown_buf as string | image.PixelMap | Resource)
-        const hidden_buf_selector : int32 = valueDeserializer.readInt8()
-        let hidden_buf : string | image.PixelMap | Resource | undefined
-        if (hidden_buf_selector == (0).toChar()) {
-            hidden_buf = (valueDeserializer.readString() as string)
-        }
-        else if (hidden_buf_selector == (1).toChar()) {
-            hidden_buf = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
-        }
-        else if (hidden_buf_selector == (2).toChar()) {
-            hidden_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for hidden_buf has to be chosen through deserialisation.")
-        }
-        const hidden_result : string | image.PixelMap | Resource = (hidden_buf as string | image.PixelMap | Resource)
-        const switching_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let switching_buf : string | image.PixelMap | Resource | undefined
-        if ((switching_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const switching_buf__selector : int32 = valueDeserializer.readInt8()
-            let switching_buf_ : string | image.PixelMap | Resource | undefined
-            if (switching_buf__selector == (0).toChar()) {
-                switching_buf_ = (valueDeserializer.readString() as string)
+        const hiddenTmpResult : string | image.PixelMap | Resource = (hiddenTmpBuf as string | image.PixelMap | Resource)
+        const switchingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let switchingTmpBuf : string | image.PixelMap | Resource | undefined
+        if ((switchingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const switchingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let switchingTmpBuf_ : string | image.PixelMap | Resource | undefined
+            if (switchingTmpBuf_UnionSelector == (0).toChar()) {
+                switchingTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (switchingTmpBuf_UnionSelector == (1).toChar()) {
+                switchingTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else if (switchingTmpBuf_UnionSelector == (2).toChar()) {
+                switchingTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for switchingTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (switching_buf__selector == (1).toChar()) {
-                switching_buf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
-            }
-            else if (switching_buf__selector == (2).toChar()) {
-                switching_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for switching_buf_ has to be chosen through deserialisation.")
-            }
-            switching_buf = (switching_buf_ as string | image.PixelMap | Resource)
+            switchingTmpBuf = (switchingTmpBuf_ as string | image.PixelMap | Resource)
         }
-        const switching_result : string | image.PixelMap | Resource | undefined = switching_buf
-        let value : ButtonIconOptions = ({shown: shown_result, hidden: hidden_result, switching: switching_result} as ButtonIconOptions)
+        const switchingTmpResult : string | image.PixelMap | Resource | undefined = switchingTmpBuf
+        let value : ButtonIconOptions = ({shown: shownTmpResult, hidden: hiddenTmpResult, switching: switchingTmpResult} as ButtonIconOptions)
         return value
     }
 }
 export class ButtonStyle_serializer {
     public static write(buffer: SerializerBase, value: ButtonStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_left  = value.left
-        let value_left_type : int32 = RuntimeType.UNDEFINED
-        value_left_type = runtimeType(value_left)
-        valueSerializer.writeInt8((value_left_type).toChar())
-        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
-            const value_left_value  = value_left!
-            valueSerializer.writeNumber(value_left_value)
+        const valueHolderForLeft  = value.left
+        if (valueHolderForLeft !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeftTmpValue  = valueHolderForLeft!
+            valueSerializer.writeNumber(valueHolderForLeftTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_top  = value.top
-        let value_top_type : int32 = RuntimeType.UNDEFINED
-        value_top_type = runtimeType(value_top)
-        valueSerializer.writeInt8((value_top_type).toChar())
-        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
-            const value_top_value  = value_top!
-            valueSerializer.writeNumber(value_top_value)
+        const valueHolderForTop  = value.top
+        if (valueHolderForTop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTopTmpValue  = valueHolderForTop!
+            valueSerializer.writeNumber(valueHolderForTopTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            valueSerializer.writeNumber(value_width_value)
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            valueSerializer.writeNumber(valueHolderForWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            valueSerializer.writeNumber(value_height_value)
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_icons  = value.icons
-        let value_icons_type : int32 = RuntimeType.UNDEFINED
-        value_icons_type = runtimeType(value_icons)
-        valueSerializer.writeInt8((value_icons_type).toChar())
-        if ((value_icons_type) != (RuntimeType.UNDEFINED)) {
-            const value_icons_value  = value_icons!
-            ButtonIconOptions_serializer.write(valueSerializer, value_icons_value)
+        const valueHolderForIcons  = value.icons
+        if (valueHolderForIcons !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconsTmpValue  = valueHolderForIcons!
+            ButtonIconOptions_serializer.write(valueSerializer, valueHolderForIconsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ButtonStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let left_buf : number | undefined
-        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            left_buf = (valueDeserializer.readNumber() as number)
+        const leftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let leftTmpBuf : number | undefined
+        if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            leftTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const left_result : number | undefined = left_buf
-        const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let top_buf : number | undefined
-        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            top_buf = (valueDeserializer.readNumber() as number)
+        const leftTmpResult : number | undefined = leftTmpBuf
+        const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let topTmpBuf : number | undefined
+        if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            topTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const top_result : number | undefined = top_buf
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            width_buf = (valueDeserializer.readNumber() as number)
+        const topTmpResult : number | undefined = topTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : number | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            widthTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const width_result : number | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            height_buf = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : number | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            heightTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const height_result : number | undefined = height_buf
-        const icons_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icons_buf : ButtonIconOptions | undefined
-        if ((icons_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            icons_buf = ButtonIconOptions_serializer.read(valueDeserializer)
+        const heightTmpResult : number | undefined = heightTmpBuf
+        const iconsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconsTmpBuf : ButtonIconOptions | undefined
+        if ((iconsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            iconsTmpBuf = ButtonIconOptions_serializer.read(valueDeserializer)
         }
-        const icons_result : ButtonIconOptions | undefined = icons_buf
-        let value : ButtonStyle = ({left: left_result, top: top_result, width: width_result, height: height_result, icons: icons_result} as ButtonStyle)
+        const iconsTmpResult : ButtonIconOptions | undefined = iconsTmpBuf
+        let value : ButtonStyle = ({left: leftTmpResult, top: topTmpResult, width: widthTmpResult, height: heightTmpResult, icons: iconsTmpResult} as ButtonStyle)
         return value
     }
 }

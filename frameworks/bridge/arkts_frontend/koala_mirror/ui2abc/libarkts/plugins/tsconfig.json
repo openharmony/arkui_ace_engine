@@ -9,6 +9,5 @@
     "include": [
         "./src/printer-plugin.ts",
         "./src/print-visitor.ts",
-        "./src/no-visitor.ts"
     ]
 }

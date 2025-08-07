@@ -479,7 +479,10 @@ void resolveDeferred(KVMDeferred* deferred, uint8_t* argsData, int32_t argsLengt
         status = vm->AttachCurrentThread(nullptr, ANI_VERSION_1, &env);
         CHECK_ANI_FATAL(status);
     }
-    status = env->PromiseResolver_Resolve((ani_resolver)deferred->handler, nullptr);
+    ani_ref undef = nullptr;
+    status = env->GetUndefined(&undef);
+    CHECK_ANI_FATAL(status);
+    status = env->PromiseResolver_Resolve((ani_resolver)deferred->handler, undef);
     CHECK_ANI_FATAL(status);
 #endif
 }

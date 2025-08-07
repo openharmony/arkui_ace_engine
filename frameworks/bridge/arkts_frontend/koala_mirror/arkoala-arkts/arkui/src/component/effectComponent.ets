@@ -17,17 +17,18 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -35,7 +36,7 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkEffectComponentPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._EffectComponent_construct(peerId, flags)
-        const _peer  = new ArkEffectComponentPeer(_peerPtr, peerId, "EffectComponent", flags)
+        const _peer  = new ArkEffectComponentPeer(_peerPtr, peerId, 'EffectComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -53,9 +54,6 @@ export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements Eff
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: EffectComponentAttribute): void {
-        super.apply(target)
-    }
 }
 
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
@@ -70,7 +68,6 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -78,26 +75,6 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
         super.applyAttributesFinish()
     }
 }
-export function withEffectComponentStyle(receiver: EffectComponentAttribute, modifier: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkEffectComponentStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("EffectComponent")
-// export function EffectComponent(
-//     
-//     @memo
-//     content_?: () => void,
-// ): EffectComponentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function EffectComponent(
@@ -113,18 +90,21 @@ export function EffectComponent(
     NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (_: ArkEffectComponentPeer): void => {
         receiver.setEffectComponentOptions()
         style?.(receiver)
-        withEffectComponentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkEffectComponentSet extends ArkCommonMethodSet implements EffectComponentAttribute {
+export class EffectComponentModifier extends CommonMethodModifier implements EffectComponentAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: EffectComponentAttribute): void {
+    applyModifierPatch(peer: ArkEffectComponentPeer): void {
+        super.applyModifierPatch(peer)
+    }
+    mergeModifier(modifier: EffectComponentModifier): void {
+        super.mergeModifier(modifier)
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

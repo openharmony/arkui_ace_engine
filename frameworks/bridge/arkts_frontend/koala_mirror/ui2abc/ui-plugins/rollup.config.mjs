@@ -19,21 +19,11 @@ import terser from "@rollup/plugin-terser"
 
 const ENABLE_SOURCE_MAPS = false;  // Enable for debugging
 
-export default [
-    buildPlugin({
-        src: "./src/parsed-stage-plugin.ts",
-        dst: "./lib/parsed-stage-plugin.js",
-    }),
-    buildPlugin({
-        src: "./src/checked-stage-plugin.ts",
-        dst: "./lib/checked-stage-plugin.js",
-    }),
-    buildPlugin({
-        src: "./src/entry.ts",
-        dst: "./lib/entry.js",
-        minimize: false,
-    }),
-]
+export default buildPlugin({
+    src: "./src/entry.ts",
+    dst: "./lib/entry.js",
+    minimize: false,
+})
 
 /** @return {import("rollup").RollupOptions} */
 function buildPlugin({ src, dst, minimize = false }) {
@@ -96,11 +86,10 @@ function APACHE_LICENSE_HEADER() {
 function replaceLibarktsImport() {
     const REQUIRE_PATTERN = `require('@koalaui/libarkts');`
     return {
-        name: "replace-librkts-import",
+        name: "replace-libarkts-import",
         generateBundle(options, bundle) {
             for (const [fileName, asset] of Object.entries(bundle)) {
                 if (!asset.code) continue
-                if (fileName !== "entry.js") continue
                 asset.code = asset.code.replace(REQUIRE_PATTERN, `require(process.env.LIBARKTS_PATH ?? "../../libarkts/lib/libarkts.js")`)
             }
         }

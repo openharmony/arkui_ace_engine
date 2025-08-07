@@ -80,7 +80,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
     }
 
-    registerCallbackForPropertyChange(value: T) {
+    registerCallbackForPropertyChange(value: T): void {
         if (!(value && typeof value === 'object')) {
             return;
         }
@@ -96,7 +96,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
     }
 
-    unregisterCallbackForPropertyChange(value: T) {
+    unregisterCallbackForPropertyChange(value: T): void {
         if (!(value && typeof value === 'object')) {
             return;
         }

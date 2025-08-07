@@ -16,21 +16,22 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { VoidCallback } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { XComponentType } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class XComponentControllerInternal {
     public static fromPtr(ptr: KPointer): XComponentController {
         return new XComponentController(ptr)
@@ -207,7 +208,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkXComponentPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._XComponent_construct(peerId, flags)
-        const _peer  = new ArkXComponentPeer(_peerPtr, peerId, "XComponent", flags)
+        const _peer  = new ArkXComponentPeer(_peerPtr, peerId, 'XComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -231,72 +232,72 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
     }
     setOnLoadAttribute(value: OnNativeLoadCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setOnLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDestroyAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setOnDestroy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setEnableAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableSecureAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setEnableSecure(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHdrBrightnessAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setHdrBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableTransparentLayerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setEnableTransparentLayer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -373,21 +374,6 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: XComponentAttribute): void {
-        super.apply(target)
-        if (this.onLoad_value !== undefined)
-            target.onLoad(this.onLoad_value!)
-        if (this.onDestroy_value !== undefined)
-            target.onDestroy(this.onDestroy_value!)
-        if (this.enableAnalyzer_value !== undefined)
-            target.enableAnalyzer(this.enableAnalyzer_value!)
-        if (this.enableSecure_value !== undefined)
-            target.enableSecure(this.enableSecure_value!)
-        if (this.hdrBrightness_value !== undefined)
-            target.hdrBrightness(this.hdrBrightness_value!)
-        if (this.enableTransparentLayer_value !== undefined)
-            target.enableTransparentLayer(this.enableTransparentLayer_value!)
     }
 }
 export interface XComponentParameter {
@@ -474,7 +460,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -482,26 +467,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         super.applyAttributesFinish()
     }
 }
-export function withXComponentStyle(receiver: XComponentAttribute, modifier: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkXComponentStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("XComponent")
-// export function XComponent(
-//     value: XComponentParameter,
-//     @memo
-//     content_?: () => void,
-// ): XComponentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function XComponent(
@@ -517,21 +482,11 @@ export function XComponent(
     NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
         receiver.setXComponentOptions(value)
         style?.(receiver)
-        withXComponentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-// @memo
-// @BuilderLambda("XComponent")
-// export function XComponent(
-//     options: XComponentOptions,
-//     @memo
-//     content_?: () => void,
-// ): XComponentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function XComponent(
@@ -547,21 +502,11 @@ export function XComponent(
     NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
         receiver.setXComponentOptions(options)
         style?.(receiver)
-        withXComponentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-// @memo
-// @BuilderLambda("XComponent")
-// export function XComponent(
-//     params: NativeXComponentParameters,
-//     @memo
-//     content_?: () => void,
-// ): XComponentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function XComponent(
@@ -577,71 +522,284 @@ export function XComponent(
     NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
         receiver.setXComponentOptions(params)
         style?.(receiver)
-        withXComponentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkXComponentSet extends ArkCommonMethodSet implements XComponentAttribute {
+export class XComponentModifier extends CommonMethodModifier implements XComponentAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _onLoad_flag?: boolean
-    _onLoad0_value?: OnNativeLoadCallback | undefined
-    _onDestroy_flag?: boolean
-    _onDestroy0_value?: VoidCallback | undefined
-    _enableAnalyzer_flag?: boolean
-    _enableAnalyzer0_value?: boolean | undefined
-    _enableSecure_flag?: boolean
-    _enableSecure0_value?: boolean | undefined
-    _hdrBrightness_flag?: boolean
-    _hdrBrightness0_value?: number | undefined
-    _enableTransparentLayer_flag?: boolean
-    _enableTransparentLayer0_value?: boolean | undefined
-    applyModifierPatch(component: XComponentAttribute): void {
-        if (this._onLoad_flag)
-            component.onLoad((this._onLoad0_value as OnNativeLoadCallback | undefined))
-        if (this._onDestroy_flag)
-            component.onDestroy((this._onDestroy0_value as VoidCallback | undefined))
-        if (this._enableAnalyzer_flag)
-            component.enableAnalyzer((this._enableAnalyzer0_value as boolean | undefined))
-        if (this._enableSecure_flag)
-            component.enableSecure((this._enableSecure0_value as boolean | undefined))
-        if (this._hdrBrightness_flag)
-            component.hdrBrightness((this._hdrBrightness0_value as number | undefined))
-        if (this._enableTransparentLayer_flag)
-            component.enableTransparentLayer((this._enableTransparentLayer0_value as boolean | undefined))
+    _onLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onLoad_0_0value?: OnNativeLoadCallback | undefined
+    _onDestroy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDestroy_0_0value?: VoidCallback | undefined
+    _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAnalyzer_0_0value?: boolean | undefined
+    _enableSecure_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableSecure_0_0value?: boolean | undefined
+    _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hdrBrightness_0_0value?: number | undefined
+    _enableTransparentLayer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableTransparentLayer_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkXComponentPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnLoadAttribute((this._onLoad_0_0value as OnNativeLoadCallback | undefined));
+                    this._onLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnLoadAttribute((undefined as OnNativeLoadCallback | undefined));
+                }
+            }
+        }
+        if (this._onDestroy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDestroy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDestroyAttribute((this._onDestroy_0_0value as VoidCallback | undefined));
+                    this._onDestroy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDestroy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDestroy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDestroyAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAnalyzerAttribute((this._enableAnalyzer_0_0value as boolean | undefined));
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAnalyzerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableSecure_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableSecure_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableSecureAttribute((this._enableSecure_0_0value as boolean | undefined));
+                    this._enableSecure_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableSecure_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableSecure_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableSecureAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hdrBrightness_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHdrBrightnessAttribute((this._hdrBrightness_0_0value as number | undefined));
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHdrBrightnessAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableTransparentLayer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableTransparentLayerAttribute((this._enableTransparentLayer_0_0value as boolean | undefined));
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableTransparentLayerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public onLoad(value: OnNativeLoadCallback | undefined): this {
-        this._onLoad_flag = true
-        this._onLoad0_value = value
+    mergeModifier(modifier: XComponentModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onLoad(modifier._onLoad_0_0value);
+                    break;
+                }
+                default: {
+                    this.onLoad((undefined as OnNativeLoadCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDestroy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDestroy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDestroy(modifier._onDestroy_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDestroy((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAnalyzer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAnalyzer(modifier._enableAnalyzer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAnalyzer((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableSecure_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableSecure_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableSecure(modifier._enableSecure_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableSecure((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hdrBrightness_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hdrBrightness(modifier._hdrBrightness_0_0value);
+                    break;
+                }
+                default: {
+                    this.hdrBrightness((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableTransparentLayer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableTransparentLayer(modifier._enableTransparentLayer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableTransparentLayer((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    onLoad(value: OnNativeLoadCallback | undefined): this {
+        if (((this._onLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onLoad_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onLoad_0_0value = value
+        } else
+        {
+            this._onLoad_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onDestroy(value: VoidCallback | undefined): this {
-        this._onDestroy_flag = true
-        this._onDestroy0_value = value
+    onDestroy(value: VoidCallback | undefined): this {
+        if (((this._onDestroy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDestroy_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDestroy_0_0value = value
+        } else
+        {
+            this._onDestroy_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableAnalyzer(value: boolean | undefined): this {
-        this._enableAnalyzer_flag = true
-        this._enableAnalyzer0_value = value
+    enableAnalyzer(value: boolean | undefined): this {
+        if (((this._enableAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAnalyzer_0_0value = value
+        } else
+        {
+            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableSecure(value: boolean | undefined): this {
-        this._enableSecure_flag = true
-        this._enableSecure0_value = value
+    enableSecure(value: boolean | undefined): this {
+        if (((this._enableSecure_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSecure_0_0value) !== (value)))
+        {
+            this._enableSecure_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableSecure_0_0value = value
+        } else
+        {
+            this._enableSecure_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public hdrBrightness(value: number | undefined): this {
-        this._hdrBrightness_flag = true
-        this._hdrBrightness0_value = value
+    hdrBrightness(value: number | undefined): this {
+        if (((this._hdrBrightness_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hdrBrightness_0_0value) !== (value)))
+        {
+            this._hdrBrightness_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hdrBrightness_0_0value = value
+        } else
+        {
+            this._hdrBrightness_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableTransparentLayer(value: boolean | undefined): this {
-        this._enableTransparentLayer_flag = true
-        this._enableTransparentLayer0_value = value
+    enableTransparentLayer(value: boolean | undefined): this {
+        if (((this._enableTransparentLayer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableTransparentLayer_0_0value) !== (value)))
+        {
+            this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableTransparentLayer_0_0value = value
+        } else
+        {
+            this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -651,71 +809,68 @@ export class ArkXComponentSet extends ArkCommonMethodSet implements XComponentAt
 export class SurfaceRect_serializer {
     public static write(buffer: SerializerBase, value: SurfaceRect): void {
         let valueSerializer : SerializerBase = buffer
-        const value_offsetX  = value.offsetX
-        let value_offsetX_type : int32 = RuntimeType.UNDEFINED
-        value_offsetX_type = runtimeType(value_offsetX)
-        valueSerializer.writeInt8((value_offsetX_type).toChar())
-        if ((value_offsetX_type) != (RuntimeType.UNDEFINED)) {
-            const value_offsetX_value  = value_offsetX!
-            valueSerializer.writeNumber(value_offsetX_value)
+        const valueHolderForOffsetX  = value.offsetX
+        if (valueHolderForOffsetX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
+            valueSerializer.writeNumber(valueHolderForOffsetXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_offsetY  = value.offsetY
-        let value_offsetY_type : int32 = RuntimeType.UNDEFINED
-        value_offsetY_type = runtimeType(value_offsetY)
-        valueSerializer.writeInt8((value_offsetY_type).toChar())
-        if ((value_offsetY_type) != (RuntimeType.UNDEFINED)) {
-            const value_offsetY_value  = value_offsetY!
-            valueSerializer.writeNumber(value_offsetY_value)
+        const valueHolderForOffsetY  = value.offsetY
+        if (valueHolderForOffsetY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
+            valueSerializer.writeNumber(valueHolderForOffsetYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_surfaceWidth  = value.surfaceWidth
-        valueSerializer.writeNumber(value_surfaceWidth)
-        const value_surfaceHeight  = value.surfaceHeight
-        valueSerializer.writeNumber(value_surfaceHeight)
+        const valueHolderForSurfaceWidth  = value.surfaceWidth
+        valueSerializer.writeNumber(valueHolderForSurfaceWidth)
+        const valueHolderForSurfaceHeight  = value.surfaceHeight
+        valueSerializer.writeNumber(valueHolderForSurfaceHeight)
     }
     public static read(buffer: DeserializerBase): SurfaceRect {
         let valueDeserializer : DeserializerBase = buffer
-        const offsetX_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetX_buf : number | undefined
-        if ((offsetX_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            offsetX_buf = (valueDeserializer.readNumber() as number)
+        const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offsetXTmpBuf : number | undefined
+        if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            offsetXTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const offsetX_result : number | undefined = offsetX_buf
-        const offsetY_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetY_buf : number | undefined
-        if ((offsetY_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            offsetY_buf = (valueDeserializer.readNumber() as number)
+        const offsetXTmpResult : number | undefined = offsetXTmpBuf
+        const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offsetYTmpBuf : number | undefined
+        if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            offsetYTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const offsetY_result : number | undefined = offsetY_buf
-        const surfaceWidth_result : number = (valueDeserializer.readNumber() as number)
-        const surfaceHeight_result : number = (valueDeserializer.readNumber() as number)
-        let value : SurfaceRect = ({offsetX: offsetX_result, offsetY: offsetY_result, surfaceWidth: surfaceWidth_result, surfaceHeight: surfaceHeight_result} as SurfaceRect)
+        const offsetYTmpResult : number | undefined = offsetYTmpBuf
+        const surfaceWidthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const surfaceHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : SurfaceRect = ({offsetX: offsetXTmpResult, offsetY: offsetYTmpResult, surfaceWidth: surfaceWidthTmpResult, surfaceHeight: surfaceHeightTmpResult} as SurfaceRect)
         return value
     }
 }
 export class SurfaceRotationOptions_serializer {
     public static write(buffer: SerializerBase, value: SurfaceRotationOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_lock  = value.lock
-        let value_lock_type : int32 = RuntimeType.UNDEFINED
-        value_lock_type = runtimeType(value_lock)
-        valueSerializer.writeInt8((value_lock_type).toChar())
-        if ((value_lock_type) != (RuntimeType.UNDEFINED)) {
-            const value_lock_value  = value_lock!
-            valueSerializer.writeBoolean(value_lock_value)
+        const valueHolderForLock  = value.lock
+        if (valueHolderForLock !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLockTmpValue  = valueHolderForLock!
+            valueSerializer.writeBoolean(valueHolderForLockTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SurfaceRotationOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const lock_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lock_buf : boolean | undefined
-        if ((lock_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            lock_buf = valueDeserializer.readBoolean()
+        const lockTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let lockTmpBuf : boolean | undefined
+        if ((lockTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            lockTmpBuf = valueDeserializer.readBoolean()
         }
-        const lock_result : boolean | undefined = lock_buf
-        let value : SurfaceRotationOptions = ({lock: lock_result} as SurfaceRotationOptions)
+        const lockTmpResult : boolean | undefined = lockTmpBuf
+        let value : SurfaceRotationOptions = ({lock: lockTmpResult} as SurfaceRotationOptions)
         return value
     }
 }
@@ -733,120 +888,115 @@ export class XComponentController_serializer {
 export class NativeXComponentParameters_serializer {
     public static write(buffer: SerializerBase, value: NativeXComponentParameters): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(value_type))
-        const value_imageAIOptions  = value.imageAIOptions
-        let value_imageAIOptions_type : int32 = RuntimeType.UNDEFINED
-        value_imageAIOptions_type = runtimeType(value_imageAIOptions)
-        valueSerializer.writeInt8((value_imageAIOptions_type).toChar())
-        if ((value_imageAIOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_imageAIOptions_value  = value_imageAIOptions!
-            ImageAIOptions_serializer.write(valueSerializer, value_imageAIOptions_value)
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(valueHolderForType))
+        const valueHolderForImageAIOptions  = value.imageAIOptions
+        if (valueHolderForImageAIOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForImageAIOptionsTmpValue  = valueHolderForImageAIOptions!
+            ImageAIOptions_serializer.write(valueSerializer, valueHolderForImageAIOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NativeXComponentParameters {
         let valueDeserializer : DeserializerBase = buffer
-        const type_result : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
-        const imageAIOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let imageAIOptions_buf : ImageAIOptions | undefined
-        if ((imageAIOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            imageAIOptions_buf = ImageAIOptions_serializer.read(valueDeserializer)
+        const typeTmpResult : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let imageAIOptionsTmpBuf : ImageAIOptions | undefined
+        if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
         }
-        const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
-        let value : NativeXComponentParameters = ({type: type_result, imageAIOptions: imageAIOptions_result} as NativeXComponentParameters)
+        const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
+        let value : NativeXComponentParameters = ({type: typeTmpResult, imageAIOptions: imageAIOptionsTmpResult} as NativeXComponentParameters)
         return value
     }
 }
 export class XComponentOptions_serializer {
     public static write(buffer: SerializerBase, value: XComponentOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_type  = value.type
-        valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(value_type))
-        const value_controller  = value.controller
-        XComponentController_serializer.write(valueSerializer, value_controller)
-        const value_imageAIOptions  = value.imageAIOptions
-        let value_imageAIOptions_type : int32 = RuntimeType.UNDEFINED
-        value_imageAIOptions_type = runtimeType(value_imageAIOptions)
-        valueSerializer.writeInt8((value_imageAIOptions_type).toChar())
-        if ((value_imageAIOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_imageAIOptions_value  = value_imageAIOptions!
-            ImageAIOptions_serializer.write(valueSerializer, value_imageAIOptions_value)
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(valueHolderForType))
+        const valueHolderForController  = value.controller
+        XComponentController_serializer.write(valueSerializer, valueHolderForController)
+        const valueHolderForImageAIOptions  = value.imageAIOptions
+        if (valueHolderForImageAIOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForImageAIOptionsTmpValue  = valueHolderForImageAIOptions!
+            ImageAIOptions_serializer.write(valueSerializer, valueHolderForImageAIOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_screenId  = value.screenId
-        let value_screenId_type : int32 = RuntimeType.UNDEFINED
-        value_screenId_type = runtimeType(value_screenId)
-        valueSerializer.writeInt8((value_screenId_type).toChar())
-        if ((value_screenId_type) != (RuntimeType.UNDEFINED)) {
-            const value_screenId_value  = value_screenId!
-            valueSerializer.writeNumber(value_screenId_value)
+        const valueHolderForScreenId  = value.screenId
+        if (valueHolderForScreenId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScreenIdTmpValue  = valueHolderForScreenId!
+            valueSerializer.writeNumber(valueHolderForScreenIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): XComponentOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const type_result : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
-        const controller_result : XComponentController = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
-        const imageAIOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let imageAIOptions_buf : ImageAIOptions | undefined
-        if ((imageAIOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            imageAIOptions_buf = ImageAIOptions_serializer.read(valueDeserializer)
+        const typeTmpResult : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
+        const controllerTmpResult : XComponentController = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let imageAIOptionsTmpBuf : ImageAIOptions | undefined
+        if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
         }
-        const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
-        const screenId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let screenId_buf : number | undefined
-        if ((screenId_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            screenId_buf = (valueDeserializer.readNumber() as number)
+        const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
+        const screenIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let screenIdTmpBuf : number | undefined
+        if ((screenIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            screenIdTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const screenId_result : number | undefined = screenId_buf
-        let value : XComponentOptions = ({type: type_result, controller: controller_result, imageAIOptions: imageAIOptions_result, screenId: screenId_result} as XComponentOptions)
+        const screenIdTmpResult : number | undefined = screenIdTmpBuf
+        let value : XComponentOptions = ({type: typeTmpResult, controller: controllerTmpResult, imageAIOptions: imageAIOptionsTmpResult, screenId: screenIdTmpResult} as XComponentOptions)
         return value
     }
 }
 export class XComponentParameter_serializer {
     public static write(buffer: SerializerBase, value: XComponentParameter): void {
         let valueSerializer : SerializerBase = buffer
-        const value_id  = value.id
-        valueSerializer.writeString(value_id)
-        const value_type  = value.type
-        valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(value_type))
-        const value_libraryname  = value.libraryname
-        let value_libraryname_type : int32 = RuntimeType.UNDEFINED
-        value_libraryname_type = runtimeType(value_libraryname)
-        valueSerializer.writeInt8((value_libraryname_type).toChar())
-        if ((value_libraryname_type) != (RuntimeType.UNDEFINED)) {
-            const value_libraryname_value  = value_libraryname!
-            valueSerializer.writeString(value_libraryname_value)
+        const valueHolderForId  = value.id
+        valueSerializer.writeString(valueHolderForId)
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(valueHolderForType))
+        const valueHolderForLibraryname  = value.libraryname
+        if (valueHolderForLibraryname !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLibrarynameTmpValue  = valueHolderForLibraryname!
+            valueSerializer.writeString(valueHolderForLibrarynameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
-            const value_controller_value  = value_controller!
-            XComponentController_serializer.write(valueSerializer, value_controller_value)
+        const valueHolderForController  = value.controller
+        if (valueHolderForController !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForControllerTmpValue  = valueHolderForController!
+            XComponentController_serializer.write(valueSerializer, valueHolderForControllerTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): XComponentParameter {
         let valueDeserializer : DeserializerBase = buffer
-        const id_result : string = (valueDeserializer.readString() as string)
-        const type_result : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
-        const libraryname_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let libraryname_buf : string | undefined
-        if ((libraryname_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            libraryname_buf = (valueDeserializer.readString() as string)
+        const idTmpResult : string = (valueDeserializer.readString() as string)
+        const typeTmpResult : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
+        const librarynameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let librarynameTmpBuf : string | undefined
+        if ((librarynameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            librarynameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const libraryname_result : string | undefined = libraryname_buf
-        const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let controller_buf : XComponentController | undefined
-        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            controller_buf = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
+        const librarynameTmpResult : string | undefined = librarynameTmpBuf
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let controllerTmpBuf : XComponentController | undefined
+        if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            controllerTmpBuf = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
         }
-        const controller_result : XComponentController | undefined = controller_buf
-        let value : XComponentParameter = ({id: id_result, type: type_result, libraryname: libraryname_result, controller: controller_result} as XComponentParameter)
+        const controllerTmpResult : XComponentController | undefined = controllerTmpBuf
+        let value : XComponentParameter = ({id: idTmpResult, type: typeTmpResult, libraryname: librarynameTmpResult, controller: controllerTmpResult} as XComponentParameter)
         return value
     }
 }

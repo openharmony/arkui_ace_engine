@@ -17,9 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { SourceTool, BaseEvent, BaseEventInternal } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -96,9 +95,9 @@ export class Gesture implements MaterializedBase {
     private allowedTypes_serialize(types: Array<SourceTool>): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((types.length).toInt())
-        for (let types_counter_i = 0; types_counter_i < types.length; types_counter_i++) {
-            const types_element : SourceTool = types[types_counter_i]
-            thisSerializer.writeInt32(TypeChecker.SourceTool_ToNumeric(types_element))
+        for (let typesCounterI = 0; typesCounterI < types.length; typesCounterI++) {
+            const typesTmpElement : SourceTool = types[typesCounterI]
+            thisSerializer.writeInt32(TypeChecker.SourceTool_ToNumeric(typesTmpElement))
         }
         ArkUIGeneratedNativeModule._Gesture_allowedTypes(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -219,12 +218,12 @@ export class PanGestureOptions implements MaterializedBase {
     }
     static construct(value?: PanGestureHandlerOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            PanGestureHandlerOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            PanGestureHandlerOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -544,467 +543,443 @@ export class TapRecognizer_serializer {
 export class FingerInfo_serializer {
     public static write(buffer: SerializerBase, value: FingerInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_id  = value.id
-        valueSerializer.writeNumber(value_id)
-        const value_globalX  = value.globalX
-        valueSerializer.writeNumber(value_globalX)
-        const value_globalY  = value.globalY
-        valueSerializer.writeNumber(value_globalY)
-        const value_localX  = value.localX
-        valueSerializer.writeNumber(value_localX)
-        const value_localY  = value.localY
-        valueSerializer.writeNumber(value_localY)
-        const value_displayX  = value.displayX
-        valueSerializer.writeNumber(value_displayX)
-        const value_displayY  = value.displayY
-        valueSerializer.writeNumber(value_displayY)
-        const value_hand  = value.hand
-        let value_hand_type : int32 = RuntimeType.UNDEFINED
-        value_hand_type = runtimeType(value_hand)
-        valueSerializer.writeInt8((value_hand_type).toChar())
-        if ((value_hand_type) != (RuntimeType.UNDEFINED)) {
-            const value_hand_value  = (value_hand as InteractionHand)
-            valueSerializer.writeInt32(TypeChecker.InteractionHand_ToNumeric(value_hand_value))
+        const valueHolderForId  = value.id
+        valueSerializer.writeNumber(valueHolderForId)
+        const valueHolderForGlobalX  = value.globalX
+        valueSerializer.writeNumber(valueHolderForGlobalX)
+        const valueHolderForGlobalY  = value.globalY
+        valueSerializer.writeNumber(valueHolderForGlobalY)
+        const valueHolderForLocalX  = value.localX
+        valueSerializer.writeNumber(valueHolderForLocalX)
+        const valueHolderForLocalY  = value.localY
+        valueSerializer.writeNumber(valueHolderForLocalY)
+        const valueHolderForDisplayX  = value.displayX
+        valueSerializer.writeNumber(valueHolderForDisplayX)
+        const valueHolderForDisplayY  = value.displayY
+        valueSerializer.writeNumber(valueHolderForDisplayY)
+        const valueHolderForHand  = value.hand
+        if (valueHolderForHand !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHandTmpValue  = (valueHolderForHand as InteractionHand)
+            valueSerializer.writeInt32(TypeChecker.InteractionHand_ToNumeric(valueHolderForHandTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FingerInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const id_result : number = (valueDeserializer.readNumber() as number)
-        const globalX_result : number = (valueDeserializer.readNumber() as number)
-        const globalY_result : number = (valueDeserializer.readNumber() as number)
-        const localX_result : number = (valueDeserializer.readNumber() as number)
-        const localY_result : number = (valueDeserializer.readNumber() as number)
-        const displayX_result : number = (valueDeserializer.readNumber() as number)
-        const displayY_result : number = (valueDeserializer.readNumber() as number)
-        const hand_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let hand_buf : InteractionHand | undefined
-        if ((hand_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            hand_buf = TypeChecker.InteractionHand_FromNumeric(valueDeserializer.readInt32())
+        const idTmpResult : number = (valueDeserializer.readNumber() as number)
+        const globalXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const globalYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const localXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const localYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const displayXTmpResult : number = (valueDeserializer.readNumber() as number)
+        const displayYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const handTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let handTmpBuf : InteractionHand | undefined
+        if ((handTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            handTmpBuf = TypeChecker.InteractionHand_FromNumeric(valueDeserializer.readInt32())
         }
-        const hand_result : InteractionHand | undefined = hand_buf
-        let value : FingerInfo = ({id: id_result, globalX: globalX_result, globalY: globalY_result, localX: localX_result, localY: localY_result, displayX: displayX_result, displayY: displayY_result, hand: hand_result} as FingerInfo)
+        const handTmpResult : InteractionHand | undefined = handTmpBuf
+        let value : FingerInfo = ({id: idTmpResult, globalX: globalXTmpResult, globalY: globalYTmpResult, localX: localXTmpResult, localY: localYTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, hand: handTmpResult} as FingerInfo)
         return value
     }
 }
 export class GestureInfo_serializer {
     public static write(buffer: SerializerBase, value: GestureInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_tag  = value.tag
-        let value_tag_type : int32 = RuntimeType.UNDEFINED
-        value_tag_type = runtimeType(value_tag)
-        valueSerializer.writeInt8((value_tag_type).toChar())
-        if ((value_tag_type) != (RuntimeType.UNDEFINED)) {
-            const value_tag_value  = value_tag!
-            valueSerializer.writeString(value_tag_value)
+        const valueHolderForTag  = value.tag
+        if (valueHolderForTag !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTagTmpValue  = valueHolderForTag!
+            valueSerializer.writeString(valueHolderForTagTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_type  = value.type
-        valueSerializer.writeInt32(TypeChecker.GestureControl_GestureType_ToNumeric(value_type))
-        const value_isSystemGesture  = value.isSystemGesture
-        valueSerializer.writeBoolean(value_isSystemGesture)
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(TypeChecker.GestureControl_GestureType_ToNumeric(valueHolderForType))
+        const valueHolderForIsSystemGesture  = value.isSystemGesture
+        valueSerializer.writeBoolean(valueHolderForIsSystemGesture)
     }
     public static read(buffer: DeserializerBase): GestureInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const tag_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let tag_buf : string | undefined
-        if ((tag_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            tag_buf = (valueDeserializer.readString() as string)
+        const tagTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let tagTmpBuf : string | undefined
+        if ((tagTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            tagTmpBuf = (valueDeserializer.readString() as string)
         }
-        const tag_result : string | undefined = tag_buf
-        const type_result : GestureControl.GestureType = TypeChecker.GestureControl_GestureType_FromNumeric(valueDeserializer.readInt32())
-        const isSystemGesture_result : boolean = valueDeserializer.readBoolean()
-        let value : GestureInfo = ({tag: tag_result, type: type_result, isSystemGesture: isSystemGesture_result} as GestureInfo)
+        const tagTmpResult : string | undefined = tagTmpBuf
+        const typeTmpResult : GestureControl.GestureType = TypeChecker.GestureControl_GestureType_FromNumeric(valueDeserializer.readInt32())
+        const isSystemGestureTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : GestureInfo = ({tag: tagTmpResult, type: typeTmpResult, isSystemGesture: isSystemGestureTmpResult} as GestureInfo)
         return value
     }
 }
 export class LongPressGestureHandlerOptions_serializer {
     public static write(buffer: SerializerBase, value: LongPressGestureHandlerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_isFingerCountLimited  = value.isFingerCountLimited
-        let value_isFingerCountLimited_type : int32 = RuntimeType.UNDEFINED
-        value_isFingerCountLimited_type = runtimeType(value_isFingerCountLimited)
-        valueSerializer.writeInt8((value_isFingerCountLimited_type).toChar())
-        if ((value_isFingerCountLimited_type) != (RuntimeType.UNDEFINED)) {
-            const value_isFingerCountLimited_value  = value_isFingerCountLimited!
-            valueSerializer.writeBoolean(value_isFingerCountLimited_value)
+        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
+        if (valueHolderForIsFingerCountLimited !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
+            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_repeat  = value.repeat
-        let value_repeat_type : int32 = RuntimeType.UNDEFINED
-        value_repeat_type = runtimeType(value_repeat)
-        valueSerializer.writeInt8((value_repeat_type).toChar())
-        if ((value_repeat_type) != (RuntimeType.UNDEFINED)) {
-            const value_repeat_value  = value_repeat!
-            valueSerializer.writeBoolean(value_repeat_value)
+        const valueHolderForRepeat  = value.repeat
+        if (valueHolderForRepeat !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRepeatTmpValue  = valueHolderForRepeat!
+            valueSerializer.writeBoolean(valueHolderForRepeatTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_duration  = value.duration
-        let value_duration_type : int32 = RuntimeType.UNDEFINED
-        value_duration_type = runtimeType(value_duration)
-        valueSerializer.writeInt8((value_duration_type).toChar())
-        if ((value_duration_type) != (RuntimeType.UNDEFINED)) {
-            const value_duration_value  = value_duration!
-            valueSerializer.writeNumber(value_duration_value)
+        const valueHolderForDuration  = value.duration
+        if (valueHolderForDuration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDurationTmpValue  = valueHolderForDuration!
+            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): LongPressGestureHandlerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimited_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimited_buf : boolean | undefined
-        if ((isFingerCountLimited_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isFingerCountLimited_buf = valueDeserializer.readBoolean()
+        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isFingerCountLimitedTmpBuf : boolean | undefined
+        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
         }
-        const isFingerCountLimited_result : boolean | undefined = isFingerCountLimited_buf
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const repeat_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let repeat_buf : boolean | undefined
-        if ((repeat_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            repeat_buf = valueDeserializer.readBoolean()
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const repeatTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let repeatTmpBuf : boolean | undefined
+        if ((repeatTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            repeatTmpBuf = valueDeserializer.readBoolean()
         }
-        const repeat_result : boolean | undefined = repeat_buf
-        const duration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let duration_buf : number | undefined
-        if ((duration_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            duration_buf = (valueDeserializer.readNumber() as number)
+        const repeatTmpResult : boolean | undefined = repeatTmpBuf
+        const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let durationTmpBuf : number | undefined
+        if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            durationTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const duration_result : number | undefined = duration_buf
-        let value : LongPressGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimited_result, fingers: fingers_result, repeat: repeat_result, duration: duration_result} as LongPressGestureHandlerOptions)
+        const durationTmpResult : number | undefined = durationTmpBuf
+        let value : LongPressGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, repeat: repeatTmpResult, duration: durationTmpResult} as LongPressGestureHandlerOptions)
         return value
     }
 }
 export class PanGestureHandlerOptions_serializer {
     public static write(buffer: SerializerBase, value: PanGestureHandlerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_isFingerCountLimited  = value.isFingerCountLimited
-        let value_isFingerCountLimited_type : int32 = RuntimeType.UNDEFINED
-        value_isFingerCountLimited_type = runtimeType(value_isFingerCountLimited)
-        valueSerializer.writeInt8((value_isFingerCountLimited_type).toChar())
-        if ((value_isFingerCountLimited_type) != (RuntimeType.UNDEFINED)) {
-            const value_isFingerCountLimited_value  = value_isFingerCountLimited!
-            valueSerializer.writeBoolean(value_isFingerCountLimited_value)
+        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
+        if (valueHolderForIsFingerCountLimited !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
+            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_direction  = value.direction
-        let value_direction_type : int32 = RuntimeType.UNDEFINED
-        value_direction_type = runtimeType(value_direction)
-        valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
-            const value_direction_value  = (value_direction as PanDirection)
-            valueSerializer.writeInt32(TypeChecker.PanDirection_ToNumeric(value_direction_value))
+        const valueHolderForDirection  = value.direction
+        if (valueHolderForDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as PanDirection)
+            valueSerializer.writeInt32(TypeChecker.PanDirection_ToNumeric(valueHolderForDirectionTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_distance  = value.distance
-        let value_distance_type : int32 = RuntimeType.UNDEFINED
-        value_distance_type = runtimeType(value_distance)
-        valueSerializer.writeInt8((value_distance_type).toChar())
-        if ((value_distance_type) != (RuntimeType.UNDEFINED)) {
-            const value_distance_value  = value_distance!
-            valueSerializer.writeNumber(value_distance_value)
+        const valueHolderForDistance  = value.distance
+        if (valueHolderForDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistanceTmpValue  = valueHolderForDistance!
+            valueSerializer.writeNumber(valueHolderForDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PanGestureHandlerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimited_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimited_buf : boolean | undefined
-        if ((isFingerCountLimited_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isFingerCountLimited_buf = valueDeserializer.readBoolean()
+        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isFingerCountLimitedTmpBuf : boolean | undefined
+        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
         }
-        const isFingerCountLimited_result : boolean | undefined = isFingerCountLimited_buf
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let direction_buf : PanDirection | undefined
-        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            direction_buf = TypeChecker.PanDirection_FromNumeric(valueDeserializer.readInt32())
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let directionTmpBuf : PanDirection | undefined
+        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            directionTmpBuf = TypeChecker.PanDirection_FromNumeric(valueDeserializer.readInt32())
         }
-        const direction_result : PanDirection | undefined = direction_buf
-        const distance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let distance_buf : number | undefined
-        if ((distance_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            distance_buf = (valueDeserializer.readNumber() as number)
+        const directionTmpResult : PanDirection | undefined = directionTmpBuf
+        const distanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distanceTmpBuf : number | undefined
+        if ((distanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distanceTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const distance_result : number | undefined = distance_buf
-        let value : PanGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimited_result, fingers: fingers_result, direction: direction_result, distance: distance_result} as PanGestureHandlerOptions)
+        const distanceTmpResult : number | undefined = distanceTmpBuf
+        let value : PanGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, distance: distanceTmpResult} as PanGestureHandlerOptions)
         return value
     }
 }
 export class PinchGestureHandlerOptions_serializer {
     public static write(buffer: SerializerBase, value: PinchGestureHandlerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_isFingerCountLimited  = value.isFingerCountLimited
-        let value_isFingerCountLimited_type : int32 = RuntimeType.UNDEFINED
-        value_isFingerCountLimited_type = runtimeType(value_isFingerCountLimited)
-        valueSerializer.writeInt8((value_isFingerCountLimited_type).toChar())
-        if ((value_isFingerCountLimited_type) != (RuntimeType.UNDEFINED)) {
-            const value_isFingerCountLimited_value  = value_isFingerCountLimited!
-            valueSerializer.writeBoolean(value_isFingerCountLimited_value)
+        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
+        if (valueHolderForIsFingerCountLimited !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
+            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_distance  = value.distance
-        let value_distance_type : int32 = RuntimeType.UNDEFINED
-        value_distance_type = runtimeType(value_distance)
-        valueSerializer.writeInt8((value_distance_type).toChar())
-        if ((value_distance_type) != (RuntimeType.UNDEFINED)) {
-            const value_distance_value  = value_distance!
-            valueSerializer.writeNumber(value_distance_value)
+        const valueHolderForDistance  = value.distance
+        if (valueHolderForDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistanceTmpValue  = valueHolderForDistance!
+            valueSerializer.writeNumber(valueHolderForDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PinchGestureHandlerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimited_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimited_buf : boolean | undefined
-        if ((isFingerCountLimited_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isFingerCountLimited_buf = valueDeserializer.readBoolean()
+        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isFingerCountLimitedTmpBuf : boolean | undefined
+        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
         }
-        const isFingerCountLimited_result : boolean | undefined = isFingerCountLimited_buf
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const distance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let distance_buf : number | undefined
-        if ((distance_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            distance_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const distanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distanceTmpBuf : number | undefined
+        if ((distanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distanceTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const distance_result : number | undefined = distance_buf
-        let value : PinchGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimited_result, fingers: fingers_result, distance: distance_result} as PinchGestureHandlerOptions)
+        const distanceTmpResult : number | undefined = distanceTmpBuf
+        let value : PinchGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, distance: distanceTmpResult} as PinchGestureHandlerOptions)
         return value
     }
 }
 export class RotationGestureHandlerOptions_serializer {
     public static write(buffer: SerializerBase, value: RotationGestureHandlerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_isFingerCountLimited  = value.isFingerCountLimited
-        let value_isFingerCountLimited_type : int32 = RuntimeType.UNDEFINED
-        value_isFingerCountLimited_type = runtimeType(value_isFingerCountLimited)
-        valueSerializer.writeInt8((value_isFingerCountLimited_type).toChar())
-        if ((value_isFingerCountLimited_type) != (RuntimeType.UNDEFINED)) {
-            const value_isFingerCountLimited_value  = value_isFingerCountLimited!
-            valueSerializer.writeBoolean(value_isFingerCountLimited_value)
+        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
+        if (valueHolderForIsFingerCountLimited !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
+            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_angle  = value.angle
-        let value_angle_type : int32 = RuntimeType.UNDEFINED
-        value_angle_type = runtimeType(value_angle)
-        valueSerializer.writeInt8((value_angle_type).toChar())
-        if ((value_angle_type) != (RuntimeType.UNDEFINED)) {
-            const value_angle_value  = value_angle!
-            valueSerializer.writeNumber(value_angle_value)
+        const valueHolderForAngle  = value.angle
+        if (valueHolderForAngle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAngleTmpValue  = valueHolderForAngle!
+            valueSerializer.writeNumber(valueHolderForAngleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): RotationGestureHandlerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimited_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimited_buf : boolean | undefined
-        if ((isFingerCountLimited_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isFingerCountLimited_buf = valueDeserializer.readBoolean()
+        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isFingerCountLimitedTmpBuf : boolean | undefined
+        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
         }
-        const isFingerCountLimited_result : boolean | undefined = isFingerCountLimited_buf
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const angle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let angle_buf : number | undefined
-        if ((angle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            angle_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const angleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let angleTmpBuf : number | undefined
+        if ((angleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            angleTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const angle_result : number | undefined = angle_buf
-        let value : RotationGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimited_result, fingers: fingers_result, angle: angle_result} as RotationGestureHandlerOptions)
+        const angleTmpResult : number | undefined = angleTmpBuf
+        let value : RotationGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, angle: angleTmpResult} as RotationGestureHandlerOptions)
         return value
     }
 }
 export class SwipeGestureHandlerOptions_serializer {
     public static write(buffer: SerializerBase, value: SwipeGestureHandlerOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_isFingerCountLimited  = value.isFingerCountLimited
-        let value_isFingerCountLimited_type : int32 = RuntimeType.UNDEFINED
-        value_isFingerCountLimited_type = runtimeType(value_isFingerCountLimited)
-        valueSerializer.writeInt8((value_isFingerCountLimited_type).toChar())
-        if ((value_isFingerCountLimited_type) != (RuntimeType.UNDEFINED)) {
-            const value_isFingerCountLimited_value  = value_isFingerCountLimited!
-            valueSerializer.writeBoolean(value_isFingerCountLimited_value)
+        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
+        if (valueHolderForIsFingerCountLimited !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
+            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_direction  = value.direction
-        let value_direction_type : int32 = RuntimeType.UNDEFINED
-        value_direction_type = runtimeType(value_direction)
-        valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
-            const value_direction_value  = (value_direction as SwipeDirection)
-            valueSerializer.writeInt32(TypeChecker.SwipeDirection_ToNumeric(value_direction_value))
+        const valueHolderForDirection  = value.direction
+        if (valueHolderForDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as SwipeDirection)
+            valueSerializer.writeInt32(TypeChecker.SwipeDirection_ToNumeric(valueHolderForDirectionTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_speed  = value.speed
-        let value_speed_type : int32 = RuntimeType.UNDEFINED
-        value_speed_type = runtimeType(value_speed)
-        valueSerializer.writeInt8((value_speed_type).toChar())
-        if ((value_speed_type) != (RuntimeType.UNDEFINED)) {
-            const value_speed_value  = value_speed!
-            valueSerializer.writeNumber(value_speed_value)
+        const valueHolderForSpeed  = value.speed
+        if (valueHolderForSpeed !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpeedTmpValue  = valueHolderForSpeed!
+            valueSerializer.writeNumber(valueHolderForSpeedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SwipeGestureHandlerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimited_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimited_buf : boolean | undefined
-        if ((isFingerCountLimited_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isFingerCountLimited_buf = valueDeserializer.readBoolean()
+        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isFingerCountLimitedTmpBuf : boolean | undefined
+        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
         }
-        const isFingerCountLimited_result : boolean | undefined = isFingerCountLimited_buf
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let direction_buf : SwipeDirection | undefined
-        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            direction_buf = TypeChecker.SwipeDirection_FromNumeric(valueDeserializer.readInt32())
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let directionTmpBuf : SwipeDirection | undefined
+        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            directionTmpBuf = TypeChecker.SwipeDirection_FromNumeric(valueDeserializer.readInt32())
         }
-        const direction_result : SwipeDirection | undefined = direction_buf
-        const speed_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let speed_buf : number | undefined
-        if ((speed_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            speed_buf = (valueDeserializer.readNumber() as number)
+        const directionTmpResult : SwipeDirection | undefined = directionTmpBuf
+        const speedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let speedTmpBuf : number | undefined
+        if ((speedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            speedTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const speed_result : number | undefined = speed_buf
-        let value : SwipeGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimited_result, fingers: fingers_result, direction: direction_result, speed: speed_result} as SwipeGestureHandlerOptions)
+        const speedTmpResult : number | undefined = speedTmpBuf
+        let value : SwipeGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, speed: speedTmpResult} as SwipeGestureHandlerOptions)
         return value
     }
 }
 export class TapGestureParameters_serializer {
     public static write(buffer: SerializerBase, value: TapGestureParameters): void {
         let valueSerializer : SerializerBase = buffer
-        const value_isFingerCountLimited  = value.isFingerCountLimited
-        let value_isFingerCountLimited_type : int32 = RuntimeType.UNDEFINED
-        value_isFingerCountLimited_type = runtimeType(value_isFingerCountLimited)
-        valueSerializer.writeInt8((value_isFingerCountLimited_type).toChar())
-        if ((value_isFingerCountLimited_type) != (RuntimeType.UNDEFINED)) {
-            const value_isFingerCountLimited_value  = value_isFingerCountLimited!
-            valueSerializer.writeBoolean(value_isFingerCountLimited_value)
+        const valueHolderForIsFingerCountLimited  = value.isFingerCountLimited
+        if (valueHolderForIsFingerCountLimited !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsFingerCountLimitedTmpValue  = valueHolderForIsFingerCountLimited!
+            valueSerializer.writeBoolean(valueHolderForIsFingerCountLimitedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_count  = value.count
-        let value_count_type : int32 = RuntimeType.UNDEFINED
-        value_count_type = runtimeType(value_count)
-        valueSerializer.writeInt8((value_count_type).toChar())
-        if ((value_count_type) != (RuntimeType.UNDEFINED)) {
-            const value_count_value  = value_count!
-            valueSerializer.writeNumber(value_count_value)
+        const valueHolderForCount  = value.count
+        if (valueHolderForCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCountTmpValue  = valueHolderForCount!
+            valueSerializer.writeNumber(valueHolderForCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_distanceThreshold  = value.distanceThreshold
-        let value_distanceThreshold_type : int32 = RuntimeType.UNDEFINED
-        value_distanceThreshold_type = runtimeType(value_distanceThreshold)
-        valueSerializer.writeInt8((value_distanceThreshold_type).toChar())
-        if ((value_distanceThreshold_type) != (RuntimeType.UNDEFINED)) {
-            const value_distanceThreshold_value  = value_distanceThreshold!
-            valueSerializer.writeNumber(value_distanceThreshold_value)
+        const valueHolderForDistanceThreshold  = value.distanceThreshold
+        if (valueHolderForDistanceThreshold !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistanceThresholdTmpValue  = valueHolderForDistanceThreshold!
+            valueSerializer.writeNumber(valueHolderForDistanceThresholdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TapGestureParameters {
         let valueDeserializer : DeserializerBase = buffer
-        const isFingerCountLimited_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isFingerCountLimited_buf : boolean | undefined
-        if ((isFingerCountLimited_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isFingerCountLimited_buf = valueDeserializer.readBoolean()
+        const isFingerCountLimitedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isFingerCountLimitedTmpBuf : boolean | undefined
+        if ((isFingerCountLimitedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isFingerCountLimitedTmpBuf = valueDeserializer.readBoolean()
         }
-        const isFingerCountLimited_result : boolean | undefined = isFingerCountLimited_buf
-        const count_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let count_buf : number | undefined
-        if ((count_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            count_buf = (valueDeserializer.readNumber() as number)
+        const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
+        const countTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let countTmpBuf : number | undefined
+        if ((countTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            countTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const count_result : number | undefined = count_buf
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const countTmpResult : number | undefined = countTmpBuf
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const distanceThreshold_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let distanceThreshold_buf : number | undefined
-        if ((distanceThreshold_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            distanceThreshold_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const distanceThresholdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distanceThresholdTmpBuf : number | undefined
+        if ((distanceThresholdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distanceThresholdTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const distanceThreshold_result : number | undefined = distanceThreshold_buf
-        let value : TapGestureParameters = ({isFingerCountLimited: isFingerCountLimited_result, count: count_result, fingers: fingers_result, distanceThreshold: distanceThreshold_result} as TapGestureParameters)
+        const distanceThresholdTmpResult : number | undefined = distanceThresholdTmpBuf
+        let value : TapGestureParameters = ({isFingerCountLimited: isFingerCountLimitedTmpResult, count: countTmpResult, fingers: fingersTmpResult, distanceThreshold: distanceThresholdTmpResult} as TapGestureParameters)
         return value
     }
 }
@@ -1133,10 +1108,10 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
     private getFingerList_serialize(): Array<FingerInfo> {
         const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<FingerInfo> = new Array<FingerInfo>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = FingerInfo_serializer.read(retvalDeserializer)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<FingerInfo> = new Array<FingerInfo>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
         }
         const returnResult : Array<FingerInfo> = buffer
         return returnResult
@@ -1144,9 +1119,9 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((fingerList.length).toInt())
-        for (let fingerList_counter_i = 0; fingerList_counter_i < fingerList.length; fingerList_counter_i++) {
-            const fingerList_element : FingerInfo = fingerList[fingerList_counter_i]
-            FingerInfo_serializer.write(thisSerializer, fingerList_element)
+        for (let fingerListCounterI = 0; fingerListCounterI < fingerList.length; fingerListCounterI++) {
+            const fingerListTmpElement : FingerInfo = fingerList[fingerListCounterI]
+            FingerInfo_serializer.write(thisSerializer, fingerListTmpElement)
         }
         ArkUIGeneratedNativeModule._BaseGestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1361,10 +1336,10 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     private getFingerList_serialize(): Array<FingerInfo> {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getFingerList(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<FingerInfo> = new Array<FingerInfo>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = FingerInfo_serializer.read(retvalDeserializer)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<FingerInfo> = new Array<FingerInfo>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
         }
         const returnResult : Array<FingerInfo> = buffer
         return returnResult
@@ -1372,9 +1347,9 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((fingerList.length).toInt())
-        for (let fingerList_counter_i = 0; fingerList_counter_i < fingerList.length; fingerList_counter_i++) {
-            const fingerList_element : FingerInfo = fingerList[fingerList_counter_i]
-            FingerInfo_serializer.write(thisSerializer, fingerList_element)
+        for (let fingerListCounterI = 0; fingerListCounterI < fingerList.length; fingerListCounterI++) {
+            const fingerListTmpElement : FingerInfo = fingerList[fingerListCounterI]
+            FingerInfo_serializer.write(thisSerializer, fingerListTmpElement)
         }
         ArkUIGeneratedNativeModule._GestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1561,12 +1536,12 @@ export class RotationGesture extends Gesture implements MaterializedBase {
     private static $_instantiate_serialize(factory: (() => RotationGesture), value?: RotationGestureHandlerOptions): RotationGesture {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(factory)
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            RotationGestureHandlerOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            RotationGestureHandlerOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._RotationGesture_$_instantiate(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1710,12 +1685,12 @@ export class SwipeGesture extends Gesture implements MaterializedBase {
     private static $_instantiate_serialize(factory: (() => SwipeGesture), value?: SwipeGestureHandlerOptions): SwipeGesture {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(factory)
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            SwipeGestureHandlerOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SwipeGestureHandlerOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._SwipeGesture_$_instantiate(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

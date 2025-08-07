@@ -17,21 +17,22 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
-import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { intl_DateTimeOptions_serializer, intl } from "./../generated/ohos.intl"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ResourceStr, ResourceColor, Length } from "./units"
 import { Color, FontStyle, FontWeight } from "./enums"
 import { ContentModifier, AttributeModifier, hookTextClockContentModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class TextClockControllerInternal {
     public static fromPtr(ptr: KPointer): TextClockController {
         return new TextClockController(ptr)
@@ -77,240 +78,206 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTextClockPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._TextClock_construct(peerId, flags)
-        const _peer  = new ArkTextClockPeer(_peerPtr, peerId, "TextClock", flags)
+        const _peer  = new ArkTextClockPeer(_peerPtr, peerId, 'TextClock', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setTextClockOptionsAttribute(options?: TextClockOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            TextClockOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            TextClockOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockInterface_setTextClockOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFormatAttribute(value: ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFormat(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDateChangeAttribute(value: ((value: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setOnDateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontSizeAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontStyleAttribute(value: FontStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as FontStyle)
-            thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as FontStyle)
+            thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_value)) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as FontWeight
-                thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as FontWeight
+                thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(valueTmpValueForIdx1))
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontFamilyAttribute(value: ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextShadowAttribute(value: ShadowOptions | Array<ShadowOptions> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isShadowOptions(value_value, false, false, false, false, false, false)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ShadowOptions) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ShadowOptions
-                ShadowOptions_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isArray_ShadowOptions(value_value))) {
+                const valueTmpValueForIdx0  = valueTmpValue as ShadowOptions
+                ShadowOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (TypeChecker.isArray_ShadowOptions(valueTmpValue)) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Array<ShadowOptions>
-                thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
-                    const value_value_1_element : ShadowOptions = value_value_1[value_value_1_counter_i]
-                    ShadowOptions_serializer.write(thisSerializer, value_value_1_element)
+                const valueTmpValueForIdx1  = valueTmpValue as Array<ShadowOptions>
+                thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
+                for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
+                    const valueTmpValueForIdx1TmpElement : ShadowOptions = valueTmpValueForIdx1[valueTmpValueForIdx1CounterI]
+                    ShadowOptions_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElement)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setTextShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontFeatureAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeString(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setFontFeature(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContentModifierAttribute(value: ContentModifier<TextClockConfiguration> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._TextClockAttribute_setContentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setDateTimeOptionsAttribute(value: intl.DateTimeOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            intl_DateTimeOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            intl_DateTimeOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextClockAttribute_setDateTimeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -412,31 +379,6 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
     public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: TextClockAttribute): void {
-        super.apply(target)
-        if (this.format_value !== undefined)
-            target.format(this.format_value!)
-        if (this.onDateChange_value !== undefined)
-            target.onDateChange(this.onDateChange_value!)
-        if (this.fontColor_value !== undefined)
-            target.fontColor(this.fontColor_value!)
-        if (this.fontSize_value !== undefined)
-            target.fontSize(this.fontSize_value!)
-        if (this.fontStyle_value !== undefined)
-            target.fontStyle(this.fontStyle_value!)
-        if (this.fontWeight_value !== undefined)
-            target.fontWeight(this.fontWeight_value!)
-        if (this.fontFamily_value !== undefined)
-            target.fontFamily(this.fontFamily_value!)
-        if (this.textShadow_value !== undefined)
-            target.textShadow(this.textShadow_value!)
-        if (this.fontFeature_value !== undefined)
-            target.fontFeature(this.fontFeature_value!)
-        if (this.contentModifier_value !== undefined)
-            target.contentModifier(this.contentModifier_value!)
-        if (this.dateTimeOptions_value !== undefined)
-            target.dateTimeOptions(this.dateTimeOptions_value!)
-    }
 }
 
 export class ArkTextClockComponent extends ArkCommonMethodComponent implements TextClockAttribute {
@@ -525,9 +467,7 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
     }
     public contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier<TextClockConfiguration> | undefined)
-            this.getPeer()?.setContentModifierAttribute(value_casted)
-            return this
+            hookTextClockContentModifier(this, value)
         }
         return this
     }
@@ -540,7 +480,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -548,26 +487,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
         super.applyAttributesFinish()
     }
 }
-export function withTextClockStyle(receiver: TextClockAttribute, modifier: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkTextClockStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("TextClock")
-// export function TextClock(
-//     options?: TextClockOptions,
-//     @memo
-//     content_?: () => void,
-// ): TextClockAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function TextClock(
@@ -583,116 +502,460 @@ export function TextClock(
     NodeAttach<ArkTextClockPeer>((): ArkTextClockPeer => ArkTextClockPeer.create(receiver), (_: ArkTextClockPeer): void => {
         receiver.setTextClockOptions(options)
         style?.(receiver)
-        withTextClockStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkTextClockSet extends ArkCommonMethodSet implements TextClockAttribute {
+export class TextClockModifier extends CommonMethodModifier implements TextClockAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _format_flag?: boolean
-    _format0_value?: ResourceStr | undefined
-    _onDateChange_flag?: boolean
-    _onDateChange0_value?: ((value: number) => void) | undefined
-    _fontColor_flag?: boolean
-    _fontColor0_value?: ResourceColor | undefined
-    _fontSize_flag?: boolean
-    _fontSize0_value?: Length | undefined
-    _fontStyle_flag?: boolean
-    _fontStyle0_value?: FontStyle | undefined
-    _fontWeight_flag?: boolean
-    _fontWeight0_value?: number | FontWeight | string | undefined
-    _fontFamily_flag?: boolean
-    _fontFamily0_value?: ResourceStr | undefined
-    _textShadow_flag?: boolean
-    _textShadow0_value?: ShadowOptions | Array<ShadowOptions> | undefined
-    _fontFeature_flag?: boolean
-    _fontFeature0_value?: string | undefined
-    _contentModifier_flag?: boolean
-    _contentModifier0_value?: ContentModifier<TextClockConfiguration> | undefined
-    _dateTimeOptions_flag?: boolean
-    _dateTimeOptions0_value?: intl.DateTimeOptions | undefined
-    applyModifierPatch(component: TextClockAttribute): void {
-        if (this._format_flag)
-            component.format((this._format0_value as ResourceStr | undefined))
-        if (this._onDateChange_flag)
-            component.onDateChange((this._onDateChange0_value as ((value: number) => void) | undefined))
-        if (this._fontColor_flag)
-            component.fontColor((this._fontColor0_value as ResourceColor | undefined))
-        if (this._fontSize_flag)
-            component.fontSize((this._fontSize0_value as Length | undefined))
-        if (this._fontStyle_flag)
-            component.fontStyle((this._fontStyle0_value as FontStyle | undefined))
-        if (this._fontWeight_flag)
-            component.fontWeight((this._fontWeight0_value as number | FontWeight | string | undefined))
-        if (this._fontFamily_flag)
-            component.fontFamily((this._fontFamily0_value as ResourceStr | undefined))
-        if (this._textShadow_flag)
-            component.textShadow((this._textShadow0_value as ShadowOptions | Array<ShadowOptions> | undefined))
-        if (this._fontFeature_flag)
-            component.fontFeature((this._fontFeature0_value as string | undefined))
-        if (this._contentModifier_flag)
-            component.contentModifier((this._contentModifier0_value as ContentModifier<TextClockConfiguration> | undefined))
-        if (this._dateTimeOptions_flag)
-            component.dateTimeOptions((this._dateTimeOptions0_value as intl.DateTimeOptions | undefined))
+    _format_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _format_0_0value?: ResourceStr | undefined
+    _onDateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDateChange_0_0value?: ((value: number) => void) | undefined
+    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontColor_0_0value?: ResourceColor | undefined
+    _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontSize_0_0value?: Length | undefined
+    _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontStyle_0_0value?: FontStyle | undefined
+    _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontFamily_0_0value?: ResourceStr | undefined
+    _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
+    _fontFeature_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontFeature_0_0value?: string | undefined
+    _dateTimeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dateTimeOptions_0_0value?: intl.DateTimeOptions | undefined
+    applyModifierPatch(peer: ArkTextClockPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._format_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._format_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFormatAttribute((this._format_0_0value as ResourceStr | undefined));
+                    this._format_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._format_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._format_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFormatAttribute((undefined as ResourceStr | undefined));
+                }
+            }
+        }
+        if (this._onDateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDateChangeAttribute((this._onDateChange_0_0value as ((value: number) => void) | undefined));
+                    this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDateChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDateChangeAttribute((undefined as ((value: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as Length | undefined));
+                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontSizeAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._fontStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontStyleAttribute((this._fontStyle_0_0value as FontStyle | undefined));
+                    this._fontStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontStyleAttribute((undefined as FontStyle | undefined));
+                }
+            }
+        }
+        if (this._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontWeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                }
+            }
+        }
+        if (this._fontFamily_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontFamily_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontFamilyAttribute((this._fontFamily_0_0value as ResourceStr | undefined));
+                    this._fontFamily_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontFamily_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontFamily_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontFamilyAttribute((undefined as ResourceStr | undefined));
+                }
+            }
+        }
+        if (this._textShadow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textShadow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextShadowAttribute((this._textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
+                    this._textShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textShadow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextShadowAttribute((undefined as ShadowOptions | Array<ShadowOptions> | undefined));
+                }
+            }
+        }
+        if (this._fontFeature_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontFeature_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontFeatureAttribute((this._fontFeature_0_0value as string | undefined));
+                    this._fontFeature_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontFeature_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontFeature_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontFeatureAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._dateTimeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dateTimeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDateTimeOptionsAttribute((this._dateTimeOptions_0_0value as intl.DateTimeOptions | undefined));
+                    this._dateTimeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dateTimeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dateTimeOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDateTimeOptionsAttribute((undefined as intl.DateTimeOptions | undefined));
+                }
+            }
+        }
     }
-    public format(value: ResourceStr | undefined): this {
-        this._format_flag = true
-        this._format0_value = value
+    mergeModifier(modifier: TextClockModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._format_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._format_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.format(modifier._format_0_0value);
+                    break;
+                }
+                default: {
+                    this.format((undefined as ResourceStr | undefined));
+                }
+            }
+        }
+        if (modifier._onDateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDateChange(modifier._onDateChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDateChange((undefined as ((value: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontColor(modifier._fontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontSize(modifier._fontSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontSize((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._fontStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontStyle(modifier._fontStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontStyle((undefined as FontStyle | undefined));
+                }
+            }
+        }
+        if (modifier._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontWeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontWeight(modifier._fontWeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                }
+            }
+        }
+        if (modifier._fontFamily_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontFamily_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontFamily(modifier._fontFamily_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontFamily((undefined as ResourceStr | undefined));
+                }
+            }
+        }
+        if (modifier._textShadow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textShadow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textShadow(modifier._textShadow_0_0value);
+                    break;
+                }
+                default: {
+                    this.textShadow((undefined as ShadowOptions | Array<ShadowOptions> | undefined));
+                }
+            }
+        }
+        if (modifier._fontFeature_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontFeature_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontFeature(modifier._fontFeature_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontFeature((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._dateTimeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dateTimeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dateTimeOptions(modifier._dateTimeOptions_0_0value);
+                    break;
+                }
+                default: {
+                    this.dateTimeOptions((undefined as intl.DateTimeOptions | undefined));
+                }
+            }
+        }
+    }
+    format(value: ResourceStr | undefined): this {
+        if (((this._format_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._format_0_flag = AttributeUpdaterFlag.UPDATE
+            this._format_0_0value = value
+        } else
+        {
+            this._format_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onDateChange(value: ((value: number) => void) | undefined): this {
-        this._onDateChange_flag = true
-        this._onDateChange0_value = value
+    onDateChange(value: ((value: number) => void) | undefined): this {
+        if (((this._onDateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDateChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDateChange_0_0value = value
+        } else
+        {
+            this._onDateChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
-        this._fontColor_flag = true
-        this._fontColor0_value = value
+    fontColor(value: ResourceColor | undefined): this {
+        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontColor_0_0value = value
+        } else
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontSize(value: Length | undefined): this {
-        this._fontSize_flag = true
-        this._fontSize0_value = value
+    fontSize(value: Length | undefined): this {
+        if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontSize_0_0value = value
+        } else
+        {
+            this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
-        this._fontStyle_flag = true
-        this._fontStyle0_value = value
+    fontStyle(value: FontStyle | undefined): this {
+        if (((this._fontStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontStyle_0_0value = value
+        } else
+        {
+            this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
-        this._fontWeight_flag = true
-        this._fontWeight0_value = value
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontWeight_0_0value = value
+        } else
+        {
+            this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontFamily(value: ResourceStr | undefined): this {
-        this._fontFamily_flag = true
-        this._fontFamily0_value = value
+    fontFamily(value: ResourceStr | undefined): this {
+        if (((this._fontFamily_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontFamily_0_0value = value
+        } else
+        {
+            this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
-        this._textShadow_flag = true
-        this._textShadow0_value = value
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        if (((this._textShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textShadow_0_0value = value
+        } else
+        {
+            this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontFeature(value: string | undefined): this {
-        this._fontFeature_flag = true
-        this._fontFeature0_value = value
+    fontFeature(value: string | undefined): this {
+        if (((this._fontFeature_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fontFeature_0_0value) !== (value)))
+        {
+            this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontFeature_0_0value = value
+        } else
+        {
+            this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
-        this._contentModifier_flag = true
-        this._contentModifier0_value = value
-        return this
-    }
-    public dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
-        this._dateTimeOptions_flag = true
-        this._dateTimeOptions0_value = value
+    dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
+        if (((this._dateTimeOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dateTimeOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dateTimeOptions_0_0value = value
+        } else
+        {
+            this._dateTimeOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -702,25 +965,25 @@ export class ArkTextClockSet extends ArkCommonMethodSet implements TextClockAttr
 export class TextClockConfiguration_serializer {
     public static write(buffer: SerializerBase, value: TextClockConfiguration): void {
         let valueSerializer : SerializerBase = buffer
-        const value_enabled  = value.enabled
-        valueSerializer.writeBoolean(value_enabled)
-        const value_contentModifier  = value.contentModifier
-        valueSerializer.holdAndWriteObject(value_contentModifier)
-        const value_timeZoneOffset  = value.timeZoneOffset
-        valueSerializer.writeNumber(value_timeZoneOffset)
-        const value_started  = value.started
-        valueSerializer.writeBoolean(value_started)
-        const value_timeValue  = value.timeValue
-        valueSerializer.writeNumber(value_timeValue)
+        const valueHolderForEnabled  = value.enabled
+        valueSerializer.writeBoolean(valueHolderForEnabled)
+        const valueHolderForContentModifier  = value.contentModifier
+        valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
+        const valueHolderForTimeZoneOffset  = value.timeZoneOffset
+        valueSerializer.writeNumber(valueHolderForTimeZoneOffset)
+        const valueHolderForStarted  = value.started
+        valueSerializer.writeBoolean(valueHolderForStarted)
+        const valueHolderForTimeValue  = value.timeValue
+        valueSerializer.writeNumber(valueHolderForTimeValue)
     }
     public static read(buffer: DeserializerBase): TextClockConfiguration {
         let valueDeserializer : DeserializerBase = buffer
-        const enabled_result : boolean = valueDeserializer.readBoolean()
-        const contentModifier_result : ContentModifier<TextClockConfiguration> = (valueDeserializer.readObject() as ContentModifier<TextClockConfiguration>)
-        const timeZoneOffset_result : number = (valueDeserializer.readNumber() as number)
-        const started_result : boolean = valueDeserializer.readBoolean()
-        const timeValue_result : number = (valueDeserializer.readNumber() as number)
-        let value : TextClockConfiguration = ({enabled: enabled_result, contentModifier: contentModifier_result, timeZoneOffset: timeZoneOffset_result, started: started_result, timeValue: timeValue_result} as TextClockConfiguration)
+        const enabledTmpResult : boolean = valueDeserializer.readBoolean()
+        const contentModifierTmpResult : ContentModifier<TextClockConfiguration> = (valueDeserializer.readObject() as ContentModifier<TextClockConfiguration>)
+        const timeZoneOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const startedTmpResult : boolean = valueDeserializer.readBoolean()
+        const timeValueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : TextClockConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, timeZoneOffset: timeZoneOffsetTmpResult, started: startedTmpResult, timeValue: timeValueTmpResult} as TextClockConfiguration)
         return value
     }
 }
@@ -738,40 +1001,38 @@ export class TextClockController_serializer {
 export class TextClockOptions_serializer {
     public static write(buffer: SerializerBase, value: TextClockOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_timeZoneOffset  = value.timeZoneOffset
-        let value_timeZoneOffset_type : int32 = RuntimeType.UNDEFINED
-        value_timeZoneOffset_type = runtimeType(value_timeZoneOffset)
-        valueSerializer.writeInt8((value_timeZoneOffset_type).toChar())
-        if ((value_timeZoneOffset_type) != (RuntimeType.UNDEFINED)) {
-            const value_timeZoneOffset_value  = value_timeZoneOffset!
-            valueSerializer.writeNumber(value_timeZoneOffset_value)
+        const valueHolderForTimeZoneOffset  = value.timeZoneOffset
+        if (valueHolderForTimeZoneOffset !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTimeZoneOffsetTmpValue  = valueHolderForTimeZoneOffset!
+            valueSerializer.writeNumber(valueHolderForTimeZoneOffsetTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
-            const value_controller_value  = value_controller!
-            TextClockController_serializer.write(valueSerializer, value_controller_value)
+        const valueHolderForController  = value.controller
+        if (valueHolderForController !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForControllerTmpValue  = valueHolderForController!
+            TextClockController_serializer.write(valueSerializer, valueHolderForControllerTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextClockOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const timeZoneOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let timeZoneOffset_buf : number | undefined
-        if ((timeZoneOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            timeZoneOffset_buf = (valueDeserializer.readNumber() as number)
+        const timeZoneOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let timeZoneOffsetTmpBuf : number | undefined
+        if ((timeZoneOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            timeZoneOffsetTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const timeZoneOffset_result : number | undefined = timeZoneOffset_buf
-        const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let controller_buf : TextClockController | undefined
-        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            controller_buf = (TextClockController_serializer.read(valueDeserializer) as TextClockController)
+        const timeZoneOffsetTmpResult : number | undefined = timeZoneOffsetTmpBuf
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let controllerTmpBuf : TextClockController | undefined
+        if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            controllerTmpBuf = (TextClockController_serializer.read(valueDeserializer) as TextClockController)
         }
-        const controller_result : TextClockController | undefined = controller_buf
-        let value : TextClockOptions = ({timeZoneOffset: timeZoneOffset_result, controller: controller_result} as TextClockOptions)
+        const controllerTmpResult : TextClockController | undefined = controllerTmpBuf
+        let value : TextClockOptions = ({timeZoneOffset: timeZoneOffsetTmpResult, controller: controllerTmpResult} as TextClockOptions)
         return value
     }
 }

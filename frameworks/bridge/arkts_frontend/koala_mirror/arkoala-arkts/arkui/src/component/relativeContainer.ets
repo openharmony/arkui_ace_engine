@@ -16,12 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -31,6 +31,7 @@ import { Dimension } from "./units"
 import { Resource, Resource_serializer } from "./../generated/resource"
 import { Axis } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,7 +39,7 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRelativeContainerPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._RelativeContainer_construct(peerId, flags)
-        const _peer  = new ArkRelativeContainerPeer(_peerPtr, peerId, "RelativeContainer", flags)
+        const _peer  = new ArkRelativeContainerPeer(_peerPtr, peerId, 'RelativeContainer', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -47,32 +48,32 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
     }
     setGuideLineAttribute(value: Array<GuideLineStyle> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : GuideLineStyle = value_value[value_value_counter_i]
-                GuideLineStyle_serializer.write(thisSerializer, value_value_element)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : GuideLineStyle = valueTmpValue[valueTmpValueCounterI]
+                GuideLineStyle_serializer.write(thisSerializer, valueTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RelativeContainerAttribute_setGuideLine(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarrierAttribute(value: Array<BarrierStyle> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : BarrierStyle = value_value[value_value_counter_i]
-                BarrierStyle_serializer.write(thisSerializer, value_value_element)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : BarrierStyle = valueTmpValue[valueTmpValueCounterI]
+                BarrierStyle_serializer.write(thisSerializer, valueTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RelativeContainerAttribute_setBarrier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -133,13 +134,6 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
     public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: RelativeContainerAttribute): void {
-        super.apply(target)
-        if (this.guideLine_value !== undefined)
-            target.guideLine(this.guideLine_value!)
-        if (this.barrier_value !== undefined)
-            target.barrier(this.barrier_value!)
-    }
 }
 
 export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements RelativeContainerAttribute {
@@ -170,7 +164,6 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         return this
     }
     public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -178,26 +171,6 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         super.applyAttributesFinish()
     }
 }
-export function withRelativeContainerStyle(receiver: RelativeContainerAttribute, modifier: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkRelativeContainerStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("RelativeContainer")
-// export function RelativeContainer(
-//     
-//     @memo
-//     content_?: () => void,
-// ): RelativeContainerAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function RelativeContainer(
@@ -213,35 +186,108 @@ export function RelativeContainer(
     NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (_: ArkRelativeContainerPeer): void => {
         receiver.setRelativeContainerOptions()
         style?.(receiver)
-        withRelativeContainerStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkRelativeContainerSet extends ArkCommonMethodSet implements RelativeContainerAttribute {
+export class RelativeContainerModifier extends CommonMethodModifier implements RelativeContainerAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _guideLine_flag?: boolean
-    _guideLine0_value?: Array<GuideLineStyle> | undefined
-    _barrier_flag?: boolean
-    _barrier0_value?: Array<BarrierStyle> | undefined
-    applyModifierPatch(component: RelativeContainerAttribute): void {
-        if (this._guideLine_flag)
-            component.guideLine((this._guideLine0_value as Array<GuideLineStyle> | undefined))
-        if (this._barrier_flag)
-            component.barrier((this._barrier0_value as Array<BarrierStyle> | undefined))
+    _guideLine_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _guideLine_0_0value?: Array<GuideLineStyle> | undefined
+    _barrier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barrier_0_0value?: Array<BarrierStyle> | undefined
+    applyModifierPatch(peer: ArkRelativeContainerPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._guideLine_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._guideLine_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setGuideLineAttribute((this._guideLine_0_0value as Array<GuideLineStyle> | undefined));
+                    this._guideLine_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._guideLine_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._guideLine_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setGuideLineAttribute((undefined as Array<GuideLineStyle> | undefined));
+                }
+            }
+        }
+        if (this._barrier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barrier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarrierAttribute((this._barrier_0_0value as Array<BarrierStyle> | undefined));
+                    this._barrier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barrier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barrier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarrierAttribute((undefined as Array<BarrierStyle> | undefined));
+                }
+            }
+        }
     }
-    public guideLine(value: Array<GuideLineStyle> | undefined): this {
-        this._guideLine_flag = true
-        this._guideLine0_value = value
+    mergeModifier(modifier: RelativeContainerModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._guideLine_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._guideLine_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.guideLine(modifier._guideLine_0_0value);
+                    break;
+                }
+                default: {
+                    this.guideLine((undefined as Array<GuideLineStyle> | undefined));
+                }
+            }
+        }
+        if (modifier._barrier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barrier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barrier(modifier._barrier_0_0value);
+                    break;
+                }
+                default: {
+                    this.barrier((undefined as Array<BarrierStyle> | undefined));
+                }
+            }
+        }
+    }
+    guideLine(value: Array<GuideLineStyle> | undefined): this {
+        if (((this._guideLine_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._guideLine_0_flag = AttributeUpdaterFlag.UPDATE
+            this._guideLine_0_0value = value
+        } else
+        {
+            this._guideLine_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public barrier(value: Array<BarrierStyle> | undefined): this {
-        this._barrier_flag = true
-        this._barrier0_value = value
+    barrier(value: Array<BarrierStyle> | undefined): this {
+        if (((this._barrier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._barrier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barrier_0_0value = value
+        } else
+        {
+            this._barrier_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -251,147 +297,131 @@ export class ArkRelativeContainerSet extends ArkCommonMethodSet implements Relat
 export class BarrierStyle_serializer {
     public static write(buffer: SerializerBase, value: BarrierStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_id  = value.id
-        valueSerializer.writeString(value_id)
-        const value_direction  = value.direction
-        valueSerializer.writeInt32(TypeChecker.BarrierDirection_ToNumeric(value_direction))
-        const value_referencedId  = value.referencedId
-        valueSerializer.writeInt32((value_referencedId.length).toInt())
-        for (let value_referencedId_counter_i = 0; value_referencedId_counter_i < value_referencedId.length; value_referencedId_counter_i++) {
-            const value_referencedId_element : string = value_referencedId[value_referencedId_counter_i]
-            valueSerializer.writeString(value_referencedId_element)
+        const valueHolderForId  = value.id
+        valueSerializer.writeString(valueHolderForId)
+        const valueHolderForDirection  = value.direction
+        valueSerializer.writeInt32(TypeChecker.BarrierDirection_ToNumeric(valueHolderForDirection))
+        const valueHolderForReferencedId  = value.referencedId
+        valueSerializer.writeInt32((valueHolderForReferencedId.length).toInt())
+        for (let valueHolderForReferencedIdCounterI = 0; valueHolderForReferencedIdCounterI < valueHolderForReferencedId.length; valueHolderForReferencedIdCounterI++) {
+            const valueHolderForReferencedIdTmpElement : string = valueHolderForReferencedId[valueHolderForReferencedIdCounterI]
+            valueSerializer.writeString(valueHolderForReferencedIdTmpElement)
         }
     }
     public static read(buffer: DeserializerBase): BarrierStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const id_result : string = (valueDeserializer.readString() as string)
-        const direction_result : BarrierDirection = TypeChecker.BarrierDirection_FromNumeric(valueDeserializer.readInt32())
-        const referencedId_buf_length : int32 = valueDeserializer.readInt32()
-        let referencedId_buf : Array<string> = new Array<string>(referencedId_buf_length)
-        for (let referencedId_buf_i = 0; referencedId_buf_i < referencedId_buf_length; referencedId_buf_i++) {
-            referencedId_buf[referencedId_buf_i] = (valueDeserializer.readString() as string)
+        const idTmpResult : string = (valueDeserializer.readString() as string)
+        const directionTmpResult : BarrierDirection = TypeChecker.BarrierDirection_FromNumeric(valueDeserializer.readInt32())
+        const referencedIdTmpBufLength : int32 = valueDeserializer.readInt32()
+        let referencedIdTmpBuf : Array<string> = new Array<string>(referencedIdTmpBufLength)
+        for (let referencedIdTmpBufBufCounterI = 0; referencedIdTmpBufBufCounterI < referencedIdTmpBufLength; referencedIdTmpBufBufCounterI++) {
+            referencedIdTmpBuf[referencedIdTmpBufBufCounterI] = (valueDeserializer.readString() as string)
         }
-        const referencedId_result : Array<string> = referencedId_buf
-        let value : BarrierStyle = ({id: id_result, direction: direction_result, referencedId: referencedId_result} as BarrierStyle)
+        const referencedIdTmpResult : Array<string> = referencedIdTmpBuf
+        let value : BarrierStyle = ({id: idTmpResult, direction: directionTmpResult, referencedId: referencedIdTmpResult} as BarrierStyle)
         return value
     }
 }
 export class GuideLinePosition_serializer {
     public static write(buffer: SerializerBase, value: GuideLinePosition): void {
         let valueSerializer : SerializerBase = buffer
-        const value_start  = value.start
-        let value_start_type : int32 = RuntimeType.UNDEFINED
-        value_start_type = runtimeType(value_start)
-        valueSerializer.writeInt8((value_start_type).toChar())
-        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
-            const value_start_value  = value_start!
-            let value_start_value_type : int32 = RuntimeType.UNDEFINED
-            value_start_value_type = runtimeType(value_start_value)
-            if (RuntimeType.STRING == value_start_value_type) {
+        const valueHolderForStart  = value.start
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            if (valueHolderForStartTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_start_value_0  = value_start_value as string
-                valueSerializer.writeString(value_start_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_start_value_type) {
+                const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as string
+                valueSerializer.writeString(valueHolderForStartTmpValueForIdx0)
+            } else if (valueHolderForStartTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_start_value_1  = value_start_value as number
-                valueSerializer.writeNumber(value_start_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_start_value_type) {
+                const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as number
+                valueSerializer.writeNumber(valueHolderForStartTmpValueForIdx1)
+            } else if (valueHolderForStartTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_start_value_2  = value_start_value as Resource
-                Resource_serializer.write(valueSerializer, value_start_value_2)
+                const valueHolderForStartTmpValueForIdx2  = valueHolderForStartTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForStartTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_end  = value.end
-        let value_end_type : int32 = RuntimeType.UNDEFINED
-        value_end_type = runtimeType(value_end)
-        valueSerializer.writeInt8((value_end_type).toChar())
-        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
-            const value_end_value  = value_end!
-            let value_end_value_type : int32 = RuntimeType.UNDEFINED
-            value_end_value_type = runtimeType(value_end_value)
-            if (RuntimeType.STRING == value_end_value_type) {
+        const valueHolderForEnd  = value.end
+        if (valueHolderForEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndTmpValue  = valueHolderForEnd!
+            if (valueHolderForEndTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_end_value_0  = value_end_value as string
-                valueSerializer.writeString(value_end_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_end_value_type) {
+                const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as string
+                valueSerializer.writeString(valueHolderForEndTmpValueForIdx0)
+            } else if (valueHolderForEndTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_end_value_1  = value_end_value as number
-                valueSerializer.writeNumber(value_end_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_end_value_type) {
+                const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as number
+                valueSerializer.writeNumber(valueHolderForEndTmpValueForIdx1)
+            } else if (valueHolderForEndTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_end_value_2  = value_end_value as Resource
-                Resource_serializer.write(valueSerializer, value_end_value_2)
+                const valueHolderForEndTmpValueForIdx2  = valueHolderForEndTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForEndTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): GuideLinePosition {
         let valueDeserializer : DeserializerBase = buffer
-        const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let start_buf : Dimension | undefined
-        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const start_buf__selector : int32 = valueDeserializer.readInt8()
-            let start_buf_ : string | number | Resource | undefined
-            if (start_buf__selector == (0).toChar()) {
-                start_buf_ = (valueDeserializer.readString() as string)
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : Dimension | undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const startTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let startTmpBuf_ : string | number | Resource | undefined
+            if (startTmpBuf_UnionSelector == (0).toChar()) {
+                startTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (startTmpBuf_UnionSelector == (1).toChar()) {
+                startTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (startTmpBuf_UnionSelector == (2).toChar()) {
+                startTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for startTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (start_buf__selector == (1).toChar()) {
-                start_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (start_buf__selector == (2).toChar()) {
-                start_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for start_buf_ has to be chosen through deserialisation.")
-            }
-            start_buf = (start_buf_ as string | number | Resource)
+            startTmpBuf = (startTmpBuf_ as string | number | Resource)
         }
-        const start_result : Dimension | undefined = start_buf
-        const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let end_buf : Dimension | undefined
-        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const end_buf__selector : int32 = valueDeserializer.readInt8()
-            let end_buf_ : string | number | Resource | undefined
-            if (end_buf__selector == (0).toChar()) {
-                end_buf_ = (valueDeserializer.readString() as string)
+        const startTmpResult : Dimension | undefined = startTmpBuf
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endTmpBuf : Dimension | undefined
+        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const endTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let endTmpBuf_ : string | number | Resource | undefined
+            if (endTmpBuf_UnionSelector == (0).toChar()) {
+                endTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (endTmpBuf_UnionSelector == (1).toChar()) {
+                endTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (endTmpBuf_UnionSelector == (2).toChar()) {
+                endTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for endTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (end_buf__selector == (1).toChar()) {
-                end_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (end_buf__selector == (2).toChar()) {
-                end_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for end_buf_ has to be chosen through deserialisation.")
-            }
-            end_buf = (end_buf_ as string | number | Resource)
+            endTmpBuf = (endTmpBuf_ as string | number | Resource)
         }
-        const end_result : Dimension | undefined = end_buf
-        let value : GuideLinePosition = ({start: start_result, end: end_result} as GuideLinePosition)
+        const endTmpResult : Dimension | undefined = endTmpBuf
+        let value : GuideLinePosition = ({start: startTmpResult, end: endTmpResult} as GuideLinePosition)
         return value
     }
 }
 export class GuideLineStyle_serializer {
     public static write(buffer: SerializerBase, value: GuideLineStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_id  = value.id
-        valueSerializer.writeString(value_id)
-        const value_direction  = value.direction
-        valueSerializer.writeInt32(TypeChecker.Axis_ToNumeric(value_direction))
-        const value_position  = value.position
-        GuideLinePosition_serializer.write(valueSerializer, value_position)
+        const valueHolderForId  = value.id
+        valueSerializer.writeString(valueHolderForId)
+        const valueHolderForDirection  = value.direction
+        valueSerializer.writeInt32(TypeChecker.Axis_ToNumeric(valueHolderForDirection))
+        const valueHolderForPosition  = value.position
+        GuideLinePosition_serializer.write(valueSerializer, valueHolderForPosition)
     }
     public static read(buffer: DeserializerBase): GuideLineStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const id_result : string = (valueDeserializer.readString() as string)
-        const direction_result : Axis = TypeChecker.Axis_FromNumeric(valueDeserializer.readInt32())
-        const position_result : GuideLinePosition = GuideLinePosition_serializer.read(valueDeserializer)
-        let value : GuideLineStyle = ({id: id_result, direction: direction_result, position: position_result} as GuideLineStyle)
+        const idTmpResult : string = (valueDeserializer.readString() as string)
+        const directionTmpResult : Axis = TypeChecker.Axis_FromNumeric(valueDeserializer.readInt32())
+        const positionTmpResult : GuideLinePosition = GuideLinePosition_serializer.read(valueDeserializer)
+        let value : GuideLineStyle = ({id: idTmpResult, direction: directionTmpResult, position: positionTmpResult} as GuideLineStyle)
         return value
     }
 }

@@ -13,7 +13,12 @@
         "plugins": [
             {
                 "transform": "@koalaui/memo-plugin",
-                "stage": "checked",
+                "state": "parsed",
+                "name": "memo"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "state": "checked",
                 "name": "memo"
             }
         ]
@@ -23,8 +28,5 @@
     ],
     "exclude": [
         "./ets/diagnostics-input/**"
-    ],
-    "dependencies": {
-        "@koalaui/runtime": ["../../../incremental/runtime/ui2abcconfig.json"]
-    }
+    ]
 }

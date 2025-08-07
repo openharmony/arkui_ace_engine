@@ -43,7 +43,6 @@ interface PerformanceData {
 
     visitedNodes: number
     createdNodes: number
-    restartTime: number
     proceedTime: number
     totalTime: number
 
@@ -67,7 +66,6 @@ export class Profiler implements PerformanceData {
     filePath: string = ""
     visitedNodes: number = 0
     createdNodes: number = 0
-    restartTime: number = 0
     proceedTime: number = 0
     totalTime: number = 0
     pluginsByName: Record<string, PluginData> = {}
@@ -115,10 +113,6 @@ export class Profiler implements PerformanceData {
         this.getPluginData(pluginName, state).transformTimeDeps += consumedTime
     }
 
-    restarted(consumedTime: number) {
-        this.restartTime += consumedTime
-    }
-
     proceededToState(consumedTime: number) {
         this.proceedTime += consumedTime
     }
@@ -129,7 +123,6 @@ export class Profiler implements PerformanceData {
 
         this.visitedNodes = 0
         this.createdNodes = 0
-        this.restartTime = 0
         this.proceedTime = 0
         this.totalTime = 0
         this.pluginsByName = {}
@@ -168,7 +161,6 @@ export class Profiler implements PerformanceData {
                     filePath: this.filePath,
                     visitedNodes: savedData.data.map(it => it.visitedNodes).reduce((sum, it) => sum + it),
                     createdNodes: savedData.data.map(it => it.createdNodes).reduce((sum, it) => sum + it),
-                    restartTime: savedData.data.map(it => it.restartTime).reduce((sum, it) => sum + it),
                     proceedTime: savedData.data.map(it => it.proceedTime).reduce((sum, it) => sum + it),
                     totalTime: savedData.data.map(it => it.totalTime).reduce((sum, it) => sum + it),
                     pluginsByName: {}

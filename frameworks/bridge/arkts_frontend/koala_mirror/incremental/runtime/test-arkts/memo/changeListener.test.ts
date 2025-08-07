@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import {
     GlobalStateManager,
     OnChange,
@@ -23,20 +22,20 @@ import {
     TestNode,
     mutableState,
     testTick,
-} from "../../src"
+} from "../../ets"
 
 const collector = new Array<string>()
 
 function testExpected(root: State<TestNode>, expected?: string) {
     collector.length = 0
     testTick(root, false)
-    Assert.equal(collector.length, 0)
+    assert.equal(collector.length, 0)
     GlobalStateManager.instance.callCallbacks()
     if (expected === undefined) {
-        Assert.equal(collector.length, 0)
+        assert.equal(collector.length, 0)
     } else {
-        Assert.equal(collector.length, 1)
-        Assert.equal(collector[0], expected)
+        assert.equal(collector.length, 1)
+        assert.equal(collector[0], expected)
     }
 }
 
@@ -47,7 +46,7 @@ export function testChange(
 ) {
     GlobalStateManager.reset()
     const state = mutableState<string>("first")
-    const root = TestNode.create((node) => { content(state.value) })
+    const root = TestNode.create((node): void => { content(state.value) })
     testExpected(root, expected)
     state.value = "f" + "i" + "r" + "s" + "t"
     testExpected(root)
@@ -59,8 +58,8 @@ export function testChange(
 
 suite("changeListener tests", () => {
 
-    test("RunEffect", () => { testChange((value: string) => { RunEffect(value, (change: string) => { collector.push(change) }) }, "first") })
+    test("RunEffect", () => { testChange((value: string): void => { RunEffect(value, (change: string): void => { collector.push(change) }) }, "first") })
 
-    test("OnChange", () => { testChange((value: string) => { OnChange(value, (change: string) => { collector.push(change) }) }) })
+    test("OnChange", () => { testChange((value: string): void => { OnChange(value, (change: string): void => { collector.push(change) }) }) })
 })
 export const __ARKTEST__ = "memo/changeListeners.test"

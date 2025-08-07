@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
+import { float64toInt32, int32 } from "@koalaui/common"
 
 /**
  * Adds statistics for constructing/disposing of the TreeNode instances.
@@ -149,7 +149,7 @@ export class RuntimeProfiler {
         if (ms - this.lastTime <= 1000) {
             this.frames++
         } else {
-            this.lastFPS = Math.round(this.frames * 1000 / (ms - this.lastTime)) as int32
+            this.lastFPS = float64toInt32(Math.round(this.frames * 1000 / (ms - this.lastTime)))
             this.frames = 1
             this.lastTime = ms
         }

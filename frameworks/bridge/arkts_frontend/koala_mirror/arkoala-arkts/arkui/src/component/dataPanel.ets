@@ -16,21 +16,22 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ResourceColor, Length } from "./units"
 import { Color } from "./enums"
 import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class LinearGradientInternal {
     public static fromPtr(ptr: KPointer): LinearGradient {
         return new LinearGradient(false, ptr)
@@ -50,9 +51,9 @@ export class LinearGradient implements MaterializedBase {
     static construct(colorStops: Array<ColorStop>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((colorStops.length).toInt())
-        for (let colorStops_counter_i = 0; colorStops_counter_i < colorStops.length; colorStops_counter_i++) {
-            const colorStops_element : ColorStop = colorStops[colorStops_counter_i]
-            ColorStop_serializer.write(thisSerializer, colorStops_element)
+        for (let colorStopsCounterI = 0; colorStopsCounterI < colorStops.length; colorStopsCounterI++) {
+            const colorStopsTmpElement : ColorStop = colorStops[colorStopsCounterI]
+            ColorStop_serializer.write(thisSerializer, colorStopsTmpElement)
         }
         const retval  = ArkUIGeneratedNativeModule._LinearGradient_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -69,7 +70,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkDataPanelPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._DataPanel_construct(peerId, flags)
-        const _peer  = new ArkDataPanelPeer(_peerPtr, peerId, "DataPanel", flags)
+        const _peer  = new ArkDataPanelPeer(_peerPtr, peerId, 'DataPanel', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -81,147 +82,118 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
     }
     setCloseEffectAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DataPanelAttribute_setCloseEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setValueColorsAttribute(value: Array<ResourceColor | LinearGradient> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeInt32((value_value.length).toInt())
-            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
-                const value_value_element : ResourceColor | LinearGradient = value_value[value_value_counter_i]
-                let value_value_element_type : int32 = RuntimeType.UNDEFINED
-                value_value_element_type = runtimeType(value_value_element)
-                if ((TypeChecker.isColor(value_value_element)) || (RuntimeType.NUMBER == value_value_element_type) || (RuntimeType.STRING == value_value_element_type) || (RuntimeType.OBJECT == value_value_element_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : ResourceColor | LinearGradient = valueTmpValue[valueTmpValueCounterI]
+                if (valueTmpValueTmpElement instanceof ResourceColor) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_element_0  = value_value_element as ResourceColor
-                    let value_value_element_0_type : int32 = RuntimeType.UNDEFINED
-                    value_value_element_0_type = runtimeType(value_value_element_0)
-                    if (TypeChecker.isColor(value_value_element_0)) {
+                    const valueTmpValueTmpElementForIdx0  = valueTmpValueTmpElement as ResourceColor
+                    if (valueTmpValueTmpElementForIdx0 instanceof Color) {
                         thisSerializer.writeInt8((0).toChar())
-                        const value_value_element_0_0  = value_value_element_0 as Color
-                        thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_element_0_0))
-                    }
-                    else if (RuntimeType.NUMBER == value_value_element_0_type) {
+                        const valueTmpValueTmpElementForIdx0ForIdx0  = valueTmpValueTmpElementForIdx0 as Color
+                        thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueTmpElementForIdx0ForIdx0))
+                    } else if (valueTmpValueTmpElementForIdx0 instanceof number) {
                         thisSerializer.writeInt8((1).toChar())
-                        const value_value_element_0_1  = value_value_element_0 as number
-                        thisSerializer.writeNumber(value_value_element_0_1)
-                    }
-                    else if (RuntimeType.STRING == value_value_element_0_type) {
+                        const valueTmpValueTmpElementForIdx0ForIdx1  = valueTmpValueTmpElementForIdx0 as number
+                        thisSerializer.writeNumber(valueTmpValueTmpElementForIdx0ForIdx1)
+                    } else if (valueTmpValueTmpElementForIdx0 instanceof string) {
                         thisSerializer.writeInt8((2).toChar())
-                        const value_value_element_0_2  = value_value_element_0 as string
-                        thisSerializer.writeString(value_value_element_0_2)
-                    }
-                    else if (RuntimeType.OBJECT == value_value_element_0_type) {
+                        const valueTmpValueTmpElementForIdx0ForIdx2  = valueTmpValueTmpElementForIdx0 as string
+                        thisSerializer.writeString(valueTmpValueTmpElementForIdx0ForIdx2)
+                    } else if (valueTmpValueTmpElementForIdx0 instanceof Resource) {
                         thisSerializer.writeInt8((3).toChar())
-                        const value_value_element_0_3  = value_value_element_0 as Resource
-                        Resource_serializer.write(thisSerializer, value_value_element_0_3)
+                        const valueTmpValueTmpElementForIdx0ForIdx3  = valueTmpValueTmpElementForIdx0 as Resource
+                        Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx0ForIdx3)
                     }
-                }
-                else if (TypeChecker.isLinearGradient(value_value_element)) {
+                } else if (valueTmpValueTmpElement instanceof LinearGradient) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_element_1  = value_value_element as LinearGradient
-                    LinearGradient_serializer.write(thisSerializer, value_value_element_1)
+                    const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as LinearGradient
+                    LinearGradient_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx1)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DataPanelAttribute_setValueColors(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTrackBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DataPanelAttribute_setTrackBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DataPanelAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTrackShadowAttribute(value: DataPanelShadowOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DataPanelShadowOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DataPanelShadowOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DataPanelAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setContentModifierAttribute(value: ContentModifier<DataPanelConfiguration> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._DataPanelAttribute_setContentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -299,21 +271,6 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: DataPanelAttribute): void {
-        super.apply(target)
-        if (this.closeEffect_value !== undefined)
-            target.closeEffect(this.closeEffect_value!)
-        if (this.valueColors_value !== undefined)
-            target.valueColors(this.valueColors_value!)
-        if (this.trackBackgroundColor_value !== undefined)
-            target.trackBackgroundColor(this.trackBackgroundColor_value!)
-        if (this.strokeWidth_value !== undefined)
-            target.strokeWidth(this.strokeWidth_value!)
-        if (this.trackShadow_value !== undefined)
-            target.trackShadow(this.trackShadow_value!)
-        if (this.contentModifier_value !== undefined)
-            target.contentModifier(this.contentModifier_value!)
-    }
 }
 
 export class ArkDataPanelComponent extends ArkCommonMethodComponent implements DataPanelAttribute {
@@ -370,14 +327,11 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
     }
     public contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier<DataPanelConfiguration> | undefined)
-            this.getPeer()?.setContentModifierAttribute(value_casted)
-            return this
+            hookDataPanelContentModifier(this, value)
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -385,26 +339,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
         super.applyAttributesFinish()
     }
 }
-export function withDataPanelStyle(receiver: DataPanelAttribute, modifier: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkDataPanelStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("DataPanel")
-// export function DataPanel(
-//     options: DataPanelOptions,
-//     @memo
-//     content_?: () => void,
-// ): DataPanelAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function DataPanel(
@@ -420,71 +354,240 @@ export function DataPanel(
     NodeAttach<ArkDataPanelPeer>((): ArkDataPanelPeer => ArkDataPanelPeer.create(receiver), (_: ArkDataPanelPeer): void => {
         receiver.setDataPanelOptions(options)
         style?.(receiver)
-        withDataPanelStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkDataPanelSet extends ArkCommonMethodSet implements DataPanelAttribute {
+export class DataPanelModifier extends CommonMethodModifier implements DataPanelAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _closeEffect_flag?: boolean
-    _closeEffect0_value?: boolean | undefined
-    _valueColors_flag?: boolean
-    _valueColors0_value?: Array<ResourceColor | LinearGradient> | undefined
-    _trackBackgroundColor_flag?: boolean
-    _trackBackgroundColor0_value?: ResourceColor | undefined
-    _strokeWidth_flag?: boolean
-    _strokeWidth0_value?: Length | undefined
-    _trackShadow_flag?: boolean
-    _trackShadow0_value?: DataPanelShadowOptions | undefined
-    _contentModifier_flag?: boolean
-    _contentModifier0_value?: ContentModifier<DataPanelConfiguration> | undefined
-    applyModifierPatch(component: DataPanelAttribute): void {
-        if (this._closeEffect_flag)
-            component.closeEffect((this._closeEffect0_value as boolean | undefined))
-        if (this._valueColors_flag)
-            component.valueColors((this._valueColors0_value as Array<ResourceColor | LinearGradient> | undefined))
-        if (this._trackBackgroundColor_flag)
-            component.trackBackgroundColor((this._trackBackgroundColor0_value as ResourceColor | undefined))
-        if (this._strokeWidth_flag)
-            component.strokeWidth((this._strokeWidth0_value as Length | undefined))
-        if (this._trackShadow_flag)
-            component.trackShadow((this._trackShadow0_value as DataPanelShadowOptions | undefined))
-        if (this._contentModifier_flag)
-            component.contentModifier((this._contentModifier0_value as ContentModifier<DataPanelConfiguration> | undefined))
+    _closeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _closeEffect_0_0value?: boolean | undefined
+    _valueColors_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _valueColors_0_0value?: Array<ResourceColor | LinearGradient> | undefined
+    _trackBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _trackBackgroundColor_0_0value?: ResourceColor | undefined
+    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeWidth_0_0value?: Length | undefined
+    _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _trackShadow_0_0value?: DataPanelShadowOptions | undefined
+    applyModifierPatch(peer: ArkDataPanelPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._closeEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCloseEffectAttribute((this._closeEffect_0_0value as boolean | undefined));
+                    this._closeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._closeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._closeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCloseEffectAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._valueColors_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._valueColors_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setValueColorsAttribute((this._valueColors_0_0value as Array<ResourceColor | LinearGradient> | undefined));
+                    this._valueColors_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._valueColors_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._valueColors_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setValueColorsAttribute((undefined as Array<ResourceColor | LinearGradient> | undefined));
+                }
+            }
+        }
+        if (this._trackBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._trackBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTrackBackgroundColorAttribute((this._trackBackgroundColor_0_0value as ResourceColor | undefined));
+                    this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTrackBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as Length | undefined));
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeWidthAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._trackShadow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._trackShadow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | undefined));
+                    this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._trackShadow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | undefined));
+                }
+            }
+        }
     }
-    public closeEffect(value: boolean | undefined): this {
-        this._closeEffect_flag = true
-        this._closeEffect0_value = value
+    mergeModifier(modifier: DataPanelModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._closeEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.closeEffect(modifier._closeEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.closeEffect((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._valueColors_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._valueColors_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.valueColors(modifier._valueColors_0_0value);
+                    break;
+                }
+                default: {
+                    this.valueColors((undefined as Array<ResourceColor | LinearGradient> | undefined));
+                }
+            }
+        }
+        if (modifier._trackBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._trackBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.trackBackgroundColor(modifier._trackBackgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.trackBackgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeWidth(modifier._strokeWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeWidth((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._trackShadow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._trackShadow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.trackShadow(modifier._trackShadow_0_0value);
+                    break;
+                }
+                default: {
+                    this.trackShadow((undefined as DataPanelShadowOptions | undefined));
+                }
+            }
+        }
+    }
+    closeEffect(value: boolean | undefined): this {
+        if (((this._closeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._closeEffect_0_0value) !== (value)))
+        {
+            this._closeEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._closeEffect_0_0value = value
+        } else
+        {
+            this._closeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
-        this._valueColors_flag = true
-        this._valueColors0_value = value
+    valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
+        if (((this._valueColors_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._valueColors_0_flag = AttributeUpdaterFlag.UPDATE
+            this._valueColors_0_0value = value
+        } else
+        {
+            this._valueColors_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public trackBackgroundColor(value: ResourceColor | undefined): this {
-        this._trackBackgroundColor_flag = true
-        this._trackBackgroundColor0_value = value
+    trackBackgroundColor(value: ResourceColor | undefined): this {
+        if (((this._trackBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._trackBackgroundColor_0_0value = value
+        } else
+        {
+            this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeWidth(value: Length | undefined): this {
-        this._strokeWidth_flag = true
-        this._strokeWidth0_value = value
+    strokeWidth(value: Length | undefined): this {
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeWidth_0_0value = value
+        } else
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public trackShadow(value: DataPanelShadowOptions | undefined): this {
-        this._trackShadow_flag = true
-        this._trackShadow0_value = value
-        return this
-    }
-    public contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
-        this._contentModifier_flag = true
-        this._contentModifier0_value = value
+    trackShadow(value: DataPanelShadowOptions | undefined): this {
+        if (((this._trackShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._trackShadow_0_0value = value
+        } else
+        {
+            this._trackShadow_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -505,372 +608,321 @@ export class LinearGradient_serializer {
 export class DataPanelConfiguration_serializer {
     public static write(buffer: SerializerBase, value: DataPanelConfiguration): void {
         let valueSerializer : SerializerBase = buffer
-        const value_enabled  = value.enabled
-        valueSerializer.writeBoolean(value_enabled)
-        const value_contentModifier  = value.contentModifier
-        valueSerializer.holdAndWriteObject(value_contentModifier)
-        const value_values  = value.values
-        valueSerializer.writeInt32((value_values.length).toInt())
-        for (let value_values_counter_i = 0; value_values_counter_i < value_values.length; value_values_counter_i++) {
-            const value_values_element : number = value_values[value_values_counter_i]
-            valueSerializer.writeNumber(value_values_element)
+        const valueHolderForEnabled  = value.enabled
+        valueSerializer.writeBoolean(valueHolderForEnabled)
+        const valueHolderForContentModifier  = value.contentModifier
+        valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
+        const valueHolderForValues  = value.values
+        valueSerializer.writeInt32((valueHolderForValues.length).toInt())
+        for (let valueHolderForValuesCounterI = 0; valueHolderForValuesCounterI < valueHolderForValues.length; valueHolderForValuesCounterI++) {
+            const valueHolderForValuesTmpElement : number = valueHolderForValues[valueHolderForValuesCounterI]
+            valueSerializer.writeNumber(valueHolderForValuesTmpElement)
         }
-        const value_maxValue  = value.maxValue
-        valueSerializer.writeNumber(value_maxValue)
+        const valueHolderForMaxValue  = value.maxValue
+        valueSerializer.writeNumber(valueHolderForMaxValue)
     }
     public static read(buffer: DeserializerBase): DataPanelConfiguration {
         let valueDeserializer : DeserializerBase = buffer
-        const enabled_result : boolean = valueDeserializer.readBoolean()
-        const contentModifier_result : ContentModifier<DataPanelConfiguration> = (valueDeserializer.readObject() as ContentModifier<DataPanelConfiguration>)
-        const values_buf_length : int32 = valueDeserializer.readInt32()
-        let values_buf : Array<number> = new Array<number>(values_buf_length)
-        for (let values_buf_i = 0; values_buf_i < values_buf_length; values_buf_i++) {
-            values_buf[values_buf_i] = (valueDeserializer.readNumber() as number)
+        const enabledTmpResult : boolean = valueDeserializer.readBoolean()
+        const contentModifierTmpResult : ContentModifier<DataPanelConfiguration> = (valueDeserializer.readObject() as ContentModifier<DataPanelConfiguration>)
+        const valuesTmpBufLength : int32 = valueDeserializer.readInt32()
+        let valuesTmpBuf : Array<number> = new Array<number>(valuesTmpBufLength)
+        for (let valuesTmpBufBufCounterI = 0; valuesTmpBufBufCounterI < valuesTmpBufLength; valuesTmpBufBufCounterI++) {
+            valuesTmpBuf[valuesTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
         }
-        const values_result : Array<number> = values_buf
-        const maxValue_result : number = (valueDeserializer.readNumber() as number)
-        let value : DataPanelConfiguration = ({enabled: enabled_result, contentModifier: contentModifier_result, values: values_result, maxValue: maxValue_result} as DataPanelConfiguration)
+        const valuesTmpResult : Array<number> = valuesTmpBuf
+        const maxValueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : DataPanelConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, values: valuesTmpResult, maxValue: maxValueTmpResult} as DataPanelConfiguration)
         return value
     }
 }
 export class DataPanelOptions_serializer {
     public static write(buffer: SerializerBase, value: DataPanelOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_values  = value.values
-        valueSerializer.writeInt32((value_values.length).toInt())
-        for (let value_values_counter_i = 0; value_values_counter_i < value_values.length; value_values_counter_i++) {
-            const value_values_element : number = value_values[value_values_counter_i]
-            valueSerializer.writeNumber(value_values_element)
+        const valueHolderForValues  = value.values
+        valueSerializer.writeInt32((valueHolderForValues.length).toInt())
+        for (let valueHolderForValuesCounterI = 0; valueHolderForValuesCounterI < valueHolderForValues.length; valueHolderForValuesCounterI++) {
+            const valueHolderForValuesTmpElement : number = valueHolderForValues[valueHolderForValuesCounterI]
+            valueSerializer.writeNumber(valueHolderForValuesTmpElement)
         }
-        const value_max  = value.max
-        let value_max_type : int32 = RuntimeType.UNDEFINED
-        value_max_type = runtimeType(value_max)
-        valueSerializer.writeInt8((value_max_type).toChar())
-        if ((value_max_type) != (RuntimeType.UNDEFINED)) {
-            const value_max_value  = value_max!
-            valueSerializer.writeNumber(value_max_value)
+        const valueHolderForMax  = value.max
+        if (valueHolderForMax !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxTmpValue  = valueHolderForMax!
+            valueSerializer.writeNumber(valueHolderForMaxTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_type  = value.type
-        let value_type_type : int32 = RuntimeType.UNDEFINED
-        value_type_type = runtimeType(value_type)
-        valueSerializer.writeInt8((value_type_type).toChar())
-        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
-            const value_type_value  = (value_type as DataPanelType)
-            valueSerializer.writeInt32(TypeChecker.DataPanelType_ToNumeric(value_type_value))
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = (valueHolderForType as DataPanelType)
+            valueSerializer.writeInt32(TypeChecker.DataPanelType_ToNumeric(valueHolderForTypeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DataPanelOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const values_buf_length : int32 = valueDeserializer.readInt32()
-        let values_buf : Array<number> = new Array<number>(values_buf_length)
-        for (let values_buf_i = 0; values_buf_i < values_buf_length; values_buf_i++) {
-            values_buf[values_buf_i] = (valueDeserializer.readNumber() as number)
+        const valuesTmpBufLength : int32 = valueDeserializer.readInt32()
+        let valuesTmpBuf : Array<number> = new Array<number>(valuesTmpBufLength)
+        for (let valuesTmpBufBufCounterI = 0; valuesTmpBufBufCounterI < valuesTmpBufLength; valuesTmpBufBufCounterI++) {
+            valuesTmpBuf[valuesTmpBufBufCounterI] = (valueDeserializer.readNumber() as number)
         }
-        const values_result : Array<number> = values_buf
-        const max_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let max_buf : number | undefined
-        if ((max_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            max_buf = (valueDeserializer.readNumber() as number)
+        const valuesTmpResult : Array<number> = valuesTmpBuf
+        const maxTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maxTmpBuf : number | undefined
+        if ((maxTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const max_result : number | undefined = max_buf
-        const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let type_buf : DataPanelType | undefined
-        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            type_buf = TypeChecker.DataPanelType_FromNumeric(valueDeserializer.readInt32())
+        const maxTmpResult : number | undefined = maxTmpBuf
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : DataPanelType | undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = TypeChecker.DataPanelType_FromNumeric(valueDeserializer.readInt32())
         }
-        const type_result : DataPanelType | undefined = type_buf
-        let value : DataPanelOptions = ({values: values_result, max: max_result, type: type_result} as DataPanelOptions)
+        const typeTmpResult : DataPanelType | undefined = typeTmpBuf
+        let value : DataPanelOptions = ({values: valuesTmpResult, max: maxTmpResult, type: typeTmpResult} as DataPanelOptions)
         return value
     }
 }
 export class DataPanelShadowOptions_serializer {
     public static write(buffer: SerializerBase, value: DataPanelShadowOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_radius  = value.radius
-        let value_radius_type : int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
-            const value_radius_value  = value_radius!
-            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
-            value_radius_value_type = runtimeType(value_radius_value)
-            if (RuntimeType.NUMBER == value_radius_value_type) {
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            if (valueHolderForRadiusTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_radius_value_0  = value_radius_value as number
-                valueSerializer.writeNumber(value_radius_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_radius_value_type) {
+                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
+                valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
+            } else if (valueHolderForRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_radius_value_1  = value_radius_value as Resource
-                Resource_serializer.write(valueSerializer, value_radius_value_1)
+                const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_offsetX  = value.offsetX
-        let value_offsetX_type : int32 = RuntimeType.UNDEFINED
-        value_offsetX_type = runtimeType(value_offsetX)
-        valueSerializer.writeInt8((value_offsetX_type).toChar())
-        if ((value_offsetX_type) != (RuntimeType.UNDEFINED)) {
-            const value_offsetX_value  = value_offsetX!
-            let value_offsetX_value_type : int32 = RuntimeType.UNDEFINED
-            value_offsetX_value_type = runtimeType(value_offsetX_value)
-            if (RuntimeType.NUMBER == value_offsetX_value_type) {
+        const valueHolderForOffsetX  = value.offsetX
+        if (valueHolderForOffsetX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
+            if (valueHolderForOffsetXTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_offsetX_value_0  = value_offsetX_value as number
-                valueSerializer.writeNumber(value_offsetX_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_offsetX_value_type) {
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
+                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+            } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_offsetX_value_1  = value_offsetX_value as Resource
-                Resource_serializer.write(valueSerializer, value_offsetX_value_1)
+                const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForOffsetXTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_offsetY  = value.offsetY
-        let value_offsetY_type : int32 = RuntimeType.UNDEFINED
-        value_offsetY_type = runtimeType(value_offsetY)
-        valueSerializer.writeInt8((value_offsetY_type).toChar())
-        if ((value_offsetY_type) != (RuntimeType.UNDEFINED)) {
-            const value_offsetY_value  = value_offsetY!
-            let value_offsetY_value_type : int32 = RuntimeType.UNDEFINED
-            value_offsetY_value_type = runtimeType(value_offsetY_value)
-            if (RuntimeType.NUMBER == value_offsetY_value_type) {
+        const valueHolderForOffsetY  = value.offsetY
+        if (valueHolderForOffsetY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
+            if (valueHolderForOffsetYTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_offsetY_value_0  = value_offsetY_value as number
-                valueSerializer.writeNumber(value_offsetY_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_offsetY_value_type) {
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
+                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+            } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_offsetY_value_1  = value_offsetY_value as Resource
-                Resource_serializer.write(valueSerializer, value_offsetY_value_1)
+                const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForOffsetYTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_colors  = value.colors
-        let value_colors_type : int32 = RuntimeType.UNDEFINED
-        value_colors_type = runtimeType(value_colors)
-        valueSerializer.writeInt8((value_colors_type).toChar())
-        if ((value_colors_type) != (RuntimeType.UNDEFINED)) {
-            const value_colors_value  = value_colors!
-            valueSerializer.writeInt32((value_colors_value.length).toInt())
-            for (let value_colors_value_counter_i = 0; value_colors_value_counter_i < value_colors_value.length; value_colors_value_counter_i++) {
-                const value_colors_value_element : ResourceColor | LinearGradient = value_colors_value[value_colors_value_counter_i]
-                let value_colors_value_element_type : int32 = RuntimeType.UNDEFINED
-                value_colors_value_element_type = runtimeType(value_colors_value_element)
-                if ((TypeChecker.isColor(value_colors_value_element)) || (RuntimeType.NUMBER == value_colors_value_element_type) || (RuntimeType.STRING == value_colors_value_element_type) || (RuntimeType.OBJECT == value_colors_value_element_type)) {
+        const valueHolderForColors  = value.colors
+        if (valueHolderForColors !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorsTmpValue  = valueHolderForColors!
+            valueSerializer.writeInt32((valueHolderForColorsTmpValue.length).toInt())
+            for (let valueHolderForColorsTmpValueCounterI = 0; valueHolderForColorsTmpValueCounterI < valueHolderForColorsTmpValue.length; valueHolderForColorsTmpValueCounterI++) {
+                const valueHolderForColorsTmpValueTmpElement : ResourceColor | LinearGradient = valueHolderForColorsTmpValue[valueHolderForColorsTmpValueCounterI]
+                if (valueHolderForColorsTmpValueTmpElement instanceof ResourceColor) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_colors_value_element_0  = value_colors_value_element as ResourceColor
-                    let value_colors_value_element_0_type : int32 = RuntimeType.UNDEFINED
-                    value_colors_value_element_0_type = runtimeType(value_colors_value_element_0)
-                    if (TypeChecker.isColor(value_colors_value_element_0)) {
+                    const valueHolderForColorsTmpValueTmpElementForIdx0  = valueHolderForColorsTmpValueTmpElement as ResourceColor
+                    if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof Color) {
                         valueSerializer.writeInt8((0).toChar())
-                        const value_colors_value_element_0_0  = value_colors_value_element_0 as Color
-                        valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_colors_value_element_0_0))
-                    }
-                    else if (RuntimeType.NUMBER == value_colors_value_element_0_type) {
+                        const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0  = valueHolderForColorsTmpValueTmpElementForIdx0 as Color
+                        valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx0))
+                    } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof number) {
                         valueSerializer.writeInt8((1).toChar())
-                        const value_colors_value_element_0_1  = value_colors_value_element_0 as number
-                        valueSerializer.writeNumber(value_colors_value_element_0_1)
-                    }
-                    else if (RuntimeType.STRING == value_colors_value_element_0_type) {
+                        const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx1  = valueHolderForColorsTmpValueTmpElementForIdx0 as number
+                        valueSerializer.writeNumber(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx1)
+                    } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof string) {
                         valueSerializer.writeInt8((2).toChar())
-                        const value_colors_value_element_0_2  = value_colors_value_element_0 as string
-                        valueSerializer.writeString(value_colors_value_element_0_2)
-                    }
-                    else if (RuntimeType.OBJECT == value_colors_value_element_0_type) {
+                        const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx2  = valueHolderForColorsTmpValueTmpElementForIdx0 as string
+                        valueSerializer.writeString(valueHolderForColorsTmpValueTmpElementForIdx0ForIdx2)
+                    } else if (valueHolderForColorsTmpValueTmpElementForIdx0 instanceof Resource) {
                         valueSerializer.writeInt8((3).toChar())
-                        const value_colors_value_element_0_3  = value_colors_value_element_0 as Resource
-                        Resource_serializer.write(valueSerializer, value_colors_value_element_0_3)
+                        const valueHolderForColorsTmpValueTmpElementForIdx0ForIdx3  = valueHolderForColorsTmpValueTmpElementForIdx0 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForColorsTmpValueTmpElementForIdx0ForIdx3)
                     }
-                }
-                else if (TypeChecker.isLinearGradient(value_colors_value_element)) {
+                } else if (valueHolderForColorsTmpValueTmpElement instanceof LinearGradient) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_colors_value_element_1  = value_colors_value_element as LinearGradient
-                    LinearGradient_serializer.write(valueSerializer, value_colors_value_element_1)
+                    const valueHolderForColorsTmpValueTmpElementForIdx1  = valueHolderForColorsTmpValueTmpElement as LinearGradient
+                    LinearGradient_serializer.write(valueSerializer, valueHolderForColorsTmpValueTmpElementForIdx1)
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DataPanelShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radius_buf : number | Resource | undefined
-        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : number | Resource | undefined
-            if (radius_buf__selector == (0).toChar()) {
-                radius_buf_ = (valueDeserializer.readNumber() as number)
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : number | Resource | undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let radiusTmpBuf_ : number | Resource | undefined
+            if (radiusTmpBuf_UnionSelector == (0).toChar()) {
+                radiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
+                radiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (radius_buf__selector == (1).toChar()) {
-                radius_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
-            }
-            radius_buf = (radius_buf_ as number | Resource)
+            radiusTmpBuf = (radiusTmpBuf_ as number | Resource)
         }
-        const radius_result : number | Resource | undefined = radius_buf
-        const offsetX_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetX_buf : number | Resource | undefined
-        if ((offsetX_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const offsetX_buf__selector : int32 = valueDeserializer.readInt8()
-            let offsetX_buf_ : number | Resource | undefined
-            if (offsetX_buf__selector == (0).toChar()) {
-                offsetX_buf_ = (valueDeserializer.readNumber() as number)
+        const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
+        const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offsetXTmpBuf : number | Resource | undefined
+        if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let offsetXTmpBuf_ : number | Resource | undefined
+            if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
+                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
+                offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (offsetX_buf__selector == (1).toChar()) {
-                offsetX_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for offsetX_buf_ has to be chosen through deserialisation.")
-            }
-            offsetX_buf = (offsetX_buf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
         }
-        const offsetX_result : number | Resource | undefined = offsetX_buf
-        const offsetY_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetY_buf : number | Resource | undefined
-        if ((offsetY_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const offsetY_buf__selector : int32 = valueDeserializer.readInt8()
-            let offsetY_buf_ : number | Resource | undefined
-            if (offsetY_buf__selector == (0).toChar()) {
-                offsetY_buf_ = (valueDeserializer.readNumber() as number)
+        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offsetYTmpBuf : number | Resource | undefined
+        if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let offsetYTmpBuf_ : number | Resource | undefined
+            if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
+                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
+                offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (offsetY_buf__selector == (1).toChar()) {
-                offsetY_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for offsetY_buf_ has to be chosen through deserialisation.")
-            }
-            offsetY_buf = (offsetY_buf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
         }
-        const offsetY_result : number | Resource | undefined = offsetY_buf
-        const colors_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colors_buf : Array<ResourceColor | LinearGradient> | undefined
-        if ((colors_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const colors_buf__length : int32 = valueDeserializer.readInt32()
-            let colors_buf_ : Array<ResourceColor | LinearGradient> = new Array<ResourceColor | LinearGradient>(colors_buf__length)
-            for (let colors_buf__i = 0; colors_buf__i < colors_buf__length; colors_buf__i++) {
-                const colors_buf__buf_selector : int32 = valueDeserializer.readInt8()
-                let colors_buf__buf : ResourceColor | LinearGradient | undefined
-                if (colors_buf__buf_selector == (0).toChar()) {
-                    const colors_buf__buf_u_selector : int32 = valueDeserializer.readInt8()
-                    let colors_buf__buf_u : Color | number | string | Resource | undefined
-                    if (colors_buf__buf_u_selector == (0).toChar()) {
-                        colors_buf__buf_u = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const colorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorsTmpBuf : Array<ResourceColor | LinearGradient> | undefined
+        if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let colorsTmpBuf_ : Array<ResourceColor | LinearGradient> = new Array<ResourceColor | LinearGradient>(colorsTmpBuf_Length)
+            for (let colorsTmpBuf_BufCounterI = 0; colorsTmpBuf_BufCounterI < colorsTmpBuf_Length; colorsTmpBuf_BufCounterI++) {
+                const colorsTmpBuf_TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let colorsTmpBuf_TempBuf : ResourceColor | LinearGradient | undefined
+                if (colorsTmpBuf_TempBufUnionSelector == (0).toChar()) {
+                    const colorsTmpBuf_TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let colorsTmpBuf_TempBufBufU : Color | number | string | Resource | undefined
+                    if (colorsTmpBuf_TempBufBufUUnionSelector == (0).toChar()) {
+                        colorsTmpBuf_TempBufBufU = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+                    } else if (colorsTmpBuf_TempBufBufUUnionSelector == (1).toChar()) {
+                        colorsTmpBuf_TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (colorsTmpBuf_TempBufBufUUnionSelector == (2).toChar()) {
+                        colorsTmpBuf_TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (colorsTmpBuf_TempBufBufUUnionSelector == (3).toChar()) {
+                        colorsTmpBuf_TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for colorsTmpBuf_TempBufBufU has to be chosen through deserialisation.")
                     }
-                    else if (colors_buf__buf_u_selector == (1).toChar()) {
-                        colors_buf__buf_u = (valueDeserializer.readNumber() as number)
-                    }
-                    else if (colors_buf__buf_u_selector == (2).toChar()) {
-                        colors_buf__buf_u = (valueDeserializer.readString() as string)
-                    }
-                    else if (colors_buf__buf_u_selector == (3).toChar()) {
-                        colors_buf__buf_u = Resource_serializer.read(valueDeserializer)
-                    }
-                    else {
-                        throw new Error("One of the branches for colors_buf__buf_u has to be chosen through deserialisation.")
-                    }
-                    colors_buf__buf = (colors_buf__buf_u as Color | number | string | Resource)
+                    colorsTmpBuf_TempBuf = (colorsTmpBuf_TempBufBufU as Color | number | string | Resource)
+                } else if (colorsTmpBuf_TempBufUnionSelector == (1).toChar()) {
+                    colorsTmpBuf_TempBuf = (LinearGradient_serializer.read(valueDeserializer) as LinearGradient)
+                } else {
+                    throw new Error("One of the branches for colorsTmpBuf_TempBuf has to be chosen through deserialisation.")
                 }
-                else if (colors_buf__buf_selector == (1).toChar()) {
-                    colors_buf__buf = (LinearGradient_serializer.read(valueDeserializer) as LinearGradient)
-                }
-                else {
-                    throw new Error("One of the branches for colors_buf__buf has to be chosen through deserialisation.")
-                }
-                colors_buf_[colors_buf__i] = (colors_buf__buf as ResourceColor | LinearGradient)
+                colorsTmpBuf_[colorsTmpBuf_BufCounterI] = (colorsTmpBuf_TempBuf as ResourceColor | LinearGradient)
             }
-            colors_buf = colors_buf_
+            colorsTmpBuf = colorsTmpBuf_
         }
-        const colors_result : Array<ResourceColor | LinearGradient> | undefined = colors_buf
-        let value : DataPanelShadowOptions = ({radius: radius_result, offsetX: offsetX_result, offsetY: offsetY_result, colors: colors_result} as DataPanelShadowOptions)
+        const colorsTmpResult : Array<ResourceColor | LinearGradient> | undefined = colorsTmpBuf
+        let value : DataPanelShadowOptions = ({radius: radiusTmpResult, offsetX: offsetXTmpResult, offsetY: offsetYTmpResult, colors: colorsTmpResult} as DataPanelShadowOptions)
         return value
     }
 }
 export class ColorStop_serializer {
     public static write(buffer: SerializerBase, value: ColorStop): void {
         let valueSerializer : SerializerBase = buffer
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        if (TypeChecker.isColor(value_color)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_color_0  = value_color as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_0))
-        }
-        else if (RuntimeType.NUMBER == value_color_type) {
+            const valueHolderForColorForIdx0  = valueHolderForColor as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorForIdx0))
+        } else if (valueHolderForColor instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_color_1  = value_color as number
-            valueSerializer.writeNumber(value_color_1)
-        }
-        else if (RuntimeType.STRING == value_color_type) {
+            const valueHolderForColorForIdx1  = valueHolderForColor as number
+            valueSerializer.writeNumber(valueHolderForColorForIdx1)
+        } else if (valueHolderForColor instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_color_2  = value_color as string
-            valueSerializer.writeString(value_color_2)
-        }
-        else if (RuntimeType.OBJECT == value_color_type) {
+            const valueHolderForColorForIdx2  = valueHolderForColor as string
+            valueSerializer.writeString(valueHolderForColorForIdx2)
+        } else if (valueHolderForColor instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_color_3  = value_color as Resource
-            Resource_serializer.write(valueSerializer, value_color_3)
+            const valueHolderForColorForIdx3  = valueHolderForColor as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
-        const value_offset  = value.offset
-        let value_offset_type : int32 = RuntimeType.UNDEFINED
-        value_offset_type = runtimeType(value_offset)
-        if (RuntimeType.STRING == value_offset_type) {
+        const valueHolderForOffset  = value.offset
+        if (valueHolderForOffset instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_offset_0  = value_offset as string
-            valueSerializer.writeString(value_offset_0)
-        }
-        else if (RuntimeType.NUMBER == value_offset_type) {
+            const valueHolderForOffsetForIdx0  = valueHolderForOffset as string
+            valueSerializer.writeString(valueHolderForOffsetForIdx0)
+        } else if (valueHolderForOffset instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_offset_1  = value_offset as number
-            valueSerializer.writeNumber(value_offset_1)
-        }
-        else if (RuntimeType.OBJECT == value_offset_type) {
+            const valueHolderForOffsetForIdx1  = valueHolderForOffset as number
+            valueSerializer.writeNumber(valueHolderForOffsetForIdx1)
+        } else if (valueHolderForOffset instanceof Resource) {
             valueSerializer.writeInt8((2).toChar())
-            const value_offset_2  = value_offset as Resource
-            Resource_serializer.write(valueSerializer, value_offset_2)
+            const valueHolderForOffsetForIdx2  = valueHolderForOffset as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForOffsetForIdx2)
         }
     }
     public static read(buffer: DeserializerBase): ColorStop {
         let valueDeserializer : DeserializerBase = buffer
-        const color_buf_selector : int32 = valueDeserializer.readInt8()
-        let color_buf : Color | number | string | Resource | undefined
-        if (color_buf_selector == (0).toChar()) {
-            color_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let colorTmpBuf : Color | number | string | Resource | undefined
+        if (colorTmpBufUnionSelector == (0).toChar()) {
+            colorTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (colorTmpBufUnionSelector == (1).toChar()) {
+            colorTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (colorTmpBufUnionSelector == (2).toChar()) {
+            colorTmpBuf = (valueDeserializer.readString() as string)
+        } else if (colorTmpBufUnionSelector == (3).toChar()) {
+            colorTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for colorTmpBuf has to be chosen through deserialisation.")
         }
-        else if (color_buf_selector == (1).toChar()) {
-            color_buf = (valueDeserializer.readNumber() as number)
+        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
+        const offsetTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let offsetTmpBuf : string | number | Resource | undefined
+        if (offsetTmpBufUnionSelector == (0).toChar()) {
+            offsetTmpBuf = (valueDeserializer.readString() as string)
+        } else if (offsetTmpBufUnionSelector == (1).toChar()) {
+            offsetTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (offsetTmpBufUnionSelector == (2).toChar()) {
+            offsetTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for offsetTmpBuf has to be chosen through deserialisation.")
         }
-        else if (color_buf_selector == (2).toChar()) {
-            color_buf = (valueDeserializer.readString() as string)
-        }
-        else if (color_buf_selector == (3).toChar()) {
-            color_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for color_buf has to be chosen through deserialisation.")
-        }
-        const color_result : ResourceColor = (color_buf as Color | number | string | Resource)
-        const offset_buf_selector : int32 = valueDeserializer.readInt8()
-        let offset_buf : string | number | Resource | undefined
-        if (offset_buf_selector == (0).toChar()) {
-            offset_buf = (valueDeserializer.readString() as string)
-        }
-        else if (offset_buf_selector == (1).toChar()) {
-            offset_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (offset_buf_selector == (2).toChar()) {
-            offset_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for offset_buf has to be chosen through deserialisation.")
-        }
-        const offset_result : Length = (offset_buf as string | number | Resource)
-        let value : ColorStop = ({color: color_result, offset: offset_result} as ColorStop)
+        const offsetTmpResult : Length = (offsetTmpBuf as string | number | Resource)
+        let value : ColorStop = ({color: colorTmpResult, offset: offsetTmpResult} as ColorStop)
         return value
     }
 }

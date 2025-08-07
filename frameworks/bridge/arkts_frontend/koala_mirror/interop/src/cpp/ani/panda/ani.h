@@ -621,6 +621,20 @@ struct __ani_interaction_api {
                                           ani_size nr_methods);
 
     /**
+     * @brief Binds static native methods to a class.
+     *
+     * This function binds an array of static native methods to the specified class.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] cls The class to which the native methods will be bound.
+     * @param[in] methods A pointer to an array of static native methods to bind.
+     * @param[in] nr_methods The number of static native methods in the array.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Class_BindStaticNativeMethods)(ani_env *env, ani_class cls, const ani_native_function *methods,
+                                                ani_size nr_methods);
+
+    /**
      * @brief Deletes a local reference.
      *
      * This function deletes a specified local reference to free up resources.
@@ -6095,6 +6109,142 @@ struct __ani_interaction_api {
      * The `resolver` is freed upon successful completion.
      */
     ani_status (*PromiseResolver_Reject)(ani_env *env, ani_resolver resolver, ani_error rejection);
+
+    /**
+     * @brief Checks if Any reference is an instance of a specified Any type.
+     *
+     * This function checks whether the given Any reference is an instance of the specified Any type.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference to check.
+     * @param[in] type The type to compare against.
+     * @param[out] result A pointer to store the boolean result (true if the reference is an instance of the type,
+     * false otherwise).
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_InstanceOf)(ani_env *env, ani_ref ref, ani_ref type, ani_boolean *result);
+
+    /**
+     * @brief Gets a property of an Any reference by name.
+     *
+     * This function retrieves the value of a named property from the given Any reference.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference from which to retrieve the property.
+     * @param[in] name The name of the property to retrieve.
+     * @param[out] result A pointer to store the retrieved property value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_GetProperty)(ani_env *env, ani_ref ref, const char *name, ani_ref *result);
+
+    /**
+     * @brief Sets a property of an Any reference by name.
+     *
+     * This function sets the value of a named property on the given Any reference.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference on which to set the property.
+     * @param[in] name The name of the property to set.
+     * @param[in] value The value to assign to the property.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_SetProperty)(ani_env *env, ani_ref ref, const char *name, ani_ref value);
+
+    /**
+     * @brief Gets an element of an Any reference by index.
+     *
+     * This function retrieves the value at a specific index from the given Any reference.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference from which to retrieve the element.
+     * @param[in] index The index of the element to retrieve.
+     * @param[out] result A pointer to store the retrieved value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_GetByIndex)(ani_env *env, ani_ref ref, ani_size index, ani_ref *result);
+
+    /**
+     * @brief Sets an element of an Any reference by index.
+     *
+     * This function sets the value at a specific index on the given Any reference.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference on which to set the element.
+     * @param[in] index The index of the element to set.
+     * @param[in] value The value to assign to the specified index.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_SetByIndex)(ani_env *env, ani_ref ref, ani_size index, ani_ref value);
+
+    /**
+     * @brief Gets a property of an Any reference by key reference.
+     *
+     * This function retrieves the value of a property using another Any reference as the key.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference from which to retrieve the property.
+     * @param[in] key The key reference used to access the property.
+     * @param[out] result A pointer to store the retrieved property value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_GetByValue)(ani_env *env, ani_ref ref, ani_ref key, ani_ref *result);
+
+    /**
+     * @brief Sets a property of an Any reference by key reference.
+     *
+     * This function sets the value of a property using another Any reference as the key.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ref The reference on which to set the property.
+     * @param[in] key The key reference used to access the property.
+     * @param[in] value The value to assign to the specified key.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_SetByValue)(ani_env *env, ani_ref ref, ani_ref key, ani_ref value);
+
+    /**
+     * @brief Calls an Any reference as a function.
+     *
+     * This function invokes the given Any reference if it represents a callable object.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] func The function reference to invoke.
+     * @param[in] argc The number of arguments.
+     * @param[in] argv An array of argument references.
+     * @param[out] result A pointer to store the function call result.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_Call)(ani_env *env, ani_ref func, ani_size argc, ani_ref *argv, ani_ref *result);
+
+    /**
+     * @brief Calls a method of an Any reference by name.
+     *
+     * This function invokes a named method on the given Any reference.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] self The object reference on which to invoke the method.
+     * @param[in] name The name of the method to invoke.
+     * @param[in] argc The number of arguments.
+     * @param[in] argv An array of argument references.
+     * @param[out] result A pointer to store the method call result.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_CallMethod)(ani_env *env, ani_ref self, const char *name, ani_size argc, ani_ref *argv,
+                                 ani_ref *result);
+
+    /**
+     * @brief Constructs a new object using an Any reference as a constructor.
+     *
+     * This function creates a new object using the given constructor reference and arguments.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] ctor The constructor function reference.
+     * @param[in] argc The number of arguments.
+     * @param[in] argv An array of argument references.
+     * @param[out] result A pointer to store the created object reference.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Any_New)(ani_env *env, ani_ref ctor, ani_size argc, ani_ref *argv, ani_ref *result);
 };
 
 // C++ API
@@ -6234,6 +6384,10 @@ struct __ani_env {
     ani_status Class_BindNativeMethods(ani_class cls, const ani_native_function *methods, ani_size nr_methods)
     {
         return c_api->Class_BindNativeMethods(this, cls, methods, nr_methods);
+    }
+    ani_status Class_BindStaticNativeMethods(ani_class cls, const ani_native_function *methods, ani_size nr_methods)
+    {
+        return c_api->Class_BindStaticNativeMethods(this, cls, methods, nr_methods);
     }
     ani_status Reference_Delete(ani_ref ref)
     {
@@ -8100,6 +8254,46 @@ struct __ani_env {
     ani_status PromiseResolver_Reject(ani_resolver resolver, ani_error rejection)
     {
         return c_api->PromiseResolver_Reject(this, resolver, rejection);
+    }
+    ani_status Any_InstanceOf(ani_ref ref, ani_ref type, ani_boolean *result)
+    {
+        return c_api->Any_InstanceOf(this, ref, type, result);
+    }
+    ani_status Any_GetProperty(ani_ref ref, const char *name, ani_ref *result)
+    {
+        return c_api->Any_GetProperty(this, ref, name, result);
+    }
+    ani_status Any_SetProperty(ani_ref ref, const char *name, ani_ref value)
+    {
+        return c_api->Any_SetProperty(this, ref, name, value);
+    }
+    ani_status Any_GetByIndex(ani_ref ref, ani_size index, ani_ref *result)
+    {
+        return c_api->Any_GetByIndex(this, ref, index, result);
+    }
+    ani_status Any_SetByIndex(ani_ref ref, ani_size index, ani_ref value)
+    {
+        return c_api->Any_SetByIndex(this, ref, index, value);
+    }
+    ani_status Any_GetByValue(ani_ref ref, ani_ref key, ani_ref *result)
+    {
+        return c_api->Any_GetByValue(this, ref, key, result);
+    }
+    ani_status Any_SetByValue(ani_ref ref, ani_ref key, ani_ref value)
+    {
+        return c_api->Any_SetByValue(this, ref, key, value);
+    }
+    ani_status Any_Call(ani_ref func, ani_size argc, ani_ref *argv, ani_ref *result)
+    {
+        return c_api->Any_Call(this, func, argc, argv, result);
+    }
+    ani_status Any_CallMethod(ani_ref self, const char *name, ani_size argc, ani_ref *argv, ani_ref *result)
+    {
+        return c_api->Any_CallMethod(this, self, name, argc, argv, result);
+    }
+    ani_status Any_New(ani_ref ctor, ani_size argc, ani_ref *argv, ani_ref *result)
+    {
+        return c_api->Any_New(this, ctor, argc, argv, result);
     }
 #endif  // __cplusplus
 };

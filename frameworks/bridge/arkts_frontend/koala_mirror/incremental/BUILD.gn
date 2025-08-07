@@ -34,11 +34,11 @@ npm_cmd("incremental_build") {
     outputs = [
         "$target_out_dir/incremental.abc"
     ]
-    project_path = rebase_path("./runtime")
-    run_tasks = [ "build:incremental:inc:ui2abc" ]
+    project_path = rebase_path(".")
+    run_tasks = [ "build" ]
 
     deps = [
-      "$koala_root/ui2abc:ui2abc"
+        "$koala_root/ui2abc:ui2abc"
     ]
 
     external_deps = [
@@ -52,7 +52,6 @@ npm_cmd("incremental_build") {
 
 group("incremental_abc") {
     deps = [
-      "../ui2abc:fast_arktsc_build",
       ":incremental_build"
     ]
 }

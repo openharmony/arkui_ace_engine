@@ -122,6 +122,9 @@ export class factory {
                     original,
                 ],
                 undefined,
+                false,
+                false,
+                undefined,
             )
         )
     }
@@ -156,6 +159,9 @@ export class factory {
                     ] })
                 ],
                 undefined,
+                false,
+                false,
+                undefined,
             )
         )
     }
@@ -179,6 +185,9 @@ export class factory {
                 false,
             ),
             [...updatedArgs],
+            undefined,
+            false,
+            false,
             undefined,
         )
     }
@@ -208,6 +217,9 @@ export class factory {
                                 ? [returnTypeAnnotation.clone()]
                                 : [arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID)],
                         ),
+                        false,
+                        false,
+                        undefined,
                     )
                 )
             ]
@@ -223,6 +235,9 @@ export class factory {
                 false
             ),
             arg ? [arg] : [],
+            undefined,
+            false,
+            false,
             undefined,
         )
     }
@@ -300,6 +315,9 @@ export class factory {
                     )
                 ],
                 undefined,
+                false,
+                false,
+                undefined,
             )
         )
     }
@@ -320,7 +338,10 @@ export class factory {
     }
     static deduceArrowWrapperType(arrow: arkts.ArrowFunctionExpression): arkts.TypeNode|undefined {
         const origType: arkts.TypeNode | undefined = arrow.function?.returnTypeAnnotation
-        if (origType == undefined) return undefined
+        const origPreferredType: arkts.TypeNode | undefined = arkts.tryConvertCheckerTypeToTypeNode(
+            arrow.function?.getPreferredReturnTypePointer()
+        )
+        if (origType == undefined && origPreferredType == undefined) return undefined
         const params = arrow.function?.params?.map(it => {
             const param = it as arkts.ETSParameterExpression
             return arkts.factory.createETSParameterExpression(
@@ -333,7 +354,7 @@ export class factory {
         return arkts.factory.createETSFunctionType(
             undefined,
             params,
-            origType.clone(),
+            origType ? origType.clone() : origPreferredType,
             false,
             arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_NONE,
             undefined
@@ -368,6 +389,9 @@ export class factory {
                 false
             ),
             [factory.createIdArgument(hash), factory.createLambdaWrapper(node)],
+            undefined,
+            false,
+            false,
             undefined,
         )
     }

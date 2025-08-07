@@ -1,0 +1,5 @@
+{
+    "inputDir": "./test-arkts",
+	"outputDir": "./ets-test",
+    "include": [ "./test-arkts/**/*.ts" ]
+}

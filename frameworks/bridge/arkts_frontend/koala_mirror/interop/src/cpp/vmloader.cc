@@ -342,7 +342,7 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
         return -1;
     }
 
-    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s bootFilesDir=%" LOG_PUBLIC "s native=%" LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
+    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s userFilesDir=%" LOG_PUBLIC "s native=%" LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
 
     std::string libPath =
 #if USE_SYSTEM_ARKVM
@@ -558,9 +558,9 @@ const AppInfo javaAppInfo = {
 
 #ifdef KOALA_ETS_NAPI
 const AppInfo pandaAppInfo = {
-    "@ohos/arkui/Application/Application",
+    "arkui/ArkUIEntry/Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZI:L@ohos/arkui/Application/Application;",
+    "Lstd/core/String;Lstd/core/String;ZI:Larkui/ArkUIEntry/Application;",
     "start",
     "JI:J",
     "enter",
@@ -586,34 +586,34 @@ const AppInfo harnessAppInfo = {
 #endif
 #ifdef KOALA_ANI
 const AppInfo harnessAniAppInfo = {
-    "L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
+    "@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
+    "C{std.core.String}C{std.core.String}C{std.core.String}zi:C{@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication}",
     "start",
-    "JI:J",
+    "li:l",
     "enter",
-    "IIJ:Z",
+    "iil:z",
     "emitEvent",
-    "IIII:Lstd/core/String;",
+    "iiii:C{std.core.String}",
     "restartWith",
-    "Lstd/core/String;:V",
+    "C{std.core.String}:",
     "UNUSED",
-    "I:I"
+    "i:i"
 };
 const AppInfo aniAppInfo = {
-    "L@ohos/arkui/Application/Application;",
+    "arkui.ArkUIEntry.Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;Lstd/core/String;ZI:L@ohos/arkui/Application/Application;",
+    "C{std.core.String}C{std.core.String}C{std.core.String}zi:C{arkui.ArkUIEntry.Application}",
     "start",
-    "JI:J",
+    "li:l",
     "enter",
-    "IJ:Z",
+    "il:z",
     "emitEvent",
-    "IIII:Lstd/core/String;",
+    "iiii:C{std.core.String}",
     "UNUSED",
-    "I:I",
+    "i:i",
     "loadView",
-    "Lstd/core/String;Lstd/core/String;:Lstd/core/String;",
+    "C{std.core.String}C{std.core.String}:C{std.core.String}",
 };
 #endif
 
@@ -1143,6 +1143,9 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
         ani_size resultStringLength = 0;
         status = env->String_GetUTF8Size(resultString, &resultStringLength);
         char* resultChars = (char*)malloc(resultStringLength);
+        if (!resultChars) {
+            return strdup("Cannot allocate memory");
+        }
         status = env->String_GetUTF8(resultString, resultChars, resultStringLength, &resultStringLength);
         return resultChars;
     }

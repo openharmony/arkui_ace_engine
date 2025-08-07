@@ -33,7 +33,7 @@ export class Reporter {
 
     static reportMemoFunctionIsNotExplicitlyTyped(functionName: string | undefined): void {
         const func = functionName ?? `anonymous function`
-        console.error(`@memo ${func} must have it's return type explicitly specified`)
+        console.error(`@memo ${func} must have its return type explicitly specified`)
     }
 
     static reportParameterReassignment(parameterName: string, contextName: string | undefined): void {

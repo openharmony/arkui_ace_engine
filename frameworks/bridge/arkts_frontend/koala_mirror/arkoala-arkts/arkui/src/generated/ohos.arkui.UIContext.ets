@@ -16,12 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, AnimateParam_serializer, SheetOptions_serializer, AnimateParam, SheetOptions } from "./../component/common"
 import { ComponentContent, ComponentContentInternal } from "./arkui.ComponentContent"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TextMenuOptions_serializer, TextMenuOptions } from "./../component/textCommon"
 import { TextPickerDialogOptions_serializer, TextPickerDialogOptions } from "./../component/textPicker"
@@ -89,12 +88,12 @@ export class PromptAction implements MaterializedBase {
     private openPopup_serialize<T>(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         TargetInfo_serializer.write(thisSerializer, target)
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            PopupCommonOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PopupCommonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._PromptAction_openPopup(this.peer!.ptr, toPeerPtr(content), thisSerializer.asBuffer(), thisSerializer.length())
@@ -104,12 +103,12 @@ export class PromptAction implements MaterializedBase {
     private upatePopup_serialize<T>(content: ComponentContent, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         PopupCommonOptions_serializer.write(thisSerializer, options)
-        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
-        partialUpdate_type = runtimeType(partialUpdate)
-        thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((partialUpdate_type) != (RuntimeType.UNDEFINED)) {
-            const partialUpdate_value  = partialUpdate!
-            thisSerializer.writeBoolean(partialUpdate_value)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._PromptAction_upatePopup(this.peer!.ptr, toPeerPtr(content), thisSerializer.asBuffer(), thisSerializer.length())
@@ -126,12 +125,12 @@ export class PromptAction implements MaterializedBase {
     private openMenu_serialize<T>(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         TargetInfo_serializer.write(thisSerializer, target)
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            MenuOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            MenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._PromptAction_openMenu(this.peer!.ptr, toPeerPtr(content), thisSerializer.asBuffer(), thisSerializer.length())
@@ -141,12 +140,12 @@ export class PromptAction implements MaterializedBase {
     private updateMenu_serialize<T>(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         MenuOptions_serializer.write(thisSerializer, options)
-        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
-        partialUpdate_type = runtimeType(partialUpdate)
-        thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((partialUpdate_type) != (RuntimeType.UNDEFINED)) {
-            const partialUpdate_value  = partialUpdate!
-            thisSerializer.writeBoolean(partialUpdate_value)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._PromptAction_updateMenu(this.peer!.ptr, toPeerPtr(content), thisSerializer.asBuffer(), thisSerializer.length())
@@ -341,16 +340,16 @@ export class UIContext implements MaterializedBase {
     }
     private getFilteredInspectorTree_serialize(filters?: Array<string>): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let filters_type : int32 = RuntimeType.UNDEFINED
-        filters_type = runtimeType(filters)
-        thisSerializer.writeInt8((filters_type).toChar())
-        if ((filters_type) != (RuntimeType.UNDEFINED)) {
-            const filters_value  = filters!
-            thisSerializer.writeInt32((filters_value.length).toInt())
-            for (let filters_value_counter_i = 0; filters_value_counter_i < filters_value.length; filters_value_counter_i++) {
-                const filters_value_element : string = filters_value[filters_value_counter_i]
-                thisSerializer.writeString(filters_value_element)
+        if (filters !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const filtersTmpValue  = filters!
+            thisSerializer.writeInt32((filtersTmpValue.length).toInt())
+            for (let filtersTmpValueCounterI = 0; filtersTmpValueCounterI < filtersTmpValue.length; filtersTmpValueCounterI++) {
+                const filtersTmpValueTmpElement : string = filtersTmpValue[filtersTmpValueCounterI]
+                thisSerializer.writeString(filtersTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._UIContext_getFilteredInspectorTree(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -358,16 +357,16 @@ export class UIContext implements MaterializedBase {
     }
     private getFilteredInspectorTreeById_serialize(id: string, depth: number, filters?: Array<string>): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let filters_type : int32 = RuntimeType.UNDEFINED
-        filters_type = runtimeType(filters)
-        thisSerializer.writeInt8((filters_type).toChar())
-        if ((filters_type) != (RuntimeType.UNDEFINED)) {
-            const filters_value  = filters!
-            thisSerializer.writeInt32((filters_value.length).toInt())
-            for (let filters_value_counter_i = 0; filters_value_counter_i < filters_value.length; filters_value_counter_i++) {
-                const filters_value_element : string = filters_value[filters_value_counter_i]
-                thisSerializer.writeString(filters_value_element)
+        if (filters !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const filtersTmpValue  = filters!
+            thisSerializer.writeInt32((filtersTmpValue.length).toInt())
+            for (let filtersTmpValueCounterI = 0; filtersTmpValueCounterI < filtersTmpValue.length; filtersTmpValueCounterI++) {
+                const filtersTmpValueTmpElement : string = filtersTmpValue[filtersTmpValueCounterI]
+                thisSerializer.writeString(filtersTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._UIContext_getFilteredInspectorTreeById(this.peer!.ptr, id, depth, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -404,8 +403,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : FrameNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
         const returnResult : FrameNode | undefined = buffer
@@ -416,8 +414,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : FrameNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
         const returnResult : FrameNode | undefined = buffer
@@ -428,8 +425,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : FrameNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
         const returnResult : FrameNode | undefined = buffer
@@ -464,8 +460,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : common.Context | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (common_Context_serializer.read(retvalDeserializer) as common.Context)
         }
         const returnResult : common.Context | undefined = buffer
@@ -479,8 +474,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : string | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult : string | undefined = buffer
@@ -496,19 +490,19 @@ export class UIContext implements MaterializedBase {
     }
     private openBindSheet_serialize<T>(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: number): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let sheetOptions_type : int32 = RuntimeType.UNDEFINED
-        sheetOptions_type = runtimeType(sheetOptions)
-        thisSerializer.writeInt8((sheetOptions_type).toChar())
-        if ((sheetOptions_type) != (RuntimeType.UNDEFINED)) {
-            const sheetOptions_value  = sheetOptions!
-            SheetOptions_serializer.write(thisSerializer, sheetOptions_value)
+        if (sheetOptions !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const sheetOptionsTmpValue  = sheetOptions!
+            SheetOptions_serializer.write(thisSerializer, sheetOptionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let targetId_type : int32 = RuntimeType.UNDEFINED
-        targetId_type = runtimeType(targetId)
-        thisSerializer.writeInt8((targetId_type).toChar())
-        if ((targetId_type) != (RuntimeType.UNDEFINED)) {
-            const targetId_value  = targetId!
-            thisSerializer.writeNumber(targetId_value)
+        if (targetId !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const targetIdTmpValue  = targetId!
+            thisSerializer.writeNumber(targetIdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._UIContext_openBindSheet(this.peer!.ptr, toPeerPtr(bindSheetContent), thisSerializer.asBuffer(), thisSerializer.length())
@@ -518,12 +512,12 @@ export class UIContext implements MaterializedBase {
     private updateBindSheet_serialize<T>(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         SheetOptions_serializer.write(thisSerializer, sheetOptions)
-        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
-        partialUpdate_type = runtimeType(partialUpdate)
-        thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((partialUpdate_type) != (RuntimeType.UNDEFINED)) {
-            const partialUpdate_value  = partialUpdate!
-            thisSerializer.writeBoolean(partialUpdate_value)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._UIContext_updateBindSheet(this.peer!.ptr, toPeerPtr(bindSheetContent), thisSerializer.asBuffer(), thisSerializer.length())
@@ -589,50 +583,44 @@ export class UIContext_serializer {
 export class TargetInfo_serializer {
     public static write(buffer: SerializerBase, value: TargetInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_id  = value.id
-        let value_id_type : int32 = RuntimeType.UNDEFINED
-        value_id_type = runtimeType(value_id)
-        if (RuntimeType.STRING == value_id_type) {
+        const valueHolderForId  = value.id
+        if (valueHolderForId instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_id_0  = value_id as string
-            valueSerializer.writeString(value_id_0)
-        }
-        else if (RuntimeType.NUMBER == value_id_type) {
+            const valueHolderForIdForIdx0  = valueHolderForId as string
+            valueSerializer.writeString(valueHolderForIdForIdx0)
+        } else if (valueHolderForId instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_id_1  = value_id as number
-            valueSerializer.writeNumber(value_id_1)
+            const valueHolderForIdForIdx1  = valueHolderForId as number
+            valueSerializer.writeNumber(valueHolderForIdForIdx1)
         }
-        const value_componentId  = value.componentId
-        let value_componentId_type : int32 = RuntimeType.UNDEFINED
-        value_componentId_type = runtimeType(value_componentId)
-        valueSerializer.writeInt8((value_componentId_type).toChar())
-        if ((value_componentId_type) != (RuntimeType.UNDEFINED)) {
-            const value_componentId_value  = value_componentId!
-            valueSerializer.writeNumber(value_componentId_value)
+        const valueHolderForComponentId  = value.componentId
+        if (valueHolderForComponentId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForComponentIdTmpValue  = valueHolderForComponentId!
+            valueSerializer.writeNumber(valueHolderForComponentIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TargetInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const id_buf_selector : int32 = valueDeserializer.readInt8()
-        let id_buf : string | number | undefined
-        if (id_buf_selector == (0).toChar()) {
-            id_buf = (valueDeserializer.readString() as string)
+        const idTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let idTmpBuf : string | number | undefined
+        if (idTmpBufUnionSelector == (0).toChar()) {
+            idTmpBuf = (valueDeserializer.readString() as string)
+        } else if (idTmpBufUnionSelector == (1).toChar()) {
+            idTmpBuf = (valueDeserializer.readNumber() as number)
+        } else {
+            throw new Error("One of the branches for idTmpBuf has to be chosen through deserialisation.")
         }
-        else if (id_buf_selector == (1).toChar()) {
-            id_buf = (valueDeserializer.readNumber() as number)
+        const idTmpResult : string | number = (idTmpBuf as string | number)
+        const componentIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let componentIdTmpBuf : number | undefined
+        if ((componentIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            componentIdTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        else {
-            throw new Error("One of the branches for id_buf has to be chosen through deserialisation.")
-        }
-        const id_result : string | number = (id_buf as string | number)
-        const componentId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let componentId_buf : number | undefined
-        if ((componentId_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            componentId_buf = (valueDeserializer.readNumber() as number)
-        }
-        const componentId_result : number | undefined = componentId_buf
-        let value : TargetInfo = ({id: id_result, componentId: componentId_result} as TargetInfo)
+        const componentIdTmpResult : number | undefined = componentIdTmpBuf
+        let value : TargetInfo = ({id: idTmpResult, componentId: componentIdTmpResult} as TargetInfo)
         return value
     }
 }

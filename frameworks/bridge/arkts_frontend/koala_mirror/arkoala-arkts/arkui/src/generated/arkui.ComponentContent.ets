@@ -16,10 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 export class ComponentContentInternal {
     public static fromPtr(ptr: KPointer): ComponentContent {
@@ -74,12 +73,12 @@ export class ComponentContent implements MaterializedBase {
     }
     private reuse_serialize(param?: Object): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let param_type : int32 = RuntimeType.UNDEFINED
-        param_type = runtimeType(param)
-        thisSerializer.writeInt8((param_type).toChar())
-        if ((param_type) != (RuntimeType.UNDEFINED)) {
-            const param_value  = param!
-            thisSerializer.holdAndWriteObject(param_value)
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            thisSerializer.holdAndWriteObject(paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ComponentContent_reuse(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

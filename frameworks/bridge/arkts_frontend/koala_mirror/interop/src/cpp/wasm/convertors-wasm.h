@@ -38,7 +38,7 @@ struct InteropTypeConverter<KStringPtr> {
         if (value == nullptr) return KStringPtr();
         KStringPtr result;
         int len = (value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24));
-        return KStringPtr(value + 4, len, true);
+        return KStringPtr(value + sizeof(int), len, true);
     }
     static InteropType convertTo(KStringPtr &value) {
         return (InteropType)value.c_str();

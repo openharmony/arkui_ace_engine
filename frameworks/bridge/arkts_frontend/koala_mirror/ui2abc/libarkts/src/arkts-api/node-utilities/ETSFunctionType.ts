@@ -26,7 +26,7 @@ export function createETSFunctionType(
     funcFlags: Es2pandaScriptFunctionFlags,
     annotations?: readonly AnnotationUsage[],
 ): ETSFunctionType {
-    const res = ETSFunctionType.createETSFunctionType(
+    return ETSFunctionType.createETSFunctionType(
         FunctionSignature.createFunctionSignature(
             typeParams,
             params,
@@ -34,11 +34,8 @@ export function createETSFunctionType(
             hasReceiver,
         ),
         funcFlags,
+        annotations,
     )
-    if (annotations) {
-        res.setAnnotations(annotations)
-    }
-    return res
 }
 
 export function updateETSFunctionType(

@@ -16,12 +16,12 @@
 import * as fs from "node:fs"
 import * as child_process from "node:child_process"
 import * as path from "node:path"
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "../../../incremental/harness/src/typescript"
 
 function makeFilesEqual(filePath: string) {
-    const out = fs.readFileSync(`./out/${filePath}.ets`, 'utf-8')
-    fs.mkdirSync(path.dirname(`./golden/${filePath}`), { recursive: true })
-    fs.writeFileSync(`./golden/${filePath}.ets`, out)
+    const out = fs.readFileSync(`./test/out/input/${filePath}.ets`, 'utf-8')
+    fs.mkdirSync(path.dirname(`./test/golden/${filePath}`), { recursive: true })
+    fs.writeFileSync(`./test/golden/${filePath}.ets`, out)
 }
 
 function filterGensym(value: string): string {
@@ -29,25 +29,37 @@ function filterGensym(value: string): string {
 }
 
 function assertFilesEqual(filePath: string) {
-    const golden = fs.readFileSync(`./golden/${filePath}.ets`, 'utf-8')
-    const out = fs.readFileSync(`./out/${filePath}.ets`, 'utf-8')
-    Assert.equal(filterGensym(out), filterGensym(golden))
+    const golden = fs.readFileSync(`./test/golden/${filePath}.ets`, 'utf-8')
+    const out = fs.readFileSync(`./test/out/input/${filePath}.ets`, 'utf-8')
+    assert.equal(filterGensym(out), filterGensym(golden))
 }
 
 function testBody(path: string) {
-    if (process.env.TEST_GOLDEN == "1") {
+    if (process.env.UPDATE_GOLDEN == "1") {
         makeFilesEqual(path)
-    } else {
-        assertFilesEqual(path)
+        return
     }
+    if (process.env.TEST_OTHER == "1" && path != "other") {
+        return
+    }
+    assertFilesEqual(path)
 }
 
 suite("golden tests", () => {
+    test.expectFailure("", "dumps files to ./test/out", () => {
+        child_process.execSync("rm -rf ./build/golden", { stdio: "inherit" })
+        child_process.execSync("rm -rf ./test/out", { stdio: "inherit" })
+        const configPath: string = (process.env.TEST_OTHER == "1") ? "./test/arktsconfig-rewrite-other.json" : "./test/arktsconfig-rewrite.json"
+        child_process.execSync(`npx fast-arktsc --config ${configPath} --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/golden/all.abc && ninja -f ./build/golden/build.ninja -k 1000`, { stdio: "inherit" })
+        if (process.env.TEST_OTHER == "1") {
+            throw new Error()
+        }
+    })
 
-    test.expectFailure("Description of the problem", "compile", () => {
-        child_process.execSync("rm -rf ../build/golden", { stdio: "inherit" })
-        child_process.execSync("rm -rf out", { stdio: "inherit" })
-        child_process.execSync("npx fast-arktsc --config ./input/arktsconfig.json --compiler ../../../incremental/tools/panda/arkts/ui2abc --link-name ../build/golden/all.abc && ninja -f ../build/golden/build.ninja -k 1000", { stdio: "inherit" })
+    suite("other", () => {
+        test("other", () => {
+            testBody("other")
+        })
     })
 
     suite("basic", () => {
@@ -61,6 +73,62 @@ suite("golden tests", () => {
 
         test("arrow", () => {
             testBody("basic/arrow")
+        })
+    })
+
+    suite("param-usage", () => {
+        suite("memo on param", () => {
+            test("memo on param", () => {
+                testBody("param-usage/on-param/memo-on-param")
+            })
+
+            test("memo on optional param", () => {
+                testBody("param-usage/on-param/memo-on-optional-param")
+            })
+
+            test("memo on possibly undefined param", () => {
+                testBody("param-usage/on-param/memo-on-possibly-undefined-param")
+            })
+
+            test("memo on optional possibly undefined param", () => {
+                testBody("param-usage/on-param/memo-on-optional-possibly-undefined-param")
+            })
+        })
+
+        suite("memo on type", () => {
+            test("memo on param's type", () => {
+                testBody("param-usage/on-type/memo-on-param")
+            })
+
+            test("memo on optional param's type", () => {
+                testBody("param-usage/on-type/memo-on-optional-param")
+            })
+
+            test("memo on possibly undefined param's type", () => {
+                testBody("param-usage/on-type/memo-on-possibly-undefined-param")
+            })
+
+            test("memo on optional possibly undefined param's type", () => {
+                testBody("param-usage/on-type/memo-on-optional-possibly-undefined-param")
+            })
+        })
+
+        suite("memo on param and type", () => {
+            test("memo on param and its type", () => {
+                testBody("param-usage/on-param-and-type/memo-on-param")
+            })
+
+            test("memo on optional param and its type", () => {
+                testBody("param-usage/on-param-and-type/memo-on-optional-param")
+            })
+
+            test("memo on possibly undefined param and its type", () => {
+                testBody("param-usage/on-param-and-type/memo-on-possibly-undefined-param")
+            })
+
+            test("memo on optional possibly undefined param and its type", () => {
+                testBody("param-usage/on-param-and-type/memo-on-optional-possibly-undefined-param")
+            })
         })
     })
 

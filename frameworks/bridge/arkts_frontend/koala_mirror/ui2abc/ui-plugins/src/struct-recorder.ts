@@ -56,7 +56,7 @@ export class StructDescriptor {
 export class StructsResolver {
     private structByFile = new Map<string, StructTable>()
 
-    constructor(private restart: boolean) {
+    constructor() {
         this.init()
     }
 
@@ -65,13 +65,13 @@ export class StructsResolver {
             const name = source.getName()
             if (name.startsWith("std.")) continue
             if (name.startsWith("escompat")) continue
-            if (name.startsWith("@ohos.arkui")) continue
+            if (name.startsWith("arkui")) continue
             if (name.startsWith("@koalaui")) continue
             if (name.startsWith("arkui.stateManagement")) continue
 
             let program = source.programs[0]
-            let table = this.getOrCreateTable(program.sourceFilePath, this.restart)
-            table.recordStructs(program, this.restart)
+            let table = this.getOrCreateTable(program.sourceFilePath)
+            table.recordStructs(program)
             this.addTable(program.sourceFilePath, table)
         }
     }
@@ -80,10 +80,10 @@ export class StructsResolver {
         this.structByFile.set(fileName, table)
     }
 
-    getOrCreateTable(fileName: string, restart: boolean) {
+    getOrCreateTable(fileName: string) {
         let result = this.structByFile.get(fileName)
         if (!result) {
-            result = new StructTable(fileName, restart)
+            result = new StructTable(fileName)
             this.addTable(fileName, result)
         }
         return result
@@ -104,7 +104,7 @@ export class StructsResolver {
         if (!declarationFile) throw new Error(`No declaration file`)
         let structs = this.structByFile.get(declarationFile)
         if (!structs) {
-            structs = new StructTable(declarationFile, this.restart)
+            structs = new StructTable(declarationFile)
             this.addTable(declarationFile, structs)
         }
         return structs
@@ -131,11 +131,7 @@ export class StructsResolver {
 
 export class StructTable {
     private structByName = new Map<string, StructDescriptor>()
-    constructor(private fileName: string, private restart: boolean) {
-        if (this.restart) {
-            this.readDB()
-        }
-    }
+    constructor(private fileName: string) { }
     readDB() {
         const db = metaDatabase(this.fileName)
         if (fs.existsSync(db)) {
@@ -152,8 +148,8 @@ export class StructTable {
             }
         }
     }
-    recordStructs(program: arkts.Program, restart: boolean = false) {
-        new StructRecorder(this, restart).visitor(program.ast)
+    recordStructs(program: arkts.Program) {
+        new StructRecorder(this).visitor(program.ast)
     }
     findStruct(name: string): StructDescriptor|undefined {
         return this.structByName.get(name)
@@ -196,31 +192,16 @@ export class StructTable {
             .map(it => (it.expr as arkts.Identifier).name!) ?? []
         return annotations
     }
-    update() {
-        if (!this.restart) return
-        if (this.structByName.size == 0) return
-        let lines = []
-        for (let desc of this.structByName.values()) {
-            lines.push(desc.toJSON())
-        }
-        let result = `{"structs": [ ${lines.join(",")} ]}`
-        const filePath = metaDatabase(
-            path.resolve(arkts.global.arktsconfig!.outDir, path.relative(arkts.global.arktsconfig!.baseUrl, arkts.global.filePath))
-        )
-        fs.mkdirSync(path.dirname(filePath), { recursive: true })
-        fs.writeFileSync(filePath, result)
-    }
 }
 
 export class StructRecorder extends arkts.AbstractVisitor {
-    constructor(private table: StructTable, private restart: boolean = false) {
+    constructor(private table: StructTable) {
         super()
     }
 
     visitor(node: arkts.AstNode): arkts.AstNode {
         if (arkts.isETSModule(node)) {
             const result = this.visitEachChild(node)
-            this.table.update()
             return result
         }
         if (arkts.isETSStructDeclaration(node)) {

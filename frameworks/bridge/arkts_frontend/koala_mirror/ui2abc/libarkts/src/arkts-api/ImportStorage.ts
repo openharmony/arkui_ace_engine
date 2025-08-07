@@ -25,11 +25,11 @@ export class ImportStorage {
     private imports: Set<KNativePointer> = new Set<KNativePointer>()
     private importSources: Set<string | undefined> = new Set<string | undefined>()
 
-    constructor(private program: Program, private isParserStage: boolean) {
+    constructor(private program: Program, private isParserState: boolean) {
         for (const statement of program.ast.statements) {
             if (isETSImportDeclaration(statement)) {
                 this.imports.add(statement.peer)
-                if (!isParserStage) {
+                if (!isParserState) {
                     // Improve: is source non nullable?
                     this.importSources.add(statement.source?.str)
                 }
@@ -45,8 +45,8 @@ export class ImportStorage {
         const newStatements: Statement[] = []
         for (const statement of statements) {
             if (isETSImportDeclaration(statement) && !this.imports.has(statement.peer)) {
-                if (!this.isParserStage && !this.importSources.has(statement.source?.str)) {
-                    console.warn("Attempt to insert import from new source after parsed stage:")
+                if (!this.isParserState && !this.importSources.has(statement.source?.str)) {
+                    console.warn("Attempt to insert import from new source after parsed state:")
                     console.warn(statement.dumpSrc())
                 }
 

@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
-import { asArray, int32, KoalaCallsiteKey, hashCodeFromString as key } from "@koalaui/common"
+import { assert, suite, test } from "@koalaui/harness"
+import { asArray, int32, float64toInt32, KoalaCallsiteKey, hashCodeFromString as key } from "@koalaui/common"
 import {
     GlobalStateManager,
     Repeat,
@@ -27,7 +26,7 @@ import {
     memoLifecycle,
     mutableState,
     testTick,
-} from "../../src"
+} from "../../ets"
 
 const collector = new Array<string>()
 
@@ -53,7 +52,7 @@ function createPages(...names: string[]): ReadonlyArray<Page> {
 function testExpected(root: State<TestNode>, ...expected: string[]) {
     collector.length = 0
     testTick(root)
-    Assert.deepEqual(collector, asArray(expected))
+    assert.deepEqual(collector, asArray(expected))
     if (expected.length > 0) testExpected(root)
 }
 
@@ -63,7 +62,7 @@ function testInsert(
 ) {
     GlobalStateManager.reset()
     const state = mutableState(createPages())
-    const root = TestNode.create((_) => { content(state.value) })
+    const root = TestNode.create((_): void => { content(state.value) })
     testExpected(root)
     state.value = createPages("three")
     testExpected(root, "+three")
@@ -81,7 +80,7 @@ function testRemove(
 ) {
     GlobalStateManager.reset()
     const state = mutableState(createPages("one", "two", "three", "four", "five"))
-    const root = TestNode.create((_) => { content(state.value) })
+    const root = TestNode.create((_): void => { content(state.value) })
     testExpected(root, "+one", "+two", "+three", "+four", "+five")
     state.value = createPages("one", "three", "five")
     testExpected(root, "-two", "-four")
@@ -99,7 +98,7 @@ function testSwap(
 ) {
     GlobalStateManager.reset()
     const state = mutableState(createPages("one", "two", "three", "four", "five"))
-    const root = TestNode.create((_) => { content(state.value) })
+    const root = TestNode.create((_): void => { content(state.value) })
     testExpected(root, "+one", "+two", "+three", "+four", "+five")
     state.value = createPages("two", "one", "three", "four", "five")
     testExpected(root, "-one", "+one")
@@ -112,8 +111,8 @@ suite("repeat tests", () => {
     test("Repeat", () => {
         GlobalStateManager.reset()
         const state = mutableState(createPages())
-        const root = TestNode.create((_) => {
-            Repeat(state.value.length as int32, (index: int32) => {
+        const root = TestNode.create((_): void => {
+            Repeat(float64toInt32(state.value.length), (index: int32): void => {
                 state.value[index].page() // index-based key
             })
         })
@@ -132,91 +131,91 @@ suite("repeat tests", () => {
 
 
     test("RepeatWithKey.insert", () => {
-        testInsert((array) => {
+        testInsert((array): void => {
             RepeatWithKey(
-                array.length as int32,
-                (index: int32) => array[index].id,
-                (index: int32) => { array[index].page() })
+                float64toInt32(array.length),
+                (index: int32): int32 => array[index].id,
+                (index: int32): void => { array[index].page() })
         })
     })
 
     test("RepeatByArray.insert", () => {
-        testInsert((array) => {
+        testInsert((array): void => {
             RepeatByArray<Page>(
                 array,
-                (element: Page, _: int32) => element.id,
-                (element: Page, _: int32) => { element.page() })
+                (element: Page, _: int32): int32 => element.id,
+                (element: Page, _: int32): void => { element.page() })
         })
     })
 
     test("RepeatRange.insert", () => {
-        testInsert((array) => {
+        testInsert((array): void => {
             RepeatRange(
                 0,
-                array.length as int32,
-                (index: int32) => array[index],
-                (element: Page, _: int32) => element.id,
-                (element: Page, _: int32) => { element.page() })
+                float64toInt32(array.length),
+                (index: int32): Page => array[index],
+                (element: Page, _: int32): int32 => element.id,
+                (element: Page, _: int32): void => { element.page() })
         })
     })
 
 
     test("RepeatWithKey.remove", () => {
-        testRemove((array) => {
+        testRemove((array): void => {
             RepeatWithKey(
-                array.length as int32,
-                (index: int32) => array[index].id,
-                (index: int32) => { array[index].page() })
+                float64toInt32(array.length),
+                (index: int32): int32 => array[index].id,
+                (index: int32): void => { array[index].page() })
         })
     })
 
     test("RepeatByArray.remove", () => {
-        testRemove((array) => {
+        testRemove((array): void => {
             RepeatByArray(
                 array,
-                (element: Page, _: int32) => element.id,
-                (element: Page, _: int32) => { element.page() })
+                (element: Page, _: int32): int32 => element.id,
+                (element: Page, _: int32): void => { element.page() })
         })
     })
 
     test("RepeatRange.remove", () => {
-        testRemove((array) => {
+        testRemove((array): void => {
             RepeatRange(
                 0,
-                array.length as int32,
-                (index: int32) => array[index],
-                (element: Page, _: int32) => element.id,
-                (element: Page, _: int32) => { element.page() })
+                float64toInt32(array.length),
+                (index: int32): Page => array[index],
+                (element: Page, _: int32): int32 => element.id,
+                (element: Page, _: int32): void => { element.page() })
         })
     })
 
 
     test("RepeatWithKey.swap", () => {
-        testSwap((array) => {
+        testSwap((array): void => {
             RepeatWithKey(
-                array.length as int32,
-                (index: int32) => array[index].id,
-                (index: int32) => { array[index].page() })
+                float64toInt32(array.length),
+                (index: int32): int32 => array[index].id,
+                (index: int32): void => { array[index].page() })
         })
     })
 
     test("RepeatByArray.swap", () => {
-        testSwap((array) => {
+        testSwap((array): void => {
             RepeatByArray(
                 array,
-                (element: Page, _: int32) => element.id,
-                (element: Page, _: int32) => { element.page() })
+                (element: Page, _: int32): int32 => element.id,
+                (element: Page, _: int32): void => { element.page() })
         })
     })
 
     test("RepeatRange.swap", () => {
-        testSwap((array) => {
+        testSwap((array): void => {
             RepeatRange(
                 0,
-                array.length as int32,
-                (index: int32) => array[index],
-                (element: Page, _: int32) => element.id,
-                (element: Page, _: int32) => { element.page() })
+                float64toInt32(array.length),
+                (index: int32): Page => array[index],
+                (element: Page, _: int32): int32 => element.id,
+                (element: Page, _: int32): void => { element.page() })
         })
     })
 })

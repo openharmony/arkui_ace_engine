@@ -16,11 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { uiObserver_NavDestinationInfo_serializer, uiObserver_NavigationInfo_serializer, uiObserver_RouterPageInfo_serializer, uiObserver } from "./../generated/ohos.arkui.observer"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { UIContext, UIContextInternal } from "./../generated/ohos.arkui.UIContext"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -51,6 +51,19 @@ export class ExtendableComponent implements MaterializedBase {
     public getUniqueId(): int32 {
         return this.getUniqueId_serialize()
     }
+    public queryNavDestinationInfo(): uiObserver.NavDestinationInfo | undefined {
+        return this.queryNavDestinationInfo0_serialize()
+    }
+    public queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo | undefined {
+        const isInner_casted = isInner as (boolean | undefined)
+        return this.queryNavDestinationInfo1_serialize(isInner_casted)
+    }
+    public queryNavigationInfo(): uiObserver.NavigationInfo | undefined {
+        return this.queryNavigationInfo_serialize()
+    }
+    public queryRouterPageInfo(): uiObserver.RouterPageInfo | undefined {
+        return this.queryRouterPageInfo_serialize()
+    }
     private getUIContext_serialize(): UIContext {
         const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_getUIContext(this.peer!.ptr)
         const obj : UIContext = UIContextInternal.fromPtr(retval)
@@ -59,6 +72,59 @@ export class ExtendableComponent implements MaterializedBase {
     private getUniqueId_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_getUniqueId(this.peer!.ptr)
         return retval
+    }
+    private queryNavDestinationInfo0_serialize(): uiObserver.NavDestinationInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_queryNavDestinationInfo0(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : uiObserver.NavDestinationInfo | undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = uiObserver_NavDestinationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : uiObserver.NavDestinationInfo | undefined = buffer
+        return returnResult
+    }
+    private queryNavDestinationInfo1_serialize(isInner: boolean | undefined): uiObserver.NavDestinationInfo | undefined {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isInner !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isInnerTmpValue  = isInner!
+            thisSerializer.writeBoolean(isInnerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_queryNavDestinationInfo1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : uiObserver.NavDestinationInfo | undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = uiObserver_NavDestinationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : uiObserver.NavDestinationInfo | undefined = buffer
+        return returnResult
+    }
+    private queryNavigationInfo_serialize(): uiObserver.NavigationInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_queryNavigationInfo(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : uiObserver.NavigationInfo | undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = uiObserver_NavigationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : uiObserver.NavigationInfo | undefined = buffer
+        return returnResult
+    }
+    private queryRouterPageInfo_serialize(): uiObserver.RouterPageInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_queryRouterPageInfo(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : uiObserver.RouterPageInfo | undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (uiObserver_RouterPageInfo_serializer.read(retvalDeserializer) as uiObserver.RouterPageInfo)
+        }
+        const returnResult : uiObserver.RouterPageInfo | undefined = buffer
+        return returnResult
     }
 }
 export interface LifeCycle {

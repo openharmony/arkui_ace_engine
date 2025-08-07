@@ -16,9 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, registerCallback, wrapCallback, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { common2D_Color_serializer, common2D, common2D_Rect_serializer, common2D_Point_serializer } from "./ohos.graphics.common2D"
@@ -41,32 +40,32 @@ export class text_FontCollection_serializer {
 export class text_FontFeature_serializer {
     public static write(buffer: SerializerBase, value: text.FontFeature): void {
         let valueSerializer : SerializerBase = buffer
-        const value_name  = value.name
-        valueSerializer.writeString(value_name)
-        const value_value  = value.value
-        valueSerializer.writeNumber(value_value)
+        const valueHolderForName  = value.name
+        valueSerializer.writeString(valueHolderForName)
+        const valueHolderForValue  = value.value
+        valueSerializer.writeNumber(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): text.FontFeature {
         let valueDeserializer : DeserializerBase = buffer
-        const name_result : string = (valueDeserializer.readString() as string)
-        const value_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.FontFeature = ({name: name_result, value: value_result} as text.FontFeature)
+        const nameTmpResult : string = (valueDeserializer.readString() as string)
+        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.FontFeature = ({name: nameTmpResult, value: valueTmpResult} as text.FontFeature)
         return value
     }
 }
 export class text_FontVariation_serializer {
     public static write(buffer: SerializerBase, value: text.FontVariation): void {
         let valueSerializer : SerializerBase = buffer
-        const value_axis  = value.axis
-        valueSerializer.writeString(value_axis)
-        const value_value  = value.value
-        valueSerializer.writeNumber(value_value)
+        const valueHolderForAxis  = value.axis
+        valueSerializer.writeString(valueHolderForAxis)
+        const valueHolderForValue  = value.value
+        valueSerializer.writeNumber(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): text.FontVariation {
         let valueDeserializer : DeserializerBase = buffer
-        const axis_result : string = (valueDeserializer.readString() as string)
-        const value_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.FontVariation = ({axis: axis_result, value: value_result} as text.FontVariation)
+        const axisTmpResult : string = (valueDeserializer.readString() as string)
+        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.FontVariation = ({axis: axisTmpResult, value: valueTmpResult} as text.FontVariation)
         return value
     }
 }
@@ -106,32 +105,32 @@ export class text_ParagraphBuilder_serializer {
 export class text_PositionWithAffinity_serializer {
     public static write(buffer: SerializerBase, value: text.PositionWithAffinity): void {
         let valueSerializer : SerializerBase = buffer
-        const value_position  = value.position
-        valueSerializer.writeNumber(value_position)
-        const value_affinity  = value.affinity
-        valueSerializer.writeInt32(TypeChecker.text_Affinity_ToNumeric(value_affinity))
+        const valueHolderForPosition  = value.position
+        valueSerializer.writeNumber(valueHolderForPosition)
+        const valueHolderForAffinity  = value.affinity
+        valueSerializer.writeInt32(TypeChecker.text_Affinity_ToNumeric(valueHolderForAffinity))
     }
     public static read(buffer: DeserializerBase): text.PositionWithAffinity {
         let valueDeserializer : DeserializerBase = buffer
-        const position_result : number = (valueDeserializer.readNumber() as number)
-        const affinity_result : text.Affinity = TypeChecker.text_Affinity_FromNumeric(valueDeserializer.readInt32())
-        let value : text.PositionWithAffinity = ({position: position_result, affinity: affinity_result} as text.PositionWithAffinity)
+        const positionTmpResult : number = (valueDeserializer.readNumber() as number)
+        const affinityTmpResult : text.Affinity = TypeChecker.text_Affinity_FromNumeric(valueDeserializer.readInt32())
+        let value : text.PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as text.PositionWithAffinity)
         return value
     }
 }
 export class text_Range_serializer {
     public static write(buffer: SerializerBase, value: text.Range): void {
         let valueSerializer : SerializerBase = buffer
-        const value_start  = value.start
-        valueSerializer.writeNumber(value_start)
-        const value_end  = value.end
-        valueSerializer.writeNumber(value_end)
+        const valueHolderForStart  = value.start
+        valueSerializer.writeNumber(valueHolderForStart)
+        const valueHolderForEnd  = value.end
+        valueSerializer.writeNumber(valueHolderForEnd)
     }
     public static read(buffer: DeserializerBase): text.Range {
         let valueDeserializer : DeserializerBase = buffer
-        const start_result : number = (valueDeserializer.readNumber() as number)
-        const end_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.Range = ({start: start_result, end: end_result} as text.Range)
+        const startTmpResult : number = (valueDeserializer.readNumber() as number)
+        const endTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.Range = ({start: startTmpResult, end: endTmpResult} as text.Range)
         return value
     }
 }
@@ -160,1137 +159,1080 @@ export class text_TextLine_serializer {
 export class text_TextTab_serializer {
     public static write(buffer: SerializerBase, value: text.TextTab): void {
         let valueSerializer : SerializerBase = buffer
-        const value_alignment  = value.alignment
-        valueSerializer.writeInt32(TypeChecker.text_TextAlign_ToNumeric(value_alignment))
-        const value_location  = value.location
-        valueSerializer.writeNumber(value_location)
+        const valueHolderForAlignment  = value.alignment
+        valueSerializer.writeInt32(TypeChecker.text_TextAlign_ToNumeric(valueHolderForAlignment))
+        const valueHolderForLocation  = value.location
+        valueSerializer.writeNumber(valueHolderForLocation)
     }
     public static read(buffer: DeserializerBase): text.TextTab {
         let valueDeserializer : DeserializerBase = buffer
-        const alignment_result : text.TextAlign = TypeChecker.text_TextAlign_FromNumeric(valueDeserializer.readInt32())
-        const location_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.TextTab = ({alignment: alignment_result, location: location_result} as text.TextTab)
+        const alignmentTmpResult : text.TextAlign = TypeChecker.text_TextAlign_FromNumeric(valueDeserializer.readInt32())
+        const locationTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.TextTab = ({alignment: alignmentTmpResult, location: locationTmpResult} as text.TextTab)
         return value
     }
 }
 export class text_TypographicBounds_serializer {
     public static write(buffer: SerializerBase, value: text.TypographicBounds): void {
         let valueSerializer : SerializerBase = buffer
-        const value_ascent  = value.ascent
-        valueSerializer.writeNumber(value_ascent)
-        const value_descent  = value.descent
-        valueSerializer.writeNumber(value_descent)
-        const value_leading  = value.leading
-        valueSerializer.writeNumber(value_leading)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
+        const valueHolderForAscent  = value.ascent
+        valueSerializer.writeNumber(valueHolderForAscent)
+        const valueHolderForDescent  = value.descent
+        valueSerializer.writeNumber(valueHolderForDescent)
+        const valueHolderForLeading  = value.leading
+        valueSerializer.writeNumber(valueHolderForLeading)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
     }
     public static read(buffer: DeserializerBase): text.TypographicBounds {
         let valueDeserializer : DeserializerBase = buffer
-        const ascent_result : number = (valueDeserializer.readNumber() as number)
-        const descent_result : number = (valueDeserializer.readNumber() as number)
-        const leading_result : number = (valueDeserializer.readNumber() as number)
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.TypographicBounds = ({ascent: ascent_result, descent: descent_result, leading: leading_result, width: width_result} as text.TypographicBounds)
+        const ascentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const descentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const leadingTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.TypographicBounds = ({ascent: ascentTmpResult, descent: descentTmpResult, leading: leadingTmpResult, width: widthTmpResult} as text.TypographicBounds)
         return value
     }
 }
 export class text_FontDescriptor_serializer {
     public static write(buffer: SerializerBase, value: text.FontDescriptor): void {
         let valueSerializer : SerializerBase = buffer
-        const value_path  = value.path
-        let value_path_type : int32 = RuntimeType.UNDEFINED
-        value_path_type = runtimeType(value_path)
-        valueSerializer.writeInt8((value_path_type).toChar())
-        if ((value_path_type) != (RuntimeType.UNDEFINED)) {
-            const value_path_value  = value_path!
-            valueSerializer.writeString(value_path_value)
+        const valueHolderForPath  = value.path
+        if (valueHolderForPath !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPathTmpValue  = valueHolderForPath!
+            valueSerializer.writeString(valueHolderForPathTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_postScriptName  = value.postScriptName
-        let value_postScriptName_type : int32 = RuntimeType.UNDEFINED
-        value_postScriptName_type = runtimeType(value_postScriptName)
-        valueSerializer.writeInt8((value_postScriptName_type).toChar())
-        if ((value_postScriptName_type) != (RuntimeType.UNDEFINED)) {
-            const value_postScriptName_value  = value_postScriptName!
-            valueSerializer.writeString(value_postScriptName_value)
+        const valueHolderForPostScriptName  = value.postScriptName
+        if (valueHolderForPostScriptName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPostScriptNameTmpValue  = valueHolderForPostScriptName!
+            valueSerializer.writeString(valueHolderForPostScriptNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fullName  = value.fullName
-        let value_fullName_type : int32 = RuntimeType.UNDEFINED
-        value_fullName_type = runtimeType(value_fullName)
-        valueSerializer.writeInt8((value_fullName_type).toChar())
-        if ((value_fullName_type) != (RuntimeType.UNDEFINED)) {
-            const value_fullName_value  = value_fullName!
-            valueSerializer.writeString(value_fullName_value)
+        const valueHolderForFullName  = value.fullName
+        if (valueHolderForFullName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFullNameTmpValue  = valueHolderForFullName!
+            valueSerializer.writeString(valueHolderForFullNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontFamily  = value.fontFamily
-        let value_fontFamily_type : int32 = RuntimeType.UNDEFINED
-        value_fontFamily_type = runtimeType(value_fontFamily)
-        valueSerializer.writeInt8((value_fontFamily_type).toChar())
-        if ((value_fontFamily_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontFamily_value  = value_fontFamily!
-            valueSerializer.writeString(value_fontFamily_value)
+        const valueHolderForFontFamily  = value.fontFamily
+        if (valueHolderForFontFamily !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
+            valueSerializer.writeString(valueHolderForFontFamilyTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontSubfamily  = value.fontSubfamily
-        let value_fontSubfamily_type : int32 = RuntimeType.UNDEFINED
-        value_fontSubfamily_type = runtimeType(value_fontSubfamily)
-        valueSerializer.writeInt8((value_fontSubfamily_type).toChar())
-        if ((value_fontSubfamily_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontSubfamily_value  = value_fontSubfamily!
-            valueSerializer.writeString(value_fontSubfamily_value)
+        const valueHolderForFontSubfamily  = value.fontSubfamily
+        if (valueHolderForFontSubfamily !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontSubfamilyTmpValue  = valueHolderForFontSubfamily!
+            valueSerializer.writeString(valueHolderForFontSubfamilyTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_weight  = value.weight
-        let value_weight_type : int32 = RuntimeType.UNDEFINED
-        value_weight_type = runtimeType(value_weight)
-        valueSerializer.writeInt8((value_weight_type).toChar())
-        if ((value_weight_type) != (RuntimeType.UNDEFINED)) {
-            const value_weight_value  = (value_weight as text.FontWeight)
-            valueSerializer.writeInt32(TypeChecker.text_FontWeight_ToNumeric(value_weight_value))
+        const valueHolderForWeight  = value.weight
+        if (valueHolderForWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWeightTmpValue  = (valueHolderForWeight as text.FontWeight)
+            valueSerializer.writeInt32(TypeChecker.text_FontWeight_ToNumeric(valueHolderForWeightTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            valueSerializer.writeNumber(value_width_value)
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            valueSerializer.writeNumber(valueHolderForWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_italic  = value.italic
-        let value_italic_type : int32 = RuntimeType.UNDEFINED
-        value_italic_type = runtimeType(value_italic)
-        valueSerializer.writeInt8((value_italic_type).toChar())
-        if ((value_italic_type) != (RuntimeType.UNDEFINED)) {
-            const value_italic_value  = value_italic!
-            valueSerializer.writeNumber(value_italic_value)
+        const valueHolderForItalic  = value.italic
+        if (valueHolderForItalic !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForItalicTmpValue  = valueHolderForItalic!
+            valueSerializer.writeNumber(valueHolderForItalicTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_monoSpace  = value.monoSpace
-        let value_monoSpace_type : int32 = RuntimeType.UNDEFINED
-        value_monoSpace_type = runtimeType(value_monoSpace)
-        valueSerializer.writeInt8((value_monoSpace_type).toChar())
-        if ((value_monoSpace_type) != (RuntimeType.UNDEFINED)) {
-            const value_monoSpace_value  = value_monoSpace!
-            valueSerializer.writeBoolean(value_monoSpace_value)
+        const valueHolderForMonoSpace  = value.monoSpace
+        if (valueHolderForMonoSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMonoSpaceTmpValue  = valueHolderForMonoSpace!
+            valueSerializer.writeBoolean(valueHolderForMonoSpaceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_symbolic  = value.symbolic
-        let value_symbolic_type : int32 = RuntimeType.UNDEFINED
-        value_symbolic_type = runtimeType(value_symbolic)
-        valueSerializer.writeInt8((value_symbolic_type).toChar())
-        if ((value_symbolic_type) != (RuntimeType.UNDEFINED)) {
-            const value_symbolic_value  = value_symbolic!
-            valueSerializer.writeBoolean(value_symbolic_value)
+        const valueHolderForSymbolic  = value.symbolic
+        if (valueHolderForSymbolic !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSymbolicTmpValue  = valueHolderForSymbolic!
+            valueSerializer.writeBoolean(valueHolderForSymbolicTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): text.FontDescriptor {
         let valueDeserializer : DeserializerBase = buffer
-        const path_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let path_buf : string | undefined
-        if ((path_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            path_buf = (valueDeserializer.readString() as string)
+        const pathTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let pathTmpBuf : string | undefined
+        if ((pathTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            pathTmpBuf = (valueDeserializer.readString() as string)
         }
-        const path_result : string | undefined = path_buf
-        const postScriptName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let postScriptName_buf : string | undefined
-        if ((postScriptName_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            postScriptName_buf = (valueDeserializer.readString() as string)
+        const pathTmpResult : string | undefined = pathTmpBuf
+        const postScriptNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let postScriptNameTmpBuf : string | undefined
+        if ((postScriptNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            postScriptNameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const postScriptName_result : string | undefined = postScriptName_buf
-        const fullName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fullName_buf : string | undefined
-        if ((fullName_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fullName_buf = (valueDeserializer.readString() as string)
+        const postScriptNameTmpResult : string | undefined = postScriptNameTmpBuf
+        const fullNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fullNameTmpBuf : string | undefined
+        if ((fullNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fullNameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const fullName_result : string | undefined = fullName_buf
-        const fontFamily_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontFamily_buf : string | undefined
-        if ((fontFamily_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontFamily_buf = (valueDeserializer.readString() as string)
+        const fullNameTmpResult : string | undefined = fullNameTmpBuf
+        const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontFamilyTmpBuf : string | undefined
+        if ((fontFamilyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontFamilyTmpBuf = (valueDeserializer.readString() as string)
         }
-        const fontFamily_result : string | undefined = fontFamily_buf
-        const fontSubfamily_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSubfamily_buf : string | undefined
-        if ((fontSubfamily_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontSubfamily_buf = (valueDeserializer.readString() as string)
+        const fontFamilyTmpResult : string | undefined = fontFamilyTmpBuf
+        const fontSubfamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontSubfamilyTmpBuf : string | undefined
+        if ((fontSubfamilyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontSubfamilyTmpBuf = (valueDeserializer.readString() as string)
         }
-        const fontSubfamily_result : string | undefined = fontSubfamily_buf
-        const weight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let weight_buf : text.FontWeight | undefined
-        if ((weight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            weight_buf = TypeChecker.text_FontWeight_FromNumeric(valueDeserializer.readInt32())
+        const fontSubfamilyTmpResult : string | undefined = fontSubfamilyTmpBuf
+        const weightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let weightTmpBuf : text.FontWeight | undefined
+        if ((weightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            weightTmpBuf = TypeChecker.text_FontWeight_FromNumeric(valueDeserializer.readInt32())
         }
-        const weight_result : text.FontWeight | undefined = weight_buf
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            width_buf = (valueDeserializer.readNumber() as number)
+        const weightTmpResult : text.FontWeight | undefined = weightTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : number | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            widthTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const width_result : number | undefined = width_buf
-        const italic_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let italic_buf : number | undefined
-        if ((italic_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            italic_buf = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number | undefined = widthTmpBuf
+        const italicTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let italicTmpBuf : number | undefined
+        if ((italicTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            italicTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const italic_result : number | undefined = italic_buf
-        const monoSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let monoSpace_buf : boolean | undefined
-        if ((monoSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            monoSpace_buf = valueDeserializer.readBoolean()
+        const italicTmpResult : number | undefined = italicTmpBuf
+        const monoSpaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let monoSpaceTmpBuf : boolean | undefined
+        if ((monoSpaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            monoSpaceTmpBuf = valueDeserializer.readBoolean()
         }
-        const monoSpace_result : boolean | undefined = monoSpace_buf
-        const symbolic_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolic_buf : boolean | undefined
-        if ((symbolic_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            symbolic_buf = valueDeserializer.readBoolean()
+        const monoSpaceTmpResult : boolean | undefined = monoSpaceTmpBuf
+        const symbolicTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let symbolicTmpBuf : boolean | undefined
+        if ((symbolicTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            symbolicTmpBuf = valueDeserializer.readBoolean()
         }
-        const symbolic_result : boolean | undefined = symbolic_buf
-        let value : text.FontDescriptor = ({path: path_result, postScriptName: postScriptName_result, fullName: fullName_result, fontFamily: fontFamily_result, fontSubfamily: fontSubfamily_result, weight: weight_result, width: width_result, italic: italic_result, monoSpace: monoSpace_result, symbolic: symbolic_result} as text.FontDescriptor)
+        const symbolicTmpResult : boolean | undefined = symbolicTmpBuf
+        let value : text.FontDescriptor = ({path: pathTmpResult, postScriptName: postScriptNameTmpResult, fullName: fullNameTmpResult, fontFamily: fontFamilyTmpResult, fontSubfamily: fontSubfamilyTmpResult, weight: weightTmpResult, width: widthTmpResult, italic: italicTmpResult, monoSpace: monoSpaceTmpResult, symbolic: symbolicTmpResult} as text.FontDescriptor)
         return value
     }
 }
 export class text_LineMetrics_serializer {
     public static write(buffer: SerializerBase, value: text.LineMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        const value_startIndex  = value.startIndex
-        valueSerializer.writeNumber(value_startIndex)
-        const value_endIndex  = value.endIndex
-        valueSerializer.writeNumber(value_endIndex)
-        const value_ascent  = value.ascent
-        valueSerializer.writeNumber(value_ascent)
-        const value_descent  = value.descent
-        valueSerializer.writeNumber(value_descent)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_left  = value.left
-        valueSerializer.writeNumber(value_left)
-        const value_baseline  = value.baseline
-        valueSerializer.writeNumber(value_baseline)
-        const value_lineNumber  = value.lineNumber
-        valueSerializer.writeNumber(value_lineNumber)
-        const value_topHeight  = value.topHeight
-        valueSerializer.writeNumber(value_topHeight)
-        const value_runMetrics  = value.runMetrics
-        valueSerializer.writeInt32((value_runMetrics.size).toInt())
-        for (const pair of value_runMetrics) {
-            const value_runMetrics_key = pair[0]
-            const value_runMetrics_value = pair[1]
-            valueSerializer.writeNumber(value_runMetrics_key)
-            text_RunMetrics_serializer.write(valueSerializer, value_runMetrics_value)
+        const valueHolderForStartIndex  = value.startIndex
+        valueSerializer.writeNumber(valueHolderForStartIndex)
+        const valueHolderForEndIndex  = value.endIndex
+        valueSerializer.writeNumber(valueHolderForEndIndex)
+        const valueHolderForAscent  = value.ascent
+        valueSerializer.writeNumber(valueHolderForAscent)
+        const valueHolderForDescent  = value.descent
+        valueSerializer.writeNumber(valueHolderForDescent)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForLeft  = value.left
+        valueSerializer.writeNumber(valueHolderForLeft)
+        const valueHolderForBaseline  = value.baseline
+        valueSerializer.writeNumber(valueHolderForBaseline)
+        const valueHolderForLineNumber  = value.lineNumber
+        valueSerializer.writeNumber(valueHolderForLineNumber)
+        const valueHolderForTopHeight  = value.topHeight
+        valueSerializer.writeNumber(valueHolderForTopHeight)
+        const valueHolderForRunMetrics  = value.runMetrics
+        valueSerializer.writeInt32((valueHolderForRunMetrics.size).toInt())
+        for (const pair of valueHolderForRunMetrics) {
+            const valueHolderForRunMetricsKeyVar = pair[0]
+            const valueHolderForRunMetricsValueVar = pair[1]
+            valueSerializer.writeNumber(valueHolderForRunMetricsKeyVar)
+            text_RunMetrics_serializer.write(valueSerializer, valueHolderForRunMetricsValueVar)
         }
     }
     public static read(buffer: DeserializerBase): text.LineMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        const startIndex_result : number = (valueDeserializer.readNumber() as number)
-        const endIndex_result : number = (valueDeserializer.readNumber() as number)
-        const ascent_result : number = (valueDeserializer.readNumber() as number)
-        const descent_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const left_result : number = (valueDeserializer.readNumber() as number)
-        const baseline_result : number = (valueDeserializer.readNumber() as number)
-        const lineNumber_result : number = (valueDeserializer.readNumber() as number)
-        const topHeight_result : number = (valueDeserializer.readNumber() as number)
-        const runMetrics_buf_size : int32 = valueDeserializer.readInt32()
-        let runMetrics_buf : Map<number, text.RunMetrics> = new Map<number, text.RunMetrics>()
+        const startIndexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const endIndexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const ascentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const descentTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const leftTmpResult : number = (valueDeserializer.readNumber() as number)
+        const baselineTmpResult : number = (valueDeserializer.readNumber() as number)
+        const lineNumberTmpResult : number = (valueDeserializer.readNumber() as number)
+        const topHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const runMetricsTmpBufSizeVar : int32 = valueDeserializer.readInt32()
+        let runMetricsTmpBuf : Map<number, text.RunMetrics> = new Map<number, text.RunMetrics>()
         // TODO: TS map resize
-        for (let runMetrics_buf_i = 0; runMetrics_buf_i < runMetrics_buf_size; runMetrics_buf_i++) {
-            const runMetrics_buf_key : number = (valueDeserializer.readNumber() as number)
-            const runMetrics_buf_value : text.RunMetrics = text_RunMetrics_serializer.read(valueDeserializer)
-            runMetrics_buf.set(runMetrics_buf_key, runMetrics_buf_value)
+        for (let runMetricsTmpBufIVar = 0; runMetricsTmpBufIVar < runMetricsTmpBufSizeVar; runMetricsTmpBufIVar++) {
+            const runMetricsTmpBufKeyVar : number = (valueDeserializer.readNumber() as number)
+            const runMetricsTmpBufValueVar : text.RunMetrics = text_RunMetrics_serializer.read(valueDeserializer)
+            runMetricsTmpBuf.set(runMetricsTmpBufKeyVar, runMetricsTmpBufValueVar)
         }
-        const runMetrics_result : Map<number, text.RunMetrics> = runMetrics_buf
-        let value : text.LineMetrics = ({startIndex: startIndex_result, endIndex: endIndex_result, ascent: ascent_result, descent: descent_result, height: height_result, width: width_result, left: left_result, baseline: baseline_result, lineNumber: lineNumber_result, topHeight: topHeight_result, runMetrics: runMetrics_result} as text.LineMetrics)
+        const runMetricsTmpResult : Map<number, text.RunMetrics> = runMetricsTmpBuf
+        let value : text.LineMetrics = ({startIndex: startIndexTmpResult, endIndex: endIndexTmpResult, ascent: ascentTmpResult, descent: descentTmpResult, height: heightTmpResult, width: widthTmpResult, left: leftTmpResult, baseline: baselineTmpResult, lineNumber: lineNumberTmpResult, topHeight: topHeightTmpResult, runMetrics: runMetricsTmpResult} as text.LineMetrics)
         return value
     }
 }
 export class text_PlaceholderSpan_serializer {
     public static write(buffer: SerializerBase, value: text.PlaceholderSpan): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
-        const value_align  = value.align
-        valueSerializer.writeInt32(TypeChecker.text_PlaceholderAlignment_ToNumeric(value_align))
-        const value_baseline  = value.baseline
-        valueSerializer.writeInt32(TypeChecker.text_TextBaseline_ToNumeric(value_baseline))
-        const value_baselineOffset  = value.baselineOffset
-        valueSerializer.writeNumber(value_baselineOffset)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
+        const valueHolderForAlign  = value.align
+        valueSerializer.writeInt32(TypeChecker.text_PlaceholderAlignment_ToNumeric(valueHolderForAlign))
+        const valueHolderForBaseline  = value.baseline
+        valueSerializer.writeInt32(TypeChecker.text_TextBaseline_ToNumeric(valueHolderForBaseline))
+        const valueHolderForBaselineOffset  = value.baselineOffset
+        valueSerializer.writeNumber(valueHolderForBaselineOffset)
     }
     public static read(buffer: DeserializerBase): text.PlaceholderSpan {
         let valueDeserializer : DeserializerBase = buffer
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        const align_result : text.PlaceholderAlignment = TypeChecker.text_PlaceholderAlignment_FromNumeric(valueDeserializer.readInt32())
-        const baseline_result : text.TextBaseline = TypeChecker.text_TextBaseline_FromNumeric(valueDeserializer.readInt32())
-        const baselineOffset_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.PlaceholderSpan = ({width: width_result, height: height_result, align: align_result, baseline: baseline_result, baselineOffset: baselineOffset_result} as text.PlaceholderSpan)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const alignTmpResult : text.PlaceholderAlignment = TypeChecker.text_PlaceholderAlignment_FromNumeric(valueDeserializer.readInt32())
+        const baselineTmpResult : text.TextBaseline = TypeChecker.text_TextBaseline_FromNumeric(valueDeserializer.readInt32())
+        const baselineOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.PlaceholderSpan = ({width: widthTmpResult, height: heightTmpResult, align: alignTmpResult, baseline: baselineTmpResult, baselineOffset: baselineOffsetTmpResult} as text.PlaceholderSpan)
         return value
     }
 }
 export class text_RectStyle_serializer {
     public static write(buffer: SerializerBase, value: text.RectStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_color  = value.color
-        common2D_Color_serializer.write(valueSerializer, value_color)
-        const value_leftTopRadius  = value.leftTopRadius
-        valueSerializer.writeNumber(value_leftTopRadius)
-        const value_rightTopRadius  = value.rightTopRadius
-        valueSerializer.writeNumber(value_rightTopRadius)
-        const value_rightBottomRadius  = value.rightBottomRadius
-        valueSerializer.writeNumber(value_rightBottomRadius)
-        const value_leftBottomRadius  = value.leftBottomRadius
-        valueSerializer.writeNumber(value_leftBottomRadius)
+        const valueHolderForColor  = value.color
+        common2D_Color_serializer.write(valueSerializer, valueHolderForColor)
+        const valueHolderForLeftTopRadius  = value.leftTopRadius
+        valueSerializer.writeNumber(valueHolderForLeftTopRadius)
+        const valueHolderForRightTopRadius  = value.rightTopRadius
+        valueSerializer.writeNumber(valueHolderForRightTopRadius)
+        const valueHolderForRightBottomRadius  = value.rightBottomRadius
+        valueSerializer.writeNumber(valueHolderForRightBottomRadius)
+        const valueHolderForLeftBottomRadius  = value.leftBottomRadius
+        valueSerializer.writeNumber(valueHolderForLeftBottomRadius)
     }
     public static read(buffer: DeserializerBase): text.RectStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const color_result : common2D.Color = common2D_Color_serializer.read(valueDeserializer)
-        const leftTopRadius_result : number = (valueDeserializer.readNumber() as number)
-        const rightTopRadius_result : number = (valueDeserializer.readNumber() as number)
-        const rightBottomRadius_result : number = (valueDeserializer.readNumber() as number)
-        const leftBottomRadius_result : number = (valueDeserializer.readNumber() as number)
-        let value : text.RectStyle = ({color: color_result, leftTopRadius: leftTopRadius_result, rightTopRadius: rightTopRadius_result, rightBottomRadius: rightBottomRadius_result, leftBottomRadius: leftBottomRadius_result} as text.RectStyle)
+        const colorTmpResult : common2D.Color = common2D_Color_serializer.read(valueDeserializer)
+        const leftTopRadiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rightTopRadiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rightBottomRadiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const leftBottomRadiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : text.RectStyle = ({color: colorTmpResult, leftTopRadius: leftTopRadiusTmpResult, rightTopRadius: rightTopRadiusTmpResult, rightBottomRadius: rightBottomRadiusTmpResult, leftBottomRadius: leftBottomRadiusTmpResult} as text.RectStyle)
         return value
     }
 }
 export class text_StrutStyle_serializer {
     public static write(buffer: SerializerBase, value: text.StrutStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fontFamilies  = value.fontFamilies
-        let value_fontFamilies_type : int32 = RuntimeType.UNDEFINED
-        value_fontFamilies_type = runtimeType(value_fontFamilies)
-        valueSerializer.writeInt8((value_fontFamilies_type).toChar())
-        if ((value_fontFamilies_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontFamilies_value  = value_fontFamilies!
-            valueSerializer.writeInt32((value_fontFamilies_value.length).toInt())
-            for (let value_fontFamilies_value_counter_i = 0; value_fontFamilies_value_counter_i < value_fontFamilies_value.length; value_fontFamilies_value_counter_i++) {
-                const value_fontFamilies_value_element : string = value_fontFamilies_value[value_fontFamilies_value_counter_i]
-                valueSerializer.writeString(value_fontFamilies_value_element)
+        const valueHolderForFontFamilies  = value.fontFamilies
+        if (valueHolderForFontFamilies !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontFamiliesTmpValue  = valueHolderForFontFamilies!
+            valueSerializer.writeInt32((valueHolderForFontFamiliesTmpValue.length).toInt())
+            for (let valueHolderForFontFamiliesTmpValueCounterI = 0; valueHolderForFontFamiliesTmpValueCounterI < valueHolderForFontFamiliesTmpValue.length; valueHolderForFontFamiliesTmpValueCounterI++) {
+                const valueHolderForFontFamiliesTmpValueTmpElement : string = valueHolderForFontFamiliesTmpValue[valueHolderForFontFamiliesTmpValueCounterI]
+                valueSerializer.writeString(valueHolderForFontFamiliesTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontStyle  = value.fontStyle
-        let value_fontStyle_type : int32 = RuntimeType.UNDEFINED
-        value_fontStyle_type = runtimeType(value_fontStyle)
-        valueSerializer.writeInt8((value_fontStyle_type).toChar())
-        if ((value_fontStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontStyle_value  = (value_fontStyle as text.FontStyle)
-            valueSerializer.writeInt32(TypeChecker.text_FontStyle_ToNumeric(value_fontStyle_value))
+        const valueHolderForFontStyle  = value.fontStyle
+        if (valueHolderForFontStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontStyleTmpValue  = (valueHolderForFontStyle as text.FontStyle)
+            valueSerializer.writeInt32(TypeChecker.text_FontStyle_ToNumeric(valueHolderForFontStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontWidth  = value.fontWidth
-        let value_fontWidth_type : int32 = RuntimeType.UNDEFINED
-        value_fontWidth_type = runtimeType(value_fontWidth)
-        valueSerializer.writeInt8((value_fontWidth_type).toChar())
-        if ((value_fontWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontWidth_value  = (value_fontWidth as text.FontWidth)
-            valueSerializer.writeInt32(TypeChecker.text_FontWidth_ToNumeric(value_fontWidth_value))
+        const valueHolderForFontWidth  = value.fontWidth
+        if (valueHolderForFontWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontWidthTmpValue  = (valueHolderForFontWidth as text.FontWidth)
+            valueSerializer.writeInt32(TypeChecker.text_FontWidth_ToNumeric(valueHolderForFontWidthTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontWeight  = value.fontWeight
-        let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
-        value_fontWeight_type = runtimeType(value_fontWeight)
-        valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontWeight_value  = (value_fontWeight as text.FontWeight)
-            valueSerializer.writeInt32(TypeChecker.text_FontWeight_ToNumeric(value_fontWeight_value))
+        const valueHolderForFontWeight  = value.fontWeight
+        if (valueHolderForFontWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontWeightTmpValue  = (valueHolderForFontWeight as text.FontWeight)
+            valueSerializer.writeInt32(TypeChecker.text_FontWeight_ToNumeric(valueHolderForFontWeightTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontSize  = value.fontSize
-        let value_fontSize_type : int32 = RuntimeType.UNDEFINED
-        value_fontSize_type = runtimeType(value_fontSize)
-        valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontSize_value  = value_fontSize!
-            valueSerializer.writeNumber(value_fontSize_value)
+        const valueHolderForFontSize  = value.fontSize
+        if (valueHolderForFontSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
+            valueSerializer.writeNumber(valueHolderForFontSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            valueSerializer.writeNumber(value_height_value)
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            valueSerializer.writeNumber(valueHolderForHeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_leading  = value.leading
-        let value_leading_type : int32 = RuntimeType.UNDEFINED
-        value_leading_type = runtimeType(value_leading)
-        valueSerializer.writeInt8((value_leading_type).toChar())
-        if ((value_leading_type) != (RuntimeType.UNDEFINED)) {
-            const value_leading_value  = value_leading!
-            valueSerializer.writeNumber(value_leading_value)
+        const valueHolderForLeading  = value.leading
+        if (valueHolderForLeading !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeadingTmpValue  = valueHolderForLeading!
+            valueSerializer.writeNumber(valueHolderForLeadingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_forceHeight  = value.forceHeight
-        let value_forceHeight_type : int32 = RuntimeType.UNDEFINED
-        value_forceHeight_type = runtimeType(value_forceHeight)
-        valueSerializer.writeInt8((value_forceHeight_type).toChar())
-        if ((value_forceHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_forceHeight_value  = value_forceHeight!
-            valueSerializer.writeBoolean(value_forceHeight_value)
+        const valueHolderForForceHeight  = value.forceHeight
+        if (valueHolderForForceHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForForceHeightTmpValue  = valueHolderForForceHeight!
+            valueSerializer.writeBoolean(valueHolderForForceHeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_enabled  = value.enabled
-        let value_enabled_type : int32 = RuntimeType.UNDEFINED
-        value_enabled_type = runtimeType(value_enabled)
-        valueSerializer.writeInt8((value_enabled_type).toChar())
-        if ((value_enabled_type) != (RuntimeType.UNDEFINED)) {
-            const value_enabled_value  = value_enabled!
-            valueSerializer.writeBoolean(value_enabled_value)
+        const valueHolderForEnabled  = value.enabled
+        if (valueHolderForEnabled !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnabledTmpValue  = valueHolderForEnabled!
+            valueSerializer.writeBoolean(valueHolderForEnabledTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_heightOverride  = value.heightOverride
-        let value_heightOverride_type : int32 = RuntimeType.UNDEFINED
-        value_heightOverride_type = runtimeType(value_heightOverride)
-        valueSerializer.writeInt8((value_heightOverride_type).toChar())
-        if ((value_heightOverride_type) != (RuntimeType.UNDEFINED)) {
-            const value_heightOverride_value  = value_heightOverride!
-            valueSerializer.writeBoolean(value_heightOverride_value)
+        const valueHolderForHeightOverride  = value.heightOverride
+        if (valueHolderForHeightOverride !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightOverrideTmpValue  = valueHolderForHeightOverride!
+            valueSerializer.writeBoolean(valueHolderForHeightOverrideTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_halfLeading  = value.halfLeading
-        let value_halfLeading_type : int32 = RuntimeType.UNDEFINED
-        value_halfLeading_type = runtimeType(value_halfLeading)
-        valueSerializer.writeInt8((value_halfLeading_type).toChar())
-        if ((value_halfLeading_type) != (RuntimeType.UNDEFINED)) {
-            const value_halfLeading_value  = value_halfLeading!
-            valueSerializer.writeBoolean(value_halfLeading_value)
+        const valueHolderForHalfLeading  = value.halfLeading
+        if (valueHolderForHalfLeading !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHalfLeadingTmpValue  = valueHolderForHalfLeading!
+            valueSerializer.writeBoolean(valueHolderForHalfLeadingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): text.StrutStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const fontFamilies_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontFamilies_buf : Array<string> | undefined
-        if ((fontFamilies_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontFamilies_buf__length : int32 = valueDeserializer.readInt32()
-            let fontFamilies_buf_ : Array<string> = new Array<string>(fontFamilies_buf__length)
-            for (let fontFamilies_buf__i = 0; fontFamilies_buf__i < fontFamilies_buf__length; fontFamilies_buf__i++) {
-                fontFamilies_buf_[fontFamilies_buf__i] = (valueDeserializer.readString() as string)
+        const fontFamiliesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontFamiliesTmpBuf : Array<string> | undefined
+        if ((fontFamiliesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontFamiliesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let fontFamiliesTmpBuf_ : Array<string> = new Array<string>(fontFamiliesTmpBuf_Length)
+            for (let fontFamiliesTmpBuf_BufCounterI = 0; fontFamiliesTmpBuf_BufCounterI < fontFamiliesTmpBuf_Length; fontFamiliesTmpBuf_BufCounterI++) {
+                fontFamiliesTmpBuf_[fontFamiliesTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
             }
-            fontFamilies_buf = fontFamilies_buf_
+            fontFamiliesTmpBuf = fontFamiliesTmpBuf_
         }
-        const fontFamilies_result : Array<string> | undefined = fontFamilies_buf
-        const fontStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontStyle_buf : text.FontStyle | undefined
-        if ((fontStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontStyle_buf = TypeChecker.text_FontStyle_FromNumeric(valueDeserializer.readInt32())
+        const fontFamiliesTmpResult : Array<string> | undefined = fontFamiliesTmpBuf
+        const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontStyleTmpBuf : text.FontStyle | undefined
+        if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontStyleTmpBuf = TypeChecker.text_FontStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const fontStyle_result : text.FontStyle | undefined = fontStyle_buf
-        const fontWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWidth_buf : text.FontWidth | undefined
-        if ((fontWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontWidth_buf = TypeChecker.text_FontWidth_FromNumeric(valueDeserializer.readInt32())
+        const fontStyleTmpResult : text.FontStyle | undefined = fontStyleTmpBuf
+        const fontWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontWidthTmpBuf : text.FontWidth | undefined
+        if ((fontWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontWidthTmpBuf = TypeChecker.text_FontWidth_FromNumeric(valueDeserializer.readInt32())
         }
-        const fontWidth_result : text.FontWidth | undefined = fontWidth_buf
-        const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeight_buf : text.FontWeight | undefined
-        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontWeight_buf = TypeChecker.text_FontWeight_FromNumeric(valueDeserializer.readInt32())
+        const fontWidthTmpResult : text.FontWidth | undefined = fontWidthTmpBuf
+        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontWeightTmpBuf : text.FontWeight | undefined
+        if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontWeightTmpBuf = TypeChecker.text_FontWeight_FromNumeric(valueDeserializer.readInt32())
         }
-        const fontWeight_result : text.FontWeight | undefined = fontWeight_buf
-        const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSize_buf : number | undefined
-        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontSize_buf = (valueDeserializer.readNumber() as number)
+        const fontWeightTmpResult : text.FontWeight | undefined = fontWeightTmpBuf
+        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontSizeTmpBuf : number | undefined
+        if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontSizeTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fontSize_result : number | undefined = fontSize_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            height_buf = (valueDeserializer.readNumber() as number)
+        const fontSizeTmpResult : number | undefined = fontSizeTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : number | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            heightTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const height_result : number | undefined = height_buf
-        const leading_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let leading_buf : number | undefined
-        if ((leading_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            leading_buf = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number | undefined = heightTmpBuf
+        const leadingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let leadingTmpBuf : number | undefined
+        if ((leadingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            leadingTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const leading_result : number | undefined = leading_buf
-        const forceHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let forceHeight_buf : boolean | undefined
-        if ((forceHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            forceHeight_buf = valueDeserializer.readBoolean()
+        const leadingTmpResult : number | undefined = leadingTmpBuf
+        const forceHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let forceHeightTmpBuf : boolean | undefined
+        if ((forceHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            forceHeightTmpBuf = valueDeserializer.readBoolean()
         }
-        const forceHeight_result : boolean | undefined = forceHeight_buf
-        const enabled_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enabled_buf : boolean | undefined
-        if ((enabled_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enabled_buf = valueDeserializer.readBoolean()
+        const forceHeightTmpResult : boolean | undefined = forceHeightTmpBuf
+        const enabledTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enabledTmpBuf : boolean | undefined
+        if ((enabledTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enabledTmpBuf = valueDeserializer.readBoolean()
         }
-        const enabled_result : boolean | undefined = enabled_buf
-        const heightOverride_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightOverride_buf : boolean | undefined
-        if ((heightOverride_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            heightOverride_buf = valueDeserializer.readBoolean()
+        const enabledTmpResult : boolean | undefined = enabledTmpBuf
+        const heightOverrideTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightOverrideTmpBuf : boolean | undefined
+        if ((heightOverrideTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            heightOverrideTmpBuf = valueDeserializer.readBoolean()
         }
-        const heightOverride_result : boolean | undefined = heightOverride_buf
-        const halfLeading_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let halfLeading_buf : boolean | undefined
-        if ((halfLeading_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            halfLeading_buf = valueDeserializer.readBoolean()
+        const heightOverrideTmpResult : boolean | undefined = heightOverrideTmpBuf
+        const halfLeadingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let halfLeadingTmpBuf : boolean | undefined
+        if ((halfLeadingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            halfLeadingTmpBuf = valueDeserializer.readBoolean()
         }
-        const halfLeading_result : boolean | undefined = halfLeading_buf
-        let value : text.StrutStyle = ({fontFamilies: fontFamilies_result, fontStyle: fontStyle_result, fontWidth: fontWidth_result, fontWeight: fontWeight_result, fontSize: fontSize_result, height: height_result, leading: leading_result, forceHeight: forceHeight_result, enabled: enabled_result, heightOverride: heightOverride_result, halfLeading: halfLeading_result} as text.StrutStyle)
+        const halfLeadingTmpResult : boolean | undefined = halfLeadingTmpBuf
+        let value : text.StrutStyle = ({fontFamilies: fontFamiliesTmpResult, fontStyle: fontStyleTmpResult, fontWidth: fontWidthTmpResult, fontWeight: fontWeightTmpResult, fontSize: fontSizeTmpResult, height: heightTmpResult, leading: leadingTmpResult, forceHeight: forceHeightTmpResult, enabled: enabledTmpResult, heightOverride: heightOverrideTmpResult, halfLeading: halfLeadingTmpResult} as text.StrutStyle)
         return value
     }
 }
 export class text_TextBox_serializer {
     public static write(buffer: SerializerBase, value: text.TextBox): void {
         let valueSerializer : SerializerBase = buffer
-        const value_rect  = value.rect
-        common2D_Rect_serializer.write(valueSerializer, value_rect)
-        const value_direction  = value.direction
-        valueSerializer.writeInt32(TypeChecker.text_TextDirection_ToNumeric(value_direction))
+        const valueHolderForRect  = value.rect
+        common2D_Rect_serializer.write(valueSerializer, valueHolderForRect)
+        const valueHolderForDirection  = value.direction
+        valueSerializer.writeInt32(TypeChecker.text_TextDirection_ToNumeric(valueHolderForDirection))
     }
     public static read(buffer: DeserializerBase): text.TextBox {
         let valueDeserializer : DeserializerBase = buffer
-        const rect_result : common2D.Rect = common2D_Rect_serializer.read(valueDeserializer)
-        const direction_result : text.TextDirection = TypeChecker.text_TextDirection_FromNumeric(valueDeserializer.readInt32())
-        let value : text.TextBox = ({rect: rect_result, direction: direction_result} as text.TextBox)
+        const rectTmpResult : common2D.Rect = common2D_Rect_serializer.read(valueDeserializer)
+        const directionTmpResult : text.TextDirection = TypeChecker.text_TextDirection_FromNumeric(valueDeserializer.readInt32())
+        let value : text.TextBox = ({rect: rectTmpResult, direction: directionTmpResult} as text.TextBox)
         return value
     }
 }
 export class text_Decoration_serializer {
     public static write(buffer: SerializerBase, value: text.Decoration): void {
         let valueSerializer : SerializerBase = buffer
-        const value_textDecoration  = value.textDecoration
-        let value_textDecoration_type : int32 = RuntimeType.UNDEFINED
-        value_textDecoration_type = runtimeType(value_textDecoration)
-        valueSerializer.writeInt8((value_textDecoration_type).toChar())
-        if ((value_textDecoration_type) != (RuntimeType.UNDEFINED)) {
-            const value_textDecoration_value  = (value_textDecoration as text.TextDecorationType)
-            valueSerializer.writeInt32(TypeChecker.text_TextDecorationType_ToNumeric(value_textDecoration_value))
+        const valueHolderForTextDecoration  = value.textDecoration
+        if (valueHolderForTextDecoration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDecorationTmpValue  = (valueHolderForTextDecoration as text.TextDecorationType)
+            valueSerializer.writeInt32(TypeChecker.text_TextDecorationType_ToNumeric(valueHolderForTextDecorationTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            common2D_Color_serializer.write(valueSerializer, value_color_value)
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            common2D_Color_serializer.write(valueSerializer, valueHolderForColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_decorationStyle  = value.decorationStyle
-        let value_decorationStyle_type : int32 = RuntimeType.UNDEFINED
-        value_decorationStyle_type = runtimeType(value_decorationStyle)
-        valueSerializer.writeInt8((value_decorationStyle_type).toChar())
-        if ((value_decorationStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_decorationStyle_value  = (value_decorationStyle as text.TextDecorationStyle)
-            valueSerializer.writeInt32(TypeChecker.text_TextDecorationStyle_ToNumeric(value_decorationStyle_value))
+        const valueHolderForDecorationStyle  = value.decorationStyle
+        if (valueHolderForDecorationStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDecorationStyleTmpValue  = (valueHolderForDecorationStyle as text.TextDecorationStyle)
+            valueSerializer.writeInt32(TypeChecker.text_TextDecorationStyle_ToNumeric(valueHolderForDecorationStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_decorationThicknessScale  = value.decorationThicknessScale
-        let value_decorationThicknessScale_type : int32 = RuntimeType.UNDEFINED
-        value_decorationThicknessScale_type = runtimeType(value_decorationThicknessScale)
-        valueSerializer.writeInt8((value_decorationThicknessScale_type).toChar())
-        if ((value_decorationThicknessScale_type) != (RuntimeType.UNDEFINED)) {
-            const value_decorationThicknessScale_value  = value_decorationThicknessScale!
-            valueSerializer.writeNumber(value_decorationThicknessScale_value)
+        const valueHolderForDecorationThicknessScale  = value.decorationThicknessScale
+        if (valueHolderForDecorationThicknessScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDecorationThicknessScaleTmpValue  = valueHolderForDecorationThicknessScale!
+            valueSerializer.writeNumber(valueHolderForDecorationThicknessScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): text.Decoration {
         let valueDeserializer : DeserializerBase = buffer
-        const textDecoration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textDecoration_buf : text.TextDecorationType | undefined
-        if ((textDecoration_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            textDecoration_buf = TypeChecker.text_TextDecorationType_FromNumeric(valueDeserializer.readInt32())
+        const textDecorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDecorationTmpBuf : text.TextDecorationType | undefined
+        if ((textDecorationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDecorationTmpBuf = TypeChecker.text_TextDecorationType_FromNumeric(valueDeserializer.readInt32())
         }
-        const textDecoration_result : text.TextDecorationType | undefined = textDecoration_buf
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : common2D.Color | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            color_buf = common2D_Color_serializer.read(valueDeserializer)
+        const textDecorationTmpResult : text.TextDecorationType | undefined = textDecorationTmpBuf
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : common2D.Color | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorTmpBuf = common2D_Color_serializer.read(valueDeserializer)
         }
-        const color_result : common2D.Color | undefined = color_buf
-        const decorationStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let decorationStyle_buf : text.TextDecorationStyle | undefined
-        if ((decorationStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            decorationStyle_buf = TypeChecker.text_TextDecorationStyle_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpResult : common2D.Color | undefined = colorTmpBuf
+        const decorationStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let decorationStyleTmpBuf : text.TextDecorationStyle | undefined
+        if ((decorationStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            decorationStyleTmpBuf = TypeChecker.text_TextDecorationStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const decorationStyle_result : text.TextDecorationStyle | undefined = decorationStyle_buf
-        const decorationThicknessScale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let decorationThicknessScale_buf : number | undefined
-        if ((decorationThicknessScale_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            decorationThicknessScale_buf = (valueDeserializer.readNumber() as number)
+        const decorationStyleTmpResult : text.TextDecorationStyle | undefined = decorationStyleTmpBuf
+        const decorationThicknessScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let decorationThicknessScaleTmpBuf : number | undefined
+        if ((decorationThicknessScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            decorationThicknessScaleTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const decorationThicknessScale_result : number | undefined = decorationThicknessScale_buf
-        let value : text.Decoration = ({textDecoration: textDecoration_result, color: color_result, decorationStyle: decorationStyle_result, decorationThicknessScale: decorationThicknessScale_result} as text.Decoration)
+        const decorationThicknessScaleTmpResult : number | undefined = decorationThicknessScaleTmpBuf
+        let value : text.Decoration = ({textDecoration: textDecorationTmpResult, color: colorTmpResult, decorationStyle: decorationStyleTmpResult, decorationThicknessScale: decorationThicknessScaleTmpResult} as text.Decoration)
         return value
     }
 }
 export class text_TextShadow_serializer {
     public static write(buffer: SerializerBase, value: text.TextShadow): void {
         let valueSerializer : SerializerBase = buffer
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            common2D_Color_serializer.write(valueSerializer, value_color_value)
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            common2D_Color_serializer.write(valueSerializer, valueHolderForColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_point  = value.point
-        let value_point_type : int32 = RuntimeType.UNDEFINED
-        value_point_type = runtimeType(value_point)
-        valueSerializer.writeInt8((value_point_type).toChar())
-        if ((value_point_type) != (RuntimeType.UNDEFINED)) {
-            const value_point_value  = value_point!
-            common2D_Point_serializer.write(valueSerializer, value_point_value)
+        const valueHolderForPoint  = value.point
+        if (valueHolderForPoint !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPointTmpValue  = valueHolderForPoint!
+            common2D_Point_serializer.write(valueSerializer, valueHolderForPointTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_blurRadius  = value.blurRadius
-        let value_blurRadius_type : int32 = RuntimeType.UNDEFINED
-        value_blurRadius_type = runtimeType(value_blurRadius)
-        valueSerializer.writeInt8((value_blurRadius_type).toChar())
-        if ((value_blurRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_blurRadius_value  = value_blurRadius!
-            valueSerializer.writeNumber(value_blurRadius_value)
+        const valueHolderForBlurRadius  = value.blurRadius
+        if (valueHolderForBlurRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBlurRadiusTmpValue  = valueHolderForBlurRadius!
+            valueSerializer.writeNumber(valueHolderForBlurRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): text.TextShadow {
         let valueDeserializer : DeserializerBase = buffer
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : common2D.Color | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            color_buf = common2D_Color_serializer.read(valueDeserializer)
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : common2D.Color | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorTmpBuf = common2D_Color_serializer.read(valueDeserializer)
         }
-        const color_result : common2D.Color | undefined = color_buf
-        const point_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let point_buf : common2D.Point | undefined
-        if ((point_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            point_buf = common2D_Point_serializer.read(valueDeserializer)
+        const colorTmpResult : common2D.Color | undefined = colorTmpBuf
+        const pointTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let pointTmpBuf : common2D.Point | undefined
+        if ((pointTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            pointTmpBuf = common2D_Point_serializer.read(valueDeserializer)
         }
-        const point_result : common2D.Point | undefined = point_buf
-        const blurRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let blurRadius_buf : number | undefined
-        if ((blurRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            blurRadius_buf = (valueDeserializer.readNumber() as number)
+        const pointTmpResult : common2D.Point | undefined = pointTmpBuf
+        const blurRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let blurRadiusTmpBuf : number | undefined
+        if ((blurRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            blurRadiusTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const blurRadius_result : number | undefined = blurRadius_buf
-        let value : text.TextShadow = ({color: color_result, point: point_result, blurRadius: blurRadius_result} as text.TextShadow)
+        const blurRadiusTmpResult : number | undefined = blurRadiusTmpBuf
+        let value : text.TextShadow = ({color: colorTmpResult, point: pointTmpResult, blurRadius: blurRadiusTmpResult} as text.TextShadow)
         return value
     }
 }
 export class text_TextStyle_serializer {
     public static write(buffer: SerializerBase, value: text.TextStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_decoration  = value.decoration
-        let value_decoration_type : int32 = RuntimeType.UNDEFINED
-        value_decoration_type = runtimeType(value_decoration)
-        valueSerializer.writeInt8((value_decoration_type).toChar())
-        if ((value_decoration_type) != (RuntimeType.UNDEFINED)) {
-            const value_decoration_value  = value_decoration!
-            text_Decoration_serializer.write(valueSerializer, value_decoration_value)
+        const valueHolderForDecoration  = value.decoration
+        if (valueHolderForDecoration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDecorationTmpValue  = valueHolderForDecoration!
+            text_Decoration_serializer.write(valueSerializer, valueHolderForDecorationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            common2D_Color_serializer.write(valueSerializer, value_color_value)
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            common2D_Color_serializer.write(valueSerializer, valueHolderForColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontWeight  = value.fontWeight
-        let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
-        value_fontWeight_type = runtimeType(value_fontWeight)
-        valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontWeight_value  = (value_fontWeight as text.FontWeight)
-            valueSerializer.writeInt32(TypeChecker.text_FontWeight_ToNumeric(value_fontWeight_value))
+        const valueHolderForFontWeight  = value.fontWeight
+        if (valueHolderForFontWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontWeightTmpValue  = (valueHolderForFontWeight as text.FontWeight)
+            valueSerializer.writeInt32(TypeChecker.text_FontWeight_ToNumeric(valueHolderForFontWeightTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontStyle  = value.fontStyle
-        let value_fontStyle_type : int32 = RuntimeType.UNDEFINED
-        value_fontStyle_type = runtimeType(value_fontStyle)
-        valueSerializer.writeInt8((value_fontStyle_type).toChar())
-        if ((value_fontStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontStyle_value  = (value_fontStyle as text.FontStyle)
-            valueSerializer.writeInt32(TypeChecker.text_FontStyle_ToNumeric(value_fontStyle_value))
+        const valueHolderForFontStyle  = value.fontStyle
+        if (valueHolderForFontStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontStyleTmpValue  = (valueHolderForFontStyle as text.FontStyle)
+            valueSerializer.writeInt32(TypeChecker.text_FontStyle_ToNumeric(valueHolderForFontStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_baseline  = value.baseline
-        let value_baseline_type : int32 = RuntimeType.UNDEFINED
-        value_baseline_type = runtimeType(value_baseline)
-        valueSerializer.writeInt8((value_baseline_type).toChar())
-        if ((value_baseline_type) != (RuntimeType.UNDEFINED)) {
-            const value_baseline_value  = (value_baseline as text.TextBaseline)
-            valueSerializer.writeInt32(TypeChecker.text_TextBaseline_ToNumeric(value_baseline_value))
+        const valueHolderForBaseline  = value.baseline
+        if (valueHolderForBaseline !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBaselineTmpValue  = (valueHolderForBaseline as text.TextBaseline)
+            valueSerializer.writeInt32(TypeChecker.text_TextBaseline_ToNumeric(valueHolderForBaselineTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontFamilies  = value.fontFamilies
-        let value_fontFamilies_type : int32 = RuntimeType.UNDEFINED
-        value_fontFamilies_type = runtimeType(value_fontFamilies)
-        valueSerializer.writeInt8((value_fontFamilies_type).toChar())
-        if ((value_fontFamilies_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontFamilies_value  = value_fontFamilies!
-            valueSerializer.writeInt32((value_fontFamilies_value.length).toInt())
-            for (let value_fontFamilies_value_counter_i = 0; value_fontFamilies_value_counter_i < value_fontFamilies_value.length; value_fontFamilies_value_counter_i++) {
-                const value_fontFamilies_value_element : string = value_fontFamilies_value[value_fontFamilies_value_counter_i]
-                valueSerializer.writeString(value_fontFamilies_value_element)
+        const valueHolderForFontFamilies  = value.fontFamilies
+        if (valueHolderForFontFamilies !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontFamiliesTmpValue  = valueHolderForFontFamilies!
+            valueSerializer.writeInt32((valueHolderForFontFamiliesTmpValue.length).toInt())
+            for (let valueHolderForFontFamiliesTmpValueCounterI = 0; valueHolderForFontFamiliesTmpValueCounterI < valueHolderForFontFamiliesTmpValue.length; valueHolderForFontFamiliesTmpValueCounterI++) {
+                const valueHolderForFontFamiliesTmpValueTmpElement : string = valueHolderForFontFamiliesTmpValue[valueHolderForFontFamiliesTmpValueCounterI]
+                valueSerializer.writeString(valueHolderForFontFamiliesTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontSize  = value.fontSize
-        let value_fontSize_type : int32 = RuntimeType.UNDEFINED
-        value_fontSize_type = runtimeType(value_fontSize)
-        valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontSize_value  = value_fontSize!
-            valueSerializer.writeNumber(value_fontSize_value)
+        const valueHolderForFontSize  = value.fontSize
+        if (valueHolderForFontSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
+            valueSerializer.writeNumber(valueHolderForFontSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_letterSpacing  = value.letterSpacing
-        let value_letterSpacing_type : int32 = RuntimeType.UNDEFINED
-        value_letterSpacing_type = runtimeType(value_letterSpacing)
-        valueSerializer.writeInt8((value_letterSpacing_type).toChar())
-        if ((value_letterSpacing_type) != (RuntimeType.UNDEFINED)) {
-            const value_letterSpacing_value  = value_letterSpacing!
-            valueSerializer.writeNumber(value_letterSpacing_value)
+        const valueHolderForLetterSpacing  = value.letterSpacing
+        if (valueHolderForLetterSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLetterSpacingTmpValue  = valueHolderForLetterSpacing!
+            valueSerializer.writeNumber(valueHolderForLetterSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_wordSpacing  = value.wordSpacing
-        let value_wordSpacing_type : int32 = RuntimeType.UNDEFINED
-        value_wordSpacing_type = runtimeType(value_wordSpacing)
-        valueSerializer.writeInt8((value_wordSpacing_type).toChar())
-        if ((value_wordSpacing_type) != (RuntimeType.UNDEFINED)) {
-            const value_wordSpacing_value  = value_wordSpacing!
-            valueSerializer.writeNumber(value_wordSpacing_value)
+        const valueHolderForWordSpacing  = value.wordSpacing
+        if (valueHolderForWordSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWordSpacingTmpValue  = valueHolderForWordSpacing!
+            valueSerializer.writeNumber(valueHolderForWordSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_heightScale  = value.heightScale
-        let value_heightScale_type : int32 = RuntimeType.UNDEFINED
-        value_heightScale_type = runtimeType(value_heightScale)
-        valueSerializer.writeInt8((value_heightScale_type).toChar())
-        if ((value_heightScale_type) != (RuntimeType.UNDEFINED)) {
-            const value_heightScale_value  = value_heightScale!
-            valueSerializer.writeNumber(value_heightScale_value)
+        const valueHolderForHeightScale  = value.heightScale
+        if (valueHolderForHeightScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightScaleTmpValue  = valueHolderForHeightScale!
+            valueSerializer.writeNumber(valueHolderForHeightScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_halfLeading  = value.halfLeading
-        let value_halfLeading_type : int32 = RuntimeType.UNDEFINED
-        value_halfLeading_type = runtimeType(value_halfLeading)
-        valueSerializer.writeInt8((value_halfLeading_type).toChar())
-        if ((value_halfLeading_type) != (RuntimeType.UNDEFINED)) {
-            const value_halfLeading_value  = value_halfLeading!
-            valueSerializer.writeBoolean(value_halfLeading_value)
+        const valueHolderForHalfLeading  = value.halfLeading
+        if (valueHolderForHalfLeading !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHalfLeadingTmpValue  = valueHolderForHalfLeading!
+            valueSerializer.writeBoolean(valueHolderForHalfLeadingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_heightOnly  = value.heightOnly
-        let value_heightOnly_type : int32 = RuntimeType.UNDEFINED
-        value_heightOnly_type = runtimeType(value_heightOnly)
-        valueSerializer.writeInt8((value_heightOnly_type).toChar())
-        if ((value_heightOnly_type) != (RuntimeType.UNDEFINED)) {
-            const value_heightOnly_value  = value_heightOnly!
-            valueSerializer.writeBoolean(value_heightOnly_value)
+        const valueHolderForHeightOnly  = value.heightOnly
+        if (valueHolderForHeightOnly !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightOnlyTmpValue  = valueHolderForHeightOnly!
+            valueSerializer.writeBoolean(valueHolderForHeightOnlyTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_ellipsis  = value.ellipsis
-        let value_ellipsis_type : int32 = RuntimeType.UNDEFINED
-        value_ellipsis_type = runtimeType(value_ellipsis)
-        valueSerializer.writeInt8((value_ellipsis_type).toChar())
-        if ((value_ellipsis_type) != (RuntimeType.UNDEFINED)) {
-            const value_ellipsis_value  = value_ellipsis!
-            valueSerializer.writeString(value_ellipsis_value)
+        const valueHolderForEllipsis  = value.ellipsis
+        if (valueHolderForEllipsis !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEllipsisTmpValue  = valueHolderForEllipsis!
+            valueSerializer.writeString(valueHolderForEllipsisTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_ellipsisMode  = value.ellipsisMode
-        let value_ellipsisMode_type : int32 = RuntimeType.UNDEFINED
-        value_ellipsisMode_type = runtimeType(value_ellipsisMode)
-        valueSerializer.writeInt8((value_ellipsisMode_type).toChar())
-        if ((value_ellipsisMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_ellipsisMode_value  = (value_ellipsisMode as text.EllipsisMode)
-            valueSerializer.writeInt32(TypeChecker.text_EllipsisMode_ToNumeric(value_ellipsisMode_value))
+        const valueHolderForEllipsisMode  = value.ellipsisMode
+        if (valueHolderForEllipsisMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEllipsisModeTmpValue  = (valueHolderForEllipsisMode as text.EllipsisMode)
+            valueSerializer.writeInt32(TypeChecker.text_EllipsisMode_ToNumeric(valueHolderForEllipsisModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_locale  = value.locale
-        let value_locale_type : int32 = RuntimeType.UNDEFINED
-        value_locale_type = runtimeType(value_locale)
-        valueSerializer.writeInt8((value_locale_type).toChar())
-        if ((value_locale_type) != (RuntimeType.UNDEFINED)) {
-            const value_locale_value  = value_locale!
-            valueSerializer.writeString(value_locale_value)
+        const valueHolderForLocale  = value.locale
+        if (valueHolderForLocale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLocaleTmpValue  = valueHolderForLocale!
+            valueSerializer.writeString(valueHolderForLocaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_baselineShift  = value.baselineShift
-        let value_baselineShift_type : int32 = RuntimeType.UNDEFINED
-        value_baselineShift_type = runtimeType(value_baselineShift)
-        valueSerializer.writeInt8((value_baselineShift_type).toChar())
-        if ((value_baselineShift_type) != (RuntimeType.UNDEFINED)) {
-            const value_baselineShift_value  = value_baselineShift!
-            valueSerializer.writeNumber(value_baselineShift_value)
+        const valueHolderForBaselineShift  = value.baselineShift
+        if (valueHolderForBaselineShift !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBaselineShiftTmpValue  = valueHolderForBaselineShift!
+            valueSerializer.writeNumber(valueHolderForBaselineShiftTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontFeatures  = value.fontFeatures
-        let value_fontFeatures_type : int32 = RuntimeType.UNDEFINED
-        value_fontFeatures_type = runtimeType(value_fontFeatures)
-        valueSerializer.writeInt8((value_fontFeatures_type).toChar())
-        if ((value_fontFeatures_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontFeatures_value  = value_fontFeatures!
-            valueSerializer.writeInt32((value_fontFeatures_value.length).toInt())
-            for (let value_fontFeatures_value_counter_i = 0; value_fontFeatures_value_counter_i < value_fontFeatures_value.length; value_fontFeatures_value_counter_i++) {
-                const value_fontFeatures_value_element : text.FontFeature = value_fontFeatures_value[value_fontFeatures_value_counter_i]
-                text_FontFeature_serializer.write(valueSerializer, value_fontFeatures_value_element)
+        const valueHolderForFontFeatures  = value.fontFeatures
+        if (valueHolderForFontFeatures !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontFeaturesTmpValue  = valueHolderForFontFeatures!
+            valueSerializer.writeInt32((valueHolderForFontFeaturesTmpValue.length).toInt())
+            for (let valueHolderForFontFeaturesTmpValueCounterI = 0; valueHolderForFontFeaturesTmpValueCounterI < valueHolderForFontFeaturesTmpValue.length; valueHolderForFontFeaturesTmpValueCounterI++) {
+                const valueHolderForFontFeaturesTmpValueTmpElement : text.FontFeature = valueHolderForFontFeaturesTmpValue[valueHolderForFontFeaturesTmpValueCounterI]
+                text_FontFeature_serializer.write(valueSerializer, valueHolderForFontFeaturesTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_textShadows  = value.textShadows
-        let value_textShadows_type : int32 = RuntimeType.UNDEFINED
-        value_textShadows_type = runtimeType(value_textShadows)
-        valueSerializer.writeInt8((value_textShadows_type).toChar())
-        if ((value_textShadows_type) != (RuntimeType.UNDEFINED)) {
-            const value_textShadows_value  = value_textShadows!
-            valueSerializer.writeInt32((value_textShadows_value.length).toInt())
-            for (let value_textShadows_value_counter_i = 0; value_textShadows_value_counter_i < value_textShadows_value.length; value_textShadows_value_counter_i++) {
-                const value_textShadows_value_element : text.TextShadow = value_textShadows_value[value_textShadows_value_counter_i]
-                text_TextShadow_serializer.write(valueSerializer, value_textShadows_value_element)
+        const valueHolderForTextShadows  = value.textShadows
+        if (valueHolderForTextShadows !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextShadowsTmpValue  = valueHolderForTextShadows!
+            valueSerializer.writeInt32((valueHolderForTextShadowsTmpValue.length).toInt())
+            for (let valueHolderForTextShadowsTmpValueCounterI = 0; valueHolderForTextShadowsTmpValueCounterI < valueHolderForTextShadowsTmpValue.length; valueHolderForTextShadowsTmpValueCounterI++) {
+                const valueHolderForTextShadowsTmpValueTmpElement : text.TextShadow = valueHolderForTextShadowsTmpValue[valueHolderForTextShadowsTmpValueCounterI]
+                text_TextShadow_serializer.write(valueSerializer, valueHolderForTextShadowsTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundRect  = value.backgroundRect
-        let value_backgroundRect_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundRect_type = runtimeType(value_backgroundRect)
-        valueSerializer.writeInt8((value_backgroundRect_type).toChar())
-        if ((value_backgroundRect_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundRect_value  = value_backgroundRect!
-            text_RectStyle_serializer.write(valueSerializer, value_backgroundRect_value)
+        const valueHolderForBackgroundRect  = value.backgroundRect
+        if (valueHolderForBackgroundRect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundRectTmpValue  = valueHolderForBackgroundRect!
+            text_RectStyle_serializer.write(valueSerializer, valueHolderForBackgroundRectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fontVariations  = value.fontVariations
-        let value_fontVariations_type : int32 = RuntimeType.UNDEFINED
-        value_fontVariations_type = runtimeType(value_fontVariations)
-        valueSerializer.writeInt8((value_fontVariations_type).toChar())
-        if ((value_fontVariations_type) != (RuntimeType.UNDEFINED)) {
-            const value_fontVariations_value  = value_fontVariations!
-            valueSerializer.writeInt32((value_fontVariations_value.length).toInt())
-            for (let value_fontVariations_value_counter_i = 0; value_fontVariations_value_counter_i < value_fontVariations_value.length; value_fontVariations_value_counter_i++) {
-                const value_fontVariations_value_element : text.FontVariation = value_fontVariations_value[value_fontVariations_value_counter_i]
-                text_FontVariation_serializer.write(valueSerializer, value_fontVariations_value_element)
+        const valueHolderForFontVariations  = value.fontVariations
+        if (valueHolderForFontVariations !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontVariationsTmpValue  = valueHolderForFontVariations!
+            valueSerializer.writeInt32((valueHolderForFontVariationsTmpValue.length).toInt())
+            for (let valueHolderForFontVariationsTmpValueCounterI = 0; valueHolderForFontVariationsTmpValueCounterI < valueHolderForFontVariationsTmpValue.length; valueHolderForFontVariationsTmpValueCounterI++) {
+                const valueHolderForFontVariationsTmpValueTmpElement : text.FontVariation = valueHolderForFontVariationsTmpValue[valueHolderForFontVariationsTmpValueCounterI]
+                text_FontVariation_serializer.write(valueSerializer, valueHolderForFontVariationsTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): text.TextStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const decoration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let decoration_buf : text.Decoration | undefined
-        if ((decoration_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            decoration_buf = text_Decoration_serializer.read(valueDeserializer)
+        const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let decorationTmpBuf : text.Decoration | undefined
+        if ((decorationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            decorationTmpBuf = text_Decoration_serializer.read(valueDeserializer)
         }
-        const decoration_result : text.Decoration | undefined = decoration_buf
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : common2D.Color | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            color_buf = common2D_Color_serializer.read(valueDeserializer)
+        const decorationTmpResult : text.Decoration | undefined = decorationTmpBuf
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : common2D.Color | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorTmpBuf = common2D_Color_serializer.read(valueDeserializer)
         }
-        const color_result : common2D.Color | undefined = color_buf
-        const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeight_buf : text.FontWeight | undefined
-        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontWeight_buf = TypeChecker.text_FontWeight_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpResult : common2D.Color | undefined = colorTmpBuf
+        const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontWeightTmpBuf : text.FontWeight | undefined
+        if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontWeightTmpBuf = TypeChecker.text_FontWeight_FromNumeric(valueDeserializer.readInt32())
         }
-        const fontWeight_result : text.FontWeight | undefined = fontWeight_buf
-        const fontStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontStyle_buf : text.FontStyle | undefined
-        if ((fontStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontStyle_buf = TypeChecker.text_FontStyle_FromNumeric(valueDeserializer.readInt32())
+        const fontWeightTmpResult : text.FontWeight | undefined = fontWeightTmpBuf
+        const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontStyleTmpBuf : text.FontStyle | undefined
+        if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontStyleTmpBuf = TypeChecker.text_FontStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const fontStyle_result : text.FontStyle | undefined = fontStyle_buf
-        const baseline_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let baseline_buf : text.TextBaseline | undefined
-        if ((baseline_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            baseline_buf = TypeChecker.text_TextBaseline_FromNumeric(valueDeserializer.readInt32())
+        const fontStyleTmpResult : text.FontStyle | undefined = fontStyleTmpBuf
+        const baselineTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let baselineTmpBuf : text.TextBaseline | undefined
+        if ((baselineTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            baselineTmpBuf = TypeChecker.text_TextBaseline_FromNumeric(valueDeserializer.readInt32())
         }
-        const baseline_result : text.TextBaseline | undefined = baseline_buf
-        const fontFamilies_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontFamilies_buf : Array<string> | undefined
-        if ((fontFamilies_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontFamilies_buf__length : int32 = valueDeserializer.readInt32()
-            let fontFamilies_buf_ : Array<string> = new Array<string>(fontFamilies_buf__length)
-            for (let fontFamilies_buf__i = 0; fontFamilies_buf__i < fontFamilies_buf__length; fontFamilies_buf__i++) {
-                fontFamilies_buf_[fontFamilies_buf__i] = (valueDeserializer.readString() as string)
+        const baselineTmpResult : text.TextBaseline | undefined = baselineTmpBuf
+        const fontFamiliesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontFamiliesTmpBuf : Array<string> | undefined
+        if ((fontFamiliesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontFamiliesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let fontFamiliesTmpBuf_ : Array<string> = new Array<string>(fontFamiliesTmpBuf_Length)
+            for (let fontFamiliesTmpBuf_BufCounterI = 0; fontFamiliesTmpBuf_BufCounterI < fontFamiliesTmpBuf_Length; fontFamiliesTmpBuf_BufCounterI++) {
+                fontFamiliesTmpBuf_[fontFamiliesTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
             }
-            fontFamilies_buf = fontFamilies_buf_
+            fontFamiliesTmpBuf = fontFamiliesTmpBuf_
         }
-        const fontFamilies_result : Array<string> | undefined = fontFamilies_buf
-        const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSize_buf : number | undefined
-        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fontSize_buf = (valueDeserializer.readNumber() as number)
+        const fontFamiliesTmpResult : Array<string> | undefined = fontFamiliesTmpBuf
+        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontSizeTmpBuf : number | undefined
+        if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontSizeTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fontSize_result : number | undefined = fontSize_buf
-        const letterSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let letterSpacing_buf : number | undefined
-        if ((letterSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            letterSpacing_buf = (valueDeserializer.readNumber() as number)
+        const fontSizeTmpResult : number | undefined = fontSizeTmpBuf
+        const letterSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let letterSpacingTmpBuf : number | undefined
+        if ((letterSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            letterSpacingTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const letterSpacing_result : number | undefined = letterSpacing_buf
-        const wordSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let wordSpacing_buf : number | undefined
-        if ((wordSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            wordSpacing_buf = (valueDeserializer.readNumber() as number)
+        const letterSpacingTmpResult : number | undefined = letterSpacingTmpBuf
+        const wordSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let wordSpacingTmpBuf : number | undefined
+        if ((wordSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            wordSpacingTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const wordSpacing_result : number | undefined = wordSpacing_buf
-        const heightScale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightScale_buf : number | undefined
-        if ((heightScale_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            heightScale_buf = (valueDeserializer.readNumber() as number)
+        const wordSpacingTmpResult : number | undefined = wordSpacingTmpBuf
+        const heightScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightScaleTmpBuf : number | undefined
+        if ((heightScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            heightScaleTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const heightScale_result : number | undefined = heightScale_buf
-        const halfLeading_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let halfLeading_buf : boolean | undefined
-        if ((halfLeading_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            halfLeading_buf = valueDeserializer.readBoolean()
+        const heightScaleTmpResult : number | undefined = heightScaleTmpBuf
+        const halfLeadingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let halfLeadingTmpBuf : boolean | undefined
+        if ((halfLeadingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            halfLeadingTmpBuf = valueDeserializer.readBoolean()
         }
-        const halfLeading_result : boolean | undefined = halfLeading_buf
-        const heightOnly_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightOnly_buf : boolean | undefined
-        if ((heightOnly_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            heightOnly_buf = valueDeserializer.readBoolean()
+        const halfLeadingTmpResult : boolean | undefined = halfLeadingTmpBuf
+        const heightOnlyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightOnlyTmpBuf : boolean | undefined
+        if ((heightOnlyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            heightOnlyTmpBuf = valueDeserializer.readBoolean()
         }
-        const heightOnly_result : boolean | undefined = heightOnly_buf
-        const ellipsis_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let ellipsis_buf : string | undefined
-        if ((ellipsis_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            ellipsis_buf = (valueDeserializer.readString() as string)
+        const heightOnlyTmpResult : boolean | undefined = heightOnlyTmpBuf
+        const ellipsisTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let ellipsisTmpBuf : string | undefined
+        if ((ellipsisTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            ellipsisTmpBuf = (valueDeserializer.readString() as string)
         }
-        const ellipsis_result : string | undefined = ellipsis_buf
-        const ellipsisMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let ellipsisMode_buf : text.EllipsisMode | undefined
-        if ((ellipsisMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            ellipsisMode_buf = TypeChecker.text_EllipsisMode_FromNumeric(valueDeserializer.readInt32())
+        const ellipsisTmpResult : string | undefined = ellipsisTmpBuf
+        const ellipsisModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let ellipsisModeTmpBuf : text.EllipsisMode | undefined
+        if ((ellipsisModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            ellipsisModeTmpBuf = TypeChecker.text_EllipsisMode_FromNumeric(valueDeserializer.readInt32())
         }
-        const ellipsisMode_result : text.EllipsisMode | undefined = ellipsisMode_buf
-        const locale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let locale_buf : string | undefined
-        if ((locale_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            locale_buf = (valueDeserializer.readString() as string)
+        const ellipsisModeTmpResult : text.EllipsisMode | undefined = ellipsisModeTmpBuf
+        const localeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let localeTmpBuf : string | undefined
+        if ((localeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            localeTmpBuf = (valueDeserializer.readString() as string)
         }
-        const locale_result : string | undefined = locale_buf
-        const baselineShift_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let baselineShift_buf : number | undefined
-        if ((baselineShift_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            baselineShift_buf = (valueDeserializer.readNumber() as number)
+        const localeTmpResult : string | undefined = localeTmpBuf
+        const baselineShiftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let baselineShiftTmpBuf : number | undefined
+        if ((baselineShiftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            baselineShiftTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const baselineShift_result : number | undefined = baselineShift_buf
-        const fontFeatures_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontFeatures_buf : Array<text.FontFeature> | undefined
-        if ((fontFeatures_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontFeatures_buf__length : int32 = valueDeserializer.readInt32()
-            let fontFeatures_buf_ : Array<text.FontFeature> = new Array<text.FontFeature>(fontFeatures_buf__length)
-            for (let fontFeatures_buf__i = 0; fontFeatures_buf__i < fontFeatures_buf__length; fontFeatures_buf__i++) {
-                fontFeatures_buf_[fontFeatures_buf__i] = text_FontFeature_serializer.read(valueDeserializer)
+        const baselineShiftTmpResult : number | undefined = baselineShiftTmpBuf
+        const fontFeaturesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontFeaturesTmpBuf : Array<text.FontFeature> | undefined
+        if ((fontFeaturesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontFeaturesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let fontFeaturesTmpBuf_ : Array<text.FontFeature> = new Array<text.FontFeature>(fontFeaturesTmpBuf_Length)
+            for (let fontFeaturesTmpBuf_BufCounterI = 0; fontFeaturesTmpBuf_BufCounterI < fontFeaturesTmpBuf_Length; fontFeaturesTmpBuf_BufCounterI++) {
+                fontFeaturesTmpBuf_[fontFeaturesTmpBuf_BufCounterI] = text_FontFeature_serializer.read(valueDeserializer)
             }
-            fontFeatures_buf = fontFeatures_buf_
+            fontFeaturesTmpBuf = fontFeaturesTmpBuf_
         }
-        const fontFeatures_result : Array<text.FontFeature> | undefined = fontFeatures_buf
-        const textShadows_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textShadows_buf : Array<text.TextShadow> | undefined
-        if ((textShadows_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const textShadows_buf__length : int32 = valueDeserializer.readInt32()
-            let textShadows_buf_ : Array<text.TextShadow> = new Array<text.TextShadow>(textShadows_buf__length)
-            for (let textShadows_buf__i = 0; textShadows_buf__i < textShadows_buf__length; textShadows_buf__i++) {
-                textShadows_buf_[textShadows_buf__i] = text_TextShadow_serializer.read(valueDeserializer)
+        const fontFeaturesTmpResult : Array<text.FontFeature> | undefined = fontFeaturesTmpBuf
+        const textShadowsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textShadowsTmpBuf : Array<text.TextShadow> | undefined
+        if ((textShadowsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const textShadowsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let textShadowsTmpBuf_ : Array<text.TextShadow> = new Array<text.TextShadow>(textShadowsTmpBuf_Length)
+            for (let textShadowsTmpBuf_BufCounterI = 0; textShadowsTmpBuf_BufCounterI < textShadowsTmpBuf_Length; textShadowsTmpBuf_BufCounterI++) {
+                textShadowsTmpBuf_[textShadowsTmpBuf_BufCounterI] = text_TextShadow_serializer.read(valueDeserializer)
             }
-            textShadows_buf = textShadows_buf_
+            textShadowsTmpBuf = textShadowsTmpBuf_
         }
-        const textShadows_result : Array<text.TextShadow> | undefined = textShadows_buf
-        const backgroundRect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundRect_buf : text.RectStyle | undefined
-        if ((backgroundRect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundRect_buf = text_RectStyle_serializer.read(valueDeserializer)
+        const textShadowsTmpResult : Array<text.TextShadow> | undefined = textShadowsTmpBuf
+        const backgroundRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundRectTmpBuf : text.RectStyle | undefined
+        if ((backgroundRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundRectTmpBuf = text_RectStyle_serializer.read(valueDeserializer)
         }
-        const backgroundRect_result : text.RectStyle | undefined = backgroundRect_buf
-        const fontVariations_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontVariations_buf : Array<text.FontVariation> | undefined
-        if ((fontVariations_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const fontVariations_buf__length : int32 = valueDeserializer.readInt32()
-            let fontVariations_buf_ : Array<text.FontVariation> = new Array<text.FontVariation>(fontVariations_buf__length)
-            for (let fontVariations_buf__i = 0; fontVariations_buf__i < fontVariations_buf__length; fontVariations_buf__i++) {
-                fontVariations_buf_[fontVariations_buf__i] = text_FontVariation_serializer.read(valueDeserializer)
+        const backgroundRectTmpResult : text.RectStyle | undefined = backgroundRectTmpBuf
+        const fontVariationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontVariationsTmpBuf : Array<text.FontVariation> | undefined
+        if ((fontVariationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontVariationsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let fontVariationsTmpBuf_ : Array<text.FontVariation> = new Array<text.FontVariation>(fontVariationsTmpBuf_Length)
+            for (let fontVariationsTmpBuf_BufCounterI = 0; fontVariationsTmpBuf_BufCounterI < fontVariationsTmpBuf_Length; fontVariationsTmpBuf_BufCounterI++) {
+                fontVariationsTmpBuf_[fontVariationsTmpBuf_BufCounterI] = text_FontVariation_serializer.read(valueDeserializer)
             }
-            fontVariations_buf = fontVariations_buf_
+            fontVariationsTmpBuf = fontVariationsTmpBuf_
         }
-        const fontVariations_result : Array<text.FontVariation> | undefined = fontVariations_buf
-        let value : text.TextStyle = ({decoration: decoration_result, color: color_result, fontWeight: fontWeight_result, fontStyle: fontStyle_result, baseline: baseline_result, fontFamilies: fontFamilies_result, fontSize: fontSize_result, letterSpacing: letterSpacing_result, wordSpacing: wordSpacing_result, heightScale: heightScale_result, halfLeading: halfLeading_result, heightOnly: heightOnly_result, ellipsis: ellipsis_result, ellipsisMode: ellipsisMode_result, locale: locale_result, baselineShift: baselineShift_result, fontFeatures: fontFeatures_result, textShadows: textShadows_result, backgroundRect: backgroundRect_result, fontVariations: fontVariations_result} as text.TextStyle)
+        const fontVariationsTmpResult : Array<text.FontVariation> | undefined = fontVariationsTmpBuf
+        let value : text.TextStyle = ({decoration: decorationTmpResult, color: colorTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, baseline: baselineTmpResult, fontFamilies: fontFamiliesTmpResult, fontSize: fontSizeTmpResult, letterSpacing: letterSpacingTmpResult, wordSpacing: wordSpacingTmpResult, heightScale: heightScaleTmpResult, halfLeading: halfLeadingTmpResult, heightOnly: heightOnlyTmpResult, ellipsis: ellipsisTmpResult, ellipsisMode: ellipsisModeTmpResult, locale: localeTmpResult, baselineShift: baselineShiftTmpResult, fontFeatures: fontFeaturesTmpResult, textShadows: textShadowsTmpResult, backgroundRect: backgroundRectTmpResult, fontVariations: fontVariationsTmpResult} as text.TextStyle)
         return value
     }
 }
 export class text_ParagraphStyle_serializer {
     public static write(buffer: SerializerBase, value: text.ParagraphStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_textStyle  = value.textStyle
-        let value_textStyle_type : int32 = RuntimeType.UNDEFINED
-        value_textStyle_type = runtimeType(value_textStyle)
-        valueSerializer.writeInt8((value_textStyle_type).toChar())
-        if ((value_textStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_textStyle_value  = value_textStyle!
-            text_TextStyle_serializer.write(valueSerializer, value_textStyle_value)
+        const valueHolderForTextStyle  = value.textStyle
+        if (valueHolderForTextStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextStyleTmpValue  = valueHolderForTextStyle!
+            text_TextStyle_serializer.write(valueSerializer, valueHolderForTextStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_textDirection  = value.textDirection
-        let value_textDirection_type : int32 = RuntimeType.UNDEFINED
-        value_textDirection_type = runtimeType(value_textDirection)
-        valueSerializer.writeInt8((value_textDirection_type).toChar())
-        if ((value_textDirection_type) != (RuntimeType.UNDEFINED)) {
-            const value_textDirection_value  = (value_textDirection as text.TextDirection)
-            valueSerializer.writeInt32(TypeChecker.text_TextDirection_ToNumeric(value_textDirection_value))
+        const valueHolderForTextDirection  = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue  = (valueHolderForTextDirection as text.TextDirection)
+            valueSerializer.writeInt32(TypeChecker.text_TextDirection_ToNumeric(valueHolderForTextDirectionTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_align  = value.align
-        let value_align_type : int32 = RuntimeType.UNDEFINED
-        value_align_type = runtimeType(value_align)
-        valueSerializer.writeInt8((value_align_type).toChar())
-        if ((value_align_type) != (RuntimeType.UNDEFINED)) {
-            const value_align_value  = (value_align as text.TextAlign)
-            valueSerializer.writeInt32(TypeChecker.text_TextAlign_ToNumeric(value_align_value))
+        const valueHolderForAlign  = value.align
+        if (valueHolderForAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAlignTmpValue  = (valueHolderForAlign as text.TextAlign)
+            valueSerializer.writeInt32(TypeChecker.text_TextAlign_ToNumeric(valueHolderForAlignTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_wordBreak  = value.wordBreak
-        let value_wordBreak_type : int32 = RuntimeType.UNDEFINED
-        value_wordBreak_type = runtimeType(value_wordBreak)
-        valueSerializer.writeInt8((value_wordBreak_type).toChar())
-        if ((value_wordBreak_type) != (RuntimeType.UNDEFINED)) {
-            const value_wordBreak_value  = (value_wordBreak as text.WordBreak)
-            valueSerializer.writeInt32(TypeChecker.text_WordBreak_ToNumeric(value_wordBreak_value))
+        const valueHolderForWordBreak  = value.wordBreak
+        if (valueHolderForWordBreak !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWordBreakTmpValue  = (valueHolderForWordBreak as text.WordBreak)
+            valueSerializer.writeInt32(TypeChecker.text_WordBreak_ToNumeric(valueHolderForWordBreakTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_maxLines  = value.maxLines
-        let value_maxLines_type : int32 = RuntimeType.UNDEFINED
-        value_maxLines_type = runtimeType(value_maxLines)
-        valueSerializer.writeInt8((value_maxLines_type).toChar())
-        if ((value_maxLines_type) != (RuntimeType.UNDEFINED)) {
-            const value_maxLines_value  = value_maxLines!
-            valueSerializer.writeNumber(value_maxLines_value)
+        const valueHolderForMaxLines  = value.maxLines
+        if (valueHolderForMaxLines !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
+            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_breakStrategy  = value.breakStrategy
-        let value_breakStrategy_type : int32 = RuntimeType.UNDEFINED
-        value_breakStrategy_type = runtimeType(value_breakStrategy)
-        valueSerializer.writeInt8((value_breakStrategy_type).toChar())
-        if ((value_breakStrategy_type) != (RuntimeType.UNDEFINED)) {
-            const value_breakStrategy_value  = (value_breakStrategy as text.BreakStrategy)
-            valueSerializer.writeInt32(TypeChecker.text_BreakStrategy_ToNumeric(value_breakStrategy_value))
+        const valueHolderForBreakStrategy  = value.breakStrategy
+        if (valueHolderForBreakStrategy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBreakStrategyTmpValue  = (valueHolderForBreakStrategy as text.BreakStrategy)
+            valueSerializer.writeInt32(TypeChecker.text_BreakStrategy_ToNumeric(valueHolderForBreakStrategyTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_strutStyle  = value.strutStyle
-        let value_strutStyle_type : int32 = RuntimeType.UNDEFINED
-        value_strutStyle_type = runtimeType(value_strutStyle)
-        valueSerializer.writeInt8((value_strutStyle_type).toChar())
-        if ((value_strutStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_strutStyle_value  = value_strutStyle!
-            text_StrutStyle_serializer.write(valueSerializer, value_strutStyle_value)
+        const valueHolderForStrutStyle  = value.strutStyle
+        if (valueHolderForStrutStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrutStyleTmpValue  = valueHolderForStrutStyle!
+            text_StrutStyle_serializer.write(valueSerializer, valueHolderForStrutStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_textHeightBehavior  = value.textHeightBehavior
-        let value_textHeightBehavior_type : int32 = RuntimeType.UNDEFINED
-        value_textHeightBehavior_type = runtimeType(value_textHeightBehavior)
-        valueSerializer.writeInt8((value_textHeightBehavior_type).toChar())
-        if ((value_textHeightBehavior_type) != (RuntimeType.UNDEFINED)) {
-            const value_textHeightBehavior_value  = (value_textHeightBehavior as text.TextHeightBehavior)
-            valueSerializer.writeInt32(TypeChecker.text_TextHeightBehavior_ToNumeric(value_textHeightBehavior_value))
+        const valueHolderForTextHeightBehavior  = value.textHeightBehavior
+        if (valueHolderForTextHeightBehavior !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextHeightBehaviorTmpValue  = (valueHolderForTextHeightBehavior as text.TextHeightBehavior)
+            valueSerializer.writeInt32(TypeChecker.text_TextHeightBehavior_ToNumeric(valueHolderForTextHeightBehaviorTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_tab  = value.tab
-        let value_tab_type : int32 = RuntimeType.UNDEFINED
-        value_tab_type = runtimeType(value_tab)
-        valueSerializer.writeInt8((value_tab_type).toChar())
-        if ((value_tab_type) != (RuntimeType.UNDEFINED)) {
-            const value_tab_value  = value_tab!
-            text_TextTab_serializer.write(valueSerializer, value_tab_value)
+        const valueHolderForTab  = value.tab
+        if (valueHolderForTab !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTabTmpValue  = valueHolderForTab!
+            text_TextTab_serializer.write(valueSerializer, valueHolderForTabTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): text.ParagraphStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const textStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textStyle_buf : text.TextStyle | undefined
-        if ((textStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            textStyle_buf = text_TextStyle_serializer.read(valueDeserializer)
+        const textStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textStyleTmpBuf : text.TextStyle | undefined
+        if ((textStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textStyleTmpBuf = text_TextStyle_serializer.read(valueDeserializer)
         }
-        const textStyle_result : text.TextStyle | undefined = textStyle_buf
-        const textDirection_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textDirection_buf : text.TextDirection | undefined
-        if ((textDirection_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            textDirection_buf = TypeChecker.text_TextDirection_FromNumeric(valueDeserializer.readInt32())
+        const textStyleTmpResult : text.TextStyle | undefined = textStyleTmpBuf
+        const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textDirectionTmpBuf : text.TextDirection | undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TypeChecker.text_TextDirection_FromNumeric(valueDeserializer.readInt32())
         }
-        const textDirection_result : text.TextDirection | undefined = textDirection_buf
-        const align_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let align_buf : text.TextAlign | undefined
-        if ((align_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            align_buf = TypeChecker.text_TextAlign_FromNumeric(valueDeserializer.readInt32())
+        const textDirectionTmpResult : text.TextDirection | undefined = textDirectionTmpBuf
+        const alignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let alignTmpBuf : text.TextAlign | undefined
+        if ((alignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            alignTmpBuf = TypeChecker.text_TextAlign_FromNumeric(valueDeserializer.readInt32())
         }
-        const align_result : text.TextAlign | undefined = align_buf
-        const wordBreak_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let wordBreak_buf : text.WordBreak | undefined
-        if ((wordBreak_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            wordBreak_buf = TypeChecker.text_WordBreak_FromNumeric(valueDeserializer.readInt32())
+        const alignTmpResult : text.TextAlign | undefined = alignTmpBuf
+        const wordBreakTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let wordBreakTmpBuf : text.WordBreak | undefined
+        if ((wordBreakTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            wordBreakTmpBuf = TypeChecker.text_WordBreak_FromNumeric(valueDeserializer.readInt32())
         }
-        const wordBreak_result : text.WordBreak | undefined = wordBreak_buf
-        const maxLines_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLines_buf : number | undefined
-        if ((maxLines_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            maxLines_buf = (valueDeserializer.readNumber() as number)
+        const wordBreakTmpResult : text.WordBreak | undefined = wordBreakTmpBuf
+        const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maxLinesTmpBuf : number | undefined
+        if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const maxLines_result : number | undefined = maxLines_buf
-        const breakStrategy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let breakStrategy_buf : text.BreakStrategy | undefined
-        if ((breakStrategy_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            breakStrategy_buf = TypeChecker.text_BreakStrategy_FromNumeric(valueDeserializer.readInt32())
+        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const breakStrategyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let breakStrategyTmpBuf : text.BreakStrategy | undefined
+        if ((breakStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            breakStrategyTmpBuf = TypeChecker.text_BreakStrategy_FromNumeric(valueDeserializer.readInt32())
         }
-        const breakStrategy_result : text.BreakStrategy | undefined = breakStrategy_buf
-        const strutStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strutStyle_buf : text.StrutStyle | undefined
-        if ((strutStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            strutStyle_buf = text_StrutStyle_serializer.read(valueDeserializer)
+        const breakStrategyTmpResult : text.BreakStrategy | undefined = breakStrategyTmpBuf
+        const strutStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strutStyleTmpBuf : text.StrutStyle | undefined
+        if ((strutStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strutStyleTmpBuf = text_StrutStyle_serializer.read(valueDeserializer)
         }
-        const strutStyle_result : text.StrutStyle | undefined = strutStyle_buf
-        const textHeightBehavior_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textHeightBehavior_buf : text.TextHeightBehavior | undefined
-        if ((textHeightBehavior_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            textHeightBehavior_buf = TypeChecker.text_TextHeightBehavior_FromNumeric(valueDeserializer.readInt32())
+        const strutStyleTmpResult : text.StrutStyle | undefined = strutStyleTmpBuf
+        const textHeightBehaviorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textHeightBehaviorTmpBuf : text.TextHeightBehavior | undefined
+        if ((textHeightBehaviorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textHeightBehaviorTmpBuf = TypeChecker.text_TextHeightBehavior_FromNumeric(valueDeserializer.readInt32())
         }
-        const textHeightBehavior_result : text.TextHeightBehavior | undefined = textHeightBehavior_buf
-        const tab_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let tab_buf : text.TextTab | undefined
-        if ((tab_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            tab_buf = text_TextTab_serializer.read(valueDeserializer)
+        const textHeightBehaviorTmpResult : text.TextHeightBehavior | undefined = textHeightBehaviorTmpBuf
+        const tabTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let tabTmpBuf : text.TextTab | undefined
+        if ((tabTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            tabTmpBuf = text_TextTab_serializer.read(valueDeserializer)
         }
-        const tab_result : text.TextTab | undefined = tab_buf
-        let value : text.ParagraphStyle = ({textStyle: textStyle_result, textDirection: textDirection_result, align: align_result, wordBreak: wordBreak_result, maxLines: maxLines_result, breakStrategy: breakStrategy_result, strutStyle: strutStyle_result, textHeightBehavior: textHeightBehavior_result, tab: tab_result} as text.ParagraphStyle)
+        const tabTmpResult : text.TextTab | undefined = tabTmpBuf
+        let value : text.ParagraphStyle = ({textStyle: textStyleTmpResult, textDirection: textDirectionTmpResult, align: alignTmpResult, wordBreak: wordBreakTmpResult, maxLines: maxLinesTmpResult, breakStrategy: breakStrategyTmpResult, strutStyle: strutStyleTmpResult, textHeightBehavior: textHeightBehaviorTmpResult, tab: tabTmpResult} as text.ParagraphStyle)
         return value
     }
 }
 export class text_RunMetrics_serializer {
     public static write(buffer: SerializerBase, value: text.RunMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        const value_textStyle  = value.textStyle
-        text_TextStyle_serializer.write(valueSerializer, value_textStyle)
-        const value_fontMetrics  = value.fontMetrics
-        drawing_FontMetrics_serializer.write(valueSerializer, value_fontMetrics)
+        const valueHolderForTextStyle  = value.textStyle
+        text_TextStyle_serializer.write(valueSerializer, valueHolderForTextStyle)
+        const valueHolderForFontMetrics  = value.fontMetrics
+        drawing_FontMetrics_serializer.write(valueSerializer, valueHolderForFontMetrics)
     }
     public static read(buffer: DeserializerBase): text.RunMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        const textStyle_result : text.TextStyle = text_TextStyle_serializer.read(valueDeserializer)
-        const fontMetrics_result : drawing.FontMetrics = drawing_FontMetrics_serializer.read(valueDeserializer)
-        let value : text.RunMetrics = ({textStyle: textStyle_result, fontMetrics: fontMetrics_result} as text.RunMetrics)
+        const textStyleTmpResult : text.TextStyle = text_TextStyle_serializer.read(valueDeserializer)
+        const fontMetricsTmpResult : drawing.FontMetrics = drawing_FontMetrics_serializer.read(valueDeserializer)
+        let value : text.RunMetrics = ({textStyle: textStyleTmpResult, fontMetrics: fontMetricsTmpResult} as text.RunMetrics)
         return value
     }
 }
@@ -1343,34 +1285,28 @@ export namespace text {
         }
         private loadFontSync_serialize(name: string, path: string | Resource): void {
             const thisSerializer : SerializerBase = SerializerBase.hold()
-            let path_type : int32 = RuntimeType.UNDEFINED
-            path_type = runtimeType(path)
-            if (RuntimeType.STRING == path_type) {
+            if (path instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const path_0  = path as string
-                thisSerializer.writeString(path_0)
-            }
-            else if (RuntimeType.OBJECT == path_type) {
+                const pathForIdx0  = path as string
+                thisSerializer.writeString(pathForIdx0)
+            } else if (path instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const path_1  = path as Resource
-                Resource_serializer.write(thisSerializer, path_1)
+                const pathForIdx1  = path as Resource
+                Resource_serializer.write(thisSerializer, pathForIdx1)
             }
             ArkUIGeneratedNativeModule._text_FontCollection_loadFontSync(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
             thisSerializer.release()
         }
         private loadFont_serialize(name: string, path: string | Resource): Promise<void> {
             const thisSerializer : SerializerBase = SerializerBase.hold()
-            let path_type : int32 = RuntimeType.UNDEFINED
-            path_type = runtimeType(path)
-            if (RuntimeType.STRING == path_type) {
+            if (path instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const path_0  = path as string
-                thisSerializer.writeString(path_0)
-            }
-            else if (RuntimeType.OBJECT == path_type) {
+                const pathForIdx0  = path as string
+                thisSerializer.writeString(pathForIdx0)
+            } else if (path instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const path_1  = path as Resource
-                Resource_serializer.write(thisSerializer, path_1)
+                const pathForIdx1  = path as Resource
+                Resource_serializer.write(thisSerializer, pathForIdx1)
             }
             const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
             ArkUIGeneratedNativeModule._text_FontCollection_loadFont(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1596,10 +1532,10 @@ export namespace text {
             const retval  = ArkUIGeneratedNativeModule._text_Paragraph_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), TypeChecker.text_RectWidthStyle_ToNumeric(widthStyle), TypeChecker.text_RectHeightStyle_ToNumeric(heightStyle))
             thisSerializer.release()
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<TextBox> = new Array<TextBox>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = text_TextBox_serializer.read(retvalDeserializer)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<TextBox> = new Array<TextBox>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
             }
             const returnResult : Array<TextBox> = buffer
             return returnResult
@@ -1607,10 +1543,10 @@ export namespace text {
         private getRectsForPlaceholders_serialize(): Array<TextBox> {
             const retval  = ArkUIGeneratedNativeModule._text_Paragraph_getRectsForPlaceholders(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<TextBox> = new Array<TextBox>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = text_TextBox_serializer.read(retvalDeserializer)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<TextBox> = new Array<TextBox>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
             }
             const returnResult : Array<TextBox> = buffer
             return returnResult
@@ -1646,10 +1582,10 @@ export namespace text {
         private getTextLines_serialize(): Array<TextLine> {
             const retval  = ArkUIGeneratedNativeModule._text_Paragraph_getTextLines(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<TextLine> = new Array<TextLine>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = (text_TextLine_serializer.read(retvalDeserializer) as text.TextLine)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<TextLine> = new Array<TextLine>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = (text_TextLine_serializer.read(retvalDeserializer) as text.TextLine)
             }
             const returnResult : Array<TextLine> = buffer
             return returnResult
@@ -1663,10 +1599,10 @@ export namespace text {
         private getLineMetrics0_serialize(): Array<LineMetrics> {
             const retval  = ArkUIGeneratedNativeModule._text_Paragraph_getLineMetrics0(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<LineMetrics> = new Array<LineMetrics>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = text_LineMetrics_serializer.read(retvalDeserializer)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<LineMetrics> = new Array<LineMetrics>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = text_LineMetrics_serializer.read(retvalDeserializer)
             }
             const returnResult : Array<LineMetrics> = buffer
             return returnResult
@@ -1676,8 +1612,7 @@ export namespace text {
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
             const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
             let buffer : LineMetrics | undefined
-            if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-            {
+            if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
                 buffer = text_LineMetrics_serializer.read(retvalDeserializer)
             }
             const returnResult : LineMetrics | undefined = buffer
@@ -1845,10 +1780,10 @@ export namespace text {
         private getGlyphs0_serialize(): Array<number> {
             const retval  = ArkUIGeneratedNativeModule._text_Run_getGlyphs0(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<number> = new Array<number>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<number> = new Array<number>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
             }
             const returnResult : Array<number> = buffer
             return returnResult
@@ -1859,10 +1794,10 @@ export namespace text {
             const retval  = ArkUIGeneratedNativeModule._text_Run_getGlyphs1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
             thisSerializer.release()
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<number> = new Array<number>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<number> = new Array<number>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
             }
             const returnResult : Array<number> = buffer
             return returnResult
@@ -1870,10 +1805,10 @@ export namespace text {
         private getPositions0_serialize(): Array<common2D.Point> {
             const retval  = ArkUIGeneratedNativeModule._text_Run_getPositions0(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<common2D.Point> = new Array<common2D.Point>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = common2D_Point_serializer.read(retvalDeserializer)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<common2D.Point> = new Array<common2D.Point>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = common2D_Point_serializer.read(retvalDeserializer)
             }
             const returnResult : Array<common2D.Point> = buffer
             return returnResult
@@ -1884,10 +1819,10 @@ export namespace text {
             const retval  = ArkUIGeneratedNativeModule._text_Run_getPositions1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
             thisSerializer.release()
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<common2D.Point> = new Array<common2D.Point>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = common2D_Point_serializer.read(retvalDeserializer)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<common2D.Point> = new Array<common2D.Point>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = common2D_Point_serializer.read(retvalDeserializer)
             }
             const returnResult : Array<common2D.Point> = buffer
             return returnResult
@@ -1895,10 +1830,10 @@ export namespace text {
         private getOffsets_serialize(): Array<common2D.Point> {
             const retval  = ArkUIGeneratedNativeModule._text_Run_getOffsets(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<common2D.Point> = new Array<common2D.Point>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = common2D_Point_serializer.read(retvalDeserializer)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<common2D.Point> = new Array<common2D.Point>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = common2D_Point_serializer.read(retvalDeserializer)
             }
             const returnResult : Array<common2D.Point> = buffer
             return returnResult
@@ -1917,10 +1852,10 @@ export namespace text {
             const retval  = ArkUIGeneratedNativeModule._text_Run_getStringIndices(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
             thisSerializer.release()
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<number> = new Array<number>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<number> = new Array<number>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
             }
             const returnResult : Array<number> = buffer
             return returnResult
@@ -2029,10 +1964,10 @@ export namespace text {
         private getGlyphRuns_serialize(): Array<Run> {
             const retval  = ArkUIGeneratedNativeModule._text_TextLine_getGlyphRuns(this.peer!.ptr)
             let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-            const buffer_length : int32 = retvalDeserializer.readInt32()
-            let buffer : Array<Run> = new Array<Run>(buffer_length)
-            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-                buffer[buffer_i] = (text_Run_serializer.read(retvalDeserializer) as text.Run)
+            const bufferLength : int32 = retvalDeserializer.readInt32()
+            let buffer : Array<Run> = new Array<Run>(bufferLength)
+            for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+                buffer[bufferBufCounterI] = (text_Run_serializer.read(retvalDeserializer) as text.Run)
             }
             const returnResult : Array<Run> = buffer
             return returnResult

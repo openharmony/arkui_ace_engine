@@ -16,8 +16,8 @@
 import { global } from "../static/global"
 import { isNumber, throwError, withWarning } from "../../utils"
 import { KNativePointer, nullptr, KInt} from "@koalaui/interop"
-import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode, passString } from "./private"
-import { Es2pandaContextState, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
+import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode, passString, unpackString } from "./private"
+import { Es2pandaContextState, Es2pandaModifierFlags, Es2pandaMethodDefinitionKind, Es2pandaPrimitiveType, Es2pandaScriptFunctionFlags } from "../../generated/Es2pandaEnums"
 import type { AstNode } from "../peers/AstNode"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import {
@@ -31,16 +31,27 @@ import {
     isScriptFunction,
     isIdentifier,
     isETSModule,
-    ImportSpecifier
+    ImportSpecifier,
+    Program,
+    isObjectExpression,
+    ETSImportDeclaration,
+    isProperty,
+    isTSInterfaceDeclaration,
+    isNumberLiteral,
+    Property,
+    MemberExpression,
+    isMethodDefinition,
+    TypeNode,
 } from "../../generated"
 import { Config } from "../peers/Config"
 import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
 import { listPrograms } from "../plugins"
+import { factory } from "../factory/nodeFactory"
 
 /**
  * Improve: Replace or remove with better naming
- * 
+ *
  * @deprecated
  */
 export function createETSModuleFromContext(): ETSModule {
@@ -59,7 +70,7 @@ export function createETSModuleFromContext(): ETSModule {
 /**
  * Now used only in tests
  * Improve: Remove or replace with better method
- * 
+ *
  * @deprecated
  */
 export function createETSModuleFromSource(
@@ -84,9 +95,8 @@ export function metaDatabase(fileName: string): string {
 
 export function checkErrors() {
     if (global.es2panda._ContextState(global.context) === Es2pandaContextState.ES2PANDA_STATE_ERROR) {
-        console.log()
-        global.es2panda._DestroyConfig(global.config)
-        console.log()
+        console.log(unpackString(global.es2panda._GetAllErrorMessages(global.context)))
+        // global.es2panda._DestroyConfig(global.config)
         process.exit(1)
     }
 }
@@ -143,15 +153,72 @@ export function recheckContext(context: KNativePointer = global.context): void {
 
 export function getDecl(node: AstNode): AstNode | undefined {
     if (isMemberExpression(node)) {
-        return getDecl(node.property!)
+        return getDeclFromArrayOrObjectMember(node)
     }
-    return getPeerDecl(passNode(node))
+    if (isObjectExpression(node)) {
+        return getPeerObjectDecl(passNode(node))
+    }
+    const decl = getPeerDecl(passNode(node))
+    if (!!decl) {
+        return decl
+    }
+    if (!!node.parent && isProperty(node.parent)) {
+        return getDeclFromProperty(node.parent)
+    }
+    return undefined
+}
+
+function getDeclFromProperty(node: Property): AstNode | undefined {
+    if (!node.key) {
+        return undefined
+    }
+    if (!!node.parent && !isObjectExpression(node.parent)) {
+        return getPeerDecl(passNode(node.key))
+    }
+    return getDeclFromObjectExpressionProperty(node)
+}
+
+function getDeclFromObjectExpressionProperty(node: Property): AstNode | undefined {
+    const declNode = getPeerObjectDecl(passNode(node.parent))
+    if (!declNode || !node.key || !isIdentifier(node.key)) {
+        return undefined
+    }
+    let body: readonly AstNode[] = []
+    if (isClassDefinition(declNode)) {
+        body = declNode.body
+    } else if (isTSInterfaceDeclaration(declNode)) {
+        body = declNode.body?.body ?? []
+    }
+    return body.find(
+        (statement) =>
+            isMethodDefinition(statement) &&
+            statement.kind === Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_GET &&
+            !!statement.id &&
+            !!node.key &&
+            isIdentifier(node.key) &&
+            statement.id.name === node.key.name
+    )
+}
+
+function getDeclFromArrayOrObjectMember(node: MemberExpression): AstNode | undefined {
+    if (isNumberLiteral(node.property)) {
+        return node.object ? getDecl(node.object) : undefined
+    }
+    return node.property ? getDecl(node.property) : undefined
 }
 
 export function getPeerDecl(peer: KNativePointer): AstNode | undefined {
     const decl = global.es2panda._DeclarationFromIdentifier(global.context, peer)
     if (decl === nullptr) {
         return undefined
+    }
+    return unpackNonNullableNode(decl)
+}
+
+export function getPeerObjectDecl(peer: KNativePointer): AstNode | undefined {
+    const decl = global.es2panda._ClassVariableDeclaration(global.context, peer);
+    if (decl === nullptr) {
+        return undefined;
     }
     return unpackNonNullableNode(decl)
 }
@@ -177,6 +244,12 @@ export function getOriginalNode(node: AstNode): AstNode {
 export function getFileName(): string {
     return global.filePath
 }
+
+export function getJsDoc(node: AstNode): string | undefined {
+    const result = unpackString(global.es2panda._JsdocStringFromDeclaration(global.context, node.peer))
+    return result === 'Empty Jsdoc' ? undefined : result
+}
+
 
 // Improve: It seems like Definition overrides AstNode  modifiers
 // with it's own modifiers which is completely unrelated set of flags.
@@ -265,10 +338,92 @@ export function generateTsDeclarationsFromContext(
     passString(outputEts),
     exportAll,
     isolated,
-    recordFile
+    passString(recordFile)
   );
 }
 
 export function setAllParents(ast: AstNode): void {
     global.es2panda._AstNodeUpdateAll(global.context, ast.peer);
+}
+
+export function getProgramFromAstNode(node: AstNode): Program {
+    return new Program(global.es2panda._AstNodeProgram(global.context, node.peer))
+}
+
+export function importDeclarationInsert(node: ETSImportDeclaration, program: Program): void {
+    global.es2panda._InsertETSImportDeclarationAndParse(global.context, program.peer, node.peer)
+}
+
+export function signatureReturnType(signature: KNativePointer): KNativePointer {
+    if (!signature) {
+        return nullptr
+    }
+    return global.es2panda._Checker_SignatureReturnType(global.context, signature)
+}
+
+export function tryConvertCheckerTypeToTypeNode(typePeer: KNativePointer | undefined): TypeNode | undefined {
+    if (!typePeer) {
+        return undefined
+    }
+    const str = unpackString(global.es2panda._Checker_TypeToString(global.context, typePeer))
+    // Primitive types
+    if (str == "void") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID)
+    }
+    if (str == "Byte") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_BYTE)
+    }
+    if (str == "Int") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_INT)
+    }
+    if (str == "Long") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_LONG)
+    }
+    if (str == "Short") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_SHORT)
+    }
+    if (str == "Float") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_FLOAT)
+    }
+    if (str == "Double") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_DOUBLE)
+    }
+    if (str == "Boolean") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_BOOLEAN)
+    }
+    if (str == "Char") {
+        return factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_CHAR)
+    }
+    // Special types
+    if (str == "undefined") {
+        return factory.createETSUndefinedType()
+    }
+    // Stdlib types
+    if (str == "String" || str == "Object" || str == "Any") {
+        return factory.createETSTypeReference(
+            factory.createETSTypeReferencePart(
+                factory.createIdentifier(str)
+            )
+        )
+    }
+    // Basic arrow type
+    if (str == "() => void") {
+        return factory.createETSFunctionType(
+            undefined,
+            [],
+            factory.createETSPrimitiveType(Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID),
+            false,
+            Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_NONE,
+            undefined,
+        )
+    }
+    // Only used in samples code
+    if (str == "StringerNode") {
+        return factory.createETSTypeReference(
+            factory.createETSTypeReferencePart(
+                factory.createIdentifier(str)
+            )
+        )
+    }
+    return undefined
 }

@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
@@ -31,6 +31,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkBlankPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,62 +39,54 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkBlankPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Blank_construct(peerId, flags)
-        const _peer  = new ArkBlankPeer(_peerPtr, peerId, "Blank", flags)
+        const _peer  = new ArkBlankPeer(_peerPtr, peerId, 'Blank', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setBlankOptionsAttribute(min?: number | string): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let min_type : int32 = RuntimeType.UNDEFINED
-        min_type = runtimeType(min)
-        thisSerializer.writeInt8((min_type).toChar())
-        if ((min_type) != (RuntimeType.UNDEFINED)) {
-            const min_value  = min!
-            let min_value_type : int32 = RuntimeType.UNDEFINED
-            min_value_type = runtimeType(min_value)
-            if (RuntimeType.NUMBER == min_value_type) {
+        if (min !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const minTmpValue  = min!
+            if (minTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const min_value_0  = min_value as number
-                thisSerializer.writeNumber(min_value_0)
-            }
-            else if (RuntimeType.STRING == min_value_type) {
+                const minTmpValueForIdx0  = minTmpValue as number
+                thisSerializer.writeNumber(minTmpValueForIdx0)
+            } else if (minTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const min_value_1  = min_value as string
-                thisSerializer.writeString(min_value_1)
+                const minTmpValueForIdx1  = minTmpValue as string
+                thisSerializer.writeString(minTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BlankInterface_setBlankOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._BlankAttribute_setColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -115,11 +108,6 @@ export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribut
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: BlankAttribute): void {
-        super.apply(target)
-        if (this.color_value !== undefined)
-            target.color(this.color_value!)
     }
 }
 
@@ -144,7 +132,6 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         return this
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -152,26 +139,6 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         super.applyAttributesFinish()
     }
 }
-export function withBlankStyle(receiver: BlankAttribute, modifier: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkBlankStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Blank")
-// export function Blank(
-//     min?: number | string,
-//     @memo
-//     content_?: () => void,
-// ): BlankAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Blank(
@@ -187,26 +154,64 @@ export function Blank(
     NodeAttach<ArkBlankPeer>((): ArkBlankPeer => ArkBlankPeer.create(receiver), (_: ArkBlankPeer): void => {
         receiver.setBlankOptions(min)
         style?.(receiver)
-        withBlankStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkBlankSet extends ArkCommonMethodSet implements BlankAttribute {
+export class BlankModifier extends CommonMethodModifier implements BlankAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _color_flag?: boolean
-    _color0_value?: ResourceColor | undefined
-    applyModifierPatch(component: BlankAttribute): void {
-        if (this._color_flag)
-            component.color((this._color0_value as ResourceColor | undefined))
+    _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _color_0_0value?: ResourceColor | undefined
+    applyModifierPatch(peer: ArkBlankPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColorAttribute((this._color_0_0value as ResourceColor | undefined));
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._color_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
     }
-    public color(value: ResourceColor | undefined): this {
-        this._color_flag = true
-        this._color0_value = value
+    mergeModifier(modifier: BlankModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.color(modifier._color_0_0value);
+                    break;
+                }
+                default: {
+                    this.color((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+    }
+    color(value: ResourceColor | undefined): this {
+        if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._color_0_flag = AttributeUpdaterFlag.UPDATE
+            this._color_0_0value = value
+        } else
+        {
+            this._color_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -1,5 +1,5 @@
 
-function main(): void {}
+function main() {}
 
 
 function foo(): void {
@@ -9,8 +9,8 @@ function foo(): void {
 }
 
 function hasTrailing(first?: string, trailing?: (()=> void)): void {
-  ({let gensym%%_994 = trailing;
-  (((gensym%%_994) == (null)) ? undefined : gensym%%_994())});
+  ({let gensym%%_942 = trailing;
+  (((gensym%%_942) == (null)) ? undefined : gensym%%_942())});
 }
 
 function bar(zzz: string): void {
@@ -22,7 +22,7 @@ function bar(zzz: string): void {
 
 
 class HasInstantiate {
-  public static $_instantiate(factory: (()=> HasInstantiate), arg: string): void {}
+  public static $_instantiate(factory: (()=> HasInstantiate), arg: string) {}
   
   public constructor() {}
   

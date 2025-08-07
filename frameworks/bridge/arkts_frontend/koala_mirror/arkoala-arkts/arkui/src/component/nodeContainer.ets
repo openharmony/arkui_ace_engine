@@ -16,19 +16,20 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { NodeController_serializer, NodeController } from "./../generated/arkui.NodeController"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
+import { NodeController_serializer, NodeController } from "./../generated/ohos.arkui.node"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -36,7 +37,7 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkNodeContainerPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._NodeContainer_construct(peerId, flags)
-        const _peer  = new ArkNodeContainerPeer(_peerPtr, peerId, "NodeContainer", flags)
+        const _peer  = new ArkNodeContainerPeer(_peerPtr, peerId, 'NodeContainer', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -57,9 +58,6 @@ export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeC
     public attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: NodeContainerAttribute): void {
-        super.apply(target)
-    }
 }
 
 export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements NodeContainerAttribute {
@@ -75,7 +73,6 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -83,26 +80,6 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
         super.applyAttributesFinish()
     }
 }
-export function withNodeContainerStyle(receiver: NodeContainerAttribute, modifier: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkNodeContainerStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("NodeContainer")
-// export function NodeContainer(
-//     controller: NodeController,
-//     @memo
-//     content_?: () => void,
-// ): NodeContainerAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function NodeContainer(
@@ -118,18 +95,21 @@ export function NodeContainer(
     NodeAttach<ArkNodeContainerPeer>((): ArkNodeContainerPeer => ArkNodeContainerPeer.create(receiver), (_: ArkNodeContainerPeer): void => {
         receiver.setNodeContainerOptions(controller)
         style?.(receiver)
-        withNodeContainerStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkNodeContainerSet extends ArkCommonMethodSet implements NodeContainerAttribute {
+export class NodeContainerModifier extends CommonMethodModifier implements NodeContainerAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyModifierPatch(component: NodeContainerAttribute): void {
+    applyModifierPatch(peer: ArkNodeContainerPeer): void {
+        super.applyModifierPatch(peer)
+    }
+    mergeModifier(modifier: NodeContainerModifier): void {
+        super.mergeModifier(modifier)
     }
     public attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

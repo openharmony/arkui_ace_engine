@@ -61,7 +61,9 @@ export class SignatureTransformer extends arkts.AbstractVisitor {
                 node.flags,
                 node.modifierFlags,
                 node.id,
-                node.annotations
+                node.annotations,
+                node.getSignaturePointer(),
+                node.getPreferredReturnTypePointer(),
             )
         }
         if (arkts.isETSFunctionType(node)) {

@@ -16,8 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
+import { Bindable_Number_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { Font_serializer, DividerStyleOptions_serializer, Offset_serializer, ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
 import { DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { TextModifier_serializer, TextModifier } from "./../generated/arkui.TextModifier"
@@ -26,7 +27,6 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
 import { Color, OptionWidthMode } from "./enums"
 import { ControlSize } from "./button"
 import { ContentModifier, AttributeModifier, hookSelectContentModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
@@ -35,6 +35,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkSelectPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -42,596 +43,525 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSelectPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Select_construct(peerId, flags)
-        const _peer  = new ArkSelectPeer(_peerPtr, peerId, "Select", flags)
+        const _peer  = new ArkSelectPeer(_peerPtr, peerId, 'Select', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setSelectOptionsAttribute(options: Array<SelectOption>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((options.length).toInt())
-        for (let options_counter_i = 0; options_counter_i < options.length; options_counter_i++) {
-            const options_element : SelectOption = options[options_counter_i]
-            SelectOption_serializer.write(thisSerializer, options_element)
+        for (let optionsCounterI = 0; optionsCounterI < options.length; optionsCounterI++) {
+            const optionsTmpElement : SelectOption = options[optionsCounterI]
+            SelectOption_serializer.write(thisSerializer, optionsTmpElement)
         }
         ArkUIGeneratedNativeModule._SelectInterface_setSelectOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSelectedAttribute(value: number | Resource | undefined): void {
+    setSelectedAttribute(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Bindable<number>) {
+                thisSerializer.writeInt8((2).toChar())
+                const valueTmpValueForIdx2  = valueTmpValue as Bindable<number>
+                Bindable_Number_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Bindable<Resource>) {
+                thisSerializer.writeInt8((3).toChar())
+                const valueTmpValueForIdx3  = valueTmpValue as Bindable<Resource>
+                Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setValueAttribute(value: ResourceStr | string | Resource | undefined): void {
+    setValueAttribute(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ResourceStr
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+            } else if (valueTmpValue instanceof Bindable<string>) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<string>
+                Bindable_String_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Bindable<Resource>) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Bindable<Resource>
+                Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontAttribute(value: Font | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            Font_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Font_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedOptionBgColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setSelectedOptionBgColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedOptionFontAttribute(value: Font | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            Font_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Font_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setSelectedOptionFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedOptionFontColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setSelectedOptionFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOptionBgColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionBgColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOptionFontAttribute(value: Font | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            Font_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Font_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOptionFontColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnSelectAttribute(value: OnSelectCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOnSelect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSpaceAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setSpace(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setArrowPositionAttribute(value: ArrowPosition | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ArrowPosition)
-            thisSerializer.writeInt32(TypeChecker.ArrowPosition_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ArrowPosition)
+            thisSerializer.writeInt32(TypeChecker.ArrowPosition_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setArrowPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOptionWidthAttribute(value: Dimension | OptionWidthMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Dimension) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Dimension
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Dimension
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_2)
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isOptionWidthMode(value_value)) {
+            } else if (valueTmpValue instanceof OptionWidthMode) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as OptionWidthMode
-                thisSerializer.writeInt32(TypeChecker.OptionWidthMode_ToNumeric(value_value_1))
+                const valueTmpValueForIdx1  = valueTmpValue as OptionWidthMode
+                thisSerializer.writeInt32(TypeChecker.OptionWidthMode_ToNumeric(valueTmpValueForIdx1))
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOptionHeightAttribute(value: Dimension | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenuBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenuBackgroundBlurStyleAttribute(value: BlurStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as BlurStyle)
-            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuBackgroundBlurStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setControlSizeAttribute(value: ControlSize | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as ControlSize)
-            thisSerializer.writeInt32(TypeChecker.ControlSize_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ControlSize)
+            thisSerializer.writeInt32(TypeChecker.ControlSize_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setControlSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMenuItemContentModifierAttribute(value: ContentModifier<MenuItemConfiguration> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._SelectAttribute_setMenuItemContentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setDividerAttribute(value: DividerOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DividerOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DividerOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextModifierAttribute(value: TextModifier | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextModifier_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextModifier_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setTextModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setArrowModifierAttribute(value: SymbolGlyphModifier | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            SymbolGlyphModifier_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SymbolGlyphModifier_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setArrowModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOptionTextModifierAttribute(value: TextModifier | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextModifier_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextModifier_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionTextModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedOptionTextModifierAttribute(value: TextModifier | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextModifier_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextModifier_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setSelectedOptionTextModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDividerStyleAttribute(value: DividerStyleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DividerStyleOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DividerStyleOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setDividerStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAvoidanceAttribute(value: AvoidanceMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as AvoidanceMode)
-            thisSerializer.writeInt32(TypeChecker.AvoidanceMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as AvoidanceMode)
+            thisSerializer.writeInt32(TypeChecker.AvoidanceMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setAvoidance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenuOutlineAttribute(value: MenuOutlineOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            MenuOutlineOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            MenuOutlineOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuOutline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenuAlignAttribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let alignType_type : int32 = RuntimeType.UNDEFINED
-        alignType_type = runtimeType(alignType)
-        thisSerializer.writeInt8((alignType_type).toChar())
-        if ((alignType_type) != (RuntimeType.UNDEFINED)) {
-            const alignType_value  = (alignType as MenuAlignType)
-            thisSerializer.writeInt32(TypeChecker.MenuAlignType_ToNumeric(alignType_value))
+        if (alignType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const alignTypeTmpValue  = (alignType as MenuAlignType)
+            thisSerializer.writeInt32(TypeChecker.MenuAlignType_ToNumeric(alignTypeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let offset_type : int32 = RuntimeType.UNDEFINED
-        offset_type = runtimeType(offset)
-        thisSerializer.writeInt8((offset_type).toChar())
-        if ((offset_type) != (RuntimeType.UNDEFINED)) {
-            const offset_value  = offset!
-            Offset_serializer.write(thisSerializer, offset_value)
+        if (offset !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const offsetTmpValue  = offset!
+            Offset_serializer.write(thisSerializer, offsetTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_selectedAttribute(callback_: ((selected: number | Resource | undefined) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._SelectAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_valueAttribute(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._SelectAttribute_set_onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -659,10 +589,10 @@ export interface MenuOutlineOptions {
     color?: ResourceColor | EdgeColors;
 }
 export interface SelectAttribute extends CommonMethod {
-    selected(value: number | Resource | undefined): this {
+    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         throw new Error("Unimplemented method selected")
     }
-    value(value: ResourceStr | string | Resource | undefined): this {
+    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
         throw new Error("Unimplemented method value")
     }
     font(value: Font | undefined): this {
@@ -743,19 +673,13 @@ export interface SelectAttribute extends CommonMethod {
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         throw new Error("Unimplemented method menuAlign")
     }
-    _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_selected")
-    }
-    _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_value")
-    }
     attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
-    selected_value?: number | Resource | undefined
-    value_value?: ResourceStr | string | Resource | undefined
+    selected_value?: number | Resource | Bindable<number> | Bindable<Resource> | undefined
+    value_value?: ResourceStr | Bindable<string> | Bindable<Resource> | undefined
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
     selectedOptionBgColor_value?: ResourceColor | undefined
@@ -782,10 +706,10 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
     attributeModifier_value?: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined
-    public selected(value: number | Resource | undefined): this {
+    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         return this
     }
-    public value(value: ResourceStr | string | Resource | undefined): this {
+    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
         return this
     }
     public font(value: Font | undefined): this {
@@ -866,71 +790,8 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         return this
     }
-    public _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
-        throw new Error("Unimplemented")
-    }
-    public _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: SelectAttribute): void {
-        super.apply(target)
-        if (this.selected_value !== undefined)
-            target.selected(this.selected_value!)
-        if (this.value_value !== undefined)
-            target.value(this.value_value!)
-        if (this.font_value !== undefined)
-            target.font(this.font_value!)
-        if (this.fontColor_value !== undefined)
-            target.fontColor(this.fontColor_value!)
-        if (this.selectedOptionBgColor_value !== undefined)
-            target.selectedOptionBgColor(this.selectedOptionBgColor_value!)
-        if (this.selectedOptionFont_value !== undefined)
-            target.selectedOptionFont(this.selectedOptionFont_value!)
-        if (this.selectedOptionFontColor_value !== undefined)
-            target.selectedOptionFontColor(this.selectedOptionFontColor_value!)
-        if (this.optionBgColor_value !== undefined)
-            target.optionBgColor(this.optionBgColor_value!)
-        if (this.optionFont_value !== undefined)
-            target.optionFont(this.optionFont_value!)
-        if (this.optionFontColor_value !== undefined)
-            target.optionFontColor(this.optionFontColor_value!)
-        if (this.onSelect_value !== undefined)
-            target.onSelect(this.onSelect_value!)
-        if (this.space_value !== undefined)
-            target.space(this.space_value!)
-        if (this.arrowPosition_value !== undefined)
-            target.arrowPosition(this.arrowPosition_value!)
-        if (this.optionWidth_value !== undefined)
-            target.optionWidth(this.optionWidth_value!)
-        if (this.optionHeight_value !== undefined)
-            target.optionHeight(this.optionHeight_value!)
-        if (this.menuBackgroundColor_value !== undefined)
-            target.menuBackgroundColor(this.menuBackgroundColor_value!)
-        if (this.menuBackgroundBlurStyle_value !== undefined)
-            target.menuBackgroundBlurStyle(this.menuBackgroundBlurStyle_value!)
-        if (this.controlSize_value !== undefined)
-            target.controlSize(this.controlSize_value!)
-        if (this.menuItemContentModifier_value !== undefined)
-            target.menuItemContentModifier(this.menuItemContentModifier_value!)
-        if (this.divider_value !== undefined)
-            target.divider(this.divider_value!)
-        if (this.textModifier_value !== undefined)
-            target.textModifier(this.textModifier_value!)
-        if (this.arrowModifier_value !== undefined)
-            target.arrowModifier(this.arrowModifier_value!)
-        if (this.optionTextModifier_value !== undefined)
-            target.optionTextModifier(this.optionTextModifier_value!)
-        if (this.selectedOptionTextModifier_value !== undefined)
-            target.selectedOptionTextModifier(this.selectedOptionTextModifier_value!)
-        if (this.dividerStyle_value !== undefined)
-            target.dividerStyle(this.dividerStyle_value!)
-        if (this.avoidance_value !== undefined)
-            target.avoidance(this.avoidance_value!)
-        if (this.menuOutline_value !== undefined)
-            target.menuOutline(this.menuOutline_value!)
     }
 }
 export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfiguration> {
@@ -953,17 +814,17 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
-    public selected(value: number | Resource | undefined): this {
+    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         if (this.checkPriority("selected")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (number | Resource | Bindable<number> | Bindable<Resource> | undefined)
             this.getPeer()?.setSelectedAttribute(value_casted)
             return this
         }
         return this
     }
-    public value(value: ResourceStr | string | Resource | undefined): this {
+    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
         if (this.checkPriority("value")) {
-            const value_casted = value as (ResourceStr | string | Resource | undefined)
+            const value_casted = value as (ResourceStr | Bindable<string> | Bindable<Resource> | undefined)
             this.getPeer()?.setValueAttribute(value_casted)
             return this
         }
@@ -1099,9 +960,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
     }
     public menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
         if (this.checkPriority("menuItemContentModifier")) {
-            const value_casted = value as (ContentModifier<MenuItemConfiguration> | undefined)
-            this.getPeer()?.setMenuItemContentModifierAttribute(value_casted)
-            return this
+            hookSelectContentModifier(this, value)
         }
         return this
     }
@@ -1178,24 +1037,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
-    public _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
-        if (this.checkPriority("_onChangeEvent_selected")) {
-            const callback__casted = callback_ as (((selected: number | Resource | undefined) => void))
-            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
-            return
-        }
-        return
-    }
-    public _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
-        if (this.checkPriority("_onChangeEvent_value")) {
-            const callback__casted = callback_ as (((value: ResourceStr | string | Resource | undefined) => void))
-            this.getPeer()?.set_onChangeEvent_valueAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -1203,26 +1045,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         super.applyAttributesFinish()
     }
 }
-export function withSelectStyle(receiver: SelectAttribute, modifier: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkSelectStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Select")
-// export function Select(
-//     options: Array<SelectOption>,
-//     @memo
-//     content_?: () => void,
-// ): SelectAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Select(
@@ -1238,280 +1060,1211 @@ export function Select(
     NodeAttach<ArkSelectPeer>((): ArkSelectPeer => ArkSelectPeer.create(receiver), (_: ArkSelectPeer): void => {
         receiver.setSelectOptions(options)
         style?.(receiver)
-        withSelectStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkSelectSet extends ArkCommonMethodSet implements SelectAttribute {
+export class SelectModifier extends CommonMethodModifier implements SelectAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _selected_flag?: boolean
-    _selected0_value?: number | Resource | undefined
-    _value_flag?: boolean
-    _value0_value?: ResourceStr | string | Resource | undefined
-    _font_flag?: boolean
-    _font0_value?: Font | undefined
-    _fontColor_flag?: boolean
-    _fontColor0_value?: ResourceColor | undefined
-    _selectedOptionBgColor_flag?: boolean
-    _selectedOptionBgColor0_value?: ResourceColor | undefined
-    _selectedOptionFont_flag?: boolean
-    _selectedOptionFont0_value?: Font | undefined
-    _selectedOptionFontColor_flag?: boolean
-    _selectedOptionFontColor0_value?: ResourceColor | undefined
-    _optionBgColor_flag?: boolean
-    _optionBgColor0_value?: ResourceColor | undefined
-    _optionFont_flag?: boolean
-    _optionFont0_value?: Font | undefined
-    _optionFontColor_flag?: boolean
-    _optionFontColor0_value?: ResourceColor | undefined
-    _onSelect_flag?: boolean
-    _onSelect0_value?: OnSelectCallback | undefined
-    _space_flag?: boolean
-    _space0_value?: Length | undefined
-    _arrowPosition_flag?: boolean
-    _arrowPosition0_value?: ArrowPosition | undefined
-    _optionWidth_flag?: boolean
-    _optionWidth0_value?: Dimension | OptionWidthMode | undefined
-    _optionHeight_flag?: boolean
-    _optionHeight0_value?: Dimension | undefined
-    _menuBackgroundColor_flag?: boolean
-    _menuBackgroundColor0_value?: ResourceColor | undefined
-    _menuBackgroundBlurStyle_flag?: boolean
-    _menuBackgroundBlurStyle0_value?: BlurStyle | undefined
-    _controlSize_flag?: boolean
-    _controlSize0_value?: ControlSize | undefined
-    _menuItemContentModifier_flag?: boolean
-    _menuItemContentModifier0_value?: ContentModifier<MenuItemConfiguration> | undefined
-    _divider_flag?: boolean
-    _divider0_value?: DividerOptions | undefined
-    _textModifier_flag?: boolean
-    _textModifier0_value?: TextModifier | undefined
-    _arrowModifier_flag?: boolean
-    _arrowModifier0_value?: SymbolGlyphModifier | undefined
-    _optionTextModifier_flag?: boolean
-    _optionTextModifier0_value?: TextModifier | undefined
-    _selectedOptionTextModifier_flag?: boolean
-    _selectedOptionTextModifier0_value?: TextModifier | undefined
-    _dividerStyle_flag?: boolean
-    _dividerStyle0_value?: DividerStyleOptions | undefined
-    _avoidance_flag?: boolean
-    _avoidance0_value?: AvoidanceMode | undefined
-    _menuOutline_flag?: boolean
-    _menuOutline0_value?: MenuOutlineOptions | undefined
-    _menuAlign_flag?: boolean
-    _menuAlign0_value?: MenuAlignType | undefined
-    _menuAlign1_value?: Offset | undefined
-    __onChangeEvent_selected_flag?: boolean
-    __onChangeEvent_selected0_value?: ((selected: number | Resource | undefined) => void)
-    __onChangeEvent_value_flag?: boolean
-    __onChangeEvent_value0_value?: ((value: ResourceStr | string | Resource | undefined) => void)
-    applyModifierPatch(component: SelectAttribute): void {
-        if (this._selected_flag)
-            component.selected((this._selected0_value as number | Resource | undefined))
-        if (this._value_flag)
-            component.value((this._value0_value as ResourceStr | string | Resource | undefined))
-        if (this._font_flag)
-            component.font((this._font0_value as Font | undefined))
-        if (this._fontColor_flag)
-            component.fontColor((this._fontColor0_value as ResourceColor | undefined))
-        if (this._selectedOptionBgColor_flag)
-            component.selectedOptionBgColor((this._selectedOptionBgColor0_value as ResourceColor | undefined))
-        if (this._selectedOptionFont_flag)
-            component.selectedOptionFont((this._selectedOptionFont0_value as Font | undefined))
-        if (this._selectedOptionFontColor_flag)
-            component.selectedOptionFontColor((this._selectedOptionFontColor0_value as ResourceColor | undefined))
-        if (this._optionBgColor_flag)
-            component.optionBgColor((this._optionBgColor0_value as ResourceColor | undefined))
-        if (this._optionFont_flag)
-            component.optionFont((this._optionFont0_value as Font | undefined))
-        if (this._optionFontColor_flag)
-            component.optionFontColor((this._optionFontColor0_value as ResourceColor | undefined))
-        if (this._onSelect_flag)
-            component.onSelect((this._onSelect0_value as OnSelectCallback | undefined))
-        if (this._space_flag)
-            component.space((this._space0_value as Length | undefined))
-        if (this._arrowPosition_flag)
-            component.arrowPosition((this._arrowPosition0_value as ArrowPosition | undefined))
-        if (this._optionWidth_flag)
-            component.optionWidth((this._optionWidth0_value as Dimension | OptionWidthMode | undefined))
-        if (this._optionHeight_flag)
-            component.optionHeight((this._optionHeight0_value as Dimension | undefined))
-        if (this._menuBackgroundColor_flag)
-            component.menuBackgroundColor((this._menuBackgroundColor0_value as ResourceColor | undefined))
-        if (this._menuBackgroundBlurStyle_flag)
-            component.menuBackgroundBlurStyle((this._menuBackgroundBlurStyle0_value as BlurStyle | undefined))
-        if (this._controlSize_flag)
-            component.controlSize((this._controlSize0_value as ControlSize | undefined))
-        if (this._menuItemContentModifier_flag)
-            component.menuItemContentModifier((this._menuItemContentModifier0_value as ContentModifier<MenuItemConfiguration> | undefined))
-        if (this._divider_flag)
-            component.divider((this._divider0_value as DividerOptions | undefined))
-        if (this._textModifier_flag)
-            component.textModifier((this._textModifier0_value as TextModifier | undefined))
-        if (this._arrowModifier_flag)
-            component.arrowModifier((this._arrowModifier0_value as SymbolGlyphModifier | undefined))
-        if (this._optionTextModifier_flag)
-            component.optionTextModifier((this._optionTextModifier0_value as TextModifier | undefined))
-        if (this._selectedOptionTextModifier_flag)
-            component.selectedOptionTextModifier((this._selectedOptionTextModifier0_value as TextModifier | undefined))
-        if (this._dividerStyle_flag)
-            component.dividerStyle((this._dividerStyle0_value as DividerStyleOptions | undefined))
-        if (this._avoidance_flag)
-            component.avoidance((this._avoidance0_value as AvoidanceMode | undefined))
-        if (this._menuOutline_flag)
-            component.menuOutline((this._menuOutline0_value as MenuOutlineOptions | undefined))
-        if (this._menuAlign_flag)
-            component.menuAlign((this._menuAlign0_value as MenuAlignType | undefined), (this._menuAlign1_value as Offset | undefined))
+    _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selected_0_0value?: number | Resource | Bindable<number> | Bindable<Resource> | undefined
+    _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _value_0_0value?: ResourceStr | Bindable<string> | Bindable<Resource> | undefined
+    _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _font_0_0value?: Font | undefined
+    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontColor_0_0value?: ResourceColor | undefined
+    _selectedOptionBgColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedOptionBgColor_0_0value?: ResourceColor | undefined
+    _selectedOptionFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedOptionFont_0_0value?: Font | undefined
+    _selectedOptionFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedOptionFontColor_0_0value?: ResourceColor | undefined
+    _optionBgColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _optionBgColor_0_0value?: ResourceColor | undefined
+    _optionFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _optionFont_0_0value?: Font | undefined
+    _optionFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _optionFontColor_0_0value?: ResourceColor | undefined
+    _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSelect_0_0value?: OnSelectCallback | undefined
+    _space_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _space_0_0value?: Length | undefined
+    _arrowPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _arrowPosition_0_0value?: ArrowPosition | undefined
+    _optionWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _optionWidth_0_0value?: Dimension | OptionWidthMode | undefined
+    _optionHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _optionHeight_0_0value?: Dimension | undefined
+    _menuBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuBackgroundColor_0_0value?: ResourceColor | undefined
+    _menuBackgroundBlurStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuBackgroundBlurStyle_0_0value?: BlurStyle | undefined
+    _controlSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _controlSize_0_0value?: ControlSize | undefined
+    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _divider_0_0value?: DividerOptions | undefined
+    _textModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textModifier_0_0value?: TextModifier | undefined
+    _arrowModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _arrowModifier_0_0value?: SymbolGlyphModifier | undefined
+    _optionTextModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _optionTextModifier_0_0value?: TextModifier | undefined
+    _selectedOptionTextModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedOptionTextModifier_0_0value?: TextModifier | undefined
+    _dividerStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dividerStyle_0_0value?: DividerStyleOptions | undefined
+    _avoidance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _avoidance_0_0value?: AvoidanceMode | undefined
+    _menuOutline_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuOutline_0_0value?: MenuOutlineOptions | undefined
+    _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuAlign_0_0value?: MenuAlignType | undefined
+    _menuAlign_0_1value?: Offset | undefined
+    applyModifierPatch(peer: ArkSelectPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedAttribute((this._selected_0_0value as number | Resource | Bindable<number> | Bindable<Resource> | undefined));
+                    this._selected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selected_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedAttribute((undefined as number | Resource | Bindable<number> | Bindable<Resource> | undefined));
+                }
+            }
+        }
+        if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._value_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setValueAttribute((this._value_0_0value as ResourceStr | Bindable<string> | Bindable<Resource> | undefined));
+                    this._value_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._value_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._value_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setValueAttribute((undefined as ResourceStr | Bindable<string> | Bindable<Resource> | undefined));
+                }
+            }
+        }
+        if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontAttribute((this._font_0_0value as Font | undefined));
+                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._font_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontAttribute((undefined as Font | undefined));
+                }
+            }
+        }
+        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._selectedOptionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedOptionBgColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedOptionBgColorAttribute((this._selectedOptionBgColor_0_0value as ResourceColor | undefined));
+                    this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedOptionBgColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._selectedOptionFont_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedOptionFont_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedOptionFontAttribute((this._selectedOptionFont_0_0value as Font | undefined));
+                    this._selectedOptionFont_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedOptionFont_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedOptionFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedOptionFontAttribute((undefined as Font | undefined));
+                }
+            }
+        }
+        if (this._selectedOptionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedOptionFontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedOptionFontColorAttribute((this._selectedOptionFontColor_0_0value as ResourceColor | undefined));
+                    this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedOptionFontColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._optionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._optionBgColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOptionBgColorAttribute((this._optionBgColor_0_0value as ResourceColor | undefined));
+                    this._optionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._optionBgColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._optionBgColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOptionBgColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._optionFont_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._optionFont_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOptionFontAttribute((this._optionFont_0_0value as Font | undefined));
+                    this._optionFont_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._optionFont_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._optionFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOptionFontAttribute((undefined as Font | undefined));
+                }
+            }
+        }
+        if (this._optionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._optionFontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOptionFontColorAttribute((this._optionFontColor_0_0value as ResourceColor | undefined));
+                    this._optionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._optionFontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._optionFontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOptionFontColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._onSelect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSelect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSelectAttribute((this._onSelect_0_0value as OnSelectCallback | undefined));
+                    this._onSelect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSelect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSelect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSelectAttribute((undefined as OnSelectCallback | undefined));
+                }
+            }
+        }
+        if (this._space_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._space_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSpaceAttribute((this._space_0_0value as Length | undefined));
+                    this._space_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._space_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._space_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSpaceAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._arrowPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._arrowPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setArrowPositionAttribute((this._arrowPosition_0_0value as ArrowPosition | undefined));
+                    this._arrowPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._arrowPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._arrowPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setArrowPositionAttribute((undefined as ArrowPosition | undefined));
+                }
+            }
+        }
+        if (this._optionWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._optionWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOptionWidthAttribute((this._optionWidth_0_0value as Dimension | OptionWidthMode | undefined));
+                    this._optionWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._optionWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._optionWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOptionWidthAttribute((undefined as Dimension | OptionWidthMode | undefined));
+                }
+            }
+        }
+        if (this._optionHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._optionHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOptionHeightAttribute((this._optionHeight_0_0value as Dimension | undefined));
+                    this._optionHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._optionHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._optionHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOptionHeightAttribute((undefined as Dimension | undefined));
+                }
+            }
+        }
+        if (this._menuBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuBackgroundColorAttribute((this._menuBackgroundColor_0_0value as ResourceColor | undefined));
+                    this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._menuBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuBackgroundBlurStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuBackgroundBlurStyleAttribute((this._menuBackgroundBlurStyle_0_0value as BlurStyle | undefined));
+                    this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuBackgroundBlurStyleAttribute((undefined as BlurStyle | undefined));
+                }
+            }
+        }
+        if (this._controlSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._controlSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setControlSizeAttribute((this._controlSize_0_0value as ControlSize | undefined));
+                    this._controlSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._controlSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._controlSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setControlSizeAttribute((undefined as ControlSize | undefined));
+                }
+            }
+        }
+        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerAttribute((this._divider_0_0value as DividerOptions | undefined));
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerAttribute((undefined as DividerOptions | undefined));
+                }
+            }
+        }
+        if (this._textModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextModifierAttribute((this._textModifier_0_0value as TextModifier | undefined));
+                    this._textModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextModifierAttribute((undefined as TextModifier | undefined));
+                }
+            }
+        }
+        if (this._arrowModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._arrowModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setArrowModifierAttribute((this._arrowModifier_0_0value as SymbolGlyphModifier | undefined));
+                    this._arrowModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._arrowModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._arrowModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setArrowModifierAttribute((undefined as SymbolGlyphModifier | undefined));
+                }
+            }
+        }
+        if (this._optionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._optionTextModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOptionTextModifierAttribute((this._optionTextModifier_0_0value as TextModifier | undefined));
+                    this._optionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._optionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._optionTextModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOptionTextModifierAttribute((undefined as TextModifier | undefined));
+                }
+            }
+        }
+        if (this._selectedOptionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedOptionTextModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedOptionTextModifierAttribute((this._selectedOptionTextModifier_0_0value as TextModifier | undefined));
+                    this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedOptionTextModifierAttribute((undefined as TextModifier | undefined));
+                }
+            }
+        }
+        if (this._dividerStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dividerStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerStyleAttribute((this._dividerStyle_0_0value as DividerStyleOptions | undefined));
+                    this._dividerStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dividerStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dividerStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerStyleAttribute((undefined as DividerStyleOptions | undefined));
+                }
+            }
+        }
+        if (this._avoidance_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._avoidance_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAvoidanceAttribute((this._avoidance_0_0value as AvoidanceMode | undefined));
+                    this._avoidance_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._avoidance_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._avoidance_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAvoidanceAttribute((undefined as AvoidanceMode | undefined));
+                }
+            }
+        }
+        if (this._menuOutline_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuOutline_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuOutlineAttribute((this._menuOutline_0_0value as MenuOutlineOptions | undefined));
+                    this._menuOutline_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuOutline_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuOutline_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuOutlineAttribute((undefined as MenuOutlineOptions | undefined));
+                }
+            }
+        }
+        if (this._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuAlignAttribute((this._menuAlign_0_0value as MenuAlignType | undefined), (this._menuAlign_0_1value as Offset | undefined));
+                    this._menuAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuAlignAttribute((undefined as MenuAlignType | undefined), (undefined as Offset | undefined | undefined));
+                }
+            }
+        }
     }
-    public selected(value: number | Resource | undefined): this {
-        this._selected_flag = true
-        this._selected0_value = value
+    mergeModifier(modifier: SelectModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selected(modifier._selected_0_0value);
+                    break;
+                }
+                default: {
+                    this.selected((undefined as number | Resource | Bindable<number> | Bindable<Resource> | undefined));
+                }
+            }
+        }
+        if (modifier._value_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._value_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.value(modifier._value_0_0value);
+                    break;
+                }
+                default: {
+                    this.value((undefined as ResourceStr | Bindable<string> | Bindable<Resource> | undefined));
+                }
+            }
+        }
+        if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.font(modifier._font_0_0value);
+                    break;
+                }
+                default: {
+                    this.font((undefined as Font | undefined));
+                }
+            }
+        }
+        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontColor(modifier._fontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._selectedOptionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedOptionBgColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedOptionBgColor(modifier._selectedOptionBgColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedOptionBgColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._selectedOptionFont_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedOptionFont_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedOptionFont(modifier._selectedOptionFont_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedOptionFont((undefined as Font | undefined));
+                }
+            }
+        }
+        if (modifier._selectedOptionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedOptionFontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedOptionFontColor(modifier._selectedOptionFontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedOptionFontColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._optionBgColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._optionBgColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.optionBgColor(modifier._optionBgColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.optionBgColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._optionFont_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._optionFont_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.optionFont(modifier._optionFont_0_0value);
+                    break;
+                }
+                default: {
+                    this.optionFont((undefined as Font | undefined));
+                }
+            }
+        }
+        if (modifier._optionFontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._optionFontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.optionFontColor(modifier._optionFontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.optionFontColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._onSelect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSelect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSelect(modifier._onSelect_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSelect((undefined as OnSelectCallback | undefined));
+                }
+            }
+        }
+        if (modifier._space_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._space_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.space(modifier._space_0_0value);
+                    break;
+                }
+                default: {
+                    this.space((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._arrowPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._arrowPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.arrowPosition(modifier._arrowPosition_0_0value);
+                    break;
+                }
+                default: {
+                    this.arrowPosition((undefined as ArrowPosition | undefined));
+                }
+            }
+        }
+        if (modifier._optionWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._optionWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.optionWidth(modifier._optionWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.optionWidth((undefined as Dimension | OptionWidthMode | undefined));
+                }
+            }
+        }
+        if (modifier._optionHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._optionHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.optionHeight(modifier._optionHeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.optionHeight((undefined as Dimension | undefined));
+                }
+            }
+        }
+        if (modifier._menuBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuBackgroundColor(modifier._menuBackgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuBackgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._menuBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuBackgroundBlurStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuBackgroundBlurStyle(modifier._menuBackgroundBlurStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuBackgroundBlurStyle((undefined as BlurStyle | undefined));
+                }
+            }
+        }
+        if (modifier._controlSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._controlSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.controlSize(modifier._controlSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.controlSize((undefined as ControlSize | undefined));
+                }
+            }
+        }
+        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.divider(modifier._divider_0_0value);
+                    break;
+                }
+                default: {
+                    this.divider((undefined as DividerOptions | undefined));
+                }
+            }
+        }
+        if (modifier._textModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textModifier(modifier._textModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.textModifier((undefined as TextModifier | undefined));
+                }
+            }
+        }
+        if (modifier._arrowModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._arrowModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.arrowModifier(modifier._arrowModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.arrowModifier((undefined as SymbolGlyphModifier | undefined));
+                }
+            }
+        }
+        if (modifier._optionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._optionTextModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.optionTextModifier(modifier._optionTextModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.optionTextModifier((undefined as TextModifier | undefined));
+                }
+            }
+        }
+        if (modifier._selectedOptionTextModifier_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedOptionTextModifier_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedOptionTextModifier(modifier._selectedOptionTextModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedOptionTextModifier((undefined as TextModifier | undefined));
+                }
+            }
+        }
+        if (modifier._dividerStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dividerStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dividerStyle(modifier._dividerStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.dividerStyle((undefined as DividerStyleOptions | undefined));
+                }
+            }
+        }
+        if (modifier._avoidance_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._avoidance_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.avoidance(modifier._avoidance_0_0value);
+                    break;
+                }
+                default: {
+                    this.avoidance((undefined as AvoidanceMode | undefined));
+                }
+            }
+        }
+        if (modifier._menuOutline_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuOutline_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuOutline(modifier._menuOutline_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuOutline((undefined as MenuOutlineOptions | undefined));
+                }
+            }
+        }
+        if (modifier._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuAlign(modifier._menuAlign_0_0value, modifier._menuAlign_0_1value);
+                    break;
+                }
+                default: {
+                    this.menuAlign((undefined as MenuAlignType | undefined), (undefined as Offset | undefined | undefined));
+                }
+            }
+        }
+    }
+    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+        if (((this._selected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selected_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selected_0_0value = value
+        } else
+        {
+            this._selected_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public value(value: ResourceStr | string | Resource | undefined): this {
-        this._value_flag = true
-        this._value0_value = value
+    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
+        if (((this._value_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._value_0_flag = AttributeUpdaterFlag.UPDATE
+            this._value_0_0value = value
+        } else
+        {
+            this._value_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public font(value: Font | undefined): this {
-        this._font_flag = true
-        this._font0_value = value
+    font(value: Font | undefined): this {
+        if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._font_0_flag = AttributeUpdaterFlag.UPDATE
+            this._font_0_0value = value
+        } else
+        {
+            this._font_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
-        this._fontColor_flag = true
-        this._fontColor0_value = value
+    fontColor(value: ResourceColor | undefined): this {
+        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontColor_0_0value = value
+        } else
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedOptionBgColor(value: ResourceColor | undefined): this {
-        this._selectedOptionBgColor_flag = true
-        this._selectedOptionBgColor0_value = value
+    selectedOptionBgColor(value: ResourceColor | undefined): this {
+        if (((this._selectedOptionBgColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedOptionBgColor_0_0value = value
+        } else
+        {
+            this._selectedOptionBgColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedOptionFont(value: Font | undefined): this {
-        this._selectedOptionFont_flag = true
-        this._selectedOptionFont0_value = value
+    selectedOptionFont(value: Font | undefined): this {
+        if (((this._selectedOptionFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedOptionFont_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedOptionFont_0_0value = value
+        } else
+        {
+            this._selectedOptionFont_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedOptionFontColor(value: ResourceColor | undefined): this {
-        this._selectedOptionFontColor_flag = true
-        this._selectedOptionFontColor0_value = value
+    selectedOptionFontColor(value: ResourceColor | undefined): this {
+        if (((this._selectedOptionFontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedOptionFontColor_0_0value = value
+        } else
+        {
+            this._selectedOptionFontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public optionBgColor(value: ResourceColor | undefined): this {
-        this._optionBgColor_flag = true
-        this._optionBgColor0_value = value
+    optionBgColor(value: ResourceColor | undefined): this {
+        if (((this._optionBgColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._optionBgColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._optionBgColor_0_0value = value
+        } else
+        {
+            this._optionBgColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public optionFont(value: Font | undefined): this {
-        this._optionFont_flag = true
-        this._optionFont0_value = value
+    optionFont(value: Font | undefined): this {
+        if (((this._optionFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._optionFont_0_flag = AttributeUpdaterFlag.UPDATE
+            this._optionFont_0_0value = value
+        } else
+        {
+            this._optionFont_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public optionFontColor(value: ResourceColor | undefined): this {
-        this._optionFontColor_flag = true
-        this._optionFontColor0_value = value
+    optionFontColor(value: ResourceColor | undefined): this {
+        if (((this._optionFontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._optionFontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._optionFontColor_0_0value = value
+        } else
+        {
+            this._optionFontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onSelect(value: OnSelectCallback | undefined): this {
-        this._onSelect_flag = true
-        this._onSelect0_value = value
+    onSelect(value: OnSelectCallback | undefined): this {
+        if (((this._onSelect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSelect_0_0value = value
+        } else
+        {
+            this._onSelect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public space(value: Length | undefined): this {
-        this._space_flag = true
-        this._space0_value = value
+    space(value: Length | undefined): this {
+        if (((this._space_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._space_0_flag = AttributeUpdaterFlag.UPDATE
+            this._space_0_0value = value
+        } else
+        {
+            this._space_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public arrowPosition(value: ArrowPosition | undefined): this {
-        this._arrowPosition_flag = true
-        this._arrowPosition0_value = value
+    arrowPosition(value: ArrowPosition | undefined): this {
+        if (((this._arrowPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._arrowPosition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._arrowPosition_0_0value = value
+        } else
+        {
+            this._arrowPosition_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public optionWidth(value: Dimension | OptionWidthMode | undefined): this {
-        this._optionWidth_flag = true
-        this._optionWidth0_value = value
+    optionWidth(value: Dimension | OptionWidthMode | undefined): this {
+        if (((this._optionWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._optionWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._optionWidth_0_0value = value
+        } else
+        {
+            this._optionWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public optionHeight(value: Dimension | undefined): this {
-        this._optionHeight_flag = true
-        this._optionHeight0_value = value
+    optionHeight(value: Dimension | undefined): this {
+        if (((this._optionHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._optionHeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._optionHeight_0_0value = value
+        } else
+        {
+            this._optionHeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menuBackgroundColor(value: ResourceColor | undefined): this {
-        this._menuBackgroundColor_flag = true
-        this._menuBackgroundColor0_value = value
+    menuBackgroundColor(value: ResourceColor | undefined): this {
+        if (((this._menuBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuBackgroundColor_0_0value = value
+        } else
+        {
+            this._menuBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
-        this._menuBackgroundBlurStyle_flag = true
-        this._menuBackgroundBlurStyle0_value = value
+    menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        if (((this._menuBackgroundBlurStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuBackgroundBlurStyle_0_0value = value
+        } else
+        {
+            this._menuBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public controlSize(value: ControlSize | undefined): this {
-        this._controlSize_flag = true
-        this._controlSize0_value = value
+    controlSize(value: ControlSize | undefined): this {
+        if (((this._controlSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._controlSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._controlSize_0_0value = value
+        } else
+        {
+            this._controlSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
-        this._menuItemContentModifier_flag = true
-        this._menuItemContentModifier0_value = value
+    divider(value: DividerOptions | undefined): this {
+        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+            this._divider_0_0value = value
+        } else
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
-        this._divider_flag = true
-        this._divider0_value = value
+    textModifier(value: TextModifier | undefined): this {
+        if (((this._textModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textModifier_0_0value = value
+        } else
+        {
+            this._textModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textModifier(value: TextModifier | undefined): this {
-        this._textModifier_flag = true
-        this._textModifier0_value = value
+    arrowModifier(value: SymbolGlyphModifier | undefined): this {
+        if (((this._arrowModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._arrowModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._arrowModifier_0_0value = value
+        } else
+        {
+            this._arrowModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public arrowModifier(value: SymbolGlyphModifier | undefined): this {
-        this._arrowModifier_flag = true
-        this._arrowModifier0_value = value
+    optionTextModifier(value: TextModifier | undefined): this {
+        if (((this._optionTextModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._optionTextModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._optionTextModifier_0_0value = value
+        } else
+        {
+            this._optionTextModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public optionTextModifier(value: TextModifier | undefined): this {
-        this._optionTextModifier_flag = true
-        this._optionTextModifier0_value = value
+    selectedOptionTextModifier(value: TextModifier | undefined): this {
+        if (((this._selectedOptionTextModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedOptionTextModifier_0_0value = value
+        } else
+        {
+            this._selectedOptionTextModifier_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedOptionTextModifier(value: TextModifier | undefined): this {
-        this._selectedOptionTextModifier_flag = true
-        this._selectedOptionTextModifier0_value = value
+    dividerStyle(value: DividerStyleOptions | undefined): this {
+        if (((this._dividerStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dividerStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dividerStyle_0_0value = value
+        } else
+        {
+            this._dividerStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public dividerStyle(value: DividerStyleOptions | undefined): this {
-        this._dividerStyle_flag = true
-        this._dividerStyle0_value = value
+    avoidance(value: AvoidanceMode | undefined): this {
+        if (((this._avoidance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._avoidance_0_flag = AttributeUpdaterFlag.UPDATE
+            this._avoidance_0_0value = value
+        } else
+        {
+            this._avoidance_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public avoidance(value: AvoidanceMode | undefined): this {
-        this._avoidance_flag = true
-        this._avoidance0_value = value
+    menuOutline(value: MenuOutlineOptions | undefined): this {
+        if (((this._menuOutline_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menuOutline_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuOutline_0_0value = value
+        } else
+        {
+            this._menuOutline_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menuOutline(value: MenuOutlineOptions | undefined): this {
-        this._menuOutline_flag = true
-        this._menuOutline0_value = value
+    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
+        if (((this._menuAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._menuAlign_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuAlign_0_0value = alignType
+            this._menuAlign_0_1value = offset
+        } else
+        {
+            this._menuAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
-    }
-    public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
-        this._menuAlign_flag = true
-        this._menuAlign0_value = alignType
-        this._menuAlign1_value = offset
-        return this
-    }
-    public _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
-    }
-    public _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1520,337 +2273,285 @@ export class ArkSelectSet extends ArkCommonMethodSet implements SelectAttribute 
 export class MenuItemConfiguration_serializer {
     public static write(buffer: SerializerBase, value: MenuItemConfiguration): void {
         let valueSerializer : SerializerBase = buffer
-        const value_enabled  = value.enabled
-        valueSerializer.writeBoolean(value_enabled)
-        const value_contentModifier  = value.contentModifier
-        valueSerializer.holdAndWriteObject(value_contentModifier)
-        const value_value  = value.value
-        let value_value_type : int32 = RuntimeType.UNDEFINED
-        value_value_type = runtimeType(value_value)
-        if (RuntimeType.STRING == value_value_type) {
+        const valueHolderForEnabled  = value.enabled
+        valueSerializer.writeBoolean(valueHolderForEnabled)
+        const valueHolderForContentModifier  = value.contentModifier
+        valueSerializer.holdAndWriteObject(valueHolderForContentModifier)
+        const valueHolderForValue  = value.value
+        if (valueHolderForValue instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_value_0  = value_value as string
-            valueSerializer.writeString(value_value_0)
-        }
-        else if (RuntimeType.OBJECT == value_value_type) {
+            const valueHolderForValueForIdx0  = valueHolderForValue as string
+            valueSerializer.writeString(valueHolderForValueForIdx0)
+        } else if (valueHolderForValue instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_value_1  = value_value as Resource
-            Resource_serializer.write(valueSerializer, value_value_1)
+            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
-        const value_icon  = value.icon
-        let value_icon_type : int32 = RuntimeType.UNDEFINED
-        value_icon_type = runtimeType(value_icon)
-        valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
-            const value_icon_value  = value_icon!
-            let value_icon_value_type : int32 = RuntimeType.UNDEFINED
-            value_icon_value_type = runtimeType(value_icon_value)
-            if (RuntimeType.STRING == value_icon_value_type) {
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_icon_value_0  = value_icon_value as string
-                valueSerializer.writeString(value_icon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_icon_value_type) {
+                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
+            } else if (valueHolderForIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_icon_value_1  = value_icon_value as Resource
-                Resource_serializer.write(valueSerializer, value_icon_value_1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_symbolIcon  = value.symbolIcon
-        let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
-        valueSerializer.writeInt8((value_symbolIcon_type).toChar())
-        if ((value_symbolIcon_type) != (RuntimeType.UNDEFINED)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            SymbolGlyphModifier_serializer.write(valueSerializer, value_symbolIcon_value)
+        const valueHolderForSymbolIcon  = value.symbolIcon
+        if (valueHolderForSymbolIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSymbolIconTmpValue  = valueHolderForSymbolIcon!
+            SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForSymbolIconTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_selected  = value.selected
-        valueSerializer.writeBoolean(value_selected)
-        const value_index  = value.index
-        valueSerializer.writeNumber(value_index)
+        const valueHolderForSelected  = value.selected
+        valueSerializer.writeBoolean(valueHolderForSelected)
+        const valueHolderForIndex  = value.index
+        valueSerializer.writeNumber(valueHolderForIndex)
     }
     public static read(buffer: DeserializerBase): MenuItemConfiguration {
         let valueDeserializer : DeserializerBase = buffer
-        const enabled_result : boolean = valueDeserializer.readBoolean()
-        const contentModifier_result : ContentModifier<MenuItemConfiguration> = (valueDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
-        const value_buf_selector : int32 = valueDeserializer.readInt8()
-        let value_buf : string | Resource | undefined
-        if (value_buf_selector == (0).toChar()) {
-            value_buf = (valueDeserializer.readString() as string)
+        const enabledTmpResult : boolean = valueDeserializer.readBoolean()
+        const contentModifierTmpResult : ContentModifier<MenuItemConfiguration> = (valueDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
+        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let valueTmpBuf : string | Resource | undefined
+        if (valueTmpBufUnionSelector == (0).toChar()) {
+            valueTmpBuf = (valueDeserializer.readString() as string)
+        } else if (valueTmpBufUnionSelector == (1).toChar()) {
+            valueTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
         }
-        else if (value_buf_selector == (1).toChar()) {
-            value_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
-        }
-        const value_result : ResourceStr = (value_buf as string | Resource)
-        const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icon_buf : ResourceStr | undefined
-        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const icon_buf__selector : int32 = valueDeserializer.readInt8()
-            let icon_buf_ : string | Resource | undefined
-            if (icon_buf__selector == (0).toChar()) {
-                icon_buf_ = (valueDeserializer.readString() as string)
+        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : ResourceStr | undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBuf_ : string | Resource | undefined
+            if (iconTmpBuf_UnionSelector == (0).toChar()) {
+                iconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
+                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (icon_buf__selector == (1).toChar()) {
-                icon_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for icon_buf_ has to be chosen through deserialisation.")
-            }
-            icon_buf = (icon_buf_ as string | Resource)
+            iconTmpBuf = (iconTmpBuf_ as string | Resource)
         }
-        const icon_result : ResourceStr | undefined = icon_buf
-        const symbolIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolIcon_buf : SymbolGlyphModifier | undefined
-        if ((symbolIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            symbolIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
+        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
+        const symbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let symbolIconTmpBuf : SymbolGlyphModifier | undefined
+        if ((symbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            symbolIconTmpBuf = SymbolGlyphModifier_serializer.read(valueDeserializer)
         }
-        const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
-        const selected_result : boolean = valueDeserializer.readBoolean()
-        const index_result : number = (valueDeserializer.readNumber() as number)
+        const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
+        const selectedTmpResult : boolean = valueDeserializer.readBoolean()
+        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
         throw new Error("Interface with functions is not supported")
     }
 }
 export class SelectOption_serializer {
     public static write(buffer: SerializerBase, value: SelectOption): void {
         let valueSerializer : SerializerBase = buffer
-        const value_value  = value.value
-        let value_value_type : int32 = RuntimeType.UNDEFINED
-        value_value_type = runtimeType(value_value)
-        if (RuntimeType.STRING == value_value_type) {
+        const valueHolderForValue  = value.value
+        if (valueHolderForValue instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_value_0  = value_value as string
-            valueSerializer.writeString(value_value_0)
-        }
-        else if (RuntimeType.OBJECT == value_value_type) {
+            const valueHolderForValueForIdx0  = valueHolderForValue as string
+            valueSerializer.writeString(valueHolderForValueForIdx0)
+        } else if (valueHolderForValue instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_value_1  = value_value as Resource
-            Resource_serializer.write(valueSerializer, value_value_1)
+            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
-        const value_icon  = value.icon
-        let value_icon_type : int32 = RuntimeType.UNDEFINED
-        value_icon_type = runtimeType(value_icon)
-        valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
-            const value_icon_value  = value_icon!
-            let value_icon_value_type : int32 = RuntimeType.UNDEFINED
-            value_icon_value_type = runtimeType(value_icon_value)
-            if (RuntimeType.STRING == value_icon_value_type) {
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_icon_value_0  = value_icon_value as string
-                valueSerializer.writeString(value_icon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_icon_value_type) {
+                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
+            } else if (valueHolderForIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_icon_value_1  = value_icon_value as Resource
-                Resource_serializer.write(valueSerializer, value_icon_value_1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_symbolIcon  = value.symbolIcon
-        let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
-        valueSerializer.writeInt8((value_symbolIcon_type).toChar())
-        if ((value_symbolIcon_type) != (RuntimeType.UNDEFINED)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            SymbolGlyphModifier_serializer.write(valueSerializer, value_symbolIcon_value)
+        const valueHolderForSymbolIcon  = value.symbolIcon
+        if (valueHolderForSymbolIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSymbolIconTmpValue  = valueHolderForSymbolIcon!
+            SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForSymbolIconTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SelectOption {
         let valueDeserializer : DeserializerBase = buffer
-        const value_buf_selector : int32 = valueDeserializer.readInt8()
-        let value_buf : string | Resource | undefined
-        if (value_buf_selector == (0).toChar()) {
-            value_buf = (valueDeserializer.readString() as string)
+        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let valueTmpBuf : string | Resource | undefined
+        if (valueTmpBufUnionSelector == (0).toChar()) {
+            valueTmpBuf = (valueDeserializer.readString() as string)
+        } else if (valueTmpBufUnionSelector == (1).toChar()) {
+            valueTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
         }
-        else if (value_buf_selector == (1).toChar()) {
-            value_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
-        }
-        const value_result : ResourceStr = (value_buf as string | Resource)
-        const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icon_buf : ResourceStr | undefined
-        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const icon_buf__selector : int32 = valueDeserializer.readInt8()
-            let icon_buf_ : string | Resource | undefined
-            if (icon_buf__selector == (0).toChar()) {
-                icon_buf_ = (valueDeserializer.readString() as string)
+        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : ResourceStr | undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBuf_ : string | Resource | undefined
+            if (iconTmpBuf_UnionSelector == (0).toChar()) {
+                iconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
+                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (icon_buf__selector == (1).toChar()) {
-                icon_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for icon_buf_ has to be chosen through deserialisation.")
-            }
-            icon_buf = (icon_buf_ as string | Resource)
+            iconTmpBuf = (iconTmpBuf_ as string | Resource)
         }
-        const icon_result : ResourceStr | undefined = icon_buf
-        const symbolIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolIcon_buf : SymbolGlyphModifier | undefined
-        if ((symbolIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            symbolIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
+        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
+        const symbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let symbolIconTmpBuf : SymbolGlyphModifier | undefined
+        if ((symbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            symbolIconTmpBuf = SymbolGlyphModifier_serializer.read(valueDeserializer)
         }
-        const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
-        let value : SelectOption = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result} as SelectOption)
+        const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
+        let value : SelectOption = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult} as SelectOption)
         return value
     }
 }
 export class MenuOutlineOptions_serializer {
     public static write(buffer: SerializerBase, value: MenuOutlineOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if ((RuntimeType.STRING == value_width_value_type) || (RuntimeType.NUMBER == value_width_value_type) || (RuntimeType.OBJECT == value_width_value_type)) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof Dimension) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as Dimension
-                let value_width_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_width_value_0_type = runtimeType(value_width_value_0)
-                if (RuntimeType.STRING == value_width_value_0_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as Dimension
+                if (valueHolderForWidthTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_width_value_0_0  = value_width_value_0 as string
-                    valueSerializer.writeString(value_width_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_width_value_0_type) {
+                    const valueHolderForWidthTmpValueForIdx0ForIdx0  = valueHolderForWidthTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForWidthTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_width_value_0_1  = value_width_value_0 as number
-                    valueSerializer.writeNumber(value_width_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_width_value_0_type) {
+                    const valueHolderForWidthTmpValueForIdx0ForIdx1  = valueHolderForWidthTmpValueForIdx0 as number
+                    valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0ForIdx1)
+                } else if (valueHolderForWidthTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((2).toChar())
-                    const value_width_value_0_2  = value_width_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_width_value_0_2)
+                    const valueHolderForWidthTmpValueForIdx0ForIdx2  = valueHolderForWidthTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isEdgeOutlineWidths(value_width_value, false, false, false, false)) {
+            } else if (valueHolderForWidthTmpValue instanceof EdgeOutlineWidths) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as EdgeOutlineWidths
-                EdgeOutlineWidths_serializer.write(valueSerializer, value_width_value_1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as EdgeOutlineWidths
+                EdgeOutlineWidths_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if ((TypeChecker.isColor(value_color_value)) || (RuntimeType.NUMBER == value_color_value_type) || (RuntimeType.STRING == value_color_value_type) || (RuntimeType.OBJECT == value_color_value_type)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof ResourceColor) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_color_value_0  = value_color_value as ResourceColor
-                let value_color_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_color_value_0_type = runtimeType(value_color_value_0)
-                if (TypeChecker.isColor(value_color_value_0)) {
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as ResourceColor
+                if (valueHolderForColorTmpValueForIdx0 instanceof Color) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_color_value_0_0  = value_color_value_0 as Color
-                    valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_color_value_0_type) {
+                    const valueHolderForColorTmpValueForIdx0ForIdx0  = valueHolderForColorTmpValueForIdx0 as Color
+                    valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorTmpValueForIdx0ForIdx0))
+                } else if (valueHolderForColorTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_color_value_0_1  = value_color_value_0 as number
-                    valueSerializer.writeNumber(value_color_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_color_value_0_type) {
+                    const valueHolderForColorTmpValueForIdx0ForIdx1  = valueHolderForColorTmpValueForIdx0 as number
+                    valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx0ForIdx1)
+                } else if (valueHolderForColorTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((2).toChar())
-                    const value_color_value_0_2  = value_color_value_0 as string
-                    valueSerializer.writeString(value_color_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_color_value_0_type) {
+                    const valueHolderForColorTmpValueForIdx0ForIdx2  = valueHolderForColorTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForColorTmpValueForIdx0ForIdx2)
+                } else if (valueHolderForColorTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((3).toChar())
-                    const value_color_value_0_3  = value_color_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_color_value_0_3)
+                    const valueHolderForColorTmpValueForIdx0ForIdx3  = valueHolderForColorTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx0ForIdx3)
                 }
-            }
-            else if (TypeChecker.isEdgeColors(value_color_value, false, false, false, false)) {
+            } else if (valueHolderForColorTmpValue instanceof EdgeColors) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_color_value_1  = value_color_value as EdgeColors
-                EdgeColors_serializer.write(valueSerializer, value_color_value_1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as EdgeColors
+                EdgeColors_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): MenuOutlineOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : Dimension | EdgeOutlineWidths | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : Dimension | EdgeOutlineWidths | undefined
-            if (width_buf__selector == (0).toChar()) {
-                const width_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let width_buf__u : string | number | Resource | undefined
-                if (width_buf__u_selector == (0).toChar()) {
-                    width_buf__u = (valueDeserializer.readString() as string)
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : Dimension | EdgeOutlineWidths | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : Dimension | EdgeOutlineWidths | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                const widthTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let widthTmpBuf_BufU : string | number | Resource | undefined
+                if (widthTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    widthTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (widthTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    widthTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                } else if (widthTmpBuf_BufUUnionSelector == (2).toChar()) {
+                    widthTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for widthTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else if (width_buf__u_selector == (1).toChar()) {
-                    width_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (width_buf__u_selector == (2).toChar()) {
-                    width_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for width_buf__u has to be chosen through deserialisation.")
-                }
-                width_buf_ = (width_buf__u as string | number | Resource)
+                widthTmpBuf_ = (widthTmpBuf_BufU as string | number | Resource)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as Dimension | EdgeOutlineWidths)
+            widthTmpBuf = (widthTmpBuf_ as Dimension | EdgeOutlineWidths)
         }
-        const width_result : Dimension | EdgeOutlineWidths | undefined = width_buf
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : ResourceColor | EdgeColors | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : ResourceColor | EdgeColors | undefined
-            if (color_buf__selector == (0).toChar()) {
-                const color_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let color_buf__u : Color | number | string | Resource | undefined
-                if (color_buf__u_selector == (0).toChar()) {
-                    color_buf__u = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const widthTmpResult : Dimension | EdgeOutlineWidths | undefined = widthTmpBuf
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | EdgeColors | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : ResourceColor | EdgeColors | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let colorTmpBuf_BufU : Color | number | string | Resource | undefined
+                if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    colorTmpBuf_BufU = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+                } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    colorTmpBuf_BufU = (valueDeserializer.readNumber() as number)
+                } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
+                    colorTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
+                    colorTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else if (color_buf__u_selector == (1).toChar()) {
-                    color_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (color_buf__u_selector == (2).toChar()) {
-                    color_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (color_buf__u_selector == (3).toChar()) {
-                    color_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for color_buf__u has to be chosen through deserialisation.")
-                }
-                color_buf_ = (color_buf__u as Color | number | string | Resource)
+                colorTmpBuf_ = (colorTmpBuf_BufU as Color | number | string | Resource)
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (color_buf__selector == (1).toChar()) {
-                color_buf_ = EdgeColors_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as ResourceColor | EdgeColors)
+            colorTmpBuf = (colorTmpBuf_ as ResourceColor | EdgeColors)
         }
-        const color_result : ResourceColor | EdgeColors | undefined = color_buf
-        let value : MenuOutlineOptions = ({width: width_result, color: color_result} as MenuOutlineOptions)
+        const colorTmpResult : ResourceColor | EdgeColors | undefined = colorTmpBuf
+        let value : MenuOutlineOptions = ({width: widthTmpResult, color: colorTmpResult} as MenuOutlineOptions)
         return value
     }
 }
