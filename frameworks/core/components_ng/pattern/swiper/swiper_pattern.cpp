@@ -239,6 +239,16 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
+    // interrupt FAST_ANIMATION and end in JUMP_NEAR_VALUE Page
+    if (oldIndex == targetIndex && fastAnimationRunning_) {
+        fastAnimationChange_ = true;
+        unselectedIndex_ = -1;
+        FireSelectedEvent(oldIndex, targetIndex);
+    }
+    if (fastAnimationChange_ && !fastAnimationRunning_) {
+        fastAnimationChange_ = false;
+        FireChangeEvent(oldIndex, targetIndex, isInLayout);
+    }
 }
 
 void SwiperPattern::StopAndResetSpringAnimation()
@@ -1644,9 +1654,13 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
 
 void SwiperPattern::FireSelectedEvent(int32_t currentIndex, int32_t targetIndex)
 {
-    if (currentIndex == targetIndex) {
+    if (jumpOnChange_) {
         return;
     }
+    if (currentIndex == targetIndex && !fastAnimationRunning_) {
+        return;
+    }
+
     auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     if (selectedIndex_ != GetLoopIndex(targetIndex)) {
@@ -2457,6 +2471,7 @@ void SwiperPattern::OnTranslateAnimationFinish()
     if (!translateAnimationIsRunning_) {
         return;
     }
+    fastAnimationRunning_ = false;
     translateAnimationIsRunning_ = false;
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
 }
@@ -2466,6 +2481,7 @@ void SwiperPattern::StopTranslateAnimation()
     if (translateAnimationIsRunning_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        fastAnimationRunning_ = false;
         translateAnimationIsRunning_ = false;
         prevFrameAnimationRunning_ = true;
 
@@ -3943,6 +3959,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         swiperPattern->UpdateTranslateForCaptureNode(offset);
         swiperPattern->FireScrollStateEvent(ScrollState::FLING);
     };
+    if (fastCurrentIndex_.has_value()) {
+        fastAnimationRunning_ = true;
+        unselectedIndex_ = GetLoopIndex(currentIndex_);
+    }
     propertyAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
     contentMainSizeBeforeAni_ = contentMainSize_;
@@ -4016,6 +4036,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
         hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
         !IsItemOverlay());
+    fastAnimationRunning_ = false;
     propertyAnimationIsRunning_ = false;
     syncCancelAniIsFailed_ = false;
     fastCurrentIndex_.reset();
@@ -4082,6 +4103,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     if (!propertyAnimationIsRunning_ || syncCancelAniIsFailed_) {
         return;
     }
+    fastAnimationRunning_ = false;
     propertyAnimationIsRunning_ = false;
     AnimationOption option;
     option.SetDuration(0);
@@ -4334,7 +4356,10 @@ void SwiperPattern::PlayTranslateAnimation(
             swiper->OnTranslateAnimationFinish();
             swiper->FireScrollStateEvent(ScrollState::IDLE);
         });
-
+    if (fastCurrentIndex_.has_value()) {
+        fastAnimationRunning_ = true;
+        unselectedIndex_ = GetLoopIndex(currentIndex_);
+    }
     SetLazyLoadFeature(true);
     UpdateItemRenderGroup(true);
 }
