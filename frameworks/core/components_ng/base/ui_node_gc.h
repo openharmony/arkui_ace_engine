@@ -25,20 +25,20 @@
 
 namespace OHOS::Ace::NG {
 class UINode;
-class UiNodeGc {
+class UiNodeGc final {
 public:
     static void OnReleaseFunc(OHOS::Ace::NG::UINode* frameNodeRawPtr);
-    static void ReleaseNodeRawMemory(int64_t deadline, RefPtr<TaskExecutor> taskExecutor);
-    static void PostReleaseNodeRawMemoryTask(RefPtr<TaskExecutor> taskExecutor);
+    static void ReleaseNodeRawMemory(int64_t deadline, const RefPtr<TaskExecutor>& taskExecutor);
+    static void PostReleaseNodeRawMemoryTask(const RefPtr<TaskExecutor>& taskExecutor);
 
 private:
-    UiNodeGc() = default;
-    ~UiNodeGc() = default;
+    UiNodeGc() = delete;
+    ~UiNodeGc() = delete;
 
     static bool IsTooLate(int64_t deadline);
-    static bool PostTask(RefPtr<TaskExecutor> taskExecutor, const TaskExecutor::Task& task, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW);
-    static void ReleaseNodeRawMemoryInner(RefPtr<TaskExecutor> taskExecutor);
+    static bool PostTask(const RefPtr<TaskExecutor>& taskExecutor, const TaskExecutor::Task& task,
+        const std::string& name, PriorityType priorityType = PriorityType::LOW);
+    static void ReleaseNodeRawMemoryInner(const RefPtr<TaskExecutor>& taskExecutor);
     static void ReleaseInner(OHOS::Ace::NG::UINode* frameNodeRawPtr);
     static void ReleaseNodeRawBucket();
     static PriorityType JudgeGCLevel(uint32_t remainBucketSize, int64_t deadline);

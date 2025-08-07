@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ using namespace testing;
 using namespace testing::ext;
  
 namespace OHOS::Ace::NG {
-class UINodeGCTest : public testing::Test {
+class UINodeGCTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -38,7 +38,7 @@ public:
  * @tc.desc: IsTooLate test
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeGCTest, IsTooLateTest, TestSize.Level1)
+HWTEST_F(UINodeGCTestNg, IsTooLateTest, TestSize.Level1)
 {
     auto ret = UiNodeGc::IsTooLate(-1);
     EXPECT_EQ(ret, false);
@@ -46,13 +46,31 @@ HWTEST_F(UINodeGCTest, IsTooLateTest, TestSize.Level1)
     ret = UiNodeGc::IsTooLate(0);
     EXPECT_EQ(ret, true);
 }
- 
+
+/**
+ * @tc.name: ReleaseInner
+ * @tc.desc: ReleaseInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeGCTestNg, ReleaseInnerTest, TestSize.Level1)
+{
+    auto& nodeRawBucket = UiNodeGc::MockGetNodeRawBucket();
+    nodeRawBucket.push({
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, // 11 rawptr
+    });
+    EXPECT_EQ(nodeRawBucket.size(), 1);
+    UiNodeGc::ReleaseInner(nullptr);
+    EXPECT_EQ(nodeRawBucket.size(), 2);
+    UiNodeGc::ReleaseNodeRawBucket();
+    EXPECT_EQ(nodeRawBucket.size(), 1);
+}
+
 /**
  * @tc.name: JudgeGCLevelTest
  * @tc.desc: JudgeGCLevel test
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeGCTest, JudgeGCLevelTest, TestSize.Level1)
+HWTEST_F(UINodeGCTestNg, JudgeGCLevelTest, TestSize.Level1)
 {
     auto ret = UiNodeGc::JudgeGCLevel(10, -1);
     EXPECT_EQ(ret, PriorityType::IDLE);
@@ -60,7 +78,7 @@ HWTEST_F(UINodeGCTest, JudgeGCLevelTest, TestSize.Level1)
     ret = UiNodeGc::JudgeGCLevel(10, 0);
     EXPECT_EQ(ret, PriorityType::LOW);
  
-    ret = UiNodeGc::JudgeGCLevel(100, 0);
+    ret = UiNodeGc::JudgeGCLevel(80, 0);
     EXPECT_EQ(ret, PriorityType::HIGH);
  
     ret = UiNodeGc::JudgeGCLevel(300, 0);
@@ -75,7 +93,7 @@ HWTEST_F(UINodeGCTest, JudgeGCLevelTest, TestSize.Level1)
  * @tc.desc: ReleaseNodeRawBucket test
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeGCTest, ReleaseNodeRawBucketTest, TestSize.Level1)
+HWTEST_F(UINodeGCTestNg, ReleaseNodeRawBucketTest, TestSize.Level1)
 {
     auto& nodeRawBucket = UiNodeGc::MockGetNodeRawBucket();
     UiNodeGc::ReleaseNodeRawBucket();
@@ -106,7 +124,7 @@ HWTEST_F(UINodeGCTest, ReleaseNodeRawBucketTest, TestSize.Level1)
  * @tc.desc: ReleaseNodeRawMemoryInner test
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeGCTest, ReleaseNodeRawMemoryInnerTest, TestSize.Level1)
+HWTEST_F(UINodeGCTestNg, ReleaseNodeRawMemoryInnerTest, TestSize.Level1)
 {
     auto& nodeRawBucket = UiNodeGc::MockGetNodeRawBucket();
     UiNodeGc::ReleaseNodeRawMemoryInner(nullptr);
@@ -117,7 +135,22 @@ HWTEST_F(UINodeGCTest, ReleaseNodeRawMemoryInnerTest, TestSize.Level1)
     frameNode1->uiNodeGcEnable_ = true;
     frameNode1 = nullptr;
     EXPECT_EQ(nodeRawBucket.size(), 1);
-    UiNodeGc::ReleaseNodeRawMemoryInner(nullptr);
+    UiNodeGc::ReleaseNodeRawMemory(1, nullptr);
+    EXPECT_EQ(nodeRawBucket.size(), 1);
+
+    UiNodeGc::ReleaseNodeRawMemory(-1, nullptr);
+    EXPECT_EQ(nodeRawBucket.size(), 0);
+}
+
+/**
+ * @tc.name: OnReleaseFunc
+ * @tc.desc: OnReleaseFunc test
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeGCTestNg, OnReleaseFuncTest, TestSize.Level1)
+{
+    auto& nodeRawBucket = UiNodeGc::MockGetNodeRawBucket();
+    UiNodeGc::OnReleaseFunc(nullptr);
     EXPECT_EQ(nodeRawBucket.size(), 0);
 }
 }

@@ -58,6 +58,12 @@ ace_unittest("inspector_test_ng") {
   sources = [ "inspector_test_ng.cpp" ]
 }
 
+ace_unittest("ui_node_gc_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "ui_node_gc_test_ng.cpp" ]
+}
+
 ace_unittest("ui_node_test_ng") {
   type = "new"
   module_output = "basic"
@@ -149,6 +155,7 @@ group("core_base_unittest") {
     ":short_cuts_little_test_ng",
     ":short_cuts_test_ng",
     ":thread_safe_node_test_ng",
+    ":ui_node_gc_test_ng",
     ":ui_node_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",

@@ -43,7 +43,7 @@ public:
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
         : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder) {}
 
-    ~LazyForEachNode();
+    ~LazyForEachNode() override;
 
     void OnDelete() override;
 

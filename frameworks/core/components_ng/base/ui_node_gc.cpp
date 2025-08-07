@@ -16,8 +16,8 @@
 #include "core/components_ng/base/ui_node_gc.h"
 
 #include "base/utils/time_util.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -27,8 +27,8 @@ enum {
     PRIORITYTYPE_WATERLINE_IMMEDIATE = 500,
     PRIORITYTYPE_WATERLINE_VIP,
 };
-static constexpr size_t PER_BUCKET_MAX_SIZE = 10;
-static constexpr size_t BUCKET_MAX_SIZE = 1000;
+constexpr size_t PER_BUCKET_MAX_SIZE = 10;
+constexpr size_t BUCKET_MAX_SIZE = 1000;
 thread_local int64_t deadline_ = -1;
 thread_local std::queue<std::vector<OHOS::Ace::NG::UINode*>> nodeRawBucket_;
 } // namespace
@@ -42,14 +42,14 @@ bool UiNodeGc::IsTooLate(int64_t deadline)
     return GetSysTimestamp() > deadline;
 }
 
-bool UiNodeGc::PostTask(RefPtr<TaskExecutor> taskExecutor, const TaskExecutor::Task& task, const std::string& name,
-    PriorityType priorityType)
+bool UiNodeGc::PostTask(const RefPtr<TaskExecutor>& taskExecutor, const TaskExecutor::Task& task,
+    const std::string& name, PriorityType priorityType)
 {
     if (taskExecutor) {
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name, priorityType);
         return true;
     }
-    LOGE("UiNodeGc::PostTask failed");
+    LOGW("UiNodeGc::PostTask failed");
     task();
     return false;
 }
@@ -101,7 +101,7 @@ PriorityType UiNodeGc::JudgeGCLevel(uint32_t remainBucketSize, int64_t deadline)
     return PriorityType::VIP;
 }
 
-void UiNodeGc::PostReleaseNodeRawMemoryTask(RefPtr<TaskExecutor> taskExecutor)
+void UiNodeGc::PostReleaseNodeRawMemoryTask(const RefPtr<TaskExecutor>& taskExecutor)
 {
     if (!taskExecutor) {
         LOGE("UiNodeGc::PostReleaseNodeRawMemoryTask taskExecutor is nullptr");
@@ -110,17 +110,15 @@ void UiNodeGc::PostReleaseNodeRawMemoryTask(RefPtr<TaskExecutor> taskExecutor)
     ReleaseNodeRawMemory(-1, taskExecutor);
 }
 
-void UiNodeGc::ReleaseNodeRawMemoryInner(RefPtr<TaskExecutor> taskExecutor)
+void UiNodeGc::ReleaseNodeRawMemoryInner(const RefPtr<TaskExecutor>& taskExecutor)
 {
     if (nodeRawBucket_.empty()) {
         return;
     }
     auto remainBucketSize = nodeRawBucket_.size();
     auto nodeGCLevel = JudgeGCLevel(remainBucketSize, deadline_);
-    auto task = [nodeGCLevel, remainBucketSize, taskExecutor]() {
+    auto task = [nodeGCLevel, remainBucketSize, taskExecutor = taskExecutor]() {
         if (IsTooLate(deadline_) && nodeGCLevel != PriorityType::VIP) {
-            ACE_SCOPED_TRACE_COMMERCIAL("UiNodeGc::ReleaseNodeRawMemory return level %d size %zu",
-                static_cast<int>(nodeGCLevel), remainBucketSize);
             return;
         }
         ReleaseNodeRawBucket();
@@ -129,7 +127,7 @@ void UiNodeGc::ReleaseNodeRawMemoryInner(RefPtr<TaskExecutor> taskExecutor)
     PostTask(taskExecutor, task, "ReleaseNodeRawMemoryTask", nodeGCLevel);
 }
 
-void UiNodeGc::ReleaseNodeRawMemory(int64_t deadline, RefPtr<TaskExecutor> taskExecutor)
+void UiNodeGc::ReleaseNodeRawMemory(int64_t deadline, const RefPtr<TaskExecutor>& taskExecutor)
 {
     deadline_ = deadline;
     UiNodeGc::ReleaseNodeRawMemoryInner(taskExecutor);
