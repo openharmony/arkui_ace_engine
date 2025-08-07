@@ -160,7 +160,7 @@ export class SHA1Hash {
             let index = start
 
             while (offset < length && index < inputBytes) {
-                let code = text.charCodeAt(offset++) | 0
+                let code = text.charCodeAt(offset++).toInt() | 0
                 if (code < 0x80) {
                     // ASCII characters
                     _byte[index++] = code
