@@ -335,6 +335,51 @@ HWTEST_F(ImageAnimatorPatternTestNg, AddImageLoadSuccessEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: Test LayoutPolicy of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, LayoutPolicyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimatorView and get frameNode.
+     * @tc.expected: step1. check frameNode exists and tag is correct.
+     */
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
+    /**
+     * @tc.steps: step2. get childNode of frameNode.
+     * @tc.expected: step2. check whether childNode is empty.
+     */
+    auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
+    ASSERT_NE(imageAnimatorPattern_, nullptr);
+
+    /** @tc.steps: step3. set width and height of imageAnimatorView.
+     * @tc.expected: step3. check whether width and height are set correctly.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(200), CalcLength(200)));
+    /**
+    * @tc.steps: step4. Update width layoutPolicy is MATCH_PARENT.
+    * @tc.expected: step4. Update width layoutPolicy is MATCH_PARENT.
+    */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    EXPECT_TRUE(layoutProperty->GetLayoutPolicyProperty().has_value());
+    /**
+    * @tc.expected: step4. Test CheckClearUserDefinedSize Function.
+     * @tc.steps: step5. CheckClearUserDefinedSize Function.
+    */
+    imageAnimatorPattern_->CheckClearUserDefinedSize(layoutProperty);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    EXPECT_NE(layoutProperty->calcLayoutConstraint_->selfIdealSize, std::nullopt);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_, std::nullopt);
+    EXPECT_NE(layoutProperty->calcLayoutConstraint_->selfIdealSize->height_, std::nullopt);
+}
+
+/**
  * @tc.name: ImageAnimatorPatternTestNg_SetDuration
  * @tc.desc: Create ImageAnimator.
  * @tc.type: FUNC

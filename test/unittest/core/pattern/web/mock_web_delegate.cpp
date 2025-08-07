@@ -26,6 +26,7 @@ static std::string g_setReturnStatus = "";
 const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
@@ -815,9 +816,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
 void WebDelegate::OnAccessibilityEvent(
     int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
 {}
-void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId) {}
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId) {}
-void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId) {}
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
 {}
@@ -1180,6 +1179,9 @@ void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1188,6 +1190,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAc
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1196,6 +1201,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1304,6 +1312,10 @@ bool WebDelegate::CloseImageOverlaySelection()
 void SetReturnStatus(const std::string& status)
 {
     g_setReturnStatus = status;
+}
+void SetReturnNode(std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node)
+{
+    g_customAccessibilityNode = node;
 }
 void SetComponentType(const std::string& type)
 {

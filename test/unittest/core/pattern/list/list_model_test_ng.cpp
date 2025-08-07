@@ -15,6 +15,10 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/ng/offset_t.h"
 
 #include "core/components_ng/pattern/list/list_position_controller.h"
@@ -23,7 +27,39 @@
 namespace OHOS::Ace::NG {
 constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";
 
-class ListModelTestNg : public ListTestNg {};
+class ListModelTestNg : public ListTestNg {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void ListModelTestNg::SetUpTestSuite()
+{
+    TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
+
+void ListModelTestNg::TearDownTestSuite()
+{
+    TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
+
+void ListModelTestNg::SetUp()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
+
+void ListModelTestNg::TearDown()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
 
 /**
  * @tc.name: SetScrollBarColor
@@ -1340,6 +1376,61 @@ HWTEST_F(ListModelTestNg, GetDivider, TestSize.Level1)
     auto result = model.GetDivider(listNode);
     EXPECT_EQ(result, divider);
     CreateDone();
+}
+
+/**
+ * @tc.name: CreateWithResourceObjScrollBarColor00
+ * @tc.desc: Test ListModelNG CreateWithResourceObjScrollBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, CreateWithResourceObjScrollBarColor00, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+
+    const int32_t resId = 0;
+    const int32_t resType = static_cast<int32_t>(ResourceType::COLOR);
+    const Color resData = Color::RED;
+    AddMockResourceData(0, resData);
+
+    /**
+     * @tc.steps: step1. Construct the objects for test
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. test
+     */
+    model.CreateWithResourceObjScrollBarColor(nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
+    scrollBarTheme->foregroundColor_ = Color::RED;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(resId, resType, params, "", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObjScrollBarColor(resObj);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto currentColor = ListModelNG::GetScrollBarColor(listNode);
+
+    EXPECT_EQ(resData.GetValue(), currentColor);
+    CreateDone();
+
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 /**

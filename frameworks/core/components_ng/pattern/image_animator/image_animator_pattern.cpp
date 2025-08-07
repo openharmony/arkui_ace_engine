@@ -505,6 +505,18 @@ std::string ImageAnimatorPattern::ImagesToString() const
     return imageArray->ToString();
 }
 
+void ImageAnimatorPattern::CheckClearUserDefinedSize(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto isPolicy = layoutPolicy.has_value();
+    if (isPolicy && !layoutPolicy->IsAllNoMatch()) {
+        bool widthPolicy = layoutPolicy->IsWidthMatch() || layoutPolicy->IsWidthFix() || layoutPolicy->IsWidthWrap();
+        bool heightPolicy =
+            layoutPolicy->IsHeightMatch() || layoutPolicy->IsHeightFix() || layoutPolicy->IsHeightWrap();
+        layoutProperty->ClearUserDefinedIdealSize(widthPolicy, heightPolicy);
+    }
+}
+
 void ImageAnimatorPattern::AdaptSelfSize()
 {
     auto host = GetHost();
@@ -541,13 +553,16 @@ void ImageAnimatorPattern::AdaptSelfSize()
     const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), CalcLength(maxHeight)));
+        CheckClearUserDefinedSize(layoutProperty);
         return;
     }
     if (!layoutConstraint->selfIdealSize->Width()) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), std::nullopt));
+        CheckClearUserDefinedSize(layoutProperty);
         return;
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
+    CheckClearUserDefinedSize(layoutProperty);
 }
 
 int32_t ImageAnimatorPattern::GetNextIndex(int32_t preIndex)

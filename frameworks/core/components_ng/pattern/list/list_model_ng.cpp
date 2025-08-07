@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -731,6 +732,14 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(
     }
 }
 
+void ListModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1041,6 +1050,8 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
 void ListModelNG::SetScrollToIndex(
     FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
 {
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment, extraOffset);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1243,6 +1254,8 @@ void ListModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
 void ListModelNG::ScrollToItemInGroup(
     FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
+    // call ScrollToItemInGroupMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, ScrollToItemInGroup, frameNode, index, indexInGroup, smooth, align);
     CHECK_NULL_VOID(frameNode);
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
@@ -1499,5 +1512,10 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
         };
         pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
     }
+}
+
+void ListModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

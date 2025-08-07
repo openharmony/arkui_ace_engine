@@ -3948,7 +3948,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level
     ListModelNG model = CreateList();
     ASSERT_NE(frameNode_, nullptr);
     ASSERT_NE(pattern_, nullptr);
-    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
 
     const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
     CalcDimension laneMinLength;
@@ -3958,7 +3957,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level
 
     // remove callback function
     model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     // add callback function
     model.CreateWithResourceObjLaneConstrain(resMinObj, resMaxObj);
@@ -3974,10 +3972,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level
     laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
     EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
     EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
-
-    // remove callback function
-    model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     g_isConfigChangePerform = false;
 }
@@ -3995,7 +3989,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
     ListModelNG model = CreateList();
     ASSERT_NE(frameNode_, nullptr);
     ASSERT_NE(pattern_, nullptr);
-    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
 
     const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
     CalcDimension laneMinLength;
@@ -4005,7 +3998,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
 
     // remove callback function
     model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     std::vector<ResourceObjectParams> params;
     resMinObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
@@ -4025,10 +4017,6 @@ HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level
     laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
     EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
     EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
-
-    // remove callback function
-    model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 
     g_isConfigChangePerform = false;
 }
@@ -4449,7 +4437,7 @@ HWTEST_F(ListCommonTestNg, FireFocus001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Focus node outside the viewport
-     * @tc.expected: lost focus for this node
+     * @tc.expected: don't lost focus for this node
      */
     pattern_->focusIndex_ = 6;
     pattern_->startIndex_ = 1;
@@ -4458,6 +4446,65 @@ HWTEST_F(ListCommonTestNg, FireFocus001, TestSize.Level1)
     pattern_->FireFocus();
     FlushUITasks();
     focusNode = GetChildFocusHub(frameNode_, 2);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+}
+
+HWTEST_F(ListCommonTestNg, FireFocus002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    // Get ListItemNode
+    auto listItemNode = GetChildFrameNode(frameNode_, 3);
+    auto listItemPattern = listItemNode->GetPattern<ListItemPattern>();
+    
+    // Create RepeatVirtualScroll2Node
+    auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        10,
+        10,
+        [](int32_t) { return std::make_pair(0, 0); },
+        [](int32_t, int32_t) {},
+        [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
+        [](int32_t, int32_t) {},
+        []() {}
+    );
+    
+    // Set parent-child relationships
+    repeatNode->AddChild(listItemNode);
+    frameNode_->AddChild(repeatNode);
+
+    /**
+     * @tc.steps: step1. Focus node inside the viewport
+     * @tc.expected: request focus for this node
+     */
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    int32_t focusNodeIndex = 6;
+    pattern_->focusIndex_ = 3;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    focusNode = GetChildFocusHub(frameNode_, 3);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node outside the viewport
+     * @tc.expected: lost focus for this node
+     */
+    pattern_->focusIndex_ = 6;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    focusNode = GetChildFocusHub(frameNode_, 3);
     EXPECT_FALSE(focusNode->IsCurrentFocus());
 }
 

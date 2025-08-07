@@ -29,7 +29,8 @@ public:
     void ReportComponentChangeEvent(const std::string& key, const std::string& value) override;
     void ReportComponentChangeEvent(
         int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) override;
-    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
+    void ReportWebUnfocusEvent(
+        int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId) override;
     void SetClickEventRegistered(bool status) override;
     void SetSearchEventRegistered(bool status) override;

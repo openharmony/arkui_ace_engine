@@ -60,6 +60,27 @@ public:
         return gradient_;
     }
 
+    void SetFontForegroudGradiantColor(const std::optional<FontForegroudGradiantColor>& gradiantColor)
+    {
+        fontForegroudGradiantColor_ = gradiantColor;
+    }
+
+    const std::optional<FontForegroudGradiantColor>& GetFontForegroudGradiantColor() const
+    {
+        return fontForegroudGradiantColor_;
+    }
+
+private:
+    std::optional<Gradient> gradient_;
+    // for ai option's gradient color
+    std::optional<FontForegroudGradiantColor> fontForegroudGradiantColor_;
+};
+
+class SymbolTextStyle : public AceType {
+    DECLARE_ACE_TYPE(SymbolTextStyle, AceType);
+
+public:
+
     void SetInnerSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
     {
         symbolEffectOptions_ = symbolEffectOptions;
@@ -79,24 +100,10 @@ public:
     {
         return symbolShadowProp_;
     }
-
-    void SetFontForegroudGradiantColor(const std::optional<FontForegroudGradiantColor>& gradiantColor)
-    {
-        fontForegroudGradiantColor_ = gradiantColor;
-    }
-
-    const std::optional<FontForegroudGradiantColor>& GetFontForegroudGradiantColor() const
-    {
-        return fontForegroudGradiantColor_;
-    }
-
 private:
-    std::optional<Gradient> gradient_;
     // for symbol
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
     std::optional<SymbolShadow> symbolShadowProp_;
-    // for ai option's gradient color
-    std::optional<FontForegroudGradiantColor> fontForegroudGradiantColor_;
 };
 } // namespace OHOS::Ace
 

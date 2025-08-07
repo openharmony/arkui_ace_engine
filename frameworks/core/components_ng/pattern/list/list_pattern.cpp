@@ -3948,6 +3948,11 @@ void ListPattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     UpdateDefaultColor();
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
 }
 
@@ -4129,6 +4134,26 @@ void ListPattern::ProcessFocusEvent(bool indexChanged)
     }
 }
 
+void ListPattern::HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(childFocusHub);
+    auto child = childFocusHub->GetFrameNode();
+    CHECK_NULL_VOID(child);
+    auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto parentNode = childNode->GetParent();
+    while (parentNode && !AceType::InstanceOf<FrameNode>(parentNode)) {
+        if (AceType::InstanceOf<LazyForEachNode>(parentNode) ||
+            AceType::InstanceOf<RepeatVirtualScroll2Node>(parentNode) ||
+            AceType::InstanceOf<RepeatVirtualScrollNode>(parentNode)) {
+            focusHub->LostChildFocusToSelf();
+            return;
+        }
+        parentNode = parentNode->GetParent();
+    }
+}
+
 void ListPattern::FireFocus()
 {
     CHECK_NULL_VOID(focusIndex_);
@@ -4175,7 +4200,7 @@ void ListPattern::FireFocus()
         auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
         CHECK_NULL_VOID(childFocusHub);
         if (childFocusHub->IsCurrentFocus()) {
-            focusHub->LostChildFocusToSelf();
+            HandleFocusParentCheck(childFocusHub, focusHub);
         }
     }
 }

@@ -84,6 +84,8 @@ void JsHoverFunction::HoverMoveExecute(HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
     hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
     hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
+    hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
+    hoverObj->SetProperty<int32_t>("pressure", 0.0f);
     const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();

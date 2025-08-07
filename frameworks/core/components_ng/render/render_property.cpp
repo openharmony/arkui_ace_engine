@@ -73,6 +73,21 @@ std::string LinearGradientBlurDirection(GradientDirection direction)
     }
     return "";
 }
+
+void SerializeRotateAngleToJson(std::unique_ptr<JsonValue>& json, const DimensionOffset& center,
+    const InspectorFilter& filter, const std::optional<Vector4F>& propTransformRotateAngle)
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("angleX", std::to_string(propTransformRotateAngle->x).c_str());
+    jsonValue->Put("angleY", std::to_string(propTransformRotateAngle->y).c_str());
+    jsonValue->Put("angleZ", std::to_string(propTransformRotateAngle->z).c_str());
+    jsonValue->Put("perspective", std::to_string(propTransformRotateAngle->w).c_str());
+    jsonValue->Put("centerX", center.GetX().ToString().c_str());
+    jsonValue->Put("centerY", center.GetY().ToString().c_str());
+    auto centerZ = center.GetZ().value_or(Dimension());
+    jsonValue->Put("centerZ", centerZ.ToString().c_str());
+    json->PutExtAttr("rotate", jsonValue, filter);
+}
 } // namespace
 
 #define ACE_OFFSET_API_NINE_TO_JSON(name)                            \
@@ -368,6 +383,8 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
             json->PutExtAttr("centerZ", JsonUtil::Create(true), filter);
         }
         json->PutExtAttr("rotate", jsonValue, filter);
+    } else if (propTransformRotateAngle.has_value()) {
+        SerializeRotateAngleToJson(json, center, filter, propTransformRotateAngle);
     } else {
         json->PutExtAttr("rotate", JsonUtil::Create(true), filter);
     }

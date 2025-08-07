@@ -773,25 +773,76 @@ public:                                                                         
             return defaultValue;                                                        \
         }                                                                               \
         return advancedTextStyle_->Get##name().value();                                 \
-    }                                                                                   \
-    void Set##name##WithoutMark(const std::optional<type> newValue)                     \
-    {                                                                                   \
-        if (!advancedTextStyle_ && !newValue.has_value()) {                             \
-            return;                                                                     \
-        }                                                                               \
-        if (!advancedTextStyle_) {                                                      \
-            advancedTextStyle_ = AceType::MakeRefPtr<AdvancedTextStyle>();              \
-        }                                                                               \
-        CHECK_NULL_VOID(advancedTextStyle_);                                            \
-        if (!advancedTextStyle_->Get##name().has_value() && !newValue.has_value()) {    \
-            return;                                                                     \
-        }                                                                               \
-        if (Has##name() && newValue.has_value()) {                                      \
-            if (NearEqual(advancedTextStyle_->Get##name().value(), newValue.value())) { \
-                return;                                                                 \
-            }                                                                           \
-        }                                                                               \
-        advancedTextStyle_->Set##name(newValue);                                        \
+    }
+
+#define ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(name, type)                        \
+    std::optional<type> Get##name() const                                             \
+    {                                                                                 \
+        CHECK_NULL_RETURN(symbolTextStyle_, std::nullopt);                            \
+        return symbolTextStyle_->Get##name();                                         \
+    }                                                                                 \
+    void Set##name(const type& newValue)                                              \
+    {                                                                                 \
+        if (!symbolTextStyle_) {                                                      \
+            symbolTextStyle_ = AceType::MakeRefPtr<SymbolTextStyle>();                \
+        }                                                                             \
+        CHECK_NULL_VOID(symbolTextStyle_);                                            \
+        if (Has##name()) {                                                            \
+            if (NearEqual(symbolTextStyle_->Get##name().value(), newValue)) {         \
+                return;                                                               \
+            }                                                                         \
+        }                                                                             \
+        symbolTextStyle_->Set##name(newValue);                                        \
+    }                                                                                 \
+    void Set##name(const std::optional<type> newValue)                                \
+    {                                                                                 \
+        if (!symbolTextStyle_ && !newValue.has_value()) {                             \
+            return;                                                                   \
+        }                                                                             \
+        if (!symbolTextStyle_) {                                                      \
+            symbolTextStyle_ = AceType::MakeRefPtr<SymbolTextStyle>();                \
+        }                                                                             \
+        CHECK_NULL_VOID(symbolTextStyle_);                                            \
+        if (!symbolTextStyle_->Get##name().has_value() && !newValue.has_value()) {    \
+            return;                                                                   \
+        }                                                                             \
+        if (Has##name() && newValue.has_value()) {                                    \
+            if (NearEqual(symbolTextStyle_->Get##name().value(), newValue.value())) { \
+                return;                                                               \
+            }                                                                         \
+        }                                                                             \
+        symbolTextStyle_->Set##name(newValue);                                        \
+    }                                                                                 \
+    bool Has##name() const                                                            \
+    {                                                                                 \
+        CHECK_NULL_RETURN(symbolTextStyle_, false);                                   \
+        return symbolTextStyle_->Get##name().has_value();                             \
+    }                                                                                 \
+    const type& Get##name##Value(const type& defaultValue) const                      \
+    {                                                                                 \
+        if (!Has##name()) {                                                           \
+            return defaultValue;                                                      \
+        }                                                                             \
+        return symbolTextStyle_->Get##name().value();                                 \
+    }                                                                                 \
+    void Set##name##WithoutMark(const std::optional<type> newValue)                   \
+    {                                                                                 \
+        if (!symbolTextStyle_ && !newValue.has_value()) {                             \
+            return;                                                                   \
+        }                                                                             \
+        if (!symbolTextStyle_) {                                                      \
+            symbolTextStyle_ = AceType::MakeRefPtr<SymbolTextStyle>();                \
+        }                                                                             \
+        CHECK_NULL_VOID(symbolTextStyle_);                                            \
+        if (!symbolTextStyle_->Get##name().has_value() && !newValue.has_value()) {    \
+            return;                                                                   \
+        }                                                                             \
+        if (Has##name() && newValue.has_value()) {                                    \
+            if (NearEqual(symbolTextStyle_->Get##name().value(), newValue.value())) { \
+                return;                                                               \
+            }                                                                         \
+        }                                                                             \
+        symbolTextStyle_->Set##name(newValue);                                        \
     }
 
 class ACE_EXPORT TextStyle final {
@@ -1253,10 +1304,8 @@ public:
     }
 
 private:
-    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
-        InnerSymbolEffectOptions, NG::SymbolEffectOptions, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
-        InnerSymbolShadowProp, SymbolShadow, SymbolStyleAttribute::SYMBOL_SHADOW);
+    ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(InnerSymbolEffectOptions, NG::SymbolEffectOptions);
+    ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(InnerSymbolShadowProp, SymbolShadow);
     std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)> reLayoutTextStyleBitmap_;
     std::bitset<static_cast<size_t>(ParagraphStyleAttribute::MAX_TEXT_STYLE)> reLayoutParagraphStyleBitmap_;
     std::bitset<static_cast<size_t>(SymbolStyleAttribute::MAX_SYMBOL_STYLE)> reLayoutSymbolStyleBitmap_;
@@ -1280,6 +1329,7 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
 
     RefPtr<AdvancedTextStyle> advancedTextStyle_;
+    RefPtr<SymbolTextStyle> symbolTextStyle_;
 };
 
 namespace StringUtils {

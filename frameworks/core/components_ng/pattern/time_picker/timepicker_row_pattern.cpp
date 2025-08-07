@@ -36,7 +36,7 @@ constexpr uint32_t MINUTE_10 = 10;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
-const int32_t UNOPTION_COUNT = 2;
+const int32_t INVISIBLE_OPTIONS_COUNT = 2;
 const int32_t AMPMDEFAULTPOSITION = 0;
 const int32_t AMPM_FORWARD_WITHSECOND = 3;
 const int32_t AMPM_FORWARD_WITHOUTSECOND = 2;
@@ -1025,7 +1025,7 @@ void TimePickerRowPattern::UpdateButtonMargin(
     buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
-void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext)
 {
     CHECK_NULL_VOID(buttonNode);
     auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
@@ -1033,7 +1033,7 @@ void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& butt
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    auto pipeline = updateNode->GetContextRefPtr();
+    auto pipeline = updateNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -2129,7 +2129,7 @@ bool TimePickerRowPattern::ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<Tim
         return true;
     }
     if (code == KeyCode::KEY_MOVE_END) {
-        pattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+        pattern->SetCurrentIndex(totalOptionCount - INVISIBLE_OPTIONS_COUNT);
         pattern->InnerHandleScroll(true, false);
         return true;
     }

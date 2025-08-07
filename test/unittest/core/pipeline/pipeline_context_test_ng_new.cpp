@@ -1044,23 +1044,29 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
     std::vector<TouchEvent> emptyHistory;
     std::vector<TouchEvent> emptyCurrent;
     uint64_t nanoTimeStamp = 1234567890;
-    bool isScreen = true;
-    auto result =
-        ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-            std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+    auto result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, CoordinateType::NORMAL);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
     result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, CoordinateType::SCREEN);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     emptyHistory.clear();
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
     result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp,
+        CoordinateType::GLOBALDISPLAY);
+    EXPECT_FLOAT_EQ(0.0f, result.x);
+    EXPECT_FLOAT_EQ(0.0f, result.y);
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    emptyCurrent.push_back(TouchEvent {}.SetX(300.0f).SetY(200.0f).SetTime(timeStampThree));
+    auto illegalType = static_cast<CoordinateType>(999);
+    result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, illegalType);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
 }
@@ -1084,14 +1090,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
     auto resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, CoordinateType::SCREEN);
 
     ASSERT_FLOAT_EQ(200.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(300.0f, resampledCoord.y);
 
     SystemProperties::debugEnabled_ = true;
     resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), 2500, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), 2500, CoordinateType::SCREEN);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.y);
 }

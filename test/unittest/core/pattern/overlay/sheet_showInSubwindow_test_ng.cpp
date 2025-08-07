@@ -596,13 +596,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
      * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
      * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
      */
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     sheetStyle.bottomOffset = OffsetF(0, -10);
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     layoutProperty->UpdateSheetStyle(sheetStyle);
     auto sheetType3 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType3, SheetType::SHEET_BOTTOM_OFFSET);

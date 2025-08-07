@@ -200,7 +200,7 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
         LOGW("ArkUI request vsync, but no vsync received in 500ms");
         auto window = weakWindow.lock();
         if (window) {
-            uint64_t nanoTimestamp = GetSysTimestamp();
+            uint64_t nanoTimestamp = static_cast<uint64_t>(GetSysTimestamp());
             // force flush vsync with now time stamp and UINT64_MAX as frameCount.
             window->ForceFlushVsync(nanoTimestamp, UINT64_MAX);
         }

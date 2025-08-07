@@ -82,13 +82,11 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
 
-#ifdef ACE_STATIC
     void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
     void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromFrameNodeMultiThread();
-#endif
 
     void InitSurface();
     void DisposeSurface();

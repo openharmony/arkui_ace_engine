@@ -1283,5 +1283,9 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest042, TestSize.Lev
     accessibilityProperty.SetHost(hostBak);
     auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
     EXPECT_EQ(result, true);
+
+    accessibilityProperty.focusDrawLevel_ = FocusDrawLevel::TOP;
+    result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG

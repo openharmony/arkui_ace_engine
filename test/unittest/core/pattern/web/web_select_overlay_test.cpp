@@ -6213,10 +6213,10 @@ HWTEST_F(WebSelectOverlayTest, ComputeMenuOffsetTest3, TestSize.Level1)
 }
 
 /**
-* @tc.name: WebMenuAvoidStrategy
-* @tc.desc: Test WebMenuAvoidStrategy.
-* @tc.type: FUNC
-*/
+ * @tc.name: WebMenuAvoidStrategy
+ * @tc.desc: Test WebMenuAvoidStrategy.
+ * @tc.type: FUNC
+ */
 HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest, TestSize.Level1)
 {
     auto *stack = ViewStackProcessor::GetInstance();

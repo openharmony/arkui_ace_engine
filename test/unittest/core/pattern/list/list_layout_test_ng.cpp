@@ -2649,6 +2649,56 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount005
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetCachedCount(1, true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), true);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
+
+    /**
+     * @tc.steps: step2. Update item4 size
+     * @tc.expected: force sync geometry.
+     */
+    bool sizeChanged = false;
+    cachedItem->SetOnSizeChangeCallback(
+        [&sizeChanged](const RectF& oldRect, const RectF& rect) { sizeChanged = true; });
+    cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
+    cachedItem->SetLayoutDirtyMarked(true);
+    cachedItem->CreateLayoutTask();
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameSize().Height(), 150);
+    EXPECT_EQ(cachedItem->oldGeometryNode_->GetFrameSize().Height(), 0);
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(sizeChanged);
+    EXPECT_EQ(cachedItem->oldGeometryNode_->GetFrameSize().Height(), 150);
+}
+
+/**
  * @tc.name: GetRepeatCountInfo001
  * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
  * @tc.type: FUNC
@@ -3893,5 +3943,50 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore001, TestSize.Level1)
     auto offset = geometryNode->GetFrameOffset();
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 10.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTestWithIgnore002
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    PaddingProperty paddingProperty;
+    paddingProperty.start = std::make_optional<CalcLength>(5.0);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    cachedItem->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = cachedItem->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(240.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 440.0f));
 }
 } // namespace OHOS::Ace::NG

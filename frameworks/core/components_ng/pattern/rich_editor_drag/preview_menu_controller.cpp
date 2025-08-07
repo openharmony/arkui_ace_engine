@@ -95,6 +95,7 @@ PreviewMenuController::PreviewMenuController(const WeakPtr<TextPattern>& pattern
         auto textPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetAISelected(AIResetSelectionReason::CLOSE_CONTEXT_MENU);
+        textPattern->DragNodeDetachFromParent();
         if (SystemProperties::GetTextTraceEnabled()) {
             auto host = textPattern->GetHost();
             CHECK_NULL_VOID(host);

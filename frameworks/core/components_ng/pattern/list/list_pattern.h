@@ -625,6 +625,7 @@ private:
     bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
+    void HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub);
     void FireFocus();
     bool CheckValidInList(int32_t index);
     void ProcessFocusEvent(bool indexChanged);

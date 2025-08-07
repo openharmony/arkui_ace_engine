@@ -73,7 +73,7 @@ public:
     static PickerTime getTimepickerSelected(FrameNode* frameNode);
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
-    static int32_t getTimepickerEnableCascade(FrameNode* frameNode);
+    static int32_t GetTimepickerEnableCascade(FrameNode* frameNode);
     static int32_t getEnableHapticFeedback(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);

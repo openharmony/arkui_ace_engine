@@ -94,6 +94,264 @@ RefPtr<FrameNode> XComponentV2TestNg::CreateXComponentNode()
 }
 
 /**
+ * @tc.name: InitSurfaceMultiThread001
+ * @tc.desc: Test XComponentPatternV2 InitSurfaceMultiThread func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, InitSurfaceMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->renderSurface_ = nullptr;
+    pattern->renderContextForSurface_ = nullptr;
+    /**
+     * @tc.steps: step2. call InitSurfaceMultiThread when host is nullptr
+     * @tc.expected: the surface is not initialized
+     */
+    pattern->InitSurfaceMultiThread(nullptr);
+    EXPECT_FALSE(pattern->renderSurface_);
+    EXPECT_FALSE(pattern->renderContextForSurface_);
+    /**
+     * @tc.steps: step3. call InitSurfaceMultiThread when host is valid
+     * @tc.expected: the surface is initialized
+     */
+    pattern->InitSurfaceMultiThread(frameNode);
+    EXPECT_TRUE(pattern->renderSurface_);
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+}
+
+/**
+ * @tc.name: InitSurfaceMultiThread002
+ * @tc.desc: Test XComponentPatternV2 InitSurfaceMultiThread func when render context is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, InitSurfaceMultiThread002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->renderSurface_ = nullptr;
+    pattern->renderContextForSurface_ = nullptr;
+    frameNode->renderContext_ = nullptr;
+    /**
+     * @tc.steps: step2. call InitSurfaceMultiThread
+     * @tc.expected: the surface is not initialized
+     */
+    pattern->InitSurfaceMultiThread(frameNode);
+    EXPECT_FALSE(pattern->renderSurface_);
+    EXPECT_FALSE(pattern->renderContextForSurface_);
+}
+
+/**
+ * @tc.name: InitSurfaceMultiThread003
+ * @tc.desc: Test XComponentPatternV2 InitSurfaceMultiThread func for XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, InitSurfaceMultiThread003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::TEXTURE;
+    pattern->renderSurface_ = nullptr;
+    pattern->renderContextForSurface_ = nullptr;
+    /**
+     * @tc.steps: step2. call InitSurfaceMultiThread
+     * @tc.expected: the surface node is not initialized
+     */
+    pattern->InitSurfaceMultiThread(frameNode);
+    EXPECT_TRUE(pattern->renderSurface_);
+    EXPECT_FALSE(pattern->renderContextForSurface_);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThreadTest
+ * @tc.desc: Test XComponentPatternV2 OnDetachFromFrameNodeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnDetachFromFrameNodeMultiThreadTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call OnDetachFromFrameNodeMultiThread
+     * @tc.expected: the resources in surfaceHolder are released
+     */
+    OH_ArkUI_SurfaceHolder* surfaceHolder = new OH_ArkUI_SurfaceHolder();
+    pattern->SetSurfaceHolder(surfaceHolder);
+    pattern->OnDetachFromFrameNodeMultiThread();
+    EXPECT_FALSE(surfaceHolder->node_);
+    EXPECT_FALSE(surfaceHolder->nativeWindow_);
+    pattern->SetSurfaceHolder(nullptr);
+    delete surfaceHolder;
+    surfaceHolder = nullptr;
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThreadTest001
+ * @tc.desc: Test XComponentPatternV2 OnDetachFromMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnDetachFromMainTreeMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = true;
+    pattern->transformHintChangedCallbackId_ = std::nullopt;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: xcomponent is not on tree
+     */
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+    EXPECT_FALSE(pattern->isOnTree_);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThreadTest002
+ * @tc.desc: Test XComponentPatternV2 OnDetachFromMainTreeMultiThread func when transformHint is registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnDetachFromMainTreeMultiThreadTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->autoInitialize_ = false;
+    pattern->transformHintChangedCallbackId_ = 1;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: transformHintChangedCallback is unregistered
+     */
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+    EXPECT_FALSE(pattern->transformHintChangedCallbackId_.has_value());
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThreadTest001
+ * @tc.desc: Test XComponentPatternV2 OnAttachToMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnAttachToMainTreeMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = false;
+    pattern->autoInitialize_ = true;
+    /**
+     * @tc.steps: step2. call OnAttachToMainTreeMultiThread
+     * @tc.expected: xcomponent is on tree
+     */
+    pattern->OnAttachToMainTreeMultiThread(frameNode);
+    EXPECT_TRUE(pattern->isOnTree_);
+    EXPECT_TRUE(pattern->isInitialized_);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThreadTest002
+ * @tc.desc: Test XComponentPatternV2 OnAttachToMainTreeMultiThread func when autoInitialize is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnAttachToMainTreeMultiThreadTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = false;
+    pattern->autoInitialize_ = false;
+    /**
+     * @tc.steps: step2. call OnAttachToMainTreeMultiThread
+     * @tc.expected: surface is not isInitialized
+     */
+    pattern->OnAttachToMainTreeMultiThread(frameNode);
+    EXPECT_TRUE(pattern->isOnTree_);
+    EXPECT_FALSE(pattern->isInitialized_);
+}
+
+/**
+ * @tc.name: RegisterContextEventMultiThreadTest
+ * @tc.desc: Test RegisterContextEventMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, RegisterContextEventMultiThreadTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->transformHintChangedCallbackId_ = std::nullopt;
+    /**
+     * @tc.steps: step2. call RegisterContextEventMultiThread
+     * @tc.expected: pipeline context event is registered
+     */
+    pattern->RegisterContextEventMultiThread(frameNode);
+    EXPECT_TRUE(pattern->transformHintChangedCallbackId_.has_value());
+    /**
+     * @tc.steps: step3. call RegisterContextEventMultiThread when transformHintChangedCallback is registered
+     * @tc.expected: transformHintChangedCallback is not updated
+     */
+    auto callbackId = pattern->transformHintChangedCallbackId_.value();
+    pattern->RegisterContextEventMultiThread(frameNode);
+    EXPECT_EQ(callbackId, pattern->transformHintChangedCallbackId_.value());
+}
+
+/**
  * @tc.name: XComponentSurfaceLifeCycleCallback001
  * @tc.desc: Test SurfaceHolder's surface life cycle callback
  * @tc.type: FUNC
@@ -861,5 +1119,38 @@ HWTEST_F(XComponentV2TestNg, FlushImplicitTransaction002, TestSize.Level1)
      */
     xcomponentPattern->FlushImplicitTransaction(hostNode);
     EXPECT_EQ(frameNode->GetId(), nodeId);
+}
+
+/**
+ * @tc.name: GetSurfaceHolderTest
+ * @tc.desc: Test GetSurfaceHolder Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetSurfaceHolderTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call GetSurfaceHolder when surfaceHolder_ is nullptr
+     * @tc.expected: GetSurfaceHolder return nullptr
+     */
+    pattern->SetSurfaceHolder(nullptr);
+    ASSERT_FALSE(pattern->GetSurfaceHolder());
+
+    /**
+     * @tc.steps: step3. call GetSurfaceHolder when surfaceHolder_ is not null
+     * @tc.expected: GetSurfaceHolder return not null
+     */
+    OH_ArkUI_SurfaceHolder* surfaceHolder = new OH_ArkUI_SurfaceHolder();
+    pattern->SetSurfaceHolder(surfaceHolder);
+    ASSERT_TRUE(pattern->GetSurfaceHolder());
 }
 } // namespace OHOS::Ace::NG

@@ -99,6 +99,9 @@ public:
     std::shared_ptr<TextPickerSettingData> CreateDefaultTextPickerSettingData();
     RefPtr<FrameNode> FindContentRowNodeTree(const RefPtr<FrameNode>& dialogNode);
     void SetColumnNodeIdealSize();
+    void CreateDialogEvent(std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+    RefPtr<FrameNode> GetNodeFromDialogByTag(const RefPtr<FrameNode>& dialogNode, std::string nodeTag);
 
 private:
     RefPtr<FrameNode> textPickerNode_;
@@ -230,6 +233,38 @@ RefPtr<FrameNode> TextPickerColumnExtendTestNg::FindContentRowNodeTree(const Ref
             if (pattern && !pattern->GetIsVertical()) {
                 return targetNode;
             }
+        }
+    }
+    return nullptr;
+}
+
+void TextPickerColumnExtendTestNg::CreateDialogEvent(std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
+{
+    auto func = [](const std::string& /* info */) {};
+    dialogEvent["changeId"] = func;
+    dialogEvent["acceptId"] = func;
+    dialogEvent["scrollStopId"] = func;
+
+    int32_t cancelCallbackInfo = 0;
+    auto cancelFunc = [&cancelCallbackInfo](
+                          const GestureEvent& /* info */) { cancelCallbackInfo = ONCANCEL_CALLBACK_INFO; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+}
+
+RefPtr<FrameNode> TextPickerColumnExtendTestNg::GetNodeFromDialogByTag(const RefPtr<FrameNode>& dialogNode,
+    std::string nodeTag)
+{
+    CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto children = customNode->GetChildren();
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        auto targetNode = AceType::DynamicCast<FrameNode>(*it);
+        if (targetNode && targetNode->GetTag() == nodeTag) {
+            return targetNode;
         }
     }
     return nullptr;
@@ -1305,8 +1340,96 @@ HWTEST_F(TextPickerColumnExtendTestNg, OnDetachFromMainTreeMultiThread001, TestS
     auto pipeline = columnNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
 
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+
     auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
     columnPattern->OnDetachFromMainTreeMultiThread();
     EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
 }
+
+/**
+ * @tc.name: TextPickerDialogViewShow012
+ * @tc.desc: Test TextPickerDialog columnWidths for a single width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShow012, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Set single column width and create a TextPickerDialog.
+     */
+    DialogProperties dialogProperties;
+    auto settingData = CreateDefaultTextPickerSettingData();
+    ASSERT_NE(settingData, nullptr);
+
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    CreateDialogEvent(dialogEvent, dialogCancelEvent);
+
+    settingData->columnWidths.emplace_back(Dimension(60.0f, DimensionUnit::PERCENT));
+
+    auto dialogNode =
+        TextPickerDialogView::Show(dialogProperties, *settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.step: step2. Get column width through TextPickerPattern.
+     * @tc.expected: The column width is consistent with the previous settings.
+     */
+    RefPtr<FrameNode> textPickerNode = GetNodeFromDialogByTag(dialogNode, V2::TEXT_PICKER_ETS_TAG);
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    std::vector<Dimension> columnWidths = textPickerPattern->GetColumnWidths();
+    EXPECT_EQ(columnWidths.size(), settingData->columnWidths.size());
+    for (size_t i = 0; i < columnWidths.size(); i++) {
+        EXPECT_EQ(columnWidths[i], settingData->columnWidths[i]);
+    }
+}
+
+/**
+ * @tc.name: TextPickerDialogViewShow013
+ * @tc.desc: Test TextPickerDialog columnWidths for a multi widths.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShow013, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Set multiple column widths and create a TextPickerDialog.
+     */
+    DialogProperties dialogProperties;
+    auto settingData = CreateDefaultTextPickerSettingData();
+    ASSERT_NE(settingData, nullptr);
+
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    CreateDialogEvent(dialogEvent, dialogCancelEvent);
+
+    settingData->columnWidths.emplace_back(Dimension(60.0f, DimensionUnit::VP));
+    settingData->columnWidths.emplace_back(Dimension(100.0f, DimensionUnit::FP));
+    settingData->columnWidths.emplace_back(Dimension(200.0f, DimensionUnit::PX));
+
+    auto dialogNode =
+        TextPickerDialogView::Show(dialogProperties, *settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.step: step2. Get column widths through TextPickerPattern.
+     * @tc.expected: The column widths are consistent with the previous settings.
+     */
+    RefPtr<FrameNode> textPickerNode = GetNodeFromDialogByTag(dialogNode, V2::TEXT_PICKER_ETS_TAG);
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    std::vector<Dimension> columnWidths = textPickerPattern->GetColumnWidths();
+    EXPECT_EQ(columnWidths.size(), settingData->columnWidths.size());
+    for (size_t i = 0; i < columnWidths.size(); i++) {
+        EXPECT_EQ(columnWidths[i], settingData->columnWidths[i]);
+    }
+}
+
 } // namespace OHOS::Ace::NG

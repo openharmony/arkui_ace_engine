@@ -229,6 +229,8 @@ public:
         layoutInfo_->InvalidatedOffset();
     }
 
+    void OnColorModeChange(uint32_t colorMode) override;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

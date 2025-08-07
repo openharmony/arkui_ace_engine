@@ -1220,7 +1220,6 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
-
     algorithm.maxAreaSpace_ = 0.0f;
     size_t i = 0;
     size_t step = 1;
@@ -1231,7 +1230,6 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level1)
     EXPECT_TRUE(algorithm.CheckPositionLeft(position, childSize, step, i, arrowPosition));
     EXPECT_FLOAT_EQ(algorithm.maxAreaSpace_, MAX_AREA_SPACE);
     EXPECT_TRUE(algorithm.canPlacement_.left);
-
     algorithm.maxAreaSpace_ = 0.0f;
     i = 0;
     step = 1;

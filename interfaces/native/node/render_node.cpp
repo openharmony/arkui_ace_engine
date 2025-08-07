@@ -636,27 +636,30 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, Ark
     return code;
 }
 
-int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderRadius* borderRadius)
+int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node,
+    ArkUI_NodeBorderRadiusOption* borderRadius)
 {
     if (node == nullptr || borderRadius == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderRadius(node->renderNodeHandle,
-        borderRadius->leftRadius, borderRadius->topRadius, borderRadius->rightRadius, borderRadius->bottomRadius);
+        borderRadius->topLeftRadius, borderRadius->topRightRadius,
+        borderRadius->bottomLeftRadius, borderRadius->bottomRightRadius);
 }
 
-int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderRadius** borderRadius)
+int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node,
+    ArkUI_NodeBorderRadiusOption** borderRadius)
 {
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     int32_t code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderRadius(node->renderNodeHandle,
-        reinterpret_cast<float*>(&((*borderRadius)->leftRadius)),
-        reinterpret_cast<float*>(&((*borderRadius)->topRadius)),
-        reinterpret_cast<float*>(&((*borderRadius)->rightRadius)),
-        reinterpret_cast<float*>(&((*borderRadius)->bottomRadius)));
+        reinterpret_cast<float*>(&((*borderRadius)->topLeftRadius)),
+        reinterpret_cast<float*>(&((*borderRadius)->topRightRadius)),
+        reinterpret_cast<float*>(&((*borderRadius)->bottomLeftRadius)),
+        reinterpret_cast<float*>(&((*borderRadius)->bottomRightRadius)));
     return code;
 }
 
@@ -1193,10 +1196,11 @@ void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(
 
 ArkUI_NodeBorderStyleOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption()
 {
-    ArkUI_NodeBorderStyle* option = new ArkUI_NodeBorderStyle { .leftStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE,
-        .rightStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE,
-        .topStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE,
-        .bottomStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE };
+    ArkUI_NodeBorderStyle* option = new ArkUI_NodeBorderStyle {
+        .leftStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID,
+        .rightStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID,
+        .topStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID,
+        .bottomStyle = ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID };
     return option;
 }
 
@@ -1331,28 +1335,28 @@ void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(ArkUI_NodeBorderRadi
     delete option;
 }
 
-void OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(
-    ArkUI_NodeBorderRadiusOption* option, uint32_t edgeRadius, ArkUI_EdgeDirection direction)
+void OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionCornerRadius(
+    ArkUI_NodeBorderRadiusOption* option, uint32_t cornerRadius, ArkUI_CornerDirection direction)
 {
     CHECK_NULL_VOID(option);
     switch (direction) {
-        case ARKUI_EDGE_DIRECTION_ALL:
-            option->leftRadius = edgeRadius;
-            option->rightRadius = edgeRadius;
-            option->topRadius = edgeRadius;
-            option->bottomRadius = edgeRadius;
+        case ARKUI_CORNER_DIRECTION_ALL:
+            option->topLeftRadius = cornerRadius;
+            option->topRightRadius = cornerRadius;
+            option->bottomLeftRadius = cornerRadius;
+            option->bottomRightRadius = cornerRadius;
             break;
-        case ARKUI_EDGE_DIRECTION_LEFT:
-            option->leftRadius = edgeRadius;
+        case ARKUI_CORNER_DIRECTION_TOP_LEFT:
+            option->topLeftRadius = cornerRadius;
             break;
-        case ARKUI_EDGE_DIRECTION_RIGHT:
-            option->rightRadius = edgeRadius;
+        case ARKUI_CORNER_DIRECTION_TOP_RIGHT:
+            option->topRightRadius = cornerRadius;
             break;
-        case ARKUI_EDGE_DIRECTION_TOP:
-            option->topRadius = edgeRadius;
+        case ARKUI_CORNER_DIRECTION_BOTTOM_LEFT:
+            option->bottomLeftRadius = cornerRadius;
             break;
-        case ARKUI_EDGE_DIRECTION_BOTTOM:
-            option->bottomRadius = edgeRadius;
+        case ARKUI_CORNER_DIRECTION_BOTTOM_RIGHT:
+            option->bottomRightRadius = cornerRadius;
             break;
         default:
             return;
@@ -1553,7 +1557,7 @@ ArkUI_RenderNodeMaskOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionF
     rectShape.right = shape->right;
     rectShape.top = shape->top;
     rectShape.bottom = shape->bottom;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .rect = rectShape, .type = RECT_SHAPE };
+    ArkUI_RenderNodeMaskOption* option = new ArkUI_RenderNodeMaskOption { .rect = rectShape, .type = RECT_SHAPE };
     return option;
 }
 
@@ -1574,7 +1578,8 @@ ArkUI_RenderNodeMaskOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionF
     rectShape.bottomLeftY = shape->bottomLeftY;
     rectShape.bottomRightX = shape->bottomRightX;
     rectShape.bottomRightY = shape->bottomRightY;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .roundRect = rectShape, .type = ROUND_RECT_SHAPE };
+    ArkUI_RenderNodeMaskOption* option = new ArkUI_RenderNodeMaskOption { .roundRect = rectShape,
+        .type = ROUND_RECT_SHAPE };
     return option;
 }
 
@@ -1586,7 +1591,7 @@ ArkUI_RenderNodeMaskOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionF
     rectShape.centerX = shape->centerX;
     rectShape.centerY = shape->centerY;
     rectShape.radius = shape->radius;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .circle = rectShape, .type = CIRCLE_SHAPE };
+    ArkUI_RenderNodeMaskOption* option = new ArkUI_RenderNodeMaskOption { .circle = rectShape, .type = CIRCLE_SHAPE };
     return option;
 }
 
@@ -1599,7 +1604,7 @@ ArkUI_RenderNodeMaskOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionF
     rectShape.right = shape->right;
     rectShape.top = shape->top;
     rectShape.bottom = shape->bottom;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .oval = rectShape, .type = OVAL_SHAPE };
+    ArkUI_RenderNodeMaskOption* option = new ArkUI_RenderNodeMaskOption { .oval = rectShape, .type = OVAL_SHAPE };
     return option;
 }
 
@@ -1607,7 +1612,8 @@ ArkUI_RenderNodeMaskOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionF
     ArkUI_CommandPathOption* path)
 {
     CHECK_NULL_RETURN(path, nullptr);
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .commands = path->commands, .type = COMMANDS };
+    ArkUI_RenderNodeMaskOption* option = new ArkUI_RenderNodeMaskOption { .commands = path->commands,
+        .type = COMMANDS };
     return option;
 }
 
@@ -1645,7 +1651,7 @@ ArkUI_RenderNodeClipOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionF
     rectShape.right = shape->right;
     rectShape.top = shape->top;
     rectShape.bottom = shape->bottom;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .rect = rectShape, .type = RECT_SHAPE };
+    ArkUI_RenderNodeClipOption* option = new ArkUI_RenderNodeClipOption { .rect = rectShape, .type = RECT_SHAPE };
     return option;
 }
 
@@ -1666,7 +1672,8 @@ ArkUI_RenderNodeClipOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionF
     rectShape.bottomLeftY = shape->bottomLeftY;
     rectShape.bottomRightX = shape->bottomRightX;
     rectShape.bottomRightY = shape->bottomRightY;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .roundRect = rectShape, .type = ROUND_RECT_SHAPE };
+    ArkUI_RenderNodeClipOption* option = new ArkUI_RenderNodeClipOption { .roundRect = rectShape,
+        .type = ROUND_RECT_SHAPE };
     return option;
 }
 
@@ -1678,7 +1685,7 @@ ArkUI_RenderNodeClipOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionF
     rectShape.centerX = shape->centerX;
     rectShape.centerY = shape->centerY;
     rectShape.radius = shape->radius;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .circle = rectShape, .type = CIRCLE_SHAPE };
+    ArkUI_RenderNodeClipOption* option = new ArkUI_RenderNodeClipOption { .circle = rectShape, .type = CIRCLE_SHAPE };
     return option;
 }
 
@@ -1691,7 +1698,7 @@ ArkUI_RenderNodeClipOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionF
     rectShape.right = shape->right;
     rectShape.top = shape->top;
     rectShape.bottom = shape->bottom;
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .oval = rectShape, .type = OVAL_SHAPE };
+    ArkUI_RenderNodeClipOption* option = new ArkUI_RenderNodeClipOption { .oval = rectShape, .type = OVAL_SHAPE };
     return option;
 }
 
@@ -1699,7 +1706,8 @@ ArkUI_RenderNodeClipOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionF
     ArkUI_CommandPathOption* path)
 {
     CHECK_NULL_RETURN(path, nullptr);
-    ArkUI_RenderNodeOption* option = new ArkUI_RenderNodeOption { .commands = path->commands, .type = COMMANDS };
+    ArkUI_RenderNodeClipOption* option = new ArkUI_RenderNodeClipOption { .commands = path->commands,
+        .type = COMMANDS };
     return option;
 }
 

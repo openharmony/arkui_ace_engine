@@ -849,6 +849,36 @@ HWTEST_F(EventManagerTestNg, TryResampleTouchEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetResamplePointerEvent001
+ * @tc.desc: Test GetResamplePointerEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetResamplePointerEvent001, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+    TouchEvent touchEvent1;
+    TouchEvent touchEvent2;
+
+    uint64_t resampleTime1 = 0.5 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds1(resampleTime1);
+    TimeStamp ts1(nanoseconds1);
+    touchEvent1.time = ts1;
+    uint64_t resampleTime2 = 3 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds2(resampleTime2);
+    TimeStamp ts2(nanoseconds2);
+    touchEvent2.time = ts2;
+    events.push_back(touchEvent1);
+    events.push_back(touchEvent2);
+    TouchEvent resample;
+    uint64_t resampleTime = 4 * 1000 * 1000;
+
+    ResamplePoint slope;
+    SystemProperties::debugEnabled_ = true;
+    bool ret = ResampleAlgo::GetResamplePointerEvent(events, resampleTime, resample, slope);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: GetResampleTouchEvent005
  * @tc.desc: Test GetResampleTouchEvent function.
  * @tc.type: FUNC
@@ -1168,37 +1198,6 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent0012, TestSize.Level1)
         dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
         EXPECT_EQ(dragPointerEvent.x, xy.first);
     }
-}
-
-/**
- * @tc.name: OnNonPointerEvent001
- * @tc.desc: Test OnNonPointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, OnNonPointerEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    NonPointerEvent event;
-    event.eventType = UIInputEventType::KEY;
-    auto ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event2;
-    event2.eventType = UIInputEventType::FOCUS_AXIS;
-    ret = eventManager->OnNonPointerEvent(event2);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event3;
-    event3.eventType = UIInputEventType::CROWN;
-    ret = eventManager->OnNonPointerEvent(event3);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event4;
-    event4.eventType = UIInputEventType::TOUCH;
-    ret = eventManager->OnNonPointerEvent(event4);
-    EXPECT_FALSE(ret);
 }
 
 /**

@@ -492,6 +492,8 @@ public:
         draggingIndex_ = index;
     }
 
+    void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

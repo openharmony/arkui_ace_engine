@@ -84,6 +84,10 @@ public:
     virtual void OnDragNodeDetachFromMainTree() {};
     virtual void ResetAISelected(AIResetSelectionReason reason) {}
     virtual void ShowAIEntityMenuForCancel() {}
+    virtual bool IsPreviewMenuShow()
+    {
+        return false;
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragBase);
 };

@@ -444,6 +444,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetInputEventType(inputEventType_);
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetPassThrough(lastTouchEvent_.passThrough);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::LONG_PRESS);
@@ -615,6 +616,7 @@ void LongPressRecognizer::UpdateGestureEventInfo(std::shared_ptr<LongPressGestur
     info->SetRawInputDeviceId(deviceId_);
     info->SetLastAction(lastAction_);
     info->SetPressedKeyCodes(trackPoint.pressedKeyCodes_);
+    info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()

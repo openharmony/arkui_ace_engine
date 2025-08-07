@@ -3957,7 +3957,7 @@
     },
     {
         "first_introduced": "20",
-        "name": "OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius"
+        "name": "OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionCornerRadius"
     },
     {
         "first_introduced": "20",

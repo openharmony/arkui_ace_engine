@@ -124,10 +124,14 @@ void JSScrollBar::JsSetEnableNestedScroll(const JSCallbackInfo& args)
 void JSScrollBar::JsSetScrollBarColor(const JSCallbackInfo& args)
 {
     Color color;
-    if (!JSViewAbstract::ParseColorMetricsToColor(args[0], color)) {
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseColorMetricsToColor(args[0], color, resObj)) {
+        CompleteResourceObjectFromColor(resObj, color, false);
         ScrollBarModel::GetInstance()->ResetScrollBarColor();
     } else {
+        CompleteResourceObjectFromColor(resObj, color, true);
         ScrollBarModel::GetInstance()->SetScrollBarColor(color);
     }
+    ScrollBarModel::GetInstance()->CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, resObj);
 }
 } // namespace OHOS::Ace::Framework

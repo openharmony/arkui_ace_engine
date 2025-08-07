@@ -24,7 +24,7 @@ action("arkoala_annotate") {
 
   args = [
     rebase_path("."),
-    rebase_path("annotate-config.json")
+    rebase_path("annotate-config.json"),
   ]
 }
 
@@ -33,13 +33,11 @@ action("arkoala_process") {
 
   script = "../../arkoala/process_arkoala.py"
 
-  args = [
-    rebase_path("."),
-  ]
+  args = [ rebase_path(".") ]
 
   deps = [
     ":arkoala_annotate",
-    "../incremental/runtime:runtime_annotate"
+    "../incremental/runtime:runtime_annotate",
   ]
 }
 
@@ -48,19 +46,15 @@ generate_static_abc("components_compile_abc") {
   files = arkui_files
   paths_keys = arkui_path_keys
   paths_values = arkui_path_values
-  #ui_enable = "True"
-  #only_memo = "True"
+  ui_enable = "True"
+  only_memo = "True"
   dependencies = [ ":arkoala_process" ]
   dst_file = target_out_dir + "/components_compile_abc"
   out_puts = [ target_out_dir + "/components_compile_abc/modules_static.abc" ]
 }
 
 ohos_copy("components_abc") {
-  sources = [
-    target_out_dir + "/components_compile_abc/modules_static.abc"
-  ]
-  outputs = [
-    target_out_dir + "/components.abc"
-  ]
+  sources = [ target_out_dir + "/components_compile_abc/modules_static.abc" ]
+  outputs = [ target_out_dir + "/components.abc" ]
   deps = [ ":components_compile_abc" ]
 }

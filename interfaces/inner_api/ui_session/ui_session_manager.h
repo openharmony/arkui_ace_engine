@@ -90,7 +90,12 @@ public:
     virtual void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) {};
     virtual void SaveInspectorTreeFunction(InspectorFunction&& function) {};
     virtual void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) {};
-    virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) {};
+    /**
+     * @description: Report web editing area focus/blur/textChange event
+     * @param type The type of event (focus, blur, or textChange), defaults to empty string
+     */
+    virtual void ReportWebUnfocusEvent(
+        int64_t accessibilityId, const std::string& data, const std::string& type = "") {};
     virtual void NotifyAllWebPattern(bool isRegister) {};
     virtual void NotifySendCommandPattern(int32_t id, const std::string& command) {};
     virtual int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) { return 11; };
@@ -159,6 +164,9 @@ public:
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
     virtual void SendExeAppAIFunctionResult(uint32_t result) {};
 protected:
+    UiSessionManager() = default;
+    virtual ~UiSessionManager() = default;
+
     static std::mutex mutex_;
     static std::shared_mutex reportObjectMutex_;
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)

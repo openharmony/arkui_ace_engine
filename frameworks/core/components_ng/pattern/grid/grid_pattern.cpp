@@ -545,7 +545,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     auto curDelta = info_.currentOffset_ - info_.prevOffset_;
     info_.currentHeight_ = EstimateHeight();
-    bool sizeDiminished = IsOutOfBoundary(true) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
+    bool sizeDiminished =
+        IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
     if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
         endHeight_ = GetTotalHeight() - GetMainContentSize();
@@ -1139,6 +1140,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     host->SetActive();
     auto* context = host->GetContext();
     if (context) {
+        host->SetEscapeDelayForIgnore(true);
         context->FlushUITaskWithSingleDirtyNode(host);
     }
     preSpring_ = false;
@@ -1783,5 +1785,19 @@ int32_t GridPattern::OnInjectionEvent(const std::string& command)
         return RET_FAILED;
     }
     return RET_SUCCESS;
+}
+
+void GridPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

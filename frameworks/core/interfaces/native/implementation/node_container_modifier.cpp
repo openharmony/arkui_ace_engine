@@ -50,16 +50,16 @@ void SetNodeContainerOptionsImpl(Ark_NativePointer node, const Ark_NodeControlle
 
 void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer childNode)
 {
-    // auto nodeContainer = reinterpret_cast<FrameNode*>(self);
-    // auto* childPeer = reinterpret_cast<Ark_FrameNode>(childNode);
-    // auto pattern = nodeContainer->GetPattern<NodeContainerPattern>();
-    // CHECK_NULL_VOID(pattern);
-    // if (!childPeer) {
-    //     pattern->AddBaseNode(nullptr);
-    //     return;
-    // }
-    // auto child = childPeer->node;
-    // pattern->AddBaseNode(child);
+    auto nodeContainer = reinterpret_cast<FrameNode*>(self);
+    auto* childPeer = reinterpret_cast<Ark_FrameNode>(childNode);
+    auto pattern = nodeContainer->GetPattern<NodeContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!childPeer) {
+        pattern->AddBaseNode(nullptr);
+        return;
+    }
+    auto child = childPeer->node;
+    pattern->AddBaseNode(child);
 }
 
 void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)

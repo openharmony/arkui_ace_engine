@@ -481,14 +481,12 @@ private:
     void RegisterNode();
     void UnregisterNode();
 
-#ifdef ACE_STATIC
     void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
     void InitControllerMultiThread();
     void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
-#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

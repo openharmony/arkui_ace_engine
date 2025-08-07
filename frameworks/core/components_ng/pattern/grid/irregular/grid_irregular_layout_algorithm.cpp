@@ -688,12 +688,12 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
         auto itemWrapper = wrapper_->GetChildByIndex(l, true);
-        if (l >= 0 && (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout())) {
+        if (l >= 0 && GridUtils::CheckNeedCacheLayout(itemWrapper)) {
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
         itemWrapper = wrapper_->GetChildByIndex(r, true);
-        if (r < info_.GetChildrenCount() && (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout())) {
+        if (r < info_.GetChildrenCount() && GridUtils::CheckNeedCacheLayout(itemWrapper)) {
             itemsToPreload.emplace_back(r);
         }
     }

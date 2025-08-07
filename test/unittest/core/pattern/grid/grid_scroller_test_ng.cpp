@@ -16,6 +16,7 @@
 #include "grid_test_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 class GridScrollerTestNg : public GridTestNg, public testing::WithParamInterface<bool> {};
@@ -1504,5 +1505,74 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndexWithExtraOffset003, TestSize.Level1)
 
     ScrollToIndex(49, false, ScrollAlign::END, -extraOffset);
     EXPECT_TRUE(Position(-4600.0f));
+}
+
+/**
+ * @tc.name: CreateWithResourceObjScrollBarColor
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, CreateWithResourceObjScrollBarColor001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.CreateWithResourceObjScrollBarColor(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(0, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObjScrollBarColor(resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto color = props->GetScrollBarColorValue(Color::BLUE);
+    EXPECT_EQ(color, Color::BLUE);
+
+    model.CreateWithResourceObjScrollBarColor(resObjWithString);
+    pattern_->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjScrollBarColor
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, CreateWithResourceObjScrollBarColor002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    GridModelNG::CreateWithResourceObjScrollBarColor(AceType::RawPtr(frameNode_), invalidResObj);
+    model.CreateWithResourceObjScrollBarColor(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(0, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+
+    GridModelNG::CreateWithResourceObjScrollBarColor(AceType::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto color = props->GetScrollBarColorValue(Color::BLUE);
+    EXPECT_EQ(color, Color::BLUE);
+
+    model.CreateWithResourceObjScrollBarColor(resObjWithString);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

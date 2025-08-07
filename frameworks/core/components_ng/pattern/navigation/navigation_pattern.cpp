@@ -107,77 +107,6 @@ GradientColor CreatePercentGradientColor(int32_t percent, Color color)
     return gredient;
 }
 
-void ReplaceNodeWithProxyNodeIfNeeded(
-    const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node)
-{
-    CHECK_NULL_VOID(navContentNode);
-    CHECK_NULL_VOID(node);
-    auto proxyNode = node->GetOrCreateProxyNode();
-    if (!proxyNode) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "failed to create proxyNode for destNode[%{public}d]", node->GetId());
-        return;
-    }
-    node->SetIsShowInPrimaryPartition(true);
-    node->SetJSViewActive(true);
-    auto property = node->GetLayoutProperty();
-    if (property) {
-        property->UpdateVisibility(VisibleType::VISIBLE);
-    }
-    auto childIndex = navContentNode->GetChildIndex(node);
-    if (childIndex < 0) {
-        return;
-    }
-    proxyNode->SetIndex(node->GetIndex());
-    navContentNode->RemoveChildSilently(node);
-    navContentNode->AddChild(proxyNode, childIndex, true);
-    navContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void RestoreNodeFromProxyNodeIfNeeded(const RefPtr<FrameNode>& primaryContentNode,
-    const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node)
-{
-    CHECK_NULL_VOID(primaryContentNode);
-    CHECK_NULL_VOID(navContentNode);
-    CHECK_NULL_VOID(node);
-    node->SetIsShowInPrimaryPartition(false);
-    auto proxyNode = node->GetOrCreateProxyNode();
-    CHECK_NULL_VOID(proxyNode);
-    auto childIndex = navContentNode->GetChildIndex(proxyNode);
-    if (childIndex < 0) {
-        return;
-    }
-
-    node->SetIndex(proxyNode->GetIndex());
-    primaryContentNode->RemoveChildSilently(node);
-    primaryContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    navContentNode->RemoveChildSilently(proxyNode);
-    navContentNode->AddChild(node, childIndex, true);
-    navContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    node->SetJSViewActive(true);
-    auto property = node->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    property->UpdateVisibility(VisibleType::VISIBLE);
-}
-
-void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
-    const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes)
-{
-    int32_t slot = 0;
-    for (const auto& weakNode : nodes) {
-        auto node = weakNode.Upgrade();
-        CHECK_NULL_CONTINUE(node);
-        auto childIndex = primaryContentNode->GetChildIndex(node);
-        if (childIndex < 0) {
-            node->MountToParent(primaryContentNode, slot, true);
-        } else if (slot != childIndex) {
-            node->MovePosition(slot);
-        }
-        slot++;
-    }
-}
-
 void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDestinationState state,
     const RefPtr<NavDestinationContext>& context, bool isFrom, std::optional<NavDestinationInfo>& info)
 {
@@ -224,6 +153,77 @@ int32_t TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& n
     return navDestination->DoTransition(operation, isEnter);
 }
 } // namespace
+
+void NavigationPattern::ReplaceNodeWithProxyNodeIfNeeded(
+    const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node)
+{
+    CHECK_NULL_VOID(navContentNode);
+    CHECK_NULL_VOID(node);
+    auto proxyNode = node->GetOrCreateProxyNode();
+    if (!proxyNode) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "failed to create proxyNode for destNode[%{public}d]", node->GetId());
+        return;
+    }
+    node->SetIsShowInPrimaryPartition(true);
+    node->SetJSViewActive(true);
+    auto property = node->GetLayoutProperty();
+    if (property) {
+        property->UpdateVisibility(VisibleType::VISIBLE);
+    }
+    auto childIndex = navContentNode->GetChildIndex(node);
+    if (childIndex < 0) {
+        return;
+    }
+    proxyNode->SetIndex(node->GetIndex());
+    navContentNode->RemoveChildSilently(node);
+    navContentNode->AddChild(proxyNode, childIndex, true);
+    navContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationPattern::RestoreNodeFromProxyNodeIfNeeded(const RefPtr<FrameNode>& primaryContentNode,
+    const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node)
+{
+    CHECK_NULL_VOID(primaryContentNode);
+    CHECK_NULL_VOID(navContentNode);
+    CHECK_NULL_VOID(node);
+    node->SetIsShowInPrimaryPartition(false);
+    auto proxyNode = node->GetOrCreateProxyNode();
+    CHECK_NULL_VOID(proxyNode);
+    auto childIndex = navContentNode->GetChildIndex(proxyNode);
+    if (childIndex < 0) {
+        return;
+    }
+
+    node->SetIndex(proxyNode->GetIndex());
+    primaryContentNode->RemoveChildSilently(node);
+    primaryContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    navContentNode->RemoveChildSilently(proxyNode);
+    navContentNode->AddChild(node, childIndex, true);
+    navContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    node->SetJSViewActive(true);
+    auto property = node->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(VisibleType::VISIBLE);
+}
+
+void NavigationPattern::ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
+    const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes)
+{
+    int32_t slot = 0;
+    for (const auto& weakNode : nodes) {
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_CONTINUE(node);
+        auto childIndex = primaryContentNode->GetChildIndex(node);
+        if (childIndex < 0) {
+            node->MountToParent(primaryContentNode, slot, true);
+        } else if (slot != childIndex) {
+            node->MovePosition(slot);
+        }
+        slot++;
+    }
+}
 
 NavigationPattern::NavigationPattern()
 {
@@ -1069,7 +1069,7 @@ void NavigationPattern::RecognizeHomePageIfNeeded()
     const auto& expectedHomeName = navManager->GetHomePageName();
     if (!expectedHomeName.empty()) {
         navBarIsHome_ = false;
-    } else if (IsNavBarHasContent()) {
+    } else if (IsNavBarValid()) {
         if (navBarIsHome_) {
             return;
         }
@@ -5196,14 +5196,14 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
         forceSplitSuccess = isMainWindow && isInAppMainPage &&
             (ignoreOrientation || orientation == DeviceOrientation::LANDSCAPE) &&
             thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
-        bool navBarHasContent = IsNavBarHasContent();
-        forceSplitUseNavBar = forceSplitSuccess && navBarHasContent && navBarIsHome_;
+        bool isNavBarValid = IsNavBarValid();
+        forceSplitUseNavBar = forceSplitSuccess && isNavBarValid && navBarIsHome_;
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "calc splitMode, isMainWindow:%{public}d, isInAppMainPage:%{public}d, "
             "isInSplitScreenMode:%{public}d, ignoreOrientation:%{public}d, orientation: %{public}s, "
-            "dipScale: %{public}f, thresholdWidth: %{public}f, curWidth: %{public}f, navBarHasContent:%{public}d, "
+            "dipScale: %{public}f, thresholdWidth: %{public}f, curWidth: %{public}f, isNavBarValid:%{public}d, "
             "navBarIsHome:%{public}d, forceSplitSuccess:%{public}d, forceSplitUseNavBar:%{public}d",
             isMainWindow, isInAppMainPage, isInSplitScreenMode, ignoreOrientation,
-            DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), navBarHasContent,
+            DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), isNavBarValid,
             navBarIsHome_, forceSplitSuccess, forceSplitUseNavBar);
     }
     if (forceSplitSuccess == forceSplitSuccess_ && forceSplitUseNavBar_ == forceSplitUseNavBar) {
@@ -5215,11 +5215,11 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
     SwapNavDestinationAndProxyNode(true);
 }
 
-bool NavigationPattern::IsNavBarHasContent()
+bool NavigationPattern::IsNavBarValid()
 {
     /**
      * When NavBar is not hidden and its width is greater than 0,
-     * it is considered that there is content in NavBar.
+     * it is considered that the NavBar is valid.
      */
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);

@@ -166,14 +166,14 @@ typedef struct ArkUI_CommandPath ArkUI_CommandPathOption;
  *
  * @since 20
  */
-typedef struct ArkUI_RenderNodeOption ArkUI_RenderNodeMaskOption;
+typedef struct ArkUI_RenderNodeMaskOption ArkUI_RenderNodeMaskOption;
 
 /**
  * @brief Render node clip option.
  *
  * @since 20
  */
-typedef struct ArkUI_RenderNodeOption ArkUI_RenderNodeClipOption;
+typedef struct ArkUI_RenderNodeClipOption ArkUI_RenderNodeClipOption;
 
 /**
  * @brief Adds a child render node to a parent node.
@@ -986,7 +986,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
  * @since 20
  */
-int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeMaskOption* option);
+int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeMaskOption* mask);
 
 /**
  * @brief Apply a clip to a render node using the clip option.
@@ -999,7 +999,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_Rend
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
  * @since 20
  */
-int32_t OH_ArkUI_RenderNodeUtils_SetClip(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeClipOption* option);
+int32_t OH_ArkUI_RenderNodeUtils_SetClip(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeClipOption* clip);
 
 /**
  * @brief Mark whether to preferentially draw the node and its children.
@@ -1055,8 +1055,8 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBounds(
  * @param node Handle to the target render node.
  * @param x X-coordinate of the bounds's top-left corner (in pixels).
  * @param y Y-coordinate of the bounds's top-left corner (in pixels).
- * @param width Width of the bounds (in pixels).
- * @param height Height of the bounds (in pixels).
+ * @param w Width of the bounds (in pixels).
+ * @param h Height of the bounds (in pixels).
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
@@ -1595,15 +1595,15 @@ ArkUI_NodeBorderRadiusOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOpt
 void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(ArkUI_NodeBorderRadiusOption* option);
 
 /**
- * @brief Set the edge value of NodeBorderRadius option.
+ * @brief Set the corner value of NodeBorderRadius option.
  *
  * @param option Pointer to the NodeBorderRadius option.
- * @param edgeRadius The edge radius value of the NodeBorderRadius option.
- * @param direction {@Link ArkUI_EdgeDirection} The direction of the edge.
+ * @param cornerRadius The corner radius value of the NodeBorderRadius option.
+ * @param direction {@Link ArkUI_CornerDirection} The direction of the corner.
  * @since 20
  */
-void OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(
-    ArkUI_NodeBorderRadiusOption* option, uint32_t edgeRadius, ArkUI_EdgeDirection direction);
+void OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionCornerRadius(
+    ArkUI_NodeBorderRadiusOption* option, uint32_t cornerRadius, ArkUI_CornerDirection direction);
 
 /**
  * @brief Create a CircleShape option.
@@ -1634,7 +1634,7 @@ void OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterX(ArkUI_CircleShapeOptio
  * @brief Set the centerY value of CircleShape option.
  *
  * @param option Pointer to the CircleShape option.
- * @param centerX The centerY value.
+ * @param centerY The centerY value.
  * @since 20
  */
 void OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterY(ArkUI_CircleShapeOption* option, float centerY);

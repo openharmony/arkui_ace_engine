@@ -343,11 +343,17 @@ ArkUINativeModuleValue GridBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* runti
         }
     }
     Color color;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, arg_color, color)) {
+    RefPtr<ResourceObject> resObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, arg_color, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getGridModifier()->setGridScrollBarColor(
             nativeNode, color.GetValue());
     } else {
         GetArkUINodeModifiers()->getGridModifier()->resetGridScrollBarColor(nativeNode);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjScrollBarColor(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -360,6 +366,9 @@ ArkUINativeModuleValue GridBridge::ResetScrollBarColor(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetGridScrollBarColor(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getGridModifier()->createWithResourceObjScrollBarColor(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

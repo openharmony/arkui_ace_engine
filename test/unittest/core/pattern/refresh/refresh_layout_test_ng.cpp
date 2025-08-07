@@ -266,6 +266,8 @@ HWTEST_F(RefreshLayoutTestNg, GetTargetOffset001, TestSize.Level1)
     pattern_->HandleDragEnd(0.f);
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
     EXPECT_FALSE(pattern_->isHigherVersion_);
+    auto algorithm = AceType::DynamicCast<RefreshLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->isHighVersion_);
 }
 
 /**
@@ -597,7 +599,6 @@ HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
      * @tc.steps: step3. refresh sets accessibilityLevel
      * @tc.expected: progress node and loadingText node have accessibilityLevel.
      */
-    
     refreshAccessibilityProperty->SetAccessibilityLevel("no");
     EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
     EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");

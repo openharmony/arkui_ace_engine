@@ -760,4 +760,102 @@ HWTEST_F(MenuItemTestOneNg, MeasureClickableArea001, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
     menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
 }
+
+/**
+ * @tc.name: RemoveParentRestrictionsForFixIdeal001
+ * @tc.desc: Test MenuItem RemoveParentRestrictionsForFixIdeal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, RemoveParentRestrictionsForFixIdeal001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu item.
+     */
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, menuItemPattern);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(150.0f, 50.0f));
+    /**
+     * @tc.steps: step2. LayoutCalPolicy width set to FIX_AT_IDEAL_SIZE.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    menuItem->SetLayoutProperty(layoutProperty);
+    auto* wrapper = new LayoutWrapperNode(menuItem, geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step3. Set layoutConstraint and contentConstraint.
+     */
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 200.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    wrapper->GetLayoutProperty()->layoutConstraint_ = constraint;
+    EXPECT_FALSE(wrapper->GetLayoutProperty()->contentConstraint_);
+    wrapper->GetLayoutProperty()->contentConstraint_ = constraint;
+
+    std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
+    std::optional<CalcLength> len = CalcLength("auto");
+    calcLayoutConstraint->selfIdealSize = std::nullopt;
+    wrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
+    geometryNode->parentLayoutConstraint_ = LayoutConstraintF();
+    EXPECT_FLOAT_EQ(menuItemLayoutAlgorithm_->maxRowWidth_, 0.0f);
+    menuItemLayoutAlgorithm_->Measure(wrapper);
+    EXPECT_FLOAT_EQ(menuItemLayoutAlgorithm_->maxRowWidth_, 200.0f);
+}
+
+/**
+ * @tc.name: RemoveParentRestrictionsForFixIdeal002
+ * @tc.desc: Test MenuItem RemoveParentRestrictionsForFixIdeal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, RemoveParentRestrictionsForFixIdeal002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu item.
+     */
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto menuItem = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, -1, menuItemPattern);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. LayoutCalPolicy is default and set maxSize to FULL_SCREEN_SIZE.
+     * @tc.expected: childConstraint.maxSize is equal to FULL_SCREEN_SIZE.
+     */
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize = FULL_SCREEN_SIZE;
+    auto props = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(props, nullptr);
+    props->UpdateLayoutConstraint(childConstraint);
+    props->UpdateContentConstraint();
+    LayoutPolicyProperty layoutPolicyProperty;
+    props->layoutPolicy_ = layoutPolicyProperty;
+    menuItemLayoutAlgorithm_->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
+    EXPECT_EQ(childConstraint.maxSize.Width(), FULL_SCREEN_SIZE.Width());
+    EXPECT_EQ(childConstraint.maxSize.Height(), FULL_SCREEN_SIZE.Height());
+
+    /**
+     * @tc.steps: step3. LayoutCalPolicy is MATCH_PARENT.
+     * @tc.expected: childConstraint.maxSize is not infinity.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    props->layoutPolicy_ = layoutPolicyProperty;
+    menuItemLayoutAlgorithm_->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
+    EXPECT_FALSE(std::isinf(childConstraint.maxSize.Width()));
+    EXPECT_FALSE(std::isinf(childConstraint.maxSize.Height()));
+
+    /**
+     * @tc.steps: step4. LayoutCalPolicy is FIX_AT_IDEAL_SIZE and set maxSize to FULL_SCREEN_SIZE.
+     * @tc.expected: childConstraint.maxSize is infinity.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    props->layoutPolicy_ = layoutPolicyProperty;
+    menuItemLayoutAlgorithm_->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Width()));
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Height()));
+}
 } // namespace OHOS::Ace::NG

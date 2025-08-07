@@ -252,7 +252,9 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     env_->GetUndefined(&optionalEntry);
     auto entryPointObj = entryLoader.GetPageEntryObj();
     auto legacyEntryPointObj = LegacyLoadPage(env_);
-    std::string moduleName = Container::Current()->GetModuleName();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, UIContentErrorCode::INVALID_URL);
+    std::string moduleName = container->GetModuleName();
     ani_string module;
     env_->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
     if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,

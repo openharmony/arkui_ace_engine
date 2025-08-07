@@ -334,6 +334,16 @@ public:
     {
         return lastAction_;
     }
+
+    void SetPassThrough(bool passThrough)
+    {
+        passThrough_ = passThrough;
+    }
+
+    bool GetPassThrough() const
+    {
+        return passThrough_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -409,6 +419,7 @@ private:
     float inputYDeltaSlope_ = 0.0f;
     GestureTypeName gestureType_ = GestureTypeName::UNKNOWN;
     std::optional<int32_t> lastAction_;
+    bool passThrough_ = false;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

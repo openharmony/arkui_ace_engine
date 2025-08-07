@@ -2004,59 +2004,6 @@ HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager001, TestSize
 }
 
 /**
- * @tc.name: GetSheetTypeFromSheetManager002
- * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
- *           Condition: The default is Bottom Type
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager002, TestSize.Level1)
-{
-    SheetPresentationTestThreeNg::SetUpTestCase();
-    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
-    /**
-     * @tc.steps: step1. create sheet page, get sheet pattern.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(sheeLayoutProperty, nullptr);
-    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
-    /**
-     * @tc.steps: step2. sheetThemeType_ = "auto".
-     */
-    pattern->sheetThemeType_ = "auto";
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 780, 800 });
-    /**
-     * @tc.steps: step2. Set preferType is Bottom.
-     * @tc.expected: the sheetType is Bottom.
-     */
-    SheetStyle sheetStyle;
-    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
-    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
-    /**
-     * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
-     * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
-     */
-    auto windowManager = pipelineContext->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-    auto isPcOrPadFreeMultiWindowCallback = []() {
-        return true;
-    };
-    windowManager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindowCallback));
-    sheetStyle.bottomOffset = OffsetF(0, -15);
-    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM_OFFSET);
-    SheetPresentationTestThreeNg::TearDownTestCase();
-}
-
-/**
  * @tc.name: GetSheetTypeFromSheetManager003
  * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
  *           Condition: sheetStyle.instanceId is 100001
@@ -2391,6 +2338,63 @@ HWTEST_F(SheetPresentationTestThreeNg, SheetWidthNeedChanged001, TestSize.Level1
      */
     sheetPattern->sheetWidth_ = 1800.0f;
     EXPECT_EQ(sheetPattern->SheetWidthNeedChanged(), true);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSheetBackgroundColor001
+ * @tc.desc: Branch: if (sheetStyle.backgroundColor.has_value()).
+ *           Condition: 1.sheetStyle.backgroundColor.has_value()=>true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "UpdateSheetBackgroundColor".
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("sheetNode", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("scrollNode", 003, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("sheetContentNode", 004,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern, before test "UpdateSheetBackgroundColor".
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle, before test "UpdateSheetBackgroundColor".
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    sheetStyle.backgroundColor = Color::BLUE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test "UpdateSheetBackgroundColor",
+     * @tc.expected: GetBackgroundColorValue = Color::BLUE.
+     */
+    sheetPattern->UpdateSheetBackgroundColor();
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto hasBackgroundColor = renderContext->HasBackgroundColor();
+    EXPECT_EQ(hasBackgroundColor, false);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

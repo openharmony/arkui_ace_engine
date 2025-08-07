@@ -102,6 +102,7 @@ public:
     virtual void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjLaneConstrain(
         const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif

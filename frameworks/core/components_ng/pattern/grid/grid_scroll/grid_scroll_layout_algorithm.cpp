@@ -2094,7 +2094,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 // Step1. Get wrapper of [GridItem]
                 CHECK_NULL_RETURN(currentIndex < childrenCount, -1.0f);
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
-                if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
+                if (GridUtils::CheckNeedCacheLayout(itemWrapper)) {
                     for (uint32_t y = i; y < crossCount_ && currentIndex < childrenCount; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
@@ -2143,7 +2143,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
         }
         // Step1. Get wrapper of [GridItem]
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
-        if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
+        if (GridUtils::CheckNeedCacheLayout(itemWrapper)) {
             for (uint32_t x = i; x < crossCount_ && currentIndex < childrenCount; x++) {
                 predictBuildList_.emplace_back(currentIndex++);
             }

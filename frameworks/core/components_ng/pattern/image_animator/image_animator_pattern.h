@@ -178,6 +178,7 @@ private:
     std::vector<PictureInfo> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
     std::string ImagesToString() const;
+    void CheckClearUserDefinedSize(const RefPtr<LayoutProperty>& layoutProperty);
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
     void DisablePreAnimatedImageAnimation(uint32_t index);

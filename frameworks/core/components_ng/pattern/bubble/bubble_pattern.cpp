@@ -381,6 +381,7 @@ void BubblePattern::PopBubble(bool tips)
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
+    auto instanceId = pipelineNg->GetInstanceId();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
     if (!popupInfo.isCurrentOnShow || (tips && !popupInfo.isTips)) {
@@ -394,9 +395,9 @@ void BubblePattern::PopBubble(bool tips)
     auto isTips = layoutProp->GetIsTips().value_or(false);
     if (showInSubWindow) {
         if (isTips) {
-            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
+            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0, instanceId);
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_, instanceId);
         }
     } else {
         if (isTips) {
