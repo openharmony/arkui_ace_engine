@@ -97,7 +97,7 @@ void QRCodeTestNg::TearDownTestSuite()
  * @tc.desc: Test qrcode paintProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -125,7 +125,7 @@ HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Test qrcode paintProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest002, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -153,7 +153,7 @@ HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest002, TestSize.Level1)
  * @tc.desc:Test pattern of qrcode.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level0)
 {
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
@@ -190,7 +190,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level1)
  * @tc.desc: Test layout of qrcode wrapper.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest003, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest003, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -310,7 +310,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest004, TestSize.Level1)
  * @tc.desc: Test qrcode  MeasureContent function.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
@@ -358,7 +358,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level1)
  * @tc.desc: Test qrcode OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
@@ -386,7 +386,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level1)
  * @tc.desc: Test qrcode OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest007, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -425,7 +425,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest007, TestSize.Level1)
  * @tc.desc: test SetContentOpacity
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -464,7 +464,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
  * @tc.desc: test GetFocusPattern
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -494,7 +494,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -549,7 +549,7 @@ HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -588,7 +588,7 @@ HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
  * @tc.desc: test onDraw
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -637,7 +637,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
  * @tc.desc: test onDraw
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -683,7 +683,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
  * @tc.desc: test qrcodePaintMethod UpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -733,7 +733,7 @@ HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level1)
  * @tc.desc: test QRCodeModelNG static Method
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -751,7 +751,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level1)
  * @tc.desc: test modifier
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create LoadingProgressModifier pointer.
@@ -818,7 +818,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent003, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent003, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
