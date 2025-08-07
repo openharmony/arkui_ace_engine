@@ -136,7 +136,7 @@ bool RepeatVirtualScroll2Node::CheckNode4IndexInL1(int32_t index, int32_t nStart
             (nStart < 0 && index >= nStart + totalCount) || // cover scenario 3.1
             (nEnd >= totalCount && index <= nEnd - totalCount); // cover scenario 3.3
     }
-    cacheItem->isL1_ = remainInL1;
+    caches_.UpdateIsL1(cacheItem, remainInL1);
     if (!remainInL1) {
         cacheItem->isOnRenderTree_ = false;
     }
@@ -347,7 +347,7 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
             }
             if (activeItems.find(index + baseIndex) != activeItems.end()) {
                 frameNode->SetActive(true);
-                cacheItem->isL1_ = true;
+                repeatNode->caches_.UpdateIsL1(cacheItem, true, false);
                 cacheItem->isActive_ = true;
                 cacheItem->isOnRenderTree_ = true;
                 return true;
@@ -356,12 +356,12 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
                 cacheItem->isActive_ = false;
             }
             if (cachedItems.find(index + baseIndex) != cachedItems.end()) {
-                cacheItem->isL1_ = true;
+                repeatNode->caches_.UpdateIsL1(cacheItem, true, false);
                 return true;
             }
 
             cacheItem->isOnRenderTree_ = false;
-            cacheItem->isL1_ = false;
+            repeatNode->caches_.UpdateIsL1(cacheItem, false);
             if (cacheItem->node_->OnRemoveFromParent(true)) {
                 repeatNode->RemoveDisappearingChild(cacheItem->node_);
             } else {
@@ -380,9 +380,10 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
 // TS calls this function at the end of rerender to update caches.l1Rid4Index_
 // forceRunDoSetActiveRange_ indicates that following DoSetActiveChildRange
 // must do a full run even if range is unchanged (which is typically the case).
-void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index)
+void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index,
+    std::unordered_set<uint32_t>& ridNeedToRecycle)
 {
-    caches_.UpdateL1Rid4Index(l1Rd4Index);
+    caches_.UpdateL1Rid4Index(l1Rd4Index, ridNeedToRecycle);
 
     // run next DoSetActiveChild range even if range unchanged
     forceRunDoSetActiveRange_ = true;

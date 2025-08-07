@@ -44,7 +44,8 @@ public:
         int32_t count, NG::UINode::NotificationType notificationType) override;
 
     void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
-        uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index) override;
+        uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index,
+        std::unordered_set<uint32_t>& ridNeedToRecycle) override;
     void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) override;
     void SetItemDragHandler(int32_t repeatElmtId, std::function<void(int32_t)>&& onLongPress,
         std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
