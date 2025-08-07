@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SECURITY_SECURITY_UI_EXTENSION_STATIC_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SECURITY_SECURITY_UI_EXTENSION_STATIC_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_UI_EXTENSION_SECURITY_UI_EXTENSION_STATIC_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_UI_EXTENSION_SECURITY_UI_EXTENSION_STATIC_H
 
 #include <memory>
 #include <string>
@@ -42,11 +42,11 @@ public:
         std::function<void(const AAFwk::WantParams&)>&& onReceive);
     static void SetSecurityOnRelease(FrameNode* frameNode, std::function<void(int32_t)>&& onRelease);
     static void SetSecurityOnRemoteReady(FrameNode* frameNode,
-        std::function<void(const RefPtr<SecurityUIExtensionProxy>&)>&& OnRemoteReady);
+        std::function<void(const RefPtr<SecurityUIExtensionProxy>&)>&& onRemoteReady);
     static void SetSecurityOnResult(FrameNode* frameNode, std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
     static void SetSecurityOnTerminated(FrameNode* frameNode,
         std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated);
     static void SetSecurityOnDrawReady(FrameNode* frameNode, std::function<void()>&& onDrawReady);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SECURITY_SECURITY_UI_EXTENSION_STATIC_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_UI_EXTENSION_SECURITY_UI_EXTENSION_STATIC_H

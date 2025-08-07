@@ -38,24 +38,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         return ani_status;
     }
 
-    ani_status = OHOS::Ace::Ani::NativeUiExtension::BindNativeSecurityUiExtension(env);
+    ani_status = OHOS::Ace::Ani::NativeSecurityUiExtension::BindNativeSecurityUiExtension(env);
     if (ani_status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
             "BindNativeSecurityUiExtension failed when ANI_Constructor");
         return ani_status;
     }
 
     ani_status = OHOS::Ace::Ani::NativeDynamicModule::BindNativeDynamicModule(env);
     if (ani_status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
             "BindNativeDynamicModule failed when ANI_Constructor");
         return ani_status;
     }
 
-    ani_status = OHOS::Ace::Ani::NativeUiExtension::BindNativeUiExtensionCommon(env);
+    ani_status = OHOS::Ace::Ani::NativeUiExtensionCommon::BindNativeUiExtensionCommon(env);
     if (ani_status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "BindNativeUiExtensionCommon failed when ANI_Constructor");
+            "BindNativeUiExtensionCommon failed");
         return ani_status;
     }
 

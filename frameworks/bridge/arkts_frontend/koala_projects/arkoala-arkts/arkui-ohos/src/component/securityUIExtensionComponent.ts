@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KLong, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KLong, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -109,7 +109,7 @@ export class SecurityUIExtensionProxyInternal implements MaterializedBase,Securi
         ArkUIGeneratedNativeModule._SecurityUIExtensionProxy_onAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private onsyncReceiverRegister_serialize(callback_: ((parameter: SecurityUIExtensionProxy) => void)): void {
+    private onSyncReceiverRegister_serialize(callback_: ((parameter: SecurityUIExtensionProxy) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         ArkUIGeneratedNativeModule._SecurityUIExtensionProxy_onSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -173,7 +173,7 @@ export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     InitArkSecurityUIExtensionCallbackHelp(): void {
-        InteropNativeModule._NativeLog("[AceSecurityUiExtensionComponent] InitArkUIExtensionCallback Help entry");
+        InteropNativeModule._NativeLog("[AceSecurityUiExtensionComponent] InitArkUIExtensionCallbackHelp entry");
         this._callbackHelp = new ArkSecurityUIExtensionCallbackHelp();
     }
     setSecurityUIExtensionComponentOptionsAttribute(want: AbilityWant, options?: SecurityUIExtensionOptions): void {
@@ -187,7 +187,7 @@ export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodPeer {
             if (options.dpiFollowStrategy != undefined) {
                 innerOption.dpiFollowStrategy = (options.dpiFollowStrategy as SecurityDpiFollowStrategy).valueOf();
             }
-            ArkUIAniSecurityUiextensionModal._SecurityUIextension_Set_Option(this.peer.ptr, innerOption);
+            ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_Option(this.peer.ptr, innerOption);
         }
 
         ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_Want(this.peer.ptr, want);
@@ -208,7 +208,7 @@ export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodPeer {
         const help = this._callbackHelp;
         if (help != undefined && help != null) {
             help.onReceive = value;
-            ArkUIAniSecurityUiextensionModal._SecurityUIextension_Set_OnReciveCallback(this.peer.ptr, (param: Record<string, Object>) => {
+            ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_OnReciveCallback(this.peer.ptr, (param: Record<string, Object>) => {
                 const onReceive = this._callbackHelp?.onReceive;
                 if (onReceive !== undefined && onReceive !== null) {
                     const innerParam = param;
@@ -224,31 +224,31 @@ export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodPeer {
             help.onError = value;
             ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_OnErrorCallback(
                 this.peer.ptr, (code1: number, name1: string, message1: string) => {
-                    const onError = this._callback_Help?.onError;
+                    const onError = this._callbackHelp?.onError;
                     if (onError !== undefined && onError !== null) {
                         const param = {
-                            code: code1,
+                            code: 1,
                             name: name1,
                             message: message1
-                        } as TerminationInfo
+                        } as BusinessError
                         onError(param);
                     }
                 });
         }
     }
-    onTerminateAttribute(value: ((parameter: TerminationInfo) => void) | undefined): void {
+    onTerminatedAttribute(value: ((parameter: TerminationInfo) => void) | undefined): void {
         const help = this._callbackHelp;
         if (help !== undefined && help !== null) {
             help.onTerminated = value;
             InteropNativeModule._NativeLog("[AceSecurityUiExtensionComponent] _SecurityUiextension_Set_OnTerminationCallback entry");
             ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_OnTerminationCallback(
-                this.setSecurityUIExtensionComponentOptionsAttribute.prototype, (code1: number, want1 : AbilityWant) => {
+                this.peer.ptr, (code1: number, want1 : AbilityWant) => {
                     const onTerminated = this._callbackHelp?.onTerminated;
                     if (onTerminated !== undefined && onTerminated !== null) {
                         const param = {
-                            code: 1,
+                            code: code1,
                             want: want1
-                        } as BusinessError
+                        } as TerminationInfo
                         onTerminated(param);
                     }
                 });
@@ -273,7 +273,7 @@ export type SecurityUIExtensionComponentInterface = (want: AbilityWant, options?
 export interface SecurityUIExtensionComponentAttribute extends CommonMethod {
     onRemoteReady(value: ((parameter: SecurityUIExtensionProxy) => void) | undefined): this
     onReceive(value: ((parameter: Record<string, Object>) => void) | undefined): this
-    onError(value: ((e:BusinessError) => void) | undefined): this
+    onError(value: ((e: BusinessError) => void) | undefined): this
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
 }
 export class ArkSecurityUIExtensionComponentStyle extends ArkCommonMethodStyle implements SecurityUIExtensionComponentAttribute {

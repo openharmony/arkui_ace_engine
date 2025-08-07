@@ -28,10 +28,10 @@ public:
 
 private:
     // SecurityUiExtensionModal
-    static ani_status SetSecurityUiExtensionOption(
+    static ani_status SetSecurityUiextensionOption(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj);
-    static ani_status SetSecurityUiExtensionWant(
+    static ani_status SetSecurityUiextensionWant(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj);
     static ani_status SetSecurityOnResult(

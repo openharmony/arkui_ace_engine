@@ -77,7 +77,7 @@ ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtensionComponent(ani
             nullptr, reinterpret_cast<void *>(SetSecurityOnRecive)},
         ani_native_function {
             "_SecurityUiextension_Set_OnTerminationCallback",
-            nullptr, reinterpret_cast<void *>(SetSecurityOnTermitate)},
+            nullptr, reinterpret_cast<void *>(SetSecurityOnTerminate)},
         ani_native_function {
             "_SecurityUiextension_Set_OnReleaseCallback",
             nullptr, reinterpret_cast<void *>(SetSecurityOnRelease)},
@@ -118,7 +118,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
     }
 
     bool isTransferringCaller = AniUtils::GetBoolOrUndefined(env, obj, "isTransferringCaller");
-    bool isWindowModeFollowHost = AniUtils::GetBoolOrUndefined(env, obj, "isWindowModelFollowHost");
+    bool isWindowModeFollowHost = AniUtils::GetBoolOrUndefined(env, obj, "isWindowModeFollowHost");
     int32_t dpiFollowStrategy = -1;
     if (!AniUtils::GetIntByName(env, obj, "dpiFollowStrategy", dpiFollowStrategy)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
