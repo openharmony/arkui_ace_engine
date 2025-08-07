@@ -3628,6 +3628,11 @@ void JsAccessibilityManager::AddToPageEventController(const RefPtr<NG::FrameNode
     pageController_.Add(node);
 }
 
+bool JsAccessibilityManager::DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node)
+{
+    return pageController_.Delete(node);
+}
+
 bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage)
 {
     CHECK_NULL_RETURN(node, false);
@@ -7211,33 +7216,49 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
 
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, accessibilityId);
 
-    uint32_t windowId = GetWindowId();
+    uint32_t parentWindowId = GetWindowId();
+    auto pattern = webPattern.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContextRefPtr();
+    uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
     auto interactionOperation = std::make_shared<WebInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     interactionOperation->SetWebPattern(webPattern);
-    auto pattern = webPattern.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
+    
     Accessibility::Registration registration {
         .windowId = static_cast<int32_t>(windowId),
-        .parentWindowId = static_cast<int32_t>(windowId),
+        .parentWindowId = static_cast<int32_t>(parentWindowId),
         .parentTreeId = treeId_,
         .elementId = accessibilityId,
     };
-    parentWebWindowId_ = windowId;
+    parentWebWindowId_ = parentWindowId;
     TAG_LOGI(AceLogTag::ACE_WEB, "windowId: %{public}u, parentWindowId: %{public}u, "
         "parentTreeId: %{public}d, elementId %{public}" PRId64,
-        windowId, windowId, treeId_, accessibilityId);
+        windowId, parentWindowId, treeId_, accessibilityId);
     Accessibility::RetError retReg = instance->RegisterElementOperator(registration, interactionOperation);
-    TAG_LOGI(AceLogTag::ACE_WEB, "RegisterWebInteractionOperationAsChildTree result: %{public}d", retReg);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "RegisterWebInteractionOperationAsChildTree result: %{public}d, accessibilityId: %{public}" PRId64, retReg,
+        accessibilityId);
     return retReg == RET_OK;
 }
 
-bool JsAccessibilityManager::DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+bool JsAccessibilityManager::DeregisterWebInteractionOperationAsChildTree(int32_t treeId,
+    const WeakPtr<NG::WebPattern>& webPattern)
 {
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
-    uint32_t windowId = GetWindowId();
+    auto pattern = webPattern.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContextRefPtr();
+    uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
     Accessibility::RetError retReg = instance->DeregisterElementOperator(windowId, treeId);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "DeregisterWebInteractionOperationAsChildTree result: %{public}d, accessibilityId: %{public}" PRId64, retReg,
+        frameNode->GetAccessibilityId());
     return retReg == RET_OK;
 }
 

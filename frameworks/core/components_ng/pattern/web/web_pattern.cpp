@@ -7933,7 +7933,7 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAccessibilityChildTreeDeregister: treeId is 0.");
         return false;
     }
-    return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
+    return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_, WeakClaim(this));
 }
 
 bool WebPattern::GetActiveStatus() const
