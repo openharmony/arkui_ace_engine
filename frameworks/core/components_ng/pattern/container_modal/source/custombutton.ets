@@ -736,6 +736,7 @@ struct custombutton {
         })
       }.id('containerModalButtonRowId')
       .height('100%')
+      .visibility(this.rowVisibility)
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset + 'vp' })
       .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.onAreaChangeEvent(oldValue, newValue)
