@@ -36,11 +36,13 @@ export class Matrix33 {
     }
 
     static makeTranslate(dx: float32, dy: float32): Matrix33 {
-        return new Matrix33(new Float32Array(Array_from_number([1.0, 0.0, dx.toDouble(), 0.0, 1.0, dy.toDouble(), 0.0, 0.0, 1.0])))
+        return new Matrix33(
+            new Float32Array(Array_from_number([1.0, 0.0, dx.toDouble(), 0.0, 1.0, dy.toDouble(), 0.0, 0.0, 1.0])))
     }
 
     static makeScale(dx: float32, dy: float32 = dx): Matrix33 {
-        return new Matrix33(new Float32Array(Array_from_number([dx.toDouble(), 0.0, 0.0, 0.0, dy.toDouble(), 0.0, 0.0, 0.0, 1.0])))
+        return new Matrix33(
+            new Float32Array(Array_from_number([dx.toDouble(), 0.0, 0.0, 0.0, dy.toDouble(), 0.0, 0.0, 0.0, 1.0])))
     }
 
     static makeRotate(degrees: float32, pivotX?: float32, pivotY?: float32): Matrix33 {

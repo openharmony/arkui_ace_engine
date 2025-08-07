@@ -37,6 +37,7 @@ import { Position, ResourceStr } from "./units"
 import { PixelMap } from "#external"
 import { PreviewMenuOptions } from "./richEditor"
 import { ArkUIAniModule } from "arkui.ani"
+import { Callback } from "./common"
 
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
@@ -3618,8 +3619,8 @@ export enum WebResponseType {
     LONG_PRESS = 1
 }
 export interface SelectionMenuOptionsExt {
-    onAppear?: (() => void);
-    onDisappear?: (() => void);
+    onAppear?: Callback<void>;
+    onDisappear?: Callback<void>;
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;

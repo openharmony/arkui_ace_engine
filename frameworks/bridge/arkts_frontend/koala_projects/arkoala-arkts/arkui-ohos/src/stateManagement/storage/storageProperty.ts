@@ -21,23 +21,16 @@ type GetType<T> = () => T;
 type SetType<T> = (newVal: T) => void;
 export type OnChangeType<T> = (propName: string, newValue: T) => void;
 
-export interface IStorageProperties {
-    value: NullishType;
-    ttype: Type;
-}
-
 export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements IStorageProperty {
     private readonly key_: string;
-    private readonly ttype_: Type;
     private readonly get_: GetType<T>;
     private readonly set_: SetType<T>;
 
-    constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
+    constructor(key: string, get: GetType<T>, set: SetType<T>) {
         super('AbstractProperty', null, key);
         StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `);
 
         this.key_ = key;
-        this.ttype_ = ttype;
         this.get_ = get;
         this.set_ = set;
 
@@ -54,10 +47,6 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements I
     // this needs renaming of info property (not function) in base classes!
     public info_(): string {
         return this.key_;
-    }
-
-    public ttype(): Type {
-        return this.ttype_;
     }
 
     public get(): T {
@@ -88,8 +77,8 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements I
  *
  */
 export class SubscribedAbstractProperty<T> extends AbstractProperty<T> {
-    constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
-        super(key, ttype, get, set);
+    constructor(key: string, get: GetType<T>, set: SetType<T>) {
+        super(key, get, set);
     }
 
     public aboutToBeDeleted(): void {}

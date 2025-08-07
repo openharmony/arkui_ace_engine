@@ -539,8 +539,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues,
 HWTEST_F(GridRowModifierTest, DISABLED_setOnBreakpointChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<GridRowEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;

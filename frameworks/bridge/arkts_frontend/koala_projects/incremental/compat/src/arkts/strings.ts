@@ -201,7 +201,6 @@ export class CustomTextDecoder {
             codePoints[cpIndex++] = value
             if (cpIndex == cpSize) {
                 cpIndex = 0
-                //result += String.fromCodePoint(...codePoints)
                 result += String.fromCodePoint(...Array_from_int32(codePoints))
             }
             index += count

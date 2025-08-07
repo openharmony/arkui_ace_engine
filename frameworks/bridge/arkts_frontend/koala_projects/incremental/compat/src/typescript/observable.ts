@@ -88,7 +88,9 @@ export class ObservableHandler implements Observable {
 
     static dropModified<Value>(value: Value): boolean {
         const handler = ObservableHandler.findIfObject(value)
-        if (handler === undefined) return false
+        if (handler === undefined) {
+            return false
+        }
         const result = handler._modified
         handler._modified = false
         return result
@@ -97,19 +99,25 @@ export class ObservableHandler implements Observable {
     /** Adds the specified `observable` to the handler corresponding to the given `value`. */
     static attach<Value>(value: Value, observable: Observable): void {
         const handler = ObservableHandler.findIfObject(value)
-        if (handler) handler.observables.add(observable)
+        if (handler) {
+            handler.observables.add(observable)
+        }
     }
 
     /** Deletes the specified `observable` from the handler corresponding to the given `value`. */
     static detach<Value>(value: Value, observable: Observable): void {
         const handler = ObservableHandler.findIfObject(value)
-        if (handler) handler.observables.delete(observable)
+        if (handler) {
+            handler.observables.delete(observable)
+        }
     }
 
     /** @returns the handler corresponding to the given `value` if it was installed */
     private static findIfObject<Value>(value: Value): ObservableHandler | undefined {
         const handlers = ObservableHandler.handlers
-        return handlers !== undefined && value instanceof Object ? handlers.get(getObservableTarget(value as Object)) : undefined
+        return handlers !== undefined && value instanceof Object
+          ? handlers.get(getObservableTarget(value as Object))
+          : undefined;
     }
 
     /**
@@ -156,24 +164,34 @@ export class ObservableHandler implements Observable {
 
     removeChild<Value>(value: Value) {
         const child = ObservableHandler.findIfObject(value)
-        if (child) child.removeParent(this)
+        if (child) {
+            child.removeParent(this)
+        }
     }
 
     private collect(all: boolean, guards = new Set<ObservableHandler>()) {
-        if (guards.has(this)) return guards // already collected
+        if (guards.has(this)) {
+            return guards // already collected
+        }
         guards.add(this) // handler is already guarded
         this.parents.forEach(handler => handler.collect(all, guards))
-        if (all) this.children.forEach((_count, handler) => handler.collect(all, guards))
+        if (all) {
+            this.children.forEach((_count, handler) => handler.collect(all, guards))
+        }
         return guards
     }
 
     static contains(observable: ObservableHandler, guards?: Set<ObservableHandler>) {
         if (observable.observed) return true
         if (guards === undefined) guards = new Set<ObservableHandler>() // create if needed
-        else if (guards.has(observable)) return false // already checked
+        else if (guards.has(observable)) {
+            return false // already checked
+        }
         guards.add(observable) // handler is already guarded
         for (const it of observable.parents.keys()) {
-            if (ObservableHandler.contains(it, guards)) return true
+            if (ObservableHandler.contains(it, guards)) {
+                return true
+            }
         }
         return false
     }
@@ -185,14 +203,27 @@ export function observableProxyArray<Value>(...value: Value[]): Array<Value> {
 }
 
 /** @internal */
-export function observableProxy<Value>(value: Value, parent?: ObservableHandler, observed?: boolean, strict = true): Value {
-    if (value instanceof ObservableHandler) return value // do not proxy a marker itself
-    if (value === null || !(value instanceof Object)) return value // only non-null object can be observable
+export function observableProxy<Value>(
+    value: Value,
+    parent?: ObservableHandler,
+    observed?: boolean,
+    strict = true
+): Value {
+    if (value instanceof ObservableHandler) {
+        return value // do not proxy a marker itself
+    }
+    if (value === null || !(value instanceof Object)) {
+        return value // only non-null object can be observable
+    }
     const observable = ObservableHandler.find(value)
     if (observable) {
         if (parent) {
-            if (strict) observable.addParent(parent)
-            if (observed === undefined) observed = ObservableHandler.contains(parent)
+            if (strict) {
+                observable.addParent(parent)
+            }
+            if (observed === undefined) {
+                observed = ObservableHandler.contains(parent)
+            }
         }
         if (observed) {
             if (Array.isArray(value)) {

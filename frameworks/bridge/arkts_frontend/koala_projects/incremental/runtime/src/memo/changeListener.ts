@@ -40,13 +40,21 @@ export function RunEffect<Value>(value: Value, effect: (value: Value) => void) {
     watch(__context(), __id(), true, value, effect)
 }
 
-function watch<Value>(context: StateContext, id: KoalaCallsiteKey, modified: boolean, value: Value, listener: (value: Value) => void) {
+function watch<Value>(
+    context: StateContext,
+    id: KoalaCallsiteKey,
+    modified: boolean,
+    value: Value,
+    listener: (value: Value) => void
+) {
     const scope = context.scope<void>(id, 1)
     const state = scope.param<Value>(0, value)
     if (scope.unchanged) {
         scope.cached
     } else {
-        if (state.modified || modified) scheduleCallback(() => listener(value))
+        if (state.modified || modified) {
+            scheduleCallback(() => listener(value))
+        }
         scope.recache()
     }
 }

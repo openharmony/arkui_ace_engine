@@ -53,7 +53,9 @@ export class ObservableHandler implements Observable {
     readonly observed: boolean
     constructor(parent?: ObservableHandler, observed: boolean = false) {
         this.observed = observed
-        if (parent) this.addParent(parent)
+        if (parent) {
+            this.addParent(parent)
+        }
     }
 
     onAccess(): void {
@@ -61,7 +63,9 @@ export class ObservableHandler implements Observable {
             const it = this.observables.keys()
             while (true) {
                 const result = it.next()
-                if (result.done) break
+                if (result.done) {
+                    break
+                }
                 result.value?.onAccess()
             }
         }
@@ -76,7 +80,9 @@ export class ObservableHandler implements Observable {
                 const it = handler.observables.keys()
                 while (true) {
                     const result = it.next()
-                    if (result.done) break
+                    if (result.done) {
+                        break
+                    }
                     result.value?.onModify()
                 }
             }
@@ -85,7 +91,9 @@ export class ObservableHandler implements Observable {
 
     static dropModified<Value>(value: Value): boolean {
         const handler = ObservableHandler.findIfObject(value)
-        if (handler === undefined) return false
+        if (handler === undefined) {
+            return false
+        }
         const result = handler._modified
         handler._modified = false
         return result
@@ -94,19 +102,25 @@ export class ObservableHandler implements Observable {
     /** Adds the specified `observable` to the handler corresponding to the given `value`. */
     static attach<Value>(value: Value, observable: Observable): void {
         const handler = ObservableHandler.findIfObject(value)
-        if (handler) handler.observables.add(observable)
+        if (handler) {
+            handler.observables.add(observable)
+        }
     }
 
     /** Deletes the specified `observable` from the handler corresponding to the given `value`. */
     static detach<Value>(value: Value, observable: Observable): void {
         const handler = ObservableHandler.findIfObject(value)
-        if (handler) handler.observables.delete(observable)
+        if (handler) {
+            handler.observables.delete(observable)
+        }
     }
 
     /** @returns the handler corresponding to the given `value` if it was installed */
     private static findIfObject<Value>(value: Value): ObservableHandler | undefined {
         const handlers = ObservableHandler.handlers
-        return handlers !== undefined && value instanceof Object ? handlers.get(getObservableTarget(value as Object)) : undefined
+        return handlers !== undefined && value instanceof Object
+          ? handlers.get(getObservableTarget(value as Object))
+          : undefined;
     }
 
     /**
@@ -153,21 +167,33 @@ export class ObservableHandler implements Observable {
 
     removeChild<Value>(value: Value) {
         const child = ObservableHandler.findIfObject(value)
-        if (child) child.removeParent(this)
+        if (child) {
+            child.removeParent(this)
+        }
     }
 
     private collect(all: boolean, guards: Set<ObservableHandler>) {
-        if (guards.has(this)) return guards // already collected
+        if (guards.has(this)) {
+            return guards // already collected
+        }
         guards.add(this) // handler is already guarded
         this.parents.forEach((handler: ObservableHandler) => { handler.collect(all, guards) })
-        if (all) this.children.forEach((_count: number, handler: ObservableHandler) => { handler.collect(all, guards) })
+        if (all) {
+            this.children.forEach((_count: number, handler: ObservableHandler) => { handler.collect(all, guards) })
+        }
         return guards
     }
 
     static contains(observable: ObservableHandler, guards?: Set<ObservableHandler>) {
-        if (observable.observed) return true
-        if (guards === undefined) guards = new Set<ObservableHandler>() // create if needed
-        else if (guards!.has(observable)) return false // already checked
+        if (observable.observed) {
+            return true
+        }
+        if (guards === undefined) {
+            guards = new Set<ObservableHandler>() // create if needed
+        }
+        else if (guards!.has(observable)) {
+            return false // already checked
+        }
         guards.add(observable) // handler is already guarded
         for (const it of observable.parents.keys()) {
             if (ObservableHandler.contains(it, guards)) return true
@@ -184,15 +210,30 @@ export function observableProxyArray<Value>(...value: Value[]): Array<Value> {
 const PROXY_DISABLED = true // because of ArkTS Reflection performance
 
 /** @internal */
-export function observableProxy<Value>(value: Value, parent?: ObservableHandler, observed?: boolean, strict: boolean = true): Value {
-    if (PROXY_DISABLED) return value
-    if (value instanceof ObservableHandler) return value as Value // do not proxy a marker itself
-    if (value == null || !(value instanceof Object)) return value as Value // only non-null object can be observable
+export function observableProxy<Value>(
+    value: Value,
+    parent?: ObservableHandler,
+    observed?: boolean,
+    strict: boolean = true
+): Value {
+    if (PROXY_DISABLED) {
+        return value
+    }
+    if (value instanceof ObservableHandler) {
+        return value as Value // do not proxy a marker itself
+    }
+    if (value == null || !(value instanceof Object)) {
+        return value as Value // only non-null object can be observable
+    }
     const observable = ObservableHandler.find(value as Object)
     if (observable) {
         if (parent) {
-            if (strict) observable.addParent(parent)
-            if (observed === undefined) observed = ObservableHandler.contains(parent)
+            if (strict) {
+                observable.addParent(parent)
+            }
+            if (observed === undefined) {
+                observed = ObservableHandler.contains(parent)
+            }
         }
         if (observed) {
             if (value instanceof Array) {
@@ -220,14 +261,18 @@ function createProxyArray<T>(array: Array<T>): Array<T> {
 }
 
 function proxyChildrenOnly<T>(array: Array<T>, parent: ObservableHandler, observed?: boolean): Array<T> {
-    if (observed === undefined) observed = ObservableHandler.contains(parent)
+    if (observed === undefined) {
+        observed = ObservableHandler.contains(parent)
+    }
     return array.map((it: T) => observableProxy(it, parent, observed))
 }
 
 class CustomArrayProxyHandler<T> extends proxy.DefaultArrayProxyHandler<T> {
     override get(target: Array<T>, index: int32): T {
         const observable = ObservableHandler.find(target)
-        if (observable) observable.onAccess()
+        if (observable) {
+            observable.onAccess()
+        }
         return super.get(target, index)
     }
 
@@ -243,7 +288,9 @@ class CustomArrayProxyHandler<T> extends proxy.DefaultArrayProxyHandler<T> {
 
     override get(target: Array<T>, name: string): NullishType {
         const observable = ObservableHandler.find(target)
-        if (observable) observable.onAccess()
+        if (observable) {
+            observable.onAccess()
+        }
         return super.get(target, name)
     }
 

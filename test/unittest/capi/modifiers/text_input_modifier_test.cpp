@@ -201,7 +201,7 @@ HWTEST_F(TextInputModifierTest, setOnWillInsertTest, TestSize.Level1)
     modifier_->setOnWillInsert(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     {
@@ -243,7 +243,7 @@ HWTEST_F(TextInputModifierTest, setOnWillDeleteTest, TestSize.Level1)
     modifier_->setOnWillDelete(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     DeleteValueInfo checkValueDefault;
 
@@ -335,7 +335,7 @@ HWTEST_F(TextInputModifierTest, setOnEditChangedTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnEditChanged, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onEditChanged = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
@@ -364,7 +364,7 @@ HWTEST_F(TextInputModifierTest, setOnEditChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnEditChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
@@ -393,7 +393,7 @@ HWTEST_F(TextInputModifierTest, setOnSecurityStateChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnEditChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
@@ -421,7 +421,7 @@ HWTEST_F(TextInputModifierTest, setOnContentScrollTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnContentScroll, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<float> expectedX = std::nullopt;
     static std::optional<float> expectedY = std::nullopt;
@@ -449,7 +449,7 @@ HWTEST_F(TextInputModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnTextSelectionChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<int32_t> expectedStart = std::nullopt;
     static std::optional<int32_t> expectedEnd = std::nullopt;
@@ -478,7 +478,7 @@ HWTEST_F(TextInputModifierTest, setOnCopyTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnCopy, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::u16string> expected = std::nullopt;
     auto onCopy = [](const Ark_Int32 resourceId, Ark_String parameter) {
@@ -503,7 +503,7 @@ HWTEST_F(TextInputModifierTest, setOnCutTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnCut, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::u16string> expected = std::nullopt;
     auto onCut = [](const Ark_Int32 resourceId, Ark_String parameter) {
@@ -529,7 +529,7 @@ HWTEST_F(TextInputModifierTest, setOnDidInsertTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnDidInsert, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::u16string> expectedText = std::nullopt;
     static std::optional<int32_t> expectedOffset = std::nullopt;
@@ -566,7 +566,7 @@ HWTEST_F(TextInputModifierTest, setOnDidDeleteTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnDidDelete, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::u16string> expectedText = std::nullopt;
     static std::optional<int32_t> expectedOffset = std::nullopt;
@@ -607,7 +607,7 @@ HWTEST_F(TextInputModifierTest, setInputFilterTest, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
         int32_t nodeId;
@@ -654,7 +654,7 @@ HWTEST_F(TextInputModifierTest, setInputFilterTest, TestSize.Level1)
 HWTEST_F(TextInputModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

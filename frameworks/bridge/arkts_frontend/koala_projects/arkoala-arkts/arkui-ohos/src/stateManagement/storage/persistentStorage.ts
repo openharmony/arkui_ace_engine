@@ -78,7 +78,7 @@ class TypedMap {
         const r1 = this.key2Type_.delete(key);
         const ref = this.key2Value_.get(key);
         if (ref !== undefined) {
-            const regId = (ref as AbstractProperty<NullishType>).getMyTriggerFromSourceWatchId();
+            const regId = (ref as AbstractProperty<Any>).getMyTriggerFromSourceWatchId();
             AppStorage.__getStoragePropUnsafe(key)!.__unregister(regId);
         }
         const r2 = this.key2Value_.delete(key);
@@ -127,6 +127,7 @@ class PersistentStorage {
         Type.from<boolean>(),
     ]);
     private readonly storage_: IAniStorage = new AniStorage();
+    private isSimpleType: boolean = false;
 
     private static getOrCreate(): PersistentStorage {
         if (PersistentStorage.instance_) {
@@ -155,26 +156,29 @@ class PersistentStorage {
      */
     public static persistProp<T>(
         key: string,
-        ttype: Type,
         defaultValue: T,
         toJson?: ToJSONType<T>,
         fromJson?: FromJSONType<T>
     ): boolean {
-        return PersistentStorage.getOrCreate().persistPropInternal(key, ttype, defaultValue, toJson, fromJson);
+        return PersistentStorage.getOrCreate().persistPropInternal(key, defaultValue, toJson, fromJson);
     }
 
     private persistPropInternal<T>(
         key: string,
-        ttype: Type,
         defaultValue: T,
         toJson?: ToJSONType<T>,
         fromJson?: FromJSONType<T>
     ): boolean {
+        const ttype = Type.of(defaultValue);
+        if (!toJson && !fromJson && this.simpleTypeSet.has(ttype)) {
+            this.isSimpleType = true;
+        }
         try {
-            if (!this.simpleTypeSet.has(ttype) && (!toJson || !fromJson)) {
+            if (!this.isSimpleType && (!toJson || !fromJson)) {
                 StateMgmtConsole.log(
                     `Object Types for key ${key} requires toJson and fromJson functions to be defined`
                 );
+                return false;
             }
             const apOpt = PersistentStorage.getOrCreate().map_.get(key, ttype);
             if (apOpt !== undefined) {
@@ -196,8 +200,8 @@ class PersistentStorage {
                 PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(
                     key,
                     ttype,
-                    this.simpleTypeSet.has(ttype) ? undefined : fromJson,
-                    this.simpleTypeSet.has(ttype) ? undefined : toJson
+                    this.isSimpleType ? undefined : fromJson,
+                    this.isSimpleType ? undefined : toJson
                 )
             ) {
                 return true;
@@ -208,8 +212,7 @@ class PersistentStorage {
                 key,
                 ttype,
                 defaultValue,
-                this.simpleTypeSet.has(ttype) ? undefined : toJson,
-                this.simpleTypeSet.has(ttype) ? undefined : fromJson
+                this.isSimpleType ? undefined : toJson,
             );
             if (!success) {
                 StateMgmtConsole.log(`Failed to create and persist key ${key} with default value`);
@@ -242,7 +245,7 @@ class PersistentStorage {
 
     // Note: persistProps can not be supported because each
     // property has different T
-    // framework can not recover T from Array<PersistPropsOptions<NullishType>>
+    // framework can not recover T from Array<PersistPropsOptions<Any>>
     // must use separate persistProp calls instead
 
     /**
@@ -268,9 +271,8 @@ class PersistentStorage {
         ttype: Type,
         defaultValue: T,
         toJson?: ToJSONType<T>,
-        fromJson?: FromJSONType<T>
     ): boolean {
-        if (!AppStorage.setOrCreate<T>(key, defaultValue, ttype)) {
+        if (!AppStorage.setOrCreate<T>(key, defaultValue)) {
             StateMgmtConsole.log(`__createNewAndPersist return false`);
             return false;
         }
@@ -293,12 +295,12 @@ class PersistentStorage {
         }
 
         try {
-            if (this.simpleTypeSet.has(ttype)) {
+            if (this.isSimpleType) {
                 // Step 2: simple type just parse from disk
                 const value = JSON.parse<T>(jsonString, ttype);
 
                 // Step 3: Store the value in AppStorage
-                AppStorage.setOrCreate(key, value, ttype);
+                AppStorage.setOrCreate(key, value);
 
                 // Step 4: persist the property
                 return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
@@ -313,7 +315,7 @@ class PersistentStorage {
                 const value: T = fromJson(jsonElement);
 
                 // Step 4: Store the value in AppStorage
-                AppStorage.setOrCreate(key, value, ttype);
+                AppStorage.setOrCreate(key, value);
 
                 // Step 5: persist the property
                 return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
@@ -331,7 +333,7 @@ class PersistentStorage {
     // case 3 - used by case 1 and 2: property exists in storage (caller needs to verify)
     // start to persist it
     private __startToPersistStorageProperty<T>(key: string, ttype: Type, toJson?: ToJSONType<T>): boolean {
-        const ref = AppStorage.ref<T>(key, ttype) as AbstractProperty<T> | undefined; // Explicitly specify T
+        const ref = AppStorage.ref<T>(key) as AbstractProperty<T> | undefined; // Explicitly specify T
         if (ref === undefined) {
             StateMgmtConsole.log(`Failed to get AppStorage ref for key ${key}`);
             return false;
@@ -343,7 +345,7 @@ class PersistentStorage {
                 return;
             }
             try {
-                if (this.simpleTypeSet.has(ttype)) {
+                if (this.isSimpleType) {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {

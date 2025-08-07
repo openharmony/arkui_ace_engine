@@ -27,6 +27,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.inspector.ets",
   "arkui-preprocessed/@ohos.arkui.observer.ets",
   "arkui-preprocessed/@ohos.arkui.shape.ets",
+  "arkui-preprocessed/@ohos.arkui.theme.ets",
   "arkui-preprocessed/@ohos.font.ets",
   "arkui-preprocessed/@ohos.graphics.common2D.ets",
   "arkui-preprocessed/@ohos.graphics.drawing.ets",
@@ -400,6 +401,18 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkXComponentNode.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/FrameNodeTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkShapesImpl.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkThemeBase.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkThemeCache.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkThemeImpl.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkThemeNativeHelper.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkThemeScopeManager.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/ArkTypographyImpl.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/index.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/system/ArkSystemShapes.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/system/ArkSystemTheme.ets",
+  "arkui-preprocessed/arkui/handwritten/theme/system/ArkSystemTypography.ets",
+  "arkui-preprocessed/arkui/handwritten/utils/SerializeUtils.ets",
   "arkui-preprocessed/arkui/index.ets",
   "arkui-preprocessed/arkui/ohos.arkui.modifier.ets",
   "arkui-preprocessed/arkui/ohos.arkui.node.ets",
@@ -497,6 +510,7 @@ arkui_path_keys = [
   "@ohos/arkui/dragController",
   "#stateMgmtTool",
   "@ohos/arkui/Parallelize",
+  "@ohos/arkui/theme",
 ]
 
 arkui_path_values = [
@@ -538,4 +552,5 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
   "arkui-preprocessed/arkui/stateManagement/tools/arkts",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
+  "arkui-preprocessed/@ohos.arkui.theme.ets",
 ]

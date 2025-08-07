@@ -119,7 +119,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnAppearTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
 
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
 
     auto onAppearFunc = [](const Ark_Int32 resourceId) {
@@ -150,7 +150,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnDisappearTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
 
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
 
     auto onDisappearFunc = [](const Ark_Int32 resourceId) {
@@ -180,9 +180,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnFocusTest, TestSize.Level1)
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
 
     auto onFocusFunc = [](const Ark_Int32 resourceId) {
         testEvent = TestEvent{
@@ -218,9 +216,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnBlurTest, TestSize.Level1)
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
 
     auto onBlurFunc = [](const Ark_Int32 resourceId) {
         testEvent = TestEvent{
@@ -268,9 +264,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnHoverTest, TestSize.Level1)
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnHover(peer_, &optCallback);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    auto inputHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
     const OffsetF& off {};
     TouchTestResult result;
@@ -307,9 +301,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnMouse(peer_, &optCallback);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    auto inputHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
     const OffsetF& off {};
     TouchTestResult result;
@@ -360,9 +352,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnKeyEventTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
 
     auto onKeyEventFunc = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
         testEvent = TestEvent{
@@ -385,7 +375,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnSizeChangeEventTest, TestSize.
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
 
     auto onSizeChangeFunc = [](const Ark_Int32 resourceId,

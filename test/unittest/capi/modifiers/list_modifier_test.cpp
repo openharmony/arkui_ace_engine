@@ -643,8 +643,7 @@ HWTEST_F(ListModifierTest, setListMaintainVisibleContentPositionTest, TestSize.L
 HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -738,7 +737,7 @@ HWTEST_F(ListModifierTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ItemDragInfo dragInfo;
     dragInfo.SetX(expectedX);
@@ -759,8 +758,7 @@ HWTEST_F(ListModifierTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -800,8 +798,7 @@ HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -848,8 +845,7 @@ HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -892,8 +888,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDropTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -944,7 +939,7 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
@@ -979,8 +974,7 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {int32_t nodeId;
@@ -1039,8 +1033,7 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnScrollVisibleContentChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
-    ASSERT_NE(eventHub, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;

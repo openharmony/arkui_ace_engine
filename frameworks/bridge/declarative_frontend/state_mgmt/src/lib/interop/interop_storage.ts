@@ -30,7 +30,7 @@
 class InteropStorage extends Map<string, ObservedPropertyAbstract<any>> {
     originStorage_: Map<string, ObservedPropertyAbstract<any>> = new Map<string, ObservedPropertyAbstract<any>>();
 
-    totalKeys_ = new Map<string, string>();
+    totalKeys_ = new Set<string>();
 
     // get value from AppStorage in ArkTS1.2
     getStaticValue_: (value: string) => ObservedPropertyAbstract<any> = () => {
@@ -42,7 +42,7 @@ class InteropStorage extends Map<string, ObservedPropertyAbstract<any>> {
     getStaticValueSize_: () => number = () => {
         throw new Error('not implement');
     };
-    getStaticTotalKeys_: () => Set<string> = () => {
+    getStaticTotalKeys_: () => IterableIterator<string> = () => {
         throw new Error('not implement');
     };
 
@@ -118,15 +118,17 @@ class InteropStorage extends Map<string, ObservedPropertyAbstract<any>> {
 
     keys(): IterableIterator<string> {
         this.totalKeys_.clear();
-        const staticKeys = this.getStaticTotalKeys_();
-        if (staticKeys.size === 0) {
+        const staticKeysIter = this.getStaticTotalKeys_();
+        const firstKey = staticKeysIter.next();
+        if (firstKey.done) {
             return this.originStorage_.keys();
-        }
-        staticKeys.forEach((value: string) => {
-            this.totalKeys_.set(value, value);
-        });
+        };
+        this.totalKeys_.add(firstKey.value);
+        for (const key of staticKeysIter) {
+            this.totalKeys_.add(key);
+        };
         this.originStorage_.forEach((value: ObservedPropertyAbstract<any>, key: string) => {
-            this.totalKeys_.set(key, key);
+            this.totalKeys_.add(key);
         });
         return this.totalKeys_.keys();
     }
@@ -136,7 +138,7 @@ function bindStaticAppStorage(
     getStaticValue: (value: string) => ObservedPropertyAbstract<any>,
     removeStaticValue: (value: string) => boolean,
     getStaticValueSize: () => number,
-    getStaticTotalKeys: () => Set<string>,
+    getStaticTotalKeys: () => IterableIterator<string>,
 
     // call ArkTS1.2 to update interop key map.
     addKeyFunc: (key: string) => void,
@@ -218,7 +220,7 @@ function bindStaticLocalStorage(
     getStaticValue: (value: string) => ObservedPropertyAbstract<any>,
     removeStaticValue: (value: string) => boolean,
     getStaticValueSize: () => number,
-    getStaticTotalKeys: () => Set<string>,
+    getStaticTotalKeys: () => IterableIterator<string>,
 
     // call ArkTS1.2 to update interop key map.
     addKeyFunc: (key: string) => void,

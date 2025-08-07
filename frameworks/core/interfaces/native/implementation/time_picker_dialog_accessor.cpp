@@ -22,12 +22,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
 #ifdef WRONG_GEN
-DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options)
-{
-    return {};
-}
-
-PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions options)
+PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& options)
 {
     PickerDialogInfo dialogInfo;
 
@@ -78,7 +73,7 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions opt
     return dialogInfo;
 }
 
-TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions options)
+TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions& options)
 {
     TimePickerSettingData settingData;
     auto format = Converter::OptConvert<TimePickerFormat>(options.format);
@@ -118,7 +113,7 @@ TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions o
     return settingData;
 }
 
-TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOptions options)
+TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOptions& options)
 {
     TimePickerDialogEvent dialogEvent;
     auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
@@ -152,7 +147,7 @@ TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOpti
     return dialogEvent;
 }
 
-std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions options)
+std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions& options)
 {
     std::vector<ButtonInfo> buttonInfos;
     auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);
