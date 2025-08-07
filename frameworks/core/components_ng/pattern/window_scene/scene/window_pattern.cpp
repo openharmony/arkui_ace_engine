@@ -552,7 +552,6 @@ void WindowPattern::CreateStartingWindow()
     auto sourceInfo = ImageSourceInfo(
         startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
     auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
-    UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
     auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
     if (preLoadPixelMap != nullptr) {
         auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
@@ -560,6 +559,7 @@ void WindowPattern::CreateStartingWindow()
         Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
     }
+    UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
