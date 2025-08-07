@@ -103,7 +103,6 @@ HWTEST_F(WebDataDetectorAdapterTest, SetDataDetectorConfig_001, TestSize.Level0)
     adapter->SetDataDetectorEnable(true);
     EXPECT_EQ(adapter->config_.enable, false);
     EXPECT_EQ(adapter->newConfig_.enable, true);
-
     TextDetectConfig config;
     config.types = "phoneNum";
     adapter->SetDataDetectorConfig(config);
