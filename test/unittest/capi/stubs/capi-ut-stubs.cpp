@@ -43,13 +43,7 @@ RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
     return FrameNode::CreateFrameNode(
         V2::CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
 }
-/*
-RefPtr<NG::FrameNode> NG::EllipseModelNG::CreateFrameNode(int32_t nodeId)
-{
-    return FrameNode::CreateFrameNode(
-        V2::ELLIPSE_ETS_TAG, nodeId, AceType::MakeRefPtr<EllipsePattern>());
-}
-*/
+
 std::optional<NG::SizeF> NG::ShapeContainerLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
@@ -64,7 +58,7 @@ std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(
 }
 
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
-    const PropertyCallback& callback) {}
+    const PropertyCallback& callback, const RefPtr<PipelineBase>& context) {}
 
 bool SystemProperties::IsFormAnimationLimited()
 {
