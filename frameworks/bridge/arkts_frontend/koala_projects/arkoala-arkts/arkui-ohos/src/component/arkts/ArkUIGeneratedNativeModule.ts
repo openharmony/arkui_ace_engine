@@ -3414,9 +3414,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_onSslErrorReceive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _WebAttribute_onRenderExited(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_onShowFileSelector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
