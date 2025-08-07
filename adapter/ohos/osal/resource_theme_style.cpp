@@ -174,7 +174,6 @@ static const std::unordered_set<std::string> stringAttrs = {
     "textfield_show_password",
     "textfield_hide_password",
     "general_ai_ask_celia",
-    "textfield_counter_content",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
