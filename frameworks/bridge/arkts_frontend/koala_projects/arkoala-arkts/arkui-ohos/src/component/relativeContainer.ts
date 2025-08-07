@@ -125,12 +125,18 @@ export interface LocalizedBarrierStyle {
     referencedId: Array<string>;
 }
 export interface RelativeContainerAttribute extends CommonMethod {
+    setRelativeContainerOptions(): this {
+        return this
+    }
     guideLine(value: Array<GuideLineStyle> | undefined): this
     barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this
 }
 export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements RelativeContainerAttribute {
     guideLine_value?: Array<GuideLineStyle> | undefined
     barrier_value?: Array<BarrierStyle> | undefined
+    public setRelativeContainerOptions(): this {
+        return this
+    }
     public guideLine(value: Array<GuideLineStyle> | undefined): this {
         return this
     }
@@ -181,10 +187,9 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
     }
 }
 /** @memo */
-export function RelativeContainer(
+export function RelativeContainerImpl(
     /** @memo */
     style: ((attributes: RelativeContainerAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -192,9 +197,7 @@ export function RelativeContainer(
         return new ArkRelativeContainerComponent()
     })
     NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (_: ArkRelativeContainerPeer) => {
-        receiver.setRelativeContainerOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

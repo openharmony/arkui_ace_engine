@@ -56,10 +56,16 @@ export class ArkContainerSpanPeer extends PeerNode {
 }
 export type ContainerSpanInterface = () => ContainerSpanAttribute;
 export interface ContainerSpanAttribute {
+    setContainerSpanOptions(): this {
+        return this
+    }
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this
 }
 export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
+    public setContainerSpanOptions(): this {
+        return this
+    }
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
         }
@@ -90,10 +96,9 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
     }
 }
 /** @memo */
-export function ContainerSpan(
+export function ContainerSpanImpl(
     /** @memo */
     style: ((attributes: ContainerSpanAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -101,9 +106,7 @@ export function ContainerSpan(
         return new ArkContainerSpanComponent()
     })
     NodeAttach<ArkContainerSpanPeer>((): ArkContainerSpanPeer => ArkContainerSpanPeer.create(receiver), (_: ArkContainerSpanPeer) => {
-        receiver.setContainerSpanOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

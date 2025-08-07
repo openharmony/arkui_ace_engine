@@ -22,5 +22,8 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { Content } from "../Content"
 
 export interface ContentSlotAttribute {
+    public setContentSlotOptions(content?: Content): this {
+        return this
+    }
 }
 export type ContentSlotInterface = (content: Content) => ContentSlotAttribute;

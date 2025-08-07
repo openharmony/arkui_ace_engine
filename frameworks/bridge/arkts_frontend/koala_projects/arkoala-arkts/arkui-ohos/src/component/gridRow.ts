@@ -124,12 +124,18 @@ export interface GridRowOptions {
 }
 export type GridRowInterface = (option?: GridRowOptions) => GridRowAttribute;
 export interface GridRowAttribute extends CommonMethod {
+    setGridRowOptions(option?: GridRowOptions): this {
+        return this
+    }
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this
     alignItems(value: ItemAlign | undefined): this
 }
 export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttribute {
     onBreakpointChange_value?: ((breakpoints: string) => void) | undefined
     alignItems_value?: ItemAlign | undefined
+    public setGridRowOptions(option?: GridRowOptions): this {
+        return this
+    }
     public onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
         return this
     }
@@ -172,10 +178,9 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
     }
 }
 /** @memo */
-export function GridRow(
+export function GridRowImpl(
     /** @memo */
     style: ((attributes: GridRowAttribute) => void) | undefined,
-    option?: GridRowOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -183,9 +188,7 @@ export function GridRow(
         return new ArkGridRowComponent()
     })
     NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (_: ArkGridRowPeer) => {
-        receiver.setGridRowOptions(option)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

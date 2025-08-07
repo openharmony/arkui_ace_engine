@@ -44,8 +44,14 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
 }
 export type EffectComponentInterface = () => EffectComponentAttribute;
 export interface EffectComponentAttribute extends CommonMethod {
+    setEffectComponentOptions(): this {
+        return this
+    }
 }
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
+    public setEffectComponentOptions(): this {
+        return this
+    }
 }
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
     getPeer(): ArkEffectComponentPeer {
@@ -65,10 +71,9 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
     }
 }
 /** @memo */
-export function EffectComponent(
+export function EffectComponentImpl(
     /** @memo */
     style: ((attributes: EffectComponentAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -76,9 +81,7 @@ export function EffectComponent(
         return new ArkEffectComponentComponent()
     })
     NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (_: ArkEffectComponentPeer) => {
-        receiver.setEffectComponentOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

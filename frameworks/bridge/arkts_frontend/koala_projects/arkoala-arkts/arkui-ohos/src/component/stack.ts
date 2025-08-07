@@ -83,12 +83,18 @@ export interface StackOptions {
 }
 export type StackInterface = (options?: StackOptions) => StackAttribute;
 export interface StackAttribute extends CommonMethod {
+    setStackOptions(options?: StackOptions): this {
+        return this
+    }
     alignContent(value: Alignment | undefined): this
     pointLight(value: PointLightStyle | undefined): this
 }
 export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribute {
     alignContent_value?: Alignment | undefined
     pointLight_value?: PointLightStyle | undefined
+    public setStackOptions(options?: StackOptions): this {
+        return this
+    }
     public alignContent(value: Alignment | undefined): this {
         return this
     }
@@ -131,10 +137,9 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
     }
 }
 /** @memo */
-export function Stack(
+export function StackImpl(
     /** @memo */
     style: ((attributes: StackAttribute) => void) | undefined,
-    options?: StackOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -142,9 +147,7 @@ export function Stack(
         return new ArkStackComponent()
     })
     NodeAttach<ArkStackPeer>((): ArkStackPeer => ArkStackPeer.create(receiver), (_: ArkStackPeer) => {
-        receiver.setStackOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

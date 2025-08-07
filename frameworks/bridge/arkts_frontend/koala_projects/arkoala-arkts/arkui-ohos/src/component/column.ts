@@ -156,6 +156,9 @@ export interface ColumnOptionsV2 {
 }
 
 export interface ColumnAttribute extends CommonMethod {
+    setColumnOptions(options?: ColumnOptions | ColumnOptions | ColumnOptionsV2): this {
+        return this
+    }
     alignItems(value: HorizontalAlign | undefined): this {return this;}
     justifyContent(value: FlexAlign | undefined): this {return this;}
     pointLight(value: PointLightStyle | undefined): this {return this;}
@@ -168,6 +171,9 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
     justifyContent_value?: FlexAlign | undefined;
     pointLight_value?: PointLightStyle | undefined;
     reverse_value?: boolean | undefined;
+    public setColumnOptions(options?: ColumnOptions | ColumnOptions | ColumnOptionsV2): this {
+        return this
+    }
     public alignItems(value: HorizontalAlign | undefined): this {
         return this;
     }
@@ -254,10 +260,9 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
 }
 
 /** @memo */
-export function Column(
+export function ColumnImpl(
     /** @memo */
     style: ((attributes: ColumnAttribute) => void) | undefined,
-    options?: ColumnOptions | ColumnOptions | ColumnOptionsV2,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -265,9 +270,7 @@ export function Column(
         return new ArkColumnComponent()
     })
     NodeAttach<ArkColumnPeer>((): ArkColumnPeer => ArkColumnPeer.create(receiver), (_: ArkColumnPeer) => {
-        receiver.setColumnOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -258,6 +258,9 @@ export interface DatePickerOptions {
 export type DatePickerInterface = (options?: DatePickerOptions) => DatePickerAttribute;
 export type Callback_DatePickerResult_Void = (value: DatePickerResult) => void;
 export interface DatePickerAttribute extends CommonMethod {
+    setDatePickerOptions(options?: DatePickerOptions): this {
+        return this
+    }
     lunar(value: boolean | undefined): this
     disappearTextStyle(value: PickerTextStyle | undefined): this
     textStyle(value: PickerTextStyle | undefined): this
@@ -277,6 +280,9 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     onDateChange_value?: ((parameter: Date) => void) | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
+    public setDatePickerOptions(options?: DatePickerOptions): this {
+        return this
+    }
     public lunar(value: boolean | undefined): this {
         return this
     }
@@ -492,10 +498,9 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function DatePicker(
+export function DatePickerImpl(
     /** @memo */
     style: ((attributes: DatePickerAttribute) => void) | undefined,
-    options?: DatePickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -503,9 +508,7 @@ export function DatePicker(
         return new ArkDatePickerComponent()
     })
     NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (_: ArkDatePickerPeer) => {
-        receiver.setDatePickerOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

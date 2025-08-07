@@ -267,6 +267,9 @@ export interface ButtonStyle {
 }
 export type SideBarContainerInterface = (type?: SideBarContainerType) => SideBarContainerAttribute;
 export interface SideBarContainerAttribute extends CommonMethod {
+    setSideBarContainerOptions(type?: SideBarContainerType): this {
+        return this
+    }
     showSideBar(value: boolean | Bindable<boolean> | undefined): this
     controlButton(value: ButtonStyle | undefined): this
     showControlButton(value: boolean | undefined): this
@@ -292,6 +295,9 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     sideBarPosition_value?: SideBarPosition | undefined
     divider_value?: DividerStyle | null | undefined
     minContentWidth_value?: Dimension | undefined
+    public setSideBarContainerOptions(type?: SideBarContainerType): this {
+        return this
+    }
     public showSideBar(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
@@ -467,10 +473,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     }
 }
 /** @memo */
-export function SideBarContainer(
+export function SideBarContainerImpl(
     /** @memo */
     style: ((attributes: SideBarContainerAttribute) => void) | undefined,
-    type?: SideBarContainerType,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -478,9 +483,7 @@ export function SideBarContainer(
         return new ArkSideBarContainerComponent()
     })
     NodeAttach<ArkSideBarContainerPeer>((): ArkSideBarContainerPeer => ArkSideBarContainerPeer.create(receiver), (_: ArkSideBarContainerPeer) => {
-        receiver.setSideBarContainerOptions(type)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

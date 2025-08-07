@@ -44,8 +44,14 @@ export class ArkScreenPeer extends ArkCommonMethodPeer {
 }
 export type ScreenInterface = (screenId: number) => ScreenAttribute;
 export interface ScreenAttribute extends CommonMethod {
+    setScreenOptions(screenId: number): this {
+        return this
+    }
 }
 export class ArkScreenStyle extends ArkCommonMethodStyle implements ScreenAttribute {
+    public setScreenOptions(screenId: number): this {
+        return this
+    }
 }
 export class ArkScreenComponent extends ArkCommonMethodComponent implements ScreenAttribute {
     getPeer(): ArkScreenPeer {
@@ -66,10 +72,9 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements Scre
     }
 }
 /** @memo */
-export function Screen(
+export function ScreenImpl(
     /** @memo */
     style: ((attributes: ScreenAttribute) => void) | undefined,
-    screenId: number,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -77,9 +82,7 @@ export function Screen(
         return new ArkScreenComponent()
     })
     NodeAttach<ArkScreenPeer>((): ArkScreenPeer => ArkScreenPeer.create(receiver), (_: ArkScreenPeer) => {
-        receiver.setScreenOptions(screenId)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

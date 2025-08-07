@@ -811,6 +811,9 @@ export type Callback_Boolean = () => boolean;
 export type Callback_Object_Void = (parameter: Object) => void;
 export type Callback_NavDestinationActiveReason_Void = (parameter: NavDestinationActiveReason) => void;
 export interface NavDestinationAttribute extends CommonMethod {
+    setNavDestinationOptions(): this {
+        return this
+    }
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this
     hideBackButton(value: boolean | undefined): this
     onShown(value: (() => void) | undefined): this
@@ -868,6 +871,9 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     onNewParam_value?: ((parameter: Object | null | undefined) => void) | undefined
     preferredOrientation_value?: Orientation | undefined
     enableNavigationIndicator_value?: boolean | undefined
+    public setNavDestinationOptions(): this {
+        return this
+    }
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
         return this
     }
@@ -1254,10 +1260,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     }
 }
 /** @memo */
-export function NavDestination(
+export function NavDestinationImpl(
     /** @memo */
     style: ((attributes: NavDestinationAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1265,9 +1270,7 @@ export function NavDestination(
         return new ArkNavDestinationComponent()
     })
     NodeAttach<ArkNavDestinationPeer>((): ArkNavDestinationPeer => ArkNavDestinationPeer.create(receiver), (_: ArkNavDestinationPeer) => {
-        receiver.setNavDestinationOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
