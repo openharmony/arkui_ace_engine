@@ -3773,7 +3773,7 @@ void PipelineContext::ConsumeTouchEvents(
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
 
-    int32_t inputIndex = touchEvents.size() - 1;
+    int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
         idToTouchPoints.emplace(scalePoint.id, scalePoint);
@@ -3823,7 +3823,7 @@ void PipelineContext::AccelerateConsumeTouchEvents(
     std::map<int32_t, int32_t> timestampToIds;
     std::unordered_set<int32_t> ids;
 
-    int32_t inputIndex = touchEvents.size() - 1;
+    int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     // consume touchEvents and generate idToTouchPoints.
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = iter->CreateScalePoint(GetViewScale());
