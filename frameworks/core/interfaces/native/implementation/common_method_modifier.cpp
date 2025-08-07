@@ -18,7 +18,6 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
-#include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/layout/grid_layout_info.h"
@@ -4350,7 +4349,7 @@ void AccessibilityUseSamePageImpl(Ark_NativePointer node,
         ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
         return;
     }
-    auto pageMode = AccessibilityStaticUtils::GetPageModeType(convValue.value());
+    auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
     ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
@@ -4381,7 +4380,7 @@ void AccessibilityRoleImpl(Ark_NativePointer node,
         return;
     }
     auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
-    role = AccessibilityStaticUtils::GetRoleByType(roleType);
+    role = AccessibilityUtils::GetRoleByType(roleType);
     if (role.empty()) {
         resetValue = true;
     }
@@ -4735,7 +4734,7 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     int32_t drawLevel = 0;
     auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
     if (convValue.has_value()) {
-        drawLevel = AccessibilityStaticUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
+        drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
         if (drawLevel == -1) {
             drawLevel = 0;
         }
