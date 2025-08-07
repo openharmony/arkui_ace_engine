@@ -32,6 +32,7 @@ public:
     void SetImageSrcByPixelMap(RefPtr<PixelMap>& pixMap);
     void SetMuted(bool muted);
     void SetHdrBrightness(float hdrBrightness);
+    void SetEnableCameraPostprocessing(bool isEnabled);
     void SetObjectFit(ImageFit objectFit);
     void SetOnComplete(MovingPhotoEventFunc&& onComplete);
     void SetOnStart(MovingPhotoEventFunc&& onStart);

@@ -384,6 +384,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
+    isGestureTriggeredLongPress_ = true;
     Start();
 }
 
@@ -1427,6 +1428,9 @@ void MovingPhotoPattern::OnMediaPlayerInitialized()
     }
     isAutoChangePlayMode_ = false;
     PrepareSurface();
+    if (cameraPostprocessingEnabled_) {
+        mediaPlayer_->EnableCameraPostprocessing();
+    }
     if (mediaPlayer_->PrepareAsync() != PREPARE_RETURN) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
     }
@@ -2137,6 +2141,14 @@ void MovingPhotoPattern::Start()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (cameraPostprocessingEnabled_) {
+        if (isGestureTriggeredLongPress_) {
+            mediaPlayer_->SetCameraPostprocessing(true);
+            isGestureTriggeredLongPress_ = false;
+        } else {
+            mediaPlayer_->SetCameraPostprocessing(false);
+        }
+    }
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
