@@ -15,6 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("qrcode_test_ng") {
   type = "new"
+  module_name = "Component-ShowInfo"
+  module_output = ""
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
