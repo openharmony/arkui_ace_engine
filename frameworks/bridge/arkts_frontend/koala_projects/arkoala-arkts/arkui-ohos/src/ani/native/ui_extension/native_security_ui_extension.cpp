@@ -218,7 +218,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
 
     ani_ref onErrorRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onErrorGlobalRef;
-    env->GlobalReference_Create(onErrorRef, &onErrorGlobalref);
+    env->GlobalReference_Create(onErrorRef, &onErrorGlobalRef);
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onErrorAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onErrorGlobalRef);
