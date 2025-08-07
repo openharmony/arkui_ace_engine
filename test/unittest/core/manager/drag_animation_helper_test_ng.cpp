@@ -339,8 +339,10 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition002, TestSize.Level1)
 
     gatherNodeInfo.imageNode =  AceType::WeakClaim(AceType::RawPtr(imageNode));
     gatherNodeInfos.emplace_back(gatherNodeInfo);
-    frameNode->previewOption_.isNumber = true;
-    frameNode->previewOption_.badgeNumber = 3;
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    dragPreviewOption.isNumber = true;
+    dragPreviewOption.badgeNumber = 3;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
 
     auto pipelineContext = MockPipelineContext::GetCurrent();
     ASSERT_NE(pipelineContext, nullptr);
