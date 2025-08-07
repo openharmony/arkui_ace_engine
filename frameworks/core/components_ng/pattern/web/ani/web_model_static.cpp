@@ -611,7 +611,8 @@ void WebModelStatic::SetEditMenuOptions(FrameNode* frameNode, const NG::OnCreate
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    webPatternStatic->UpdateEditMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void WebModelStatic::SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle)
