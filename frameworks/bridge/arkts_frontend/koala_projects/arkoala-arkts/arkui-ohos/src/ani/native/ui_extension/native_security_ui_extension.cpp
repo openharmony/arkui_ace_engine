@@ -96,8 +96,10 @@ ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtensionComponent(ani
 }
 
 ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object obj)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityUiextensionOption start");
@@ -204,8 +206,10 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionWant(
 }
 
 ani_status NativeSecurityUiExtension::SetSecurityOnError(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnError start");
@@ -239,7 +243,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
         }
 
         auto fnObj = reinterpret_cast<ani_fn_object>(onErrorGlobalRef);
-        auto codeArgs = AniUtils::CreateDouble(env, code); // TODO : Change to CreateInt
+        auto codeArgs = AniUtils::CreateDouble(env, code);
         if (codeArgs == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
                 "CreateDouble failed when onErrorCallback");
@@ -269,8 +273,10 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
 }
 
 ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnRecive start");
@@ -326,8 +332,10 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
 }
 
 ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnTerminate start");
@@ -379,8 +387,9 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
             }
 
             ani_ref result;
-            std::vector<ani_ref> tmp =
-                { reinterpret_cast<ani_ref>(codeArgs), reinterpret_cast<ani_ref>(wantArgs)};
+            std::vector<ani_ref> tmp = {
+                reinterpret_cast<ani_ref>(codeArgs), reinterpret_cast<ani_ref>(wantArgs)
+            };
             env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
         };
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -392,10 +401,11 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
 }
 
 
-
 ani_status NativeSecurityUiExtension::SetSecurityOnRelease(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnRelease not supported now.");
@@ -403,8 +413,10 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRelease(
 }
 
 ani_status NativeSecurityUiExtension::SetSecurityOnDrawReady(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnDrawReady not supported now.");
@@ -412,8 +424,10 @@ ani_status NativeSecurityUiExtension::SetSecurityOnDrawReady(
 }
 
 ani_status NativeSecurityUiExtension::SetSecurityOnResult(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurity OnResult not supported now.");

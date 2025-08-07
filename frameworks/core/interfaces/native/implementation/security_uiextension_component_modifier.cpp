@@ -55,7 +55,6 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
         return;
     }
     auto onRemoteReady =
