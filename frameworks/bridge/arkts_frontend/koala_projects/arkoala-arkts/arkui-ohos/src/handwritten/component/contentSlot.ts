@@ -24,8 +24,6 @@ import { Content } from "../Content"
 import { NodeContent } from "../NodeContent"
 import { ArkUIAniModule } from "arkui.ani"
 
-export interface UIContentSlotAttribute {
-}
 export class ArkContentSlotPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -48,12 +46,12 @@ export class ArkContentSlotPeer extends PeerNode {
         }
     }
 }
-/** @memo:stable */
-export class ArkContentSlotComponent extends ComponentBase implements UIContentSlotAttribute {
+
+export class ArkContentSlotComponent extends ComponentBase implements ContentSlotAttribute {
     getPeer(): ArkContentSlotPeer {
         return (this.peer as ArkContentSlotPeer)
     }
-    /** @memo */
+
     public setContentSlotOptions(content?: Content): this {
         if (this.checkPriority("setContentSlotOptions")) {
             const content_type = runtimeType(content)
@@ -70,7 +68,7 @@ export class ArkContentSlotComponent extends ComponentBase implements UIContentS
 /** @memo */
 export function ContentSlot(
     /** @memo */
-    style: ((attributes: UIContentSlotAttribute) => void) | undefined,
+    style: ((attributes: ContentSlotAttribute) => void) | undefined,
     content?: Content,
     /** @memo */
     content_?: (() => void) | undefined,
