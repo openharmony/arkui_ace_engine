@@ -15,12 +15,13 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -2173,6 +2174,7 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
     auto focusNode = GetChildFocusNodeById(id);
+    focusNode = focusNode ? focusNode : GetFocusNodeFromSubWindow(id);
     if (!focusNode) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus id can not found.");
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
@@ -2193,6 +2195,36 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
         }
     }
     return result;
+}
+
+RefPtr<FocusHub> FocusHub::GetFocusNodeFromSubWindow(const std::string& id)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto parentContainerId = Container::CurrentId();
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto isSubContainer = container->IsSubContainer();
+    if (!isSubContainer) {
+        auto subContainerIds = SubwindowManager::GetInstance()->GetAllSubContainerId(parentContainerId);
+        for (auto& containerId : subContainerIds) {
+            auto subPipeline = pipeline->GetContextByContainerId(containerId);
+            CHECK_NULL_RETURN(subPipeline, nullptr);
+            ContainerScope scope(containerId);
+            auto rootNode = subPipeline->GetRootElement();
+            CHECK_NULL_RETURN(rootNode, nullptr);
+            auto rootFocusHub = rootNode->GetFocusHub();
+            CHECK_NULL_RETURN(rootFocusHub, nullptr);
+            RefPtr<FocusHub> requestNode = nullptr;
+            requestNode = rootFocusHub->GetChildFocusNodeById(id);
+            if (requestNode) {
+                return requestNode;
+            }
+        }
+    }
+    return nullptr;
 }
 
 int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
