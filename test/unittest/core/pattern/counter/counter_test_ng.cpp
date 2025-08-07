@@ -173,7 +173,7 @@ void CounterTestNg::Create(const std::function<void(CounterModelNG)>& callback)
  * @tc.desc: Test counter SetOnInc and SetOnDec function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level0)
 {
     Create([](CounterModelNG model) {
         auto counterEventFunc1 = []() {};
@@ -200,7 +200,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest002, TestSize.Level1)
  * @tc.desc: Test counter SetHeight and SetWidth function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level0)
 {
     Create([](CounterModelNG model) {
         model.SetWidth(WIDTH);
@@ -217,7 +217,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest003, TestSize.Level1)
  * @tc.desc: Test counter SetControlWidth, SetStateChange and SetBackgroundColor function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level0)
 {
     Create([](CounterModelNG model) {
         model.SetControlWidth(WIDTH);
@@ -234,7 +234,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest004, TestSize.Level1)
  * @tc.desc: Test CounterNode AddChildToGroup function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest005, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest005, TestSize.Level0)
 {
     Create();
 
@@ -254,7 +254,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest005, TestSize.Level1)
  * @tc.desc: Test counter SetEnableInc function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level0)
 {
     Create([](CounterModelNG model) {
         model.SetEnableInc(true);
@@ -280,7 +280,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest007, TestSize.Level1)
  * @tc.desc: Test counter SetEnableDec function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level0)
 {
     Create([](CounterModelNG model) {
         model.SetEnableInc(false);
@@ -306,7 +306,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest008, TestSize.Level1)
  * @tc.desc: Test counter Create function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest009, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest009, TestSize.Level0)
 {
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     CounterModelNG model;
@@ -328,7 +328,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest009, TestSize.Level1)
  * @tc.desc: Test counter Create function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest010, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest010, TestSize.Level0)
 {
     auto columnNode =
         CounterNode::GetOrCreateCounterNode("Column", 100, []() { return AceType::MakeRefPtr<CounterPattern>(); });
@@ -345,7 +345,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest010, TestSize.Level1)
  * @tc.desc: Test counter SetEnableInc function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterPatternTest011, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest011, TestSize.Level0)
 {
     CounterModelNG model;
     model.Create();
@@ -380,7 +380,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level0)
 {
     CounterModelNG model;
     model.Create();
@@ -406,7 +406,7 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level1)
  * @tc.desc: Test counter UpdateTextColor function.
  * @tc.type: FUNC
  */
-HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTest001, TestSize.Level0)
 {
     CounterModelNG model;
     model.Create();
@@ -433,7 +433,7 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(CounterTestNg, CounterLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterLayoutPropertyTest001, TestSize.Level0)
 {
     CounterModelNG model;
     model.Create();
@@ -458,7 +458,7 @@ HWTEST_F(CounterTestNg, CounterLayoutPropertyTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(CounterTestNg, CounterModelNGTest001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterModelNGTest001, TestSize.Level0)
 {
     CounterModelNG model;
     model.Create();
@@ -478,7 +478,7 @@ HWTEST_F(CounterTestNg, CounterModelNGTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level0)
 {
     CounterModelNG model;
     model.Create();
@@ -500,7 +500,7 @@ HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(CounterTestNg, CounterThemeWrapperTest001, TestSize.Level1)
+HWTEST_F(CounterTestNg, CounterThemeWrapperTest001, TestSize.Level0)
 {
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
     ASSERT_NE(themeConstants, nullptr);
