@@ -176,7 +176,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
             retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
-        if (radialVerticalSize.has_value()) {
+        if (radialHorizontalSize.has_value()) {
             retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
         }
     }

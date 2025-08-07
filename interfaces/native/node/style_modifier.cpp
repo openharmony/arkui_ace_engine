@@ -13321,13 +13321,13 @@ const ArkUI_AttributeItem* GetTextLinearGradient(ArkUI_NodeHandle node)
     g_numberValues[2].i32 = values[2];
     //size
     g_attributeItem.size = NUM_3;
-    if (resultValue < NUM_1) {
+    if (resultValue < NUM_1 || resultValue > NUM_10) {
         return &g_attributeItem;
     }
 
-    static ArkUI_ColorStop colorStop;
-    static uint32_t gradientColors[NUM_10];
-    static float gradientStops[NUM_10];
+    ArkUI_ColorStop colorStop;
+    uint32_t gradientColors[NUM_10];
+    float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
         gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数
@@ -13428,13 +13428,13 @@ const ArkUI_AttributeItem* GetTextRadialGradient(ArkUI_NodeHandle node)
     g_numberValues[NUM_3].i32 = values[NUM_3];
     //size
     g_attributeItem.size = NUM_3;
-    if (resultValue < NUM_1) {
+    if (resultValue < NUM_1 || resultValue > NUM_10) {
         return &g_attributeItem;
     }
 
-    static ArkUI_ColorStop colorStop;
-    static uint32_t gradientColors[NUM_10];
-    static float gradientStops[NUM_10];
+    ArkUI_ColorStop colorStop;
+    uint32_t gradientColors[NUM_10];
+    float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
         gradientStops[i] = stops[i] / 100.0f; //百分比转换为小数

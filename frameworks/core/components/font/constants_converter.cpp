@@ -656,7 +656,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
             retGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient().radialHorizontalSize;
-        if (radialVerticalSize.has_value()) {
+        if (radialHorizontalSize.has_value()) {
             retGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialHorizontalSize.value());
         }
     }

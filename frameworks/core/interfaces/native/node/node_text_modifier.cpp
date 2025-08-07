@@ -1702,6 +1702,9 @@ ArkUI_Int32 GetTextLinearGradient(
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetColor().GetValue();
         (*stop)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -1755,14 +1758,16 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
     (*values)[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_2] =
-        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = radialGradient->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[NUM_3] = gradient.GetRepeat();
 
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetColor().GetValue();
         (*stops)[index] = gradientColor.GetDimension().Value();
         index++;
