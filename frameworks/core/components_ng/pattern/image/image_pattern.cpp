@@ -1605,19 +1605,11 @@ void ImagePattern::OpenSelectOverlay()
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
     };
-    info.onHandleMoveDone = [weak = WeakClaim(this), firstRect = info.firstHandle.paintRect,
-                                secondRect = info.secondHandle.paintRect](const RectF&, bool isFirst) {
+    info.onHandleMoveDone = [weak = WeakClaim(this)](const RectF&, bool isFirst) {
         // reset handle position
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern && pattern->selectOverlay_);
-        SelectHandleInfo info;
-        if (isFirst) {
-            info.paintRect = firstRect;
-            pattern->selectOverlay_->UpdateFirstSelectHandleInfo(info);
-        } else {
-            info.paintRect = secondRect;
-            pattern->selectOverlay_->UpdateSecondSelectHandleInfo(info);
-        }
+        pattern->HandleMoveDone(isFirst);
     };
     info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
         if (closedByGlobalEvent) {
@@ -1635,6 +1627,26 @@ void ImagePattern::OpenSelectOverlay()
     pipeline->AddOnAreaChangeNode(host->GetId());
     // paint selected mask effect
     host->MarkNeedRenderOnly();
+}
+
+void ImagePattern::HandleMoveDone(bool isFirst)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+        geometryNode->GetContentSize().Height() };
+    SelectHandleInfo info;
+    if (isFirst) {
+        info.paintRect = RectF(rect.GetOffset(), handleSize);
+        selectOverlay_->UpdateFirstSelectHandleInfo(info);
+    } else {
+        OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
+        info.paintRect = RectF(rect.GetOffset() + offset, handleSize);
+        selectOverlay_->UpdateSecondSelectHandleInfo(info);
+    }
 }
 
 void ImagePattern::CloseSelectOverlay()
