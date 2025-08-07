@@ -2126,15 +2126,16 @@ template<>
 BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
     BorderColorProperty dst;
-    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
-        " handles invalid structure"
-    );
-    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
     dst.leftColor = OptConvert<Color>(src.start);
     dst.topColor = OptConvert<Color>(src.top);
     dst.rightColor = OptConvert<Color>(src.end);
     dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    dst.leftColor = isRightToLeft? OptConvert<Color>(src.end) : OptConvert<Color>(src.start);
+    dst.rightColor = isRightToLeft? OptConvert<Color>(src.start) : OptConvert<Color>(src.end);
+
     return dst;
 }
 
@@ -2249,6 +2250,13 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    widthProperty.leftDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
+    widthProperty.rightDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
+
     return widthProperty;
 }
 
