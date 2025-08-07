@@ -758,12 +758,12 @@ HWTEST_F(TextFieldUXTest, TabGetFocus001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.steps: step2. Get foucs
+     * @tc.steps: step2. Get focus
      */
     GetFocus();
 
     /**
-     * @tc.steps: step3. Get foucs by press tab
+     * @tc.steps: step3. Get focus by press tab
      * @tc.expected: Select all value without handles
      */
     KeyEvent event;
