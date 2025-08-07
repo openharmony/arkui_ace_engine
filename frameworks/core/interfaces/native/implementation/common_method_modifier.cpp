@@ -4349,7 +4349,6 @@ void AccessibilityUseSamePageImpl(Ark_NativePointer node,
         ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
         return;
     }
-    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
