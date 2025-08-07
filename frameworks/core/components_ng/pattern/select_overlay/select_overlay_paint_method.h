@@ -33,11 +33,12 @@ public:
     SelectOverlayPaintMethod(const RefPtr<SelectOverlayModifier>& selectOverlayModifier,
         const RefPtr<SelectOverlayContentModifier>& selectOverlayContentModifier, SelectOverlayInfo info,
         const OffsetF& endOffset, float selectMenuHeight, bool hasExtensionMenu, bool hasShowAnimation, bool isCreated,
-        bool isHiddenHandle, const OffsetF& startOffset, bool isReverse)
+        bool isHiddenHandle, const OffsetF& startOffset, bool isReverse, const WeakPtr<Pattern>& pattern)
         : selectOverlayModifier_(selectOverlayModifier), selectOverlayContentModifier_(selectOverlayContentModifier),
           info_(std::move(info)), defaultMenuEndOffset_(endOffset), selectMenuHeight_(selectMenuHeight),
           hasExtensionMenu_(hasExtensionMenu), hasShowAnimation_(hasShowAnimation), isCreated_(isCreated),
-          isHiddenHandle_(isHiddenHandle), defaultMenuStartOffset_(startOffset), isReversePaint_(isReverse)
+          isHiddenHandle_(isHiddenHandle), defaultMenuStartOffset_(startOffset), isReversePaint_(isReverse),
+          pattern_(pattern)
     {}
     ~SelectOverlayPaintMethod() override = default;
 
@@ -94,6 +95,7 @@ private:
     OffsetF defaultMenuStartOffset_;
 
     bool isReversePaint_ = false;
+    WeakPtr<Pattern> pattern_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPaintMethod);
 };

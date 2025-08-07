@@ -1583,7 +1583,8 @@ void SelectOverlayNode::DispatchVisibleState(FrameNodeType type, FrameNodeTrigge
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
-                });
+                },
+                nullptr, GetContextRefPtr());
             break;
         case FrameNodeTrigger::SHOW:
         case FrameNodeTrigger::SHOWN:
@@ -1616,7 +1617,8 @@ void SelectOverlayNode::DispatchVisibleToGoneState(FrameNodeType type, FrameNode
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
-                });
+                },
+                nullptr, GetContextRefPtr());
             break;
         case FrameNodeTrigger::HIDDEN:
             SetFrameNodeStatus(type, FrameNodeStatus::GONE);
@@ -1652,7 +1654,8 @@ void SelectOverlayNode::DispatchGoneState(FrameNodeType type, FrameNodeTrigger t
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
-                });
+                },
+                nullptr, GetContextRefPtr());
             break;
         case FrameNodeTrigger::SHOWN:
         case FrameNodeTrigger::HIDE:
@@ -1687,7 +1690,8 @@ void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNode
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
-                });
+                },
+                nullptr, GetContextRefPtr());
             break;
         case FrameNodeTrigger::SHOW:
         case FrameNodeTrigger::HIDDEN:
@@ -1827,7 +1831,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
             auto colorMode = Container::CurrentColorMode();
             extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
             selectMenuInnerContext->UpdateOpacity(0.0);
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
     modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f, noAnimation);
     modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f, noAnimation);
     modifier->SetLineEndOffset(true, noAnimation);
@@ -1856,12 +1860,12 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     pipeline->FlushUITasks();
     extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
-    AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
+    AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback, GetContextRefPtr());
     selectProperty->UpdateUserDefinedIdealSize(frameSize);
     selectMenuInnerContext->UpdateTransformTranslate({ ANIMATION_TEXT_OFFSET.ConvertToPx(), 0.0f, 0.0f });
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
-    AnimationUtils::CloseImplicitAnimation();
+    AnimationUtils::CloseImplicitAnimation(GetContextRefPtr());
     isDoingAnimation_ = true;
 }
 
@@ -1913,7 +1917,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
         }
         extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
         selectMenuInnerContext->UpdateOpacity(1.0);
-    });
+    }, nullptr, nullptr, GetContextRefPtr());
 
     modifier->SetOtherPointRadius(MAX_DIAMETER / 2.0f, noAnimation);
     modifier->SetHeadPointRadius(MAX_DIAMETER / 2.0f, noAnimation);
@@ -1949,7 +1953,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     selectOption.SetDuration(ANIMATION_DURATION1);
     selectOption.SetCurve(Curves::FRICTION);
     pipeline->FlushUITasks();
-    AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
+    AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback, GetContextRefPtr());
     UpdateMoreOrBackSymbolOptionsWithDelay();
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         auto geometryNode = selectMenu_->GetGeometryNode();
@@ -1964,7 +1968,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     selectContext->UpdateOffset(OffsetT<Dimension>(0.0_px, 0.0_px));
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
-    AnimationUtils::CloseImplicitAnimation();
+    AnimationUtils::CloseImplicitAnimation(GetContextRefPtr());
     isDoingAnimation_ = true;
 }
 
@@ -3191,7 +3195,7 @@ void SelectOverlayNode::ShowSelectOverlay(bool animation)
                 auto node = weak.Upgrade();
                 CHECK_NULL_VOID(node);
                 node->SetFrameNodeOpacity(FrameNodeType::MENUONLY, 1.0f);
-            });
+            }, nullptr, nullptr, GetContextRefPtr());
         } else {
             SetFrameNodeOpacity(FrameNodeType::MENUONLY, 1.0f);
         }
@@ -3209,7 +3213,7 @@ void SelectOverlayNode::ShowSelectOverlay(bool animation)
             node->SetSelectMenuOpacity(1.0);
             node->SetExtensionMenuOpacity(1.0);
             node->SetBackButtonOpacity(1.0);
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
     } else {
         SetSelectMenuOpacity(1.0);
         SetExtensionMenuOpacity(1.0);
@@ -3233,7 +3237,7 @@ void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
         auto contentModifier = pattern->GetContentModifier();
         CHECK_NULL_VOID(contentModifier);
         contentModifier->SetHandleOpacity(0.0);
-    });
+    }, nullptr, nullptr, GetContextRefPtr());
 
     AnimationOption overlayOption;
     overlayOption.SetDuration(MENU_HIDE_ANIMATION_DURATION);
@@ -3251,7 +3255,7 @@ void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
                 CHECK_NULL_VOID(node);
                 node->SetFrameNodeOpacity(FrameNodeType::MENUONLY, 0.0f);
             },
-            callback);
+            callback, nullptr, GetContextRefPtr());
         return;
     }
 
@@ -3270,7 +3274,7 @@ void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
             CHECK_NULL_VOID(overlayModifier);
             overlayModifier->SetCirclesAndBackArrowOpacity(0.0);
         },
-        callback);
+        callback, nullptr, GetContextRefPtr());
 }
 
 void SelectOverlayNode::ExecuteOverlayStatus(FrameNodeType type, FrameNodeTrigger trigger)
