@@ -5599,6 +5599,7 @@ void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason re
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_VOID(mouseStyleManager);
     mouseStyleManager->SetUserSetCursor(false);
+    eventManager_->FlushCursorStyleRequests();
 }
 
 void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& option)
