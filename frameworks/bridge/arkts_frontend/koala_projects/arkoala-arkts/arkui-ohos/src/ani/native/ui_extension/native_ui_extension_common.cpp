@@ -19,12 +19,12 @@
 #include "ani_common_want.h"
 #include "../utils/ani_utils.h"
 #include "base/log/log_wrapper.h"
-#ifdef WINDOWSCENE_SUPPORTED
+#ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
-#endif //WINDOWSCENE_SUPPORTED
+#endif //WINDOW_SCENE_SUPPORTED
 #include "want.h"
 
 namespace OHOS::Ace::Ani {
@@ -35,7 +35,7 @@ ani_status NativeUiExtensionCommon::BindNativeUiExtensionCommon(ani_env *env)
     ani_status ret = BindNativeUiExtensionProxy(env);
     if (ret != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "BindNativeUiExtensionCommon failed");
+            "BindNativeUiExtensionProxy failed");
         return ret;
     }
 
@@ -63,12 +63,12 @@ ani_status NativeUiExtensionCommon::BindNativeUiExtensionProxy(ani_env *env)
             "BindNativeUiExtensionProxy Class_BindNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
-    }
+    };
 
     return ANI_OK;
 }
 
-static ani_status NativeUiExtensionCommon::SendData(
+ani_status NativeUiExtensionCommon::SendData(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
 {
@@ -92,7 +92,7 @@ static ani_status NativeUiExtensionCommon::SendData(
     return ANI_OK;
 }
 
-static ani_status NativeUiExtensionCommon::SendDataSync(
+ani_object NativeUiExtensionCommon::SendDataSync(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
 {

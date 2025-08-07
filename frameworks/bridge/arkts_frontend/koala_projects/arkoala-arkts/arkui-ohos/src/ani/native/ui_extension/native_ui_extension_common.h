@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTENSION_NATIVE_UI_EXTENSION_COMMON
-#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTENSION_NATIVE_UI_EXTENSION_COMMON
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_UI_EXTESNION_COMMON
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_UI_EXTESNION_COMMON
 
 #include "ani.h"
 
@@ -31,10 +31,10 @@ private:
     static ani_status SendData(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj);
-    static ani_status SendDataSync(
+    static ani_object SendDataSync(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj);
 };
 } // namespace OHOS::Ace::Ani
 
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTENSION_NATIVE_UI_EXTENSION_COMMON
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_UI_EXTESNION_COMMON

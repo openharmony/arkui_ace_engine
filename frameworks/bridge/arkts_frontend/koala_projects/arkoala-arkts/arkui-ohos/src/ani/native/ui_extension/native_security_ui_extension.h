@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTENSION_NATIVE_SECURITY_UI_EXTENSION
-#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTENSION_NATIVE_SECURITY_UI_EXTENSION
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_SECURITY_UI_EXTESNION
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_SECURITY_UI_EXTESNION
 
 #include "ani.h"
 
@@ -40,7 +40,7 @@ private:
     static ani_status SetSecurityOnError(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
-    static ani_status SetSecurityOnReceive(
+    static ani_status SetSecurityOnRecive(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
     static ani_status SetSecurityOnTerminate(
@@ -52,7 +52,7 @@ private:
     static ani_status SetSecurityOnDrawReady(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
-}
-}
+};
+} // namespace OHOS::Ace::Ani
 
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTENSION_NATIVE_SECURITY_UI_EXTENSION
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UI_EXTESNION_NATIVE_SECURITY_UI_EXTESNION

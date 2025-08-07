@@ -27,7 +27,7 @@
 #endif //WINDOW_SCENE_SUPPORTED
 #include "want.h"
 
-namesapce OHOS::Ace::Ani {
+namespace OHOS::Ace::Ani {
 namespace {
 constexpr int32_t FOLLOW_HOST_DPI = 0;
 const char UI_EXTENSION_PLACEHOLDER_TYPE_INITIAL[] = "initPlaceholder";
@@ -76,7 +76,7 @@ ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtensionComponent(ani
             "_SecurityUiextension_Set_OnReciveCallback",
             nullptr, reinterpret_cast<void *>(SetSecurityOnRecive)},
         ani_native_function {
-            "_SecurityUiextension_Set_OnTermitationCallback",
+            "_SecurityUiextension_Set_OnTerminationCallback",
             nullptr, reinterpret_cast<void *>(SetSecurityOnTermitate)},
         ani_native_function {
             "_SecurityUiextension_Set_OnReleaseCallback",
@@ -91,7 +91,7 @@ ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtensionComponent(ani
             "BindNativeSecurityUiExtensionComponent Class_BindNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
-    }
+    };
     return ANI_OK;
 }
 
@@ -118,7 +118,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
     }
 
     bool isTransferringCaller = AniUtils::GetBoolOrUndefined(env, obj, "isTransferringCaller");
-    bool isWindowModelFollowHost = AniUtils::GetBoolOrUndefined(env, obj, "isWindowModelFollowHost");
+    bool isWindowModeFollowHost = AniUtils::GetBoolOrUndefined(env, obj, "isWindowModelFollowHost");
     int32_t dpiFollowStrategy = -1;
     if (!AniUtils::GetIntByName(env, obj, "dpiFollowStrategy", dpiFollowStrategy)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
@@ -155,11 +155,11 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "SetSecurityUiextensionOption isTransferringCaller: %{public}d, dpiFollowStrategy: %{public}d,"
         "isWindowModeFollowHost: %{public}d, placeholderMap size: %{public}d",
-        isTransferringCaller, dpiFollowStrategy, isWindowModelFollowHost, static_cast<int32_t>(placeholderMap.size()));
+        isTransferringCaller, dpiFollowStrategy, isWindowModeFollowHost, static_cast<int32_t>(placeholderMap.size()));
 #ifdef WINDOW_SCENE_SUPPORTED
     bool densityDpi = (dpiFollowStrategy == FOLLOW_HOST_DPI) ? true : false;
     NG::SecurityUIExtensionStatic::UpdateSecurityUecConfig(
-        frameNode, isTransferringCaller, densityDpi, isWindowModelFollowHost, placeholderMap);
+        frameNode, isTransferringCaller, densityDpi, isWindowModeFollowHost, placeholderMap);
 #endif
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityUiextensionOption end");
@@ -167,7 +167,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
 }
 
 
-static ani_status NativeSecurityUiExtension::SetSecurityUiExtensionWant(
+ani_status NativeSecurityUiExtension::SetSecurityUiExtensionWant(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj)
 {
@@ -203,7 +203,7 @@ TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
     return ANI_OK;
 }
 
-static ani_status NativeSecurityUiExtension::SetSecurityOnError(
+ani_status NativeSecurityUiExtension::SetSecurityOnError(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -268,7 +268,7 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnError(
     return ANI_OK;
 }
 
-static ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
+ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -282,8 +282,8 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
     }
 
     ani_ref onReciveRef = reinterpret_cast<ani_ref>(callbackObj);
-    ani_ref onReciveGolbalRef;
-    env->GlobalReference_Create(onReciveRef, &onReciveGolbalRef);
+    ani_ref onReciveGlobalRef;
+    env->GlobalReference_Create(onReciveRef, &onReciveGlobalRef);
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onReciveAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReciveGlobalRef);
@@ -317,15 +317,15 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
 
-#ifdef WINDOW_SCENE_SUPPRTED
+#ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::SetSecurityOnReceive(frameNode, std::move(onReciveCallback));
-#endif //WINDOW_SCENE_SUPPRTED
+#endif //WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnRecive end");
     return ANI_OK;
 }
 
-static ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
+ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -339,11 +339,11 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
     }
 
     ani_ref onTerminateRef = reinterpret_cast<ani_ref>(callbackObj);
-    ani_ref onTerminateGolbalRef;
-    env->GlobalReference_Create(onTerminateRef, &onTerminateGolbalRef);
+    ani_ref onTerminateGlobalRef;
+    env->GlobalReference_Create(onTerminateRef, &onTerminateGlobalRef);
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
-    auto onTerminateAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onTerminateGolbalRef);
+    auto onTerminateAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onTerminateGlobalRef);
     auto onTerminateCallback =
         [env, onTerminateAniReadyCallbackInfo] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
             if (onTerminateAniReadyCallbackInfo == nullptr) {
@@ -360,7 +360,7 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
                 return;
             }
 
-            AAAFwk::Want want;
+            AAFwk::Want want;
             if (wantWrap) {
                 want = wantWrap->GetWant();
             }
@@ -393,7 +393,7 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
 
 
 
-static ani_status NativeSecurityUiExtension::SetSecurityOnRelease(
+ani_status NativeSecurityUiExtension::SetSecurityOnRelease(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -402,7 +402,7 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnRelease(
     return ANI_OK;
 }
 
-static ani_status NativeSecurityUiExtension::SetSecurityOnDrawReady(
+ani_status NativeSecurityUiExtension::SetSecurityOnDrawReady(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
@@ -411,7 +411,7 @@ static ani_status NativeSecurityUiExtension::SetSecurityOnDrawReady(
     return ANI_OK;
 }
 
-static ani_status NativeSecurityUiExtension::SetSecurityOnResult(
+ani_status NativeSecurityUiExtension::SetSecurityOnResult(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
