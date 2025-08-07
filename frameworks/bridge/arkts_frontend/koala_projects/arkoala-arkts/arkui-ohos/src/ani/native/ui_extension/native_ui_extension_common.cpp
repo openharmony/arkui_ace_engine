@@ -69,8 +69,10 @@ ani_status NativeUiExtensionCommon::BindNativeUiExtensionProxy(ani_env *env)
 }
 
 ani_status NativeUiExtensionCommon::SendData(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object paramObj)
 {
     auto uIExtensionProxyPeer =
         reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
@@ -93,8 +95,10 @@ ani_status NativeUiExtensionCommon::SendData(
 }
 
 ani_object NativeUiExtensionCommon::SendDataSync(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object paramObj)
 {
     ani_object result_obj = {};
     auto uIExtensionProxyPeer =
