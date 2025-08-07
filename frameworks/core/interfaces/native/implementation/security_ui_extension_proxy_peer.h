@@ -29,7 +29,7 @@ struct SecurityUIExtensionProxyPeerImpl : public AceType {
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
     using ProxyRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::SecurityUIExtensionProxy>;
-    using CallbackFunc = std::function<void(const ProxyRefPtf&)>;
+    using CallbackFunc = std::function<void(const ProxyRefPtr&)>;
     using CallbackFuncPairList = std::list<std::pair<int32_t, CallbackFunc>>;
     using PatternRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::SecurityUIExtensionPattern>;
 #endif //WINDOW_SCENE_SUPPORTED
@@ -72,7 +72,7 @@ struct SecurityUIExtensionProxyPeerImpl : public AceType {
 
     inline void AddAsyncCallbackToList(int32_t id, const CallbackFunc& onFunc)
     {
-        auto iter = FundCallback(id, onAsyncCallbackList_);
+        auto iter = FindCallback(id, onAsyncCallbackList_);
         if (iter == onAsyncCallbackList_.end()) {
             onAsyncCallbackList_.emplace_back(std::make_pair(id, onFunc));
         }
@@ -80,7 +80,7 @@ struct SecurityUIExtensionProxyPeerImpl : public AceType {
 
     inline void AddSyncCallbackToList(int32_t id, const CallbackFunc& onFunc)
     {
-        auto iter = FundCallback(id, onSyncCallbackList_);
+        auto iter = FindCallback(id, onSyncCallbackList_);
         if (iter == onSyncCallbackList_.end()) {
             onSyncCallbackList_.emplace_back(std::make_pair(id, onFunc));
         }
@@ -88,8 +88,8 @@ struct SecurityUIExtensionProxyPeerImpl : public AceType {
 
     inline void DeleteSyncCallbackFromList(int32_t id)
     {
-        auto iter = FundCallback(id, onSyncCallbackList_);
-        if (iter == onSyncCallbackList_.end()) {
+        auto iter = FindCallback(id, onSyncCallbackList_);
+        if (iter != onSyncCallbackList_.end()) {
             onSyncCallbackList_.erase(iter);
         }
     }
@@ -101,8 +101,8 @@ struct SecurityUIExtensionProxyPeerImpl : public AceType {
 
     inline void DeleteAsyncCallbackFromList(int32_t id)
     {
-        auto iter = FundCallback(id, onAsyncCallbackList_);
-        if (iter == onAsyncCallbackList_.end()) {
+        auto iter = FindCallback(id, onAsyncCallbackList_);
+        if (iter != onAsyncCallbackList_.end()) {
             onAsyncCallbackList_.erase(iter);
         }
     }

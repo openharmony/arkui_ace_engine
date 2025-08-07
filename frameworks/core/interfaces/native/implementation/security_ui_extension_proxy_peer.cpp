@@ -33,9 +33,9 @@ int32_t SecurityUIExtensionProxyPeerImpl::SendDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
     if (proxy_ == nullptr) {
-        return;
+        return 0;
     }
-    proxy_->SendDataSync(wantParams, reWantParams);
+    return proxy_->SendDataSync(wantParams, reWantParams);
 }
 #endif //WINDOW_SCENE_SUPPORTED
 } // namespace OHOS::Ace::NG::GeneratedModifier

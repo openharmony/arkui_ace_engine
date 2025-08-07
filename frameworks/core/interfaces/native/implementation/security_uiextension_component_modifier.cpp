@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#ifdef WINDOW_SCENE_SUPORTED
+#ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_model_static.h"
 #include "core/interfaces/native/implementation/security_ui_extension_proxy_peer.h"
 #endif
@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 #ifdef WINDOW_SCENE_SUPPORTED
-cosnt GENERAGED_ArkUISecurityUIExtensionProxyAccessor* GetSecurityUIExtensionProxyAccessor();
+const GENERATED_ArkUISecurityUIExtensionProxyAccessor* GetSecurityUIExtensionProxyAccessor();
 #endif //WINDOW_SCENE_SUPPORTED
 }
 
@@ -68,7 +68,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             uiExtensionProxyPeerPtr->SetProxy(proxy);
             arkCallback.Invoke(peer);
         };
-    NG::SecurityUIExtensionstatic::SetSecurityOnRemoterReady(frameNode, std::move(onRemoteReady));
+    NG::SecurityUIExtensionStatic::SetSecurityOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 } // SecurityUIExtensionComponentAttributeModifier
@@ -76,7 +76,7 @@ const GENERATED_ArkUISecurityUIExtensionComponentModifier* GetSecurityUIExtensio
 {
     static const GENERATED_ArkUISecurityUIExtensionComponentModifier ArkUISecurityUIExtensionComponentModifierImpl {
         SecurityUIExtensionComponentModifier::ConstructImpl,
-        SecurityUIExtensionComponentModifier::OnRemoteReadyImpl,
+        SecurityUIExtensionComponentAttributeModifier::OnRemoteReadyImpl,
     };
     return &ArkUISecurityUIExtensionComponentModifierImpl;
 }
