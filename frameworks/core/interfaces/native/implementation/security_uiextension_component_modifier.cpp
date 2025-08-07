@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 #ifdef WINDOW_SCENE_SUPPORTED
 const GENERATED_ArkUISecurityUIExtensionProxyAccessor* GetSecurityUIExtensionProxyAccessor();
-#endif //WINDOW_SCENE_SUPPORTED
+#endif // WINDOW_SCENE_SUPPORTED
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -59,7 +59,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
         return;
     }
     auto onRemoteReady =
-        [arkCallback = CallbackHelper(*optValue)](const Refptr<SecurityUIExtensionProxy>& proxy) {
+        [arkCallback = CallbackHelper(*optValue)](const RefPtr<SecurityUIExtensionProxy>& proxy) {
             auto accessor = GetSecurityUIExtensionProxyAccessor();
             CHECK_NULL_VOID(accessor);
             auto peer = accessor->ctor();
