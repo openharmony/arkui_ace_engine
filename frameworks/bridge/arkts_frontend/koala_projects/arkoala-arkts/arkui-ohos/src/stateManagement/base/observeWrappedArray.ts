@@ -1005,29 +1005,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fromIndex index to search from
      * @returns index of val, -1 otherwise
      */
-    public override indexOf(val: T, fromIndex: int): int {
+    public override indexOf(val: T, fromIndex?: int): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.indexOf(val, fromIndex);
     }
 
-    /**
-     * Returns the first index at which a given element
-     * can be found in the array, or -1 if it is not present.
-     *
-     * @param val value to search
-     * @param fromIndex index to search from
-     * @returns index of val, -1 otherwise
-     */
-    public override indexOf(val: T, fromIndex?: Number): number {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.indexOf(val, fromIndex);
-    }
-
-    public override indexOf(val: T) {
+    public override indexOf(val: T): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
