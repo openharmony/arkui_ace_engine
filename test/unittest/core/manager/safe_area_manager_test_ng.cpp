@@ -28,6 +28,7 @@
 #include "frameworks/core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -330,6 +331,52 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
     keyboardInset = safeAreaManager_->GetKeyboardInset();
     EXPECT_EQ(keyboardInset.start, rootHeight - KEYBOARD_HEIGHT);
     EXPECT_EQ(keyboardInset.end, rootHeight);
+}
+
+HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 call UpdateKeyboardWebSafeAreaTest with valid systemArea
+     */
+    MockContainer container(nullptr);
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    auto ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, false);
+    auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, DISPLAY_HEIGHT);
+    MockContainer::SetUp();
+    safeAreaManager_->SetIsFullScreen(false);
+    safeAreaManager_->UpdateSystemSafeArea(systemArea);
+    ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, false);
+    keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, SYSTEM_BOTTOM_START - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, SYSTEM_BOTTOM_START);
+    /**
+     * @tc.steps: step2 call UpdateKeyboardSafeAreaTest with invalid systemArea
+     */
+    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
+    keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    EXPECT_EQ(keyboardInset.start, rootHeight - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, rootHeight);
+    /**
+     * @tc.steps: step3 call UpdateKeyboardSafeAreaTest with rootHeight and invalid systemArea
+     */
+    rootHeight = SYSTEM_BOTTOM_START;
+    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT, rootHeight);
+    keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, rootHeight - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, rootHeight);
+    MockContainer::TearDown();
 }
 
 /**
@@ -1344,6 +1391,24 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetKeyboardWebInset
+ * @tc.desc: Use GetKeyboardWebInset and test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
+{
+    SafeAreaInsets::Inset inset;
+    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
+    auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, inset.start);
+    EXPECT_EQ(keyboardInset.end, inset.end);
+    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
+    EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
+}
+
+/**
  * @tc.name: IsModeResizeOrIsModeOffset
  * @tc.desc: Test IsModeResize and IsModeOffset
  * @tc.type: FUNC
@@ -1369,5 +1434,24 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);
         EXPECT_EQ(safeAreaManager_->IsModeResize(), expectedRes[i].second);
     }
+}
+
+/**
+ * @tc.name: SetAndGetKeyboardInsetImplTest
+ * @tc.desc: test Set And GetKeyboardInsetImplTest interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SetAndGetKeyboardInsetImplTest, TestSize.Level1)
+{
+    safeAreaManager_->SetKeyboardInsetImpl([](SafeAreaManager* manager) { return manager->GetKeyboardWebInset(); });
+    EXPECT_NE(safeAreaManager_->getKeyboardInset, nullptr);
+    auto ret = safeAreaManager_->GetKeyboardInsetImpl();
+    auto compare = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(ret, compare);
+    safeAreaManager_->SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)>());
+    EXPECT_EQ(safeAreaManager_->getKeyboardInset, nullptr);
+    ret = safeAreaManager_->GetKeyboardInsetImpl();
+    compare = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(ret, compare);
 }
 } // namespace OHOS::Ace::NG

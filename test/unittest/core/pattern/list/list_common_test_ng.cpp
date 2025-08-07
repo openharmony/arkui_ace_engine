@@ -17,6 +17,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/list/list_theme.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "core/components_ng/syntax/repeat_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,12 +40,34 @@ const Offset LEFT_TOP = Offset(120.f, 150.f);
 const Offset LEFT_BOTTOM = Offset(120.f, 250.f);
 const Offset RIGHT_TOP = Offset(360.f, 150.f);
 const Offset RIGHT_BOTTOM = Offset(360.f, 250.f);
+
+Dimension GetLaneMinLength(FrameNode* frameNode)
+{
+    Dimension laneMinLength = 0.0_vp;
+    CHECK_NULL_RETURN(frameNode, laneMinLength);
+    return frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLaneMinLength().value_or(laneMinLength);
+}
+
+Dimension GetLaneMaxLength(FrameNode* frameNode)
+{
+    Dimension laneMaxLength = 0.0_vp;
+    CHECK_NULL_RETURN(frameNode, laneMaxLength);
+    return frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLaneMaxLength().value_or(laneMaxLength);
+}
+
+V2::ItemDivider GetDivider(FrameNode* frameNode)
+{
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, frameNode, value);
+    return value;
+}
 } // namespace
 
 class ListCommonTestNg : public ListTestNg {
 public:
     void CreateFocusableListItems(int32_t itemNumber, int32_t count = 0);
     void CreateFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum = GROUP_ITEM_NUMBER);
+    void CreateFocusableAndUnFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     void MouseSelect(Offset start, Offset end);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
     AssertionResult IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id);
@@ -74,8 +98,7 @@ public:
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetRepeatItemDragManager(int32_t itemIndex);
     ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter(int32_t count = 0, int32_t index = 0);
-    void CreateFocusableListItemGroupsWithHeaderAndFooter(
-        int32_t groupNumber, int32_t groupItemNum, int32_t count = 0, int32_t index = 0);
+    void CreateFocusableListItemGroupsWithHeaderAndFooter(int32_t groupNumber, int32_t groupItemNum, int32_t count = 0);
     std::function<void()> GetHeaderOrFooterButtonBuilder(int32_t count = 0, std::string prefix = "", int32_t index = 0);
     static void CreateFocusableListItemsWithMultiComponent(int32_t index, std::string prefix = "");
 };
@@ -154,6 +177,24 @@ void ListCommonTestNg::CreateFocusableListItemGroups(int32_t groupNumber, int32_
     }
 }
 
+void ListCommonTestNg::CreateFocusableAndUnFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        CreateListItemGroup();
+        for (int32_t itemIndex = 0; itemIndex < groupItemNum; itemIndex++) {
+            if (itemIndex % EVEN_NUMBER_MOD == 0) {
+                CreateListItems(1);
+            } else {
+                CreateFocusableListItems(1);
+            }
+        }
+
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
 std::function<void()> ListCommonTestNg::GetHeaderOrFooterButtonBuilder(int32_t count, std::string prefix, int32_t index)
 {
     return [count, prefix, index]() {
@@ -188,7 +229,7 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(in
 }
 
 void ListCommonTestNg::CreateFocusableListItemGroupsWithHeaderAndFooter(
-    int32_t groupNumber, int32_t groupItemNum, int32_t count, int32_t index)
+    int32_t groupNumber, int32_t groupItemNum, int32_t count)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         auto groupMode = CreateListItemGroupWithHeaderAndFooter(count, index);
@@ -535,6 +576,49 @@ RefPtr<ListItemDragManager> ListCommonTestNg::GetRepeatItemDragManager(int32_t i
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
     return listItemPattern->dragManager_;
+}
+
+/**
+* @tc.name: OnMoveDragManager001
+* @tc.desc: Test ListItemDragManager IsNeedMove
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, OnMoveDragManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List
+     */
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone();
+    auto manager = GetForEachItemDragManager(0);
+
+    /**
+     * @tc.steps: step2. Test IsNeedMove
+     */
+    RectF nearRect = RectF(0.f, 0.f, 100.f, 400.f);
+    RectF rect = RectF(0.f, 400.f, 100.f, 100.f);
+    Axis axis = Axis::VERTICAL;
+
+    float axisDelta = -100.f;
+    bool needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = -300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
+
+    nearRect = RectF(0.f, 100.f, 100.f, 400.f);
+    rect = RectF(0.f, 0.f, 100.f, 100.f);
+    axis = Axis::VERTICAL;
+
+    axisDelta = 100.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, false);
+
+    axisDelta = 300.f;
+    needMove = manager->IsNeedMove(nearRect, rect, axis, axisDelta);
+    EXPECT_EQ(needMove, true);
 }
 
 /**
@@ -1004,6 +1088,200 @@ HWTEST_F(ListCommonTestNg, FocusWrapMode004, TestSize.Level1)
      * @tc.expected: Move focus to the previous line of last item
      */
     EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 2, 2, 1, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode005, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. In single-column list, call GetNextFocusNode from third item.
+     * @tc.expected: With wrap mode, focus should move to next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, 4));
+    /**
+     * @tc.steps: step2. In single-column list, call GetNextFocusNode from forth item.
+     * @tc.expected: With wrap mode, focus should move to front item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, 3));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode006, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    list.SetListDirection(Axis::HORIZONTAL);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. In single-column horizontal list, call GetNextFocusNode from first item.
+     * @tc.expected: With wrap mode, focus should move to next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 1, 2));
+    /**
+     * @tc.steps: step2. In single-column horizontal list, call GetNextFocusNode from second item.
+     * @tc.expected: With wrap mode, focus should move to front item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 2, 1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode007, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, -1));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, -1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode008, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetListDirection(Axis::HORIZONTAL);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, -1));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 4, -1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode009, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(2);
+    CreateListItems(1);
+    CreateFocusableListItems(2);
+    CreateListItems(1);
+    CreateFocusableListItems(2);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should not move (returns -1) because the third item is non-focusable.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 3, -1));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should not move (returns -1) because the third item is non-focusable.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 4, -1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode010, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 1, NULL_VALUE, 1, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 1, NULL_VALUE, 1, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode011, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetListDirection(Axis::VERTICAL);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should move to the next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 0, 1, 0, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should move to the front item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 1, 0, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode012, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetListDirection(Axis::HORIZONTAL);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should move to the next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::DOWN, 0, 1, 0, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should move to the next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::UP, 1, 0, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode013, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetListDirection(Axis::HORIZONTAL);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::DOWN, 0, NULL_VALUE, 0, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::UP, 1, NULL_VALUE, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode014, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    CreateFocusableAndUnFocusableListItemGroups(1, 8);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from fifth item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the fifth item is non-focusable.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 5, NULL_VALUE, 0, 8));
 }
 
 /**
@@ -2124,6 +2402,47 @@ HWTEST_F(ListCommonTestNg, ForEachDrag013, TestSize.Level1)
 }
 
 /**
+* @tc.name: ForEachDrag014
+* @tc.desc: List drag sort without hight, EdgeEffect is alwaysEnable.
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag014, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. Clear List Height
+    * @tc.expected: List height is 300
+    */
+    frameNode_->layoutProperty_->ClearUserDefinedIdealSize(false, true);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 300);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: List size not change and item position correct.
+     */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 1);
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.f);
+    info.SetGlobalPoint(Point(0, 10.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 300);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 200);
+}
+
+/**
  * @tc.name: LazyForEachDrag001
  * @tc.desc: Drag big delta to change order
  * @tc.type: FUNC
@@ -2295,7 +2614,74 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
     EXPECT_EQ(actualFrom, -1);
     EXPECT_EQ(actualTo, -1);
 }
+/**
+ * @tc.name: LazyForEachDrag003
+ * @tc.desc: Drag big delta to change order
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LazyForEachDrag003, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    ListModelNG model = CreateList();
+    CreateItemsInLazyForEach(3, 100.0f, std::move(onMoveEvent));
+    CreateDone();
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(host, nullptr);
+    host->geometryNode_->padding_ = std::make_unique<PaddingPropertyF>();
+    host->geometryNode_->padding_->top = 200.0f;
+    host->geometryNode_->padding_->bottom = 500.0f;
 
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto dragManager = GetLazyForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(53.0);
+    info.SetGlobalPoint(Point(0, 53.0f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"1", "0", "2"}));
+    auto fromTo = lazyForEachNode->builder_->moveFromTo_.value();
+    EXPECT_EQ(fromTo.first, 0);
+    EXPECT_EQ(fromTo.second, 1);
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 153.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "2", "0" }));
+    auto fromTo1 = lazyForEachNode->builder_->moveFromTo_.value();
+    EXPECT_EQ(fromTo1.first, 0);
+    EXPECT_EQ(fromTo1.second, 2);
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 0);
+    EXPECT_EQ(actualTo, 2);
+}
 /**
  * @tc.name: InitDragDropEvent001
  * @tc.desc: Test InitDragDropEvent, if already init, will not create dragEvent again
@@ -2464,6 +2850,36 @@ HWTEST_F(ListCommonTestNg, GetCurrentOffset001, TestSize.Level1)
     FlushUITasks();
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(pattern_->GetCurrentOffset(), Offset(ITEM_MAIN_SIZE, 0.0)));
+}
+
+/**
+ * @tc.name: GetTotalOffset001
+ * @tc.desc: Test GetTotalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetTotalOffset001, TestSize.Level1)
+{
+    constexpr double contentMainSize = 1000000000.0;
+    constexpr double itemMainSize = 50000000.0;
+    constexpr int32_t totalItemCount = contentMainSize / itemMainSize;
+
+    CreateList();
+    CreateItemWithSize(totalItemCount, SizeT<Dimension>(FILL_LENGTH, Dimension(itemMainSize)));
+    CreateDone();
+
+    ScrollToIndex(totalItemCount - 1, false, ScrollAlign::AUTO);
+
+    double prevOffset = pattern_->GetTotalOffset();
+    float delta = 1.0f;
+    UpdateCurrentOffset(delta);
+    double currentOffset = pattern_->GetTotalOffset();
+    EXPECT_TRUE(IsEqual(currentOffset, prevOffset - delta));
+
+    prevOffset = pattern_->GetTotalOffset();
+    delta = -1.0f;
+    UpdateCurrentOffset(delta);
+    currentOffset = pattern_->GetTotalOffset();
+    EXPECT_TRUE(IsEqual(currentOffset, prevOffset - delta));
 }
 
 /**
@@ -3321,6 +3737,443 @@ HWTEST_F(ListCommonTestNg, ChainAnimation004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double DEFAULT_FRICTION = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.CreateWithResourceObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = DEFAULT_FRICTION;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, DEFAULT_FRICTION);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.CreateWithResourceObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = DEFAULT_FRICTION;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, DEFAULT_FRICTION);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double DEFAULT_FRICTION = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    ListModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ListModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    ListModelNG::CreateWithResourceObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ListModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = DEFAULT_FRICTION;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, DEFAULT_FRICTION);
+
+    // remove callback function
+    ListModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    ListModelNG::CreateWithResourceObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    ListModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = DEFAULT_FRICTION;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, DEFAULT_FRICTION);
+
+    // remove callback function
+    ListModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjLaneGutter
+ * @tc.desc: Test CreateWithResourceObjLaneGutter in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneGutter001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const CalcDimension DEFAULT_LANE_GUTTER = 10000000.0_vp;
+    CalcDimension laneGutter;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.CreateWithResourceObjLaneGutter(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.CreateWithResourceObjLaneGutter(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneGutter.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, DEFAULT_LANE_GUTTER, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    ACE_GET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode_);
+    EXPECT_NE(laneGutter, DEFAULT_LANE_GUTTER);
+
+    // remove callback function
+    model.CreateWithResourceObjLaneGutter(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.CreateWithResourceObjLaneGutter(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneGutter.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, DEFAULT_LANE_GUTTER, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    ACE_GET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode_);
+    EXPECT_NE(laneGutter, DEFAULT_LANE_GUTTER);
+
+    // remove callback function
+    model.CreateWithResourceObjLaneGutter(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjLaneGutter
+ * @tc.desc: Test CreateWithResourceObjLaneGutter in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneGutter002, TestSize.Level1)
+{
+    ResetMockResourceData();
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const CalcDimension DEFAULT_LANE_GUTTER = 10000000.0_vp;
+    CalcDimension laneGutter;
+    int32_t id = 1;
+    AddMockResourceData(id, -1);
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(id,
+        static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.CreateWithResourceObjLaneGutter(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneGutter.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, DEFAULT_LANE_GUTTER, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    ACE_GET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode_);
+    EXPECT_NE(laneGutter, DEFAULT_LANE_GUTTER);
+
+    // remove callback function
+    model.CreateWithResourceObjLaneGutter(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: CreateWithResourceObjLaneConstrain
+ * @tc.desc: Test CreateWithResourceObjLaneConstrain in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
+    CalcDimension laneMinLength;
+    CalcDimension laneMaxLength;
+    RefPtr<ResourceObject> resMinObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    RefPtr<ResourceObject> resMaxObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
+
+    // add callback function
+    model.CreateWithResourceObjLaneConstrain(resMinObj, resMaxObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneMinLength.Reset();
+    laneMaxLength.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, DEFAULT_LANE_LENGTH, frameNode_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, DEFAULT_LANE_LENGTH, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    laneMinLength = GetLaneMinLength(AceType::RawPtr(frameNode_));
+    laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
+    EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
+    EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
+
+    g_isConfigChangePerform = false;
+}
+
+
+/**
+ * @tc.name: CreateWithResourceObjLaneConstrain
+ * @tc.desc: Test CreateWithResourceObjLaneConstrain in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain002, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
+    CalcDimension laneMinLength;
+    CalcDimension laneMaxLength;
+    RefPtr<ResourceObject> resMinObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    RefPtr<ResourceObject> resMaxObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.CreateWithResourceObjLaneConstrain(nullptr, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resMinObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    resMaxObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.CreateWithResourceObjLaneConstrain(resMinObj, resMaxObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneMinLength.Reset();
+    laneMaxLength.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, DEFAULT_LANE_LENGTH, frameNode_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, DEFAULT_LANE_LENGTH, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    laneMinLength = GetLaneMinLength(AceType::RawPtr(frameNode_));
+    laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
+    EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
+    EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
+
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: CreateWithResourceObjLaneConstrain
+ * @tc.desc: Test CreateWithResourceObjLaneConstrain in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
+    CalcDimension laneMinLength;
+    CalcDimension laneMaxLength;
+    RefPtr<ResourceObject> resMinObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    RefPtr<ResourceObject> resMaxObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    ListModelNG::CreateWithResourceObjLaneConstrain(nullptr, nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjLaneConstrain(nullptr, resMinObj, resMaxObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjLaneConstrain(AceType::RawPtr(frameNode_), nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    ListModelNG::CreateWithResourceObjLaneConstrain(AceType::RawPtr(frameNode_), resMinObj, resMaxObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneMinLength.Reset();
+    laneMaxLength.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, DEFAULT_LANE_LENGTH, frameNode_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, DEFAULT_LANE_LENGTH, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    laneMinLength = GetLaneMinLength(AceType::RawPtr(frameNode_));
+    laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
+    EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
+    EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
+
+    // remove callback function
+    ListModelNG::CreateWithResourceObjLaneConstrain(nullptr, nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjLaneConstrain(AceType::RawPtr(frameNode_), nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjLaneConstrain
+ * @tc.desc: Test CreateWithResourceObjLaneConstrain in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CreateWithResourceObjLaneConstrain004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const CalcDimension DEFAULT_LANE_LENGTH = 10000000.0_vp;
+    CalcDimension laneMinLength;
+    CalcDimension laneMaxLength;
+    RefPtr<ResourceObject> resMinObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    RefPtr<ResourceObject> resMaxObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    ListModelNG::CreateWithResourceObjLaneConstrain(nullptr, nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjLaneConstrain(nullptr, resMinObj, resMaxObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjLaneConstrain(AceType::RawPtr(frameNode_), nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resMinObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    resMaxObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    ListModelNG::CreateWithResourceObjLaneConstrain(AceType::RawPtr(frameNode_), resMinObj, resMaxObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    laneMinLength.Reset();
+    laneMaxLength.Reset();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, DEFAULT_LANE_LENGTH, frameNode_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, DEFAULT_LANE_LENGTH, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    laneMinLength = GetLaneMinLength(AceType::RawPtr(frameNode_));
+    laneMaxLength = GetLaneMaxLength(AceType::RawPtr(frameNode_));
+    EXPECT_NE(laneMinLength, DEFAULT_LANE_LENGTH);
+    EXPECT_NE(laneMaxLength, DEFAULT_LANE_LENGTH);
+
+    // remove callback function
+    ListModelNG::CreateWithResourceObjLaneConstrain(nullptr, nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    ListModelNG::CreateWithResourceObjLaneConstrain(AceType::RawPtr(frameNode_), nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+
+/**
+ * @tc.name: ParseResObjDividerStrokeWidth
+ * @tc.desc: Test ParseResObjDividerStrokeWidth in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDivider001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    const CalcDimension DEFAULT_DIMENSION = 10000000.0_vp;
+    const Color DEFAULT_COLOR = Color::RED;
+
+    ListModelNG::ParseResObjDividerStrokeWidth(nullptr, nullptr);
+    ListModelNG::ParseResObjDividerColor(nullptr, nullptr);
+    ListModelNG::ParseResObjDividerStartMargin(nullptr, nullptr);
+    ListModelNG::ParseResObjDividerEndMargin(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ListModelNG::ParseResObjDividerStrokeWidth(AceType::RawPtr(frameNode_), nullptr);
+    ListModelNG::ParseResObjDividerColor(AceType::RawPtr(frameNode_), nullptr);
+    ListModelNG::ParseResObjDividerStartMargin(AceType::RawPtr(frameNode_), nullptr);
+    ListModelNG::ParseResObjDividerEndMargin(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ListModelNG::ParseResObjDividerStrokeWidth(nullptr, resObj);
+    ListModelNG::ParseResObjDividerColor(nullptr, resObj);
+    ListModelNG::ParseResObjDividerStartMargin(nullptr, resObj);
+    ListModelNG::ParseResObjDividerEndMargin(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ListModelNG::ParseResObjDividerStrokeWidth(AceType::RawPtr(frameNode_), resObj);
+    ListModelNG::ParseResObjDividerColor(AceType::RawPtr(frameNode_), resObj);
+    ListModelNG::ParseResObjDividerStartMargin(AceType::RawPtr(frameNode_), resObj);
+    ListModelNG::ParseResObjDividerEndMargin(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = { DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_DIMENSION, DEFAULT_COLOR };
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode_);
+    pattern_->resourceMgr_->ReloadResources();
+    divider = GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.strokeWidth, DEFAULT_DIMENSION);
+    EXPECT_NE(divider.startMargin, DEFAULT_DIMENSION);
+    EXPECT_NE(divider.endMargin, DEFAULT_DIMENSION);
+    EXPECT_NE(divider.color, DEFAULT_COLOR);
+}
+
+/**
  * @tc.name: UpdateDefaultColorTest
  * @tc.desc: Test ListPattern UpdateDefaultColor
  * @tc.type: FUNC
@@ -3437,11 +4290,10 @@ HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex001, TestSize.Level1)
     RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
     focusNode->currentFocus_ = true;
     frameNode->focusHub_ = focusNode;
-    list.needTriggerFocus_ = true;
     list.focusIndex_ = 2;
     list.startIndex_ = 0;
     list.endIndex_ = 10;
-    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_UP);
+    auto result = list.ScrollToLastFocusIndex(KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN));
     EXPECT_FALSE(result);
 }
 
@@ -3470,133 +4322,13 @@ HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex002, TestSize.Level1)
     auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     frameNode->layoutProperty_ = listLayoutProperty;
     frameNode->focusHub_ = focusNode;
-    list.needTriggerFocus_ = true;
-    list.focusIndex_ = 2;
-    list.startIndex_ = 5;
-
-    list.endIndex_ = 10;
-    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_DOWN);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(list.scrollSource_, 7);
-}
-
-/**
- * @tc.name: ScrollToLastFocusIndex003
- * @tc.desc: Test ListFocus ScrollToLastFocusIndex
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex003, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
-    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
-    focusManager->isFocusActive_ = true;
-    pipe->focusManager_ = focusManager;
-    frameNode->context_ = AceType::RawPtr(pipe);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
-    frameNode->layoutProperty_ = listLayoutProperty;
-    frameNode->focusHub_ = focusNode;
-    list.needTriggerFocus_ = true;
     list.focusIndex_ = 2;
     list.startIndex_ = 5;
     list.endIndex_ = 10;
-
-    auto result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_UP);
-    EXPECT_TRUE(result);
+    list.maxListItemIndex_ = 10;
+    auto result = list.ScrollToLastFocusIndex(KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN));
+    EXPECT_FALSE(result);
     EXPECT_EQ(list.scrollSource_, 7);
-
-    list.focusIndex_ = 11;
-    result = list.ScrollToLastFocusIndex(KeyCode::KEY_DPAD_DOWN);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(list.scrollSource_, 7);
-}
-
-
-/**
- * @tc.name: ProcessFocusEvent001
- * @tc.desc: Test list ProcessFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ProcessFocusEvent001, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    frameNode->focusHub_ = focusNode;
-    KeyEvent event;
-    
-    list.needTriggerFocus_ = true;
-    list.triggerFocus_ = true;
-    list.ProcessFocusEvent(event, true);
-    EXPECT_FALSE(list.triggerFocus_);
-}
-
-/**
- * @tc.name: ProcessFocusEvent002
- * @tc.desc: Test list ProcessFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ProcessFocusEvent002, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    frameNode->focusHub_ = focusNode;
-    KeyEvent event;
-    
-    list.needTriggerFocus_ = true;
-    list.focusIndex_ = std::nullopt;
-    list.ProcessFocusEvent(event, true);
-    EXPECT_FALSE(list.needTriggerFocus_);
-}
-
-/**
- * @tc.name: ProcessFocusEvent003
- * @tc.desc: Test list ProcessFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, ProcessFocusEvent003, TestSize.Level1)
-{
-    ListPattern list;
-    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemPattern> listItemPattern =
-        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
-    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
-    WeakPtr<FrameNode> node = frameNode;
-    listItemPattern->frameNode_ = frameNode;
-    list.frameNode_ = frameNode;
-    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
-    focusNode->currentFocus_ = true;
-    frameNode->focusHub_ = focusNode;
-    KeyEvent event;
-
-    list.needTriggerFocus_ = true;
-    list.focusIndex_ = 2;
-    list.ProcessFocusEvent(event, true);
-    EXPECT_TRUE(list.triggerFocus_);
 }
 
 /**
@@ -3616,6 +4348,7 @@ HWTEST_F(ListCommonTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
      */
     int32_t focusNodeIndex = 6;
     pattern_->focusIndex_ = 2;
+    pattern_->startIndex_ = 4;
     pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
     FlushUITasks();
     RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
@@ -3623,6 +4356,390 @@ HWTEST_F(ListCommonTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
 
     focusNode = GetChildFocusHub(frameNode_, 2);
     EXPECT_TRUE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: UpdateStartIndex001
+ * @tc.desc: Test ListFocus UpdateStartIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, UpdateStartIndex001, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    frameNode->focusHub_ = focusNode;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
+
+    /**
+     * @tc.steps: step1. Focus node outside the list index
+     * @tc.expected: do NOT scroll
+     */
+    auto result1 = list.UpdateStartIndex(-1, -1);
+    EXPECT_FALSE(result1);
+    EXPECT_EQ(list.scrollSource_, 0);
+
+    /**
+     * @tc.steps: step1. Focus node excute UpdateStartIndex
+     * @tc.expected: scroll to the node
+     */
+    auto result2 = list.UpdateStartIndex(2, -1);
+    EXPECT_FALSE(result2);
+    EXPECT_EQ(list.scrollSource_, 7);
+}
+
+/**
+ * @tc.name: FireFocus001
+ * @tc.desc: Test FireFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FireFocus001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Focus node inside the viewport
+     * @tc.expected: request focus for this node
+     */
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    int32_t focusNodeIndex = 6;
+    pattern_->focusIndex_ = 2;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    focusNode = GetChildFocusHub(frameNode_, 2);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node outside the viewport
+     * @tc.expected: don't lost focus for this node
+     */
+    pattern_->focusIndex_ = 6;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    focusNode = GetChildFocusHub(frameNode_, 2);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+}
+
+HWTEST_F(ListCommonTestNg, FireFocus002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    // Get ListItemNode
+    auto listItemNode = GetChildFrameNode(frameNode_, 3);
+    auto listItemPattern = listItemNode->GetPattern<ListItemPattern>();
+    
+    // Create RepeatVirtualScroll2Node
+    auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        10,
+        10,
+        [](int32_t) { return std::make_pair(0, 0); },
+        [](int32_t, int32_t) {},
+        [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
+        [](int32_t, int32_t) {},
+        []() {}
+    );
+    
+    // Set parent-child relationships
+    repeatNode->AddChild(listItemNode);
+    frameNode_->AddChild(repeatNode);
+
+    /**
+     * @tc.steps: step1. Focus node inside the viewport
+     * @tc.expected: request focus for this node
+     */
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    int32_t focusNodeIndex = 6;
+    pattern_->focusIndex_ = 3;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    focusNode = GetChildFocusHub(frameNode_, 3);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node outside the viewport
+     * @tc.expected: lost focus for this node
+     */
+    pattern_->focusIndex_ = 6;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    focusNode = GetChildFocusHub(frameNode_, 3);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: FireFocusInListItemGroup001
+ * @tc.desc: Test FireFocusInListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FireFocusInListItemGroup001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItemGroups(3);
+    CreateDone();
+    if (itemGroupPatters_.size() < 0 || itemGroupPatters_.size() != 3) {
+        AssertionFailure() << "ItemGroupPatters count is NOT valid.";
+    }
+    /**
+     * @tc.steps: step1. Focus node inside the list item group viewport
+     * @tc.expected: request focus for this node
+     */
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    pattern_->focusIndex_ = 0;
+    pattern_->focusGroupIndex_ = 0;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+
+    if (!itemGroupPatters_[0]) {
+        AssertionFailure() << "ItemGroupPatter[0]  is null.";
+    }
+    auto itemGoupHost = itemGroupPatters_[0]->GetHost();
+    if (!itemGoupHost) {
+        AssertionFailure() << "ItemGoupHost is null.";
+    }
+    auto groupHub = itemGoupHost->GetFocusHub();
+    itemGroupPatters_[0]->itemDisplayStartIndex_ = 0;
+    itemGroupPatters_[0]->itemDisplayEndIndex_ = 4;
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(itemGoupHost, 0);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    pattern_->FireFocusInListItemGroup(0);
+    focusNode = GetChildFocusHub(itemGoupHost, 0);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node outside the viewport
+     * @tc.expected: lost focus for this node
+     */
+    pattern_->focusIndex_ = 0;
+    pattern_->focusGroupIndex_ = 0;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    itemGroupPatters_[0]->itemDisplayStartIndex_ = 3;
+    itemGroupPatters_[0]->itemDisplayEndIndex_ = 5;
+    pattern_->FireFocusInListItemGroup(0);
+    focusNode = GetChildFocusHub(itemGoupHost, 0);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: NotifyDataChange001
+ * @tc.desc: Test NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, NotifyDataChange001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItemGroups(3);
+    CreateDone();
+    if (itemGroupPatters_.size() < 0 || itemGroupPatters_.size() != 3) {
+        AssertionFailure() << "ItemGroupPatters count is NOT valid.";
+    }
+
+    if (!itemGroupPatters_[0]) {
+        AssertionFailure() << "ItemGroupPatter[0]  is null.";
+    }
+
+    /**
+     * @tc.steps: step1. Focus node Notify Data Change, focusGroupIndex_ should also change.
+     * @tc.expected: focusGroupIndex_ should change.
+     */
+    pattern_->focusIndex_ = 0;
+    pattern_->focusGroupIndex_ = 0;
+
+    itemGroupPatters_[0]->NotifyDataChange(0, 1);
+    EXPECT_EQ(pattern_->focusGroupIndex_, 1);
+
+    /**
+     * @tc.steps: step1. Focus node Notify Data Change, but not the same with focusIndex_.
+     * @tc.expected: focusGroupIndex_ should NOT change.
+     */
+    itemGroupPatters_[0]->NotifyDataChange(2, 1);
+    EXPECT_EQ(pattern_->focusGroupIndex_, 1);
+
+    /**
+     * @tc.steps: step1. Focus node Notify Data Change, with boundary value.
+     * @tc.expected: focusGroupIndex_ should NOT change.
+     */
+    itemGroupPatters_[0]->NotifyDataChange(0, -2);
+    EXPECT_EQ(pattern_->focusGroupIndex_, 0);
+}
+
+/**
+ * @tc.name: LostChildFocusToSelf001
+ * @tc.desc: Test LostChildFocusToSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LostChildFocusToSelf001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step1. Focus node scroll outside.
+     * @tc.expected: Node keep focus.
+     */
+    pattern_->focusIndex_ = 3;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, 3);
+    focusNode = GetChildFocusHub(frameNode_, 3);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node scroll inside.
+     * @tc.expected: Node lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: LostChildFocusToSelf002
+ * @tc.desc: Test LostChildFocusToSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LostChildFocusToSelf002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto headerNode = model.CreateFrameNode(0, false);
+    model.SetHeader(headerNode);
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step1. Focus node scroll outside.
+     * @tc.expected: Node keep focus.
+     */
+    pattern_->focusIndex_ = 1;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, 1);
+    focusNode = GetChildFocusHub(frameNode_, 1);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node scroll inside.
+     * @tc.expected: Node lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: IsListItemGroupByIndex001
+ * @tc.desc: Test IsListItemGroupByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, IsListItemGroupByIndex001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Listitem is NOT ListItemGroup.
+     * @tc.expected: function return false.
+     */
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(0));
+    /**
+     * @tc.steps: step1. Invaild index.
+     * @tc.expected: function return false.
+     */
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(-1));
+}
+
+/**
+ * @tc.name: IsListItemGroupByIndex002
+ * @tc.desc: Test IsListItemGroupByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, IsListItemGroupByIndex002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItemGroups(3);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Index for ListItemGroup is valid.
+     * @tc.expected: function return false.
+     */
+    EXPECT_TRUE(pattern_->IsListItemGroupByIndex(0));
+
+    /**
+     * @tc.steps: step1. Index for ListItemGroup is NOT valid.
+     * @tc.expected: function return false.
+     */
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(-1));
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(5));
 }
 
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
@@ -3680,5 +4797,302 @@ void ListCommonTestNg::MapEventInRepeatForItemDragEvent(int32_t* actualDragStart
     auto repeatNode = AceType::DynamicCast<RepeatNode>(frameNode_->GetChildAtIndex(0));
     repeatNode->SetItemDragHandler(std::move(onLongPressEvent), std::move(onDragStartEvent),
         std::move(onMoveThroughEvent), std::move(onDropEvent));
+}
+
+/**
+ * @tc.name: ParseResObjDividerStrokeWidth001
+ * @tc.desc: Test ParseResObjDividerStrokeWidth in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerStrokeWidth001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ParseResObjDividerStrokeWidth(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.strokeWidth = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    model.ParseResObjDividerStrokeWidth(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.strokeWidth = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStrokeWidth002
+ * @tc.desc: Test ParseResObjDividerStrokeWidth in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerStrokeWidth002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListModelNG::ParseResObjDividerStrokeWidth(AceType::RawPtr(frameNode_), invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.strokeWidth = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListModelNG::ParseResObjDividerStrokeWidth(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.strokeWidth = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerColor001
+ * @tc.desc: Test ParseResObjDividerColor in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerColor001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ParseResObjDividerColor(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.color = Color::BLUE;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.color, Color::BLUE);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    model.ParseResObjDividerColor(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.color = Color::BLUE;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.color, Color::BLUE);
+}
+
+/**
+ * @tc.name: ParseResObjDividerColor002
+ * @tc.desc: Test ParseResObjDividerColor in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerColor002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListModelNG::ParseResObjDividerColor(AceType::RawPtr(frameNode_), invalidResObj);
+    model.ParseResObjDividerColor(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.color = Color::BLUE;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.color, Color::BLUE);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListModelNG::ParseResObjDividerColor(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.color = Color::BLUE;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.color, Color::BLUE);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStartMargin001
+ * @tc.desc: Test ParseResObjDividerStartMargin in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerStartMargin001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ParseResObjDividerStartMargin(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.startMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    model.ParseResObjDividerStartMargin(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.startMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStartMargin002
+ * @tc.desc: Test ParseResObjDividerStartMargin in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerStartMargin002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListModelNG::ParseResObjDividerStartMargin(AceType::RawPtr(frameNode_), invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.startMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListModelNG::ParseResObjDividerStartMargin(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.startMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerEndMargin001
+ * @tc.desc: Test ParseResObjDividerEndMargin in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerEndMargin001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ParseResObjDividerEndMargin(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.endMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    model.ParseResObjDividerEndMargin(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.endMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerEndMargin002
+ * @tc.desc: Test ParseResObjDividerEndMargin in ListModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ParseResObjDividerEndMargin002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListModelNG::ParseResObjDividerEndMargin(AceType::RawPtr(frameNode_), invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.endMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListModelNG::ParseResObjDividerEndMargin(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    divider.endMargin = 1000.0_vp;
+    pattern_->resourceMgr_->ReloadResources();
+    divider = ListModelNG::GetDivider(AceType::RawPtr(frameNode_));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
 }
 } // namespace OHOS::Ace::NG

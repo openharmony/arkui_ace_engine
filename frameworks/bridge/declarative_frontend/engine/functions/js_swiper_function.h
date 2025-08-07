@@ -32,7 +32,7 @@ public:
 
     ~JsSwiperFunction() override {};
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

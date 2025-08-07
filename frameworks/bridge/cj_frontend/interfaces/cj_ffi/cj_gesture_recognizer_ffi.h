@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -22,6 +22,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gesture_ffi.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/gestures/gesture_info.h"
 #include "bridge/cj_frontend/cppview/gesture.h"
 
@@ -47,22 +48,22 @@ DECL_TYPE(CJEventTargetInfo, OHOS::FFI::FFIData)
 public:
     CJEventTargetInfo() : FFIData() {}
 
-    void setId(const std::string& inspectorId)
+    void SetId(const std::string& inspectorId)
     {
         inspectorId_ = inspectorId;
     }
 
-    std::string getId()
+    std::string GetId() const
     {
         return inspectorId_;
     }
 
-    void setType(const CJEventTargetInfoType type)
+    void SetType(const CJEventTargetInfoType type)
     {
         type_ = type;
     }
 
-    CJEventTargetInfoType getType()
+    CJEventTargetInfoType GetType() const
     {
         return type_;
     }
@@ -76,14 +77,14 @@ class CJScrollableTargetInfo : public CJEventTargetInfo {
 public:
     CJScrollableTargetInfo() : CJEventTargetInfo() {}
 
-    void setPattern(const WeakPtr<NG::Pattern>& pattern)
+    void SetPattern(const WeakPtr<NG::Pattern>& pattern)
     {
         pattern_ = pattern;
     }
 
-    bool isBegin();
+    bool IsBegin() const;
 
-    bool isEnd();
+    bool IsEnd() const;
 
 private:
     WeakPtr<NG::Pattern> pattern_;
@@ -94,37 +95,37 @@ DECL_TYPE(CJGestureRecognizer, OHOS::FFI::FFIData)
 public:
     CJGestureRecognizer() : FFIData() {}
 
-    void update(const RefPtr<NG::NGGestureRecognizer>& recognizer)
+    void Update(const RefPtr<NG::NGGestureRecognizer>& recognizer)
     {
         recognizer_ = recognizer;
     }
 
-    WeakPtr<NG::NGGestureRecognizer> GetRecognizer()
+    WeakPtr<NG::NGGestureRecognizer> GetRecognizer() const
     {
         return recognizer_;
     }
 
-    std::string getTag();
+    std::string GetTag() const;
 
-    int32_t getType();
+    int32_t GetType() const;
 
-    int32_t getFingers();
+    int32_t GetFingers() const;
 
-    bool isFingerCountLimit();
+    bool IsFingerCountLimit() const;
 
-    bool isBuiltIn();
+    bool IsBuiltIn() const;
 
-    bool isEnabled();
+    bool IsEnabled() const;
 
-    void setEnabled(bool enabled);
+    void SetEnabled(bool enabled);
 
-    bool isValid();
+    bool IsValid() const;
 
-    CJGestureRecognizerState getRefereeState();
+    CJGestureRecognizerState GetRefereeState() const;
 
-    sptr<CJEventTargetInfo> getEventTargetInfo();
+    sptr<CJEventTargetInfo> GetEventTargetInfo() const;
 
-    static CJGestureRecognizerState convertRefereeState(NG::RefereeState state)
+    static CJGestureRecognizerState ConvertRefereeState(NG::RefereeState state)
     {
         switch (state) {
             case NG::RefereeState::READY:
@@ -157,9 +158,9 @@ class CJMultiFingerRecognizer : public CJGestureRecognizer {
 public:
     CJMultiFingerRecognizer() : CJGestureRecognizer() {}
 
-    void update(const RefPtr<NG::MultiFingersRecognizer>& recognizer)
+    void Update(const RefPtr<NG::MultiFingersRecognizer>& recognizer)
     {
-        CJGestureRecognizer::update(recognizer);
+        CJGestureRecognizer::Update(recognizer);
         isLimitFingerCount_ = recognizer->GetLimitFingerCount();
         fingers_ = recognizer->GetFingers();
     }
@@ -169,14 +170,14 @@ class CJPanRecognizer : public CJMultiFingerRecognizer {
 public:
     CJPanRecognizer() : CJMultiFingerRecognizer() {}
 
-    void update(const RefPtr<NG::PanRecognizer>& recognizer)
+    void Update(const RefPtr<NG::PanRecognizer>& recognizer)
     {
-        CJMultiFingerRecognizer::update(recognizer);
-        setPanGestureOptions(
+        CJMultiFingerRecognizer::Update(recognizer);
+        SetPanGestureOptions(
             recognizer->GetFingers(), recognizer->GetDistance(), recognizer->GetDirection());
     }
 
-    sptr<NativePanGestureOption> getPanGestureOptions()
+    sptr<NativePanGestureOption> GetPanGestureOptions() const
     {
         PanDirection direction;
         auto panGestureOption = FFIData::Create<NativePanGestureOption>(0, direction, 0.0);
@@ -185,7 +186,7 @@ public:
     }
 
 private:
-    void setPanGestureOptions(int32_t fingers, double distance, PanDirection direction)
+    void SetPanGestureOptions(int32_t fingers, double distance, PanDirection direction)
     {
         panGestureOption_ = AceType::MakeRefPtr<PanGestureOption>();
         panGestureOption_->SetFingers(fingers);

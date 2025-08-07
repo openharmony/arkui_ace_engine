@@ -32,8 +32,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MIN_LINES = 1;
-constexpr uint32_t MAXLINESMODE_CLIP = 0;
-constexpr uint32_t MAXLINESMODE_SCROLL = 1;
+constexpr uint32_t MAX_LINES_MODE_CLIP = 0;
+constexpr uint32_t MAX_LINES_MODE_SCROLL = 1;
 constexpr uint32_t TWO_ARGS = 2;
 }
 
@@ -139,7 +139,6 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
 {
     auto normalMaxViewLines = Infinity<uint32_t>();
     auto inlineMaxViewLines = MAX_LINES;
-    auto overflow = MAXLINESMODE_CLIP;
     auto isValid = !(info.Length() < 1 || !info[0]->IsNumber() || info[0]->ToNumber<int32_t>() <= 0);
     if (isValid) {
         inlineMaxViewLines = info[0]->ToNumber<uint32_t>();
@@ -148,12 +147,13 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetNormalMaxViewLines(normalMaxViewLines);
     TextFieldModel::GetInstance()->SetMaxViewLines(inlineMaxViewLines);
 
+    auto overflow = MAX_LINES_MODE_CLIP;
     if (info.Length() == TWO_ARGS && info[1]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         auto overflowMode = paramObject->GetProperty("overflowMode");
-        overflow = overflowMode->ToNumber<int32_t>();
-        if (overflowMode->IsUndefined() || (overflow != MAXLINESMODE_CLIP && overflow != MAXLINESMODE_SCROLL)) {
-            overflow = MAXLINESMODE_CLIP;
+        auto modeValue = overflowMode->IsNumber() ? overflowMode->ToNumber<int32_t>() : -1;
+        if (modeValue >= 0 && (modeValue == MAX_LINES_MODE_CLIP || modeValue == MAX_LINES_MODE_SCROLL)) {
+            overflow = static_cast<uint32_t>(modeValue);
         }
     }
     TextFieldModel::GetInstance()->SetOverflowMode(OVERFLOWS_MODE[overflow]);
@@ -165,7 +165,7 @@ void JSTextArea::SetMinLines(const JSCallbackInfo& info)
     if (info.Length() == 1) {
         auto tmpInfo = info[0];
         if (tmpInfo->IsNumber() && tmpInfo->ToNumber<int32_t>() > 0) {
-            minLines = tmpInfo->ToNumber<int32_t>();
+            minLines = tmpInfo->ToNumber<uint32_t>();
         }
     }
     TextFieldModel::GetInstance()->SetMinLines(minLines);

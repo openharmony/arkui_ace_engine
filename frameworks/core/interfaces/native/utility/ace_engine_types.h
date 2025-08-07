@@ -19,8 +19,6 @@
 #include <variant>
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/list/list_properties.h"
@@ -97,6 +95,11 @@ struct FontFamilies {
     std::vector<std::string> families;
 };
 
+struct FontWeightInt {
+    std::optional<FontWeight> fixed;
+    std::optional<int32_t> variable;
+};
+
 enum class MessageLevel {
     DEBUG = 1,
     INFO = 2,
@@ -125,6 +128,12 @@ enum class ThreatType {
     FRAUD = 1,
     RISK = 2,
     WARNING = 3,
+};
+
+enum class RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY
 };
 
 struct Header {

@@ -816,6 +816,50 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureCreateRecognizerTest002, Tes
 }
 
 /**
+ * @tc.name: LongPressGestureCreateRecognizerTest003
+ * @tc.desc: Test LongPressGesture CreateRecognizer function
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressGestureCreateRecognizerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressGesture.
+     */
+    LongPressGestureModelNG longPressGestureModelNG;
+    longPressGestureModelNG.Create(FINGER_NUMBER, false, LONG_PRESS_DURATION);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto longPressGestureNG = AceType::DynamicCast<NG::LongPressGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(longPressGestureNG->duration_, LONG_PRESS_DURATION);
+
+    LongPressGesture longPressGesture = LongPressGesture(FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false);
+    EXPECT_EQ(longPressGesture.repeat_, false);
+    EXPECT_EQ(longPressGesture.duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressGesture.isForDrag_, false);
+    EXPECT_EQ(longPressGesture.isDisableMouseLeft_, false);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionCancelId not existed
+     */
+    longPressGesture.fingers_ = FINGER_NUMBER_OVER_MAX;
+    longPressGesture.duration_ = 0;
+    auto onActionCancel = [](GestureEvent& info) { return true; };
+    longPressGesture.SetOnActionCancelId(onActionCancel);
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step3. call CreateRecognizer function and compare result
+     * @tc.steps: case2: onActionCancelId existed
+     */
+    longPressGesture.fingers_ = SINGLE_FINGER_NUMBER;
+    longPressGesture.duration_ = 200;
+    longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+}
+
+/**
  * @tc.name: LongPressRecognizerHandleTouchUpEventTest009
  * @tc.desc: Test LongPressRecognizer function: HandleTouchUpEvent
  * @tc.type: FUNC
@@ -2122,5 +2166,42 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize
     longPressRecognizer->targetComponent_ = targetComponent;
     targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     longPressRecognizer->TriggerGestureJudgeCallback();
+}
+
+/**
+ * @tc.name: TriggerGestureJudgeCallbackTest003
+ * @tc.desc: Test LongPressRecognizer function: TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, 2, false, false, false, true);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult::REJECT; };
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case1: targetComponent is default.
+     * @tc.expected: step2. result equals.
+     */
+
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    TouchEvent touchEvent;
+    touchEvent.rollAngle = 0;
+    longPressRecognizer->touchPoints_[0] = touchEvent;
+    longPressRecognizer->touchPoints_[1] = touchEvent;
+    longPressRecognizer->touchPoints_[2] = touchEvent;
+    longPressRecognizer->targetComponent_ = targetComponent;
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    longPressRecognizer->HandleOverdueDeadline(true);
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::NONE);
 }
 } // namespace OHOS::Ace::NG

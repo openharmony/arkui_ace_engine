@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime",
+        "outDir": "build",
+        "baseUrl": "./ets-processed",
+        "paths": {
+            "@koalaui/common": ["../../common/src"],
+            "@koalaui/compat": ["../../compat/src/arkts"],
+            "@koalaui/runtime/annotations": ["../annotations"],
+            "arkui.stateManagement.runtime": ["../stateMgmt.ts"]
+        }
+    },
+    "include": ["ets-processed/**/*.ets"]
+}

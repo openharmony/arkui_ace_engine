@@ -59,6 +59,7 @@ public:
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
     int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName);
+    void SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration);
     void ReportJankFrameApp(double jank);
     void SetPageUrl(const std::string& pageUrl);
     std::string GetPageUrl();
@@ -77,6 +78,7 @@ public:
                            const std::string& bundleName);
     void NotifyAppJankStatsBegin();
     void NotifyAppJankStatsEnd();
+    void SetApplicationInfo();
 private:
     std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
 };

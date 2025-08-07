@@ -33,6 +33,7 @@ constexpr int32_t JS_ENUM_TRANSITIONTYPE_EXPLODE = 5;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT = 6;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM = 7;
 constexpr int32_t MIN_INFO_LENGTH = 2;
+constexpr uint32_t ARGC_TWO = 2;
 constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 
 // sources in js_window_utils.h
@@ -111,6 +112,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navDestination.toolbarConfiguration");
     using namespace OHOS::Ace::Framework;
     JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
     bool hideText = false;
@@ -154,7 +157,9 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
         }
     }
     NG::NavigationToolbarOptions options;
-    JSNavigationUtils::ParseToolbarOptions(info, options);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navigation.navigationToolbarOptions");
+    JSNavigationUtils::ParseToolbarOptions(info, options, NUM_2);
     NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -163,6 +168,39 @@ ArkUINativeModuleValue NavDestinationBridge::ResetToolBarConfiguration(ArkUIRunt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() < ARGC_TWO, true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> backgroundColorResObj;
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackgroundColor(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationBackgroundColor(
+        nativeNode, color.GetValue(), bgColorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -235,6 +273,9 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.backButtonIcon.icon");
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     std::string src;
@@ -251,10 +292,10 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     std::string moduleName;
     
     Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
-    if (!SystemProperties::ConfigChangePerform()) {
-        NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
-    } else {
+    if (SystemProperties::ConfigChangePerform() && backButtonIconResObj) {
         NavDestinationModelNG::SetBackButtonIcon(frameNode, noPixMap, pixMap, backButtonIconResObj);
+    } else {
+        NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -292,6 +333,8 @@ ArkUINativeModuleValue NavDestinationBridge::ResetBackButtonIcon(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.backButtonIcon.icon");
     bool noPixMap = false;
     RefPtr<PixelMap> pixMap = nullptr;
     std::string src;
@@ -401,7 +444,7 @@ ArkUINativeModuleValue NavDestinationBridge::SetTitle(ArkUIRuntimeCallInfo* runt
 
     ArkUINavigationTitlebarOptions options;
     if (optionsArg->IsObject(vm)) {
-        NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
+        NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, nativeNode, options);
     }
     ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
     auto titleRawPtr = AceType::RawPtr(titleResObj);

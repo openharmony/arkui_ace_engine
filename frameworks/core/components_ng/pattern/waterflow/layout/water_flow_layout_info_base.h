@@ -205,6 +205,8 @@ public:
         return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
     }
 
+    virtual void InvalidatedOffset() = 0;
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
@@ -249,6 +251,8 @@ public:
 
     // unfold the LazyVGrid during the position calculation.
     bool duringPositionCalc_ = false;
+
+    bool measureInNextFrame_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

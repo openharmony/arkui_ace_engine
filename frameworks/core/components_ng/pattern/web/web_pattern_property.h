@@ -76,6 +76,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MetaViewport, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CssDisplayChangeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
@@ -89,6 +90,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
 };
 
 } // namespace OHOS::Ace::NG

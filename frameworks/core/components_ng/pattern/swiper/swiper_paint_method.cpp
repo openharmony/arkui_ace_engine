@@ -97,6 +97,9 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
         }
     }
 
+    auto clipRect = RSRect(0, 0, width, height);
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+
     RSBrush brush;
     brush.SetColor(ToRSColor(paintProperty->GetFadeColor().value_or(Color::GRAY)));
     brush.SetAlphaF(FADE_ALPHA);

@@ -38,7 +38,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 };
 
 class ResourceParseUtils final : public AceType {
@@ -49,6 +50,8 @@ public:
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);
     static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result);
+    static bool ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
+        const ColorMode& colorMode);
     static bool ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result);
     static bool ParseResInteger(const RefPtr<ResourceObject>& resObj, int32_t& result);
     static bool ParseResInteger(const RefPtr<ResourceObject>& resObj, uint32_t& result);
@@ -77,9 +80,8 @@ public:
 
     static bool IsNumberType(int32_t type)
     {
-        return type == static_cast<int32_t>(ResourceType::FLOAT) ||
-            type == static_cast<int32_t>(ResourceType::PLURAL) ||
-            type == static_cast<int32_t>(ResourceType::INTEGER);
+        return type == static_cast<int32_t>(ResourceObjectParamType::FLOAT) ||
+            type == static_cast<int32_t>(ResourceObjectParamType::INT);
     }
 
     template<typename T>
@@ -106,9 +108,24 @@ public:
         return false;
     }
 
+    static void SetIsReloading(bool isReloading)
+    {
+        isReloading_ = isReloading;
+    }
+
+    static bool IsReloading()
+    {
+        return isReloading_;
+    }
+
 private:
+    static void InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
+        const ColorMode& colorMode);
+    static bool ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
+        RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode);
     static bool ParseResStringObj(const std::vector<ResourceObjectParams>& params,
         RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type);
+    static bool isReloading_;
 };
 }
 #endif

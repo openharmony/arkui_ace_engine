@@ -155,6 +155,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void StartCustomNodeAnimation(bool select);
     RefPtr<GroupManager> GetGroupManager();
 
@@ -169,10 +170,23 @@ public:
     static int32_t ParseCommand(const std::string& command, bool& selectStatus);
     void ReportChangeEvent(bool selectStatus);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void SetIsUserSetMargin(bool isUserSetMargin)
+    {
+        isUserSetMargin_ = isUserSetMargin;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
@@ -197,6 +211,7 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
+    void UpdateGroupStatus(FrameNode* frameNode);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
@@ -219,6 +234,9 @@ private:
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
     void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
     void SetNeedAnimation(bool needAnimation);
+    void InitDefaultMargin();
+    void ResetDefaultMargin();
+    void UpdateNavIdAndState(const RefPtr<FrameNode>& host);
 
     CheckboxSettingData checkboxSettingData_;
 
@@ -240,6 +258,7 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
     bool visible_ = true;
+    bool isUserSetMargin_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

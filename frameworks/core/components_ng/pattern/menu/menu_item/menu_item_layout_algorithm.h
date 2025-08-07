@@ -40,6 +40,8 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void RemoveParentRestrictionsForFixIdeal(
+        const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint);
     void CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
         std::optional<LayoutConstraintF>& layoutConstraint);
     void CheckUserHeight(LayoutWrapper* layoutWrapper);
@@ -52,7 +54,7 @@ private:
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
     float GetBordersHeight(LayoutWrapper* layoutWrapper);
-    float GetMenuItemVerticalPadding();
+    float GetMenuItemVerticalPadding(LayoutWrapper* layoutWrapper);
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     void UpdateIconMargin(LayoutWrapper* layoutWrapper);
     void UpdateIdealSize(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props,

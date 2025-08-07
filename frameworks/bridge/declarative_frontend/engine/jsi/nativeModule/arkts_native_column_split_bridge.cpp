@@ -57,10 +57,15 @@ ArkUINativeModuleValue ColumnSplitBridge::SetDivider(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension startMargin(0.0, DimensionUnit::VP);
     CalcDimension endMargin(0.0, DimensionUnit::VP);
-    ArkTSUtils::ParseJsDimensionVp(vm, startMarginArg, startMargin);
-    ArkTSUtils::ParseJsDimensionVp(vm, endMarginArg, endMargin);
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, startMarginArg, startMargin, startMarginResObj);
+    ArkTSUtils::ParseJsDimensionVp(vm, endMarginArg, endMargin, endMarginResObj);
+    auto startMarginRawPtr = AceType::RawPtr(startMarginResObj);
+    auto endMarginRawPtr = AceType::RawPtr(endMarginResObj);
     GetArkUINodeModifiers()->getColumnSplitModifier()->setColumnSplitDivider(nativeNode, startMargin.Value(),
-        static_cast<int32_t>(startMargin.Unit()), endMargin.Value(), static_cast<int32_t>(endMargin.Unit()));
+        static_cast<int32_t>(startMargin.Unit()), endMargin.Value(), static_cast<int32_t>(endMargin.Unit()),
+        startMarginRawPtr, endMarginRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -44,6 +44,7 @@ bool SystemProperties::windowAnimationEnabled_ = true;
 std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
 std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
+bool SystemProperties::dynamicDetectionTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
 bool SystemProperties::measureDebugTraceEnable_ = false;
 bool SystemProperties::safeAreaDebugTraceEnable_ = false;
@@ -68,8 +69,11 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
+bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
+std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
+bool SystemProperties::gridIrregularLayoutEnable_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
@@ -83,6 +87,9 @@ bool SystemProperties::imageFrameworkEnable_ = true;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+int32_t SystemProperties::velocityTrackerPointNumber_ = 20;
+bool SystemProperties::isVelocityWithinTimeWindow_ = true;
+bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
@@ -90,14 +97,17 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 
-bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
+bool g_isConfigChangePerform = false;
+bool g_isMultiInstanceEnabled = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -134,11 +144,12 @@ bool SystemProperties::GetIsUseMemoryMonitor()
 
 bool SystemProperties::GetMultiInstanceEnabled()
 {
-    return multiInstanceEnabled_;
+    return g_isMultiInstanceEnabled || multiInstanceEnabled_;
 }
 
 void SystemProperties::SetMultiInstanceEnabled(bool enabled)
 {
+    g_isMultiInstanceEnabled = enabled;
     multiInstanceEnabled_ = enabled;
 }
 
@@ -188,6 +199,16 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
+bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
+{
+    return forceSplitIgnoreOrientationEnabled_;
+}
+
+std::optional<bool> SystemProperties::GetArkUIHookEnabled()
+{
+    return arkUIHookEnabled_;
+}
+
 bool SystemProperties::GetCacheNavigationNodeEnable()
 {
     return cacheNavigationNodeEnable_;
@@ -200,7 +221,7 @@ bool SystemProperties::GetGridCacheEnabled()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return g_irregularGrid;
+    return gridIrregularLayoutEnable_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
@@ -231,6 +252,21 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+int32_t SystemProperties::GetVelocityTrackerPointNumber()
+{
+    return velocityTrackerPointNumber_;
+}
+
+bool SystemProperties::IsVelocityWithinTimeWindow()
+{
+    return isVelocityWithinTimeWindow_;
+}
+
+bool SystemProperties::IsVelocityWithoutUpPoint()
+{
+    return isVelocityWithoutUpPoint_;
 }
 
 bool SystemProperties::GetAllowWindowOpenMethodEnabled()
@@ -290,7 +326,7 @@ bool SystemProperties::GetResourceDecoupling()
 
 bool SystemProperties::ConfigChangePerform()
 {
-    return false;
+    return g_isConfigChangePerform;
 }
 
 int32_t SystemProperties::GetDragDropFrameworkStatus()
@@ -313,6 +349,11 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+bool SystemProperties::IsSoftPageTransition()
+{
+    return softPagetransition_;
+}
+
 bool SystemProperties::IsFormSkeletonBlurEnabled()
 {
     return formSkeletonBlurEnabled_;
@@ -321,5 +362,30 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return false;
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return 0;
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return 0;
+}
+
+std::string SystemProperties::GetMapSearchPrefix()
+{
+    return "";
 }
 } // namespace OHOS::Ace

@@ -63,7 +63,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void FireOnErrorCallbackOnUI(
         int32_t code, const std::string& name, const std::string& msg);
 
@@ -87,6 +87,8 @@ public:
     }
 
     void HandleVisibleAreaChange(bool visible, double ratio);
+
+    bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
 private:
     void InitializeRender(void* runtime);
@@ -115,6 +117,8 @@ private:
     void UnRegisterSingleHandTransformChangedCallback(int32_t instanceId);
 
     void RegisterVisibleAreaChange();
+
+    void HandleMouseEvent(const MouseInfo& info) override;
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;

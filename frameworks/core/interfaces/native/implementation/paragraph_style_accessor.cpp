@@ -76,68 +76,59 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
+Opt_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
 {
-    Ark_TextAlign ret = Ark_TextAlign::ARK_TEXT_ALIGN_START;
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
-    ret = Converter::ArkValue<Ark_TextAlign>(peer->span->GetParagraphStyle().align.value_or(TextAlign::START));
-    return ret;
+    auto invalid = Converter::ArkValue<Opt_TextAlign>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    return Converter::ArkValue<Opt_TextAlign>(peer->span->GetParagraphStyle().align);
 }
-Ark_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
+Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
-    Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     if (style.textIndent) {
-        return Converter::ArkValue<Ark_Number>(style.textIndent->ConvertToPx());
+        return Converter::ArkValue<Opt_Number>(style.textIndent->ConvertToPx());
     }
-    return ret;
+    return invalid;
 }
-Ark_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
+Opt_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
 {
-    Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    if (style.maxLines) {
-        return Converter::ArkValue<Ark_Number>(style.maxLines.value());
-    }
-    return ret;
+    return Converter::ArkValue<Opt_Number>(style.maxLines);
 }
-Ark_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
+Opt_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
 {
-    Ark_TextOverflow ret = Ark_TextOverflow::ARK_TEXT_OVERFLOW_NONE;
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
+    auto invalid = Converter::ArkValue<Opt_TextOverflow>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    if (style.textOverflow) {
-        return Converter::ArkValue<Ark_TextOverflow>(style.textOverflow.value());
-    }
-    return ret;
+    return Converter::ArkValue<Opt_TextOverflow>(style.textOverflow);
 }
-Ark_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
+Opt_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
 {
-    Ark_WordBreak ret = Ark_WordBreak::ARK_WORD_BREAK_NORMAL;
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
+    auto invalid = Converter::ArkValue<Opt_WordBreak>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    if (style.wordBreak) {
-        return Converter::ArkValue<Ark_WordBreak>(style.wordBreak.value());
-    }
-    return ret;
+    return Converter::ArkValue<Opt_WordBreak>(style.wordBreak);
 }
-Ark_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
+Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->span, {});
+    auto invalid = Converter::ArkValue<Opt_Union_Number_LeadingMarginPlaceholder>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    std::optional<NG::LeadingMargin>& leadingMargin = style.leadingMargin;
-    if (leadingMargin) {
-        return Converter::ArkUnion<Ark_Union_Number_LeadingMarginPlaceholder,
-            Ark_LeadingMarginPlaceholder>(*leadingMargin);
-    }
+    return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
+        Ark_LeadingMarginPlaceholder>(style.leadingMargin);
+}
+Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
+{
     return {};
 }
 } // ParagraphStyleAccessor
@@ -153,6 +144,7 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::GetOverflowImpl,
         ParagraphStyleAccessor::GetWordBreakImpl,
         ParagraphStyleAccessor::GetLeadingMarginImpl,
+        ParagraphStyleAccessor::GetParagraphSpacingImpl,
     };
     return &ParagraphStyleAccessorImpl;
 }

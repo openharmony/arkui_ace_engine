@@ -66,9 +66,16 @@ public:
 
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
+    void OnColorConfigurationUpdate() override;
+
     std::string DumpDividerColor();
   
     bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
     {
         return true;
     }

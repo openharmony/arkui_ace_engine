@@ -97,11 +97,12 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
         CHECK_NULL_VOID(container);
         auto isSubContainer = container->IsSubContainer();
         auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-        if (!expandDisplay && isSubContainer && dialogProperties.isShowInSubWindow) {
+        auto enableOpenSubwindowInSubwindow = expandDisplay || container->IsPcOrFreeMultiWindowCapability();
+        if (!enableOpenSubwindowInSubwindow && isSubContainer && dialogProperties.isShowInSubWindow) {
             TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
             return;
         }
-        if (isSubContainer && (!dialogProperties.isShowInSubWindow || expandDisplay)) {
+        if (isSubContainer && (!dialogProperties.isShowInSubWindow || enableOpenSubwindowInSubwindow)) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
             container = AceEngine::Get().GetContainer(currentId);
             if (!container) {

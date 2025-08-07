@@ -24,6 +24,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "base/geometry/ng/rect_t.h"
+#include "draw/color.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
@@ -559,7 +560,13 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         brush.SetColor(textStyle.GetTextColor().GetValue());
         txtStyle.foregroundBrush = brush;
     }
-    
+    if (textStyle.GetColorShaderStyle().has_value() && textStyle.GetStrokeWidth().Value() == DEFAULT_STROKE_WIDTH) {
+        RSBrush brush;
+        auto shaderEffect =
+            RSRecordingShaderEffect::CreateColorShader(textStyle.GetColorShaderStyle().value().GetValue());
+        brush.SetShaderEffect(shaderEffect);
+        txtStyle.foregroundBrush = brush;
+    }
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         Rosen::TextShadow txtShadow;
         txtShadow.color = spanShadow.GetColor().GetValue();
@@ -592,7 +599,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.fontFeatures = features;
     }
 
-    auto gradiantColor = textStyle.GetFontForegroudGradiantColor();
+    auto gradiantColor = textStyle.GetFontForegroudGradiantColor().value_or(FontForegroudGradiantColor());
     if (gradiantColor.IsValid()) {
         ConvertGradiantColor(textStyle, context, txtStyle, gradiantColor);
     }
@@ -624,7 +631,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
     if (gradient.GetType() == GradientType::LINEAR) {
         auto angle = gradient.GetLinearGradient().angle;
         if (angle.has_value()) {
-            retGradient.GetLinearGradient()->angle = CalcDimension(angle.value().Value());
+            retGradient.GetLinearGradient()->angle = CalcDimension(angle.value());
         }
         auto linearX = gradient.GetLinearGradient().linearX;
         if (linearX.has_value()) {
@@ -638,19 +645,19 @@ NG::Gradient ToGradient(const Gradient& gradient)
     if (gradient.GetType() == GradientType::RADIAL) {
         auto radialCenterX = gradient.GetRadialGradient().radialCenterX;
         if (radialCenterX.has_value()) {
-            retGradient.GetRadialGradient()->radialCenterX = CalcDimension(radialCenterX.value().Value());
+            retGradient.GetRadialGradient()->radialCenterX = CalcDimension(radialCenterX.value());
         }
         auto radialCenterY = gradient.GetRadialGradient().radialCenterY;
         if (radialCenterY.has_value()) {
-            retGradient.GetRadialGradient()->radialCenterY = CalcDimension(radialCenterY.value().Value());
+            retGradient.GetRadialGradient()->radialCenterY = CalcDimension(radialCenterY.value());
         }
         auto radialVerticalSize = gradient.GetRadialGradient().radialVerticalSize;
         if (radialVerticalSize.has_value()) {
-            retGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialVerticalSize.value().Value());
+            retGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient().radialHorizontalSize;
         if (radialVerticalSize.has_value()) {
-            retGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialHorizontalSize.value().Value());
+            retGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialHorizontalSize.value());
         }
     }
     retGradient.SetRepeat(gradient.GetRepeat());
@@ -667,7 +674,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
 
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle)
 {
-    if (!textStyle.GetGradient().has_value()) {
+    if (!textStyle.GetGradient().has_value() || textStyle.GetStrokeWidth().Value() != DEFAULT_STROKE_WIDTH) {
         return;
     }
     txtStyle.textStyleUid = static_cast<unsigned long>(textStyle.GetTextStyleUid());
@@ -684,6 +691,19 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
     txtStyle.foregroundBrush = brush;
 }
 
+Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>& intermediate)
+{
+    Rosen::SymbolColor symbolColor;
+    symbolColor.colorType = Rosen::SymbolColorType::GRADIENT_TYPE;
+    for (const auto& grad : intermediate) {
+        if (auto nativeGradient = CreateNativeGradient(grad)) {
+            symbolColor.gradients.push_back(nativeGradient);
+        }
+    }
+
+    return symbolColor;
+}
+
 void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
     if (!textStyle.isSymbolGlyph_) {
@@ -698,6 +718,13 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
     }
     txtStyle.symbol.SetRenderColor(symbolColors);
+
+    if (auto intermediateStyle = textStyle.GetShaderStyle(); !intermediateStyle.empty()) {
+        txtStyle.symbol.SetSymbolColor(ConvertToNativeSymbolColor(intermediateStyle));
+    }
+
+    txtStyle.symbol.SetSymbolShadow(ConvertToNativeSymbolShadow(textStyle.GetSymbolShadow()));
+
     if (textStyle.GetSymbolEffectOptions().has_value()) {
         auto options = textStyle.GetSymbolEffectOptions().value();
         auto effectType = options.GetEffectType();
@@ -784,5 +811,73 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, Rosen::PlaceholderSpan& t
 float GetVariableFontWeight(FontWeight fontWeight)
 {
     return (static_cast<int32_t>(ConvertTxtFontWeight(fontWeight)) + 1) * DEFAULT_MULTIPLE;
+}
+
+std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow)
+{
+    if (shadow.IsDefault()) {
+        return std::nullopt;
+    }
+    Rosen::SymbolShadow rosenShadow;
+
+    rosenShadow.color = ConvertSkColor(shadow.color);
+
+    rosenShadow.offset = Rosen::Drawing::Point(
+        shadow.offset.first,
+        shadow.offset.second);
+
+    rosenShadow.blurRadius = shadow.radius;
+
+    return rosenShadow;
+}
+
+std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad)
+{
+    switch (grad.type) {
+        case SymbolGradientType::COLOR_SHADER: {
+            auto gradient = std::make_shared<Rosen::SymbolGradient>();
+            gradient->SetColors(ConvertColors(grad.symbolColor));
+            return gradient;
+        }
+        case SymbolGradientType::LINEAR_GRADIENT: {
+            auto gradient = std::make_shared<Rosen::SymbolLineGradient>(grad.angle.value_or(0.0f));
+            gradient->SetColors(ConvertColors(grad.symbolColor));
+            gradient->SetPositions(grad.symbolOpacities);
+            gradient->SetTileMode(grad.repeating ?
+                Rosen::Drawing::TileMode::REPEAT : Rosen::Drawing::TileMode::CLAMP);
+            return gradient;
+        }
+        case SymbolGradientType::RADIAL_GRADIENT: {
+            auto getCoord = [](const std::optional<Dimension>& dim) {
+                if (!dim) return Dimension(0.0).ConvertToPx();
+                return dim->Unit() == DimensionUnit::PERCENT ? dim->Value() : dim->ConvertToPx();
+            };
+            Rosen::Drawing::Point centerPt(
+                static_cast<float>(getCoord(grad.radialCenterX)),
+                static_cast<float>(getCoord(grad.radialCenterY))
+            );
+            auto gradient = std::make_shared<Rosen::SymbolRadialGradient>
+                            (centerPt, grad.radius.value_or(Dimension(0.0)).Value());
+            if (grad.radius.has_value() && grad.radius.value().Unit() != DimensionUnit::PERCENT) {
+                gradient->SetRadius(static_cast<float>(grad.radius.value().ConvertToPx()));
+            }
+            gradient->SetColors(ConvertColors(grad.symbolColor));
+            gradient->SetPositions(grad.symbolOpacities);
+            gradient->SetTileMode(grad.repeating ?
+                Rosen::Drawing::TileMode::REPEAT : Rosen::Drawing::TileMode::CLAMP);
+            return gradient;
+        }
+        default:
+            return nullptr;
+    }
+}
+
+std::vector<Rosen::Drawing::ColorQuad> ConvertColors(const std::vector<Color>& colors)
+{
+    std::vector<Rosen::Drawing::ColorQuad> symbolColors;
+    for (const auto& color : colors) {
+        symbolColors.emplace_back(ConvertSkColor(color));
+    }
+    return symbolColors;
 }
 } // namespace OHOS::Ace::Constants

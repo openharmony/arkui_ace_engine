@@ -34,11 +34,13 @@
 #include "base/log/ace_trace.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
@@ -152,7 +154,6 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     if (args[0]->IsString()) {
         src = args[0]->ToString();
     } else {
-        srcValid = ParseJsMedia(args[0], src);
         srcValid = ParseJsMedia(args[0], src, resObj);
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
@@ -181,7 +182,7 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::ALT, resObj);
     }
 }
@@ -503,11 +504,67 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     }
 }
 
+void ParseImageAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
+    const RefPtr<ResourceObject>& topLeftResObj, const RefPtr<ResourceObject>& topRightResObj,
+    const RefPtr<ResourceObject>& bottomLeftResObj, const RefPtr<ResourceObject>& bottomRightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (topLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusTopLeft = result;
+        };
+        borderRadius.AddResource("borderRadius.topLeft", topLeftResObj, std::move(updateFunc));
+    }
+    if (topRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusTopRight = result;
+        };
+        borderRadius.AddResource("borderRadius.topRight", topRightResObj, std::move(updateFunc));
+    }
+    if (bottomLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusBottomLeft = result;
+        };
+        borderRadius.AddResource("borderRadius.bottomLeft", bottomLeftResObj, std::move(updateFunc));
+    }
+    if (bottomRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+            borderRadius.radiusBottomRight = result;
+        };
+        borderRadius.AddResource("borderRadius.bottomRight", bottomRightResObj, std::move(updateFunc));
+    }
+}
+
+void SetImageBorderRadius(const CalcDimension& topLeft, const CalcDimension& topRight, const CalcDimension& bottomLeft,
+    const CalcDimension& bottomRight)
+{
+    ImageModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+}
+
 void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     CalcDimension borderRadius;
-    if (ParseJsDimensionVp(args, borderRadius)) {
-        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    RefPtr<ResourceObject> borderRadiusResObj;
+    if (ParseJsDimensionVp(args, borderRadius, borderRadiusResObj)) {
+        if (SystemProperties::ConfigChangePerform() && borderRadiusResObj) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusResObj);
+        } else {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, borderRadiusResObj);
+        }
         ImageModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
@@ -522,8 +579,28 @@ void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
                 GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
             return;
         }
-        ImageModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
-        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        if (SystemProperties::ConfigChangePerform()) {
+            NG::BorderRadiusProperty borderRadiusProperty;
+            RefPtr<ResourceObject> topLeftResObj;
+            RefPtr<ResourceObject> topRightResObj;
+            RefPtr<ResourceObject> bottomLeftResObj;
+            RefPtr<ResourceObject> bottomRightResObj;
+            GetBorderRadiusResObj("topLeft", object, topLeft, topLeftResObj);
+            GetBorderRadiusResObj("topRight", object, topRight, topRightResObj);
+            GetBorderRadiusResObj("bottomLeft", object, bottomLeft, bottomLeftResObj);
+            GetBorderRadiusResObj("bottomRight", object, bottomRight, bottomRightResObj);
+            borderRadiusProperty.radiusTopLeft = topLeft;
+            borderRadiusProperty.radiusTopRight = topRight;
+            borderRadiusProperty.radiusBottomLeft = bottomLeft;
+            borderRadiusProperty.radiusBottomRight = bottomRight;
+            borderRadiusProperty.multiValued = true;
+            ParseImageAllBorderRadiusesResObj(
+                borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
+            ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+        } else {
+            SetImageBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        }
     }
 }
 
@@ -580,6 +657,37 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     ParseResizableLattice(resizableObject);
 }
 
+void ApplySliceResource(ImageResizableSlice& sliceResult, const std::string& resKey,
+    const RefPtr<ResourceObject>& resObj, BorderImageDirection direction)
+{
+    if (resObj && SystemProperties::ConfigChangePerform()) {
+        sliceResult.AddResource(
+            resKey, resObj, [direction](const RefPtr<ResourceObject>& currentResObj, ImageResizableSlice& slice) {
+                CalcDimension dim;
+                ResizableOption resizableOption;
+                switch (direction) {
+                    case BorderImageDirection::LEFT:
+                        resizableOption = ResizableOption::LEFT;
+                        break;
+                    case BorderImageDirection::RIGHT:
+                        resizableOption = ResizableOption::RIGHT;
+                        break;
+                    case BorderImageDirection::TOP:
+                        resizableOption = ResizableOption::TOP;
+                        break;
+                    case BorderImageDirection::BOTTOM:
+                        resizableOption = ResizableOption::BOTTOM;
+                        break;
+                    default:
+                        return;
+                }
+                if (ResourceParseUtils::ParseResDimensionVpNG(currentResObj, dim) && dim.IsValid()) {
+                    slice.SetEdgeSlice(resizableOption, dim);
+                }
+            });
+    }
+}
+
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
 {
     // creatge a array has 4 elements for paresing sliceSize
@@ -589,28 +697,36 @@ void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableS
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i));
         CalcDimension sliceDimension;
-        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+        RefPtr<ResourceObject> resObj;
+        std::string resKey = "image.";
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
             continue;
         }
         if (!sliceDimension.IsValid()) {
             continue;
         }
-        switch (static_cast<BorderImageDirection>(i)) {
+        BorderImageDirection direction = static_cast<BorderImageDirection>(i);
+        switch (direction) {
             case BorderImageDirection::LEFT:
                 sliceResult.left = sliceDimension;
+                resKey += "left";
                 break;
             case BorderImageDirection::RIGHT:
                 sliceResult.right = sliceDimension;
+                resKey += "right";
                 break;
             case BorderImageDirection::TOP:
                 sliceResult.top = sliceDimension;
+                resKey += "top";
                 break;
             case BorderImageDirection::BOTTOM:
                 sliceResult.bottom = sliceDimension;
+                resKey += "bottom";
                 break;
             default:
                 break;
         }
+        ApplySliceResource(sliceResult, resKey, resObj, direction);
     }
     ImageModel::GetInstance()->SetResizableSlice(sliceResult);
 }
@@ -678,9 +794,12 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
         color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
+    // Fix the svg collision bug with the foreground color placeholder 0x00000001.
+    ViewAbstractModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
 
-    if (SystemProperties::ConfigChangePerform()&&resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::FILL_COLOR, resObj);
+        ImageModel::GetInstance()->SetImageFillSetByUser(!status);
     }
 }
 

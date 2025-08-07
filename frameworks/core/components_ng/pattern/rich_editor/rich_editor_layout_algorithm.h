@@ -106,15 +106,20 @@ private:
     std::unordered_map<KeyType, Iterator> cacheMap;
 };
 
+struct AISpanLayoutInfo {
+    const std::map<int32_t, AISpan>& aiSpanMap;
+    bool needShowAIDetect = false;
+};
+
 class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm {
     DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, MultipleParagraphLayoutAlgorithm);
 
 public:
     RichEditorLayoutAlgorithm() = delete;
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
-        LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
+        LRUMap<uint64_t, RefPtr<Paragraph>>* paraMapPtr,
         std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder,
-        const std::map<int32_t, AISpan>& aiSpanMap);
+        const AISpanLayoutInfo& aiSpanLayoutInfo);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -126,7 +131,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
 
-    const RectF& GetTextRect()
+    const std::optional<RectF>& GetTextRect()
     {
         return richTextRect_;
     }
@@ -179,10 +184,13 @@ private:
     void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth);
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
         std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph);
-    std::uintptr_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
+    inline uint64_t Hash(uint64_t hash, const RefPtr<SpanItem>& span);
+    uint64_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
     RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
         const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) override;
+    void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo);
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
+    void HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
@@ -193,22 +201,12 @@ private:
     std::list<RefPtr<SpanItem>> allSpans_;
     RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
-    RectF richTextRect_;
-    std::optional<TextStyle> typingTextStyle_;
-    LRUMap<std::uintptr_t, RefPtr<Paragraph>>* const paraMapPtr_;
+    std::optional<RectF> richTextRect_;
+    LRUMap<uint64_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;
     int32_t cacheHitCount_ = 0;
-    const std::function<void(const RefPtr<SpanItem>& span)> CLEAR_AI_EFFECT = [](const RefPtr<SpanItem>& span) {
-        CHECK_NULL_VOID(span && span->hasAISpanResult);
-        span->hasAISpanResult = false;
-        span->needReLayout = true;
-    };
-    const std::function<void(const RefPtr<SpanItem>& span)> ADD_AI_EFFECT = [](const RefPtr<SpanItem>& span) {
-        CHECK_NULL_VOID(span && !span->hasAISpanResult);
-        span->hasAISpanResult = true;
-        span->needReLayout = true;
-    };
+    std::unordered_set<uint64_t> paragraphKeySet_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

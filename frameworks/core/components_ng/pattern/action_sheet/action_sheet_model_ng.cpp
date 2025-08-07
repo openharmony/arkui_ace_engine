@@ -154,43 +154,40 @@ void ActionSheetModelNG::CreateWithOptionsResourceObj(const RefPtr<OHOS::Ace::NG
     const RefPtr<ResourceObject>& textColorResObj, ActionSheetType type)
 {
     CHECK_NULL_VOID(pattern);
-    if (textColorResObj) {
-        std::string key = "ActionSheetDialog" + DialogTypeStr(type);
-        auto&& updateFunc = [&](const RefPtr<ResourceObject>& textColorResObj) {
-            std::string color = pattern->GetResCacheMapByKey(key);
-            std::string result;
-            if (color.empty()) {
-                ResourceParseUtils::ParseResString(textColorResObj, result);
-                pattern->AddResCache(key, result);
-            } else {
-                result = color;
-            }
-            UpdateActionSheetType(pattern, type, result);
-        };
-        updateFunc(textColorResObj);
-        pattern->AddResObj(key, textColorResObj, std::move(updateFunc));
+    std::string key = "ActionSheetDialog" + DialogTypeStr(type);
+    if (!textColorResObj) {
+        pattern->RemoveResObj(key);
+        return;
     }
+    CHECK_NULL_VOID(textColorResObj);
+    auto&& updateFunc = [pattern, type](const RefPtr<ResourceObject>& textColorResObj) {
+        std::string result;
+        if (!ResourceParseUtils::ParseResString(textColorResObj, result)) {
+            return;
+        }
+        ActionSheetModelNG::UpdateActionSheetType(pattern, type, result);
+    };
+    updateFunc(textColorResObj);
+    pattern->AddResObj(key, textColorResObj, std::move(updateFunc));
 }
 
 void ActionSheetModelNG::CreateWithColorResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
     const RefPtr<ResourceObject>& textColorResObj, ActionSheetType type)
 {
     CHECK_NULL_VOID(pattern);
-    if (textColorResObj) {
-        std::string key = "ActionSheetDialog" + DialogTypeStr(type);
-        auto&& updateFunc = [&](const RefPtr<ResourceObject>& textColorResObj) {
-            std::string color = pattern->GetResCacheMapByKey(key);
-            Color result;
-            if (color.empty()) {
-                ResourceParseUtils::ParseResColor(textColorResObj, result);
-                pattern->AddResCache(key, result.ColorToString());
-            } else {
-                result = Color::ColorFromString(color);
-            }
-            UpdateActionSheetType(pattern, type, result.ColorToString());
-        };
-        updateFunc(textColorResObj);
-        pattern->AddResObj(key, textColorResObj, std::move(updateFunc));
+    std::string key = "ActionSheetDialog" + DialogTypeStr(type);
+    if (!textColorResObj) {
+        pattern->RemoveResObj(key);
+        return;
     }
+    auto&& updateFunc = [pattern, type](const RefPtr<ResourceObject>& textColorResObj) {
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(textColorResObj, result)) {
+            return;
+        }
+        ActionSheetModelNG::UpdateActionSheetType(pattern, type, result.ColorToString());
+    };
+    updateFunc(textColorResObj);
+    pattern->AddResObj(key, textColorResObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

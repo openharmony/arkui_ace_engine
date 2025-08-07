@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "ui/resource/resource_info.h"
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -71,6 +72,14 @@ constexpr double NUM_TWO = 2.0;
 const SizeF CHILD_FRAME_SIZE = SizeF(50.0, 50.0);
 constexpr Dimension FOCUSBGSIZE = 2.0_vp;
 const int32_t VERSION_TWELVE = 12;
+const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
+const SizeF TEST_SIZE_100_200 = SizeF(100.0f, 200.0f);
+const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+const SizeF TEST_SIZE_50 = SizeF(50.0f, 50.0f);
+const SizeF TEST_SIZE_60 = SizeF(60.0f, 60.0f);
+constexpr float TEST_WIDTH_50 = 50.0f;
+constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
 
 class RadioTestNg : public TestNG {
@@ -1154,7 +1163,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
     layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutProperty->calcLayoutConstraint_->selfIdealSize->Reset();
     layoutProperty->calcLayoutConstraint_->selfIdealSize->width_ = CalcLength(COMPONENT_WIDTH);
-    pattern->GetChildContentSize();
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    pattern->GetChildContentSize(theme);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
 }
@@ -1737,7 +1749,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest032, TestSize.Level1)
      * @tc.steps: step3. Get paint property
      * @tc.expected: Check the Radio property value
      */
-   
+
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     bool isChecked = false;
@@ -1773,7 +1785,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest033, TestSize.Level1)
      * @tc.steps: step3. Get paint property
      * @tc.expected: Check the Radio property value
      */
-   
+
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     bool isChecked = false;
@@ -1810,7 +1822,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest034, TestSize.Level1)
                 EXPECT_EQ(true, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -1844,7 +1856,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest035, TestSize.Level1)
                 EXPECT_EQ(false, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -1875,7 +1887,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest036, TestSize.Level1)
                 EXPECT_EQ(false, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -1908,7 +1920,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest037, TestSize.Level1)
                 EXPECT_EQ(false, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -2363,5 +2375,264 @@ HWTEST_F(RadioTestNg, RadioPatternTest052, TestSize.Level1)
     pattern->UpdateUncheckStatus(frameNode);
     EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: RadioCreateResetSetByUserTest001
+ * @tc.desc: Test RadioModelNG::Create resets *_SetByUser flags in RadioPaintProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioCreateResetSetByUserTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a radio button and retrieve its paint property.
+     * @tc.expected: step1. Frame node and paint property are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set all *_SetByUser flags to true.
+     * @tc.expected: step2. Flags are successfully set to true.
+     */
+    radioPaintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    radioPaintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    radioPaintProperty->UpdateRadioIndicatorColorSetByUser(true);
+
+    /**
+     * @tc.steps: step3. Create another radio button and check its paint property.
+     * @tc.expected: step3. All *_SetByUser flags are reset to false by Create().
+     */
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    radioModelNG.Create(NAME1, GROUP_NAME1, INDICATOR_TYPE_TICK);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+
+    auto radioPaintProperty2 = frameNode2->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty2, nullptr);
+
+    EXPECT_FALSE(radioPaintProperty2->HasRadioCheckedBackgroundColorSetByUser());
+    EXPECT_FALSE(radioPaintProperty2->HasRadioUncheckedBorderColorSetByUser());
+    EXPECT_FALSE(radioPaintProperty2->HasRadioIndicatorColorSetByUser());
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj001
+ * @tc.desc: Test RadioModelNG CreateWithColorResourceObj with different resource objects.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, CreateWithColorResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a radio button and retrieve its pattern.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set checked background color with null resource object.
+     * @tc.expected: step2. Color value is not set (nullopt).
+     */
+    radioModelNG.CreateWithColorResourceObj(nullptr, RadioColorType::CHECKED_BACKGROUND_COLOR);
+
+    auto paintProperty = pattern->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetRadioCheckedBackgroundColor();
+    EXPECT_FALSE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step3. Create valid color resource object and set checked background color.
+     * @tc.expected: step3. Color value is set to red (#FFFF0000).
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "#FFFF0000";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::COLOR);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    radioModelNG.SetCheckedBackgroundColor(Color::RED);
+    radioModelNG.CreateWithColorResourceObj(resObj, RadioColorType::CHECKED_BACKGROUND_COLOR);
+
+    colorRet = paintProperty->GetRadioCheckedBackgroundColor();
+    EXPECT_TRUE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step4. Add resource to cache and reload resources.
+     * @tc.expected: step4. Resource manager reloads without errors.
+     */
+    std::string key = "radio" + RadioModelNG::ColorTypeToString(RadioColorType::CHECKED_BACKGROUND_COLOR);
+    pattern->AddResCache(key, param.value.value());
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj002
+ * @tc.desc: Test RadioModelNG CreateWithColorResourceObj when resource object is not provided.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a radio button and retrieve its pattern.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set indicator color with null resource object.
+     * @tc.expected: step2. Indicator color value is not set (nullopt).
+     */
+    radioModelNG.CreateWithColorResourceObj(nullptr, RadioColorType::INDICATOR_COLOR);
+
+    auto paintProperty = pattern->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetRadioIndicatorColor();
+    EXPECT_FALSE(colorRet.has_value());
+}
+
+/**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: Test RadioModelNG ColorTypeToString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, ColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases for all RadioColorType values and an unknown value.
+     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
+     */
+    std::vector<std::pair<RadioColorType, std::string>> types = {
+        { RadioColorType::CHECKED_BACKGROUND_COLOR, "CheckedBackgroundColor" },
+        { RadioColorType::UNCHECKED_BORDER_COLOR, "UncheckedBorderColor" },
+        { RadioColorType::INDICATOR_COLOR, "IndicatorColor" },
+        { static_cast<RadioColorType>(999), "" }
+    };
+
+    /**
+     * @tc.steps: step2. Iterate through test cases and verify string conversion.
+     * @tc.expected: step2. All enum values are converted to their correct string representations.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = RadioModelNG::ColorTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: MeasureContentTest001
+ * @tc.desc: Test Radio MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, MeasureContentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_100.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = radioLayoutAlgorithm.MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
+ * @tc.name: LayoutPolicyIsMatchParentTest001
+ * @tc.desc: Test Radio LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call LayoutPolicyIsMatchParent function.
+     * @tc.expected: step1. ret is equal to TEST_SIZE_0.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF contentConstraint;
+    auto layoutPolicy = radioLayoutAlgorithm.GetLayoutPolicy(&layoutWrapper);
+    auto ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step2. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step2. ret is equal to TEST_SIZE_100.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+
+    /**
+     * @tc.steps: step3. set selfIdealSize.height_ to TEST_HEIGHT_60.
+     * @tc.expected: step3. ret is equal to TEST_SIZE_60.
+     */
+    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_60);
+
+    /**
+     * @tc.steps: step4. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step4. ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step5. set selfIdealSize.width_ to TEST_WIDTH_50.
+     * @tc.expected: step5. ret is equal to TEST_SIZE_50.
+     */
+    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_50);
+
+    /**
+     * @tc.steps: step6. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step6. ret is equal to TEST_SIZE_100.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
 }
 } // namespace OHOS::Ace::NG

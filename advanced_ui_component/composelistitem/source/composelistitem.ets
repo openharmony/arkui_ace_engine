@@ -1029,7 +1029,7 @@ struct OperateItemStruct {
       } else if (this.icon != null && this.text != null) {
         this.createText();
         this.createIcon({ icon: this.icon })
-      } else if (this.arrow != null && this.text == null) {
+      } else if (this.arrow != null && (this.text == null || this.text == '')) {
         this.createArrow();
       } else if (this.arrow != null && this.text != null) {
         this.createTextArrow();

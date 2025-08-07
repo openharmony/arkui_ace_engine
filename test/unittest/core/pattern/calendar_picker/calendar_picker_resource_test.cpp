@@ -20,11 +20,13 @@
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_system_properties.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/common/resource/resource_object.h"
@@ -35,7 +37,25 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace OHOS::Ace {
+std::unique_ptr<CalendarPickerModel> CalendarPickerModel::instance_ = nullptr;
+
+CalendarPickerModel* CalendarPickerModel::GetInstance()
+{
+    if (!instance_) {
+        if (!instance_) {
+            instance_.reset(new NG::CalendarPickerModelNG());
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double TEST_FONT_SIZE = 10.0;
+}
+
 class CalendarPickerResourceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -48,6 +68,7 @@ public:
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<PickerTheme> pickerThem_;
     RefPtr<ButtonTheme> buttonTheme_;
+    RefPtr<CalendarTheme> calendarTheme_;
 };
 
 void CalendarPickerResourceTest::SetUpTestCase()
@@ -68,6 +89,7 @@ void CalendarPickerResourceTest::SetUp()
     dialogTheme_ = AceType::MakeRefPtr<DialogTheme>();
     pickerThem_ = MockThemeDefault::GetPickerTheme();
     buttonTheme_ = AceType::MakeRefPtr<ButtonTheme>();
+    calendarTheme_ = AceType::MakeRefPtr<CalendarTheme>();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -95,6 +117,8 @@ RefPtr<Theme> CalendarPickerResourceTest::GetThemeByType(ThemeType type)
         return pickerThem_;
     } else if (type == ButtonTheme::TypeId()) {
         return buttonTheme_;
+    } else if (type == CalendarTheme::TypeId()) {
+        return calendarTheme_;
     } else {
         return nullptr;
     }
@@ -146,6 +170,92 @@ HWTEST_F(CalendarPickerResourceTest, CalendarPickerParseEdgeAlignResObj001, Test
     pattern->OnColorModeChange(0);
     offsetResult = CalendarPickerModelNG::GetEdgeOffset(Referenced::RawPtr(frameNode));
     EXPECT_EQ(offsetResult, offset);
+}
+
+/**
+ * @tc.name: CalendarPickerRemoveResObj001
+ * @tc.desc: Test CalendarPickerRemoveResObj function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerResourceTest, CalendarPickerRemoveResObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     */
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::GetInstance()->Create(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set CalendarPicker SetEdgeAlign.
+     */
+    NG::CalendarEdgeAlign alignType = NG::CalendarEdgeAlign::EDGE_ALIGN_END;
+    DimensionOffset offset(10.0_vp, 10.0_vp);
+    CalendarPickerModelNG::GetInstance()->SetEdgeAlign(alignType, offset);
+
+    /**
+     * @tc.steps: step3. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    auto& resMap = pattern->resourceMgr_->resMap_;
+
+    /**
+     * @tc.steps: step4. Call ParseEdgeAlignResObj to register the resourceObject callback function.
+     */
+    RefPtr<ResourceObject> dxResObj;
+    RefPtr<ResourceObject> dyResObj;
+    std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
+    CalendarPickerModelNG::GetInstance()->ParseEdgeAlignResObj(resArray);
+
+    /**
+     * @tc.steps: step5. Call CalendarPickerRemoveResObj to remove the resourceObject.
+     */
+    EXPECT_FALSE(resMap.find("CalendarPicker.EdgeAlign") == resMap.end());
+    CalendarPickerModelNG::GetInstance()->CalendarPickerRemoveResObj("CalendarPicker.EdgeAlign");
+    EXPECT_EQ(pattern->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextStyle001
+ * @tc.desc: Test DatePickerPattern UpdateTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerResourceTest, UpdateTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     */
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::GetInstance()->Create(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    CalendarPickerModelNG::GetInstance()->SetTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
 }
 
 } // namespace OHOS::Ace::NG

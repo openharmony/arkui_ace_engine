@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
 #include "core/components_ng/svg/parse/svg_constants.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,7 +51,7 @@ bool ConvertStringToFloat(const std::string& str, float& result)
 
 inline float DegreesToRadians(float degrees)
 {
-    return (degrees) * (M_PI / 180.0f);
+    return (degrees) * (ACE_PI / 180.0f);
 }
 
 const std::vector<float> luminanceMatrix_ = {

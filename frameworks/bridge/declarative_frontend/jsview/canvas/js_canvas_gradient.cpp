@@ -46,6 +46,7 @@ void JSCanvasGradient::JSBind(BindingTarget globalObj)
 // if the params is invalid, fill the shape with transparent
 void JSCanvasGradient::AddColorTransparent()
 {
+    CHECK_NULL_VOID(gradient_);
     isColorStopValid_ = false;
     gradient_->ClearColors();
     GradientColor color;
@@ -61,7 +62,7 @@ void JSCanvasGradient::AddColorStop(const JSCallbackInfo& info)
     if (!isColorStopValid_ && gradient_->GetColors().empty()) {
         isColorStopValid_ = true;
     }
-    if (!info[0]->IsNumber() || (!info[1]->IsString() && !info[1]->IsObject())) {
+    if (!isColorStopValid_ || !info[0]->IsNumber() || (!info[1]->IsString() && !info[1]->IsObject())) {
         return;
     }
     double offset = 0.0;

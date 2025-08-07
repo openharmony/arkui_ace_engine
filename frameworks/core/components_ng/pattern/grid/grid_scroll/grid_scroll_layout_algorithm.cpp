@@ -15,8 +15,9 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
-#include "base/log/log_wrapper.h"
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/feature_param.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -54,11 +55,28 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = info_.axis_;
     frameSize_ = CreateIdealSize(
         gridLayoutProperty->GetLayoutConstraint().value(), axis, gridLayoutProperty->GetMeasureType(), true);
+    auto layoutPolicy = gridLayoutProperty->GetLayoutPolicyProperty();
+    auto isMainWrap = false;
+    if (layoutPolicy.has_value()) {
+        auto isVertical = axis == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        if (isMainFix) {
+            frameSize_.SetMainSize(Infinity<float>(), axis);
+        }
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            gridLayoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        frameSize_.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+    }
     if (NearZero(GetMainAxisSize(frameSize_, axis))) {
         TAG_LOGW(AceLogTag::ACE_GRID, "size of main axis value is 0, please check");
         return;
     }
-    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis));
+    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis)) || isMainWrap;
+    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+                info_.targetIndex_.has_value() || !NearEqual(info_.currentOffset_, info_.prevOffset_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), frameSize_);
     info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
@@ -89,7 +107,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (gridLayoutProperty->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
         GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
     }
-
+    // update layout info.
+    info_.prevOffset_ = info_.currentOffset_;
     // update cache info.
     const int32_t cacheCnt =
         static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * crossCount_);
@@ -103,6 +122,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     info_.offsetEnd_ = moveToEndLineIndex_ > 0 ? (info_.endIndex_ + 1 >= info_.GetChildrenCount()) : info_.offsetEnd_;
 
     if (SystemProperties::GetGridCacheEnabled()) {
+        if (measureInNextFrame_) {
+            return;
+        }
         const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
         if (sync) {
             SyncPreload(
@@ -315,8 +337,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             offset += OffsetF(padding.left.value_or(0.0f), 0.0f);
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
-            const bool forceLayout =
-                info_.hasMultiLineItem_ || expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout();
+            const bool forceLayout = info_.hasMultiLineItem_ || expandSafeArea_ ||
+                                     wrapper->CheckNeedForceMeasureAndLayout() || wrapper->IsIgnoreOptsValid();
             if (!isCache && forceLayout) {
                 wrapper->Layout();
             } else {
@@ -520,6 +542,9 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
             info_.reachEnd_ = true;
             break;
         }
+        if (measureInNextFrame_) {
+            break;
+        }
     }
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
@@ -577,6 +602,9 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
             info_.lineHeightMap_[info_.startMainLineIndex_] = lineHeight;
             blankAtStart -= (lineHeight + mainGap_);
             fillNewLine = true;
+            if (measureInNextFrame_) {
+                break;
+            }
             continue;
         }
         info_.reachStart_ = true;
@@ -687,6 +715,10 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     // fill current line first
     FillCurrentLine(mainSize, crossSize, layoutWrapper);
 
+    if (measureInNextFrame_) {
+        return;
+    }
+
     if (GreatNotEqual(mainLength, mainSize)) {
         if (IsScrollToEndLine()) {
             TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
@@ -701,6 +733,10 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (GreatOrEqual(lineHeight, 0.0)) {
             mainLength += (lineHeight + mainGap_);
+            if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+                measureInNextFrame_ = true;
+                break;
+            }
             continue;
         }
         info_.reachEnd_ = true;
@@ -745,6 +781,10 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
             info_.endIndex_ = currentIndex;
             currentIndex++;
             doneFillCurrentLine = true;
+            if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+                measureInNextFrame_ = true;
+                break;
+            }
         }
         if (doneFillCurrentLine) {
             info_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
@@ -1121,7 +1161,8 @@ inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
 }
 } // namespace
 
-bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
+bool GridScrollLayoutAlgorithm::MeasureExistingLine(
+    int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning)
 {
     auto it = info_.gridMatrix_.find(line);
     if (it == info_.gridMatrix_.end() || info_.lineHeightMap_.find(line) == info_.lineHeightMap_.end()) {
@@ -1157,6 +1198,11 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
+        auto deltaHeight = info_.lineHeightMap_[line] - cellAveLength_;
+        if (Positive(deltaHeight) && isScrollableSpringMotionRunning) {
+            mainLength += deltaHeight;
+            info_.currentOffset_ = mainLength;
+        }
         info_.lineHeightMap_[line] = cellAveLength_;
         mainLength += cellAveLength_ + mainGap_;
     }
@@ -1176,8 +1222,13 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     bool runOutOfRecord = false;
     // Measure grid items row by row
     int32_t tempEndIndex = -1;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, runOutOfRecord);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, runOutOfRecord);
+    auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
     while (LessNotEqual(mainLength, mainSize)) {
-        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex)) {
+        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
         }
@@ -1425,6 +1476,10 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
             break;
         }
         addLine = true;
+        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+            measureInNextFrame_ = true;
+            break;
+        }
     }
     if (!addLine) {
         return;
@@ -1493,6 +1548,10 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             break;
         }
         if (currentIndex >= info_.GetChildrenCount()) {
+            if (currentIndex == 0) {
+                layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+                TAG_LOGW(ACE_GRID, "total item count is 0");
+            }
             break;
         }
         // Step1. Get wrapper of [GridItem]
@@ -1526,6 +1585,10 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         info_.endIndex_ = currentIndex;
         currentIndex++;
         doneFillLine = true;
+        if (!reverse && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+            measureInNextFrame_ = true;
+            break;
+        }
     }
 
     if (doneFillLine || info_.gridMatrix_.find(currentMainLineIndex_) != info_.gridMatrix_.end()) {
@@ -1662,6 +1725,7 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
         itemConstraint.percentReference = SizeF(itemConstraint.percentReference.Width(), heightPercentBase);
     }
     itemConstraint.maxSize = itemIdealSize;
+    itemConstraint.parentIdealSize.SetCrossSize(itemCrossSize, axis_);
     itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis_ == Axis::VERTICAL
                                                             ? OptionalSizeF(itemCrossSize, std::nullopt)
                                                             : OptionalSizeF(std::nullopt, itemCrossSize));
@@ -1770,7 +1834,7 @@ bool GridScrollLayoutAlgorithm::CheckNeedMeasure(
         return true;
     }
 
-    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout() || layoutWrapper->IsIgnoreOptsValid()) {
         return true;
     }
 
@@ -2030,7 +2094,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 // Step1. Get wrapper of [GridItem]
                 CHECK_NULL_RETURN(currentIndex < childrenCount, -1.0f);
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
-                if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
+                if (GridUtils::CheckNeedCacheLayout(itemWrapper)) {
                     for (uint32_t y = i; y < crossCount_ && currentIndex < childrenCount; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
@@ -2079,7 +2143,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
         }
         // Step1. Get wrapper of [GridItem]
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
-        if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
+        if (GridUtils::CheckNeedCacheLayout(itemWrapper)) {
             for (uint32_t x = i; x < crossCount_ && currentIndex < childrenCount; x++) {
                 predictBuildList_.emplace_back(currentIndex++);
             }
@@ -2254,7 +2318,14 @@ void GridScrollLayoutAlgorithm::SyncPreload(
         if (!MeasureExistingLine(line, len, endIdx)) {
             currentMainLineIndex_ = line - 1;
             FillCurrentLine(mainSize, crossSize, wrapper);
+            // avoid fill another line when current line is not full
+            if (measureInNextFrame_) {
+                break;
+            }
             FillNewLineBackward(crossSize, mainSize, wrapper, false);
+        }
+        if (measureInNextFrame_) {
+            break;
         }
     }
 }

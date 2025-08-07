@@ -21,7 +21,9 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_cited_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
@@ -137,6 +139,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("editMenuOptions", &JSSearch::EditMenuOptions);
     JSClass<JSSearch>::StaticMethod("strokeWidth", &JSSearch::SetStrokeWidth);
     JSClass<JSSearch>::StaticMethod("strokeColor", &JSSearch::SetStrokeColor);
+    JSClass<JSSearch>::StaticMethod("margin", &JSSearch::JsMargin);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -207,16 +210,22 @@ void JSSearch::Create(const JSCallbackInfo& info)
     std::optional<std::string> src;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal;
+    bool placeholderResult = false;
+    bool textResult = false;
+    std::u16string placeholder;
+    std::u16string text;
+    RefPtr<ResourceObject> placeholderObject;
+    RefPtr<ResourceObject> textObject;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
-        std::u16string placeholder;
         if (param->GetProperty("placeholder")->IsUndefined()) {
             tip = u"";
         }
-        if (ParseJsString(param->GetProperty("placeholder"), placeholder)) {
+        placeholderResult = ParseJsString(param->GetProperty("placeholder"), placeholder, placeholderObject);
+        if (placeholderResult) {
             tip = placeholder;
         }
-        std::u16string text;
+
         JSRef<JSVal> textValue = param->GetProperty("value");
         if (textValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
@@ -224,18 +233,21 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (changeEventVal->IsFunction()) {
                 textValue = valueObj->GetProperty("value");
             }
-            if (ParseJsString(textValue, text)) {
+            textResult = ParseJsString(textValue, text, textObject);
+            if (textResult) {
                 key = text;
             }
         } else if (param->GetProperty("$value")->IsFunction()) {
             changeEventVal = param->GetProperty("$value");
-            if (ParseJsString(textValue, text)) {
+            textResult = ParseJsString(textValue, text, textObject);
+            if (textResult) {
                 key = text;
             }
         } else if (param->HasProperty("value") && textValue->IsUndefined()) {
             key = u"";
         } else {
-            if (ParseJsString(textValue, text)) {
+            textResult = ParseJsString(textValue, text, textObject);
+            if (textResult) {
                 key = text;
             }
         }
@@ -257,6 +269,19 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("placeholder");
+        if (placeholderObject && placeholderResult) {
+            RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
+        }
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("text");
+        if (textObject && textResult) {
+            RegisterResource<std::u16string>("text", textObject, text);
+        }
+    }
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -265,9 +290,14 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("selectedBackgroundColor");
+    if (!ParseJsColor(info[0], selectedColor, resourceObject)) {
         SearchModel::GetInstance()->ResetSelectedBackgroundColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("selectedBackgroundColor", resourceObject, selectedColor);
     }
     // Alpha = 255 means opaque
     if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
@@ -303,54 +333,82 @@ void JSSearch::SetKey(const std::string& key)
     SearchModel::GetInstance()->UpdateInspectorId(key);
 }
 
+void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    Color fontColor = theme->GetSearchButtonTextColor();
+    if (info.Length() < 2 || !info[1]->IsObject()) { // 2 : args num
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
+        SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        return;
+    }
+    
+    auto param = JSRef<JSObject>::Cast(info[1]);
+    // set button font size, unit FP
+    auto fontSize = param->GetProperty("fontSize");
+    RefPtr<ResourceObject> fontSizeObject;
+    UnregisterResource("searchButtonFontSize");
+    CalcDimension size = theme->GetButtonFontSize();
+    if (ParseJsDimensionVpNG(fontSize, size, fontSizeObject) && size.Unit() != DimensionUnit::PERCENT &&
+        GreatOrEqual(size.Value(), 0.0)) {
+        ParseJsDimensionFp(fontSize, size, fontSizeObject);
+    } else {
+        size = theme->GetButtonFontSize();
+    }
+    if (SystemProperties::ConfigChangePerform() && fontSizeObject) {
+        RegisterResource<CalcDimension>("searchButtonFontSize", fontSizeObject, size);
+    }
+    SearchModel::GetInstance()->SetSearchButtonFontSize(size);
+    
+    auto fontColorProp = param->GetProperty("fontColor");
+    RefPtr<ResourceObject> colorObject;
+    if (fontColorProp->IsUndefined() || fontColorProp->IsNull() ||
+        !ParseJsColor(fontColorProp, fontColor, colorObject)) {
+        SearchModel::GetInstance()->ResetSearchButtonFontColor();
+    } else {
+        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+    }
+    if (SystemProperties::ConfigChangePerform() && fontSizeObject) {
+        RegisterResource<Color>("searchButtonFontColor", colorObject, fontColor);
+    } else {
+        UnregisterResource("searchButtonFontColor");
+    }
+
+    auto autoDisable = param->GetProperty("autoDisable");
+    if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+        SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+    } else {
+        SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
+    }
+}
+
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     std::string buttonValue = "";
+    UnregisterResource("searchButtonValue");
     if (info[0]->IsString()) {
         buttonValue = info[0]->ToString();
     } else {
-        ParseJsString(info[0], buttonValue);
+        RefPtr<ResourceObject> resourceObject;
+        ParseJsString(info[0], buttonValue, resourceObject);
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::string>("searchButtonValue", resourceObject, buttonValue);
+        }
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
-    // set font color
-    Color fontColor = theme->GetSearchButtonTextColor();
-    if (info[1]->IsObject()) {
-        auto param = JSRef<JSObject>::Cast(info[1]);
-
-        // set button font size, unit FP
-        auto fontSize = param->GetProperty("fontSize");
-        CalcDimension size = theme->GetButtonFontSize();
-        if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
-            GreatOrEqual(size.Value(), 0.0)) {
-            ParseJsDimensionFp(fontSize, size);
-        } else {
-            size = theme->GetButtonFontSize();
-        }
-        SearchModel::GetInstance()->SetSearchButtonFontSize(size);
-
-        auto fontColorProp = param->GetProperty("fontColor");
-        if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            SearchModel::GetInstance()->ResetSearchButtonFontColor();
-        } else {
-            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
-        }
-        
-        auto autoDisable = param->GetProperty("autoDisable");
-        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
-            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
-        } else {
-            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
-        }
-    } else {
-        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
-        SearchModel::GetInstance()->ResetSearchButtonFontColor();
-    }
+    SetSearchButtonOptions(info);
 }
 
 void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("searchIconSize");
+        UnregisterResource("searchButtonIconSrc");
+        UnregisterResource("searchIconColor");
+    }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
         SetSearchDefaultIcon();
         return;
@@ -399,31 +457,48 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
-    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
+    RefPtr<ResourceObject> sizeObject;
+    UnregisterResource("cancelButtonIconSize");
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() &&
+        ParseJsDimensionVpNG(iconSizeProp, iconSize, sizeObject)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconHeight();
         }
     } else {
         iconSize = theme->GetIconHeight();
     }
+    if (SystemProperties::ConfigChangePerform() && sizeObject) {
+        RegisterResource<CalcDimension>("cancelButtonIconSize", sizeObject, iconSize);
+    }
 
     // set icon src
     std::string iconSrc;
+    RefPtr<ResourceObject> srcObject;
+    UnregisterResource("cancelButtonIconSrc");
     auto iconSrcProp = iconParam->GetProperty("src");
-    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
+    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc, srcObject)) {
         iconSrc = "";
+    }
+    if (SystemProperties::ConfigChangePerform() && srcObject) {
+        RegisterResource<std::string>("cancelButtonIconSrc", srcObject, iconSrc);
     }
 
     // set icon color
     Color iconColor;
+    RefPtr<ResourceObject> colorObject;
+    UnregisterResource("cancelButtonIconColor");
     NG::IconOptions cancelIconOptions;
     auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
+        ParseJsColor(iconColorProp, iconColor, colorObject)) {
         SearchModel::GetInstance()->SetCancelIconColor(iconColor);
         cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
     } else {
         SearchModel::GetInstance()->ResetCancelIconColor();
         cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
+    }
+    if (SystemProperties::ConfigChangePerform() && colorObject) {
+        RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
     }
     SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
 }
@@ -456,33 +531,45 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     // set icon size
     CalcDimension size;
     auto sizeProp = param->GetProperty("size");
-    if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVpNG(sizeProp, size)) {
+    RefPtr<ResourceObject> sizeObject;
+    if (!sizeProp->IsUndefined() && !sizeProp->IsNull() &&
+        ParseJsDimensionVpNG(sizeProp, size, sizeObject)) {
         if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
             size = theme->GetIconHeight();
         }
     } else {
         size = theme->GetIconHeight();
     }
-
+    if (SystemProperties::ConfigChangePerform() && sizeObject) {
+        RegisterResource<CalcDimension>("searchIconSize", sizeObject, size);
+    }
     // set icon src
     std::string src;
+    RefPtr<ResourceObject> mediaObject;
     auto srcPathProp = param->GetProperty("src");
-    if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
+    if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src, mediaObject)) {
         src = "";
+    }
+    if (SystemProperties::ConfigChangePerform() && mediaObject) {
+        RegisterResource<std::string>("searchButtonIconSrc", mediaObject, src);
     }
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
     // set icon color
     Color colorVal;
+    RefPtr<ResourceObject> colorObject;
     NG::IconOptions searchIconOptions;
     auto colorProp = param->GetProperty("color");
-    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
+    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal, colorObject)) {
         SearchModel::GetInstance()->SetSearchIconColor(colorVal);
         searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
     } else {
         SearchModel::GetInstance()->ResetSearchIconColor();
         searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
+    }
+    if (SystemProperties::ConfigChangePerform() && colorObject) {
+        RegisterResource<Color>("searchIconColor", colorObject, colorVal);
     }
     SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
@@ -554,9 +641,14 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
 
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
-    if (!ParseJsColor(value, colorVal)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("fontColor");
+    if (!ParseJsColor(value, colorVal, resourceObject)) {
         SearchModel::GetInstance()->ResetTextColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("fontColor", resourceObject, colorVal);
     }
     SearchModel::GetInstance()->SetTextColor(colorVal);
 }
@@ -584,17 +676,29 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         // set caret width
         CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
         auto caretWidthProp = param->GetProperty("width");
-        if (!ParseJsDimensionVpNG(caretWidthProp, caretWidth, false) || LessNotEqual(caretWidth.Value(), 0.0)) {
+        RefPtr<ResourceObject> widthObject;
+        UnregisterResource("caretWidth");
+        if (!ParseJsDimensionVpNG(caretWidthProp, caretWidth, widthObject, false) ||
+            LessNotEqual(caretWidth.Value(), 0.0)) {
             caretWidth = textFieldTheme->GetCursorWidth();
+        }
+        if (SystemProperties::ConfigChangePerform() && widthObject) {
+            RegisterResource<CalcDimension>("caretWidth", widthObject, caretWidth);
         }
         SearchModel::GetInstance()->SetCaretWidth(caretWidth);
 
         // set caret color
         Color caretColor;
+        RefPtr<ResourceObject> colorObject;
+        UnregisterResource("caretColor");
         auto caretColorProp = param->GetProperty("color");
-        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() ||
+            !ParseJsColor(caretColorProp, caretColor, colorObject)) {
             SearchModel::GetInstance()->ResetCaretColor();
             return;
+        }
+        if (SystemProperties::ConfigChangePerform() && widthObject) {
+            RegisterResource<Color>("caretColor", colorObject, caretColor);
         }
         SearchModel::GetInstance()->SetCaretColor(caretColor);
     }
@@ -609,12 +713,21 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
     auto errInfo = info[1];
     std::string inputFilter;
     if (tmpInfo->IsUndefined()) {
+        UnregisterResource("inputFilter");
         SearchModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
         return;
     }
-    if (!ParseJsString(tmpInfo, inputFilter)) {
+
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsString(tmpInfo, inputFilter, resourceObject)) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<std::string>("inputFilter", resourceObject, inputFilter);
+    } else {
+        UnregisterResource("inputFilter");
+    }
+
     if (!CheckRegexValid(inputFilter)) {
         inputFilter = "";
     }
@@ -644,8 +757,13 @@ void JSSearch::SetOnEditChange(const JSCallbackInfo& info)
 void JSSearch::SetTextIndent(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionVpNG(info[0], value, true)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("textIndent");
+    if (!ParseJsDimensionVpNG(info[0], value, resourceObject, true)) {
         value.Reset();
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("textIndent", resourceObject, value);
     }
     SearchModel::GetInstance()->SetTextIndent(value);
 }
@@ -654,9 +772,14 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
-    if (!ParseJsColor(value, colorVal)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("placeholderColor");
+    if (!ParseJsColor(value, colorVal, resourceObject)) {
         SearchModel::GetInstance()->ResetPlaceholderColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("placeholderColor", resourceObject, colorVal);
     }
     SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
 }
@@ -672,20 +795,27 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("placeholderFontSize");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = themeFontSize;
     } else {
         auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
         CalcDimension size;
-        if ((versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size)) &&
+        if ((versionTenOrLarger ?
+            ParseJsDimensionVpNG(fontSize, size, resourceObject) :
+            ParseJsDimensionVp(fontSize, size, resourceObject)) &&
             size.Unit() != DimensionUnit::PERCENT) {
-            ParseJsDimensionFp(fontSize, size);
+            ParseJsDimensionFp(fontSize, size, resourceObject);
             font.fontSize = size;
         } else {
             font.fontSize = themeFontSize;
         }
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<CalcDimension>("placeholderFontSize", resourceObject, size);
+        }
     }
-
+    
     auto weight = param->GetProperty("weight");
     if (!weight->IsNull()) {
         std::string weightVal;
@@ -727,13 +857,18 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = param->GetProperty("size");
     CalcDimension size = themeFontSize;
-    if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("fontSize");
+    if (ParseJsDimensionVpNG(fontSize, size, resourceObject) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
-        ParseJsDimensionFp(fontSize, size);
+        ParseJsDimensionFp(fontSize, size, resourceObject);
     } else {
         size = themeFontSize;
     }
     font.fontSize = size;
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("fontSize", resourceObject, size);
+    }
 
     auto weight = param->GetProperty("weight");
     if (!weight->IsNull()) {
@@ -791,7 +926,7 @@ void JSSearch::JsBorder(const JSCallbackInfo& info)
 
     auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
     if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius);
+        JSViewAbstract::ParseBorderRadius(valueRadius);
         SearchModel::GetInstance()->SetBackBorderRadius();
     }
     // use default value when undefined.
@@ -1281,41 +1416,47 @@ void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 
 void JSSearch::SetDecoration(const JSCallbackInfo& info)
 {
-    do {
-        auto tmpInfo = info[0];
-        if (!tmpInfo->IsObject()) {
-            SearchModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
-            SearchModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
-            SearchModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
-            break;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
-        JSRef<JSVal> typeValue = obj->GetProperty("type");
-        JSRef<JSVal> colorValue = obj->GetProperty("color");
-        JSRef<JSVal> styleValue = obj->GetProperty("style");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsObject()) {
+        SearchModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+        SearchModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+        SearchModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+    JSRef<JSVal> typeValue = obj->GetProperty("type");
+    JSRef<JSVal> colorValue = obj->GetProperty("color");
+    JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<SearchTheme>();
-        CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextDecoration();
-        if (typeValue->IsNumber()) {
-            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
-        }
-        Color result = theme->GetTextStyle().GetTextDecorationColor();
-        ParseJsColor(colorValue, result, Color::BLACK);
-        std::optional<TextDecorationStyle> textDecorationStyle;
-        if (styleValue->IsNumber()) {
-            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    TextDecoration textDecoration = theme->GetTextDecoration();
+    if (typeValue->IsNumber()) {
+        textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    }
+    Color result = theme->GetTextStyle().GetTextDecorationColor();
+    RefPtr<ResourceObject> resourceObject;
+    auto ret = ParseJsColor(colorValue, result, Color::BLACK, resourceObject);
+    if (ret && SystemProperties::ConfigChangePerform()) {
+        if (resourceObject) {
+            RegisterResource<Color>("decorationColor", resourceObject, result);
         } else {
-            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
+            UnregisterResource("decorationColor");
         }
-        SearchModel::GetInstance()->SetTextDecoration(textDecoration);
-        SearchModel::GetInstance()->SetTextDecorationColor(result);
-        if (textDecorationStyle) {
-            SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-        }
-    } while (false);
+    }
+    std::optional<TextDecorationStyle> textDecorationStyle;
+    if (styleValue->IsNumber()) {
+        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
+    }
+    SearchModel::GetInstance()->SetTextDecoration(textDecoration);
+    SearchModel::GetInstance()->SetTextDecorationColor(result);
+    if (textDecorationStyle) {
+        SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
 }
 
 void JSSearch::SetMinFontSize(const JSCallbackInfo& info)
@@ -1324,9 +1465,14 @@ void JSSearch::SetMinFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension minFontSize;
-    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("minFontSize");
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, resourceObject, false)) {
         SearchModel::GetInstance()->SetAdaptMinFontSize(CalcDimension());
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("minFontSize", resourceObject, minFontSize);
     }
     if (minFontSize.IsNegative()) {
         minFontSize = CalcDimension();
@@ -1344,10 +1490,16 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
-    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("maxFontSize");
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, resourceObject, false)) {
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
         SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("maxFontSize", resourceObject, maxFontSize);
     }
     if (maxFontSize.IsNegative()) {
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
@@ -1358,8 +1510,14 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
 void JSSearch::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale = 0.0;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resourceObject)) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<float>("minFontScale", resourceObject, minFontScale);
+    } else {
+        UnregisterResource("minFontScale");
     }
     if (LessOrEqual(minFontScale, 0.0f)) {
         SearchModel::GetInstance()->SetMinFontScale(0.0f);
@@ -1375,8 +1533,14 @@ void JSSearch::SetMinFontScale(const JSCallbackInfo& info)
 void JSSearch::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale = 0.0;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resourceObject)) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<float>("maxFontScale", resourceObject, maxFontScale);
+    } else {
+        UnregisterResource("maxFontScale");
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         SearchModel::GetInstance()->SetMaxFontScale(1.0f);
@@ -1388,10 +1552,15 @@ void JSSearch::SetMaxFontScale(const JSCallbackInfo& info)
 void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDimensionFpNG(info[0], value, resourceObject, false)) {
         value.Reset();
         SearchModel::GetInstance()->SetLetterSpacing(value);
+        UnregisterResource("letterSpacing");
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("letterSpacing", resourceObject, value);
     }
     SearchModel::GetInstance()->SetLetterSpacing(value);
 }
@@ -1399,10 +1568,15 @@ void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
 void JSSearch::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFpNG(info[0], value)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDimensionFpNG(info[0], value, resourceObject)) {
         value.Reset();
         SearchModel::GetInstance()->SetLineHeight(value);
+        UnregisterResource("lineHeight");
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("lineHeight", resourceObject, value);
     }
     if (value.IsNegative()) {
         value.Reset();
@@ -1584,5 +1758,20 @@ void JSSearch::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     }
     NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
     NG::SearchModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+}
+
+void JSSearch::UnregisterResource(const std::string& key)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+}
+
+void JSSearch::JsMargin(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsMargin(info);
+    SearchModel::GetInstance()->SetUserMargin();
 }
 } // namespace OHOS::Ace::Framework

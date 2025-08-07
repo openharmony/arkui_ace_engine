@@ -33,6 +33,11 @@ public:
     void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
+    void SetSymbolShadow(const SymbolShadow& symbolShadow) override;
+    void SetShaderStyle(const std::vector<SymbolGradient>& style) override;
+
+    void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+        const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr) override;
 
     void SetFontFamilies(std::vector<std::string>& familyNames) override;
     void SetSymbolType(SymbolType value) override;
@@ -52,6 +57,10 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,
         const std::int16_t isTxtActiveSource);
+    static void SetSymbolShadow(FrameNode* frameNode, const SymbolShadow& symbolShadow);
+    static void SetShaderStyle(FrameNode* frameNode, const std::vector<SymbolGradient>& style);
+    static void RegisterSymbolFontColorResource(FrameNode* frameNode, const std::string& key,
+        std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
 };
 } // namespace OHOS::Ace::NG
 

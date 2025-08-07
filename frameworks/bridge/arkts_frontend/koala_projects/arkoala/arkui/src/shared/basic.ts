@@ -106,11 +106,6 @@ export function parseDimension(dimension: Length, unit: ArkUIAPIDimensionUnit = 
         return new GeoLength(dimension, unit);
     } else if (typeof dimension === "string") {
         // TODO: think about it
-        // withString(dimension, str => {
-        //     withFloat32Array(parseDimensionBuffer, Access.WRITE, out => {
-        //         nativeModule()._ParseDimension(str, out);
-        //     })
-        // })
         let unit = parseDimensionBuffer[1];
         let value = parseDimensionBuffer[0];
         if (unit != -1) {

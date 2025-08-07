@@ -115,8 +115,6 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    UINode* GetChildAfter(UINode* node);
-    UINode* GetChildBefore(UINode* node);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     bool RemoveChildSilently(const RefPtr<UINode>& child);
@@ -143,7 +141,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
+    void DetachFromMainTree(bool recursive = false, bool needCheckThreadSafeNodeTree = false);
     virtual void FireCustomDisappear();
     // Traverse downwards to update system environment variables.
     void UpdateConfigurationUpdate();
@@ -189,7 +187,7 @@ public:
     }
 
     // Return children for get inspector tree calling, return cache children directly
-    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const
     {
         return children_;
     }
@@ -223,12 +221,15 @@ public:
         return parent_.Upgrade();
     }
 
+    RefPtr<UINode> GetAncestor() const;
+
     void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
     {
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
     virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
+    void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
     // performance.
@@ -249,10 +250,11 @@ public:
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
+    void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
+    bool DumpTreeByComponentName(const std::string& name);
 
     const std::string& GetTag() const
     {
@@ -574,6 +576,20 @@ public:
             nodeInfo_->codeCol = col;
         }
     }
+    void SetFilePath(const std::string& sources)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->pagePath = sources;
+        }
+    }
+
+    std::string GetFilePath() const
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->pagePath;
+        }
+        return "";
+    }
     void SetForeachItem()
     {
         if (nodeInfo_) {
@@ -633,7 +649,22 @@ public:
     NodeStatus GetNodeStatus() const;
     void UpdateNodeStatus(NodeStatus nodeStatus);
     void SetIsRootBuilderNode(bool isRootBuilderNode);
+    void SetJsBuilderNodeId(int32_t jsBuilderNodeId)
+    {
+        jsBuilderNodeId_ = jsBuilderNodeId;
+    }
+
+    int32_t GetJsBuilderNodeId() const
+    {
+        return jsBuilderNodeId_;
+    }
+
     bool GetIsRootBuilderNode() const;
+    void SetNodeAdapter(bool enable)
+    {
+        isNodeAdapter_ = enable;
+    }
+    
 
     bool IsArkTsFrameNode() const
     {
@@ -782,7 +813,7 @@ public:
     virtual void FireOnNodeDestroyCallback()
     {
         CHECK_NULL_VOID(destroyCallback_);
-        destroyCallback_(GetId());
+        destroyCallback_(nodeId_);
     }
 
     bool IsAllowAddChildBelowModalUec() const
@@ -1037,27 +1068,14 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
-    bool IsFreeNode() const
+    bool IsThreadSafeNode() const
     {
-        return isFreeNode_;
+        return isThreadSafeNode_;
     }
 
-    bool IsFreeState() const
+    bool IsFree() const
     {
-        return isFreeState_;
-    }
-
-    bool IsFreeNodeTree()
-    {
-        if (!IsFreeNode()) {
-            return false;
-        }
-        for (const auto& child : GetChildren()) {
-            if (!child->IsFreeNodeTree()) {
-                return false;
-            }
-        }
-        return true;
+        return isFree_;
     }
 
     void PostAfterAttachMainTreeTask(std::function<void()>&& task)
@@ -1067,6 +1085,8 @@ public:
         }
         afterAttachMainTreeTasks_.emplace_back(std::move(task));
     }
+
+    void FindTopNavDestination(RefPtr<FrameNode>& result);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -1098,7 +1118,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
@@ -1152,6 +1172,17 @@ protected:
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
     const static std::set<std::string> layoutTags_;
+    std::string tag_ = "UINode";
+    int32_t depth_ = Infinity<int32_t>();
+    int32_t hostRootId_ = 0;
+    int32_t hostPageId_ = 0;
+    int32_t nodeId_ = 0;
+    int32_t jsBuilderNodeId_ = -1;
+    int64_t accessibilityId_ = -1;
+    int32_t layoutPriority_ = 0;
+    int32_t rootNodeId_ = 0; // host is Page or NavDestination
+    int32_t themeScopeId_ = 0;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -1177,26 +1208,19 @@ private:
         }
         afterAttachMainTreeTasks_.clear();
     }
+    bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
-    WeakPtr<UINode> parent_;
-    std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
-    int32_t hostRootId_ = 0;
-    int32_t hostPageId_ = 0;
-    int32_t nodeId_ = 0;
-    int64_t accessibilityId_ = -1;
-    int32_t layoutPriority_ = 0;
-    int32_t rootNodeId_ = 0; // host is Page or NavDestination
-    int32_t themeScopeId_ = 0;
+    WeakPtr<UINode> parent_; // maybe wrong when not on the tree
+    WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     bool isRoot_ = false;
     bool onMainTree_ = false;
-    bool isFreeNode_ = false;
-    bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
+    bool isThreadSafeNode_ = false;
+    bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
@@ -1214,6 +1238,7 @@ private:
     int32_t instanceId_ = -1;
     int32_t apiVersion_ = 0;
     uint32_t nodeFlag_ { 0 };
+    bool isNodeAdapter_ = false;
 
     int32_t restoreId_ = -1;
 

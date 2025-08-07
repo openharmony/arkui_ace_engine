@@ -41,7 +41,7 @@ void FolderStackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     if (!isIntoFolderStack_) {
         auto childLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        if (childLayoutProperty->GetPositionProperty()) {
+        if (childLayoutProperty && childLayoutProperty->GetPositionProperty()) {
             childLayoutProperty->GetPositionProperty()->UpdateAlignment(align);
         }
         StackLayoutAlgorithm::Layout(layoutWrapper);
@@ -56,8 +56,10 @@ void FolderStackLayoutAlgorithm::LayoutHoverStack(LayoutWrapper* layoutWrapper,
 {
     auto folderStackGeometryNode = layoutWrapper->GetGeometryNode();
     auto size = folderStackGeometryNode->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
@@ -92,7 +94,9 @@ void FolderStackLayoutAlgorithm::LayoutControlPartsStack(LayoutWrapper* layoutWr
     const RefPtr<FolderStackGroupNode>& hostNode, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty)
 {
     auto folderStackGeometryNode = layoutWrapper->GetGeometryNode();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
@@ -174,13 +178,17 @@ void FolderStackLayoutAlgorithm::MeasureControlPartsStack(LayoutWrapper* layoutW
     CHECK_NULL_VOID(controlPartsWrapper);
     auto constraint = foldStackLayoutProperty->CreateChildConstraint();
     constraint.selfIdealSize = OptionalSizeF(size.Width(), preControlPartsStackHeight_);
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     PaddingProperty controlPartsPadding;
     controlPartsPadding.left = CalcLength(padding.left.value_or(0));
     controlPartsPadding.right = CalcLength(padding.right.value_or(0));
     controlPartsPadding.top = CalcLength(padding.top.value_or(0));
     controlPartsPadding.bottom = CalcLength(padding.bottom.value_or(0));
-    controlPartsWrapper->GetLayoutProperty()->UpdatePadding(controlPartsPadding);
+    const auto& controlPartsLayoutProperty = controlPartsWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(controlPartsLayoutProperty);
+    controlPartsLayoutProperty->UpdatePadding(controlPartsPadding);
     controlPartsWrapper->Measure(constraint);
 }
 
@@ -217,7 +225,9 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
     CHECK_NULL_RETURN(host, false);
     auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parent, false);
-    auto padding = parent->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& parentLayoutProperty = parent->GetLayoutProperty();
+    CHECK_NULL_RETURN(parentLayoutProperty, false);
+    auto padding = parentLayoutProperty->CreatePaddingAndBorder();
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowManager = pipeline->GetWindowManager();
@@ -344,7 +354,10 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
     auto controlPartsWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(controlPartsWrapper);
-    controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
+    const auto& controlPartsLayoutProperty = controlPartsWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(controlPartsLayoutProperty);
+    controlPartsLayoutProperty->UpdatePadding(padding);
+    MatchParentWhenChildrenMatch(layoutWrapper, controlPartsWrapper);
     StackLayoutAlgorithm::Measure(layoutWrapper);
     auto hoverNode = hostNode->GetHoverNode();
     CHECK_NULL_VOID(hoverNode);
@@ -355,4 +368,19 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
 }
 
+
+void FolderStackLayoutAlgorithm::MatchParentWhenChildrenMatch(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& controlPartsLayoutWrapper)
+{
+    for (auto&& child : controlPartsLayoutWrapper->GetAllChildrenWithBuild()) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+            const auto& controlPartsLayoutProperty = controlPartsLayoutWrapper->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(controlPartsLayoutProperty);
+            controlPartsLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -23,7 +23,7 @@
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
-enum class JsResourceType {
+enum class PatternLockResourceType {
     SELECTEDCOLOR,
     PATHCOLOR,
     ACTIVECOLOR,
@@ -41,19 +41,25 @@ public:
     virtual void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete);
     virtual void SetDotConnect(std::function<void(int32_t)>&& onDotConnect);
     virtual void SetSelectedColor(const Color& selectedColor);
+    virtual void SetSelectedColorByUser(bool isByuserSet);
     virtual void SetAutoReset(bool isAutoReset);
     virtual void SetPathColor(const Color& pathColor);
+    virtual void SetPathColorByUser(bool isByuserSet);
     virtual void SetActiveColor(const Color& activeColor);
+    virtual void SetActiveColorByUser(bool isByuserSet);
     virtual void SetRegularColor(const Color& regularColor);
+    virtual void SetRegularColorByUser(bool isByuserSet);
     virtual void SetCircleRadius(const Dimension& radius);
     virtual void SetSideLength(const Dimension& sideLength);
     virtual void SetStrokeWidth(const Dimension& lineWidth);
     virtual void SetActiveCircleColor(const Color& activeCircleColor);
+    virtual void SetActiveCircleColorByUser(bool isByuserSet);
     virtual void SetActiveCircleRadius(const Dimension& activeCircleRadius);
     virtual void SetEnableWaveEffect(bool enableWaveEffect);
     virtual void SetEnableForeground(bool enableForeground);
     virtual void SetSkipUnselectedPoint(bool isSkipUnselectedPoint);
-    virtual void CreateWithResourceObj(JsResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
+    virtual void CreateWithResourceObj(
+        PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resObj);
 
 private:
     static std::unique_ptr<PatternLockModel> instance_;

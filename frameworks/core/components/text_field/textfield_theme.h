@@ -253,6 +253,7 @@ public:
             }
             theme->autoFillIconPrimaryColor_ = pattern->GetAttr<Color>("auto_fill_icon_primary_color", Color());
             theme->autoFillIconEmphasizeColor_ = pattern->GetAttr<Color>("auto_fill_icon_emphasize_color", Color());
+            theme->counterContent_ = pattern->GetAttr<std::string>("textfield_counter_content", "");
         }
     };
 
@@ -874,6 +875,11 @@ public:
         return autoFillIconSize_;
     }
 
+    const std::string& GetCounterContent() const
+    {
+        return counterContent_;
+    }
+
 protected:
     TextFieldTheme() = default;
     TextStyle textStyle_;
@@ -1024,6 +1030,7 @@ private:
     Color autoFillIconPrimaryColor_;
     Color autoFillIconEmphasizeColor_;
     Dimension autoFillIconSize_ = 24.0_vp;
+    std::string counterContent_;
 };
 
 } // namespace OHOS::Ace

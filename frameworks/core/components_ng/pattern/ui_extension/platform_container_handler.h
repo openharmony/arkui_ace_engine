@@ -43,6 +43,8 @@ public:
 
     void UpdateAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
 
+    void GetHostFocusWindowSceneCloseKeyboard(const std::function<void(bool)>& getKeyCallback) override;
+
     virtual void OnAccessibilityParentRectInfoUpdate() {};
 
 private:

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 constexpr float PROGRESS_MAX_VALUE = 100.f;
@@ -33,14 +33,15 @@ auto g_setLinearStyle = [](FrameNode* frameNode, const Ark_LinearStyleOptions& o
     auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
-    ProgressModelNG::SetStrokeWidth(frameNode, strokeWidth);
+    ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
     // enableScanEffect
-    ProgressModelNG::SetLinearSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
+    ProgressModelStatic::SetLinearSweepingEffect(frameNode,
+        Converter::OptConvert<bool>(options.enableScanEffect));
     // strokeRadius
     auto strokeRadius = Converter::OptConvert<Dimension>(options.strokeRadius);
     Validator::ValidatePositive(strokeRadius);
     Validator::ValidateNonPercent(strokeRadius);
-    ProgressModelNG::SetStrokeRadius(frameNode, strokeRadius);
+    ProgressModelStatic::SetStrokeRadius(frameNode, strokeRadius);
 };
 
 auto g_setRingStyle = [](FrameNode* frameNode, const Ark_RingStyleOptions& options) {
@@ -48,13 +49,13 @@ auto g_setRingStyle = [](FrameNode* frameNode, const Ark_RingStyleOptions& optio
     auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
-    ProgressModelNG::SetStrokeWidth(frameNode, strokeWidth);
+    ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
     // shadow
-    ProgressModelNG::SetPaintShadow(frameNode, Converter::OptConvert<bool>(options.shadow));
+    ProgressModelStatic::SetPaintShadow(frameNode, Converter::OptConvert<bool>(options.shadow));
     // enableScanEffect
-    ProgressModelNG::SetRingSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
+    ProgressModelStatic::SetRingSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
     // status
-    ProgressModelNG::SetProgressStatus(frameNode, Converter::OptConvert<ProgressStatus>(options.status));
+    ProgressModelStatic::SetProgressStatus(frameNode, Converter::OptConvert<ProgressStatus>(options.status));
 };
 
 auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions& options) {
@@ -62,29 +63,29 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
     auto borderWidth = Converter::OptConvert<Dimension>(options.borderWidth);
     Validator::ValidatePositive(borderWidth);
     Validator::ValidateNonPercent(borderWidth);
-    ProgressModelNG::SetBorderWidth(frameNode, borderWidth);
+    ProgressModelStatic::SetBorderWidth(frameNode, borderWidth);
     // borderColor
-    ProgressModelNG::SetBorderColor(frameNode, Converter::OptConvert<Color>(options.borderColor));
+    ProgressModelStatic::SetBorderColor(frameNode, Converter::OptConvert<Color>(options.borderColor));
     // enableScanEffect
-    ProgressModelNG::SetSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
+    ProgressModelStatic::SetSweepingEffect(frameNode, Converter::OptConvert<bool>(options.enableScanEffect));
     // showDefaultPercentage
-    ProgressModelNG::SetShowText(frameNode, Converter::OptConvert<bool>(options.showDefaultPercentage));
+    ProgressModelStatic::SetShowText(frameNode, Converter::OptConvert<bool>(options.showDefaultPercentage));
     // content
-    ProgressModelNG::SetText(frameNode, Converter::OptConvert<std::string>(options.content));
+    ProgressModelStatic::SetText(frameNode, Converter::OptConvert<std::string>(options.content));
     // fontColor
-    ProgressModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(options.fontColor));
+    ProgressModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(options.fontColor));
     // font
     auto font = Converter::OptConvert<Font>(options.font);
     if (font.has_value()) {
-        ProgressModelNG::SetFontSize(frameNode, font.value().fontSize);
-        ProgressModelNG::SetFontWeight(frameNode, font.value().fontWeight);
-        ProgressModelNG::SetItalicFontStyle(frameNode, font.value().fontStyle);
-        ProgressModelNG::SetFontFamily(frameNode, font.value().fontFamilies);
+        ProgressModelStatic::SetFontSize(frameNode, font.value().fontSize);
+        ProgressModelStatic::SetFontWeight(frameNode, font.value().fontWeight);
+        ProgressModelStatic::SetItalicFontStyle(frameNode, font.value().fontStyle);
+        ProgressModelStatic::SetFontFamily(frameNode, font.value().fontFamilies);
     } else {
-        ProgressModelNG::SetFontSize(frameNode, std::nullopt);
-        ProgressModelNG::SetFontWeight(frameNode, std::nullopt);
-        ProgressModelNG::SetItalicFontStyle(frameNode, std::nullopt);
-        ProgressModelNG::SetFontFamily(frameNode, std::nullopt);
+        ProgressModelStatic::SetFontSize(frameNode, std::nullopt);
+        ProgressModelStatic::SetFontWeight(frameNode, std::nullopt);
+        ProgressModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
+        ProgressModelStatic::SetFontFamily(frameNode, std::nullopt);
     }
 };
 
@@ -93,20 +94,20 @@ auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOption
     auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
-    ProgressModelNG::SetStrokeWidth(frameNode, strokeWidth);
+    ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
     // scaleCount
     auto scaleCount = Converter::OptConvert<int32_t>(options.scaleCount);
     Validator::ValidateGreatOrEqual(scaleCount, 1);
-    ProgressModelNG::SetScaleCount(frameNode, scaleCount);
+    ProgressModelStatic::SetScaleCount(frameNode, scaleCount);
     // scaleWidth
     auto scaleWidth = Converter::OptConvert<Dimension>(options.scaleWidth);
     Validator::ValidatePositive(scaleWidth);
     Validator::ValidateNonPercent(scaleWidth);
-    ProgressModelNG::SetScaleWidth(frameNode, scaleWidth);
+    ProgressModelStatic::SetScaleWidth(frameNode, scaleWidth);
     // enableSmoothEffect
-    ProgressModelNG::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
+    ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
 };
-} // namespace OHOS::Ace::NG
+} // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -135,23 +136,12 @@ template<>
 void AssignCast(std::optional<ProgressType>& dst, const Ark_ProgressType& src)
 {
     switch (src) {
-        case ARK_PROGRESS_TYPE_LINEAR:
-            dst = ProgressType::LINEAR;
-            break;
-        case ARK_PROGRESS_TYPE_RING:
-            dst = ProgressType::RING;
-            break;
-        case ARK_PROGRESS_TYPE_ECLIPSE:
-            dst = ProgressType::MOON;
-            break;
-        case ARK_PROGRESS_TYPE_SCALE_RING:
-            dst = ProgressType::SCALE;
-            break;
-        case ARK_PROGRESS_TYPE_CAPSULE:
-            dst = ProgressType::CAPSULE;
-            break;
-        default:
-            LOGE("Unexpected enum value in Ark_ProgressType: %{public}d", src);
+        case ARK_PROGRESS_TYPE_LINEAR: dst = ProgressType::LINEAR; break;
+        case ARK_PROGRESS_TYPE_RING: dst = ProgressType::RING; break;
+        case ARK_PROGRESS_TYPE_ECLIPSE: dst = ProgressType::MOON; break;
+        case ARK_PROGRESS_TYPE_SCALE_RING: dst = ProgressType::SCALE; break;
+        case ARK_PROGRESS_TYPE_CAPSULE: dst = ProgressType::CAPSULE; break;
+        default: LOGE("Unexpected enum value in Ark_ProgressType: %{public}d", src);
     }
 }
 
@@ -159,23 +149,12 @@ template<>
 void AssignCast(std::optional<ProgressType>& dst, const Ark_ProgressStyle& src)
 {
     switch (src) {
-        case ARK_PROGRESS_STYLE_LINEAR:
-            dst = ProgressType::LINEAR;
-            break;
-        case ARK_PROGRESS_STYLE_RING:
-            dst = ProgressType::RING;
-            break;
-        case ARK_PROGRESS_STYLE_ECLIPSE:
-            dst = ProgressType::MOON;
-            break;
-        case ARK_PROGRESS_STYLE_SCALE_RING:
-            dst = ProgressType::SCALE;
-            break;
-        case ARK_PROGRESS_STYLE_CAPSULE:
-            dst = ProgressType::CAPSULE;
-            break;
-        default:
-            LOGE("Unexpected enum value in Ark_ProgressStyle: %{public}d", src);
+        case ARK_PROGRESS_STYLE_LINEAR: dst = ProgressType::LINEAR; break;
+        case ARK_PROGRESS_STYLE_RING: dst = ProgressType::RING; break;
+        case ARK_PROGRESS_STYLE_ECLIPSE: dst = ProgressType::MOON; break;
+        case ARK_PROGRESS_STYLE_SCALE_RING: dst = ProgressType::SCALE; break;
+        case ARK_PROGRESS_STYLE_CAPSULE: dst = ProgressType::CAPSULE; break;
+        default: LOGE("Unexpected enum value in Ark_ProgressStyle: %{public}d", src);
     }
 }
 
@@ -183,32 +162,29 @@ template<>
 void AssignCast(std::optional<ProgressStatus>& dst, const Ark_ProgressStatus& src)
 {
     switch (src) {
-        case ARK_PROGRESS_STATUS_LOADING:
-            dst = ProgressStatus::LOADING;
-            break;
-        case ARK_PROGRESS_STATUS_PROGRESSING:
-            dst = ProgressStatus::PROGRESSING;
-            break;
-        default:
-            LOGE("Unexpected enum value in Ark_ProgressStatus: %{public}d", src);
+        case ARK_PROGRESS_STATUS_LOADING: dst = ProgressStatus::LOADING; break;
+        case ARK_PROGRESS_STATUS_PROGRESSING: dst = ProgressStatus::PROGRESSING; break;
+        default: LOGE("Unexpected enum value in Ark_ProgressStatus: %{public}d", src);
     }
 }
-} // namespace OHOS::Ace::NG::Converter
+} // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
     auto frameNode = ProgressModelNG::CreateFrameNode(id, 0, 100, NG::ProgressType::LINEAR);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // namespace ProgressModifier
+} // ProgressModifier
 namespace ProgressInterfaceModifier {
-void SetProgressOptionsImpl(Ark_NativePointer node, const Ark_ProgressOptions* options)
+void SetProgressOptionsImpl(Ark_NativePointer node,
+                            const Ark_ProgressOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto convValue = Converter::Convert<ProgressOptions>(*options);
@@ -216,23 +192,26 @@ void SetProgressOptionsImpl(Ark_NativePointer node, const Ark_ProgressOptions* o
     ProgressModelNG::SetValue(frameNode, convValue.value);
     ProgressModelNG::SetType(frameNode, convValue.type);
 }
-} // namespace ProgressInterfaceModifier
+} // ProgressInterfaceModifier
 namespace ProgressAttributeModifier {
-void ValueImpl(Ark_NativePointer node, const Ark_Number* value)
+void ValueImpl(Ark_NativePointer node,
+               const Opt_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = static_cast<double>(Converter::Convert<float>(*value));
-    ProgressModelNG::SetValue(frameNode, convValue);
+    auto convValue = Converter::OptConvert<double>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    ProgressModelNG::SetValue(frameNode, *convValue);
 }
-void ColorImpl(Ark_NativePointer node, const Ark_Union_ResourceColor_LinearGradient* value)
+void ColorImpl(Ark_NativePointer node,
+               const Opt_Union_ResourceColor_LinearGradient* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    Converter::VisitUnion(
-        *value,
+    Converter::VisitUnion(*value,
         [frameNode](const Ark_ResourceColor& resourceColor) {
             std::optional<Color> colorOpt = Converter::OptConvert<Color>(resourceColor);
             std::optional<Gradient> gradientOpt = std::nullopt;
@@ -248,44 +227,55 @@ void ColorImpl(Ark_NativePointer node, const Ark_Union_ResourceColor_LinearGradi
                 gradient.AddColor(beginSideColor);
                 gradientOpt = gradient;
             }
-            ProgressModelNG::SetGradientColor(frameNode, gradientOpt);
-            ProgressModelNG::SetColor(frameNode, colorOpt);
+            ProgressModelStatic::SetGradientColor(frameNode, gradientOpt);
+            ProgressModelStatic::SetColor(frameNode, colorOpt);
         },
         [frameNode](const Ark_LinearGradient& linearGradient) {
-            ProgressModelNG::SetGradientColor(frameNode, Converter::Convert<Gradient>(linearGradient));
+            ProgressModelStatic::SetGradientColor(frameNode, Converter::OptConvert<Gradient>(linearGradient));
         },
-        []() {});
+        // TODO: Reset value
+        []() {}
+    );
 }
 void StyleImpl(Ark_NativePointer node,
-    const Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
+               const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    Converter::VisitUnion(
-        *value, [frameNode](const Ark_LinearStyleOptions& options) { g_setLinearStyle(frameNode, options); },
-        [frameNode](const Ark_RingStyleOptions& options) { g_setRingStyle(frameNode, options); },
-        [frameNode](const Ark_CapsuleStyleOptions& options) { g_setCapsuleStyle(frameNode, options); },
-        [frameNode](const Ark_ProgressStyleOptions& options) { g_setProgressStyle(frameNode, options); }, []() {});
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_LinearStyleOptions& options) {
+            g_setLinearStyle(frameNode, options);
+        },
+        [frameNode](const Ark_RingStyleOptions& options) {
+            g_setRingStyle(frameNode, options);
+        },
+        [frameNode](const Ark_CapsuleStyleOptions& options) {
+            g_setCapsuleStyle(frameNode, options);
+        },
+        [frameNode](const Ark_ProgressStyleOptions& options) {
+            g_setProgressStyle(frameNode, options);
+        },
+        // TODO: Reset value
+        []() {}
+    );
 }
-void PrivacySensitiveImpl(Ark_NativePointer node, const Opt_Boolean* value)
+void PrivacySensitiveImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<bool>(*value);
-    ProgressModelNG::SetPrivacySensitive(frameNode, convValue);
+    ProgressModelStatic::SetPrivacySensitive(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* value)
+void ContentModifierImpl(Ark_NativePointer node,
+                         const Opt_ContentModifier* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    // auto convValue = Converter::OptConvert<type_name>(*value);
-    // ProgressModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA ProgressInterfaceModifier::ContentModifierImpl -> Method is not implemented.");
 }
-} // namespace ProgressAttributeModifier
+} // ProgressAttributeModifier
 const GENERATED_ArkUIProgressModifier* GetProgressModifier()
 {
     static const GENERATED_ArkUIProgressModifier ArkUIProgressModifierImpl {
@@ -300,4 +290,4 @@ const GENERATED_ArkUIProgressModifier* GetProgressModifier()
     return &ArkUIProgressModifierImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

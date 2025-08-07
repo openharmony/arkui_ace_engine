@@ -291,6 +291,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts102, TestS
     richEditorPattern->paragraphs_.minParagraphFontSize = style.GetFontSize().ConvertToPx();
     richEditorPattern->HandleSelect(CaretMoveIntent::Up);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+
+    // during move caret
+    richEditorPattern->floatingCaretState_.isFloatingCaretVisible = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = true;
+    richEditorPattern->HandleSelect(CaretMoveIntent::Up);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->moveCaretState_.isMoveCaret);
 }
 
 /**
@@ -356,6 +363,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts202, TestS
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 4);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextColor, std::nullopt);
     EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
 }
 
@@ -390,6 +398,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts203, TestS
     richEditorPattern->textSelector_.Update(4, 20);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextColor, std::nullopt);
     EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
 }
 
@@ -423,6 +432,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts204, TestS
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextColor, std::nullopt);
     EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
 }
 

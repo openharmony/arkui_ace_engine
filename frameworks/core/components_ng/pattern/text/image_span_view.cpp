@@ -31,22 +31,9 @@ void ImageSpanView::SetVerticalAlign(VerticalAlign verticalAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign);
 }
 
-void ImageSpanView::SetObjectFit(FrameNode* frameNode, const std::optional<ImageFit>& value)
+void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, frameNode);
-    }
-}
-
-void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, const std::optional<VerticalAlign>& verticalAlign)
-{
-    if (verticalAlign) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign, frameNode);
 }
 
 void ImageSpanView::SetBaselineOffset(const Dimension& value)
@@ -54,13 +41,9 @@ void ImageSpanView::SetBaselineOffset(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value);
 }
 
-void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value)
+void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
 }
 
 float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)
@@ -87,6 +70,25 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
         style.backgroundColor.has_value() || style.backgroundRadius.has_value());
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        styleValue.groupId = frameNode->GetId();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, styleValue, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+            styleValue.backgroundColor.has_value() || styleValue.backgroundRadius.has_value(), frameNode);
+        SpanNode::RequestTextFlushDirty(frameNode, true);
+    };
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
@@ -97,6 +99,25 @@ void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyl
         style.backgroundColor.has_value() || style.backgroundRadius.has_value(), frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto key = "textbackgroundStyle";
+    auto&& updateFunc = [style, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(style);
+        styleValue.ReloadResources();
+        styleValue.groupId = frameNode->GetId();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, styleValue, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+            styleValue.backgroundColor.has_value() || styleValue.backgroundRadius.has_value(), frameNode);
+        SpanNode::RequestTextFlushDirty(frameNode, true);
+    };
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ImageSpanView::Create()
@@ -131,16 +152,6 @@ ImageSourceInfo ImageSpanView::GetImageSpanSrc(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultImageSource);
     return layoutProperty->GetImageSourceInfo().value_or(defaultImageSource);
-}
-
-void ImageSpanView::SetImageSpanSrc(FrameNode* frameNode, const ImageSourceInfo& info)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, frameNode);
-    if (info.IsPixmap()) {
-        const auto& pattern = frameNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetSyncLoad(true);
-    }
 }
 
 ImageFit ImageSpanView::GetObjectFit(FrameNode* frameNode)

@@ -14,6 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("TextInputTest") {
+  module_name = "Component-Text"
+  module_output = ""
   type = "new"
   sources = [
     "text_area_base.cpp",
@@ -22,6 +24,7 @@ ace_unittest("TextInputTest") {
     "text_area_test.cpp",
     "text_area_test_two.cpp",
     "text_field_algorithm_test.cpp",
+    "text_field_auto_fill_controller_test.cpp",
     "text_field_content_modifier_test.cpp",
     "text_field_controller_test.cpp",
     "text_field_keyevent_test.cpp",
@@ -36,6 +39,7 @@ ace_unittest("TextInputTest") {
     "text_field_pattern_testnine.cpp",
     "text_field_pattern_testseven.cpp",
     "text_field_pattern_testsix.cpp",
+    "text_field_pattern_testten.cpp",
     "text_field_pattern_testthree.cpp",
     "text_field_pattern_testtwo.cpp",
     "text_input_area_model_test.cpp",
@@ -52,6 +56,7 @@ ace_unittest("TextInputTest") {
     "text_input_test.cpp",
     "text_input_update_test.cpp",
     "text_input_wordbreak_test.cpp",
+    "text_select_controller_test.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
   ]
   cflags = [ "-fno-access-control" ]

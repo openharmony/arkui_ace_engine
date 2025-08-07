@@ -37,6 +37,10 @@ RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 
 void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
+    if (!HasFocus()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -49,14 +53,8 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     TAG_LOGI(
         AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
     // If the developer wants to keep editing, editing will not stop
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        if (event.IsKeepEditable()) {
-            return;
-        }
-    } else {
-        if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
-            return;
-        }
+    if (event.IsKeepEditable()) {
+        return;
     }
     HandleCloseKeyboard(forceCloseKeyboard);
 }
@@ -70,7 +68,10 @@ void SearchTextFieldPattern::InitDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->SetDraggable(true);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(parentFrameNode);
+    auto draggable = parentFrameNode->IsDraggable() || !parentFrameNode->IsCustomerSet();
+    host->SetDraggable(draggable);
     TextFieldPattern::InitDragEvent();
 }
 
@@ -117,6 +118,7 @@ void SearchTextFieldPattern::ProcessSelection()
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
         SetIsSingleHandle(!IsSelected());
+        selectOverlay_->UpdateHandleColor();
         if (isTextChangedAtCreation_ && textWidth == 0) {
             CloseSelectOverlay();
             StartTwinkling();

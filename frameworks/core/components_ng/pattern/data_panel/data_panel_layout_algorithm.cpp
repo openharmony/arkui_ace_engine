@@ -19,6 +19,9 @@
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float ZERO_MEASURE_CONTENT_SIZE = 0.0f;
+}
 DataPanelLayoutAlgorithm::DataPanelLayoutAlgorithm() = default;
 
 void DataPanelLayoutAlgorithm::OnReset() {}
@@ -37,6 +40,12 @@ std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
             host->GetGeometryNode()->Reset();
         }
         return std::nullopt;
+    }
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        return SizeF(ZERO_MEASURE_CONTENT_SIZE, ZERO_MEASURE_CONTENT_SIZE);
     }
     // 1.If user set the width and height, use the selfIdealSize.
     if (contentConstraint.selfIdealSize.IsValid()) {

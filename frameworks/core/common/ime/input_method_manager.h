@@ -25,6 +25,8 @@ class InputMethodManager final {
 public:
     static InputMethodManager* GetInstance();
     void OnFocusNodeChange(const RefPtr<NG::FrameNode>& focusNode, FocusReason focusReason);
+    void ManageFocusNode(const RefPtr<NG::FrameNode>& focusNode, FocusReason focusReason,
+        bool saveKeyboard = false);
     void SetWindowFocus(bool windowFocus);
     bool NeedSoftKeyboard() const;
     // Close the keyboard in-process
@@ -53,6 +55,8 @@ private:
 
     std::optional<bool> windowFocus_;
     WeakPtr<NG::FrameNode> curFocusNode_;
+    bool isLastFocusUIExtension_ = false;
+    int32_t lastFocusNodeId_ = -1;
     bool lastKeep_ = false;
 };
 } // namespace OHOS::Ace

@@ -84,7 +84,7 @@ public:
     void FireOnRecycleFunc();
 
     void SetRecycleRenderFunc(std::function<void()>&& func);
-    void FireRecycleRenderFunc();
+    virtual void FireRecycleRenderFunc();
     bool HasRecycleRenderFunc();
 
     void FireClearAllRecycleFunc();
@@ -110,14 +110,18 @@ public:
     // called for PageTransition animation
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc);
     void CallPageTransitionFunction() const;
-        
+
     void SetClearAllRecycleFunc(std::function<void()>&& func);
+
+    void SetReuseId(const std::string& reuseId);
+    const std::string& GetReuseId() const;
 
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
     bool isV2_ = false;
     bool executeFireOnAppear_ = false;
+    std::string reuseId_;
 
 private:
     std::function<void()> updateFunc_;

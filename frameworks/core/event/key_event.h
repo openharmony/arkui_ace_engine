@@ -533,7 +533,7 @@ struct KeyEvent final : public NonPointerEvent {
     }
     bool IsShiftWith(KeyCode expectCodes) const
     {
-        return IsKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
+        return (HasKey(KeyCode::KEY_SHIFT_LEFT) || HasKey(KeyCode::KEY_SHIFT_RIGHT)) && HasKey(expectCodes);
     }
     bool IsExactlyShiftWith(KeyCode expectCodes) const
     {
@@ -594,6 +594,7 @@ struct KeyEvent final : public NonPointerEvent {
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
     std::optional<bool> activeMark;
+    int32_t targetDisplayId = 0;
 
     std::string ToString() const
     {
@@ -616,7 +617,7 @@ public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
         keyCode_ = event.code;
-        keyText_ = event.key.c_str();
+        keyText_ = event.key;
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
@@ -629,6 +630,7 @@ public:
         numLock_ = event.numLock;
         capsLock_ = event.enableCapsLock;
         scrollLock_ = event.scrollLock;
+        targetDisplayId_ = event.targetDisplayId;
     };
     ~KeyEventInfo() override = default;
 
@@ -640,7 +642,7 @@ public:
     {
         return keyCode_;
     }
-    const char* GetKeyText() const
+    const std::string& GetKeyText() const
     {
         return keyText_;
     }
@@ -686,7 +688,7 @@ public:
 
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
-    const char* keyText_ = "";
+    std::string keyText_ = "";
     KeyAction keyType_ = KeyAction::UNKNOWN;
     int32_t metaKey_ = 0;
     SourceType keySource_ = SourceType::NONE;

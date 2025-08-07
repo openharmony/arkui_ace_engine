@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1622,6 +1622,66 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg039, TestSize.Level1)
     EXPECT_EQ(onDidAppearFlag, true);
     EXPECT_EQ(onWillDisappearFlag, true);
     EXPECT_EQ(onDidDisappearFlag, true);
+}
+
+/**
+ * @tc.name: DialogModelTestNg040
+ * @tc.desc: Test AlertDialogModelNG's SetOnWillDismissRelease.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg040, TestSize.Level1)
+{
+    const std::function<void()> EMPTY_FUNC = nullptr;
+    /**
+     * @tc.steps: step1. Create DialogPattern instance
+     */
+    RefPtr<DialogTheme> dialogTheme;
+    RefPtr<UINode> customNode;
+    auto dialogPattern = AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode);
+
+    /**
+     * @tc.steps: step2. Call SetOnWillDismissRelease with empty function
+     * @tc.expected: The internal callback should be set to empty function
+     */
+    dialogPattern->SetOnWillDismissRelease(EMPTY_FUNC);
+    EXPECT_EQ(dialogPattern->onWillDismissRelease_, nullptr);
+}
+
+/**
+ * @tc.name: DialogModelTestNg041
+ * @tc.desc: Test AlertDialogModelNG's SetOnWillDismissRelease.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DialogPattern instance
+     */
+    RefPtr<DialogTheme> dialogTheme;
+    RefPtr<UINode> customNode;
+    auto dialogPattern = AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode);
+
+    /**
+     * @tc.steps: step2. Create a flag to check if callback is executed
+     */
+    bool isCalled = false;
+    auto callback = [&isCalled]() { isCalled = true; };
+
+    /**
+     * @tc.steps: step3. Call SetOnWillDismissRelease with non-empty function
+     * @tc.expected: The internal callback should be set properly
+     */
+    dialogPattern->SetOnWillDismissRelease(callback);
+    EXPECT_NE(dialogPattern->onWillDismissRelease_, nullptr);
+
+    /**
+     * @tc.steps: step4. Execute the callback and verify
+     * @tc.expected: The callback should be executed properly
+     */
+    if (dialogPattern->onWillDismissRelease_) {
+        dialogPattern->onWillDismissRelease_();
+    }
+    EXPECT_TRUE(isCalled);
 }
 
 /**

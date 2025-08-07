@@ -2242,4 +2242,62 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest019, TestSize.Level1)
     sum = textPickerPattern_->GetColumnWidthSumForFirstIndexColumns(1);
     EXPECT_FLOAT_EQ(sum, 0);
 }
+
+/**
+ * @tc.name: TextPickerPatternTest020
+ * @tc.desc: Test CalculateColumnSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest020, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+
+    int32_t index = 0;
+    float childCount = 1.0f;
+    SizeF pickerContentSize = SizeF(0.0f, 200.0f);
+    auto columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 0.0f);
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
+    textPickerPattern_->SetColumnWidths(width);
+    index = 1;
+    childCount = 2.0f;
+    pickerContentSize = SizeF(100.0f, 200.0f);
+    columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 90.0f);
+
+    textPickerPattern_->SetColumnWidths(width);
+    index = 1;
+    childCount = 1.0f;
+    pickerContentSize = SizeF(100.0f, 200.0f);
+    columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 0.0f);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest021
+ * @tc.desc: Test GetColumnWidthsStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest021, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+    auto columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
+    EXPECT_STREQ(columnWidthsStr.c_str(), "0.00px,0.00px");
+
+    auto host = textPickerPattern_->GetHost();
+    auto children = host->GetChildren();
+    for (auto iter = children.begin(); iter != children.end(); iter++) {
+        ASSERT_NE(*iter, nullptr);
+        auto stackNode = AceType::DynamicCast<FrameNode>(*iter);
+        host->RemoveChildAndReturnIndex(stackNode);
+    }
+    columnWidthsStr = textPickerPattern_->GetColumnWidthsStr();
+    EXPECT_STREQ(columnWidthsStr.c_str(), "");
+}
 } // namespace OHOS::Ace::NG

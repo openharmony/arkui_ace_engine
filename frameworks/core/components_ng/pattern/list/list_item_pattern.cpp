@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
@@ -46,10 +47,19 @@ constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 void ListItemPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread() by multi thread;
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
         SetListItemDefaultAttributes(host);
     }
+}
+
+void ListItemPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread() by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void ListItemPattern::OnColorConfigurationUpdate()
@@ -143,6 +153,25 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         pendingSwipeFunc_ = nullptr;
     }
     return false;
+}
+
+void ListItemPattern::OnRecycle()
+{
+    if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD) {
+        return;
+    }
+    FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+    if (springController_ && !springController_->IsStopped()) {
+        // clear stop listener before stop
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
+    startNodeSize_ = 0.0f;
+    endNodeSize_ = 0.0f;
+    float oldOffset = curOffset_;
+    curOffset_ = 0.0f;
+    FireSwipeActionOffsetChange(oldOffset, curOffset_);
+    MarkDirtyNode();
 }
 
 void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
@@ -674,7 +703,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
         }
         listItem->MarkDirtyNode();
         if (trigOnFinishEvent) {
-            listItem->FireOnFinshEvent();
+            listItem->FireOnFinishEvent();
         }
     });
 }
@@ -1388,9 +1417,8 @@ void ListItemPattern::HandleFocusEvent()
     pattern->SetFocusIndex(GetIndexInList());
     if (groupIndex >= 0) {
         pattern->SetGroupFocusIndex(groupIndex);
-        pattern->SetFocusIndexChangedByListItemGroup(true);
     } else {
-        pattern->SetFocusIndexChangedByListItemGroup(false);
+        pattern->ResetGroupFocusIndex();
     }
 }
 

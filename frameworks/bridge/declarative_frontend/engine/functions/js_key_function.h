@@ -28,7 +28,7 @@ public:
     explicit JsKeyFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsKeyFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

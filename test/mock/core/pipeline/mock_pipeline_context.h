@@ -33,10 +33,13 @@ public:
     static void TearDown();
     static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
-    void ResetFontManager();
     void SetRootSize(double rootWidth, double rootHeight);
     void SetInstanceId(int32_t instanceId);
     void SetContainerModalButtonsRect(bool hasModalButtonsRect);
+    void SetContainerCustomTitleVisible(bool visible);
+    void SetContainerControlButtonVisible(bool visible);
+    void SetContainerModalButtonsRect(RectF buttons);
+    void SetContainerModalTitleHeight(int32_t height);
 
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
     MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
@@ -77,7 +80,6 @@ public:
         }
         return false;
     }
-    void SetEnableSwipeBack(bool isEnable) {}
 
     void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
@@ -99,6 +101,16 @@ public:
         if (responseTime_ > 0 && responseTime_ != INT32_MAX) {
             responseTime_--;
         }
+    }
+
+    std::string GetCurrentPageNameCallback()
+    {
+        return "";
+    }
+
+    auto Get()
+    {
+        return this;
     }
 protected:
     float fontScale_ = 1.0f;

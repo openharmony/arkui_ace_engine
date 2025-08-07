@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { subMenuOne, subMenuTwo, subMenuThree, subMenuFive }  from './customMenu';
+import { subMenuOne, subMenuTwo, subMenuThree, subMenuFive } from './customMenu';
 
 @Builder
 export function bindContextMenuPreviewBottomBuilder(name: string, param: Object) {

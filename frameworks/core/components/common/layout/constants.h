@@ -387,6 +387,7 @@ enum class TextDataDetectType {
     EMAIL,
     ADDRESS,
     DATE_TIME,
+    ASK_CELIA, // ask Celia tag, not a valid ai entity
 };
 
 enum class LineBreakStrategy {
@@ -521,6 +522,11 @@ enum class TextHeightAdaptivePolicy {
     MAX_LINES_FIRST,
     MIN_FONT_SIZE_FIRST,
     LAYOUT_CONSTRAINT_FIRST,
+};
+
+enum class TextEffectStrategy {
+    NONE = 0,
+    FLIP,
 };
 
 enum class MarqueeDirection {

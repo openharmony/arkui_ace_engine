@@ -38,27 +38,4 @@ void FfiOHOSAceFrameworkPasteButtonCreateWithButtonOptions(int32_t icon, int32_t
 {
     PasteButtonModelNG::GetInstance()->Create(text, icon, buttonType, false);
 }
-
-void FfiOHOSAceFrameworkPasteButtonOnClick(void (*callback)(CJClickInfo event, int32_t result))
-{
-    auto lambda = [ffiOnClick = CJLambda::Create(callback)](const GestureEvent& info) -> void {
-        int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
-        auto secEventValue = info.GetSecCompHandleEvent();
-        if (secEventValue != nullptr) {
-            res = secEventValue->GetInt("handleRes", res);
-            if (res == static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
-                return;
-            }
-        }
-        CJClickInfo cjClickInfo {};
-        CJEventTarget cjEventTarget {};
-        CJArea cjArea {};
-        CJPosition cjPosition {};
-        CJPosition cjGlobalPosition {};
-        AssambleCJClickInfo(info, cjClickInfo, cjEventTarget, cjArea, cjPosition, cjGlobalPosition);
-        ffiOnClick(cjClickInfo, res);
-    };
-    double distanceThreshold = std::numeric_limits<double>::infinity();
-    NG::ViewAbstract::SetOnClick(std::move(lambda), distanceThreshold);
-}
 }

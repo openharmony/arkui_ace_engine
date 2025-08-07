@@ -19,6 +19,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -102,6 +103,7 @@ void GaugeModifier::InitProperty()
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
     indicatorChange_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIndicatorChangeValue(false));
+    gaugeUpdate_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     if (paintProperty->HasShadowOptions()) {
         GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
@@ -182,10 +184,13 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
         }
     }
 
-    if (paintProperty->GetIsShowIndicatorValue(false)) {
+    if (paintProperty->GetIsShowIndicatorValue(false) ||
+        (SystemProperties::ConfigChangePerform() && paintProperty->GetUseSpecialDefaultIndicatorValue(false))) {
         auto indicatorChange = indicatorChange_->Get();
         indicatorChange_->Set(!indicatorChange);
     }
+
+    gaugeUpdate_->Set(!gaugeUpdate_->Get());
 }
 
 
@@ -795,8 +800,8 @@ void GaugeModifier::DrawSegmentGradient(RSCanvas& canvas, RSBrush& brush, Render
             CHECK_NULL_VOID(theme);
             float space = data.radius * MIN_CIRCLE * theme->GetIntervalRatio();
             auto degree = info.lastStartDegree + info.lastSweepDegree;
-            clipPath2.AddCircle(data.center.GetX() + radius * std::cos((degree)*M_PI / HALF_CIRCLE),
-                data.center.GetY() + radius * std::sin((degree)*M_PI / HALF_CIRCLE),
+            clipPath2.AddCircle(data.center.GetX() + radius * std::cos((degree)*ACE_PI / HALF_CIRCLE),
+                data.center.GetY() + radius * std::sin((degree)*ACE_PI / HALF_CIRCLE),
                 (data.thickness * PERCENT_HALF + space));
             canvas.ClipPath(clipPath, RSClipOp::INTERSECT, true);
             canvas.ClipPath(clipPath2, RSClipOp::DIFFERENCE, true);
@@ -855,13 +860,13 @@ void GaugeModifier::DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float 
     CHECK_NULL_VOID(theme);
     float space = data.radius * MIN_CIRCLE * theme->GetIntervalRatio();
     RSPath path1;
-    path1.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                    data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
+    path1.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE),
+                    data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE),
                     data.thickness * PERCENT_HALF);
 
     RSPath path2;
-    path2.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                    data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
+    path2.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE),
+                    data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE),
                     (data.thickness * PERCENT_HALF + space));
 
     canvas.ClipPath(path2, RSClipOp::DIFFERENCE, true);
@@ -871,23 +876,24 @@ void GaugeModifier::DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float 
 
     float tempDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF + space);
     RSPath path4;
-    path4.MoveTo(data.center.GetX() + (data.radius) * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                 data.center.GetY() + (data.radius) * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE));
+    path4.MoveTo(
+        data.center.GetX() + (data.radius) * std::cos((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE),
+        data.center.GetY() + (data.radius) * std::sin((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE));
     path4.LineTo(
         data.center.GetX() + (data.radius - data.thickness) *
-            std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
+            std::cos((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE),
         data.center.GetY() + (data.radius - data.thickness) *
-            std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE));
+            std::sin((drawStartDegree - offsetDegree) * ACE_PI / HALF_CIRCLE));
     path4.LineTo(
         data.center.GetX() + (data.radius - data.thickness) *
-            std::cos((drawStartDegree - offsetDegree - tempDegree) * M_PI / HALF_CIRCLE),
+            std::cos((drawStartDegree - offsetDegree - tempDegree) * ACE_PI / HALF_CIRCLE),
         data.center.GetY() + (data.radius - data.thickness) *
-            std::sin((drawStartDegree - offsetDegree - tempDegree) * M_PI / HALF_CIRCLE));
+            std::sin((drawStartDegree - offsetDegree - tempDegree) * ACE_PI / HALF_CIRCLE));
     path4.LineTo(
         data.center.GetX() + (data.radius) *
-            std::cos((drawStartDegree - offsetDegree - tempDegree) * M_PI / HALF_CIRCLE),
+            std::cos((drawStartDegree - offsetDegree - tempDegree) * ACE_PI / HALF_CIRCLE),
         data.center.GetY() + (data.radius) *
-            std::sin((drawStartDegree - offsetDegree - tempDegree) * M_PI / HALF_CIRCLE));
+            std::sin((drawStartDegree - offsetDegree - tempDegree) * ACE_PI / HALF_CIRCLE));
 
     RSPath path5;
     path5.Op(path3, path4, RSPathOp::DIFFERENCE);
@@ -899,7 +905,7 @@ float GaugeModifier::GetOffsetDegree(RenderRingInfo& data, float oppositeSide)
 {
     return NearEqual(data.radius, data.thickness * PERCENT_HALF)
                ? ZERO_CIRCLE
-               : std::tan((oppositeSide) / (data.radius - data.thickness * PERCENT_HALF)) * HALF_CIRCLE / M_PI;
+               : std::tan((oppositeSide) / (data.radius - data.thickness * PERCENT_HALF)) * HALF_CIRCLE / ACE_PI;
 }
 
 void GaugeModifier::NewDrawIndicator(
@@ -1039,7 +1045,7 @@ void GaugeModifier::CreateDefaultTrianglePath(
 
 void GaugeModifier::GetDrawPath(RSPath& path, RenderRingInfo& data, float startAngle, float sweepAngle, bool isFirst)
 {
-    auto startRadian = M_PI * startAngle / HALF_CIRCLE;
+    auto startRadian = ACE_PI * startAngle / HALF_CIRCLE;
     RSPoint startPoint1(data.center.GetX() + (data.radius - data.thickness * PERCENT_HALF) * std::cos(startRadian) -
                             data.thickness * PERCENT_HALF,
         data.center.GetY() + (data.radius - data.thickness * PERCENT_HALF) * std::sin(startRadian) -
@@ -1061,7 +1067,7 @@ void GaugeModifier::GetDrawPath(RSPath& path, RenderRingInfo& data, float startA
     }
 
     auto endAngle = startAngle + sweepAngle;
-    auto endRadian = M_PI * endAngle / HALF_CIRCLE;
+    auto endRadian = ACE_PI * endAngle / HALF_CIRCLE;
     RSPoint endPoint1(data.center.GetX() + (data.radius - data.thickness * PERCENT_HALF) * std::cos(endRadian) -
                           data.thickness * PERCENT_HALF,
         data.center.GetY() + (data.radius - data.thickness * PERCENT_HALF) * std::sin(endRadian) -

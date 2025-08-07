@@ -313,7 +313,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemBackgroundColor(ArkUIR
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupItemBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupItemBackgroundColor(
@@ -352,7 +353,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetColor(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAlphabetIndexerColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlphabetIndexerColor(nativeNode, color.GetValue());
@@ -386,7 +388,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupColor(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupColor(nativeNode, color.GetValue());
@@ -424,7 +427,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedColor(ArkUIRuntimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAlphabetIndexerSelectedColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlphabetIndexerSelectedColor(
@@ -463,7 +467,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupBackground(ArkUIRuntimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupBackground(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupBackground(nativeNode, color.GetValue());
@@ -501,7 +506,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedBackgroundColor(ArkUIRu
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetSelectedBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setSelectedBackgroundColor(
@@ -540,7 +546,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupUnselectedColor(ArkUIRunti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupUnselectedColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupUnselectedColor(nativeNode, color.GetValue());
@@ -625,7 +632,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupSelectedColor(ArkUIRuntime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupSelectedColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupSelectedColor(nativeNode, color.GetValue());
@@ -897,7 +905,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupTitleBackground(ArkUIRunti
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupTitleBackground(nativeNode);
     } else {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setPopupTitleBackground(nativeNode, color.GetValue());

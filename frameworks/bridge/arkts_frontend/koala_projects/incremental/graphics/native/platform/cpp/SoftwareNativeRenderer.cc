@@ -40,7 +40,6 @@ private:
     bool makeSurface() {
         pixels = SkData::MakeUninitialized(width * height * 4);
         auto imageInfo = SkImageInfo::Make(width, height, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType);
-        //auto imageInfo = SkImageInfo::MakeN32(width, height, kUnpremul_SkAlphaType);
         colorType = imageInfo.colorType();
         drawSurface = SkSurfaces::WrapPixels(imageInfo, pixels->writable_data(), width * 4);
         return true;

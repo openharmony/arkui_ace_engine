@@ -2447,6 +2447,70 @@ HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Tlv012
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv012, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_TEXTSHADOW_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<Shadow> readShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(readShadows.empty());
+}
+
+/**
+ * @tc.name: Tlv013
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv013, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_FONTFAMILIES_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<std::string> vec = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(vec.empty());
+}
+
+
+/**
+ * @tc.name: Tlv014
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv014, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<TextDecoration> vec = TLVUtil::ReadTextDecorations(buffer, cursor);
+    EXPECT_TRUE(vec.empty());
+}
+
+/**
+ * @tc.name: Tlv015
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv015, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_FONTFEATURE_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::list<std::pair<std::string, int32_t>> list = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(list.empty());
+}
+
+/**
  * @tc.name: GetSpanResultObject001
  * @tc.desc: Test GetSpanResultObject
  * @tc.type: FUNC
@@ -2564,6 +2628,42 @@ HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
     buffer = decorationSpan2->ToString();
     EXPECT_FALSE(buffer.empty());
     EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+}
+
+/**
+ * @tc.name: TextLayoutTest001
+ * @tc.desc: Test new attribute of TextLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, TextLayoutTest001, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::START;
+    spanParagraphStyle.maxLines = 2;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(30);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanString->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+    auto firstSpans = spanString->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto paraSpans = spanString->GetSpans(0, 2, SpanType::ParagraphStyle);
+    EXPECT_EQ(paraSpans.size(), 1);
+    auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(paraSpans[0]);
+    EXPECT_NE(paraSpan, nullptr);
+    EXPECT_EQ(paraSpan->GetStartIndex(), 0);
+    EXPECT_EQ(paraSpan->GetEndIndex(), 1);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().align, TextAlign::START);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().maxLines, 2);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().wordBreak, WordBreak::BREAK_ALL);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textOverflow, TextOverflow::ELLIPSIS);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textIndent, Dimension(30));
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Width().ConvertToVp(), 25);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Height().ConvertToVp(), 26);
 }
 
 

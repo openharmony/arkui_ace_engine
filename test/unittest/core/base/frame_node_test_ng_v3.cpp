@@ -237,12 +237,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg100, TestSize.Level1)
     eventHub->SetGestureEventHub(gestureEventHub);
     frameNode->eventHub_ = eventHub;
     frameNode->CollectSelfAxisResult(globalPoint, localPoint, isConsumed, parentRevertPoint,
-            onAxisResult, isPreventBubbling, testResult, touchRestrict);
+            onAxisResult, isPreventBubbling, testResult, touchRestrict, false);
     EXPECT_EQ(testResult, HitTestResult::BUBBLING);
     gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
     isConsumed = false;
     frameNode->CollectSelfAxisResult(globalPoint, localPoint, isConsumed, parentRevertPoint,
-            onAxisResult, isPreventBubbling, testResult, touchRestrict);
+            onAxisResult, isPreventBubbling, testResult, touchRestrict, false);
     EXPECT_EQ(testResult, HitTestResult::STOP_BUBBLING);
 }
 
@@ -323,8 +323,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg103, TestSize.Level1)
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg104, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::CLICK, "");
+    frameNode->UpdateAccessibilityNodeRect();
+    EXPECT_NE(frameNode->renderContext_, nullptr);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
     frameNode->UpdateAccessibilityNodeRect();
     EXPECT_NE(frameNode->renderContext_, nullptr);
 }
@@ -371,6 +375,19 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg106, TestSize.Level1)
     frameNode->onMainTree_ = true;
     frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
     EXPECT_FALSE(frameNode->isWindowBoundary_);
+}
+
+/**
+ * @tc.name: GetGlobalPositionOnDisplay001
+ * @tc.desc: Test frame node method GetGlobalPositionOnDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetGlobalPositionOnDisplay001, TestSize.Level1)
+{
+    OffsetF Offset = { 0, 0 };
+    FRAME_NODE2->SetParent(FRAME_NODE3);
+    auto globalDisplayOffset = FRAME_NODE2->GetGlobalPositionOnDisplay();
+    EXPECT_EQ(globalDisplayOffset, Offset);
 }
 
 /**

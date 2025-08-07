@@ -24,7 +24,7 @@ void JSThemeColors::SetColors(const JSRef<JSArray>& colors)
         RefPtr<ResourceObject> resObj;
         Color value;
         JSViewAbstract::ParseJsColor(colors->GetValueAt(i), value, resObj);
-        if (resObj) {
+        if (resObj && colors->GetValueAt(i)->IsObject()) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colors->GetValueAt(i));
             JSViewAbstract::CompleteResourceObject(jsObj);
             resObj = JSViewAbstract::GetResourceObject(jsObj);

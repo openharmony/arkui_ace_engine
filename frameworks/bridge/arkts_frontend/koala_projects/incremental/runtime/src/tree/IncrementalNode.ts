@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { className, uint32 } from "@koalaui/common"
+import { className, KoalaCallsiteKey, uint32 } from "@koalaui/common"
 import { Disposable } from "../states/Disposable"
 import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
 
@@ -66,9 +66,10 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     /**
      * Reuse a scope from the pool.
      * @param reuseKey - The type of the scope to reuse.
+     * @param id - The id of the scope to reuse.
      * @returns A recycled scope, or undefined if none is available.
      */
-    reuse(reuseKey: string): Disposable | undefined {
+    reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         return undefined
     }
 
@@ -76,9 +77,10 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * Recycle a scope by adding it to the recycler pool for reuse.
      * @param scope - The scope to recycle.
      * @param reuseKey - The type of the scope (used as the key in the pool).
+     * @param id - The id of the scope to recycle.
      * @return true if child is successfully recycled
      */
-    recycle(reuseKey: string, child: Disposable): boolean {
+    recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
     }
 

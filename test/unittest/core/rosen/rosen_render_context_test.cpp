@@ -15,6 +15,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #define private public
 #define protected public
@@ -1099,6 +1100,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
     rosenRenderContext->PaintBackground();
     auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    rsColor.ConvertToP3ColorSpace();
     EXPECT_EQ(backgroundColorVal.GetRed(), rsColor.GetRed());
     EXPECT_EQ(backgroundColorVal.GetGreen(), rsColor.GetGreen());
     EXPECT_EQ(backgroundColorVal.GetBlue(), rsColor.GetBlue());
@@ -1215,20 +1217,23 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     auto rotationYUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto rotationZUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto cameraDistanceUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
-    rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::RSRotationXModifier>(rotationXUserModifier);
-    rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::RSRotationYModifier>(rotationYUserModifier);
-    rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::RSRotationModifier>(rotationZUserModifier);
-    rosenRenderContext->cameraDistanceUserModifier_ =
-        std::make_shared<Rosen::RSCameraDistanceModifier>(cameraDistanceUserModifier);
+    rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->rotationXUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::ROTATION_X, rotationXUserModifier);
+    rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->rotationYUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::ROTATION_Y, rotationYUserModifier);
+    rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->rotationZUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::ROTATION, rotationZUserModifier);
+    rosenRenderContext->cameraDistanceUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->cameraDistanceUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::CAMERA_DISTANCE, cameraDistanceUserModifier);
     rosenRenderContext->OnTransformRotateAngleUpdate({ rotateX, rotateY, rotateZ, perspective });
-    auto rotationXValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationXUserModifier_->GetProperty())->Get();
-    auto rotationYValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationYUserModifier_->GetProperty())->Get();
-    auto rotationZValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationZUserModifier_->GetProperty())->Get();
-    auto cameraDistanceValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->cameraDistanceUserModifier_->GetProperty()) ->Get();
+    auto rotationXValue = rosenRenderContext->rotationXUserModifier_->GetRotationX();
+    auto rotationYValue = rosenRenderContext->rotationYUserModifier_->GetRotationY();
+    auto rotationZValue = rosenRenderContext->rotationZUserModifier_->GetRotation();
+    auto cameraDistanceValue = rosenRenderContext->cameraDistanceUserModifier_->GetCameraDistance();
     EXPECT_EQ(rotationXValue, -rotateX);
     EXPECT_EQ(rotationYValue, -rotateY);
     EXPECT_EQ(rotationZValue, rotateZ);
@@ -1698,6 +1703,45 @@ HWTEST_F(RosenRenderContextTest, GetWithRange005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWithRange006
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    auto startNode = FrameNode::CreateFrameNode("startNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto endNode = FrameNode::CreateFrameNode("endNode", -1, AceType::MakeRefPtr<Pattern>());
+    NodeIdentity startID;
+    NodeIdentity endID;
+    bool isStartRect = true;
+    int32_t errorCode = -1;
+    ComponentSnapshot::JsCallback callback = [&errorCode](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    startID.first = "0";
+    endID.first = "endNode";
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+
+    errorCode = -1;
+    startID.first = "startNode";
+    endID.first = "0";
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
  * @tc.name: GetRangeIDNode001
  * @tc.desc: Test GetRangeIDNode Func.
  * @tc.type: FUNC
@@ -1813,6 +1857,32 @@ HWTEST_F(RosenRenderContextTest, GetRangeIDStr003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateBackgroundPixelMap001
+ * @tc.desc: Test CreateBackgroundPixelMap Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, CreateBackgroundPixelMap001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Call CreateBackgroundPixelMap function.
+     * @tc.expected: step1. The backgroundTaskId_ can be set correctly.
+     */
+    auto backgroundNode =
+        FrameNode::GetOrCreateFrameNode("background", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(backgroundNode, nullptr);
+    uint32_t backgroundTaskId = 1;
+    rosenRenderContext->backgroundTaskId_ = backgroundTaskId;
+    rosenRenderContext->CreateBackgroundPixelMap(backgroundNode);
+    EXPECT_EQ(rosenRenderContext->backgroundTaskId_, backgroundTaskId + 1);
+}
+
+/**
  * @tc.name: OnCustomBackgroundColorUpdate001
  * @tc.desc: Test OnCustomBackgroundColorUpdate Func.
  * @tc.type: FUNC
@@ -1873,52 +1943,6 @@ HWTEST_F(RosenRenderContextTest, OnBuilderBackgroundFlagUpdate001, TestSize.Leve
     rosenRenderContext->rsNode_ = nullptr;
     rosenRenderContext->OnBuilderBackgroundFlagUpdate(false);
     EXPECT_TRUE(transitionModifier->isBuilderBackground_);
-}
-
-/**
- * @tc.name: OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001
- * @tc.desc: Test OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate Func.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
-    ASSERT_NE(rosenRenderContext, nullptr);
-    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
-    ASSERT_NE(transitionModifier, nullptr);
-    /**
-     * @tc.steps: step1. Call ignoresLayoutSafeAreaEdges to true.
-     * @tc.expected: step1. The transitionModifier->Modify() should be called.
-     */
-    uint32_t ignoresLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
-    transitionModifier->Modify();
-    bool flag = transitionModifier->flag_->Get();
-    rosenRenderContext->UpdateIsTransitionBackground(true);
-    rosenRenderContext->UpdateBuilderBackgroundFlag(false);
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_NE(transitionModifier->flag_->Get(), flag);
-
-    /**
-     * @tc.steps: step2. Set ignoresLayoutSafeAreaEdges to false.
-     * @tc.expected: step2. The transitionModifier->Modify() should not be called.
-     */
-    flag = transitionModifier->flag_->Get();
-    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_EQ(flag, transitionModifier->flag_->Get());
-
-    /**
-     * @tc.steps: step3. Set ignoresLayoutSafeAreaEdges while rsNode_ is null.
-     * @tc.expected: step3. The transitionModifier->Modify() should not be called.
-     */
-    rosenRenderContext->rsNode_ = nullptr;
-    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
-    flag = transitionModifier->flag_->Get();
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_EQ(flag, transitionModifier->flag_->Get());
 }
 
 /**
@@ -2003,6 +2027,38 @@ HWTEST_F(RosenRenderContextTest, OnBackgroundPixelMapUpdate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCustomBackground001
+ * @tc.desc: Test UpdateCustomBackground Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, UpdateCustomBackground001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Create transition modifier and get the modifier flag.
+     * @tc.expected: step1. Creation successful.
+     */
+    rosenRenderContext->UpdateIsTransitionBackground(true);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+    transitionModifier->Modify();
+    ASSERT_NE(transitionModifier->flag_, nullptr);
+    bool flag = transitionModifier->flag_->Get();
+
+    /**
+     * @tc.steps: step2. Call UpdateCustomBackground function.
+     * @tc.expected: step2. The modifier flag is changed.
+     */
+    rosenRenderContext->UpdateCustomBackground();
+    EXPECT_NE(transitionModifier->flag_->Get(), flag);
+}
+
+/**
  * @tc.name: OnTransform3DMatrixUpdate001
  * @tc.desc: Test OnTransform3DMatrixUpdate Func.
  * @tc.type: FUNC
@@ -2020,13 +2076,13 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
         INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
     rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
-    auto perspectiveValue = rosenRenderContext->transformMatrixModifier_->perspectiveValue.get()->Get();
-    auto xyTranslateValue = rosenRenderContext->transformMatrixModifier_->translateXYValue.get()->Get();
-    auto translateZValue = rosenRenderContext->transformMatrixModifier_->translateZValue.get()->Get();
-    auto scaleXYValue = rosenRenderContext->transformMatrixModifier_->scaleXYValue.get()->Get();
-    auto scaleZValue = rosenRenderContext->transformMatrixModifier_->scaleZValue.get()->Get();
-    auto skewValue = rosenRenderContext->transformMatrixModifier_->skewValue.get()->Get();
-    auto quaternionValue = rosenRenderContext->transformMatrixModifier_->quaternionValue.get()->Get();
+    auto perspectiveValue = rosenRenderContext->transformModifier_->GetPersp();
+    auto xyTranslateValue = rosenRenderContext->transformModifier_->GetTranslate();
+    auto translateZValue = rosenRenderContext->transformModifier_->GetTranslateZ();
+    auto scaleXYValue = rosenRenderContext->transformModifier_->GetScale();
+    auto scaleZValue = rosenRenderContext->transformModifier_->GetScaleZ();
+    auto skewValue = rosenRenderContext->transformModifier_->GetSkew();
+    auto quaternionValue = rosenRenderContext->transformModifier_->GetQuaternion();
     EXPECT_NE(perspectiveValue[0], 0);
     EXPECT_EQ(perspectiveValue[1], 0);
     EXPECT_EQ(perspectiveValue[2], 0);
@@ -2082,6 +2138,86 @@ HWTEST_F(RosenRenderContextTest, ClearModifiers001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBitmapTest001
+ * @tc.desc: Test RosenRenderContext GetBitmap with rsNode_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetBitmapTest001, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+
+    rosenRenderContext->rsNode_ = nullptr;
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetBitmap(bitmap, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetBitmapTest002
+ * @tc.desc: Test RosenRenderContext GetBitmap with rsNode_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetBitmapTest002, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(true, contextParamValue);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetBitmap(bitmap, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetPixelMapTest001
+ * @tc.desc: Test RosenRenderContext GetPixelMap with rsNode_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetPixelMapTest001, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+
+    rosenRenderContext->rsNode_ = nullptr;
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetPixelMap(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetPixelMapTest002
+ * @tc.desc: Test RosenRenderContext GetPixelMap with rsNode_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetPixelMapTest002, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(true, contextParamValue);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetPixelMap(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: RemoveFromTreeTest001
  * @tc.desc: Test RosenRenderContext RemoveFromTree
  * @tc.type: FUNC
@@ -2127,5 +2263,123 @@ HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTreeInit_, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTree_, false);
+}
+
+class MockRosenRenderContext : public RosenRenderContext {
+public:
+    MOCK_METHOD1(SetNeedUseCmdlistDrawRegion, void(bool needUseCmdlistDrawRegion));
+};
+
+/**
+ * @tc.name: SetNeedUseCmdlistDrawRegion001
+ * @tc.desc: Test RosenRenderContext SetNeedUseCmdlistDrawRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetNeedUseCmdlistDrawRegion001, TestSize.Level1)
+{
+    auto mockRosenRenderContext = AceType::MakeRefPtr<MockRosenRenderContext>();
+    EXPECT_CALL(*mockRosenRenderContext, SetNeedUseCmdlistDrawRegion(_)).Times(2);
+    mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(true);
+    mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(false);
+}
+
+/**
+ * @tc.name: ShouldSkipAffineTransformation001
+ * @tc.desc: Test ShouldSkipAffineTransformation Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->rsNode_->SetDrawNodeType(Rosen::DrawNodeType::DrawPropertyType);
+    bool res = rosenRenderContext->ShouldSkipAffineTransformation(rosenRenderContext->rsNode_);
+    rosenRenderContext->rsNode_->SetDrawNodeType(Rosen::DrawNodeType::GeometryPropertyType);
+    res = rosenRenderContext->ShouldSkipAffineTransformation(rosenRenderContext->rsNode_);
+    ASSERT_EQ(res, false);
+    rosenRenderContext->rsNode_ = nullptr;
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: ShouldSkipAffineTransformation002
+ * @tc.desc: Test ShouldSkipAffineTransformation Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, -1.0f, 1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, -1.0f, 1.0f));
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, 1.0f, -1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, -1.0f));
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, 1.0f, 1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, 1.0f));
+    rosenRenderContext->rsNode_ = nullptr;
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: RSUIContext001
+ * @tc.desc: Test RSUIContext001 Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RSUIContext001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ComponentSnapshot snapshot;
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rsUIContext = snapshot.GetRSUIContext(pipeline);
+    EXPECT_EQ(rsUIContext, nullptr);
+}
+
+/**
+ * @tc.name: OnZindexUpdate001
+ * @tc.desc: Test OnZindexUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnZindexUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Set zIndex.
+     * @tc.expected: step1. zIndex set success.
+     */
+    rosenRenderContext->OnZIndexUpdate(2);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto positionZ = stagingProperties.GetPositionZ();
+    EXPECT_EQ(positionZ, 2);
+
+    /**
+     * @tc.steps: step2. Set Layouting and zIndex.
+     * @tc.expected: step2. zIndex set success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetIsLayouting(true);
+    rosenRenderContext->OnZIndexUpdate(3);
+    pipeline->taskScheduler_->FlushTask();
+    positionZ = stagingProperties.GetPositionZ();
+    EXPECT_EQ(positionZ, 3);
 }
 } // namespace OHOS::Ace::NG

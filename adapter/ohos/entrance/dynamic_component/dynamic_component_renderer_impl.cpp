@@ -31,7 +31,7 @@ constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
 constexpr size_t WORKER_MAX_NUM = 1;
 constexpr int32_t WORKER_SIZE_ONE = 1;
-constexpr int32_t DC_MAX_NUM_IN_WORKER = 1;
+constexpr int32_t DC_MAX_NUM_IN_WORKER = 4;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -317,6 +317,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     hostTaskExecutor->PostTask(
         [weak = WeakClaim(this)] () {
             auto render = weak.Upgrade();
+            CHECK_NULL_VOID(render);
             render->SetUIContentJsContext();
         }, TaskExecutor::TaskType::UI, "HostSetUIContentJsContext");
     rendererDumpInfo_.limitedWorkerInitTime = GetCurrentTimestamp();
@@ -376,11 +377,6 @@ void DynamicComponentRendererImpl::SetUIContentJsContext()
             CHECK_NULL_VOID(aceContainer);
             aceContainer->SetJsContextWithDeserialize(data);
         }, TaskExecutor::TaskType::UI, "WorkerSetJsContextWithDeserialize");
-    auto container = Container::GetContainer(uiContent_->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
-    CHECK_NULL_VOID(aceContainer);
-    aceContainer->SetJsContext(jsContext);
 }
 
 void DynamicComponentRendererImpl::RegisterErrorEventHandler()
@@ -638,7 +634,7 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
             CHECK_NULL_VOID(uiContent);
             auto subInstanceId = uiContent->GetInstanceId();
             ContainerScope scope(subInstanceId);
-            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent);
+            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent, keyEvent.isPreIme);
             TAG_LOGI(aceLogTag, "send key event: %{public}s, result = %{public}d",
                 keyEvent.ToString().c_str(), result);
         },
@@ -792,10 +788,22 @@ void DynamicComponentRendererImpl::DestroyContent()
     AfterDestroyContent();
 }
 
+void DynamicComponentRendererImpl::UnRegisterContainerHandler()
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto container = Container::GetContainer(uiContent_->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    aceContainer->RegisterContainerHandler(nullptr);
+    TAG_LOGI(aceLogTag_, "UnRegisterContainerHandler");
+}
+
 void DynamicComponentRendererImpl::OnDestroyContent()
 {
     CHECK_NULL_VOID(uiContent_);
     UnRegisterConfigChangedCallback();
+    UnRegisterContainerHandler();
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(

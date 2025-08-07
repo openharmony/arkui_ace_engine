@@ -36,6 +36,11 @@ RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNode(const std::string& tag)
     return frameNode;
 }
 
+RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNode(const std::string& tag, int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<CustomNodeExtPattern>());
+}
+
 void CustomNodeExtModelNG::SetMeasureCallback(
     FrameNode* frameNode, std::function<void(LayoutConstraintF constraints)>&& onMeasure)
 {
@@ -108,6 +113,23 @@ void CustomNodeExtModelNG::SetOnWindowUnfocusedCallback(FrameNode* frameNode, st
     auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnWindowUnfocusedCallback(std::move(onWindowUnfocused));
+}
+
+void CustomNodeExtModelNG::SetOnWindowActivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowActivated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowActivatedCallback(std::move(onWindowActivated));
+}
+
+void CustomNodeExtModelNG::SetOnWindowDeactivatedCallback(
+    FrameNode* frameNode, std::function<void()>&& onWindowDeactivated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowDeactivatedCallback(std::move(onWindowDeactivated));
 }
 
 void CustomNodeExtModelNG::SetOnAttachToMainTreeCallback(

@@ -169,7 +169,7 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node) {
-            if (layoutTags_.find(node->GetTag()) != layoutTags_.end() && !node->IsActive()) {
+            if (!node->CheckVisibleOrActive()) {
                 continue;
             }
             auto property = node->GetLayoutProperty();
@@ -182,6 +182,13 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
             }
         }
         TravelFindPixelMap(item);
+    }
+}
+
+void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
     }
 }
 

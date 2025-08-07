@@ -16,10 +16,13 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
 #include "core/components_ng/render/drawing.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "modifier_ng/background/rs_background_shader_modifier.h"
+
 #undef private
 #undef protected
 
@@ -342,6 +345,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew011, TestSize.Level1)
     rosenRenderContext->SetBackgroundColor(SHAPE_MASK_DEFAULT_COLOR);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
         OHOS::Rosen::RSColor::FromArgbInt(SHAPE_MASK_DEFAULT_COLOR));
+
     rosenRenderContext->SetScale(1.0, 0.0);
     rosenRenderContext->PaintPixmapBgImage();
     rosenRenderContext->PaintRSBgImage();
@@ -604,6 +608,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew019, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowOffsetY(), 0.0);
 }
 
+using RSModifier = Rosen::ModifierNG::RSModifier;
+
 /**
  * @tc.name: RosenRenderContextTestNew020
  * @tc.desc: OnClipEdgeUpdate().
@@ -614,8 +620,9 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew020, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    auto property = std::make_shared<Rosen::RSPropertyBase>();
-    std::shared_ptr<Rosen::RSModifier> modifier = std::make_shared<Rosen::RSBackgroundShaderModifier>(property);
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
+    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
+    modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
     rosenRenderContext->AddModifier(modifier);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     BrightnessOption option;
@@ -662,8 +669,9 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew021, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    auto property = std::make_shared<Rosen::RSPropertyBase>();
-    std::shared_ptr<Rosen::RSModifier> modifier = std::make_shared<Rosen::RSBackgroundShaderModifier>(property);
+    auto property = std::make_shared<Rosen::RSProperty<bool>>();
+    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
+    modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
     rosenRenderContext->AddModifier(modifier);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     rosenRenderContext->OnBackBlendApplyTypeUpdate(BlendApplyType::OFFSCREEN);
@@ -1157,5 +1165,27 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew043, TestSize.Level1)
     auto stagingProperties = rsNdoe->GetStagingProperties();
     auto spherizeDegree = stagingProperties.GetSpherizeDegree();
     EXPECT_NEAR(spherizeDegree, 10.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew045
+ * @tc.desc: UpdateFrontBlurStyle().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew044, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    g_isConfigChangePerform = true;
+    BlurStyleOption blur;
+    blur.blurStyle = BlurStyle::NO_MATERIAL;
+    SysOptions sysOptions;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    rosenRenderContext->UpdateFrontBlurStyle(blur, sysOptions);
+    g_isConfigChangePerform = false;
+    std::string blurStyleStr = pattern->GetResCacheMapByKey("foregroundBlurStyle.blurStyle");
+    EXPECT_EQ(blurStyleStr, "");
 }
 } // namespace OHOS::Ace::NG

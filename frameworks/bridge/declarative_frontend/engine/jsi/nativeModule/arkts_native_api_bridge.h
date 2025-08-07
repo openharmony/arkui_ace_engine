@@ -35,7 +35,6 @@ public:
     static ArkUINativeModuleValue GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPageInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetNavigationInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue GetArkUINativeModuleForm(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportedUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -117,10 +116,6 @@ private:
     static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterListAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterListItemAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterSwiperAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterIndicatorComponentAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

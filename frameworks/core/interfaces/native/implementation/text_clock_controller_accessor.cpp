@@ -23,7 +23,6 @@ namespace TextClockControllerAccessor {
 void DestroyPeerImpl(Ark_TextClockController peer)
 {
     if (peer) {
-        peer->controller = nullptr;
         delete peer;
     }
 }
@@ -58,7 +57,4 @@ const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor
     return &TextClockControllerAccessorImpl;
 }
 
-struct TextClockControllerPeer {
-    virtual ~TextClockControllerPeer() = default;
-};
 }

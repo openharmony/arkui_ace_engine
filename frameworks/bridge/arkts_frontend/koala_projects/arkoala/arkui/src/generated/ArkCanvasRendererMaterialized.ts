@@ -765,7 +765,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const retval = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, toPeerPtr(image), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length);
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32);
         let retval_type : int32 = retvalDeserializer.readInt8() as int32
         if ((RuntimeType.UNDEFINED) != (retval_type)) {
             const pattern = retvalDeserializer.readCanvasPattern();

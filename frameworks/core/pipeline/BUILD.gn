@@ -45,12 +45,14 @@ template("ace_core_pipeline_source_set") {
       "base/constants.cpp",
       "base/element.cpp",
       "base/element_register.cpp",
+      "base/element_register_multi_thread.cpp",
       "base/multi_composed_component.cpp",
       "base/multi_composed_element.cpp",
       "base/related_node.cpp",
       "base/render_context_creator.cpp",
       "base/render_element.cpp",
       "base/render_node.cpp",
+      "base/rs_node_adapter.cpp",
       "base/sole_child_element.cpp",
 
       # factories

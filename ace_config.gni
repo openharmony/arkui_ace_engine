@@ -35,6 +35,9 @@ declare_args() {
   # Enable pgo for building.
   ace_engine_feature_enable_codemerge = false
 
+  # Enable AArch64 instruction prefetch for building.
+  ace_engine_feature_enable_inst_prefetch = false
+
   # Set pgo profdata path
   ace_engine_feature_pgo_path = ""
 
@@ -88,6 +91,9 @@ declare_args() {
 
   # Enable long press gesture extra handling
   ace_engine_feature_enable_long_press_gesture_extra_handling = false
+
+  # Enable skia upgrade
+  ace_engine_feature_enable_upgrade_skia = true
 }
 
 enable_dump_drawcmd = false
@@ -120,7 +126,11 @@ graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
-skia_root_new = "//third_party/skia"
+if (ace_engine_feature_enable_upgrade_skia) {
+  skia_root_new = "//third_party/skia/m133"
+} else {
+  skia_root_new = "//third_party/skia"
+}
 c_utils_header_path = "//commonlibrary/c_utils/base/include"
 ace_graphic_surface = "//foundation/graphic/graphic_surface"
 
@@ -368,4 +378,11 @@ if (ohos_indep_compiler_enable) {
 
 if (ace_engine_feature_enable_form_size_change_animation) {
   ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
+}
+
+# Enable ArkUI static instructive code
+ace_engine_feature_enable_static_instructive_code = false
+
+if (ace_engine_feature_enable_static_instructive_code) {
+  ace_common_defines += [ "ACE_STATIC" ]
 }

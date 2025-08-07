@@ -615,7 +615,22 @@ HWTEST_F(PluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
     drawRSFrame->DrawRSFrame(rsNode, Rect(100.0, 100.0, 100.0, 100.0));
 }
 
-/**s
+/**
+ * @tc.name: PluginCodeLanguageTestNg
+ * @tc.desc: Test funcions in Plugin Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginPatternTestNg, PluginCodeLanguageTestNg, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto info = pattern->GetPluginRequestInfo();
+    auto codeLanguage = pattern->GetPackageCodeLanguage(info);
+    EXPECT_EQ(codeLanguage, "");
+}
+
+/**
  * @tc.name: PluginLayoutPropertyTestNg
  * @tc.desc: Test funcions in PluginLayoutProperty.
  * @tc.type: FUNC
@@ -629,5 +644,45 @@ HWTEST_F(PluginPatternTestNg, PluginLayoutTestNg, TestSize.Level1)
     EXPECT_NE(layout, nullptr);
     layout->Clone();
     layout.Reset();
+}
+
+/**
+ * @tc.name: JSPluginOnCompleteTest
+ * @tc.desc: Test funcions in JSPlugin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginPatternTestNg, JSPluginOnCompleteTest, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = AceType::DynamicCast<PluginEventHub>(pattern->CreateEventHub());
+    EXPECT_NE(eventHub, nullptr);
+    auto onComplete = [](const std::string& param) { EXPECT_EQ(param, "OnComplete"); };
+
+    pluginModel.SetOnComplete(onComplete);
+    eventHub->FireOnComplete("OnComplete");
+    auto allowUpdate = pattern->ISAllowUpdate();
+    EXPECT_TRUE(allowUpdate);
+}
+
+/**
+ * @tc.name: JSPluginOnErrorTest
+ * @tc.desc: Test funcions in JSPlugin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginPatternTestNg, JSPluginOnErrorTest, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = AceType::DynamicCast<PluginEventHub>(pattern->CreateEventHub());
+    EXPECT_NE(eventHub, nullptr);
+    auto onError = [](const std::string& param) { EXPECT_EQ(param, "OnError"); };
+
+    pluginModel.SetOnError(onError);
+    eventHub->FireOnError("OnError");
+    auto allowUpdate = pattern->ISAllowUpdate();
+    EXPECT_TRUE(allowUpdate);
 }
 } // namespace OHOS::Ace::NG

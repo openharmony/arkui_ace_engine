@@ -16,7 +16,7 @@ import curves from '@ohos.curves';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { LengthMetrics, SymbolGlyphModifier } from '@kit.ArkUI';
 import { i18n } from '@kit.LocalizationKit';
 
 const START_TIME = 250;
@@ -63,8 +63,7 @@ export struct ExceptionPrompt {
 
   @Builder
   TextBuilder() {
-    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
-      .Center }) {
+    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
       Row() {
         if (this.options?.symbolStyle !== undefined) {
           SymbolGlyph()
@@ -92,11 +91,7 @@ export struct ExceptionPrompt {
           .fontColor($r('sys.color.ohos_id_color_warning'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(2)
-          .margin(
-            i18n.isRTL(i18n.System.getSystemLanguage()) ?
-              { right: $r('sys.float.ohos_id_dialog_margin_end') } :
-              { left: $r('sys.float.ohos_id_dialog_margin_end') }
-          )
+          .margin({ start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')) })
           .flexShrink(1)
           .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
       }
@@ -117,10 +112,7 @@ export struct ExceptionPrompt {
               .fontColor($r('sys.color.ohos_id_color_text_secondary'))
               .maxLines(2)
               .padding(0)
-              .margin(
-                i18n.isRTL(i18n.System.getSystemLanguage()) ?
-                  { left: $r('sys.float.ohos_id_text_paragraph_margin_s') } :
-                  { right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
+              .margin({ end: LengthMetrics.resource($r('sys.float.ohos_id_text_paragraph_margin_s')) })
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .flexShrink(1)
               .textAlign(TextAlign.End)

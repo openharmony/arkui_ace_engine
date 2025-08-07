@@ -307,7 +307,11 @@ ACE_EXPORT extern const char BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char RECYCLE_VIEW_ETS_TAG[];
 
 // common
+#ifdef ACE_STATIC
+ACE_FORCE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
+#else
 ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
+#endif
 // option
 ACE_EXPORT extern const char OPTION_COMPONENT_TAG[];
 ACE_EXPORT extern const char OPTION_ETS_TAG[];
@@ -678,5 +682,8 @@ ACE_EXPORT extern const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[];
 
 // LazyVGridLayout
 ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
+
+// UndefinedNode
+ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

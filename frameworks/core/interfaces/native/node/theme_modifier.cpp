@@ -70,8 +70,8 @@ ArkUINodeHandle GetWithThemeNode(ArkUI_Int32 id)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(withThemeNode));
 }
 
-ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode,
-    const void* resObjs)
+ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, const ArkUI_Uint32* darkColors,
+    ArkUI_Int32 colorMode, const void* lightResObjs, const void* darkResObjs)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(themeId);
     if (!theme) {
@@ -79,11 +79,15 @@ ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, Ark
             themeId, colorMode);
         ColorMode themeScopeColorMode = MapNumberToColorMode(colorMode);
         auto themeColors = ConvertColorArrayToTokenColors(colors);
+        auto themeDarkColors = ConvertColorArrayToTokenColors(darkColors);
         theme = AceType::MakeRefPtr<TokenTheme>(themeId);
         theme->SetColors(themeColors);
+        theme->SetDarkColors(themeDarkColors);
         theme->SetColorMode(themeScopeColorMode);
-        auto resourceObjs = ConvertResObjArray(resObjs);
-        theme->SetResObjs(std::move(resourceObjs));
+        auto lightResourceObjs = ConvertResObjArray(lightResObjs);
+        auto darkResourceObjs = ConvertResObjArray(darkResObjs);
+        theme->SetResObjs(std::move(lightResourceObjs));
+        theme->SetDarkResObjs(std::move(darkResourceObjs));
         TokenThemeStorage::GetInstance()->CacheSet(theme);
     }
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(theme));
@@ -101,12 +105,19 @@ void CreateThemeScope(ArkUINodeHandle node, ArkUINodeHandle theme)
     withThemeNode->NotifyThemeScopeUpdate();
 }
 
-void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark)
+void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark, const void* resObjs)
 {
     TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme SetDefaultTheme isDark:%{public}d", isDark);
     auto themeColors = ConvertColorArrayToTokenColors(colors);
+    auto resourceObjs = ConvertResObjArray(resObjs);
     auto theme = AceType::MakeRefPtr<TokenTheme>(0);
-    theme->SetColors(themeColors);
+    if (isDark) {
+        theme->SetDarkColors(themeColors);
+        theme->SetDarkResObjs(std::move(resourceObjs));
+    } else {
+        theme->SetColors(themeColors);
+        theme->SetResObjs(std::move(resourceObjs));
+    }
     auto colorMode = isDark ? ColorMode::DARK : ColorMode::LIGHT;
     TokenThemeStorage::GetInstance()->SetDefaultTheme(theme, colorMode);
 

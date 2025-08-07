@@ -14,13 +14,12 @@
  */
 
 #include <cstdint>
-#include <utility>
 
 #include "arkoala_api_generated.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -29,46 +28,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
 Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer mark, Ark_Int32 direction)
 {
-    CHECK_NULL_RETURN(node, nullptr);
-    constexpr int32_t requestMoreItemFlag = 0x01;
-    auto* parent = reinterpret_cast<FrameNode*>(node);
-    auto* scrollWindowAdapter = parent->GetScrollWindowAdapter();
-    CHECK_NULL_RETURN(scrollWindowAdapter, reinterpret_cast<Ark_NativePointer>(requestMoreItemFlag));
-    return scrollWindowAdapter->NeedMoreElements(
-        reinterpret_cast<FrameNode*>(mark), static_cast<FillDirection>(direction));
     return nullptr;
 }
-void OnRangeUpdateImpl(Ark_NativePointer node,
-                       Ark_Int32 totalCount,
-                       const Callback_RangeUpdate* updater)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(updater);
-
-    auto onEvent = [callback = CallbackHelper(*updater)](
-                       const Ark_Int32 index, const Ark_NativePointer mark) { callback.Invoke(index, mark, 0); };
-    auto* scrollWindowAdapter = frameNode->GetOrCreateScrollWindowAdapter();
-    CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->RegisterUpdater(std::move(onEvent));
-    scrollWindowAdapter->SetTotalCount(totalCount);
-}
-void SetCurrentIndexImpl(Ark_NativePointer node,
-                         Ark_Int32 index)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
-void PrepareImpl(Ark_NativePointer node, Ark_Int32, Ark_Int32)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
-    CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->Prepare(0); // use parameter when new Idl is generated
-    int32_t totalCount = scrollWindowAdapter->GetTotalCount(); // use parameter when new Idl is generated
-    scrollWindowAdapter->SetTotalCount(totalCount);
-}
+void OnRangeUpdateImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_RangeUpdate* updater) {}
+void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index) {}
+void PrepareImpl(Ark_NativePointer node, Ark_Int32 totalCount, Ark_Int32 offset) {}
 void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -82,8 +46,20 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
         pattern->NotifyDataChange(endIdx, changeCnt);
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->ArkoalaRemoveItemsOnChange(startIdx);
 }
-} // LazyForEachOpsAccessor
+
+void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_CreateItem* creator,
+    const Callback_RangeUpdate* updater)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && creator && updater);
+    frameNode->ArkoalaSynchronize(
+        [callback = CallbackHelper(*creator)](
+            int32_t index) { return AceType::DynamicCast<FrameNode>(callback.BuildSync(index)); },
+        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); }, totalCount);
+}
+} // namespace LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
@@ -92,8 +68,9 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
         LazyForEachOpsAccessor::PrepareImpl,
         LazyForEachOpsAccessor::NotifyChangeImpl,
+        LazyForEachOpsAccessor::SyncImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

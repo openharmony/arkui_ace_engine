@@ -193,6 +193,11 @@ public:
         onActionStart_ = std::make_unique<GestureEventFunc>(onActionStart);
     }
 
+    void SetOnActionExtUpdate(const GestureEventFunc& onActionExtUpdate)
+    {
+        onActionExtUpdate_ = std::make_unique<GestureEventFunc>(onActionExtUpdate);
+    }
+
     void SetOnActionUpdate(const GestureEventFunc& onActionUpdate)
     {
         onActionUpdate_ = std::make_unique<GestureEventFunc>(onActionUpdate);
@@ -346,6 +351,9 @@ public:
     }
 
     virtual void ForceCleanRecognizer() {};
+    virtual void ForceCleanRecognizerWithGroup() {
+        ForceCleanRecognizer();
+    };
     virtual void CleanRecognizerState() {};
 
     bool AboutToAddCurrentFingers(const TouchEvent& event);
@@ -441,6 +449,8 @@ public:
     void SetPreventBegin(bool preventBegin);
 
     std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
+
+    void ResetResponseLinkRecognizer();
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -478,7 +488,11 @@ protected:
     void HandleTouchDown(const TouchEvent& point);
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
-    void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type);
+    void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType);
+    virtual bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
+    {
+        return false;
+    }
 
     RefereeState refereeState_ = RefereeState::READY;
 
@@ -497,6 +511,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onAction_;
     std::unique_ptr<GestureEventFunc> onActionStart_;
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
+    std::unique_ptr<GestureEventFunc> onActionExtUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventFunc> onActionCancel_;
     // triggered when the recongnizer is rejected
@@ -527,8 +542,7 @@ protected:
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;
-    GestureListenerType GetListenerType(GestureTypeName typeName) const;
-    GestureActionPhase GetActionPhase(GestureCallbackType callbackType, GestureTypeName typeName) const;
+    GestureActionPhase GetActionPhase(GestureCallbackType callbackType, GestureListenerType listenerType) const;
 };
 
 } // namespace OHOS::Ace::NG

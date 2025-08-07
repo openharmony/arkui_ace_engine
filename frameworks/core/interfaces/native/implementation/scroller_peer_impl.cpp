@@ -197,15 +197,17 @@ void ScrollerPeerImpl::TriggerFling(const Ark_Number* velocity)
     scrollController->Fling(flingVelocity);
 }
 
-void ScrollerPeerImpl::TriggerScrollPage0(bool next)
+void ScrollerPeerImpl::TriggerScrollPage0(const Ark_ScrollPageOptions* value)
 {
-    bool smooth = false;
+    CHECK_NULL_VOID(value);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage0 Controller not bound to component.");
         return;
     }
     ContainerScope scope(instanceId_);
+    bool next = Converter::Convert<bool>(value->next);
+    auto smooth = Converter::OptConvert<bool>(value->animation).value_or(false);
     scrollController->ScrollPage(!next, smooth);
 }
 
@@ -213,7 +215,13 @@ void ScrollerPeerImpl::TriggerScrollPage1(bool next)
 {
     // deprecated since 9
     LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage1 Deprecated method.");
-    TriggerScrollPage0(next);
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage1 Controller not bound to component.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    scrollController->ScrollPage(!next, false);
 }
 
 Ark_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset()
@@ -267,12 +275,12 @@ void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_B
     scrollController->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
-void ScrollerPeerImpl::TriggerScrollBy(const Ark_Length* dx, const Ark_Length* dy)
+void ScrollerPeerImpl::TriggerScrollBy(const Opt_Length* dx, const Opt_Length* dy)
 {
     CHECK_NULL_VOID(dx);
     CHECK_NULL_VOID(dy);
-    Dimension xOffset = Converter::Convert<Dimension>(*dx);
-    Dimension yOffset = Converter::Convert<Dimension>(*dy);
+    Dimension xOffset = Converter::OptConvert<Dimension>(*dx).value_or(Dimension());
+    Dimension yOffset = Converter::OptConvert<Dimension>(*dy).value_or(Dimension());
 
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {

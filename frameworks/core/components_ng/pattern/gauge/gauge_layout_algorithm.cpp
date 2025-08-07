@@ -21,11 +21,13 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
+constexpr float ZERO_MEASURE_CONTENT_SIZE = 0.0f;
 } // namespace
 
 GaugeLayoutAlgorithm::GaugeLayoutAlgorithm() = default;
@@ -54,6 +56,16 @@ void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
         return;
     }
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+        if (layoutConstraint) {
+            layoutConstraint->maxSize.SetWidth(ZERO_MEASURE_CONTENT_SIZE);
+            layoutConstraint->maxSize.SetHeight(ZERO_MEASURE_CONTENT_SIZE);
+        }
+    }
     BoxLayoutAlgorithm::Measure(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         MeasureLimitValueTextWidth(layoutWrapper);
@@ -73,6 +85,12 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        return SizeF(ZERO_MEASURE_CONTENT_SIZE, ZERO_MEASURE_CONTENT_SIZE);
+    }
     auto pattern = host->GetPattern<GaugePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
@@ -154,8 +172,8 @@ void GaugeLayoutAlgorithm::MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapp
 
     startAngle -= QUARTER_CIRCLE;
     endAngle -= QUARTER_CIRCLE;
-    auto startDegree = startAngle * M_PI / HALF_CIRCLE;
-    auto endDegree = endAngle * M_PI / HALF_CIRCLE;
+    auto startDegree = startAngle * ACE_PI / HALF_CIRCLE;
+    auto endDegree = endAngle * ACE_PI / HALF_CIRCLE;
     startAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(startDegree);
     endAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(endDegree);
     auto diameter = radius * 2.0f;

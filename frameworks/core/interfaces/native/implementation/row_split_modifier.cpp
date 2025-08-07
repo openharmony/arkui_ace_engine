@@ -18,18 +18,17 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = LinearSplitModelNGStatic::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // RowSplitModifier
 namespace RowSplitInterfaceModifier {
@@ -40,11 +39,16 @@ void SetRowSplitOptionsImpl(Ark_NativePointer node)
 } // RowSplitInterfaceModifier
 namespace RowSplitAttributeModifier {
 void ResizeableImpl(Ark_NativePointer node,
-                    Ark_Boolean value)
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);
 }
 } // RowSplitAttributeModifier
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()

@@ -669,4 +669,7 @@ const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_nod
 
 // LazyVGridLayout
 const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
+
+// UndefinedNode
+const char UNDEFINED_NODE_ETS_TAG[] = "";
 } // namespace OHOS::Ace::V2

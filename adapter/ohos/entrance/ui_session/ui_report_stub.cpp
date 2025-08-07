@@ -15,6 +15,8 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_stub.h"
 
+#include "pixel_map.h"
+
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
@@ -111,6 +113,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case SEND_CURRENT_PAGE_NAME: {
             std::string result = data.ReadString();
             SendCurrentPageName(result);
+            break;
+        }
+        case SEND_EXE_APP_AI_FUNCTION_RESULT: {
+            uint32_t result = data.ReadUint32();
+            SendExeAppAIFunctionResult(result);
             break;
         }
         default: {
@@ -281,6 +288,18 @@ void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)
     if (optMem != nullptr) {
         optMem->UnmapAshmem();
         optMem->CloseAshmem();
+    }
+}
+
+void UiReportStub::RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback)
+{
+    exeAppAIFunctionCallback_ = std::move(finishCallback);
+}
+
+void UiReportStub::SendExeAppAIFunctionResult(uint32_t result)
+{
+    if (exeAppAIFunctionCallback_) {
+        exeAppAIFunctionCallback_(result);
     }
 }
 } // namespace OHOS::Ace

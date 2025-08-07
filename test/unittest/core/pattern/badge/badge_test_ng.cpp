@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -162,7 +163,7 @@ void BadgeTestNg::CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -187,7 +188,7 @@ HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -220,7 +221,7 @@ HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest001, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest001, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -378,7 +379,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level0)
 {
     BadgeModelNG BadgeModelNG;
     BadgeParameters badgeParameters;
@@ -416,7 +417,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level0)
 {
     BadgeModelNG BadgeModelNG;
     BadgeParameters badgeParameters;
@@ -454,7 +455,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest005, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest005, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -684,7 +685,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
  * @tc.desc: test UpdateSizeWithCheck
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create badge and get frameNode.
@@ -723,7 +724,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
  * @tc.desc: test SetSizeInit
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create badge and get frameNode.
@@ -744,7 +745,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -760,7 +761,7 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -1042,7 +1043,7 @@ HWTEST_F(BadgeTestNg, BadgeDumpSimplifyInfoTest001, TestSize.Level1)
     textNode->MountToParent(frameNode_);
     pattern_->OnModifyDone();
 
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
     pattern_->DumpSimplifyInfo(json);
 
     // update badge layoutProperty and go to different branch
@@ -1241,5 +1242,578 @@ HWTEST_F(BadgeTestNg, UpdateBadgePatternTest009, TestSize.Level1)
     CalcDimension width2(BADGE_FONT_SIZE);
     pattern_->UpdateBorderWidth(width2, false);
     EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+}
+
+/**
+ * @tc.name: BadgeModelNGSetBadgeParameMaxCount
+ * @tc.desc: Test badge SetBadgeParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGSetBadgeParameMaxCount, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateFrameNode.
+     */
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. setvalue badgeMaxCount .
+     */
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = COUNT;
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.case: case1. check value badgeMaxCount.
+     * @tc.expected: it should be as we set.
+     */
+    EXPECT_EQ(layoutProperty->GetBadgeMaxCount(), COUNT);
+}
+
+/**
+ * @tc.name: BadgeModelNGSetBadgeParam
+ * @tc.desc: Test badge SetBadgeParam is not init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGSetBadgeParam, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateFrameNode.
+     */
+    auto frameNode = BadgeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. SetBadgeParam.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    BadgeParameters badgeParameters;
+
+    BadgeModelNG::SetBadgeParam(node, badgeParameters, false, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.case: case to cover branch has_value() is false.
+     * @tc.expected: it should be the theme value.
+     */
+    const int defaultMaxCount = 99;
+    const double defaultPosValue = 0.0;
+    EXPECT_EQ(layoutProperty->GetBadgeMaxCount(), defaultMaxCount);
+    EXPECT_EQ(layoutProperty->HasBadgeValue(), false);
+    EXPECT_EQ(layoutProperty->GetBadgePositionXValue().Value(), defaultPosValue);
+    EXPECT_EQ(layoutProperty->GetBadgePositionYValue().Value(), defaultPosValue);
+    EXPECT_EQ(layoutProperty->GetIsPositionXyValue(), false);
+    EXPECT_EQ(layoutProperty->GetBadgePositionValue(), BadgePosition::RIGHT_TOP);
+}
+
+/**
+ * @tc.name: BadgeModelNGCreateWithResourceObj001
+ * @tc.desc: Test badge CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGCreateWithResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create instance and badgeParameters is not init.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    /**
+     * @tc.steps: step2. call to CreateWithResourceObj.
+     */
+    badge.CreateWithResourceObj(frameNode_, badgeParameters);
+
+    /**
+     * @tc.steps: step3. check the key value, .
+     * @tc.expected: it should be null.
+     */
+    EXPECT_EQ(badgeParameters.resourceBadgeValueObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceColorObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceBadgeColorObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceBorderColorObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceFontWeightObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceFontSizeObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceBadgeSizeObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceBadgePositionXObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceBadgePositionYObject, nullptr);
+    EXPECT_EQ(badgeParameters.resourceBorderWidthObject, nullptr);
+    std::string key = "badge.badgeValue";
+    std::string badgeValue = pattern_->GetResCacheMapByKey(key);
+    EXPECT_EQ(badgeValue, "");
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBadgeValue
+ * @tc.desc: Test badge ProcessBadgeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "";
+    badgeParameters.badgeCount = COUNT;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBadgeValue.
+     */
+    badgeParameters.resourceBadgeValueObject = AceType::MakeRefPtr<ResourceObject>();
+    badge.ProcessBadgeValue(pattern_, badgeParameters.resourceBadgeValueObject);
+
+    /**
+     * @tc.steps: step3. check the key value, .
+     * @tc.expected: it should be "".
+     */
+    std::string badgeValue = layoutProperty_->GetBadgeValueValue();
+    EXPECT_EQ(badgeValue, "");
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBadgeTextColor
+ * @tc.desc: Test badge ProcessBadgeTextColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeTextColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeTextColor = Color::WHITE;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBadgeValue.
+     */
+    badgeParameters.resourceColorObject = AceType::MakeRefPtr<ResourceObject>();
+    badge.ProcessBadgeValue(pattern_, badgeParameters.resourceColorObject);
+
+    /**
+     * @tc.steps: step3. check the key value, .
+     * @tc.expected: it should be "Color::WHITE".
+     */
+    Color textColor = layoutProperty_->GetBadgeTextColorValue();
+    EXPECT_EQ(textColor, Color::WHITE);
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBadgePositionX
+ * @tc.desc: Test badge ProcessBadgePositionX
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgePositionX, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgePositionX = Dimension(1, DimensionUnit::VP);
+    badgeParameters.badgePositionY = Dimension(1, DimensionUnit::VP);
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBadgePositionX.
+     */
+    badgeParameters.resourceBadgePositionXObject = AceType::MakeRefPtr<ResourceObject>();
+    badge.ProcessBadgePositionX(pattern_, badgeParameters.resourceBadgePositionXObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be Dimension(1).
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    Dimension positionX = layoutProperty_->GetBadgePositionXValue();
+    EXPECT_EQ(positionX.Value(), 1);
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBadgePositionY
+ * @tc.desc: Test badge ProcessBadgePositionY
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgePositionY, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgePositionX = Dimension(1);
+    badgeParameters.badgePositionY = Dimension(1, DimensionUnit::VP);
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBadgePositionY.
+     */
+    badgeParameters.resourceBadgePositionYObject = AceType::MakeRefPtr<ResourceObject>();
+    badge.ProcessBadgePositionY(pattern_, badgeParameters.resourceBadgePositionYObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be Dimension(1).
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    Dimension positionY = layoutProperty_->GetBadgePositionYValue();
+    EXPECT_EQ(positionY.Value(), 1);
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBorderWidth
+ * @tc.desc: Test badge ProcessBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeBorderWidth = BADGE_BORDER_WIDTH;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBorderWidth.
+     */
+    badgeParameters.resourceBorderWidthObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge.ProcessBorderWidth(pattern_, badgeParameters.resourceBorderWidthObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be 0.0.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isSystemColorChange_ = true;
+    Dimension borderWidth = layoutProperty_->GetBadgeBorderWidthValue();
+    EXPECT_EQ(borderWidth.Value(), BADGE_BORDER_WIDTH.Value());
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessFontSize
+ * @tc.desc: Test badge ProcessFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessFontSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeFontSize = 1.00_vp;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessFontSize.
+     */
+    badgeParameters.resourceFontSizeObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge.ProcessFontSize(pattern_, badgeParameters.resourceFontSizeObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be 0.0f.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isSystemColorChange_ = true;
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    Dimension FontSize = layoutProperty_->GetBadgeFontSizeValue();
+    EXPECT_EQ(FontSize, badgeTheme->GetBadgeFontSize());
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessFontWeight
+ * @tc.desc: Test badge ProcessFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessFontWeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeFontWeight = FontWeight::NORMAL;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessFontWeight.
+     */
+    badgeParameters.resourceFontWeightObject = AceType::MakeRefPtr<ResourceObject>();
+    badge.ProcessFontWeight(pattern_, badgeParameters.resourceFontWeightObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be NORMAL.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto fontWeight = layoutProperty_->GetBadgeFontWeightValue();
+    EXPECT_EQ(fontWeight, FontWeight::NORMAL);
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBorderColor
+ * @tc.desc: Test badge ProcessBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeBorderColor = Color::WHITE;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBorderColor.
+     */
+    badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge.ProcessBorderColor(pattern_, badgeParameters.resourceBorderColorObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be FF000000.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto pipeline = frameNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isSystemColorChange_ = true;
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
+    auto borderColor = layoutProperty_->GetBadgeBorderColorValue();
+    EXPECT_EQ(borderColor, badgeTheme->GetBadgeBorderColor());
+}
+
+/**
+ * @tc.name: BadgeModelNGProcessBadgeColor
+ * @tc.desc: Test badge ProcessBadgeColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     */
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeCount = COUNT;
+    badgeParameters.badgeColor = Color::WHITE;
+    badge.Create(badgeParameters);
+    GetInstance();
+    /**
+     * @tc.steps: step2. call to ProcessBadgeColor.
+     */
+    badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>();
+    badge.ProcessBadgeColor(pattern_, badgeParameters.resourceBadgeColorObject);
+
+    /**
+     * @tc.steps: step3. check the key value.
+     * @tc.expected: it should be FF000000.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto badgeColor = layoutProperty_->GetBadgeBorderColorValue();
+    EXPECT_EQ(badgeColor.ColorToString(), "#FF000000");
+}
+
+/**
+ * @tc.name: BadgeDumpInfo001
+ * @tc.desc: Test dump info of Badge.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpInfo001, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    
+    CalcDimension width(BADGE_FONT_SIZE);
+    pattern_->UpdateBorderWidth(width, true);
+    pattern_->DumpInfo();
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width);
+    
+    CalcDimension width2(BADGE_FONT_SIZE);
+    pattern_->UpdateBorderWidth(width2, false);
+    pattern_->DumpInfo();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+}
+
+/**
+ * @tc.name: BadgeModelNGTest001
+ * @tc.desc: Test CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGTest001, TestSize.Level1)
+{
+    BadgeModelNG badge1;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    g_isConfigChangePerform = false;
+    badge1.Create(badgeParameters);
+    GetInstance();
+
+    BadgeModelNG badge2;
+    g_isConfigChangePerform = true;
+    badgeParameters.resourceBadgeValueObject = nullptr;
+    badgeParameters.resourceBadgeColorObject = nullptr;
+    badgeParameters.resourceBadgeColorObject = nullptr;
+    badgeParameters.resourceBorderColorObject = nullptr;
+    badgeParameters.resourceFontWeightObject = nullptr;
+    badgeParameters.resourceFontSizeObject = nullptr;
+    badgeParameters.resourceBadgeSizeObject = nullptr;
+    badgeParameters.resourceBadgePositionXObject = nullptr;
+    badgeParameters.resourceBadgePositionYObject = nullptr;
+    badgeParameters.resourceBorderWidthObject = nullptr;
+    badge2.Create(badgeParameters);
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), Color::BLACK);
+
+    BadgeModelNG badge3;
+    badgeParameters.resourceBadgeValueObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceFontWeightObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceFontSizeObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgeSizeObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgePositionXObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgePositionYObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBorderWidthObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge3.Create(badgeParameters);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto badgeTextColor = badgeTheme->GetBadgeTextColor();
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), badgeTextColor);
+}
+
+/**
+ * @tc.name: BadgePatternOnColorUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternOnColorUpdate001, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    g_isConfigChangePerform = false;
+    pattern_->OnColorConfigurationUpdate();
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), Color::BLACK);
+    g_isConfigChangePerform = true;
+    pattern_->OnColorConfigurationUpdate();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto badgeTextColor = badgeTheme->GetBadgeTextColor();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), badgeTextColor);
+
+    layoutProperty->UpdateBadgePositionXByuser(true);
+    layoutProperty->UpdateBadgePositionYByuser(true);
+    layoutProperty->UpdateBadgeFontSizeByuser(true);
+    layoutProperty->UpdateBadgeCircleSizeByuser(true);
+    layoutProperty->UpdateBadgeBorderColorByuser(true);
+    layoutProperty->UpdateBadgeBorderWidthByuser(true);
+    layoutProperty->UpdateBadgeTextColorByuser(true);
+    layoutProperty->UpdateBadgeColorByuser(true);
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), Color::BLACK);
+}
+
+/**
+ * @tc.name: CreateBadgeFrameNodeTest001
+ * @tc.desc: Test to create a badge frame node and return.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, CreateBadgeFrameNodeTest001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    auto framenode = badge.CreateBadgeFrameNode();
+    ASSERT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: CreateByFrameNodeTest001
+ * @tc.desc: Test to create a badge by frame node.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, CreateByFrameNodeTest001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    auto framenode = badge.CreateBadgeFrameNode();
+    ASSERT_NE(framenode, nullptr);
+
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "test";
+    badgeParameters.badgeCount = 1;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgePosition = 1;
+    badgeParameters.badgeColor = Color::BLACK;
+    badgeParameters.badgeTextColor = Color::GREEN;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
+    badgeParameters.isPositionXy = true;
+    badgeParameters.badgePositionX = Dimension(10);
+    badgeParameters.badgePositionY = Dimension(10);
+    badge.CreateByFrameNode(framenode, badgeParameters);
+
+    GetInstance();
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_EQ(layoutProperty_->GetBadgeValue(), "test");
+    EXPECT_EQ(layoutProperty_->GetBadgeCount(), 1);
+    EXPECT_EQ(layoutProperty_->GetBadgeMaxCount(), 99);
+    EXPECT_EQ(layoutProperty_->GetBadgeColor(), Color::BLACK);
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), Color::GREEN);
+    EXPECT_EQ(layoutProperty_->GetBadgeFontSize(), BADGE_FONT_SIZE);
+    EXPECT_EQ(layoutProperty_->GetBadgeCircleSize(), BADGE_CIRCLE_SIZE);
 }
 } // namespace OHOS::Ace::NG

@@ -86,7 +86,15 @@ std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::PanGestureInfos
 std::unordered_map<NG::FrameNode*, std::shared_ptr<UIObserver::NodeRenderListener>>
     UIObserver::specifiedNodeRenderStateListeners_;
 
-// UIObserver.on(type: "navDestinationUpdate", callback)
+template<typename ListenerList, typename... Args>
+void SafeIterateListeners(const ListenerList& listeners, void (UIObserverListener::*callback)(Args...), Args... args)
+{
+    ListenerList listenersCopy = listeners;
+    for (const auto& listener : listenersCopy) {
+        (listener.get()->*callback)(std::forward<Args>(args)...);
+    }
+}
+
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -299,7 +307,9 @@ void UIObserver::UnRegisterScrollEventCallback(const std::string& id, napi_value
 void UIObserver::HandleScrollEventStateChange(const std::string& id, int32_t uniqueId,
     NG::ScrollEventType eventType, float offset, Ace::Axis axis)
 {
-    for (const auto& listener : scrollEventListeners_) {
+    // copy value to avoid developer call off while execute callback of on
+    auto scrollEventListeners = scrollEventListeners_;
+    for (const auto& listener : scrollEventListeners) {
         listener->OnScrollEventStateChange(id, uniqueId, eventType, offset, axis);
     }
 
@@ -308,7 +318,8 @@ void UIObserver::HandleScrollEventStateChange(const std::string& id, int32_t uni
         return;
     }
 
-    auto& holder = iter->second;
+    // copy value to avoid developer call off while execute callback of on
+    auto holder = iter->second;
 
     for (const auto& listener : holder) {
         listener->OnScrollEventStateChange(id, uniqueId, eventType, offset, axis);
@@ -595,10 +606,7 @@ void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double densit
     if (iter == specifiedDensityListeners_.end()) {
         return;
     }
-    auto holder = iter->second;
-    for (const auto& listener : holder) {
-        listener->OnDensityChange(density);
-    }
+    SafeIterateListeners(iter->second, &UIObserverListener::OnDensityChange, density);
 }
 
 void UIObserver::HandDrawCommandSendChange()
@@ -607,10 +615,7 @@ void UIObserver::HandDrawCommandSendChange()
     if (specifiedDrawListeners_.find(currentId) == specifiedDrawListeners_.end()) {
         return;
     }
-    auto holder = specifiedDrawListeners_[currentId];
-    for (const auto& listener : holder) {
-        listener->OnDrawOrLayout();
-    }
+    SafeIterateListeners(specifiedDrawListeners_[currentId], &UIObserverListener::OnDrawOrLayout);
 }
 
 void UIObserver::HandLayoutDoneChange()
@@ -619,10 +624,7 @@ void UIObserver::HandLayoutDoneChange()
     if (specifiedLayoutListeners_.find(currentId) == specifiedLayoutListeners_.end()) {
         return;
     }
-    auto holder = specifiedLayoutListeners_[currentId];
-    for (const auto& listener : holder) {
-        listener->OnDrawOrLayout();
-    }
+    SafeIterateListeners(specifiedLayoutListeners_[currentId], &UIObserverListener::OnDrawOrLayout);
 }
 
 /**

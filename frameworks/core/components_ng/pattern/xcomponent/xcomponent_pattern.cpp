@@ -29,6 +29,7 @@
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
@@ -47,6 +48,10 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "feature/anco_manager/rs_ext_node_operation.h"
 #include "transaction/rs_interfaces.h"
+#include "transaction/rs_transaction.h"
+#include "transaction/rs_transaction_handler.h"
+#include "ui/rs_ui_context.h"
+#include "ui/rs_ui_director.h"
 #endif
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_surface_impl.h"
@@ -155,6 +160,7 @@ void XComponentPattern::InitXComponent()
 void XComponentPattern::InitSurface()
 {
     auto host = GetHost();
+    FREE_NODE_CHECK(host, InitSurface, host);
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -172,7 +178,8 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -204,21 +211,20 @@ void XComponentPattern::InitSurface()
     surfaceId_ = renderSurface_->GetUniqueId();
     initialSurfaceId_ = surfaceId_;
     UpdateTransformHint();
-    RegisterSurfaceRenderContext();
+    RegisterNode();
 }
 
-void XComponentPattern::RegisterSurfaceRenderContext()
+void XComponentPattern::RegisterNode()
 {
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-            initialSurfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+        XComponentInnerSurfaceController::RegisterNode(initialSurfaceId_, WeakPtr(GetHost()));
     }
 }
 
-void XComponentPattern::UnregisterSurfaceRenderContext()
+void XComponentPattern::UnregisterNode()
 {
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(initialSurfaceId_);
+        XComponentInnerSurfaceController::UnregisterNode(initialSurfaceId_);
     }
 }
 
@@ -269,13 +275,14 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
@@ -289,13 +296,14 @@ void XComponentPattern::OnAttachToMainTree()
 
 void XComponentPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     isOnTree_ = false;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (displaySync_ && displaySync_->IsOnPipeline()) {
@@ -380,6 +388,9 @@ void XComponentPattern::OnAttachToFrameNode()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    nodeId_ = std::to_string(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -461,13 +472,16 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     SetSurfaceNodeToGraphic();
 }
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    UnregisterSurfaceRenderContext();
+    UnregisterNode();
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -514,6 +528,7 @@ void XComponentPattern::InitController()
     CHECK_NULL_VOID(xcomponentController_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, InitController);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -612,9 +627,16 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     globalPosition_ = geometryNode->GetFrameOffset();
     localPosition_ = geometryNode->GetContentOffset();
 
-    if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(geometryNode);
-    }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        pattern->UpdateAnalyzerUIConfig(geometryNode);
+    });
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = paintRect_.GetSize();
@@ -1338,6 +1360,8 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     host->MarkModifyDone();
@@ -1371,6 +1395,22 @@ XComponentControllerErrorCode XComponentPattern::SetExtController(const RefPtr<X
     return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 
+std::shared_ptr<Rosen::RSUIContext> XComponentPattern::GetRSUIContext(const RefPtr<FrameNode>& frameNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
+#endif
+    return nullptr;
+}
+
 XComponentControllerErrorCode XComponentPattern::ResetExtController(const RefPtr<XComponentPattern>& extPattern)
 {
     if (!extPattern) {
@@ -1380,8 +1420,30 @@ XComponentControllerErrorCode XComponentPattern::ResetExtController(const RefPtr
     if (!curExtPattern || curExtPattern != extPattern) {
         return XCOMPONENT_CONTROLLER_RESET_ERROR;
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    auto host = GetHost();
+    auto rsUIContext = GetRSUIContext(host);
+    auto extHost = extPattern->GetHost();
+    auto extRsUIContext = GetRSUIContext(extHost);
+    auto rsTransHandler = rsUIContext ? rsUIContext->GetRSTransaction() : nullptr;
+    auto extRsTransHandler = extRsUIContext ? extRsUIContext->GetRSTransaction() : nullptr;
+    if (rsTransHandler) {
+        rsTransHandler->Begin();
+    }
+    if (extRsTransHandler) {
+        extRsTransHandler->Begin();
+    }
+#endif
     RestoreHandlingRenderContextForSurface();
     extPattern->RestoreHandlingRenderContextForSurface();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransHandler) {
+        rsTransHandler->Commit();
+    }
+    if (extRsTransHandler) {
+        extRsTransHandler->Commit();
+    }
+#endif
     extPattern_.Reset();
     return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
@@ -1466,6 +1528,8 @@ bool XComponentPattern::StopTextureExport()
     CHECK_NULL_RETURN(renderContext, false);
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     renderContext->SetIsNeedRebuildRSTree(true);
     return true;
 }

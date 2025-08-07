@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/grid_row/grid_row_model_ng_static.h"
 
 namespace OHOS::Ace::NG {
     struct GridRowSizeOption {
@@ -198,7 +199,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 
         auto optDirection = Converter::OptConvert<V2::GridRowDirection>(arkOptions.direction);
         auto direction = optDirection.has_value() ? optDirection : std::nullopt;
-        GridRowModelNG::SetDirection(frameNode, direction);
+        GridRowModelNGStatic::SetDirection(frameNode, direction);
 
         auto optBreakPoints = Converter::OptConvert<V2::BreakPoints>(arkOptions.breakpoints);
         auto breakpoints = optBreakPoints.has_value()
@@ -212,7 +213,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
         GridRowModelNG::SetColumns(frameNode, columns);
     } else {
         GridRowModelNG::SetGutter(frameNode, nullGutter);
-        GridRowModelNG::SetDirection(frameNode, std::nullopt);
+        GridRowModelNGStatic::SetDirection(frameNode, std::nullopt);
         GridRowModelNG::SetBreakpoints(frameNode, nullBreakPoints);
         GridRowModelNG::SetColumns(frameNode, nullGridContainerSize);
     }
@@ -220,23 +221,27 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 } // GridRowInterfaceModifier
 namespace GridRowAttributeModifier {
 void OnBreakpointChangeImpl(Ark_NativePointer node,
-                            const Callback_String_Void* value)
+                            const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onBreakpointChange = [arkCallback = CallbackHelper(*value)](const std::string& breakpoint) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onBreakpointChange = [arkCallback = CallbackHelper(*optValue)](const std::string& breakpoint) {
         arkCallback.Invoke(Converter::ArkValue<Ark_String>(breakpoint));
     };
     GridRowModelNG::SetOnBreakPointChange(frameNode, std::move(onBreakpointChange));
 }
 void AlignItemsImpl(Ark_NativePointer node,
-                    Ark_ItemAlign value)
+                    const Opt_ItemAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<FlexAlign>(value);
-    GridRowModelNG::SetAlignItems(frameNode, convValue);
+    auto convValue = Converter::OptConvert<FlexAlign>(*value);
+    GridRowModelNGStatic::SetAlignItems(frameNode, convValue);
 }
 } // GridRowAttributeModifier
 const GENERATED_ArkUIGridRowModifier* GetGridRowModifier()

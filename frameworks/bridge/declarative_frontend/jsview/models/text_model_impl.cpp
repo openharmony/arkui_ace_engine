@@ -218,6 +218,10 @@ void TextModelImpl::SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {}
 
 void TextModelImpl::SetGradientShaderStyle(NG::Gradient& gradient) {}
 
+void TextModelImpl::SetColorShaderStyle(const Color& value) {}
+
+void TextModelImpl::ResetGradientShaderStyle() {}
+
 void TextModelImpl::SetAdaptMinFontSize(const Dimension& value)
 {
     auto component = GetComponent();

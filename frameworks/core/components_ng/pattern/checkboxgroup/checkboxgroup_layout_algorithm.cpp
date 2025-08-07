@@ -17,6 +17,7 @@
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -25,6 +26,11 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
 {
     auto themeScopeId = layoutWrapper->GetHostNode() ? layoutWrapper->GetHostNode()->GetThemeScopeId() : 0;
     InitializeParam(themeScopeId);
+    auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        return LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
+    }
+
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -76,4 +82,38 @@ void CheckBoxGroupLayoutAlgorithm::InitializeParam(uint32_t themeScopeId)
     }
 }
 
+std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, LayoutWrapper* layoutWrapper)
+{
+    auto height = contentConstraint.parentIdealSize.Height().value_or(0.0f);
+    auto width = contentConstraint.parentIdealSize.Width().value_or(0.0f);
+    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
+    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
+    if (layoutPolicy->IsAllMatch()) {
+        auto length = std::min(width, height);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsWidthMatch()) {
+        auto realSize = std::min(width, selfHeight);
+        if (!contentConstraint.selfIdealSize.Height().has_value()) {
+            realSize = width;
+        }
+        return SizeF(realSize, realSize);
+    } else if (layoutPolicy->IsHeightMatch()) {
+        auto realSize = std::min(height, selfWidth);
+        if (!contentConstraint.selfIdealSize.Width().has_value()) {
+            realSize = height;
+        }
+        return SizeF(realSize, realSize);
+    }
+    return SizeF();
+}
+
+std::optional<NG::LayoutPolicyProperty> CheckBoxGroupLayoutAlgorithm::GetLayoutPolicy(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, NG::LayoutPolicyProperty());
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicy, NG::LayoutPolicyProperty());
+    return layoutPolicy;
+}
 } // namespace OHOS::Ace::NG

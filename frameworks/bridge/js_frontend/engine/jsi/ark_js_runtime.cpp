@@ -206,6 +206,35 @@ bool ArkJSRuntime::IsExecuteModuleInAbcFile(
     return ret;
 }
 
+bool ArkJSRuntime::IsStaticOrInvalidFile(const uint8_t *data, int32_t size)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    JSNApi::PandaFileType fileType = JSNApi::GetFileType(data, size);
+    bool ret;
+    switch (fileType) {
+        case JSNApi::PandaFileType::FILE_DYNAMIC:
+            ret = false;
+            LOGI("ArkJSRuntime::IsStaticOrInvalidFile, file is dynamic");
+            break;
+        case JSNApi::PandaFileType::FILE_STATIC:
+            ret = true;
+            LOGI("ArkJSRuntime::IsStaticOrInvalidFile, file is static");
+            break;
+        case JSNApi::PandaFileType::FILE_FORMAT_INVALID:
+            ret = true;
+            LOGE("ArkJSRuntime::IsStaticOrInvalidFile, file is invalid. reason is param invalid");
+            break;
+        default:
+            ret = true;
+            LOGE("ArkJSRuntime::IsStaticOrInvalidFile, file is invalid");
+    }
+
+    HandleUncaughtException(trycatch);
+    return ret;
+}
+
 bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
 {
     JSExecutionScope executionScope(vm_);
@@ -257,6 +286,14 @@ shared_ptr<JsValue> ArkJSRuntime::GetGlobal()
 {
     LocalScope scope(vm_);
     return std::make_shared<ArkJSValue>(shared_from_this(), JSNApi::GetGlobalObject(vm_));
+}
+
+shared_ptr<JsValue> ArkJSRuntime::GetGlobal(ArkNativeEngine* nativeArkEngine)
+{
+    LocalScope scope(vm_);
+    CHECK_NULL_RETURN(nativeArkEngine, nullptr);
+    return std::make_shared<ArkJSValue>(
+        shared_from_this(), JSNApi::GetGlobalObject(vm_, nativeArkEngine->GetContext()));
 }
 
 void ArkJSRuntime::RunGC()

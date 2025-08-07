@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -302,6 +303,46 @@ HWTEST_F(SwiperIndicatorTestNg, HandleLongPress001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: Test SwiperIndicator HandleTouchEvent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleTouchEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper.
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. isPressed_ is true, and input DOWN event.
+     * @tc.expected: not call HandleTouchUp
+     */
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, true);
+
+    /**
+     * @tc.steps: step3. isPressed_ is true, and input UP event.
+     * @tc.expected: call HandleTouchUp
+     */
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, false);
+
+    /**
+     * @tc.steps: step4. isPressed_ is true, and input CANCEL event.
+     * @tc.expected: call HandleTouchUp
+     */
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::CANCEL, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, false);
+}
+
+/**
  * @tc.name: SetDotIndicatorStyle001
  * @tc.desc: Test SwiperModelNG SetDotIndicatorStyle
  * @tc.type: FUNC
@@ -334,6 +375,31 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation001
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->PlayIndicatorTranslateAnimation(0.0f);
+    EXPECT_EQ(frameNode_->GetAnimatablePropertyFloat("indicator"), 0);
+
+    pattern_->PlayIndicatorTranslateAnimation(1.0f);
+    EXPECT_EQ(frameNode_->GetAnimatablePropertyFloat("indicator"), 1);
+
+    pattern_->PlayIndicatorTranslateAnimation(0.0f);
+    EXPECT_EQ(frameNode_->GetAnimatablePropertyFloat("indicator"), 1);
+}
+
+/**
  * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation002
  * @tc.desc: PlayIndicatorTranslateAnimation
  * @tc.type: FUNC
@@ -350,7 +416,121 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002,
      */
     TurnPageRateFunc callback = [](const int32_t i, float f) {};
     pattern_->swiperController_->SetTurnPageRateCallback(callback);
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation003
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation003, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->PlayIndicatorTranslateAnimation(0.1f);
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    const std::string indicatorPropertyName = "indicator";
+    ASSERT_NE(host->nodeAnimatablePropertyMap_.count(indicatorPropertyName), 0);
+    auto propertyBase = host->nodeAnimatablePropertyMap_[indicatorPropertyName];
+    ASSERT_NE(propertyBase, nullptr);
+    auto propertyFloat = AceType::DynamicCast<NodeAnimatablePropertyFloat>(propertyBase);
+    ASSERT_NE(propertyFloat, nullptr);
+    auto floatProperty = propertyFloat->GetProperty();
+    ASSERT_NE(floatProperty, nullptr);
+    auto aniPropertyFloat = AceType::DynamicCast<AnimatablePropertyFloat>(floatProperty);
+    ASSERT_NE(aniPropertyFloat, nullptr);
+    auto propertyCallback = aniPropertyFloat->GetUpdateCallback();
+    ASSERT_NE(propertyCallback, nullptr);
+
+    pattern_->itemPosition_.clear();
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    const float startPos = 10.0f;
+    pattern_->itemPosition_.insert(std::make_pair(0, SwiperItemInfo { startPos, 0.0f }));
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation004
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation004, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    TurnPageRateFunc callback = [](const int32_t i, float f) {};
+    pattern_->swiperController_->SetTurnPageRateCallback(callback);
+    pattern_->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    const std::string indicatorPropertyName = "indicator";
+    ASSERT_NE(host->nodeAnimatablePropertyMap_.count(indicatorPropertyName), 0);
+    auto propertyBase = host->nodeAnimatablePropertyMap_[indicatorPropertyName];
+    ASSERT_NE(propertyBase, nullptr);
+    auto propertyFloat = AceType::DynamicCast<NodeAnimatablePropertyFloat>(propertyBase);
+    ASSERT_NE(propertyFloat, nullptr);
+    auto floatProperty = propertyFloat->GetProperty();
+    ASSERT_NE(floatProperty, nullptr);
+    auto aniPropertyFloat = AceType::DynamicCast<AnimatablePropertyFloat>(floatProperty);
+    ASSERT_NE(aniPropertyFloat, nullptr);
+    auto propertyCallback = aniPropertyFloat->GetUpdateCallback();
+    ASSERT_NE(propertyCallback, nullptr);
+
+    pattern_->itemPosition_.clear();
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    const float startPos = 10.0f;
+    pattern_->itemPosition_.insert(std::make_pair(0, SwiperItemInfo { startPos, 0.0f }));
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
     EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
 }
 
@@ -1065,7 +1245,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateAngleOffset004, TestSize.Level1)
     float centerY = 2.0f;
     float radius = 45.0f;
     double angle = 300.0f;
-    auto radians = std::abs(FULL_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+    auto radians = std::abs(FULL_CIRCLE_ANGLE - angle) * ACE_PI / HALF_CIRCLE_ANGLE;
     float resultX = centerX + cos(radians) * radius;
     float resultY = centerY - sin(radians) * radius;
     OffsetF Offset = { resultX, resultY };
@@ -1174,6 +1354,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd001, TestSize.Level1)
     /**
      * @tc.steps: step2. call HandleMouseEvent.
      */
+    indicatorPattern->isPressed_ = true;
     indicatorPattern->isLongPressed_ = true;
     indicatorPattern->HandleDragEnd(20.0f);
     EXPECT_FALSE(indicatorPattern->isLongPressed_);
@@ -1215,6 +1396,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd002, TestSize.Level1)
     /**
      * @tc.steps: step2. call HandleDragEnd.
      */
+    indicatorPattern->isPressed_ = true;
     indicatorPattern->isLongPressed_ = true;
     indicatorPattern->HandleDragEnd(20.0f);
     EXPECT_FALSE(indicatorPattern->isLongPressed_);
@@ -1256,6 +1438,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd003, TestSize.Level1)
     /**
      * @tc.steps: step2. call HandleDragEnd.
      */
+    indicatorPattern->isPressed_ = true;
     indicatorPattern->isLongPressed_ = true;
     indicatorPattern->HandleDragEnd(20.0f);
     EXPECT_FALSE(indicatorPattern->isLongPressed_);
@@ -2097,5 +2280,27 @@ HWTEST_F(SwiperIndicatorTestNg, CheckDragAndUpdate003, TestSize.Level1)
         indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_);
     EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_,
         indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_);
+}
+
+/**
+ * @tc.name: SetSwiperNode001
+ * @tc.desc: Test SwiperIndicator SetSwiperNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SetSwiperNode001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto mockIndicatorNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+    EXPECT_NE(mockIndicatorNode, nullptr);
+    auto indicatorPattern = mockIndicatorNode->GetPattern<IndicatorPattern>();
+    auto controller = indicatorPattern->GetIndicatorController();
+    controller->SetSwiperNode(frameNode_);
+    EXPECT_EQ(indicatorNode_->GetPattern<IndicatorPattern>(), nullptr);
 }
 } // namespace OHOS::Ace::NG

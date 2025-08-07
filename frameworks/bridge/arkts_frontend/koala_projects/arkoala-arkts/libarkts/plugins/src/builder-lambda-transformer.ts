@@ -85,25 +85,13 @@ function builderLambdaArgumentName(annotation: arkts.AnnotationUsage): string | 
 
     return property.value.str
 }
-/*
-function builderLambdaTypeName(annotation: arkts.AnnotationUsageIr): string | undefined {
-    if (!isBuilderLambdaAnnotation(annotation)) return undefined
 
-    if (!annotation.properties[1].value ||
-        !arkts.isStringLiteral(annotation.properties[1].value)
-    ) {
-        return undefined
-    }
-    return annotation.properties[1].value.str
-}
-*/
 function findBuilderLambdaAnnotation(node: arkts.CallExpression): arkts.AnnotationUsage | undefined {
     let decl: arkts.AstNode|undefined = undefined
     if (arkts.isIdentifier(node.expression)) {
         decl = arkts.getDecl(node.expression)
     } else if (arkts.isMemberExpression(node.expression)) {
         // TODO: getDecl doesn't work for members.
-        // decl = arkts.getDecl(node.expression)
         return undefined
     } else {
         return undefined

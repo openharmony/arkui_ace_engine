@@ -141,7 +141,12 @@ public:
 
     uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const
     {
-        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::SAFE_AREA_EDGE_NONE);
+        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+    }
+
+    uint32_t GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges() const
+    {
+        return localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
     }
 
     RefPtr<GeometryTransition> GetGeometryTransition() const;
@@ -163,6 +168,12 @@ public:
     void UpdateOuterBorderWidth(const BorderWidthProperty& value);
 
     void UpdateAlignment(Alignment value);
+
+    void UpdateLocalizedAlignment(std::string value);
+
+    void UpdateLayoutGravity(Alignment value);
+
+    void UpdateIsMirrorable(bool value);
 
     void UpdateLayoutWeight(float value);
 
@@ -220,7 +231,9 @@ public:
 
     virtual void UpdateCalcMaxSize(const CalcSize& value);
 
-    std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
+    void CalcToString(const CalcSize& calcSize, std::pair<std::vector<std::string>, std::vector<std::string>>& result);
+
+    IgnoreLayoutSafeAreaOpts GenIgnoreOpts() const;
 
     virtual void ExpandConstraintWithSafeArea();
 
@@ -442,15 +455,21 @@ public:
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
     void CheckIgnoreLayoutSafeArea(const TextDirection& direction);
+    void CheckBackgroundLayoutSafeAreaEdges(const TextDirection& direction);
+    void CheckLocalizedAlignment(const TextDirection& direction);
+    bool DecideMirror();
 
     virtual void OnPropertyChangeMeasure() {}
 
     std::string LayoutInfoToString();
 
+    std::string GetAlignmentStringFromLocalized(TextDirection layoutDirection, std::string localizedAlignment);
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
     virtual void Clone(RefPtr<LayoutProperty> layoutProperty) const;
+    std::optional<LayoutConstraintF> layoutConstraint_;
 
 private:
     // This will call after ModifyLayoutConstraint.
@@ -462,8 +481,7 @@ private:
     void ConstraintContentByPadding();
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
-    PaddingPropertyF CreateSafeAreaPadding();
-    bool DecideMirror();
+    PaddingPropertyF CreateSafeAreaPadding(bool adjustingRound = false);
 
     const std::string PixelRoundToJsonValue() const;
 
@@ -474,7 +492,6 @@ private:
     void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
-    std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
 
     // layoutConstraint_ set by builderNode
@@ -505,6 +522,7 @@ private:
     std::optional<RectF> layoutRect_;
     std::optional<Dimension> markAnchorStart_;
     std::optional<uint32_t> backgroundIgnoresLayoutSafeAreaEdges_;
+    std::optional<uint32_t> localizedBackgroundIgnoresLayoutSafeAreaEdges_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 

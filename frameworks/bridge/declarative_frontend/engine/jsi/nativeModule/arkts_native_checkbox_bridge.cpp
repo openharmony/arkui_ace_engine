@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -106,12 +107,15 @@ ArkUINativeModuleValue CheckboxBridge::SetSelectedColor(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color selectedColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetSelectedColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    GetArkUINodeModifiers()->getCheckboxModifier()->setSelectedColor(nativeNode, selectedColor.GetValue());
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setSelectedColorPtr(
+        nativeNode, selectedColor.GetValue(), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -124,12 +128,15 @@ ArkUINativeModuleValue CheckboxBridge::SetUnSelectedColor(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color unSelectedColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetUnSelectedColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    GetArkUINodeModifiers()->getCheckboxModifier()->setUnSelectedColor(nativeNode, unSelectedColor.GetValue());
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setUnSelectedColorPtr(
+        nativeNode, unSelectedColor.GetValue(), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -393,6 +400,7 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxShape(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::NativePointerRef::New(vm, nullptr));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (styleArg->IsNull() || styleArg->IsUndefined()) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetCheckboxShape(nativeNode);
@@ -400,7 +408,6 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxShape(ArkUIRuntimeCallInfo* ru
         int32_t style = styleArg->Int32Value(vm);
         GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxShape(nativeNode, style);
     }
-
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -475,6 +482,31 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxOnChange(ArkUIRuntimeCallInfo*
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxOnChange(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::SetMargin(runtimeCallInfo);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getCheckboxModifier()->setIsUserSetMargin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::ResetMargin(runtimeCallInfo);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCheckboxModifier()->setIsUserSetMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

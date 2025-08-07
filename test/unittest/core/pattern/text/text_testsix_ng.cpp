@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_texteffect.h"
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
@@ -376,5 +379,148 @@ HWTEST_F(TextTestSixNg, ParagraphManagerTestNG001, TestSize.Level1)
     rect = RectF(0.0f, y, 0.0f, DEFAULT_TEXT_HEIGHT);
     result = ParagraphManager::IsRectOutByHandler(rect, selectData);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ResetTextEffectBeforeLayoutTest001
+ * @tc.desc: Test ResetTextEffectBeforeLayout when textEffectStrategy is NONE
+ */
+HWTEST_F(TextTestSixNg, ResetTextEffectBeforeLayoutTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::NONE);
+
+    bool result = pattern->ResetTextEffectBeforeLayout();
+    EXPECT_TRUE(result);
+
+    layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
+
+    result = pattern->ResetTextEffectBeforeLayout(false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetOrCreateTextEffectTest001
+ * @tc.desc: Test GetOrCreateTextEffect when need to reset text effect
+ */
+HWTEST_F(TextTestSixNg, GetOrCreateTextEffectTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
+
+    bool needUpdate = false;
+    std::u16string content = u"123";
+    auto result = pattern->GetOrCreateTextEffect(content, needUpdate);
+    EXPECT_NE(result, nullptr);
+    EXPECT_FALSE(needUpdate);
+
+    content = u"124";
+    result = pattern->GetOrCreateTextEffect(content, needUpdate);
+    EXPECT_NE(result, nullptr);
+    EXPECT_TRUE(needUpdate);
+
+    layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::NONE);
+
+    result = pattern->GetOrCreateTextEffect(content, needUpdate);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: RegularMatchNumbersTest001
+ * @tc.desc: Test RegularMatchNumbers with empty content
+ */
+HWTEST_F(TextTestSixNg, RegularMatchNumbersTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    std::u16string content = u"";
+    bool result = pattern->RegularMatchNumbers(content);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RegularMatchNumbersTest002
+ * @tc.desc: Test RegularMatchNumbers with pure numbers
+ */
+HWTEST_F(TextTestSixNg, RegularMatchNumbersTest002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    std::u16string content = u"1234567890";
+    bool result = pattern->RegularMatchNumbers(content);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CreateOrUpdateTextEffectTest001
+ * @tc.desc: Test CreateOrUpdateTextEffect with non-number content
+ */
+HWTEST_F(TextTestSixNg, CreateOrUpdateTextEffectTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+
+    // Non-number content should not create text effect
+    layoutAlgorithm->CreateOrUpdateTextEffect(nullptr, paragraph, pattern, u"abc");
+
+    // Verify no text effect was created
+    auto textEffect = pattern->GetTextEffect();
+    EXPECT_EQ(textEffect, nullptr);
+}
+
+/**
+ * @tc.name: RelayoutResetOrUpdateTextEffect001
+ * @tc.desc: Test Update When Values Change
+ */
+HWTEST_F(TextTestSixNg, RelayoutResetOrUpdateTextEffect001, TestSize.Level1)
+{
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    // Set up textEffect_ with initial values
+    textPattern->textEffect_ = TextEffect::CreateTextEffect();
+    auto textEffect = AceType::DynamicCast<MockTextEffect>(textPattern->textEffect_);
+    ASSERT_NE(textEffect, nullptr);
+    textEffect->direction_ = TextFlipDirection::DOWN;
+    textEffect->enableBlur_ = false;
+
+    // Call the function with new values (should return -1)
+    textLayoutProperty->UpdateTextFlipDirection(TextFlipDirection::UP);
+    textLayoutProperty->UpdateTextFlipEnableBlur(true);
+    textLayoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
+    textPattern->RelayoutResetOrUpdateTextEffect();
+
+    // Verify updates occurred (return value -1)
+    EXPECT_EQ(textEffect->direction_, TextFlipDirection::UP);
+    EXPECT_EQ(textEffect->enableBlur_, true);
+}
+
+/**
+ * @tc.name: IsSelectableAndCopyTest001
+ * @tc.desc: Test IsSelectableAndCopy when textEffect is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, IsSelectableAndCopyTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+
+    // 设置 SELECTABLE 模式和非 None copyOption
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->textEffect_ = TextEffect::CreateTextEffect(); // textEffect 不为空
+
+    EXPECT_FALSE(pattern->IsSelectableAndCopy());
 }
 } // namespace OHOS::Ace::NG

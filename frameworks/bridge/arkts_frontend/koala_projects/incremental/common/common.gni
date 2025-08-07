@@ -1,0 +1,39 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DO NOT MODIFY THIS FILE MANUALLY.
+# USE FOLLOWING COMMAND:
+# ../../tools/gen_gni.py --json arktsconfig.json --output common.gni --gn-tool ../../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn
+
+koalaui_common_files = [
+  "src/Point3.ts",
+  "src/MarkableQueue.ts",
+  "src/PerfProbe.ts",
+  "src/koalaKey.ts",
+  "src/Finalization.ts",
+  "src/stringUtils.ts",
+  "src/math.ts",
+  "src/uniqueId.ts",
+  "src/index.ts",
+  "src/Point.ts",
+  "src/Matrix44.ts",
+  "src/LifecycleEvent.ts",
+  "src/sha1.ts",
+  "src/KoalaProfiler.ts",
+  "src/Matrix33.ts",
+  "src/Errors.ts",
+]
+
+koalaui_common_path_keys = [ "@koalaui/compat" ]
+
+koalaui_common_path_values = [ "../compat/src/arkts" ]

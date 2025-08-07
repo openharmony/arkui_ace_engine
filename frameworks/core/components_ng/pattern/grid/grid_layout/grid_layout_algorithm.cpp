@@ -53,6 +53,7 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
     if (!childLayoutProperty || !childLayoutProperty->GetCalcLayoutConstraint()) {
         layoutConstraint.selfIdealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     }
+    layoutConstraint.parentIdealSize = OptionalSizeF(colLen, rowLen);
     return layoutConstraint;
 }
 

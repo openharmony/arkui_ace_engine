@@ -758,6 +758,90 @@ HWTEST_F(TextTestThreeNg, TryLinkJump001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test test_pattern.h UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateAIMenuOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and text textPattern
+     */
+    auto [frameNode, textPattern] = Init();
+    textPattern->textSelector_.Update(0, 42);
+
+    /**
+     * @tc.steps: step2. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    textPattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    textPattern->SetTextDetectEnable(true);
+    textPattern->copyOption_ = CopyOptions::InApp;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    textPattern->textDetectEnable_ = true;
+    textPattern->enabled_ = true;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    textPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(textPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(textPattern->isShowAIMenuOption_, false);
+    textPattern->pManager_->Reset();
+
+    /**
+     * @tc.steps: step4. unexpected input set 1.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    textPattern->textSelector_.Update(-10, -42);
+    textPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(textPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(textPattern->isShowAIMenuOption_, false);
+    textPattern->pManager_->Reset();
+
+    /**
+     * @tc.steps: step5. unexpected input set 2.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    textPattern->textSelector_.Update(42, 0);
+    textPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(textPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(textPattern->isShowAIMenuOption_, false);
+    textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: IsNeedAskCelia
+ * @tc.desc: test test_pattern.h IsNeedAskCelia function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextTestThreeNg, IsNeedAskCelia001, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. create frameNode and text textPattern
+      */
+     auto [frameNode, textPattern] = Init();
+     EXPECT_FALSE(textPattern->IsNeedAskCelia());
+ }
+
+/**
  * @tc.name: SetTextSelection001
  * @tc.desc: test test_pattern.h SetTextSelection function.
  * @tc.type: FUNC
@@ -1331,6 +1415,7 @@ HWTEST_F(TextTestThreeNg, TextLayoutAlgorithmTest009, TestSize.Level1)
     std::map<int32_t, AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     textPattern->dataDetectorAdapter_->textForAI_ = U16TEXT_FOR_AI;
 
@@ -1387,6 +1472,7 @@ HWTEST_F(TextTestThreeNg, HandleClickAISpanEvent, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
@@ -1836,8 +1922,57 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
     textModelNG.SetTextDetectConfig(textDetectConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);
     pattern->dataDetectorAdapter_->InitTextDetect(0, "orange");
+}
+
+
+/**
+ * @tc.name: SetTextDetectConfig001
+ * @tc.desc: test test_pattern.h SetTextDetectTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetTextDetectConfig001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and pattern with child span node.
+    */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"");
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.enablePreviewMenu = true;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    /**
+     * @tc.steps: step2. call InitTextDetect.
+     */
+    pattern->SetTextDetectConfig(textDetectConfig);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->enablePreviewMenu_, true);
+}
+
+/**
+ * @tc.name: SetTextDetectTypes002
+ * @tc.desc: test test_pattern.h SetTextDetectTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetTextDetectTypes002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and pattern with child span node.
+    */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"");
+    TextDetectConfig textDetectConfig;
+    textModelNG.SetTextDetectConfig(textDetectConfig);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    /**
+     * @tc.steps: step2. call InitTextDetect.
+     */
+    pattern->dataDetectorAdapter_->InitTextDetect(0, "2023年12月30日 5点半 十二月三十日");
+    EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);
 }
 
 /**
@@ -2457,6 +2592,7 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions001, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[aiSpan1.start] = aiSpan1;
     aiSpanMap[aiSpan2.start] = aiSpan2;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
@@ -2507,6 +2643,7 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[aiSpan1.start] = aiSpan1;
     aiSpanMap[aiSpan2.start] = aiSpan2;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
@@ -2519,5 +2656,70 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
     EXPECT_EQ(aiSpan.type, TextDataDetectType::EMAIL);
     EXPECT_EQ(ret, false);
     textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TextModelGetShaderStyleInJson001
+ * @tc.desc: Test if GetShaderStyleInJson is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set type == RADIAL.
+     */
+    Gradient gradientLinear = Gradient();
+    gradientLinear.type_ = GradientType::LINEAR;
+    LinearGradient linearGradient;
+    linearGradient.angle = std::make_optional(2.00_vp);
+    gradientLinear.SetLinearGradient(linearGradient);
+    textLayoutProperty->UpdateGradientShaderStyle(gradientLinear);
+    std::string radialJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(radialJson,
+        "{\"angle\":\"2.00vp\",\"direction\":\"GradientDirection.None\",\"colors\":[],\"repeating\":\"false\"}");
+
+    /**
+     * @tc.steps: step3. Set type == RADIAL.
+     */
+    Gradient gradientRadial = Gradient();
+    gradientRadial.type_ = GradientType::RADIAL;
+    RadialGradient radialGradient;
+    radialGradient.radialCenterX = std::make_optional(25.0_vp);
+    radialGradient.radialCenterY = std::make_optional(25.0_vp);
+    gradientRadial.SetRadialGradient(radialGradient);
+    textLayoutProperty->UpdateGradientShaderStyle(gradientRadial);
+    std::string linearJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(linearJson, "{\"center\":[\"25.00vp\",\"25.00vp\"],\"colors\":[],\"repeating\":\"false\"}");
+
+    /**
+     * @tc.steps: step4. Set ColorShaderStyle.
+     */
+    Color color = Color::RED;
+    textLayoutProperty->ResetGradientShaderStyle();
+    textLayoutProperty->UpdateColorShaderStyle(color);
+    std::string colorJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(colorJson, "{\"color\":\"#FFFF0000\"}");
+
+    /**
+     * @tc.steps: step5. Set type == null.
+     */
+    Gradient gradient = Gradient();
+    textLayoutProperty->UpdateGradientShaderStyle(gradient);
+    std::string json = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(json, "{}");
 }
 } // namespace OHOS::Ace::NG

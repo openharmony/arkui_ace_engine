@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,30 +75,33 @@ public:
     void SetRSStrokeWidth(const RefPtr<ResourceObject>& resObj);
     void SetRSScaleWidth(const RefPtr<ResourceObject>& resObj);
     void SetTextResource(const RefPtr<ResourceObject>& resObj);
+    void SetCapsuleStyleFontColor(bool value) override;
+    void SetCapsuleStyle(bool value) override;
+    void SetGradientColorByUser(bool value) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
-    static void SetColor(FrameNode* frameNode, const std::optional<Color>& value);
-    static void SetGradientColor(FrameNode* frameNode, const std::optional<Gradient>& value);
-    static void SetSmoothEffect(FrameNode* frameNode, const std::optional<bool>& value);
-    static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetLinearSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value);
-    static void SetRingSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value);
-    static void SetPaintShadow(FrameNode* frameNode, const std::optional<bool>& value);
-    static void SetProgressStatus(FrameNode* frameNode, const std::optional<ProgressStatus>& status);
-    static void SetScaleCount(FrameNode* frameNode, const std::optional<int32_t>& value);
-    static void SetScaleWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
-    static void SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value);
-    static void SetShowText(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetColor(FrameNode* frameNode, const Color& value);
+    static void SetGradientColor(FrameNode* frameNode, const Gradient& value);
+    static void SetSmoothEffect(FrameNode* frameNode, bool value);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetLinearSweepingEffect(FrameNode* frameNode, bool value);
+    static void SetRingSweepingEffect(FrameNode* frameNode, bool value);
+    static void SetPaintShadow(FrameNode* frameNode, bool value);
+    static void SetProgressStatus(FrameNode* frameNode, ProgressStatus status);
+    static void SetScaleCount(FrameNode* frameNode, int32_t value);
+    static void SetScaleWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetSweepingEffect(FrameNode* frameNode, bool value);
+    static void SetShowText(FrameNode* frameNode, bool value);
     static void SetText(FrameNode* frameNode, const std::optional<std::string>& value);
-    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
-    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
-    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value);
-    static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
-    static void SetStrokeRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetFontColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontWeight(FrameNode* frameNode, const FontWeight& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    static void SetStrokeRadius(FrameNode* frameNode, const Dimension& value);
     static void ResetStrokeRadius(FrameNode* frameNode);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTotal(FrameNode* frameNode, double max);
@@ -111,13 +114,37 @@ public:
     static void ProgressInitialize(
         FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
-    static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void ResetBorderRadius(FrameNode* frameNode);
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);
     static void ResetGradientColor(FrameNode* frameNode);
     static void SetModifierInitiatedColor(FrameNode* frameNode, bool value);
     static void SetModifierInitiatedBgColor(FrameNode* frameNode, bool value);
+    static void SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetLSSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetLSStrokeRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetSmoothResEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetRingStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetRingShadow(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetRingStatus(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetRingSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetCapsuleBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetCapsuleBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetCapsuleSweepingEffect(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetShowDefaultPercentage(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFontColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetBackgroundColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFontWeightResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetRSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetRSScaleWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetTextResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFontSizeResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObj(FrameNode* frameNode, JsProgressResourceType jsResourceType,
+        const RefPtr<ResourceObject>& resObj);
+    static void CreateLSOrRingOrCapsuleWithResourceObj(
+        FrameNode* frameNode, JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
+    static void SetGradientColorByUser(FrameNode* frameNode, bool value);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

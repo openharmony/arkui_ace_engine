@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
@@ -56,11 +57,12 @@ void ClickRecognizer::ForceCleanRecognizer()
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
-    if (distanceThreshold_ < std::numeric_limits<double>::infinity()) {
+    auto distanceThreshold = distanceThreshold_.ConvertToPx();
+    if (distanceThreshold < std::numeric_limits<double>::infinity()) {
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
-        if (offset.GetDistance() > distanceThreshold_) {
+        if (offset.GetDistance() > distanceThreshold) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
-            "distanceThreshold_ is %{public}f", distanceThreshold_);
+            "distanceThreshold_ is %{public}f", distanceThreshold);
             extraInfo_ += "move distance out of distanceThreshold.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
@@ -73,7 +75,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        bool needPostEvent = isPostEventResult_ || event.passThrough;
+        TransformForRecognizer(
+            localPoint, frameNode, false, needPostEvent, event.postEventNodeId);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
@@ -91,13 +95,32 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 }
 
 ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count)
+{
+    if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
+        fingers_ = DEFAULT_TAP_FINGERS;
+    }
+    distanceThreshold_ = Dimension(
+        Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+
+    userDT_ = distanceThreshold_.ConvertToPx();
+    if (userDT_ <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+
+    SetOnAccessibility(GetOnAccessibilityEventFunc());
+}
+
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, Dimension distanceThreshold, bool isLimitFingerCount)
     : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
     }
-    if (distanceThreshold_ <= 0) {
-        distanceThreshold_ = std::numeric_limits<double>::infinity();
+    
+    userDT_ = distanceThreshold.ConvertToPx();
+    if (userDT_ <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
     SetOnAccessibility(GetOnAccessibilityEventFunc());
@@ -133,6 +156,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);
@@ -154,6 +178,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
         info.SetRollAngle(touchPoint.rollAngle.value());
     }
     info.SetSourceTool(touchPoint.sourceTool);
+    info.SetTargetDisplayId(touchPoint.targetDisplayId);
     return info;
 }
 
@@ -171,7 +196,7 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "CLK RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
     lastRefereeState_ = refereeState_;
@@ -186,10 +211,11 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
-    TransformForRecognizer(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
+        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+    TransformForRecognizer(
+        localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info = GetClickInfo();
@@ -318,14 +344,15 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
         OnAccepted();
         return;
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
-        return;
-    }
-    if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -360,6 +387,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
         if (CheckLimitFinger()) {
+            extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
         if (tappedCount_ == count_) {
@@ -410,7 +438,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    extraInfo_ += "receive cancel event.";
+    extraInfo_ += "cancel received.";
     if (IsRefereeFinished()) {
         return;
     }
@@ -418,10 +446,29 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }
 
+void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto refereeNG = eventManager->GetGestureRefereeNG(nullptr);
+    CHECK_NULL_VOID(refereeNG);
+    if (refereeNG->QueryAllDone()) {
+        for (const auto& recognizer : responseLinkRecognizer_) {
+            if (recognizer && recognizer != AceType::Claim(this)) {
+                recognizer->ResetResponseLinkRecognizer();
+            }
+        }
+        ResetResponseLinkRecognizer();
+    }
+}
+
 void ClickRecognizer::HandleOverdueDeadline()
 {
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        ResetStatusInHandleOverdueDeadline();
     }
 }
 
@@ -483,11 +530,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    TransformForRecognizer(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    TransformForRecognizer(
+        localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+    info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -509,11 +558,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         info.SetRollAngle(touchPoint.rollAngle.value());
     }
     info.SetSourceTool(touchPoint.sourceTool);
+    info.SetTargetDisplayId(touchPoint.targetDisplayId);
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    info.SetClickPointerEvent(touchPoint.GetTouchEventPointerEvent());
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     info.SetInputEventType(inputEventType_);
     info.CopyConvertInfoFrom(touchPoint.convertInfo);
@@ -530,7 +581,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetGestureTypeName(GestureTypeName::TAP_GESTURE);
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::TAP);
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
@@ -624,13 +675,35 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    info->SetTargetDisplayId(touchPoint.targetDisplayId);
+    info->SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     if (sysJudge_) {
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "sysJudge");
         return sysJudge_(gestureInfo_, info);
     }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
+}
+
+bool ClickRecognizer::CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    RefPtr<ClickRecognizer> curr = AceType::DynamicCast<ClickRecognizer>(recognizer);
+    if (!curr) {
+        return true;
+    }
+    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        return true;
+    }
+    if (curr->distanceThreshold_.Value() == std::numeric_limits<double>::infinity() &&
+        distanceThreshold_.Value() == std::numeric_limits<double>::infinity()) {
+        return false;
+    }
+    if (curr->distanceThreshold_ != distanceThreshold_) {
+        return true;
+    }
+    return false;
 }
 
 bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
@@ -640,9 +713,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         ResetStatus();
         return false;
     }
-
-    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_ ||
-        curr->distanceThreshold_ != distanceThreshold_) {
+    if (CheckReconcileFromProperties(recognizer)) {
         ResetStatus();
         return false;
     }
@@ -659,6 +730,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "userDT: " << userDT_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;

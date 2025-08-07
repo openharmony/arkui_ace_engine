@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
@@ -33,12 +34,16 @@ constexpr float FONT_SIZE_PERCENT_50 = 0.5f;
 constexpr int32_t HALF_NUMBER = 2;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
+const Dimension FONT_SIZE = Dimension(2.0);
+const Dimension FOCUS_SIZE = Dimension(1.0);
 } // namespace
 
 void PickerColumnPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
+
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
@@ -47,6 +52,7 @@ void PickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
     tossAnimationController_->SetPipelineContext(context);
     tossAnimationController_->SetColumn(AceType::WeakClaim(this));
     jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
@@ -59,11 +65,27 @@ void PickerColumnPattern::OnAttachToFrameNode()
 
 void PickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
+
     isTossPlaying_ = false;
     if (hapticController_) {
         hapticController_->Stop();
     }
     UnregisterWindowStateChangedCallback(frameNode);
+}
+
+void PickerColumnPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
+}
+
+void PickerColumnPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
 }
 
 void PickerColumnPattern::RegisterWindowStateChangedCallback()
@@ -229,10 +251,10 @@ RefPtr<TouchEventImpl> PickerColumnPattern::CreateItemTouchEventListener()
 void PickerColumnPattern::HandleMouseEvent(bool isHover)
 {
     if (isHover) {
-        hoverd_ = true;
+        hovered_ = true;
         PlayHoverAnimation(GetButtonHoverColor());
     } else {
-        hoverd_ = false;
+        hovered_ = false;
         PlayHoverAnimation(GetButtonBgColor());
     }
 }
@@ -245,7 +267,7 @@ void PickerColumnPattern::OnTouchDown()
 
 void PickerColumnPattern::OnTouchUp()
 {
-    if (hoverd_) {
+    if (hovered_) {
         PlayPressAnimation(GetButtonHoverColor());
     } else {
         PlayPressAnimation(GetButtonBgColor());
@@ -350,14 +372,32 @@ Dimension PickerColumnPattern::LinearFontSize(
     }
 }
 
+void PickerColumnPattern::HandleAccessibilityTextChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserTextValue(GetCurrentOption());
+    accessibilityProperty->SetAccessibilityText(GetCurrentOption());
+    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
 bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly, bool isUpdateAnimationProperties)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto pattern = host->GetPattern<PickerColumnPattern>();
+    CHECK_NULL_RETURN(pattern, false);
     auto totalOptionCount = pattern->GetOptionCount();
-    CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(totalOptionCount, false);
+
+    if (!GetCanLoopFromLayoutProperty() && ((isDown && currentIndex_ == totalOptionCount - 1) ||
+        (!isDown && currentIndex_ == 0))) {
+        return false;
+    }
 
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {
@@ -374,7 +414,7 @@ bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesO
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
 
-    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+    HandleAccessibilityTextChange();
     return true;
 }
 
@@ -556,6 +596,78 @@ void PickerColumnPattern::ScrollOption(double delta, bool isJump)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
+void PickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
+{
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    textLayoutProperty->UpdateTextColor(pickerLayoutProperty->GetDisappearColor().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+    if (pickerLayoutProperty->HasDisappearFontSize()) {
+        textLayoutProperty->UpdateFontSize(pickerLayoutProperty->GetDisappearFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+    }
+    textLayoutProperty->UpdateFontWeight(pickerLayoutProperty->GetDisappearWeight().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(pickerLayoutProperty->GetDisappearFontFamily().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(pickerLayoutProperty->GetDisappearFontStyle().value_or(
+        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+}
+
+void PickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
+{
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    textLayoutProperty->UpdateTextColor(
+        pickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
+    if (pickerLayoutProperty->HasFontSize()) {
+        textLayoutProperty->UpdateFontSize(pickerLayoutProperty->GetFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
+    }
+    textLayoutProperty->UpdateFontWeight(
+        pickerLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
+    textLayoutProperty->UpdateFontFamily(
+        pickerLayoutProperty->GetFontFamily().value_or(pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        pickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+}
+
+void PickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
+{
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(false, false).GetTextColor());
+        }
+    } else {
+        textLayoutProperty->UpdateTextColor(
+            pickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    }
+
+    if (pickerLayoutProperty->HasSelectedFontSize()) {
+        textLayoutProperty->UpdateFontSize(pickerLayoutProperty->GetSelectedFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
+    }
+    textLayoutProperty->UpdateFontWeight(
+        pickerLayoutProperty->GetSelectedWeight().value_or(pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
+    SelectedWeight_ =
+        pickerLayoutProperty->GetSelectedWeight().value_or(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    textLayoutProperty->UpdateFontFamily(pickerLayoutProperty->GetSelectedFontFamily().value_or(
+        pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        pickerLayoutProperty->GetSelectedFontStyle().value_or(pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+}
+
 void PickerColumnPattern::ResetAlgorithmOffset()
 {
     algorithmOffset_.clear();
@@ -636,8 +748,33 @@ void PickerColumnPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetAccessibilityCustomRole(parentNode->GetTag());
+    accessibilityProperty->SetUserTextValue(GetCurrentOption());
+    accessibilityProperty->SetAccessibilityText(GetCurrentOption());
+
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [weakPtr = WeakClaim(this), accessibilityPtr = WeakClaim(RawPtr(accessibilityProperty))]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+        CHECK_NULL_VOID(accessibilityProperty);
+        if (pattern->CanMove(true)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+        if (pattern->CanMove(false)) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    });
+
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);

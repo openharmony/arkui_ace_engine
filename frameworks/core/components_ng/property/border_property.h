@@ -115,6 +115,7 @@ struct BorderRadiusPropertyT<Dimension> {
     {}
 
     bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
+    bool operator!=(const BorderRadiusPropertyT<Dimension>& value) const;
 
     void SetRadius(const Dimension& borderRadius);
 
@@ -150,11 +151,29 @@ struct BorderRadiusPropertyT<Dimension> {
         resMap_[key] = {resObj, std::move(updateFunc)};
     }
 
+    bool HasResources() const
+    {
+        return !resMap_.empty();
+    }
+
     void ReloadResources()
     {
         for (const auto& [key, resourceUpdater] : resMap_) {
             resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
         }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
+        }
+    }
+
+    void ClearResources()
+    {
+        resMap_.clear();
     }
 };
 
@@ -257,10 +276,23 @@ struct BorderColorProperty {
         resMap_[key] = {resObj, std::move(updateFunc)};
     }
 
+    bool HasResources() const
+    {
+        return !resMap_.empty();
+    }
+
     void ReloadResources()
     {
         for (const auto& [key, resourceUpdater] : resMap_) {
             resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
         }
     }
 };
@@ -347,6 +379,11 @@ struct BorderWidthPropertyT<Dimension> {
             return;
         }
         resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    bool HasResources() const
+    {
+        return !resMap_.empty();
     }
 
     void ReloadResources()

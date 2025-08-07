@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -158,7 +159,7 @@ void FocusAnimationModifier::InitRoundRectTrajectory(const RSRoundRect& rrect)
 
 void FocusAnimationModifier::InitCircleTrajectory(float radius)
 {
-    grith_ = 2.0f * M_PI * radius;
+    grith_ = 2.0f * ACE_PI * radius;
     topLeftX_ = radius;
     topLeftY_ = radius;
     topRightX_ = radius;
@@ -312,7 +313,7 @@ float FocusAnimationModifier::CalArcAngle(float radius, float arcLen)
 
 float FocusAnimationModifier::CalArcLen(float radius)
 {
-    return 0.5f * M_PI * radius;
+    return 0.5f * ACE_PI * radius;
 }
 
 std::tuple<float, float> FocusAnimationModifier::GetPosition(float curProcess)
@@ -345,6 +346,6 @@ float FocusAnimationModifier::GetIncludeAngleOfVector(float x0, float y0, float 
         return 0.0f;
     }
     float angle = std::acos(res);
-    return y2 < y0 ? 360.0f - angle / M_PI * 180.0f : angle / M_PI * 180.0f;
+    return y2 < y0 ? 360.0f - angle / ACE_PI * 180.0f : angle / ACE_PI * 180.0f;
 }
 } // namespace OHOS::Ace::NG

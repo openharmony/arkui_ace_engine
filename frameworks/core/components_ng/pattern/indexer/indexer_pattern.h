@@ -104,6 +104,7 @@ protected:
     void RemoveBubble();
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
     void OnSelect();
+    void ItemSelectedChangedAnimation();
     int32_t GetSkipChildIndex(int32_t step);
     void UpdatePopupOpacity(float ratio);
     void UpdatePopupVisibility(VisibleType visible);
@@ -122,7 +123,7 @@ private:
     void DumpInfo() override;
     void OnColorModeChange(uint32_t colorMode) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void BuildArrayValueItems();
     void BuildFullArrayValue();
     void CollapseArrayValue();
@@ -189,7 +190,6 @@ private:
     void IndexerHoverInAnimation();
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
-    void ItemSelectedChangedAnimation();
     void IndexerPressOutAnimation();
     void SetActionSelect(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
     void SetActionClearSelection(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);

@@ -54,8 +54,9 @@ public:
 private:
     void RunPluginContainer();
     void InitEvent(const RefPtr<PluginComponent>& component);
-    void SplitString(const std::string& str, char tag, std::vector<std::string>& strList);
+    void SplitString(const std::string& str, char tag, std::vector<std::string>& strList) const;
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
+    std::string GetPackageCodeLanguage(const RequestPluginInfo& info) const;
     std::string GetPackagePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByAbsolutePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;

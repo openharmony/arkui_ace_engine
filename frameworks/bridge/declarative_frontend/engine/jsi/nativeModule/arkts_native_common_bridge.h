@@ -24,6 +24,8 @@ namespace OHOS::Ace::NG {
 using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class CommonBridge {
 public:
+    static ArkUINativeModuleValue SetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -64,6 +66,8 @@ public:
     static ArkUINativeModuleValue ResetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetLayoutGravity(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetLayoutGravity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackdropBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackdropBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHueRotate(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -293,6 +297,9 @@ public:
     static Local<panda::ObjectRef> CreateGestureInfo(EcmaVM* vm, const RefPtr<NG::GestureInfo>& gestureInfo);
     static Local<panda::ObjectRef> CreateGestureEventInfo(
         EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
+    static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
+    static void SetCommonAttributes(
+        Local<panda::ObjectRef>& obj, EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateFingerInfosInfo(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, Local<panda::ObjectRef>& obj);
     static Local<panda::ObjectRef> SetUniqueAttributes(
@@ -321,11 +328,9 @@ public:
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
         bool& limitFingerCount, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
-        PanDistanceMap& distanceMap, bool& limitFingerCount, uint32_t argNumber);
+        PanDistanceMapDimension& distanceMap, bool& limitFingerCount, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateTapGestureLocationInfo(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
-    static Local<panda::ObjectRef> CreateTapGestureLocationEvent(
-        EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);    
     static void GetSwipeGestureValue(
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed,
         bool& limitFingerCount, uint32_t argNumber);
@@ -342,6 +347,8 @@ public:
         int& isLocalizedBorderColor, int& isLocalizedBorderRadius);
     static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
         std::vector<ArkUI_Float32>& values, bool needLocalized = false);
+    static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
+        std::vector<ArkUI_Float32>& values, std::vector<RefPtr<ResourceObject>>& resObjs, bool needLocalized = false);
     static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
     static ArkUIGesture* GetGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info);
@@ -398,6 +405,8 @@ public:
     static ArkUINativeModuleValue ResetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddTapGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);

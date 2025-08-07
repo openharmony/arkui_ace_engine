@@ -33,7 +33,7 @@ ohos_shared_library("componentUtils_ani") {
 #构建abc
 generate_static_abc("componentUtils") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.componentUtils.ets" ]
+  files = [ "./ets/@ohos.arkui.componentUtils.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/componentUtils.abc"
 }

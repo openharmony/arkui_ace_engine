@@ -170,9 +170,13 @@ foreach(item, ace_platforms) {
       sources += [
         "$ace_root/adapter/preview/osal/event_report.cpp",
         "$ace_root/adapter/preview/osal/system_properties.cpp",
+        "$ace_root/adapter/preview/osal/system_properties_multi_thread.cpp",
       ]
     } else {
-      sources += [ "$ace_root/adapter/$platform/osal/system_properties.cpp" ]
+      sources += [
+        "$ace_root/adapter/$platform/osal/system_properties.cpp",
+        "$ace_root/adapter/$platform/osal/system_properties_multi_thread.cpp",
+      ]
     }
 
     if (platform == "ohos") {

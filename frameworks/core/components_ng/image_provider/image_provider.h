@@ -68,6 +68,11 @@ struct UriDownLoadConfig {
     bool hasProgressCallback = false;
 };
 
+struct ImageLoadResultInfo {
+    ImageErrorInfo errorInfo;
+    size_t fileSize = 0; // size of file in bytes
+};
+
 class ImageObject;
 
 // load & decode images

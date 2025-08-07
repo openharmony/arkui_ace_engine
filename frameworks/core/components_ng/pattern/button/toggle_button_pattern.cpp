@@ -728,6 +728,22 @@ void ToggleButtonPattern::OnRestoreInfo(const std::string& restoreInfo)
 void ToggleButtonPattern::OnColorConfigurationUpdate()
 {
     OnModifyDone();
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<ToggleTheme>();
+        CHECK_NULL_VOID(theme);
+        auto pops = host->GetPaintProperty<ToggleButtonPaintProperty>();
+        CHECK_NULL_VOID(pops);
+        if (!pops->GetSelectedColorSetByUserValue(false)) {
+            Color color = theme->GetCheckedColor();
+            pops->UpdateSelectedColor(color);
+        }
+        host->MarkModifyDone();
+        host->MarkDirtyNode();
+    }
 }
 
 bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)

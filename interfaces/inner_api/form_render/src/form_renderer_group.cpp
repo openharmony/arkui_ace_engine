@@ -17,6 +17,7 @@
 
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
+#include "form_renderer_event_report.h"
 
 namespace OHOS {
 namespace Ace {
@@ -128,6 +129,8 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
     auto compId = formRequest.compId;
     OHOS::AAFwk::Want want = formRequest.want;
     AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
+    FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(formJsInfo.formId, formJsInfo.bundleName,
+        formJsInfo.formName);
     if (formRenderer_ == nullptr || initState_ == FormRendererInitState::UNINITIALIZED) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_, eventHandler_);
         if (!formRenderer_) {
@@ -292,7 +295,7 @@ void FormRendererGroup::RecoverRenderer(const std::vector<FormRequest>& formRequ
         HILOG_ERROR("current comp index %{public}zu invalid", currentCompIndex);
         return;
     }
-    
+
     const FormRequest &currentComp = formRequests[currentCompIndex];
     for (auto formRequest: formRequests) {
         formRequests_.emplace_back(formRequest);

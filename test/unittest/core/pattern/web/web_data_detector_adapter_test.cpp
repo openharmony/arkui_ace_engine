@@ -21,6 +21,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -102,6 +103,7 @@ HWTEST_F(WebDataDetectorAdapterTest, SetDataDetectorConfig_001, TestSize.Level0)
     adapter->SetDataDetectorEnable(true);
     EXPECT_EQ(adapter->config_.enable, false);
     EXPECT_EQ(adapter->newConfig_.enable, true);
+
     TextDetectConfig config;
     config.types = "phoneNum";
     adapter->SetDataDetectorConfig(config);
@@ -565,6 +567,7 @@ HWTEST_F(WebDataDetectorAdapterTest, ProcessClick_001, TestSize.Level0)
     adapter->ProcessClick("{}");
     adapter->ProcessClick(R"({"rect": 666})");
     adapter->ProcessClick(R"({"rect": {}})");
+    adapter->ProcessClick(R"({"rect": {}, "touchTest": true})");
     EXPECT_FALSE(adapter->hasInit_);
 #endif
 }
@@ -684,6 +687,203 @@ HWTEST_F(WebDataDetectorAdapterTest, OnDetectSelectedTextDone_001, TestSize.Leve
     adapter->UpdateAISelectMenu("phoneNum", "12345678901");
     EXPECT_FALSE(adapter->hasInit_);
 #endif
+}
+
+/**
+ * @tc.name: GetPreviewMenuNode_001
+ * @tc.desc: Test GetPreviewMenuNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, GetPreviewMenuNode_001, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto adapter = AceType::MakeRefPtr<WebDataDetectorAdapter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)), 0);
+    AIMenuInfo info { "phoneNum", "12345678901", R"(<a href="tel:12345678901">12345678901</a>)", RectF(0, 0, 10, 10) };
+
+    auto node = adapter->GetPreviewMenuNode(info);
+    EXPECT_EQ(node, nullptr);
+
+    FuncVariant funcCopy = []() -> std::string { return "copy"; };
+    FuncVariant funcSelectText = []() -> std::string { return "selectText"; };
+    FuncVariant funcPhoneEmailURL = [](sptr<IRemoteObject> obj, std::string content) {};
+    FuncVariant funcLocation = [](int32_t id, std::string content) {};
+    FuncVariant funcDateTime = [](int32_t a, std::string b, std::string c, int32_t d, std::string e) {};
+
+    adapter->textDetectResult_.menuOptionAndAction["phoneNum"] = { { "make phone", funcPhoneEmailURL },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
+    adapter->textDetectResult_.menuOptionAndAction["location"] = { { "make location", funcLocation },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
+
+    node = adapter->GetPreviewMenuNode(info);
+    EXPECT_NE(node, nullptr);
+
+    AIMenuInfo info2 { "location", "here", R"(<a href="geo:here">here</a>)", RectF(0, 0, 10, 10) };
+    node = adapter->GetPreviewMenuNode(info2);
+    EXPECT_NE(node, nullptr);
+    
+    // add mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<TextOverlayTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    node = adapter->GetPreviewMenuNode(info);
+    EXPECT_NE(node, nullptr);
+
+    node = adapter->GetPreviewMenuNode(info2);
+    EXPECT_NE(node, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetPreviewMenuBuilder_001
+ * @tc.desc: Test GetPreviewMenuBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, GetPreviewMenuBuilder_001, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto adapter = AceType::MakeRefPtr<WebDataDetectorAdapter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)), 0);
+
+    FuncVariant funcCopy = []() -> std::string { return "copy"; };
+    FuncVariant funcSelectText = []() -> std::string { return "selectText"; };
+    FuncVariant funcPhoneEmailURL = [](sptr<IRemoteObject> obj, std::string content) {};
+    FuncVariant funcLocation = [](int32_t id, std::string content) {};
+    FuncVariant funcDateTime = [](int32_t a, std::string b, std::string c, int32_t d, std::string e) {};
+
+    adapter->textDetectResult_.menuOptionAndAction["phoneNum"] = { { "make phone", funcPhoneEmailURL },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
+    adapter->textDetectResult_.menuOptionAndAction["location"] = { { "make location", funcLocation },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
+    adapter->textDetectResult_.menuOptionAndAction["url"] = { { "load url", funcPhoneEmailURL },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
+
+    std::function<void()> func1, func2;
+
+    // also test SetPreviewMenuLink
+    EXPECT_FALSE(adapter->SetPreviewMenuLink("tel:12345678901"));
+    EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::INVALID);
+    EXPECT_EQ(adapter->previewMenuContent_, "");
+
+    EXPECT_FALSE(adapter->GetPreviewMenuBuilder(func1, func2));
+    adapter->config_.enable = true;
+
+    EXPECT_FALSE(adapter->GetPreviewMenuBuilder(func1, func2));
+
+    EXPECT_TRUE(adapter->SetPreviewMenuLink("www.example.com"));
+    EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::URL);
+    EXPECT_EQ(adapter->previewMenuContent_, "www.example.com");
+
+    adapter->SetPreviewMenuAttr();
+    EXPECT_TRUE(adapter->SetPreviewMenuLink("tel:12345678901"));
+    EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::PHONE_NUMBER);
+    EXPECT_EQ(adapter->previewMenuContent_, "12345678901");
+
+    EXPECT_TRUE(adapter->SetPreviewMenuLink("tel:12345678902"));
+    EXPECT_EQ(adapter->previewMenuContent_, "12345678901");
+
+    EXPECT_TRUE(adapter->SetPreviewMenuLink("www.example.com"));
+    EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::URL);
+    EXPECT_EQ(adapter->previewMenuContent_, "www.example.com");
+
+    EXPECT_TRUE(adapter->GetPreviewMenuBuilder(func1, func2));
+    EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::INVALID);
+    EXPECT_EQ(adapter->previewMenuContent_, "");
+#endif
+}
+
+/**
+ * @tc.name: UrlDecode_001
+ * @tc.desc: Test UrlDecode function with various scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, UrlDecode_001, TestSize.Level0)
+{
+    // Case 1: Empty string test
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode(""), "");
+
+    // Case 2: Normal characters pass through
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("hello world"), "hello world");
+
+    // Case 3: '+' decoded to space
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("hello+world"), "hello world");
+
+    // Case 4: Valid percent encoding
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("%21%3F%23"), "!?#");  // !?# URL code
+
+    // Case 5: Invalid percent encoding (single digit)
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("%2"), "%2");
+
+    // Case 6: Invalid percent encoding (non-hex characters)
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("%XX"), "%XX");
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("%2G"), "%2G");
+
+    // Case 7: Percent sign at string end (incomplete encoding)
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("abc%"), "abc%");
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("%"), "%");
+
+    // Case 8: Mixed cases
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("a%20b%2Fc+d"), "a b/c d");
+    
+    // Case 9: Uppercase hex encoding
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode("%41%42%43"), "ABC");  // URL encoding of ABC
+
+    // Case 10: Long string mixed test
+    std::string longInput = "%E4%BD%A0%E5%A5%BD+%E4%B8%96%E7%95%8C";  // URL encoding of "你好 世界"
+    EXPECT_EQ(WebDataDetectorAdapter::UrlDecode(longInput), "你好 世界");
+}
+
+/**
+ * @tc.name: ExtraParamsTest_001
+ * @tc.desc: Test extra params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, ExtraParamsTest_001, TestSize.Level0)
+{
+    auto adapter = AceType::MakeRefPtr<WebDataDetectorAdapter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)), 0);
+    std::map<std::string, std::string> res;
+    res = adapter->AttrsToParams(nullptr);
+    EXPECT_TRUE(res.empty());
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString("test"));
+    EXPECT_TRUE(res.empty());
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString("{}"));
+    EXPECT_TRUE(res.empty());
+
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString(R"({"test": "test"})"));
+    EXPECT_TRUE(res.empty());
+
+    adapter->extraParamKeys_ = {"test"};
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString(R"({"example": "test"})"));
+    EXPECT_TRUE(res.empty());
+    res = adapter->AttrsToParams(JsonUtil::ParseJsonString(R"({"test": "test"})"));
+    EXPECT_FALSE(res.empty());
+}
+
+/**
+ * @tc.name: ExtraParamsTest_002
+ * @tc.desc: Test extra params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebDataDetectorAdapterTest, ExtraParamsTest_002, TestSize.Level0)
+{
+    std::map<std::string, std::string> res;
+    res = WebDataDetectorAdapter::ParseExtraParams("datetime", nullptr);
+    EXPECT_TRUE(res.empty());
+    res = WebDataDetectorAdapter::ParseExtraParams("datetime", JsonUtil::ParseJsonString(R"([])"));
+    EXPECT_TRUE(res.empty());
+    res = WebDataDetectorAdapter::ParseExtraParams("invalid", JsonUtil::ParseJsonString(R"({})"));
+    EXPECT_TRUE(res.empty());
+
+    // for others
+    res = WebDataDetectorAdapter::ParseExtraParams("phoneNum", JsonUtil::ParseJsonString(R"({})"));
+    EXPECT_TRUE(res.empty());
+
+    // for datetime
+    res = WebDataDetectorAdapter::ParseExtraParams("datetime", JsonUtil::ParseJsonString(R"({})"));
+    EXPECT_TRUE(res.empty());
+    res = WebDataDetectorAdapter::ParseExtraParams(
+        "datetime", JsonUtil::ParseJsonString(R"({"startTimestamp": 123456})"));
+    EXPECT_FALSE(res.empty());
 }
 
 /**

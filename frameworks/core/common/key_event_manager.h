@@ -41,6 +41,7 @@ public:
     bool IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys);
     bool DispatchKeyboardShortcut(const KeyEvent& event);
     void ReDispatch(KeyEvent& keyEvent);
+    bool RemoveOverlayByESC(const KeyEvent& keyEvent);
     void SetIsKeyConsumed(bool value);
     void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
     {

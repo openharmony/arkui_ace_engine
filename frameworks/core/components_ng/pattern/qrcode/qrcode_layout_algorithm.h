@@ -37,6 +37,8 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     float GetQRCodeSize() const
     {
         return qrCodeSize_;

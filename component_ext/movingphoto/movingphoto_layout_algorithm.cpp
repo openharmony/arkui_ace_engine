@@ -18,7 +18,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t ROUND_XMAGE_MODE_VALUE = 10;
+constexpr int32_t ROUND_XMAGE_MODE_VALUE = 0;
+constexpr int32_t ROUND_XMAGE_PIXEL_GAP = 2;
 }
 
 void MovingPhotoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -29,19 +30,22 @@ void MovingPhotoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
-    SizeF roundXmageOffset = GetRoundXmageLayoutOffset(layoutWrapper);
+    SizeF xmageOffset = GetXmageLayoutOffset(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        CHECK_NULL_VOID(child);
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::COLUMN_ETS_TAG) {
             child->GetGeometryNode()->SetMarginFrameOffset(
-                { contentOffset.GetX() + roundXmageOffset.Width(), contentOffset.GetY() + roundXmageOffset.Height() });
+                { contentOffset.GetX() + xmageOffset.Width(), contentOffset.GetY() + xmageOffset.Height() });
         }
         child->Layout();
         if (child->GetHostTag() != V2::COLUMN_ETS_TAG) {
             continue;
         }
-        auto childLayoutWrapper = host->GetChildByIndex(1);
+        int32_t childCount = host->GetTotalChildCount();
+        CHECK_NULL_VOID(childCount >= 1);
+        auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
         for (auto&& videoChild : childLayoutWrapper->GetAllChildrenWithBuild()) {
             if (videoChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
                 videoChild->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
@@ -55,17 +59,17 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-    auto layoutProperty = DynamicCast<MovingPhotoLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetXmageModeStatus() && pattern->GetXmageModeValue() == ROUND_XMAGE_MODE_VALUE) {
-        MeasureInRoundXmageMode(layoutWrapper);
+    pattern->SetXmagePosition();
+    if (pattern->GetXmageModeStatus() && pattern->GetXmageModeValue() != ROUND_XMAGE_MODE_VALUE) {
+        MeasureInXmageMode(layoutWrapper);
         return;
     }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        CHECK_NULL_VOID(child);
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             auto layoutConstraintForImage = layoutConstraint;
             layoutConstraintForImage.UpdateSelfMarginSizeWithCheck(OptionalSizeF(contentSize));
@@ -74,23 +78,14 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             child->Measure(layoutConstraintForImage);
         } else if (child->GetHostTag() == V2::COLUMN_ETS_TAG) {
             auto layoutConstraintForColumn = layoutConstraint;
-            auto columnSize = contentSize;
-            float xmageHeight = 0;
-            float ratio = 0;
-            if (pattern->GetXmageModeStatus()) {
-                pattern->GetXmageHeight();
-                ratio = pattern->CalculateRatio(contentSize);
-                xmageHeight = layoutProperty->HasXmageHeight() ? layoutProperty->GetXmageHeight().value() : 0;
-                TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Measure xmageHeight.%{public}f, GetRatio.%{public}f",
-                    xmageHeight, ratio);
-                columnSize.SetHeight(contentSize.Height() - xmageHeight * ratio + 1);
-            }
-            layoutConstraintForColumn.UpdateSelfMarginSizeWithCheck(OptionalSizeF(columnSize));
-            layoutConstraintForColumn.UpdateMaxSizeWithCheck(columnSize);
-            layoutConstraintForColumn.UpdateMinSizeWithCheck(columnSize);
+            layoutConstraintForColumn.UpdateSelfMarginSizeWithCheck(OptionalSizeF(contentSize));
+            layoutConstraintForColumn.UpdateMaxSizeWithCheck(contentSize);
+            layoutConstraintForColumn.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForColumn);
-            auto childLayoutWrapper = host->GetChildByIndex(1);
-            ChildMeasure(childLayoutWrapper, contentSize, xmageHeight * ratio, layoutConstraint);
+            int32_t childCount = host->GetTotalChildCount();
+            CHECK_NULL_VOID(childCount >= 1);
+            auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
+            ChildMeasure(childLayoutWrapper, contentSize, layoutConstraint);
             if (childLayoutWrapper) {
                 PerformMeasureSelf(&*childLayoutWrapper);
             }
@@ -99,7 +94,22 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     PerformMeasureSelf(layoutWrapper);
 }
 
-void MovingPhotoLayoutAlgorithm::MeasureInRoundXmageMode(LayoutWrapper* layoutWrapper)
+void MovingPhotoLayoutAlgorithm::ChildMeasure(RefPtr<LayoutWrapper> childLayoutWrapper,
+                                              SizeF contentSize, LayoutConstraintF layoutConstraint)
+{
+    for (auto&& columnChild : childLayoutWrapper->GetAllChildrenWithBuild()) {
+        if (columnChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
+            auto layoutConstraintForVideo = layoutConstraint;
+            layoutConstraintForVideo.UpdateSelfMarginSizeWithCheck(OptionalSizeF(contentSize));
+            layoutConstraintForVideo.UpdateMaxSizeWithCheck(contentSize);
+            layoutConstraintForVideo.UpdateMinSizeWithCheck(contentSize);
+            columnChild->Measure(layoutConstraintForVideo);
+        }
+    }
+}
+
+
+void MovingPhotoLayoutAlgorithm::MeasureInXmageMode(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
@@ -110,6 +120,7 @@ void MovingPhotoLayoutAlgorithm::MeasureInRoundXmageMode(LayoutWrapper* layoutWr
     auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        CHECK_NULL_VOID(child);
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             auto layoutConstraintForImage = layoutConstraint;
             layoutConstraintForImage.UpdateSelfMarginSizeWithCheck(OptionalSizeF(contentSize));
@@ -119,16 +130,17 @@ void MovingPhotoLayoutAlgorithm::MeasureInRoundXmageMode(LayoutWrapper* layoutWr
         } else if (child->GetHostTag() == V2::COLUMN_ETS_TAG) {
             auto layoutConstraintForColumn = layoutConstraint;
             auto columnSize = contentSize;
-            pattern->SetXmagePosition();
             SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
             SizeF imageSize = layoutProperty->GetImageSize().value();
-            columnSize.SetHeight(imageSize.Height() * xmageOffsetRatio.Height() + 1);
-            columnSize.SetWidth(imageSize.Width() * xmageOffsetRatio.Width() + 1);
+            columnSize.SetHeight(imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
+            columnSize.SetWidth(imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP);
             layoutConstraintForColumn.UpdateSelfMarginSizeWithCheck(OptionalSizeF(columnSize));
             layoutConstraintForColumn.UpdateMaxSizeWithCheck(columnSize);
             layoutConstraintForColumn.UpdateMinSizeWithCheck(columnSize);
             child->Measure(layoutConstraintForColumn);
-            auto childLayoutWrapper = host->GetChildByIndex(1);
+            int32_t childCount = host->GetTotalChildCount();
+            CHECK_NULL_VOID(childCount >= 1);
+            auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
             ChildMeasureInXmage(childLayoutWrapper, contentSize, imageSize, xmageOffsetRatio, layoutConstraint);
             if (childLayoutWrapper) {
                 PerformMeasureSelf(&*childLayoutWrapper);
@@ -138,31 +150,16 @@ void MovingPhotoLayoutAlgorithm::MeasureInRoundXmageMode(LayoutWrapper* layoutWr
     PerformMeasureSelf(layoutWrapper);
 }
 
-void MovingPhotoLayoutAlgorithm::ChildMeasure(RefPtr<LayoutWrapper> childLayoutWrapper,
-                                              SizeF contentSize, float xHeight, LayoutConstraintF layoutConstraint)
-{
-    for (auto&& columnChild : childLayoutWrapper->GetAllChildrenWithBuild()) {
-        if (columnChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
-            auto layoutConstraintForVideo = layoutConstraint;
-            auto videoSize = contentSize;
-            videoSize.SetHeight(contentSize.Height() - xHeight);
-            layoutConstraintForVideo.UpdateSelfMarginSizeWithCheck(OptionalSizeF(videoSize));
-            layoutConstraintForVideo.UpdateMaxSizeWithCheck(videoSize);
-            layoutConstraintForVideo.UpdateMinSizeWithCheck(videoSize);
-            columnChild->Measure(layoutConstraintForVideo);
-        }
-    }
-}
-
 void MovingPhotoLayoutAlgorithm::ChildMeasureInXmage(RefPtr<LayoutWrapper> childLayoutWrapper, SizeF contentSize,
     SizeF imageSize, SizeF xmageRatio, LayoutConstraintF layoutConstraint)
 {
     for (auto&& columnChild : childLayoutWrapper->GetAllChildrenWithBuild()) {
+        CHECK_NULL_VOID(columnChild);
         if (columnChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
             auto layoutConstraintForVideo = layoutConstraint;
             auto videoSize = contentSize;
-            videoSize.SetHeight(imageSize.Height() * xmageRatio.Height());
-            videoSize.SetWidth(imageSize.Width() * xmageRatio.Width());
+            videoSize.SetHeight(imageSize.Height() * xmageRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
+            videoSize.SetWidth(imageSize.Width() * xmageRatio.Width() + ROUND_XMAGE_PIXEL_GAP);
             layoutConstraintForVideo.UpdateSelfMarginSizeWithCheck(OptionalSizeF(videoSize));
             layoutConstraintForVideo.UpdateMaxSizeWithCheck(videoSize);
             layoutConstraintForVideo.UpdateMinSizeWithCheck(videoSize);
@@ -179,7 +176,7 @@ std::optional<SizeF> MovingPhotoLayoutAlgorithm::MeasureContent(
     return layoutSize;
 }
 
-SizeF MovingPhotoLayoutAlgorithm::GetRoundXmageLayoutOffset(LayoutWrapper* layoutWrapper)
+SizeF MovingPhotoLayoutAlgorithm::GetXmageLayoutOffset(LayoutWrapper* layoutWrapper)
 {
     SizeF ret = SizeF(0, 0);
     auto host = layoutWrapper->GetHostNode();
@@ -195,7 +192,8 @@ SizeF MovingPhotoLayoutAlgorithm::GetRoundXmageLayoutOffset(LayoutWrapper* layou
         }
         SizeF xmageOffset = layoutProperty->GetXmageOffset().value();
         SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
-        ret = SizeF(xmageOffset.Width() * xmageOffsetRatio.Width(), xmageOffset.Height() * xmageOffsetRatio.Height());
+        ret = SizeF(xmageOffset.Width() * xmageOffsetRatio.Width() - 1,
+                    xmageOffset.Height() * xmageOffsetRatio.Height() - 1);
     }
     return ret;
 }

@@ -15,18 +15,19 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "core/components/search/search_theme.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "base/memory/ace_type.h"
-#include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/search/search_theme.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -119,13 +120,14 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     auto themeFontSize = theme->GetFontSize();
     CalcDimension size = themeFontSize;
+    RefPtr<ResourceObject> resourceObject;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, size) || size.Unit() == DimensionUnit::PERCENT
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, size, resourceObject) || size.Unit() == DimensionUnit::PERCENT
         || LessNotEqual(size.Value(), 0.0)) {
         value.fontSizeNumber = themeFontSize.Value();
         value.fontSizeUnit = static_cast<int8_t>(themeFontSize.Unit());
     } else {
-        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size);
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size, resourceObject);
         value.fontSizeNumber = size.Value();
         value.fontSizeUnit = static_cast<int8_t>(size.Unit());
     }
@@ -153,7 +155,8 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
         value.fontStyle = fiveArg->Int32Value(vm);
     }
 
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchTextFont(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchTextFont(
+        nativeNode, &value, AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -177,10 +180,13 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
+    RefPtr<ResourceObject> resourceObject;
     uint32_t result;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         result = color.GetValue();
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderColor(nativeNode, result);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderColor(
+            nativeNode, result, AceType::RawPtr(resourceObject));
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchPlaceholderColor(nativeNode);
     }
@@ -238,19 +244,23 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
     auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, caretWidthArg, caretWidth, false) ||
+    RefPtr<ResourceObject> widthObject;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, caretWidthArg, caretWidth, widthObject, false) ||
             LessNotEqual(caretWidth.Value(), 0.0)) {
         caretWidth = textFieldTheme->GetCursorWidth();
     }
     Color color;
     uint32_t caretColor;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
+    RefPtr<ResourceObject> colorObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
         caretColor = color.GetValue();
     } else {
         caretColor = textFieldTheme->GetCursorColor().GetValue();
     }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCaretStyle(
-        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);
+        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor,
+        AceType::RawPtr(widthObject), AceType::RawPtr(colorObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -331,8 +341,9 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     }
     struct ArkUISizeType size = { 0.0, 0, nullptr };
     CalcDimension iconSize;
+    RefPtr<ResourceObject> sizeObject;
     if (!thirdArg->IsUndefined() && !thirdArg->IsNull() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, thirdArg, iconSize, false)) {
+        ArkTSUtils::ParseJsDimensionVpNG(vm, thirdArg, iconSize, sizeObject, false)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconHeight();
         }
@@ -343,19 +354,27 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     size.unit = static_cast<int8_t>(iconSize.Unit());
     Color value;
     uint32_t color;
+    RefPtr<ResourceObject> colorObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
-        ArkTSUtils::ParseJsColorAlpha(vm, forthArg, value)) {
+        ArkTSUtils::ParseJsColorAlpha(vm, forthArg, value, colorObject, nodeInfo)) {
         color = value.GetValue();
     } else {
         color = theme->GetSearchIconColor().GetValue();
     }
     std::string srcStr;
+    RefPtr<ResourceObject> srcObject;
     if (fifthArg->IsUndefined() || fifthArg->IsNull() ||
-        !ArkTSUtils::ParseJsMedia(vm, fifthArg, srcStr)) {
+        !ArkTSUtils::ParseJsMedia(vm, fifthArg, srcStr, srcObject)) {
         srcStr = "";
     }
     const char* src = srcStr.c_str();
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(nativeNode, style, &size, color, src);
+    ArkUIImageIconRes searchButtonIconObj;
+    searchButtonIconObj.sizeObj = AceType::RawPtr(sizeObject);
+    searchButtonIconObj.colorObj = AceType::RawPtr(colorObject);
+    searchButtonIconObj.srcObj = AceType::RawPtr(srcObject);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(
+        nativeNode, style, &size, color, src, &searchButtonIconObj);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -425,8 +444,9 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     auto themeFontSize = theme->GetFontSize();
     CalcDimension size;
+    RefPtr<ResourceObject> resourceObject;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size) || size.Unit() == DimensionUnit::PERCENT) {
+        !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size, resourceObject) || size.Unit() == DimensionUnit::PERCENT) {
         value.fontSizeNumber = themeFontSize.Value();
         value.fontSizeUnit = static_cast<int8_t>(themeFontSize.Unit());
     } else {
@@ -456,7 +476,8 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     if (!fiveArg->IsNull() && fiveArg->IsNumber()) {
         value.fontStyle = fiveArg->Int32Value(vm);
     }
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderFont(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderFont(
+        nativeNode, &value, AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -493,8 +514,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
     auto theme = themeManager->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+    RefPtr<ResourceObject> sizeObject;
     if (!secondArg->IsUndefined() && !secondArg->IsNull() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, size, false)) {
+        ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, size, sizeObject, false)) {
         if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
             size = theme->GetIconHeight();
         }
@@ -505,19 +527,25 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     value.unit = static_cast<int8_t>(size.Unit());
 
     Color color;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, threeArg, color)) {
+    RefPtr<ResourceObject> colorObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, threeArg, color, colorObject, nodeInfo)) {
         value.color = static_cast<int32_t>(color.GetValue());
     } else {
         value.color = INVALID_COLOR_VALUE;
     }
 
     std::string srcStr;
-    if (fourArg->IsUndefined() || fourArg->IsNull() || !ArkTSUtils::ParseJsMedia(vm, fourArg, srcStr)) {
+    RefPtr<ResourceObject> srcObject;
+    if (fourArg->IsUndefined() || fourArg->IsNull() || !ArkTSUtils::ParseJsMedia(vm, fourArg, srcStr, srcObject)) {
         srcStr = "";
     }
     value.src = srcStr.c_str();
-
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchIcon(nativeNode, &value);
+    ArkUIImageIconRes searchIconObj;
+    searchIconObj.sizeObj = AceType::RawPtr(sizeObject);
+    searchIconObj.colorObj = AceType::RawPtr(colorObject);
+    searchIconObj.srcObj = AceType::RawPtr(srcObject);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchIcon(nativeNode, &value, &searchIconObj);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -547,7 +575,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
     
     std::string valueString = "";
-    if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) && ArkTSUtils::ParseJsString(vm, secondArg, valueString)) {
+    RefPtr<ResourceObject> srcObject;
+    if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
+        ArkTSUtils::ParseJsString(vm, secondArg, valueString, srcObject)) {
         value.value = valueString.c_str();
     }
 
@@ -560,9 +590,10 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     auto theme = themeManager->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     CalcDimension size = theme->GetButtonFontSize();
-    if (ArkTSUtils::ParseJsDimensionVpNG(vm, threeArg, size) && size.Unit() != DimensionUnit::PERCENT &&
+    RefPtr<ResourceObject> sizeObject;
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, threeArg, size, sizeObject) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
-        ArkTSUtils::ParseJsDimensionFp(vm, threeArg, size);
+        ArkTSUtils::ParseJsDimensionFp(vm, threeArg, size, sizeObject);
     } else {
         size = theme->GetButtonFontSize();
     }
@@ -570,20 +601,26 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     value.sizeUnit = static_cast<int8_t>(size.Unit());
 
     Color fontColor;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor)) {
+    RefPtr<ResourceObject> colorObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor, colorObject, nodeInfo)) {
         value.fontColor = static_cast<int32_t>(fontColor.GetValue());
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
     
+    ArkUIImageIconRes searchButtonObj;
+    searchButtonObj.sizeObj = AceType::RawPtr(sizeObject);
+    searchButtonObj.colorObj = AceType::RawPtr(colorObject);
+    searchButtonObj.srcObj = AceType::RawPtr(srcObject);
     if (fiveArg->IsBoolean()) {
         value.autoDisable = fiveArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value, &searchButtonObj);
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchButton(nativeNode);
     }
 
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value, &searchButtonObj);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -615,11 +652,14 @@ ArkUINativeModuleValue SearchBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     auto theme = themeManager->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     Color value;
+    RefPtr<ResourceObject> resourceObject;
     uint32_t color = theme->GetTextColor().GetValue();
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, value)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, value, resourceObject, nodeInfo)) {
         color = value.GetValue();
     }
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchFontColor(nativeNode, color);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchFontColor(
+        nativeNode, color, AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -703,6 +743,10 @@ ArkUINativeModuleValue SearchBridge::SetSearchHeight(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    if (TextInputBridge::ParseLayoutPolicy(vm, valueArg, false)) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     CalcDimension height;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height)) {
@@ -713,10 +757,10 @@ ArkUINativeModuleValue SearchBridge::SetSearchHeight(ArkUIRuntimeCallInfo* runti
         }
         if (height.Unit() == DimensionUnit::CALC) {
             GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str());
+                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str(), nullptr);
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str());
+                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str(), nullptr);
         }
         GetArkUINodeModifiers()->getSearchModifier()->setSearchHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
@@ -776,14 +820,15 @@ ArkUINativeModuleValue SearchBridge::SetSearchMinFontSize(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, false)) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchAdaptMinFontSize(nativeNode);
     } else {
         if (value.IsNegative()) {
             value = theme->GetTextStyle().GetAdaptMinFontSize();
         }
         GetArkUINodeModifiers()->getSearchModifier()->setSearchAdaptMinFontSize(
-            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()));
+            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -811,13 +856,15 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     if (secondArg->IsInt()) {
         searchDecoration = secondArg->Int32Value(vm);
     }
-    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK);
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK, resourceObject, nodeInfo);
     int32_t textDecorationStyle = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchDecoration(
-        nativeNode, searchDecoration, color.GetValue(), textDecorationStyle);
+        nativeNode, searchDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -841,11 +888,12 @@ ArkUINativeModuleValue SearchBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension value;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, false)) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchLetterSpacing(nativeNode);
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->setSearchLetterSpacing(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+            nativeNode, value.Value(), static_cast<int>(value.Unit()), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -870,14 +918,15 @@ ArkUINativeModuleValue SearchBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension value;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, true)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, true)) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchLineHeight(nativeNode);
     } else {
         if (value.IsNegative()) {
             value.Reset();
         }
         GetArkUINodeModifiers()->getSearchModifier()->setSearchLineHeight(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+            nativeNode, value.Value(), static_cast<int>(value.Unit()), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -906,14 +955,15 @@ ArkUINativeModuleValue SearchBridge::SetSearchMaxFontSize(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, valueArg, value, DimensionUnit::FP, resourceObject, false)) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchAdaptMaxFontSize(nativeNode);
     } else {
         if (value.IsNegative()) {
             value = theme->GetTextStyle().GetAdaptMaxFontSize();
         }
         GetArkUINodeModifiers()->getSearchModifier()->setSearchAdaptMaxFontSize(
-            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()));
+            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -927,7 +977,8 @@ ArkUINativeModuleValue SearchBridge::SetMinFontScale(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double minFontScale;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale, resourceObject)) {
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessOrEqual(minFontScale, 0.0f)) {
@@ -936,7 +987,7 @@ ArkUINativeModuleValue SearchBridge::SetMinFontScale(ArkUIRuntimeCallInfo* runti
         minFontScale = 1.0f;
     }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchMinFontScale(
-        nativeNode, static_cast<float>(minFontScale));
+        nativeNode, static_cast<float>(minFontScale), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -960,13 +1011,15 @@ ArkUINativeModuleValue SearchBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double maxFontScale;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale, resourceObject)) {
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         maxFontScale = 1.0f;
     }
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchMaxFontScale(nativeNode, static_cast<float>(maxFontScale));
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchMaxFontScale(
+        nativeNode, static_cast<float>(maxFontScale), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1069,9 +1122,12 @@ ArkUINativeModuleValue SearchBridge::SetSelectedBackgroundColor(ArkUIRuntimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     uint32_t result;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         result = color.GetValue();
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchSelectedBackgroundColor(nativeNode, result);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSelectedBackgroundColor(
+            nativeNode, result, AceType::RawPtr(resourceObject));
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchSelectedBackgroundColor(nativeNode);
     }
@@ -1098,12 +1154,13 @@ ArkUINativeModuleValue SearchBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension indent;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, indent, DimensionUnit::VP, true)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, indent, DimensionUnit::VP, resourceObject, true)) {
         indent.Reset();
     }
     
     GetArkUINodeModifiers()->getSearchModifier()->setSearchTextIndent(
-        nativeNode, indent.Value(), static_cast<int8_t>(indent.Unit()));
+        nativeNode, indent.Value(), static_cast<int8_t>(indent.Unit()), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1998,10 +2055,19 @@ ArkUINativeModuleValue SearchBridge::SetSearchAutoCapitalizationMode(ArkUIRuntim
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    if (secondArg->IsNumber()) {
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchAutoCapitalizationMode(nativeNode, value);
     } else {
@@ -2015,6 +2081,15 @@ ArkUINativeModuleValue SearchBridge::ResetSearchAutoCapitalizationMode(ArkUIRunt
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSearchModifier()->resetSearchAutoCapitalizationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -2102,6 +2177,31 @@ ArkUINativeModuleValue SearchBridge::ResetEnableAutoSpacing(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSearchModifier()->resetEnableAutoSpacing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::SetMargin(runtimeCallInfo);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchMargin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::ResetMargin(runtimeCallInfo);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

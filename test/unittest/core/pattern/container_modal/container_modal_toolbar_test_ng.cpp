@@ -466,31 +466,27 @@ HWTEST_F(ContainerModelToolBarTestNg, ParsePlacementType, TestSize.Level1)
     titleMgr_->InitToolBarManager();
     EXPECT_TRUE(titleMgr_->toolbarManager_);
     titleMgr_->toolbarManager_->SetHasNavBar(false);
-    titleMgr_->ParsePlacementType();
-    size = titleMgr_->itemsWillOnTree_[noneNode].size();
-    EXPECT_EQ(size, 1);
-    size = titleMgr_->itemWillAdd_[ItemPlacementType::NONE].size();
-    EXPECT_EQ(size, 0);
 
     // clear itemsWillOnTree_ and itemWillAdd_
     titleMgr_->itemsWillOnTree_.clear();
     titleMgr_->itemWillAdd_.clear();
 
-    // create navigation and navbar
-    auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     auto navbarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
-    navigationNode->AddChild(navbarNode);
-    titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
-
     // create toolbarItem and mountToParent
     auto toolbarItem2 =
         FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 5, AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->itemsWillOnTree_[navbarNode].push_back(toolbarItem);
+    CreatePageWithAllNodes();
+    titleMgr_->SetHasNavOrSideBarNodes(true);
+    titleMgr_->GetNavOrSideBarNodes();
+    auto navigationNode = titleMgr_->navigationNode_.Upgrade();
+    ASSERT_NE(navigationNode, nullptr);
+    navigationNode->AddChild(navbarNode);
     titleMgr_->ParsePlacementType();
     size = titleMgr_->itemsWillOnTree_[navbarNode].size();
-    EXPECT_EQ(size, 1);
-    size = titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].size();
     EXPECT_EQ(size, 0);
+    size = titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].size();
+    EXPECT_EQ(size, 1);
 }
 
 /**
@@ -566,15 +562,15 @@ HWTEST_F(ContainerModelToolBarTestNg, RemoveAllToolbarItem, TestSize.Level1)
     ASSERT_NE(titleMgr_, nullptr);
 
     // test Valid Inputs
-    auto parentNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    auto toolbarItem =
-        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem = FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     parentNode->AddChild(toolbarItem);
+    auto noParentToolbarItem = FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
-    titleMgr_->RemoveAllToolbarItem();
-    EXPECT_TRUE(titleMgr_->itemsOnTree_.empty());
-
-    // test Invalid Inputs
+    titleMgr_->itemsOnTree_[parentNode].push_back(noParentToolbarItem);
     titleMgr_->RemoveAllToolbarItem();
     EXPECT_TRUE(titleMgr_->itemsOnTree_.empty());
 }
@@ -674,8 +670,18 @@ HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToContainer, TestSize.Level1
     auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].emplace_back(toolbarItem);
     titleMgr_->AddToolbarItemToContainer();
-
     EXPECT_EQ(titleMgr_->itemWillAdd_.size(), 1);
+    EXPECT_EQ(titleMgr_->itemsWillOnTree_.size(), 0);
+
+    titleMgr_->itemWillAdd_.clear();
+    titleMgr_->itemsWillOnTree_.clear();
+
+    titleMgr_->toolbarManager_->SetHasNavBar(false);
+    auto toolbarItem1 = FrameNode::CreateFrameNode("toolbarItem", 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->itemWillAdd_[ItemPlacementType::NONE].emplace_back(toolbarItem1);
+    titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].emplace_back(toolbarItem);
+    titleMgr_->AddToolbarItemToContainer();
+    EXPECT_EQ(titleMgr_->itemWillAdd_.size(), 2);
     EXPECT_EQ(titleMgr_->itemsWillOnTree_.size(), 0);
 }
 
@@ -686,7 +692,6 @@ HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToContainer, TestSize.Level1
  */
 HWTEST_F(ContainerModelToolBarTestNg, UpdateTitleLayout_001, TestSize.Level1)
 {
-    bool result = true;
     CreateContainerModal();
     ASSERT_NE(titleMgr_, nullptr);
 
@@ -737,7 +742,7 @@ HWTEST_F(ContainerModelToolBarTestNg, UpdateTitleLayout_001, TestSize.Level1)
     titleMgr_->isTitleShow_ = true;
     titleMgr_->customTitleShow_ = false;
     titleMgr_->UpdateTitleLayout();
-    EXPECT_TRUE(result);
+    EXPECT_DOUBLE_EQ(titleMgr_->toolbarItemMaxHeight_, 0.0f);
 }
 
 /**
@@ -747,7 +752,6 @@ HWTEST_F(ContainerModelToolBarTestNg, UpdateTitleLayout_001, TestSize.Level1)
  */
 HWTEST_F(ContainerModelToolBarTestNg, UpdateTitleLayout_002, TestSize.Level1)
 {
-    bool result = true;
     CreateContainerModal();
     ASSERT_NE(titleMgr_, nullptr);
 
@@ -796,7 +800,7 @@ HWTEST_F(ContainerModelToolBarTestNg, UpdateTitleLayout_002, TestSize.Level1)
     titleMgr_->isTitleShow_ = false;
     titleMgr_->customTitleShow_ = false;
     titleMgr_->UpdateTitleLayout();
-    EXPECT_TRUE(result);
+    EXPECT_DOUBLE_EQ(titleMgr_->toolbarItemMaxHeight_, 0.0f);
 }
 
 /**
@@ -955,11 +959,13 @@ HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavBarStart, TestSize.Leve
     titleMgr_->toolbarManager_->SetHasNavBar(true);
 
     // valid Inputs
-    auto toolbarItem1 = FrameNode::CreateFrameNode("toolbarItem1", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem1 = FrameNode::CreateFrameNode(
+        "toolbarItem1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavBarStart(toolbarItem1);
     EXPECT_EQ(titleMgr_->leftNavRow_->GetChildren().size(), 1);
 
-    auto toolbarItem2 = FrameNode::CreateFrameNode("toolbarItem2", 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem2 = FrameNode::CreateFrameNode(
+        "toolbarItem2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavBarStart(toolbarItem2);
     EXPECT_EQ(titleMgr_->leftNavRow_->GetChildren().size(), 2);
 }
@@ -981,11 +987,13 @@ HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavBarEnd, TestSize.Level1
     titleMgr_->toolbarManager_->SetHasNavBar(true);
 
     // valid Inputs
-    auto toolbarItem1 = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem1 = FrameNode::CreateFrameNode(
+        "toolbarItem", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavBarEnd(toolbarItem1);
     EXPECT_EQ(titleMgr_->rightNavRow_->GetChildren().size(), 1);
 
-    auto toolbarItem2 = FrameNode::CreateFrameNode("toolbarItem2", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem2 = FrameNode::CreateFrameNode(
+        "toolbarItem2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavBarEnd(toolbarItem2);
     EXPECT_EQ(titleMgr_->rightNavRow_->GetChildren().size(), 2);
 }
@@ -1007,11 +1015,13 @@ HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavDestStart, TestSize.Lev
     titleMgr_->toolbarManager_->SetHasNavDest(true);
 
     // valid Inputs
-    auto toolbarItem1 = FrameNode::CreateFrameNode("toolbarItem1", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem1 = FrameNode::CreateFrameNode(
+        "toolbarItem1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavDestStart(toolbarItem1);
     EXPECT_EQ(titleMgr_->leftNavDestRow_->GetChildren().size(), 1);
 
-    auto toolbarItem2 = FrameNode::CreateFrameNode("toolbarItem2", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem2 = FrameNode::CreateFrameNode(
+        "toolbarItem2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavDestStart(toolbarItem2);
     EXPECT_EQ(titleMgr_->leftNavDestRow_->GetChildren().size(), 2);
 }
@@ -1033,11 +1043,13 @@ HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavDestEnd, TestSize.Level
     titleMgr_->toolbarManager_->SetHasNavDest(true);
 
     // valid Inputs
-    auto toolbarItem1 = FrameNode::CreateFrameNode("toolbarItem1", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem1 = FrameNode::CreateFrameNode(
+        "toolbarItem1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavDestEnd(toolbarItem1);
     EXPECT_EQ(titleMgr_->rightNavDestRow_->GetChildren().size(), 1);
 
-    auto toolbarItem2 = FrameNode::CreateFrameNode("toolbarItem2", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem2 = FrameNode::CreateFrameNode(
+        "toolbarItem2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavDestEnd(toolbarItem2);
     EXPECT_EQ(titleMgr_->rightNavDestRow_->GetChildren().size(), 2);
 }
@@ -1209,11 +1221,11 @@ HWTEST_F(ContainerModelToolBarTestNg, AddNavDestBarRow_002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveToolbarRowContainers
+ * @tc.name: RemoveToolbarRowContainers_001
  * @tc.desc: Test RemoveToolbarRowContainers.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarRowContainers, TestSize.Level1)
+HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarRowContainers_001, TestSize.Level1)
 {
     CreateContainerModal();
     ASSERT_NE(titleMgr_, nullptr);
@@ -1227,14 +1239,107 @@ HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarRowContainers, TestSize.Level
     // add toolbar row and remove
     titleMgr_->AddNavBarRow();
     ASSERT_NE(titleMgr_->navbarRow_, nullptr);
-
     titleMgr_->AddNavDestBarRow();
     ASSERT_NE(titleMgr_->navDestbarRow_, nullptr);
-
     titleMgr_->RemoveToolbarRowContainers();
-
     ASSERT_EQ(titleMgr_->navbarRow_, nullptr);
     ASSERT_EQ(titleMgr_->navDestbarRow_, nullptr);
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem2 = FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
+    auto toolbarItem3 = FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem2);
+    parentNode->AddChild(toolbarItem3);
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_END, toolbarItem2);
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_END, toolbarItem3);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem2);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem3);
+    titleMgr_->RemoveToolbarRowContainers();
+    EXPECT_EQ(titleMgr_->title_->GetChildren().size(), 3);
+    EXPECT_EQ(titleMgr_->navbarRow_->GetChildren().size(), 2);
+    EXPECT_EQ(titleMgr_->navDestbarRow_->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: RemoveToolbarRowContainers_002
+ * @tc.desc: Test RemoveToolbarRowContainers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarRowContainers_002, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+
+    // add toolbar row and remove
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem2 = FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem2);
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_END, toolbarItem2);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem2);
+    titleMgr_->RemoveToolbarRowContainers();
+
+    EXPECT_EQ(titleMgr_->title_->GetChildren().size(), 2);
+    EXPECT_EQ(titleMgr_->navbarRow_->GetChildren().size(), 2);
+
+    auto toolbarItem3 = FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem3);
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_END, toolbarItem3);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem3);
+    titleMgr_->RemoveToolbarRowContainers();
+    EXPECT_EQ(titleMgr_->title_->GetChildren().size(), 3);
+    EXPECT_EQ(titleMgr_->navDestbarRow_->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: OnToolBarLayoutChange
+ * @tc.desc: Test OnToolBarLayoutChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, OnToolBarLayoutChange, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    titleMgr_->hasNavOrSideBarNodes_ = true;
+
+    // checking the layout change of toolbar
+    std::vector<std::pair<bool, bool>> vec { { false, false }, { false, true }, { true, false }, { true, true } };
+    ToolbarInfo sideBarInfo_ = { false, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { false, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+    for (auto& pair : vec) {
+        navBarInfo_.isShow = pair.first;
+        navDestInfo_.isShow = pair.second;
+        titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+        titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+        titleMgr_->toolbarManager_->SetHasNavBar(true);
+        titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+        titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+        titleMgr_->toolbarManager_->SetHasNavDest(true);
+        titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+        titleMgr_->OnToolBarLayoutChange();
+        auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+        ASSERT_NE(pipeline, nullptr);
+        pipeline->taskScheduler_->FlushAfterRenderTask();
+    }
+    EXPECT_EQ(titleMgr_->navbarRow_, nullptr);
 }
 
 /**
@@ -2117,12 +2222,26 @@ HWTEST_F(ContainerModelToolBarTestNg, ResetExpandStackNode, TestSize.Level1)
     CreateContainerModal();
     ASSERT_NE(pattern_, nullptr);
     ASSERT_NE(titleMgr_, nullptr);
+    std::vector<std::pair<bool, bool>> vec { { true, false }, { true, true }, { false, true }, { false, false } };
+    for (auto pair : vec) {
+        titleMgr_->isUpdateTargetNode_ = pair.first;
+        titleMgr_->isFloating_ = pair.second;
+        titleMgr_->ResetExpandStackNode();
+    }
     titleMgr_->InitToolBarManager();
-    titleMgr_->isUpdateTargetNode_ = true;
-    titleMgr_->ResetExpandStackNode();
-    EXPECT_FALSE(titleMgr_->isUpdateTargetNode_);
-    auto isMoveUp = titleMgr_->toolbarManager_->GetIsMoveUp();
-    EXPECT_FALSE(isMoveUp);
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    for (const auto& pair : vec) {
+        titleMgr_->toolbarManager_->SetIsMoveUp(true);
+        titleMgr_->isUpdateTargetNode_ = pair.first;
+        titleMgr_->isFloating_ = pair.second;
+        titleMgr_->ResetExpandStackNode();
+        auto isMoveUp = titleMgr_->toolbarManager_->GetIsMoveUp();
+        if (pair.first && !pair.second) {
+            EXPECT_FALSE(isMoveUp);
+        } else {
+            EXPECT_TRUE(isMoveUp);
+        }
+    }
 }
 
 /**
@@ -2304,7 +2423,7 @@ HWTEST_F(ContainerModelToolBarTestNg, GetNavOrSideBarNodesParseChildren_OnlySide
     ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
     auto pageInfo = GetPageNodeAndWidth();
     ASSERT_NE(pageInfo.node, nullptr);
-    ASSERT_TRUE(titleMgr_->GetNavOrSideBarNodesParseChildren(pageInfo.node, pageInfo.width));
+    ASSERT_FALSE(titleMgr_->GetNavOrSideBarNodesParseChildren(pageInfo.node, pageInfo.width));
 }
 
 /**
@@ -2571,46 +2690,398 @@ HWTEST_F(ContainerModelToolBarTestNg, ToInitNavOrSideBarNodeTest, TestSize.Level
     titleMgr_->sideBarNode_.Reset();
     titleMgr_->navigationNode_.Reset();
     ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.clear();
     titleMgr_->ToInitNavOrSideBarNode();
-    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 1);
 
     auto sideBarNode = FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     titleMgr_->sideBarNode_ = AceType::WeakClaim(AceType::RawPtr(sideBarNode));
     titleMgr_->navigationNode_.Reset();
     titleMgr_->ToInitNavOrSideBarNode();
-    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 2);
 
     sideBarNode = FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 2, AceType::MakeRefPtr<SideBarContainerPattern>());
     titleMgr_->sideBarNode_ = AceType::WeakClaim(AceType::RawPtr(sideBarNode));
     titleMgr_->navigationNode_.Reset();
     titleMgr_->ToInitNavOrSideBarNode();
-    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 3);
 
     titleMgr_->sideBarNode_.Reset();
     titleMgr_->navigationNode_.Reset();
     titleMgr_->ToInitNavOrSideBarNode();
-    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 4);
 
     auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     titleMgr_->sideBarNode_.Reset();
     titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
     titleMgr_->ToInitNavOrSideBarNode();
-    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 5);
 
     titleMgr_->sideBarNode_.Reset();
     navigationNode =
         FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<NavigationPattern>());
     titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
     titleMgr_->ToInitNavOrSideBarNode();
-    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 6);
 
     sideBarNode = FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 5, AceType::MakeRefPtr<SideBarContainerPattern>());
     titleMgr_->sideBarNode_ = AceType::WeakClaim(AceType::RawPtr(sideBarNode));
     navigationNode =
         FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 6, AceType::MakeRefPtr<NavigationPattern>());
     titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
-    titleMgr_->toolbarManager_ = AceType::MakeRefPtr<ToolbarManager>();
     titleMgr_->ToInitNavOrSideBarNode();
-    ASSERT_NE(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 0);
+    EXPECT_EQ(titleMgr_->toolbarManager_->modifyDoneCallbackFuncs_.size(), 7);
+}
+
+/**
+ * @tc.name: ToolbarManager_OnChange
+ * @tc.desc: Test ToolbarManager OnChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolbarManager_OnChange, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    int32_t count = 0;
+    titleMgr_->toolbarManager_->SetToolBarChangeCallback([&count]() { count++; });
+    titleMgr_->toolbarManager_->SetToolBarChangeCallback(nullptr);
+    titleMgr_->toolbarManager_->OnChange();
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: ToolbarManager_OnToolBarManagerModifyDone
+ * @tc.desc: Test ToolbarManager OnToolBarManagerModifyDone function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolbarManager_OnToolBarManagerModifyDone, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    int32_t count = 0;
+    titleMgr_->toolbarManager_->SetModifyDoneCallback([&count]() { count++; });
+    titleMgr_->toolbarManager_->SetModifyDoneCallback(nullptr);
+    titleMgr_->toolbarManager_->OnToolBarManagerModifyDone();
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: ToolbarManager_OnChangeSideBarColor
+ * @tc.desc: Test ToolbarManager OnChangeSideBarColor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolbarManager_OnChangeSideBarColor, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    int32_t count = 0;
+    titleMgr_->toolbarManager_->SetSideBarColorChangeCallback(
+        [&count](const Color&, const Color&, const BlurStyle&) { count++; });
+    titleMgr_->toolbarManager_->OnChangeSideBarColor();
+    EXPECT_EQ(count, 1);
+    titleMgr_->toolbarManager_->SetSideBarColorChangeCallback(nullptr);
+    titleMgr_->toolbarManager_->OnChangeSideBarColor();
+}
+
+/**
+ * @tc.name: ToolbarManager_SetNavigationModeChangeCallback
+ * @tc.desc: Test ToolbarManager SetNavigationModeChangeCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolbarManager_SetNavigationModeChangeCallback, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    int32_t count = 0;
+    titleMgr_->toolbarManager_->SetNavigationModeChangeCallback([&count]() { count++; });
+    titleMgr_->toolbarManager_->SetNavigationModeChangeCallback(nullptr);
+    titleMgr_->toolbarManager_->OnNavigationModeChange();
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: FocusEventTest_003
+ * @tc.desc: Test PagePattern GetNextFocusNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest_003, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(frameNode_, 0);
+    ASSERT_NE(pattern_, nullptr);
+    auto pageNode = pattern_->GetPageNode();
+    ASSERT_NE(pageNode, nullptr);
+    EXPECT_EQ(pageNode->GetTag(), V2::PAGE_ETS_TAG);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    ASSERT_NE(pagePattern, nullptr);
+    auto toolBarRow = pattern_->GetCustomTitleRow();
+    ASSERT_NE(toolBarRow, nullptr);
+    EXPECT_EQ(toolBarRow->GetTag(), V2::ROW_ETS_TAG);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    ASSERT_NE(toolBarRowFocusHub, nullptr);
+
+    auto buttonNode1 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub1 = buttonNode1->GetFocusHub();
+    ASSERT_NE(buttonFocusHub1, nullptr);
+
+    auto buttonNode2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub2 = buttonNode2->GetFocusHub();
+    ASSERT_NE(buttonFocusHub2, nullptr);
+    auto buttonNode3 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub3 = buttonNode3->GetFocusHub();
+    ASSERT_NE(buttonFocusHub3, nullptr);
+    pageNode->AddChild(buttonNode1);
+    toolBarRow->AddChild(buttonNode2, 0);
+    toolBarRow->AddChild(buttonNode3, 1);
+    ASSERT_NE(toolBarRowFocusHub->GetHeadOrTailChild(true), nullptr);
+    EXPECT_EQ(pagePattern->GetNextFocusNode(FocusStep::UP, buttonFocusHub1).Upgrade(), buttonFocusHub2);
+    EXPECT_EQ(pagePattern->GetNextFocusNode(FocusStep::TAB, buttonFocusHub1).Upgrade(), toolBarRowFocusHub);
+    EXPECT_EQ(pagePattern->GetNextFocusNode(FocusStep::SHIFT_TAB, buttonFocusHub1).Upgrade(), toolBarRowFocusHub);
+    EXPECT_EQ(pagePattern->GetNextFocusNode(FocusStep::LEFT, buttonFocusHub1).Upgrade(), nullptr);
+    EXPECT_EQ(pagePattern->GetNextFocusNode(FocusStep::RIGHT, buttonFocusHub1).Upgrade(), nullptr);
+    rootNode->RemoveChild(frameNode_);
+}
+
+/**
+ * @tc.name: ToolBarRowPatternGetNextFocusNodeTest_001
+ * @tc.desc: Test ToolBarRowPattern::GetNextFocusNode FocusStep::DOWN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolBarRowPatternGetNextFocusNodeTest_001, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(frameNode_, 0);
+
+    auto pattern = frameNode_->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pageNode = pattern->GetPageNode();
+    ASSERT_NE(pageNode, nullptr);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    ASSERT_NE(pageFocusHub, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    pageNode->AddChild(buttonNode);
+    auto buttonFocusHub = buttonNode->GetFocusHub();
+    ASSERT_NE(buttonFocusHub, nullptr);
+
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    ASSERT_NE(toolBarRow, nullptr);
+    auto toolBarRowPattern = toolBarRow->GetPattern<ToolBarRowPattern>();
+    ASSERT_NE(toolBarRowPattern, nullptr);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    ASSERT_NE(toolBarRowFocusHub, nullptr);
+
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::DOWN, toolBarRowFocusHub).Upgrade(), buttonFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::UP, toolBarRowFocusHub).Upgrade(), nullptr);
+    rootNode->RemoveChild(frameNode_);
+}
+
+/**
+ * @tc.name: ToolBarRowPatternGetNextFocusNodeTest_002
+ * @tc.desc: Test ToolBarRowPattern::GetNextFocusNode leftRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolBarRowPatternGetNextFocusNodeTest_002, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(frameNode_, 0);
+
+    auto pattern = frameNode_->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    ASSERT_NE(toolBarRow, nullptr);
+    auto toolBarRowPattern = toolBarRow->GetPattern<ToolBarRowPattern>();
+    ASSERT_NE(toolBarRowPattern, nullptr);
+    auto pageNode = pattern->GetPageNode();
+    ASSERT_NE(pageNode, nullptr);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    ASSERT_NE(pageFocusHub, nullptr);
+
+    auto leftRow = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto leftRowFocusHub = leftRow->GetFocusHub();
+    toolBarRow->AddChild(leftRow, 1);
+
+    auto buttonNode1 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub1 = buttonNode1->GetFocusHub();
+    leftRow->AddChild(buttonNode1);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::TAB, buttonFocusHub1).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::RIGHT, buttonFocusHub1).Upgrade(), nullptr);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::SHIFT_TAB, buttonFocusHub1).Upgrade(), leftRowFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::LEFT, buttonFocusHub1).Upgrade(), leftRowFocusHub);
+
+    rootNode->RemoveChild(frameNode_);
+}
+
+/**
+ * @tc.name: ToolBarRowPatternGetNextFocusNodeTest_003
+ * @tc.desc: Test ToolBarRowPattern::GetNextFocusNode rightRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolBarRowPatternGetNextFocusNodeTest_003, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(frameNode_, 0);
+
+    auto pattern = frameNode_->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    ASSERT_NE(toolBarRow, nullptr);
+    auto toolBarRowPattern = toolBarRow->GetPattern<ToolBarRowPattern>();
+    ASSERT_NE(toolBarRowPattern, nullptr);
+    auto pageNode = pattern->GetPageNode();
+    ASSERT_NE(pageNode, nullptr);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    ASSERT_NE(pageFocusHub, nullptr);
+
+    auto rightRow = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto rightRowFocusHub = rightRow->GetFocusHub();
+    toolBarRow->AddChild(rightRow, 2);
+
+    auto buttonNode1 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub1 = buttonNode1->GetFocusHub();
+
+    rightRow->AddChild(buttonNode1);
+
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::TAB, buttonFocusHub1).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::RIGHT, buttonFocusHub1).Upgrade(), nullptr);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::SHIFT_TAB, buttonFocusHub1).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::LEFT, buttonFocusHub1).Upgrade(), nullptr);
+
+    rootNode->RemoveChild(frameNode_);
+}
+/**
+ * @tc.name: ToolBarRowPatternGetNextFocusNodeTest_004
+ * @tc.desc: Test ToolBarRowPattern::GetNextFocusNode leftRow and rightRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolBarRowPatternGetNextFocusNodeTest_004, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(frameNode_, 0);
+
+    auto pattern = frameNode_->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    ASSERT_NE(toolBarRow, nullptr);
+    auto toolBarRowPattern = toolBarRow->GetPattern<ToolBarRowPattern>();
+    ASSERT_NE(toolBarRowPattern, nullptr);
+    auto pageNode = pattern->GetPageNode();
+    ASSERT_NE(pageNode, nullptr);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    ASSERT_NE(pageFocusHub, nullptr);
+
+    auto leftRow = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto leftRowFocusHub = leftRow->GetFocusHub();
+    auto rightRow = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto rightRowFocusHub = rightRow->GetFocusHub();
+    toolBarRow->AddChild(leftRow, 1);
+    toolBarRow->AddChild(rightRow, 2);
+
+    auto buttonNode1 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub1 = buttonNode1->GetFocusHub();
+    auto buttonNode2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub2 = buttonNode2->GetFocusHub();
+    leftRow->AddChild(buttonNode1);
+
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::TAB, buttonFocusHub1).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::RIGHT, buttonFocusHub1).Upgrade(), nullptr);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::SHIFT_TAB, rightRowFocusHub).Upgrade(), leftRowFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::LEFT, rightRowFocusHub).Upgrade(), leftRowFocusHub);
+    leftRowFocusHub->SetCurrentFocus(true);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::SHIFT_TAB, leftRowFocusHub).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::LEFT, leftRowFocusHub).Upgrade(), nullptr);
+    rootNode->RemoveChild(frameNode_);
+}
+
+/**
+ * @tc.name: ToolBarRowPatternGetNextFocusNodeTest_005
+ * @tc.desc: Test ToolBarRowPattern::GetNextFocusNode leftRow and rightRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolBarRowPatternGetNextFocusNodeTest_005, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(MockPipelineContext::GetCurrent());
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(frameNode_, 0);
+
+    auto pattern = frameNode_->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    ASSERT_NE(toolBarRow, nullptr);
+    auto toolBarRowPattern = toolBarRow->GetPattern<ToolBarRowPattern>();
+    ASSERT_NE(toolBarRowPattern, nullptr);
+    auto pageNode = pattern->GetPageNode();
+    ASSERT_NE(pageNode, nullptr);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    ASSERT_NE(pageFocusHub, nullptr);
+
+    auto leftRow = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto leftRowFocusHub = leftRow->GetFocusHub();
+    auto rightRow = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto rightRowFocusHub = rightRow->GetFocusHub();
+    toolBarRow->AddChild(leftRow, 1);
+    toolBarRow->AddChild(rightRow, 2);
+
+    auto buttonNode1 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub1 = buttonNode1->GetFocusHub();
+    auto buttonNode2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonFocusHub2 = buttonNode2->GetFocusHub();
+
+    rightRow->AddChild(buttonNode2);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::TAB, buttonFocusHub1).Upgrade(), rightRowFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::RIGHT, buttonFocusHub1).Upgrade(), rightRowFocusHub);
+    rightRowFocusHub->SetCurrentFocus(true);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::TAB, rightRowFocusHub).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::RIGHT, rightRowFocusHub).Upgrade(), nullptr);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::SHIFT_TAB, rightRowFocusHub).Upgrade(), pageFocusHub);
+    EXPECT_EQ(toolBarRowPattern->GetNextFocusNode(FocusStep::LEFT, rightRowFocusHub).Upgrade(), nullptr);
+    rootNode->RemoveChild(frameNode_);
 }
 } // namespace OHOS::Ace::NG

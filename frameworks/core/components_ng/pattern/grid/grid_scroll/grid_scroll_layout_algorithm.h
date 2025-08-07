@@ -185,9 +185,9 @@ private:
 
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
-    bool IsIrregularLine(int32_t lineIndex) const override;
-
     void ResetOffsetWhenHeightChanged();
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
 
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
 
@@ -253,9 +253,11 @@ private:
      * @param line index of line to measure
      * updates @param mainLength by adding this line's measured height
      * updates @param endIdx with max item index in this line
+     * updates @param isScrollableSpringMotionRunning spring effect is runnning
      * @return false if line isn't recorded.
      */
-    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx);
+    bool MeasureExistingLine(
+        int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning = false);
 
     LayoutWrapper* wrapper_;
     SizeF frameSize_;

@@ -22,11 +22,13 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
-#include "core/common/multi_thread_build_manager.h"
+#include "core/common/builder_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -35,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,6 +54,8 @@ const RefPtr<FrameNode> FIVE = FrameNode::CreateFrameNode("five", 5, AceType::Ma
 const RefPtr<FrameNode> F_ONE = FrameNode::CreateFrameNode("one", 5, AceType::MakeRefPtr<Pattern>());
 const int32_t TEST_ID_ONE = 21;
 const int32_t TEST_ID_TWO = 22;
+constexpr size_t SIZE_ZERO = 0;
+constexpr size_t SIZE_ONE = 1;
 } // namespace
 
 class TestNode : public UINode {
@@ -1296,6 +1301,49 @@ HWTEST_F(UINodeTestNg, GetCurrentCustomNodeInfo002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFilePath001
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "abc");
+}
+
+/**
+ * @tc.name: GetFilePath002
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "a/b/c");
+}
+
+/**
  * @tc.name: GetPerformanceCheckData001
  * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
  * @tc.type: FUNC
@@ -1489,7 +1537,6 @@ HWTEST_F(UINodeTestNg, DumpTreeById001, TestSize.Level1)
     child->tag_ = V2::COMMON_VIEW_ETS_TAG;
     child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
     parent->AddChild(child);
-
     /**
      * @tc.steps: step2. call DumpTreeById
      * @tc.expected: cover branch GetDumpFile is nullptr and result is false
@@ -2390,6 +2437,51 @@ HWTEST_F(UINodeTestNg, UINodeTestNg072, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UINodeTestNg073
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg073, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), false);
+
+    child->tag_ = V2::IMAGE_ETS_TAG;
+    parent->AddChild(child);
+    std::list<RefPtr<UINode>> nodes;
+
+    /**
+     * @tc.steps: step2. call GetFirstBuilderNode
+     * @tc.expected: child isRootBuilderNode_ is true, nodes size is 1
+     */
+    child->SetIsRootBuilderNode(true);
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ONE);
+
+    child->SetIsRootBuilderNode(false);
+    auto son = FrameNode::CreateFrameNode(
+        "son", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    child->AddChild(son);
+    son->SetIsRootBuilderNode(true);
+    child->tag_ = V2::NODE_CONTAINER_ETS_TAG;
+    nodes.clear();
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ZERO);
+    child->tag_ = V2::JS_NODE_SLOT_ETS_TAG;
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ZERO);
+
+    child->tag_ = V2::IMAGE_ETS_TAG;
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ONE);
+}
+
+/**
  * @tc.name: GetPerformanceCheckData004
  * @tc.desc: Test ui node method GetPerformanceCheckData
  * @tc.type: FUNC
@@ -3008,7 +3100,7 @@ HWTEST_F(UINodeTestNg, AddFunc_API14, TestSize.Level1)
     const RefPtr<FrameNode> testNode =
         FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     testNode->AddChild(ONE, 1, false);
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
     auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
     testNode->AddDisappearingChild(child);
@@ -3450,7 +3542,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
     /**
      * @tc.steps: step2. attach context
      */
-    SystemProperties::multiInstanceEnabled_ = true;
+    g_isMultiInstanceEnabled = true;
     testNode->AttachContext(AceType::RawPtr(context), true);
     EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
     EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
@@ -3464,189 +3556,108 @@ HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
 }
 
 /**
- * @tc.name: FreeUINodeTestNg001
- * @tc.desc: Test free ui node create.
+ * @tc.name: AddChildOPTTest001
+ * @tc.desc: Test AddChild optimize
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg001, TestSize.Level1)
+HWTEST_F(UINodeTestNg, AddChildOPTTest001, TestSize.Level1)
 {
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-    EXPECT_EQ(frameNode->isFreeNode_, true);
-    EXPECT_EQ(frameNode->isFreeState_, true);
+    ONE->Clean();
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildBefore(testNode, testNode2);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildAfter(testNode2, testNode);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
 }
 
 /**
- * @tc.name: FreeUINodeTestNg002
- * @tc.desc: Test free ui node release.
+ * @tc.name: FindTopNavDestination001
+ * @tc.desc: Test FindTopNavDestination.
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg002, TestSize.Level1)
+HWTEST_F(UINodeTestNg, FindTopNavDestination001, TestSize.Level1)
 {
-    bool isUIThread = MultiThreadBuildManager::isUIThread_;
-    {
-        MultiThreadBuildManager::SetIsFreeNodeScope(true);
-        auto frameNode =
-            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-        MultiThreadBuildManager::SetIsFreeNodeScope(false);
-        
-        MultiThreadBuildManager::isUIThread_ = false;
-        EXPECT_EQ(frameNode->isFreeNode_, true);
-        EXPECT_EQ(frameNode->isFreeState_, true);
-    }
-    {
-        MultiThreadBuildManager::SetIsFreeNodeScope(true);
-        auto frameNode =
-            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-        MultiThreadBuildManager::SetIsFreeNodeScope(false);
-        
-        MultiThreadBuildManager::isUIThread_ = true;
-        EXPECT_EQ(frameNode->isFreeNode_, true);
-        EXPECT_EQ(frameNode->isFreeState_, true);
-    }
-    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(firstNode);
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    firstNode->AddChild(navigationGroupNode);
+ 
+    /**
+     * @tc.steps2: make some NavDestinationNode.
+     */
+    auto navDestinationNode1 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 21, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode2 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode3 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode4 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 24, AceType::MakeRefPtr<Pattern>(), true);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", navDestinationNode1));
+    navPathList.emplace_back(std::make_pair("pageTwo", navDestinationNode2));
+    navPathList.emplace_back(std::make_pair("pageThree", navDestinationNode3));
+    navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+ 
+    RefPtr<FrameNode> topNavNode;
+    stageNode->FindTopNavDestination(topNavNode);
+    ASSERT_NE(topNavNode, nullptr);
+    EXPECT_EQ(topNavNode, navDestinationNode4);
 }
 
 /**
- * @tc.name: FreeUINodeTestNg003
- * @tc.desc: Test ui node release.
+ * @tc.name: UINodeTestNg074
+ * @tc.desc: Test ui node method
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg003, TestSize.Level1)
+HWTEST_F(UINodeTestNg, UINodeTestNg074, TestSize.Level1)
 {
-    bool isUIThread = MultiThreadBuildManager::isUIThread_;
-    {
-        auto frameNode =
-            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-        
-        MultiThreadBuildManager::isUIThread_ = false;
-        EXPECT_EQ(frameNode->isFreeNode_, false);
-        EXPECT_EQ(frameNode->isFreeState_, false);
-    }
-    {
-        auto frameNode =
-            FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-        
-        MultiThreadBuildManager::isUIThread_ = true;
-        EXPECT_EQ(frameNode->isFreeNode_, false);
-        EXPECT_EQ(frameNode->isFreeState_, false);
-    }
-    MultiThreadBuildManager::isUIThread_ = isUIThread;
-}
+    /**
+     * @tc.steps1: step1. create node with darkMode
+     * @tc.expected: node isDarkMethod_ is true
+     */
+    MockContainer::SetUp();
+    EXPECT_FALSE(ONE->isDarkMode_);
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    auto lightNode = FrameNode::CreateFrameNode("lightNode", 1000, AceType::MakeRefPtr<Pattern>());
+    EXPECT_TRUE(lightNode->isDarkMode_);
 
-/**
- * @tc.name: FreeUINodeTestNg004
- * @tc.desc: Test free ui node AttachToMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg004, TestSize.Level1)
-{
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-    
-    PipelineContext* pipeline = frameNode->GetContextWithCheck();
-    frameNode->AttachToMainTree(false, pipeline);
-    EXPECT_EQ(frameNode->isFreeState_, false);
-    frameNode->DetachFromMainTree(false, false);
-    EXPECT_EQ(frameNode->isFreeState_, true);
-}
+    /**
+     * @tc.steps2: step1. create node with lightMode
+     * @tc.expected: node isDarkMethod_ is false
+     */
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    auto darkNode = FrameNode::CreateFrameNode("darkNode", 1001, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(darkNode->isDarkMode_);
 
-/**
- * @tc.name: FreeUINodeTestNg005
- * @tc.desc: Test free ui node DetachFromMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg005, TestSize.Level1)
-{
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-        
-    PipelineContext* pipeline = frameNode->GetContextWithCheck();
-    frameNode->AttachToMainTree(false, pipeline);
-    EXPECT_EQ(frameNode->isFreeState_, false);
-    frameNode->DetachFromMainTree(false, true);
-    EXPECT_EQ(frameNode->isFreeState_, true);
-}
-
-/**
- * @tc.name: FreeUINodeTestNg006
- * @tc.desc: Test free ui node tree DetachFromMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg006, TestSize.Level1)
-{
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    auto child =
-        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
-    frameNode->AddChild(child);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-        
-    PipelineContext* pipeline = frameNode->GetContextWithCheck();
-    frameNode->AttachToMainTree(false, pipeline);
-    EXPECT_EQ(frameNode->isFreeState_, false);
-    frameNode->DetachFromMainTree(false, true);
-    EXPECT_EQ(frameNode->isFreeState_, true);
-}
-
-/**
- * @tc.name: FreeUINodeTestNg007
- * @tc.desc: Test free ui node tree DetachFromMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg007, TestSize.Level1)
-{
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-    auto child =
-        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
-    frameNode->AddChild(child);
-        
-    PipelineContext* pipeline = frameNode->GetContextWithCheck();
-    frameNode->AttachToMainTree(false, pipeline);
-    EXPECT_EQ(frameNode->isFreeState_, false);
-    frameNode->DetachFromMainTree(false, true);
-    EXPECT_EQ(frameNode->isFreeState_, true);
-}
-
-/**
- * @tc.name: FreeUINodeTestNg008
- * @tc.desc: Test free node MarkModifyDone.
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg008, TestSize.Level1)
-{
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(frameNode->isFreeNode_, true);
-    EXPECT_EQ(frameNode->isFreeState_, true);
-}
-
-/**
- * @tc.name: FreeUINodeTestNg009
- * @tc.desc: Test free node MarkDirtyNode.
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, FreeUINodeTestNg009, TestSize.Level1)
-{
-    MultiThreadBuildManager::SetIsFreeNodeScope(true);
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    MultiThreadBuildManager::SetIsFreeNodeScope(false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    EXPECT_EQ(frameNode->isFreeNode_, true);
-    EXPECT_EQ(frameNode->isFreeState_, true);
+    /**
+     * @tc.steps3: step1. create node with no container
+     * @tc.expected: node isDarkMethod_ is false
+     */
+    MockContainer::TearDown();
+    auto noContainerNode = FrameNode::CreateFrameNode("noContainerNode", 1002, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(noContainerNode->isDarkMode_);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

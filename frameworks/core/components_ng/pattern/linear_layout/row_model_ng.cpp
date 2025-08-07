@@ -80,13 +80,57 @@ void RowModelNG::Create(const RefPtr<ResourceObject>& spaceResObj, AlignDeclarat
 
 void RowModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
-    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value(), frameNode);
     } else {
         LOGE("Column: the space value is illegal due to space is less than zero");
     }
+}
+
+void RowModelNG::SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string rawString = pattern->GetResCacheMapByKey("row.space");
+        CalcDimension value;
+        if (rawString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("row.space", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(rawString);
+        }
+        if (GreatOrEqual(value.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    updateFunc(spaceResObj);
+    pattern->AddResObj("row.space", spaceResObj, std::move(updateFunc));
+    CalcDimension value;
+    ResourceParseUtils::ParseResDimensionVp(spaceResObj, value);
+    if (GreatOrEqual(value.Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value);
+    } else {
+        LOGE("Column: the space value is illegal due to space is less than zero");
+    }
+}
+
+void RowModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 
 RefPtr<FrameNode> RowModelNG::CreateFrameNode(int32_t nodeId)
@@ -115,34 +159,21 @@ void RowModelNG::SetIsReverse(bool isReverse)
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse);
 }
 
-void RowModelNG::SetIsReverse(FrameNode* frameNode, const std::optional<bool> isReverse)
+void RowModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (isReverse.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse, frameNode);
 }
 
-void RowModelNG::SetJustifyContent(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign)
+void RowModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
 {
     CHECK_NULL_VOID(frameNode);
-    if (flexAlign.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign, frameNode);
 }
 
-void RowModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign)
+void RowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign)
 {
     CHECK_NULL_VOID(frameNode);
-    if (flexAlign.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign, frameNode);
 }
 
 FlexAlign RowModelNG::GetJustifyContent(FrameNode* frameNode)

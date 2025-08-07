@@ -1927,4 +1927,154 @@ HWTEST_F(CustomTestNg, CustomTest049, TestSize.Level1)
     EXPECT_EQ(customNode->isV2_, isV2);
     EXPECT_EQ(customNode->GetIsV2(), true);
 }
+
+/**
+ * @tc.name: CustomTest100
+ * @tc.desc: Test FindParentCustomNode method
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a regular FrameNode as root.
+     * @tc.expected: Root node created successfully.
+     */
+    auto rootFrameNode = CreateNode(V2::TEXT_ETS_TAG);
+    ASSERT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create first level CustomNode and mount to root.
+     * @tc.expected: First level CustomNode created and mounted.
+     */
+    auto parentCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "ParentCustom");
+    ASSERT_NE(parentCustomNode, nullptr);
+    parentCustomNode->SetJSViewName("ParentCustomNode");
+    parentCustomNode->MountToParent(rootFrameNode);
+
+    /**
+     * @tc.steps: step3. Create another regular FrameNode and mount to parent CustomNode.
+     * @tc.expected: Intermediate FrameNode created and mounted.
+     */
+    auto intermediateFrameNode = CreateNode(V2::COLUMN_ETS_TAG);
+    ASSERT_NE(intermediateFrameNode, nullptr);
+    intermediateFrameNode->MountToParent(parentCustomNode);
+
+    /**
+     * @tc.steps: step4. Create child CustomNode and mount to intermediate FrameNode.
+     * @tc.expected: Child CustomNode created and mounted.
+     */
+    auto childCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "ChildCustom");
+    ASSERT_NE(childCustomNode, nullptr);
+    childCustomNode->SetJSViewName("ChildCustomNode");
+    childCustomNode->MountToParent(intermediateFrameNode);
+
+    /**
+     * @tc.steps: step5. Test FindParentCustomNode for child CustomNode.
+     * @tc.expected: Should find parentCustomNode.
+     */
+    auto foundParent = childCustomNode->FindParentCustomNode();
+    EXPECT_EQ(foundParent, parentCustomNode);
+    EXPECT_EQ(foundParent->GetJSViewName(), "ParentCustomNode");
+
+    /**
+     * @tc.steps: step6. Test FindParentCustomNode for parent CustomNode.
+     * @tc.expected: Should return nullptr since no CustomNode parent exists.
+     */
+    auto foundGrandParent = parentCustomNode->FindParentCustomNode();
+    EXPECT_EQ(foundGrandParent, nullptr);
+}
+
+/**
+ * @tc.name: CustomTest101
+ * @tc.desc: Test FindParentCustomNode with nested CustomNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest101, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create nested CustomNode hierarchy.
+     * @tc.expected: All nodes created successfully.
+     */
+    auto grandParentCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "GrandParent");
+    grandParentCustomNode->SetJSViewName("GrandParentCustomNode");
+
+    auto parentCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "Parent");
+    parentCustomNode->SetJSViewName("ParentCustomNode");
+    parentCustomNode->MountToParent(grandParentCustomNode);
+
+    auto childCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "Child");
+    childCustomNode->SetJSViewName("ChildCustomNode");
+    childCustomNode->MountToParent(parentCustomNode);
+
+    /**
+     * @tc.steps: step2. Test FindParentCustomNode for deeply nested child.
+     * @tc.expected: Should find immediate parent CustomNode.
+     */
+    auto foundParent = childCustomNode->FindParentCustomNode();
+    EXPECT_EQ(foundParent, parentCustomNode);
+    EXPECT_EQ(foundParent->GetJSViewName(), "ParentCustomNode");
+
+    /**
+     * @tc.steps: step3. Test FindParentCustomNode for middle level CustomNode.
+     * @tc.expected: Should find grandparent CustomNode.
+     */
+    auto foundGrandParent = parentCustomNode->FindParentCustomNode();
+    EXPECT_EQ(foundGrandParent, grandParentCustomNode);
+    EXPECT_EQ(foundGrandParent->GetJSViewName(), "GrandParentCustomNode");
+
+    /**
+     * @tc.steps: step4. Test FindParentCustomNode for top level CustomNode.
+     * @tc.expected: Should return nullptr.
+     */
+    auto foundGreatGrandParent = grandParentCustomNode->FindParentCustomNode();
+    EXPECT_EQ(foundGreatGrandParent, nullptr);
+}
+
+/**
+ * @tc.name: CustomTest102
+ * @tc.desc: Test FindParentCustomNode with no parent CustomNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest102, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a standalone CustomNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto standaloneCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "Standalone");
+    standaloneCustomNode->SetJSViewName("StandaloneCustomNode");
+
+    /**
+     * @tc.steps: step2. Test FindParentCustomNode for standalone CustomNode.
+     * @tc.expected: Should return nullptr.
+     */
+    auto foundParent = standaloneCustomNode->FindParentCustomNode();
+    EXPECT_EQ(foundParent, nullptr);
+
+    /**
+     * @tc.steps: step3. Create regular FrameNode hierarchy and mount CustomNode.
+     * @tc.expected: CustomNode mounted to regular FrameNode hierarchy.
+     */
+    auto rootFrame = CreateNode(V2::TEXT_ETS_TAG);
+    auto columnFrame = CreateNode(V2::COLUMN_ETS_TAG);
+    columnFrame->MountToParent(rootFrame);
+
+    auto customNodeInRegularHierarchy = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "InRegular");
+    customNodeInRegularHierarchy->SetJSViewName("CustomInRegularHierarchy");
+    customNodeInRegularHierarchy->MountToParent(columnFrame);
+
+    /**
+     * @tc.steps: step4. Test FindParentCustomNode for CustomNode in regular hierarchy.
+     * @tc.expected: Should return nullptr as no parent CustomNode exists.
+     */
+    auto foundParentInRegular = customNodeInRegularHierarchy->FindParentCustomNode();
+    EXPECT_EQ(foundParentInRegular, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -17,30 +17,157 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Length, PX, VP, LPX, ResourceColor, Font, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { Resource } from "global/resource";
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, ContentModifier, CommonConfiguration } from "./common"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ResourceColor, Length, PX, VP, LPX, Font } from "./units"
 import { LinearGradient } from "./dataPanel"
-import { ArkProgressComponent } from "./../generated/ArkProgress"
-import { ArkProgressPeer } from "./../generated/peers/ArkProgressPeer"
+import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
+import { Color } from "./enums"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { LengthMetrics } from "../Graphics"
+
+export class ArkProgressPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkProgressPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Progress_construct(peerId, flags)
+        const _peer  = new ArkProgressPeer(_peerPtr, peerId, "Progress", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setProgressOptionsAttribute(options: ProgressOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeProgressOptions(options)
+        ArkUIGeneratedNativeModule._ProgressInterface_setProgressOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    valueAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._ProgressAttribute_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    colorAttribute(value: ResourceColor | LinearGradient | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            if (TypeChecker.isLinearGradient(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as LinearGradient
+                thisSerializer.writeLinearGradient(value_value_1)
+            } else {
+                let value_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_type = runtimeType(value_value)
+                if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0  = value_value as ResourceColor
+                    let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                    value_value_0_type = runtimeType(value_value_0)
+                    if (TypeChecker.isColor(value_value_0)) {
+                        thisSerializer.writeInt8(0 as int32)
+                        const value_value_0_0  = value_value_0 as Color
+                        thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                    }
+                    else if (RuntimeType.NUMBER == value_value_0_type) {
+                        thisSerializer.writeInt8(1 as int32)
+                        const value_value_0_1  = value_value_0 as number
+                        thisSerializer.writeNumber(value_value_0_1)
+                    }
+                    else if (RuntimeType.STRING == value_value_0_type) {
+                        thisSerializer.writeInt8(2 as int32)
+                        const value_value_0_2  = value_value_0 as string
+                        thisSerializer.writeString(value_value_0_2)
+                    }
+                    else if (RuntimeType.OBJECT == value_value_0_type) {
+                        thisSerializer.writeInt8(3 as int32)
+                        const value_value_0_3  = value_value_0 as Resource
+                        thisSerializer.writeResource(value_value_0_3)
+                    }
+                }
+            }
+        }
+        ArkUIGeneratedNativeModule._ProgressAttribute_color(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    styleAttribute(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isLinearStyleOptions(value_value, true, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as LinearStyleOptions
+                thisSerializer.writeLinearStyleOptions(value_value_0)
+            }
+            else if (TypeChecker.isRingStyleOptions(value_value, true, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as RingStyleOptions
+                thisSerializer.writeRingStyleOptions(value_value_1)
+            }
+            else if (TypeChecker.isCapsuleStyleOptions(value_value, false, false, false, false, false, false, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as CapsuleStyleOptions
+                thisSerializer.writeCapsuleStyleOptions(value_value_2)
+            }
+            else if (TypeChecker.isProgressStyleOptions(value_value, true, false, false)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as ProgressStyleOptions
+                thisSerializer.writeProgressStyleOptions(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._ProgressAttribute_style(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    privacySensitiveAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._ProgressAttribute_privacySensitive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifierAttribute(value: ContentModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._ProgressAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface ProgressOptions {
     value: number;
     total?: number;
-    style?: ProgressStyle;
     type?: ProgressType;
 }
 export enum ProgressType {
@@ -77,22 +204,23 @@ export interface ScaleRingStyleOptions extends CommonProgressStyleOptions {
     scaleWidth?: Length;
     scaleCount?: number;
 }
-export interface RingStyleOptions extends ScanEffectOptions {
+export interface RingStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     strokeWidth?: Length;
     shadow?: boolean;
     status?: ProgressStatus;
 }
-export interface LinearStyleOptions extends ScanEffectOptions {
+export interface LinearStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     strokeWidth?: Length;
     strokeRadius?: PX | VP | LPX | Resource;
 }
-export interface CapsuleStyleOptions extends ScanEffectOptions {
+export interface CapsuleStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     borderColor?: ResourceColor;
     borderWidth?: Length;
     content?: string;
     font?: Font;
     fontColor?: ResourceColor;
     showDefaultPercentage?: boolean;
+    borderRadius?: LengthMetrics;
 }
 export enum ProgressStyle {
     LINEAR = 0,
@@ -108,33 +236,106 @@ export enum ProgressStyle {
 }
 export interface ProgressStyleMap {
 }
-export interface ProgressConfiguration extends CommonConfiguration<ProgressConfiguration> {
+export type ProgressInterface = (options: ProgressOptions) => ProgressAttribute;
+export interface ProgressAttribute extends CommonMethod {
+    value(value: number | undefined): this
+    color(value: ResourceColor | LinearGradient | undefined): this
+    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this
+    privacySensitive(value: boolean | undefined): this
+    contentModifier(value: ContentModifier | undefined): this
+}
+export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAttribute {
+    value_value?: number | undefined
+    color_value?: ResourceColor | LinearGradient | undefined
+    style_value?: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined
+    privacySensitive_value?: boolean | undefined
+    contentModifier_value?: ContentModifier | undefined
+    public value(value: number | undefined): this {
+        return this
+    }
+    public color(value: ResourceColor | LinearGradient | undefined): this {
+        return this
+    }
+    public style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
+        return this
+    }
+    public privacySensitive(value: boolean | undefined): this {
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        return this
+        }
+}
+export interface ProgressConfiguration extends CommonConfiguration {
     value: number;
     total: number;
 }
-/** @memo:stable */
-export interface ProgressAttribute extends CommonMethod {
-    /** @memo */
-    setProgressOptions(options: ProgressOptions): this
-    /** @memo */
-    value(value: number): this
-    /** @memo */
-    color(value: ResourceColor | LinearGradient): this
-    /** @memo */
-    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions): this
-    /** @memo */
-    privacySensitive(value?: boolean): this
-    /** @memo */
-    contentModifier(value: ContentModifier<object>): this
+export class ArkProgressComponent extends ArkCommonMethodComponent implements ProgressAttribute {
+    getPeer(): ArkProgressPeer {
+        return (this.peer as ArkProgressPeer)
+    }
+    public setProgressOptions(options: ProgressOptions): this {
+        if (this.checkPriority("setProgressOptions")) {
+            const options_casted = options as (ProgressOptions)
+            this.getPeer()?.setProgressOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public value(value: number | undefined): this {
+        if (this.checkPriority("value")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.valueAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public color(value: ResourceColor | LinearGradient | undefined): this {
+        if (this.checkPriority("color")) {
+            const value_casted = value as (ResourceColor | LinearGradient | undefined)
+            this.getPeer()?.colorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
+        if (this.checkPriority("style")) {
+            const value_casted = value as (LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined)
+            this.getPeer()?.styleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public privacySensitive(value: boolean | undefined): this {
+        if (this.checkPriority("privacySensitive")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.privacySensitiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        if (this.checkPriority("contentModifier")) {
+            const value_casted = value as (ContentModifier | undefined)
+            this.getPeer()?.contentModifierAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Progress(
-  /** @memo */
-  style: ((attributes: ProgressAttribute) => void) | undefined,
-  options: ProgressOptions, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: ProgressAttribute) => void) | undefined,
+    options: ProgressOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkProgressComponent()
     })

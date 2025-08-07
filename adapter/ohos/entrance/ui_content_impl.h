@@ -128,7 +128,7 @@ public:
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
-    void RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline);
+    void RegisterGetCurrentPageName();
     void SaveGetCurrentInstanceId();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -136,6 +136,7 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
+    void RegisterExeAppAIFunction();
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 
@@ -382,7 +383,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
+        bool isRouter = true, bool ignoreOrientation = false) override;
+    void SetForceSplitConfig(const std::string& configJsonStr) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
@@ -421,9 +424,9 @@ public:
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
-    void SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline);
-    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
-    void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
+    void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
+    void InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
     bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
         const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId) override;
@@ -521,6 +524,7 @@ private:
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWindowRectChangeListener> windowRectChangeListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IDisplayIdChangeListener> displayIdChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IDisplayModeListener> foldDisplayModeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;

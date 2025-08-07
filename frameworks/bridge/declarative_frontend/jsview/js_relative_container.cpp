@@ -165,32 +165,19 @@ void JSRelativeContainer::ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo
         if (JSViewAbstract::ParseJsDimensionVpNG(startVal, start, startResObj)) {
             guidelineInfoItem.start = start;
         }
-        if (SystemProperties::ConfigChangePerform() && startResObj) {
-            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
-                CalcDimension result;
-                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-                guidelineInfo.start = result;
-            };
-            guidelineInfoItem.AddResource("RelativeContainer.guideLine.position.start",
-                startResObj, std::move(updateFunc));
-        }
+        NG::RelativeContainerModelNG::SetPositionResObj(
+            startResObj, guidelineInfoItem, "relativeContainer.guideLine.position.start");
         if (JSViewAbstract::ParseJsDimensionVpNG(endVal, end, endResObj)) {
             guidelineInfoItem.end = end;
         }
-        if (SystemProperties::ConfigChangePerform() && endResObj) {
-            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
-                CalcDimension result;
-                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-                guidelineInfo.end = result;
-            };
-            guidelineInfoItem.AddResource("RelativeContainer.guideLine.position.end",
-                endResObj, std::move(updateFunc));
-        }
+        NG::RelativeContainerModelNG::SetPositionResObj(
+            endResObj, guidelineInfoItem, "relativeContainer.guideLine.position.end");
     }
 }
 
 void JSRelativeContainer::JsGuideline(const JSCallbackInfo& info)
 {
+    RelativeContainerModel::GetInstance()->ResetResObj("relativeContainer.guideLine");
     auto tmpInfo = info[0];
     std::vector<GuidelineInfo> guidelineInfos;
     if (tmpInfo->IsUndefined()) {

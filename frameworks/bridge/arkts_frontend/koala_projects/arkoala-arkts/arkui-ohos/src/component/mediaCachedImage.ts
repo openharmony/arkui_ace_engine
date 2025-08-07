@@ -17,43 +17,106 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle } from "./image"
+import { PixelMap } from "./arkui-pixelmap"
+import { ResourceStr } from "./units"
+import { DrawableDescriptor } from "./arkui-drawabledescriptor"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ResourceStr, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, ColorFilter } from "./units"
-import { DrawableDescriptor, ImageAttribute, ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ResolutionQuality } from "./image"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, PointLightStyle } from "./common"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { ImageAnalyzerConfig } from "./imageCommon"
-import { ArkMediaCachedImageComponent } from "./../generated/ArkMediaCachedImage"
-import { ArkMediaCachedImagePeer } from "./../generated/peers/ArkMediaCachedImagePeer"
+
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+export class ArkMediaCachedImagePeer extends ArkImagePeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkMediaCachedImagePeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._MediaCachedImage_construct(peerId, flags)
+        const _peer  = new ArkMediaCachedImagePeer(_peerPtr, peerId, "MediaCachedImage", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setMediaCachedImageOptionsAttribute(src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let src_type : int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        if (TypeChecker.isPixelMap(src, false, false)) {
+            thisSerializer.writeInt8(0 as int32)
+            const src_0  = src as PixelMap
+            thisSerializer.writePixelMap(src_0)
+        }
+        else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
+            thisSerializer.writeInt8(1 as int32)
+            const src_1  = src as ResourceStr
+            let src_1_type : int32 = RuntimeType.UNDEFINED
+            src_1_type = runtimeType(src_1)
+            if (RuntimeType.STRING == src_1_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const src_1_0  = src_1 as string
+                thisSerializer.writeString(src_1_0)
+            }
+            else if (RuntimeType.OBJECT == src_1_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const src_1_1  = src_1 as Resource
+                thisSerializer.writeResource(src_1_1)
+            }
+        }
+        else if (TypeChecker.isDrawableDescriptor(src)) {
+            thisSerializer.writeInt8(2 as int32)
+            const src_2  = src as DrawableDescriptor
+            thisSerializer.writeDrawableDescriptor(src_2)
+        }
+        else if (TypeChecker.isASTCResource(src, false, false)) {
+            thisSerializer.writeInt8(3 as int32)
+            const src_3  = src as ASTCResource
+            thisSerializer.writeASTCResource(src_3)
+        }
+        ArkUIGeneratedNativeModule._MediaCachedImageInterface_setMediaCachedImageOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface ASTCResource {
     sources: Array<string>;
     column: number;
 }
-/** @memo:stable */
+export type MediaCachedImageInterface = (src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) => MediaCachedImageAttribute;
 export interface MediaCachedImageAttribute extends ImageAttribute {
-    /** @memo */
-    setMediaCachedImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this
+}
+export class ArkMediaCachedImageStyle extends ArkImageStyle implements MediaCachedImageAttribute {
+}
+export class ArkMediaCachedImageComponent extends ArkImageComponent implements MediaCachedImageAttribute {
+    getPeer(): ArkMediaCachedImagePeer {
+        return (this.peer as ArkMediaCachedImagePeer)
+    }
+    public setMediaCachedImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
+        if (this.checkPriority("setMediaCachedImageOptions")) {
+            const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ASTCResource)
+            this.getPeer()?.setMediaCachedImageOptionsAttribute(src_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function MediaCachedImage(
-  /** @memo */
-  style: ((attributes: MediaCachedImageAttribute) => void) | undefined,
-  src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: MediaCachedImageAttribute) => void) | undefined,
+    src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkMediaCachedImageComponent()
     })

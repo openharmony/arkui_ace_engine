@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_H
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
-#include "frameworks/core/components/grid_layout/grid_layout_component.h"
-#include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -60,6 +58,7 @@ public:
     static void SetFriction(const JSCallbackInfo& info);
     static void SetFocusWrapMode(const JSCallbackInfo& args);
     static void SetAlignItems(const JSCallbackInfo& info);
+    static void SetSyncLoad(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnReachStart(const JSCallbackInfo& args);

@@ -369,7 +369,9 @@ public:
 
     std::unordered_map<int32_t, TouchDelegates> touchDelegatesMap_;
 
-    TouchDelegateHdl RegisterTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater);
+    TouchDelegateHdl AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater);
+
+    TouchDelegateHdl UpdateTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater);
 
     void UnregisterTouchDelegate(TouchDelegateHdl handler);
 
@@ -383,6 +385,11 @@ public:
     {
         CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
         return mouseStyleManager_->GetCurrentMouseStyle();
+    }
+
+    bool IsDragCancelPending() const
+    {
+        return isDragCancelPending_;
     }
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
@@ -405,13 +412,10 @@ private:
     void CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
-    void LogAndForceCleanReferee(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
-        float viewScale = 1.0f, bool needAppend = false);
     bool DispatchMultiContainerEvent(const TouchEvent& point);
     void DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch = true);
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
-    void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
+    void DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
@@ -430,6 +434,7 @@ private:
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     void CheckMousePendingRecognizersState(const TouchEvent& event);
     void ExecuteTouchTestDoneCallback(const TouchEvent& touchEvent, const ResponseLinkResult& responseLinkRecognizers);
+    void ExecuteTouchTestDoneCallback(const AxisEvent& axisEvent, const ResponseLinkResult& responseLinkRecognizers);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;
@@ -490,6 +495,7 @@ private:
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
     std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
     bool passThroughResult_ = false;
+    bool isDragCancelPending_ = false;
 };
 
 } // namespace OHOS::Ace

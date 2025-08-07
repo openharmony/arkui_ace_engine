@@ -48,6 +48,7 @@ private:
         LayoutWrapper* layoutWrapper);
     float CalcStackSubMenuPositionYHalfScreen(const SizeF& size, const RefPtr<FrameNode>& parentMenu,
         const RefPtr<FrameNode>& parentMenuItem);
+    float NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY, float positionY);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;
     float paddingEnd_ = 0.0f;

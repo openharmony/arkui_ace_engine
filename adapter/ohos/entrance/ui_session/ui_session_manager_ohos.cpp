@@ -18,7 +18,6 @@
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
 std::shared_mutex UiSessionManager::reportObjectMutex_;
-std::shared_mutex UiSessionManager::translateManagerMutex_;
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
 UiSessionManager* UiSessionManager::GetInstance()
 {
@@ -97,19 +96,21 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
     }
 }
 
-void UiSessionManagerOhos::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
+void UiSessionManagerOhos::ReportWebUnfocusEvent(
+    int64_t accessibilityId, const std::string& data, const std::string& type)
 {
     auto jsonValue = InspectorJsonUtil::Create(true);
     jsonValue->Put("id", accessibilityId);
     jsonValue->Put("$type", "web");
     jsonValue->Put("text", data.c_str());
+    jsonValue->Put("eventType", type.c_str());
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportWebUnfocusEvent(accessibilityId, jsonValue->ToString());
         } else {
-            LOGW("report web unfocus event failed,process id:%{public}d", pair.first);
+            LOGW("report web unfocus event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -331,21 +332,23 @@ void UiSessionManagerOhos::SaveTranslateManager(std::shared_ptr<UiTranslateManag
 
 void UiSessionManagerOhos::SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(getInstanceIdCallbackMutex_);
     getInstanceIdCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::RemoveSaveGetCurrentInstanceId(int32_t instanceId)
 {
+    std::unique_lock<std::shared_mutex> lock(translateManagerMutex_);
     translateManagerMap_.erase(instanceId);
 }
 
 std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateManager()
 {
     std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
-
+    std::shared_lock<std::shared_mutex> lock(getInstanceIdCallbackMutex_);
     if (getInstanceIdCallback_) {
         int32_t instanceId = getInstanceIdCallback_();
+        std::shared_lock<std::shared_mutex> lock(translateManagerMutex_);
         auto iter = translateManagerMap_.find(instanceId);
         if (iter != translateManagerMap_.end()) {
             auto translateManager = iter->second;
@@ -359,11 +362,11 @@ std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateMan
 
 void UiSessionManagerOhos::GetWebViewLanguage()
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
-
-    auto  currentTranslateManager = GetCurrentTranslateManager();
+    auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
-        currentTranslateManager->GetWebViewCurrentLanguage();
+        currentTranslateManager->PostToUI([currentTranslateManager]() {
+            currentTranslateManager->GetWebViewCurrentLanguage();
+        });
     } else {
         LOGE("translateManager is nullptr ,translate failed");
     }
@@ -402,7 +405,7 @@ void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 
 void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["translate"]]);
     if (reportService) {
         reportService->SendCurrentLanguage(result);
@@ -413,9 +416,11 @@ void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isCon
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
 
-    auto  currentTranslateManager = GetCurrentTranslateManager();
+    auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
-        currentTranslateManager->GetTranslateText(extraData, isContinued);
+        currentTranslateManager->PostToUI([currentTranslateManager, extraData, isContinued]() {
+            currentTranslateManager->GetTranslateText(extraData, isContinued);
+        });
     } else {
         LOGE("translateManager is nullptr ,translate failed");
     }
@@ -423,7 +428,7 @@ void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isCon
 
 void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["translate"]]);
     if (reportService != nullptr) {
         reportService->SendWebText(nodeId, res);
@@ -435,11 +440,11 @@ void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 void UiSessionManagerOhos::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
-
-    auto  currentTranslateManager = GetCurrentTranslateManager();
+    auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
-        currentTranslateManager->SendTranslateResult(nodeId, results, ids);
+        currentTranslateManager->PostToUI([currentTranslateManager, nodeId, results, ids]() {
+            currentTranslateManager->SendTranslateResult(nodeId, results, ids);
+        });
     } else {
         LOGE("translateManager is nullptr ,translate failed");
     }
@@ -449,9 +454,11 @@ void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
 
-    auto  currentTranslateManager = GetCurrentTranslateManager();
+    auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
-        currentTranslateManager->SendTranslateResult(nodeId, res);
+        currentTranslateManager->PostToUI([currentTranslateManager, nodeId, res]() {
+            currentTranslateManager->SendTranslateResult(nodeId, res);
+        });
     } else {
         LOGE("translateManager is nullptr ,translate failed");
     }
@@ -460,10 +467,11 @@ void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 {
     std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
-
-    auto  currentTranslateManager = GetCurrentTranslateManager();
+    auto currentTranslateManager = GetCurrentTranslateManager();
     if (currentTranslateManager) {
-        currentTranslateManager->ResetTranslate(nodeId);
+        currentTranslateManager->PostToUI([currentTranslateManager, nodeId]() {
+            currentTranslateManager->ResetTranslate(nodeId);
+        });
     } else {
         LOGE("translateManager is nullptr ,translate failed");
     }
@@ -478,13 +486,10 @@ void UiSessionManagerOhos::GetPixelMap()
     }
 }
 
-void UiSessionManagerOhos::SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
+void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps)
 {
-    std::shared_lock<std::shared_mutex> reportLock(translateManagerMutex_);
-    std::shared_ptr<UiTranslateManager> translateManager = nullptr;
-
-    auto  currentTranslateManager = GetCurrentTranslateManager();
-
+    auto currentTranslateManager = GetCurrentTranslateManager();
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     if (!currentTranslateManager) {
         LOGW("send pixelMap failed,translateManager is nullptr");
     }
@@ -492,7 +497,9 @@ void UiSessionManagerOhos::SendPixelMap(std::vector<std::pair<int32_t, std::shar
     if (reportService != nullptr) {
         reportService->SendShowingImage(maps);
         if (currentTranslateManager) {
-            currentTranslateManager->ClearMap();
+            currentTranslateManager->PostToUI([currentTranslateManager]() {
+               currentTranslateManager->ClearMap();
+            });
         }
     } else {
         LOGW("send pixel maps failed,process id:%{public}d", processMap_["pixel"]);
@@ -521,5 +528,32 @@ void UiSessionManagerOhos::SendCommand(const std::string& command)
 void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
 {
     sendCommandFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
+    std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    pipelineExeAppAIFunctionCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params)
+{
+    if (pipelineExeAppAIFunctionCallback_) {
+        auto result = pipelineExeAppAIFunctionCallback_(funcName, params);
+        SendExeAppAIFunctionResult(result);
+    }
+}
+
+void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
+{
+    for (auto& pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->SendExeAppAIFunctionResult(result);
+        } else {
+            LOGW("report send execute application AI function result failed,process id:%{public}d", pair.first);
+        }
+    }
 }
 } // namespace OHOS::Ace

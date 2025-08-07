@@ -472,6 +472,9 @@ HWTEST_F(ContainerModelTestNg, AccessibilityProperty001, TestSize.Level1)
 HWTEST_F(ContainerModelTestNg, VisibleTest009, TestSize.Level1)
 {
     CreateContainerModal();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
     auto customRow = pattern_->GetCustomTitleRow();
     ASSERT_NE(customRow, nullptr);
     auto customLayoutProperty = customRow->GetLayoutProperty();
@@ -959,6 +962,7 @@ HWTEST_F(ContainerModelTestNg, SetToolbarBuilder, TestSize.Level1)
     pattern_->SetToolbarBuilder(frameNode, nullptr);
     ASSERT_NE(pattern_->titleMgr_, nullptr);
     ASSERT_NE(pattern_->floatTitleMgr_, nullptr);
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
 }
 
 /**

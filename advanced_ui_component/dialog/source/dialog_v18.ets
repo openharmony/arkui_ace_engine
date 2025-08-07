@@ -143,6 +143,10 @@ const CONTENT_FONT_WEIGHT = lazyInit<FontWeight>(() => {
   let fontWeight: FontWeight = FontWeight[getString(125834682) || 'Medium'];
   return fontWeight;
 });
+// 'sys.string.dialog_content_font_size'
+const CONTENT_FONT_SIZE = lazyInit<number>(() => {
+  return getLengthMetricsByResource($r('sys.float.dialog_content_font_size'), BODY_L);
+});
 const SCROLL_BAR_OFFSET = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
@@ -231,7 +235,7 @@ export struct TipsDialog {
           })
           .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN()) })
         Text(this.checkTips)
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE()}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -341,7 +345,7 @@ export struct TipsDialog {
   }
 
   getContentFontSize(): Length {
-    return BODY_L + 'fp';
+    return CONTENT_FONT_SIZE() + 'fp';
   }
 
   private initButtons(): void {
@@ -550,7 +554,7 @@ export struct SelectDialog {
               .onClick(() => {
                 this.selectedIndex = index;
                 item.action && item.action();
-                this.controller?.close();
+                closeDialog(this.controller, 'onClick');
               })
             }
             .paddingStyle()
@@ -739,7 +743,7 @@ export struct ConfirmDialog {
             .focusBox({
               strokeWidth: LengthMetrics.px(0)
             })
-            .fontSize(`${BODY_L}fp`)
+            .fontSize(`${CONTENT_FONT_SIZE()}fp`)
             .fontWeight(CONTENT_FONT_WEIGHT())
             .fontColor(this.fontColorWithTheme)
             .textAlign(this.textAlign)
@@ -909,7 +913,7 @@ export struct AlertDialog {
           .focusBox({
             strokeWidth: LengthMetrics.px(0)
           })
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE()}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
@@ -1089,10 +1093,8 @@ struct CustomDialogContentComponent {
   @State customStyle: boolean | undefined = undefined;
   @State buttonMaxFontSize: Length = `${BODY_L}fp`;
   @State buttonMinFontSize: Length = 9;
-  @State primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
-  @State primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_SIZE()}fp`;
-  @State secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  @State primaryTitleFontSize: Length = `${TITLE_S}fp`;
+  @State secondaryTitleFontSize: Length = `${SUBTITLE_SIZE()}fp`;
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @State titleTextAlign: TextAlign = TextAlign.Center;
@@ -1303,8 +1305,7 @@ struct CustomDialogContentComponent {
           .fontWeight(TITLE_FONT_WEIGHT())
           .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.primaryTitleMaxFontSize)
-          .minFontSize(this.primaryTitleMinFontSize)
+          .fontSize(this.primaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
@@ -1323,8 +1324,7 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Regular)
           .fontColor(this.secondaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.secondaryTitleMaxFontSize)
-          .minFontSize(this.secondaryTitleMinFontSize)
+          .fontSize(this.secondaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
@@ -1667,7 +1667,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, isHasDefaultFocus: bo
       if (buttonOptions.action) {
         buttonOptions.action();
       }
-      controller?.close();
+      closeDialog(controller, 'onKeyEvent');
       event.stopPropagation();
     }
   })
@@ -1675,13 +1675,22 @@ function setButtonProperties(buttonOptions: ButtonOptions, isHasDefaultFocus: bo
     if (buttonOptions.action) {
       buttonOptions.action();
     }
-    controller?.close();
+    closeDialog(controller, 'onClick');
   })
   .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions.buttonStyle ??
     (buttonOptions.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE() : ALERT_BUTTON_STYLE()))
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+}
+
+function closeDialog(controller: CustomDialogController | undefined, funcName: string) {
+  if (controller) {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller true`);
+    controller?.close();
+  } else {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller false`);
+  }
 }
 
 /**
@@ -1915,7 +1924,7 @@ export struct LoadingDialog {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE()}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)

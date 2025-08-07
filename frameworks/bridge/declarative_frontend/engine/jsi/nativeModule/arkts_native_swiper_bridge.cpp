@@ -350,17 +350,18 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
     CalcDimension lengthValue;
     Color color;
     std::vector<RefPtr<ResourceObject>> resObjs;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     resObjs.resize(ARROW_RESOURCE_VECTOR_LENGTH);
     std::string backgroundSizeStr = ArkTSUtils::ParseJsDimension(vm, backgroundSize, lengthValue, DimensionUnit::VP,
         resObjs.at(ARROW_RESOURCE_BACKGROUND_SIZE), false)
         ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit()) : "-";
     std::string backgroundColorStr = ArkTSUtils::ParseJsColorAlpha(vm, backgroundColor, color,
-        resObjs.at(ARROW_RESOURCE_BACKGROUND_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(ARROW_RESOURCE_BACKGROUND_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string arrowSizeStr = ArkTSUtils::ParseJsDimensionNG(vm, arrowSize, lengthValue, DimensionUnit::VP,
         resObjs.at(ARROW_RESOURCE_SIZE), false)
         ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit()) : "-";
     std::string arrowColorStr = ArkTSUtils::ParseJsColorAlpha(vm, arrowColor, color,
-        resObjs.at(ARROW_RESOURCE_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(ARROW_RESOURCE_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string isHoverShowStr = "2";
     if (!isHoverShow->IsUndefined()) {
         isHoverShowStr = isHoverShow->ToBoolean(vm)->Value() ? "1" : "0";
@@ -735,7 +736,7 @@ std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool
     }
     if (hasIgnoreSize) {
         CalcDimension bottomcCalc;
-        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc);
+        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc, resObj);
         if (!parseOK) {
             bottom = GetStringByValueRef(vm, jsValue, resObj);
             return bottom;
@@ -802,7 +803,7 @@ void GetSpaceAndBottom(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::s
 }
 
 std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<RefPtr<ResourceObject>>& resObjs, ArkUINodeHandle nativeNode)
 {
     Local<JSValueRef> itemWidthArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_WIDTH);
     Local<JSValueRef> itemHeightArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_HEIGHT);
@@ -835,10 +836,11 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
         mask = maskArg->ToBoolean(vm)->Value() ? "1" : "0";
     }
     Color color;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     std::string colorStr = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color,
-        resObjs.at(DOT_INDICATOR_RESOURCE_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DOT_INDICATOR_RESOURCE_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string selectedColor = ArkTSUtils::ParseJsColorAlpha(vm, selectedColorArg, color,
-        resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string left = GetStringByValueRef(vm, leftArg, resObjs.at(INDICATOR_RESOURCE_LEFT));
     std::string top = GetStringByValueRef(vm, topArg, resObjs.at(INDICATOR_RESOURCE_TOP));
     std::string right = GetStringByValueRef(vm, rightArg, resObjs.at(INDICATOR_RESOURCE_RIGHT));
@@ -854,7 +856,7 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     return indicatorStr;
 }
 std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<RefPtr<ResourceObject>>& resObjs, ArkUINodeHandle nativeNode)
 {
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_FONT_COLOR);
     Local<JSValueRef> selectedFontColorArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SELECTED_FONT_COLOR);
@@ -872,10 +874,11 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     Local<JSValueRef> setIgnoreSizeArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SET_IGNORE_SIZE);
     Color color;
     CalcDimension calc;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     std::string fontColor = ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color,
-        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string selectedFontColor = ArkTSUtils::ParseJsColorAlpha(vm, selectedFontColorArg, color,
-        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::FP,
         resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SIZE), false)
         ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
@@ -925,9 +928,9 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
         std::string indicator = indicatorArg->ToBoolean(vm)->Value() ? "1" : "0";
         indicatorStr = type + "|" + indicator;
     } else if (type == "ArkDotIndicator") {
-        indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm, resObjs);
+        indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "ArkDigitIndicator") {
-        indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm, resObjs);
+        indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "IndicatorComponentController") {
         Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
         Framework::JSIndicatorController* jsController =
@@ -1128,9 +1131,9 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationStart(ArkUIRuntimeCallI
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> targetIndexParam = panda::NumberRef::New(vm, targetIndex);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.targetOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.velocity.value()) };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.targetOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.velocity.value_or(0.0f)) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[3] = { indexParam, targetIndexParam, eventObject }; // 3: Array length
         func->Call(vm, func.ToLocal(), params, 3); // 3: Array length
@@ -1310,18 +1313,13 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperCustomContentTransition(ArkUIRunti
 
     JSRef<JSVal> transition = transitionObj->GetProperty("transition");
     if (transition->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(transition);
-        auto func = jsFunc->GetLocalHandle();
-        auto onTransition = [vm, func = panda::CopyableGlobal(vm, func)](
+        auto jsOnTransition =
+            AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(transition));
+        auto onTransition = [execCtx = info.GetExecutionContext(), func = std::move(jsOnTransition)](
                                 const RefPtr<SwiperContentTransitionProxy>& proxy) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.customContentTransition");
-            JSRef<JSObject> proxyObj = JSClass<JsSwiperContentTransitionProxy>::NewInstance();
-            auto jsProxy = Referenced::Claim(proxyObj->Unwrap<JsSwiperContentTransitionProxy>());
-            jsProxy->SetProxy(proxy);
-            panda::Local<panda::JSValueRef> params[1] = { proxyObj->GetLocalHandle() };
-            func->Call(vm, func.ToLocal(), params, 1);
+            func->Execute(proxy);
         };
         transitionInfo.transition = std::move(onTransition);
     }
@@ -1488,6 +1486,50 @@ ArkUINativeModuleValue SwiperBridge::ReSetSwiperMaintainVisibleContentPosition(A
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetMaintainVisibleContentPosition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperOnScrollStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnScrollStateChanged(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "scrollStateInfo invalid, OnScrollStateChanged failed.");
+            return;
+        }
+        panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, scrollStateInfo->GetIndex());
+        panda::Local<panda::JSValueRef> params[1] = { indexParam };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperOnScrollStateChanged(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperOnScrollStateChanged(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnScrollStateChanged(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

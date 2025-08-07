@@ -110,6 +110,9 @@ public:
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
+    void SetAlign(const std::string& localizedAlignment) override {}
+    void SetLayoutGravity(const Alignment& alignment) override {}
+    void SetIsMirrorable(const bool& isMirrorable) override {}
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetChainStyle(const ChainInfo& chainInfo) override {}
     void SetBias(const BiasPair& biasPair) override {}
@@ -196,6 +199,8 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(
@@ -231,7 +236,7 @@ public:
     void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) override;
+    void SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) override;
     void SetOnDragSpringLoadingConfiguration(
         const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
@@ -294,7 +299,7 @@ public:
     void SetBackground(std::function<void()>&& buildFunc) override {};
     void SetBackgroundAlign(const Alignment& align) override {};
     void SetCustomBackgroundColor(const Color& color) override {};
-    void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override {};
     void SetIsTransitionBackground(bool val) override {};
     void SetIsBuilderBackground(bool val) override {};
@@ -414,14 +419,12 @@ public:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
-    void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override {};
-    void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override {};
-    void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj,
+        const PopupType& type) override {};
     void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override {};
 };
 
 } // namespace OHOS::Ace::Framework

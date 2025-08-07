@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
@@ -62,21 +63,19 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const std::string& param) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                           const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (param != "true" && param != "false") {
             return;
         }
         bool newValue = StringToBool(param);
         ACE_SCORING_EVENT("Refresh.ChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, newValue) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+        func->ExecuteJS(1, &newJSVal);
     };
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
@@ -97,6 +96,9 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
     JSClass<JSRefresh>::StaticMethod("refreshOffset", &JSRefresh::JsRefreshOffset);
     JSClass<JSRefresh>::StaticMethod("pullToRefresh", &JSRefresh::SetPullToRefresh, opt);
+    JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
+    JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
+    JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
     JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
     JSClass<JSRefresh>::StaticMethod("maxPullDownDistance", &JSRefresh::SetMaxPullDownDistance);
     JSClass<JSRefresh>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
@@ -167,22 +169,23 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto refreshing = paramObject->GetProperty("refreshing");
-    auto jsOffset = paramObject->GetProperty("offset");
-    auto friction = paramObject->GetProperty("friction");
-    auto promptText = paramObject->GetProperty("promptText");
+    auto refreshing = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING));
+    auto jsOffset = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET));
+    auto friction = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FRICTION));
+    auto promptText = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::PROMPT_TEXT));
     JSRef<JSVal> changeEventVal;
     RefreshModel::GetInstance()->Create();
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
-        changeEventVal = paramObject->GetProperty("$refreshing");
+        changeEventVal = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::$REFRESHING));
         ParseRefreshingObject(info, changeEventVal);
     } else if (refreshing->IsObject()) {
         JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-        changeEventVal = refreshingObj->GetProperty("changeEvent");
+        changeEventVal = refreshingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CHANGE_EVENT));
         ParseRefreshingObject(info, changeEventVal);
-        RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
+        RefreshModel::GetInstance()->SetRefreshing(
+            refreshingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE))->ToBoolean());
     } else {
         RefreshModel::GetInstance()->SetRefreshing(false);
     }
@@ -216,17 +219,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
 {
-    JSRef<JSVal> contentParam = paramObject->GetProperty("refreshingContent");
+    JSRef<JSVal> contentParam = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING_CONTENT));
     if (!contentParam->IsObject()) {
         return false;
     }
     JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
-    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER_NODE));
     if (!builderNodeParam->IsObject()) {
         return false;
     }
     JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty(static_cast<int32_t>(ArkUIIndex::NODEPTR));
     if (nodeptr.IsEmpty()) {
         return false;
     }
@@ -247,13 +250,13 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
         return false;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto builder = paramObject->GetProperty("builder");
+    auto builder = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
     RefPtr<NG::UINode> customNode;
     if (builder->IsFunction()) {
         {
             NG::ScopedViewStackProcessor builderViewStackProcessor;
-            auto jsFunc = JSRef<JSFunc>::Cast(builder);
-            jsFunc->Call(info.This());
+            JsFunction Jsfunc(info.This(), JSRef<JSFunc>::Cast(builder));
+            Jsfunc.Execute();
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
@@ -262,6 +265,61 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
         return false;
     }
+}
+
+void JSRefresh::OnStateChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             const int32_t& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Refresh.OnStateChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
+    };
+    RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
+}
+
+void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Refresh.OnRefreshing");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make();
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
+}
+
+void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        RefreshModel::GetInstance()->ResetOnOffsetChange();
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto offsetChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const float& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Refresh.OnOffsetChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RefreshModel::GetInstance()->SetOnOffsetChange(std::move(offsetChange));
 }
 
 void JSRefresh::ParsFrictionData(const JsiRef<JsiValue>& friction)

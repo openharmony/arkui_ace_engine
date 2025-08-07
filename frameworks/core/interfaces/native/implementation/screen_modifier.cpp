@@ -49,7 +49,7 @@ void SetScreenOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(screenId);
 
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    auto convValue = Converter::Convert<uint32_t>(*screenId);
+    // auto convValue = Converter::Convert<uint32_t>(*screenId);
     // ScreenModel::SetOptions(frameNode, convValue);
 #endif //WINDOW_SCENE_SUPPORTED
 }

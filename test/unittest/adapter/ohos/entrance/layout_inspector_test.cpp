@@ -53,4 +53,60 @@ HWTEST_F(LayoutInspectorTest, Filter3DSnapshot001, TestSize.Level1)
     EXPECT_EQ(snapinfos.size(), 5);
     EXPECT_EQ(infos.size(), 2);
 }
+
+/**
+ * @tc.name: ProcessMessagesTest
+ * @tc.desc: Test cast to ProcessMessages
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutInspectorTest, ProcessMessagesTest, TestSize.Level1)
+{
+    // test1: empty msg
+    std::string inspectorMsg = "";
+    auto result = LayoutInspector::ProcessMessages(inspectorMsg);
+    uint32_t windowId = result.first;
+    int32_t methodNum = result.second;
+    EXPECT_EQ(windowId, 0);
+    EXPECT_EQ(methodNum, -1);
+    
+    // test2: invalid msg1, window id is corret, method is wrong
+    inspectorMsg = "{\"method\":\"ArkUI.xxx\", \"params\":{\"windowId\":\"10\"}}";
+    result = LayoutInspector::ProcessMessages(inspectorMsg);
+    windowId = result.first;
+    methodNum = result.second;
+    EXPECT_EQ(windowId, 0);
+    EXPECT_EQ(methodNum, -1);
+    
+    // test3: invalid msg2, window id is wrong, method is corret
+    inspectorMsg = "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"xxx\"}}";
+    result = LayoutInspector::ProcessMessages(inspectorMsg);
+    windowId = result.first;
+    methodNum = result.second;
+    EXPECT_EQ(windowId, 0);
+    EXPECT_EQ(methodNum, 0);
+    
+    // test4: valid msg, window id is corret, method is ArkUI.tree
+    inspectorMsg = "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"11\"}}";
+    result = LayoutInspector::ProcessMessages(inspectorMsg);
+    windowId = result.first;
+    methodNum = result.second;
+    EXPECT_EQ(windowId, 11);
+    EXPECT_EQ(methodNum, 0);
+    
+    // test5: valid msg, window id is corret, method is ArkUI.tree.3D
+    inspectorMsg = "{\"method\":\"ArkUI.tree.3D\", \"params\":{\"windowId\":\"11\"}}";
+    result = LayoutInspector::ProcessMessages(inspectorMsg);
+    windowId = result.first;
+    methodNum = result.second;
+    EXPECT_EQ(windowId, 11);
+    EXPECT_EQ(methodNum, 1);
+    
+    // test6: valid msg, window id is corret, method is ArkUI.queryAbilities
+    inspectorMsg = "{\"method\":\"ArkUI.queryAbilities\", \"params\":{\"windowId\":\"11\"}}";
+    result = LayoutInspector::ProcessMessages(inspectorMsg);
+    windowId = result.first;
+    methodNum = result.second;
+    EXPECT_EQ(windowId, 11);
+    EXPECT_EQ(methodNum, 2);
+}
 } // namespace OHOS::Ace::NG

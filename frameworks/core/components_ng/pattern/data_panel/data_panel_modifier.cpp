@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -226,7 +227,7 @@ void DataPanelModifier::GetPaintPath(ArcData& arcData, RSPath& path, RSPath& end
     float sine = thickness * PERCENT_HALF / (radius - (thickness * PERCENT_HALF));
     float radian = asin(sine);
     // the angle of center of start half circle to center and tangent of start half circle to center
-    arcData.circleAngle = radian * HALF_CIRCLE / M_PI;
+    arcData.circleAngle = radian * HALF_CIRCLE / ACE_PI;
     float circleAngle = arcData.circleAngle;
 
     float startAngle = 0.0f;
@@ -248,11 +249,11 @@ void DataPanelModifier::GetPaintPath(ArcData& arcData, RSPath& path, RSPath& end
      * tagAngle: the angle of line of center of start half circle and center of end half circle and
                  line of intersection of start half circle and intersection of end half circle
     */
-    float lastRadian = M_PI * lastAngle / HALF_CIRCLE;
-    float drawRadian = M_PI * drawAngle / HALF_CIRCLE;
-    float totalDrawRadian = M_PI * totalDrawAngle / HALF_CIRCLE;
-    float startRadian = M_PI * startAngle / HALF_CIRCLE;
-    float originDrawRadian = M_PI * arcData.totalDrawAngle / HALF_CIRCLE;
+    float lastRadian = ACE_PI * lastAngle / HALF_CIRCLE;
+    float drawRadian = ACE_PI * drawAngle / HALF_CIRCLE;
+    float totalDrawRadian = ACE_PI * totalDrawAngle / HALF_CIRCLE;
+    float startRadian = ACE_PI * startAngle / HALF_CIRCLE;
+    float originDrawRadian = ACE_PI * arcData.totalDrawAngle / HALF_CIRCLE;
     float d = std::sqrt(
         std::pow(
             (radius - thickness * PERCENT_HALF) - (radius - thickness * PERCENT_HALF) * std::cos(originDrawRadian), 2) +
@@ -263,8 +264,8 @@ void DataPanelModifier::GetPaintPath(ArcData& arcData, RSPath& path, RSPath& end
         midAngle = std::acos(std::abs((radius - thickness * PERCENT_HALF) -
                                       (radius - thickness * PERCENT_HALF) * std::cos(originDrawRadian)) /
                              d) *
-                   HALF_CIRCLE / M_PI;
-        tagAngle = std::acos((d / thickness)) * HALF_CIRCLE / M_PI;
+                   HALF_CIRCLE / ACE_PI;
+        tagAngle = std::acos((d / thickness)) * HALF_CIRCLE / ACE_PI;
     }
     /*
      * path of start half circle:

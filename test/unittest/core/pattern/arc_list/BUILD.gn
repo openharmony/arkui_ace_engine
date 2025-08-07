@@ -23,6 +23,7 @@ ace_unittest("arc_list_test_ng") {
     "arc_list_attr_test_ng.cpp",
     "arc_list_common_test_ng.cpp",
     "arc_list_layout_test_ng.cpp",
+    "arc_list_pattern_test_ng.cpp",
     "arc_list_scroller_event_test_ng.cpp",
     "arc_list_scroller_test_ng.cpp",
     "arc_list_swipe_test_ng.cpp",

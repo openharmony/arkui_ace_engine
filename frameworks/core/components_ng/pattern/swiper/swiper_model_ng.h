@@ -86,20 +86,20 @@ public:
     void SetDisableTransitionAnimation(bool isDisable) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) override;
+    void SetOnScrollStateChanged(
+        std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged) override;
     void SetBindIndicator(bool bind) override;
     void SetJSIndicatorController(std::function<void()> resetFunc) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
     void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) override;
     void SetMaintainVisibleContentPosition(bool value) override;
-    void ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) override;
-    void ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
-    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
-        const std::optional<bool> &ignoreBlank = false);
-    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
-        const std::optional<bool> &ignoreBlank = false);
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlankn = false);
     static void SetIndex(FrameNode* frameNode, uint32_t index);
     static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
@@ -131,7 +131,6 @@ public:
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(int32_t index)>&& onChange);
     static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
@@ -165,6 +164,8 @@ public:
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
     static void SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll);
+    static void SetOnScrollStateChanged(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
@@ -180,12 +181,27 @@ public:
     static std::shared_ptr<SwiperDigitalParameters> GetDigitIndicator(FrameNode* frameNode);
     static void SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value);
     static bool GetMaintainVisibleContentPosition(FrameNode* frameNode);
+    static void ProcessDotPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDotSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDotStyleSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessDotColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessArrowColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessArrowBackgroundColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessArrowSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessBackgroundSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateDotWithResourceObj(FrameNode*  frameNode, const SwiperParameters& swiperParameters);
     static void CreateDigitWithResourceObj(FrameNode*  frameNode,
         const SwiperDigitalParameters& swiperDigitalParameters);
     static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters);
-    static void SetOnChangeEvent(FrameNode* frameNode,
-        std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
 };
 
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
+#ifdef ACE_STATIC
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#endif
 
 namespace OHOS::Ace::NG {
 ListHeightOffsetCalculator::ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition,
@@ -132,26 +135,20 @@ void ListHeightOffsetCalculator::CalculatePosMapNode()
 
 int32_t ListHeightOffsetCalculator::GetPosMapStartIndex()
 {
-    if (!posMap_) {
-        return -1;
-    }
-    return posMap_->GetStartIndexAndPos().first;
+    return posMap_ ? posMap_->GetStartIndexAndPos().first : -1;
 }
 
 int32_t ListHeightOffsetCalculator::GetPosMapEndIndex()
 {
-    if (!posMap_) {
-        return -1;
-    }
-    return posMap_->GetEndIndexAndPos().first;
+    return posMap_ ? posMap_->GetEndIndexAndPos().first : -1;
 }
 
 void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINode> node)
 {
-    auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
+    auto repeatV2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
     int32_t count = 0;
-    if (repeat2) {
-        auto totalCount = repeat2->GetTotalCount();
+    if (repeatV2) {
+        auto totalCount = repeatV2->GetTotalCount();
         count = (totalCount <= INT_MAX) ? static_cast<int32_t>(totalCount) : INT_MAX;
     } else {
         count = node->FrameCount();
@@ -193,7 +190,7 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
 void ListHeightOffsetCalculator::CalculateUINode(RefPtr<UINode> node, bool checkStart)
 {
     CHECK_NULL_VOID(node);
-    auto children = node->GetChildren();
+    const auto& children = node->GetChildren();
     int32_t index = 0;
     for (const auto& child : children) {
         index++;
@@ -203,9 +200,12 @@ void ListHeightOffsetCalculator::CalculateUINode(RefPtr<UINode> node, bool check
         if (AceType::InstanceOf<FrameNode>(child)) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             CalculateFrameNode(frameNode);
-        } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
-            AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
-            AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+        } else if (AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScroll2Node>(child)
+#ifdef ACE_STATIC
+                   || AceType::InstanceOf<ArkoalaLazyNode>(child)
+#endif
+        ) {
             auto posMapStart = GetPosMapStartIndex();
             if (posMapStart >= 0 && posMapStart <= currentIndex_ && !syncPosMap_) {
                 CalculateLazyForEachNodeWithPosMap(child);

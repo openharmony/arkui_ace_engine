@@ -21,6 +21,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 
 namespace OHOS::Ace {
 
@@ -119,6 +120,183 @@ SpanString::~SpanString()
 {
     spansMap_.clear();
     spans_.clear();
+}
+
+void UpdateImageLayoutPropertyByImageSpanAttribute(std::optional<ImageSpanAttribute>& imageAttribute,
+    RefPtr<NG::ImageSpanNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageAttribute.has_value());
+    auto imgAttr = imageAttribute.value();
+    auto imagePattern = imageNode->GetPattern<NG::ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<NG::ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imagePattern->SetSyncLoad(imgAttr.syncLoad);
+    if (imgAttr.size.has_value()) {
+        imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
+    }
+    if (imgAttr.verticalAlign.has_value()) {
+        imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
+    }
+    if (imgAttr.objectFit.has_value()) {
+        imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+    }
+    if (imgAttr.marginProp.has_value()) {
+        imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+    }
+    if (imgAttr.paddingProp.has_value()) {
+        imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
+    }
+    if (imgAttr.borderRadius.has_value()) {
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+        imageRenderCtx->SetClipToBounds(true);
+    }
+}
+
+PlaceholderRun GetImageSpanItemPlaceholderRun(const RefPtr<NG::SpanItem>& child,
+    std::optional<double>& maxWidth)
+{
+    PlaceholderRun run;
+    auto imageSpanItem = AceType::DynamicCast<NG::ImageSpanItem>(child);
+    CHECK_NULL_RETURN(imageSpanItem, run);
+    auto imageNode = NG::ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NG::ImagePattern>(); });
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<NG::ImageLayoutProperty>();
+    auto options = imageSpanItem->options;
+    imageLayoutProperty->UpdateImageSourceInfo(NG::ParagraphUtil::CreateImageSourceInfo(options));
+    UpdateImageLayoutPropertyByImageSpanAttribute(options.imageAttribute, imageNode);
+
+    std::optional<NG::LayoutConstraintF> constraint = std::make_optional<NG::LayoutConstraintF>();
+    constraint->maxSize.SetWidth(maxWidth.has_value() ? maxWidth.value() : std::numeric_limits<float>::infinity());
+    imageNode->Measure(constraint);
+    TextStyle spanTextStyle;
+    auto baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(Dimension(0.0f));
+    auto geometryNode = imageNode->GetGeometryNode();
+    run.width = geometryNode->GetMarginFrameSize().Width();
+    run.height = geometryNode->GetMarginFrameSize().Height();
+    auto base = baselineOffset.ConvertToPxDistribute(
+        spanTextStyle.GetMinFontScale(), spanTextStyle.GetMaxFontScale(), spanTextStyle.IsAllowScale());
+    if (!NearZero(base)) {
+        run.baseline_offset = base;
+        run.alignment = PlaceholderAlignment::BASELINE;
+    } else {
+        run.alignment = NG::GetPlaceHolderAlignmentFromVerticalAlign(
+            imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM));
+    }
+    return run;
+}
+
+void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::SpanItem>& child,
+    std::optional<double>& maxWidth)
+{
+    CHECK_NULL_VOID(child);
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    if (child->spanItemType == SpanItemType::NORMAL) {
+        TextStyle spanTextStyle = CreateTextStyleUsingTheme(child->fontStyle, child->textLineStyle, theme, false);
+        paragraph->PushStyle(spanTextStyle);
+        if (!child->content.empty()) {
+            auto displayText = child->content;
+            auto textCase = spanTextStyle.GetTextCase();
+            StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+            UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()),
+                displayText.length(), 0);
+            paragraph->AddText(displayText);
+        }
+        paragraph->PopStyle();
+        return;
+    }
+    PlaceholderRun run;
+    if (child->spanItemType == SpanItemType::IMAGE) {
+        run = GetImageSpanItemPlaceholderRun(child, maxWidth);
+    } else if (child->spanItemType == SpanItemType::CustomSpan) {
+        auto customSpanItem = AceType::DynamicCast<NG::CustomSpanItem>(child);
+        CHECK_NULL_VOID(customSpanItem);
+        auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+        if (customSpanItem->onMeasure.has_value()) {
+            auto onMeasure = customSpanItem->onMeasure.value();
+            CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+            run.width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
+            run.height = static_cast<float>(
+                customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
+        }
+    }
+    TextStyle spanTextStyle;
+    paragraph->PushStyle(spanTextStyle);
+    paragraph->AddPlaceholder(run);
+    paragraph->PopStyle();
+}
+
+RefPtr<NG::SpanItem> GetParagraphStyleSpanItem(std::list<RefPtr<NG::SpanItem>>& group)
+{
+    RefPtr<NG::SpanItem> paraStyleSpanItem = *group.begin();
+    auto it = group.begin();
+    while (it != group.end()) {
+        if (!AceType::DynamicCast<NG::PlaceholderSpanItem>(*it)) {
+            paraStyleSpanItem = *it;
+            break;
+        }
+        ++it;
+    }
+    return paraStyleSpanItem;
+}
+
+std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanString>& spanStr,
+    std::optional<double>& maxWidth)
+{
+    auto spans = spanStr->GetSpanItems();
+    std::vector<std::list<RefPtr<NG::SpanItem>>> spanGroupVec;
+    bool spanStringHasMaxLines = false;
+    NG::ParagraphUtil::ConstructParagraphSpanGroup(spans, spanGroupVec, spanStringHasMaxLines);
+    TextStyle textStyle;
+    std::vector<RefPtr<NG::Paragraph>> paraVec;
+    auto paraStyle = NG::ParagraphUtil::GetParagraphStyle(textStyle);
+    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    paraStyle.leadingMarginAlign = Alignment::CENTER;
+
+    auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
+    for (auto groupIt = spanGroupVec.begin(); groupIt != spanGroupVec.end(); groupIt++) {
+        auto& group = *(groupIt);
+        NG::ParagraphStyle spanParagraphStyle = paraStyle;
+        if (paraStyle.maxLines != UINT32_MAX) {
+            if (!paraVec.empty()) {
+                maxLines -= static_cast<int32_t>(paraVec.back()->GetLineCount());
+            }
+            spanParagraphStyle.maxLines = std::max(maxLines, 0);
+        }
+        RefPtr<NG::SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
+        if (paraStyleSpanItem) {
+            // unable to get text direction because no layoutwrapper
+            NG::ParagraphUtil::GetSpanParagraphStyle(nullptr, paraStyleSpanItem, spanParagraphStyle);
+            if (paraStyleSpanItem->fontStyle->HasFontSize()) {
+                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
+                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            }
+            spanParagraphStyle.isEndAddParagraphSpacing = paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
+                Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
+                std::next(groupIt) != spanGroupVec.end();
+            spanParagraphStyle.isFirstParagraphLineSpacing = (groupIt == spanGroupVec.begin());
+        }
+        auto&& paragraph = NG::Paragraph::Create(spanParagraphStyle, NG::FontCollection::Current());
+        if (!paragraph) {
+            continue;
+        }
+        for (const auto& child : group) {
+            AddSpanItemToParagraph(paragraph, child, maxWidth);
+        }
+        NG::ParagraphUtil::HandleEmptyParagraph(paragraph, group);
+        paragraph->Build();
+        auto maxWidthVal = maxWidth.has_value()? maxWidth.value() : std::numeric_limits<float>::max();
+        NG::ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidthVal, textStyle);
+        paragraph->Layout(maxWidthVal);
+        paraVec.emplace_back(paragraph);
+    }
+    return paraVec;
 }
 
 std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(

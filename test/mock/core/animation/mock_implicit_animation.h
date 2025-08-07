@@ -48,7 +48,8 @@ public:
      * @brief force update the property by @c delta to simulate velocity update
      * @note currently only supports float type
      */
-    void ForceUpdate(float delta);
+    template<typename T>
+    void ForceUpdate(const T& delta);
 
     bool Finished() const
     {

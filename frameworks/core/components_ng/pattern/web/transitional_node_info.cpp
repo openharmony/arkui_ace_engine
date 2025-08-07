@@ -257,4 +257,24 @@ namespace OHOS::Ace::NG {
     {
         return node_->GetIsAccessibilityGroup();
     }
+
+    std::string TransitionalNodeInfo::GetHtmlElementId()
+    {
+        return node_->GetHtmlElementId();
+    }
+
+    std::string TransitionalNodeInfo::GetComponentTypeDescription()
+    {
+        return node_->GetComponentTypeDescription();
+    }
+
+    int32_t TransitionalNodeInfo::GetCheckboxGroupSelectedStatus()
+    {
+        return node_->GetCheckboxGroupSelectedStatus();
+    }
+
+    std::string TransitionalNodeInfo::GetExpandedState()
+    {
+        return node_->GetExpandedState();
+    }
 } // namespace OHOS::Ace::NG

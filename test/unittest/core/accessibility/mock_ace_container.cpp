@@ -138,10 +138,12 @@ bool AceContainer::IsSceneBoardWindow()
 {
     return false;
 }
+
 bool AceContainer::IsUIExtensionWindow()
 {
-    return false;
+    return IsUIExtensionSubWindow();
 }
+
 bool AceContainer::IsSceneBoardEnabled()
 {
     return true;
@@ -301,4 +303,8 @@ bool AceContainer::IsCrossAxisWindow()
 }
 
 void AceContainer::UpdateColorMode(uint32_t colorMode) {}
+
+void AceContainer::TriggerModuleSerializer() {}
+
+void AceContainer::SetIsFormRender(bool isFormRender) {}
 } // namespace OHOS::Ace::Platform

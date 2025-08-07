@@ -113,7 +113,7 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     if (config.colorFilter_.colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(config.colorFilter_.colorFilterMatrix_->data());
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
     } else if (config.colorFilter_.colorFilterDrawing_) {
         auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
             config.colorFilter_.colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
@@ -123,7 +123,7 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
     }
 }
 
@@ -334,6 +334,8 @@ void PixelMapImage::DrawToRSCanvas(
     if (CheckIfNeedForStretching(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
+    ACE_SCOPED_TRACE("DrawToRSCanvas %s-%f-%f-%d-%d", dfxConfig.ToStringWithSrc().c_str(),
+        dfxConfig.GetFrameSizeWidth(), dfxConfig.GetFrameSizeHeight(), pixmap->GetWidth(), pixmap->GetHeight());
     const auto& config = GetPaintConfig();
     RSBrush brush;
     RSSamplingOptions options;

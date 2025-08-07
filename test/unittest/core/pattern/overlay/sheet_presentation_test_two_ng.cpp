@@ -22,6 +22,7 @@
 #define protected public
 
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -30,10 +31,10 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,6 +49,7 @@ public:
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
     static void TearDownTestCase();
+    static void SetApiVersion(int32_t apiTargetVersion);
 
 private:
     void SetOnBindSheet();
@@ -131,7 +133,6 @@ void SheetPresentationTestTwoNg::SetOnBindSheet()
 
 void SheetPresentationTestTwoNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
 {
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
@@ -149,6 +150,13 @@ void SheetPresentationTestTwoNg::SetSheetType(RefPtr<SheetPresentationPattern> s
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
 }
 
+void SheetPresentationTestTwoNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
+}
+
 void SheetPresentationTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
@@ -163,6 +171,7 @@ void SheetPresentationTestTwoNg::TearDownTestCase()
 HWTEST_F(SheetPresentationTestTwoNg, SetSheetType001, TestSize.Level1)
 {
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -330,6 +339,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsPhoneInLandScape004, TestSize.Level1)
 HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate001, TestSize.Level1)
 {
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -547,6 +557,7 @@ HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate006, TestSize.Level1)
 HWTEST_F(SheetPresentationTestTwoNg, HandleDragUpdate007, TestSize.Level1)
 {
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -768,6 +779,14 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode002, TestSize.Level
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
     EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
     sheetPattern->AvoidKeyboardBySheetMode();
+    safeAreaManager->keyboardInset_ = SafeAreaInsets::Inset();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::POPUP_SHEET;
+    host->GetFocusHub()->currentFocus_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -968,6 +987,54 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode007, TestSize.Level
     EXPECT_TRUE(focusHub->IsCurrentFocus());
     EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
     sheetPattern->AvoidKeyboardBySheetMode();
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: AvoidKeyboardBySheetMode008
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::AvoidKeyboardBySheetMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode008, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_ETS_TAG, 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    sheetPattern->keyboardHeight_ = safeAreaManager->GetKeyboardInset().Length() + 10.0f;
+    sheetPattern->isDismissProcess_ = false;
+    sheetPattern->isScrolling_ = true;
+    sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    AnimationOption option;
+    auto propertyCallback = []() {};
+    sheetPattern->animation_ = AnimationUtils::StartAnimation(option, propertyCallback);
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    safeAreaManager->keyboardInset_.end = 1000.0f;
+    pipelineContext->rootHeight_ = 1800.0f;
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+
+    EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
+    EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    EXPECT_FALSE(sheetPattern->AvoidKeyboardBeforeTranslate());
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    EXPECT_NE(sheetPattern->GetSheetHeightChange(), 0.0f);
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    EXPECT_FALSE(sheetPattern->isAnimationBreak_);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1651,13 +1718,13 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
      * @tc.steps: step1. set up bind sheet and theme
      */
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-
     /**
      * @tc.steps: step2. set up sheet style
      * @tc.expected: sheet type is bottom style.
@@ -1666,10 +1733,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
     sheetStyle.bottomOffset = { 10, 20 };
     layoutProperty->propSheetStyle_ = sheetStyle;
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-
     /**
      * @tc.steps: step3. set up device type
      * @tc.expected: SHEET_BOTTOM_OFFSET only valid in TWO_IN_ONE.
@@ -1680,7 +1745,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto sheetType1 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM_OFFSET);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     /**
      * @tc.steps: step4. set up sheet theme.
      * @tc.expected: SHEET_BOTTOM_OFFSET can obtain render properties.
@@ -1738,6 +1804,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
      * @tc.steps: step1. set up bind sheet and theme.
      */
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1760,7 +1827,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
     DirtySwapConfig config;
     config.skipMeasure = false;
     sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
@@ -1959,9 +2025,7 @@ HWTEST_F(SheetPresentationTestTwoNg, UpdateBackBlurStyle001, TestSize.Level1)
      * @tc.steps: step1. create target node and set API12.
      */
     SheetPresentationTestTwoNg::SetUpTestCase();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
@@ -2228,6 +2292,7 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
     auto stageNode = FrameNode::CreateFrameNode(
@@ -2258,37 +2323,11 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
     ASSERT_NE(sheetPattern, nullptr);
 
     /**
-     * @tc.steps: step4. set API11.
-     */
-    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
-
-    /**
-     * @tc.steps: step5. set SheetType to SHEET_BOTTOMLANDSPACE.
-     * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 800.
-     */
-    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOMLANDSPACE);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOMLANDSPACE);
-    sheetPattern->pageHeight_ = 800.0f;
-
-    /**
-     * @tc.steps: step6. excute ComputeSheetOffset function.
-     * @tc.expected: sheetHeight_ is (pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx()).
-     */
-    overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
-    EXPECT_EQ(overlayManager->sheetHeight_, 800 - SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
-
-    /**
-     * @tc.steps: step7. set API12.
-     */
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-
-    /**
      * @tc.steps: step8. set SheetType to SHEET_BOTTOMLANDSPACE.
      * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 1000 and frameSize height is 500.
      */
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetPattern->pageHeight_ = 1000.0f;
     auto sheetSize = SizeF({ 500, 500 });
     sheetNode->GetGeometryNode()->SetFrameSize(sheetSize);
@@ -2305,9 +2344,8 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
      * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE.
      */
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     sheetPattern->pageHeight_ = 1200.0f;
-
     /**
      * @tc.steps: step11. excute ComputeSheetOffset function.
      * @tc.expected: sheetHeight_ is pageHeight_.
@@ -2315,7 +2353,56 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
     overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
     EXPECT_EQ(overlayManager->sheetHeight_, 1200);
     SheetPresentationTestTwoNg::TearDownTestCase();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: ComputeSheetOffset002
+ * @tc.desc: Test OverlayManager::ComputeSheetOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetNode.
+     * @tc.expected: sheetNode is not nullptr.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step3. get sheetPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step5. set SheetType to SHEET_BOTTOMLANDSPACE.
+     * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 800.
+     */
+    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOMLANDSPACE);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOMLANDSPACE);
+    SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
 /**
@@ -2447,7 +2534,10 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     style.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-    
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. create sheet property and style.
      * @tc.expected: layoutProperty and LayoutAlgorithm are not nullptr.
@@ -2463,7 +2553,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->sheetMaxHeight_ = 2420;
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
     layoutProperty->propSheetStyle_ = style;
 
     /**
@@ -2471,7 +2560,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
      */
     sheetNode->Measure(sheetNode->GetLayoutConstraint());
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     manager->keyboardInset_ = KEYBOARD_INSET;
     pipeline->isHalfFoldHoverStatus_ = true;
@@ -2486,8 +2574,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
     std::vector<Rect> rects;
-    Rect rect;
-    rect.SetRect(0, 1064, 2294, 171);
+    Rect rect(0, 1064, 2294, 171);
     rects.insert(rects.end(), rect);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -2587,6 +2674,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -2595,7 +2683,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
     sheetPattern->UpdateSheetType();
     sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
@@ -2604,8 +2691,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
     Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetTheme->sheetType_ = "popup";
-
     /**
      * @tc.steps: step3. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
@@ -2660,6 +2747,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     SheetPresentationTestTwoNg::SetUpTestCase();
+    SheetPresentationTestTwoNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step3. set sheet theme.
@@ -2669,7 +2757,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
@@ -2679,7 +2766,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
     sheetTheme->sheetType_ = "popup";
-
     /**
      * @tc.steps: step4. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
@@ -2689,6 +2775,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
     EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
 
@@ -2788,261 +2875,6 @@ HWTEST_F(SheetPresentationTestTwoNg, CreateScrollNode003, TestSize.Level1)
     auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
     EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
     EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest001
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::NONE,
- *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 001, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 003,
-        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 004, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 005, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 1121,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get scrollPattern and sheetPattern.
-     */
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-
-    /**
-     * @tc.steps: step3. init sheetPattern value, set scrollSizeMode_, scrollableDistance_, sheetEffectEdge_.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS,
-     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
-    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest002
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::NONE,
- *                      2.scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 01, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 03,
-        AceType::MakeRefPtr<SheetPresentationPattern>(04, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 05, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 06, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 07,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern、 scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT,
-     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest003
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
- *                      2.scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 1, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 3,
-        AceType::MakeRefPtr<SheetPresentationPattern>(4, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 5, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 6, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 7,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 3.6f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::START;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT,
-     * scrollableDistance_ < 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest004
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
- *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 10, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 20,
-        AceType::MakeRefPtr<SheetPresentationPattern>(30, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 40, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 50, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 60,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-    
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 1.3f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::START;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS,
-     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::START.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
-    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
     EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }

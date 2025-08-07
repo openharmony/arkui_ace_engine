@@ -62,6 +62,9 @@ public:
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
         override;
     int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
+    int32_t ExeAppAIFunction(
+        const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
+        override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

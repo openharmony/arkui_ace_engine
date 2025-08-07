@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t PARAM_COUNT_THREE = 3;
@@ -140,13 +141,19 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& finge
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
+    fingerInfoObj->SetProperty<int32_t>("hand", fingerInfo.operatingHand_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     fingerInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     fingerInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     return fingerInfoObj;
 }
 
@@ -249,7 +256,9 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
 JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objTemp = JSRef<JSObjTemplate>::New();
+    objTemp->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objTemp->NewInstance();
     SetUniqueAttributes(obj, typeName, info);
     obj->SetProperty<double>("timestamp", info->GetTimeStamp().time_since_epoch().count());
     obj->SetProperty<double>("source", static_cast<int32_t>(info->GetSourceDevice()));
@@ -262,6 +271,8 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     obj->SetProperty<float>("axisVertical", info->GetVerticalAxis());
     obj->SetProperty<float>("axisHorizontal", info->GetHorizontalAxis());
+    obj->SetPropertyObject(
+        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
@@ -287,6 +298,7 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     CreateFingerInfosObject(info, obj);
+    obj->Wrap<BaseGestureEvent>(info.get());
     return obj;
 }
 

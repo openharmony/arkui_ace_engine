@@ -75,6 +75,17 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
     itemConstraint.maxSize.SetMainSize(Infinity<float>(), params.axis);
     itemConstraint.percentReference = itemIdealSize;
 
+    if (child) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy.has_value() && ((params.axis == Axis::VERTICAL && layoutPolicy->IsWidthMatch()) ||
+                                                (params.axis == Axis::HORIZONTAL && layoutPolicy->IsHeightMatch()))) {
+                itemConstraint.parentIdealSize = OptionalSizeF(itemIdealSize);
+            }
+        }
+    }
+
     CHECK_NULL_RETURN(props->HasItemLayoutConstraint() && !params.haveUserDefSize, itemConstraint);
 
     OptionalSizeF childMinSize;
@@ -136,7 +147,22 @@ std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapp
 {
     const auto& props = wrapper->GetLayoutProperty();
     auto size = CreateIdealSize(props->GetLayoutConstraint().value(), axis, props->GetMeasureType(), true);
-    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size, axis));
+    auto layoutPolicy = props->GetLayoutPolicyProperty();
+    auto isMainWrap = false;
+    if (layoutPolicy.has_value()) {
+        auto isVertical = axis == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            props->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        size.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+        if (isMainFix) {
+            size.SetMainSize(Infinity<float>(), axis);
+        }
+    }
+    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size, axis)) || isMainWrap;
     if (!matchChildren) {
         wrapper->GetGeometryNode()->SetFrameSize(size);
     }
@@ -154,7 +180,9 @@ float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
     footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     footer->Measure(footerConstraint);
     auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
-    return GetMainAxisSize(itemSize, axis);
+    auto footerSize = GetMainAxisSize(itemSize, axis);
+
+    return std::max(footerSize, 0.0f);
 }
 
 float WaterFlowLayoutUtils::GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx)

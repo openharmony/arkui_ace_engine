@@ -421,6 +421,24 @@ HWTEST_F(TextFieldPatternTestEight, ClearTextContent001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ClearTextContent002
+ * @tc.desc: test ClearTextContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ClearTextContent002, TestSize.Level0)
+{
+    CreateTextField();
+
+    pattern_->ClearTextContent();
+    EXPECT_TRUE(pattern_->contentController_->IsEmpty());
+
+    std::u16string value = u"n";
+    pattern_->contentController_->SetTextValue(value);
+    pattern_->ClearTextContent();
+    EXPECT_FALSE(pattern_->showCountBorderStyle_);
+}
+
+/**
  * @tc.name: HandleButtonMouseEvent001
  * @tc.desc: test HandleButtonMouseEvent
  * @tc.type: FUNC
@@ -784,6 +802,18 @@ HWTEST_F(TextFieldPatternTestEight, CreateTextDragInfo001, TestSize.Level0)
     manager1->shareOverlayInfo_->secondHandle.isShow = false;
     info = pattern_->CreateTextDragInfo();
     EXPECT_EQ(info.maxSelectedWidth, 0);
+
+    manager1->shareOverlayInfo_->firstHandle.isShow = false;
+    manager1->shareOverlayInfo_->secondHandle.isShow = true;
+    info = pattern_->CreateTextDragInfo();
+    EXPECT_TRUE(info.isFirstHandleAnimation);
+    EXPECT_FALSE(info.isSecondHandleAnimation);
+
+    manager1->shareOverlayInfo_->firstHandle.isShow = true;
+    manager1->shareOverlayInfo_->secondHandle.isShow = false;
+    info = pattern_->CreateTextDragInfo();
+    EXPECT_FALSE(info.isFirstHandleAnimation);
+    EXPECT_TRUE(info.isSecondHandleAnimation);
 }
 
 /**
@@ -1779,6 +1809,32 @@ HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: InitTheme001
+ * @tc.desc: test InitTheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, InitTheme001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+
+    auto frameNode = pattern_->GetHost();
+    auto pipeline = frameNode->GetContext();
+    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+
+    int32_t lastPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+
+    pattern_->InitTheme();
+
+    auto theme = pattern_->GetTheme();
+    EXPECT_NE(theme, nullptr);
+    EXPECT_NE(pattern_->needToRequestKeyboardOnFocus_, pattern_->independentControlKeyboard_);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(lastPlatformVersion);
+}
+
+/**
  * @tc.name: ProcessCancelButton001
  * @tc.desc: test ProcessCancelButton
  * @tc.type: FUNC
@@ -1868,5 +1924,22 @@ HWTEST_F(TextFieldPatternTestEight, ScrollToSafeArea001, TestSize.Level0)
     pipeline->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
     pattern_->ScrollToSafeArea();
     EXPECT_TRUE(pipeline->UsingCaretAvoidMode());
+}
+
+/**
+ * @tc.name: TextFieldPattern Handle keyEvent.
+ * @tc.desc: test ConvertCodeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ConvertCodeToString, TestSize.Level0)
+{
+    KeyEvent event;
+    event.code = KeyCode::KEY_A;
+    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_A };
+    EXPECT_EQ(event.ConvertCodeToString(), "A");
+    event.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_A };
+    EXPECT_EQ(event.ConvertCodeToString(), "A");
+    event.enableCapsLock = true;
+    EXPECT_EQ(event.ConvertCodeToString(), "a");
 }
 } // namespace OHOS::Ace::NG,

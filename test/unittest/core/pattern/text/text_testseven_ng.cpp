@@ -571,6 +571,107 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConstructTextStyles001
+ * @tc.desc: test ConstructTextStyles of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ConstructTextStyles001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct a minimal version 10.
+     */
+    /**
+     * @tc.steps: step1. init
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_SPAN_ETS_TAG, 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    SymbolShadow symbolShadow;
+    symbolShadow.radius = 10.0f;
+    layoutProperty->UpdateSymbolShadow(symbolShadow);
+    /**
+     * @tc.steps: step3. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    multipleAlgorithm->ConstructTextStyles(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper), textStyle);
+    EXPECT_EQ(textStyle.symbolTextStyle_, nullptr);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test TextLayoutProperty ToJsonValue001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. run ToJsonValue().
+     */
+    textLayoutProperty->UpdateLineSpacing(LINE_SPACING_VALUE);
+    textLayoutProperty->UpdateIsOnlyBetweenLines(true);
+    auto json = JsonUtil::Create(true);
+    textLayoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("lineSpacing"), "20.00px");
+    EXPECT_EQ(json->GetString("onlyBetweenLines"), "true");
+}
+
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Test TextLayoutProperty ToJsonValue002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ToJsonValue002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. run ToJsonValue().
+     */
+    textLayoutProperty->UpdateOptimizeTrailingSpace(true);
+    auto json = JsonUtil::Create(true);
+    textLayoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("optimizeTrailingSpace"), "true");
+}
+
+/**
  * @tc.name: SpanBuildParagraph001
  * @tc.desc: test InheritParentTextStyle of multiple paragraph.
  * @tc.type: FUNC
@@ -620,7 +721,7 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
-
+    textFrameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     textLayoutAlgorithm->BuildParagraph(
         textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     MockContainer::Current()->SetApiTargetVersion(originApiVersion);

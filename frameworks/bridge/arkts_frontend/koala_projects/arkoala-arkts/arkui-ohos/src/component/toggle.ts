@@ -17,26 +17,147 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { Callback_Boolean_Void } from "./navigation"
+import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
+import { ResourceColor } from "./units"
+import { Color } from "./enums"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource";
-import { ResourceColor, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { CommonConfiguration, ContentModifier, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Callback_Boolean_Void } from "./checkbox"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkToggleComponent } from "./../generated/ArkToggle"
-import { ArkTogglePeer } from "./../generated/peers/ArkTogglePeer"
+
+export class ArkTogglePeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTogglePeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(peerId, flags)
+        const _peer  = new ArkTogglePeer(_peerPtr, peerId, "Toggle", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setToggleOptionsAttribute(options: ToggleOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeToggleOptions(options)
+        ArkUIGeneratedNativeModule._ToggleInterface_setToggleOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifierAttribute(value: ContentModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_selectedColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    switchPointColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_switchPointColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    switchStyleAttribute(value: SwitchStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeSwitchStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_switchStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    _onChangeEvent_isOnAttribute(callback: ((isVisible: boolean) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._ToggleAttribute__onChangeEvent_isOn(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum ToggleType {
     CHECKBOX = 0,
     Checkbox = 0,
@@ -51,40 +172,123 @@ export interface SwitchStyle {
     pointColor?: ResourceColor;
     trackBorderRadius?: number | Resource;
 }
-export interface ToggleConfiguration extends CommonConfiguration<ToggleConfiguration> {
+export interface ToggleConfiguration extends CommonConfiguration {
     isOn: boolean;
     enabled: boolean;
-    triggerChange: ((parameter: boolean) => void);
+    triggerChange: ((isVisible: boolean) => void);
 }
 export interface ToggleOptions {
     type: ToggleType;
     isOn?: boolean;
 }
-/** @memo:stable */
+export type ToggleInterface = (options: ToggleOptions) => ToggleAttribute;
 export interface ToggleAttribute extends CommonMethod {
-    /** @memo */
-    setToggleOptions(options: ToggleOptions): this
-    /** @memo */
-    onChange(value: ((parameter: boolean) => void)): this
-    /** @memo */
-    contentModifier(value: ContentModifier<object>): this
-    /** @memo */
-    selectedColor(value: ResourceColor): this
-    /** @memo */
-    switchPointColor(value: ResourceColor): this
-    /** @memo */
-    switchStyle(value: SwitchStyle): this
-    /** @memo */
-    _onChangeEvent_isOn(callback: ((parameter: boolean) => void)): void
+    onChange(value: ((isVisible: boolean) => void) | undefined): this
+    contentModifier(value: ContentModifier | undefined): this
+    selectedColor(value: ResourceColor | undefined): this
+    switchPointColor(value: ResourceColor | undefined): this
+    switchStyle(value: SwitchStyle | undefined): this
+    _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void
+}
+export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
+    onChange_value?: ((isVisible: boolean) => void) | undefined
+    contentModifier_value?: ContentModifier | undefined
+    selectedColor_value?: ResourceColor | undefined
+    switchPointColor_value?: ResourceColor | undefined
+    switchStyle_value?: SwitchStyle | undefined
+    public onChange(value: ((isVisible: boolean) => void) | undefined): this {
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public switchPointColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public switchStyle(value: SwitchStyle | undefined): this {
+        return this
+    }
+    public _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {
+        throw new Error("Unimplmented")
+        }
+}
+export class ArkToggleComponent extends ArkCommonMethodComponent implements ToggleAttribute {
+    getPeer(): ArkTogglePeer {
+        return (this.peer as ArkTogglePeer)
+    }
+    public setToggleOptions(options: ToggleOptions): this {
+        if (this.checkPriority("setToggleOptions")) {
+            const options_casted = options as (ToggleOptions)
+            this.getPeer()?.setToggleOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public onChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_casted = value as (((isVisible: boolean) => void) | undefined)
+            this.getPeer()?.onChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        if (this.checkPriority("contentModifier")) {
+            const value_casted = value as (ContentModifier | undefined)
+            this.getPeer()?.contentModifierAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("selectedColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.selectedColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public switchPointColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("switchPointColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.switchPointColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public switchStyle(value: SwitchStyle | undefined): this {
+        if (this.checkPriority("switchStyle")) {
+            const value_casted = value as (SwitchStyle | undefined)
+            this.getPeer()?.switchStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {
+        if (this.checkPriority("_onChangeEvent_isOn")) {
+            const callback_casted = callback as (((isVisible: boolean) => void))
+            this.getPeer()?._onChangeEvent_isOnAttribute(callback_casted)
+            return
+        }
+        return
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Toggle(
-  /** @memo */
-  style: ((attributes: ToggleAttribute) => void) | undefined,
-  options: ToggleOptions, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: ToggleAttribute) => void) | undefined,
+    options: ToggleOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkToggleComponent()
     })

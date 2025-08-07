@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -623,7 +624,7 @@ void ArcIndexerPattern::OnTouchUp(const TouchEventInfo& info)
     childPressIndex_ = -1;
     ResetStatus();
     ApplyIndexChanged(true, true, true);
-    OnSelect();
+    ItemSelectedChangedAnimation();
 }
 
 void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -792,9 +793,14 @@ void ArcIndexerPattern::ResetStatus()
 
 void ArcIndexerPattern::OnSelect()
 {
+    FireOnSelect(selected_, false);
+    ItemSelectedChangedAnimation();
+}
+ 
+void ArcIndexerPattern::ItemSelectedChangedAnimation()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FireOnSelect(selected_, false);
     animateSelected_ = selected_;
     if (animateSelected_ >= 0) {
         auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
@@ -1532,7 +1538,7 @@ float ArcIndexerPattern::GetPositionAngle(const Offset& position)
 {
     float deltaY = position.GetY() - arcCenter_.GetY();
     float deltaX = position.GetX() - arcCenter_.GetX();
-    float posAngle = atan2f(deltaY, deltaX) * HALF_CIRCLE_ANGLE / M_PI;
+    float posAngle = atan2f(deltaY, deltaX) * HALF_CIRCLE_ANGLE / ACE_PI;
     if (deltaY < 0) {
         posAngle += FULL_CIRCLE_ANGLE;
     }

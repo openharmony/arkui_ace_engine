@@ -19,8 +19,10 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
+#include "core/components_ng/pattern/flex/flex_model_ng_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 
@@ -134,15 +136,15 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
 
     if (!options->wrap.has_value() || options->wrap.value() == FlexWrap::NO_WRAP) {
         FlexModelNG::SetFlexRow(frameNode);
-        FlexModelNG::SetFlexDirection(frameNode, options->direction);
-        FlexModelNG::SetMainAxisAlign(frameNode, options->align);
-        FlexModelNG::SetCrossAxisAlign(frameNode, options->alignItems);
+        FlexModelNGStatic::SetFlexDirection(frameNode, options->direction);
+        FlexModelNGStatic::SetMainAxisAlign(frameNode, options->align);
+        FlexModelNGStatic::SetCrossAxisAlign(frameNode, options->alignItems);
     } else if (options->wrap.value() == FlexWrap::WRAP || options->wrap.value() == FlexWrap::WRAP_REVERSE) {
         FlexModelNG::SetFlexWrap(frameNode);
         int32_t wrap = static_cast<int32_t>(options->wrap.value());
         if (options->direction.has_value()) {
             int32_t direction = static_cast<int32_t>(options->direction.value());
-            FlexModelNG::SetFlexDirection(frameNode, options->direction);
+            FlexModelNGStatic::SetFlexDirection(frameNode, options->direction);
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
             direction <= 1 ? direction += NUM_2 * (wrap - NUM_1) : direction -= NUM_2 * (wrap - NUM_1);
             FlexModelNG::SetFlexWrapDirection(frameNode, static_cast<WrapDirection>(direction));
@@ -152,9 +154,9 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
              WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
             FlexModelNG::SetFlexWrapDirection(frameNode, wrapDirection);
         }
-        FlexModelNG::SetWrapMainAlignment(frameNode, options->wrapAlignment);
-        FlexModelNG::SetWrapCrossAlignment(frameNode, options->wrapAlignItems);
-        FlexModelNG::SetFlexAlignContent(frameNode, options->alignContent);
+        FlexModelNGStatic::SetWrapMainAlignment(frameNode, options->wrapAlignment);
+        FlexModelNGStatic::SetWrapCrossAlignment(frameNode, options->wrapAlignItems);
+        FlexModelNGStatic::SetFlexAlignContent(frameNode, options->alignContent);
         if (options->crossSpace) {
             FlexModelNG::SetCrossSpace(frameNode, options->crossSpace);
         }
@@ -166,40 +168,39 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
 } // FlexInterfaceModifier
 namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
-                    const Ark_PointLightStyle* value)
+                    const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 #ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
-    // if (pointLightStyle) {
-    //     if (pointLightStyle->lightSource) {
-    //         ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
-    //             pointLightStyle->lightSource->y,
-    //             pointLightStyle->lightSource->z);
-    //         ViewAbstractModelNG::SetLightIntensity(frameNode,
-    //             pointLightStyle->lightSource->intensity);
-    //         ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
-    //     } else {
-    //         ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-    //         ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-    //         ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
-    //     }
-    //     // illuminated
-    //     ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
-    //     // bloom
-    //     ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
-    // } else {
-    //     ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-    //     ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-    //     ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
-    //     ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-    //     ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
-    // }
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
 #endif
 }
 } // FlexAttributeModifier

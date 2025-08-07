@@ -179,10 +179,36 @@ public:
     void CreateCancelIcon();
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
     void UpdateDisable(const std::u16string& textValue);
-    void UpdateEnable(bool needToenable);
+    void UpdateEnable(bool needToEnable);
     float GetMaxFontScale();
     float GetMinFontScale();
     void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config);
+    void OnColorModeChange(uint32_t colorMode) override;
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    void UpdatePlaceholderResource(const std::u16string& value);
+    void UpdateTextResource(const std::u16string& value);
+    void UpdateSearchButtonValueResource(const std::string value);
+    void UpdateSearchButtonFontSizeResource(const Dimension& value);
+    void UpdateSearchButtonFontColorResource(const Color& value);
+    void UpdateFontColorResource(const Color& value);
+    void UpdateCaretColorResource(const Color& value);
+    void UpdateCaretWidthResource(const Dimension& value);
+    void UpdatePlaceholderColorResource(const Color& value);
+    void UpdatePlaceholderFontSizeResource(const Dimension& value);
+    void UpdateDecorationColorResource(const Color& value);
+    void UpdateMinFontSizeResource(const Dimension& value);
+    void UpdateMaxFontSizeResource(const Dimension& value);
+    void UpdateLetterSpacingResource(const Dimension& value);
+    void UpdateLineHeightResource(const Dimension& value);
+    void UpdateMinFontScaleResource(const float value);
+    void UpdateMaxFontScaleResource(const float value);
+    void UpdateSelectedBackgroundColorResource(const Color& value);
+    void UpdateTextIndentResource(const Dimension& value);
+    void UpdateInputFilterResource(const std::string& value);
+    void UpdateFontSizeResource(const Dimension& value);
+    void UpdateBorderResource() override;
+    void ProcessTextFieldDefaultStyleAndBehaviors();
+    void ProcessTextFieldDefaultStyleAndBehaviorsMultiThread();
 
 private:
     void OnModifyDone() override;
@@ -215,7 +241,6 @@ private:
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
     void InitTextFieldDragEvent();
-    void RemoveDragFrameNodeFromManager();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void HandleBackgroundColor();
@@ -288,9 +313,13 @@ private:
 
     bool IsSearchAttached();
     RefPtr<SearchTheme> GetTheme() const;
+    
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
+    void InitMargin(const RefPtr<SearchLayoutProperty>& property);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -336,6 +365,10 @@ private:
     WeakPtr<FrameNode> cancelIcon_;
     WeakPtr<SearchNode> searchNode_;
     WeakPtr<SearchTheme> searchTheme_;
+
+    // ----- multi thread state variables -----
+    bool processTextFieldDefaultStyleAndBehaviorsMultiThread_ = false;
+    // ----- multi thread state variables end -----
 };
 
 } // namespace OHOS::Ace::NG

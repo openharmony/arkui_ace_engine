@@ -181,7 +181,11 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   maintainVisibleContentPosition(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperMaintainVisibleContentPositionModifier.identity, SwiperMaintainVisibleContentPositionModifier, handler);
+    modifierWithKey(this._modifiersWithKeys, SwiperMaintainVisibleContentPositionModifier.identity, SwiperMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
+  onScrollStateChanged(event: Callback<ScrollState>): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnScrollStateChangedModifier.identity, SwiperOnScrollStateChangedModifier, event);
     return this;
   }
 }
@@ -953,6 +957,22 @@ class SwiperMaintainVisibleContentPositionModifier extends ModifierWithKey<boole
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class SwiperOnScrollStateChangedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnScrollStateChanged');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnScrollStateChanged(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnScrollStateChanged(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 // @ts-ignore
 globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
@@ -960,41 +980,4 @@ globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.SwiperModifier(nativePtr, classType);
   });
-};
-
-globalThis.Swiper.onChange = function (value: Callback<number>): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnChange(nodePtr, value);
-};
-globalThis.Swiper.onAnimationStart = function (value: (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnAnimationStart(nodePtr, value);
-};
-globalThis.Swiper.onAnimationEnd = function (value: Callback<number, SwiperAnimationEvent>): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnAnimationEnd(nodePtr, value);
-};
-globalThis.Swiper.onGestureSwipe = function (value: Callback<number, SwiperAnimationEvent>): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnGestureSwipe(nodePtr, value);
-};
-globalThis.Swiper.customContentTransition = function (value: SwiperContentAnimatedTransition): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperCustomContentTransition(nodePtr, value);
-};
-globalThis.Swiper.onSelected = function (value: Callback<number>): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnSelected(nodePtr, value);
-};
-globalThis.Swiper.onUnselected = function (value: Callback<number>): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnUnselected(nodePtr, value);
-};
-globalThis.Swiper.onContentDidScroll = function (value: (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnContentDidScroll(nodePtr, value);
-};
-globalThis.Swiper.onContentWillScroll = function (value: (result: SwiperContentWillScrollResult) => boolean): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().swiper.setSwiperOnContentWillScroll(nodePtr, value);
 };

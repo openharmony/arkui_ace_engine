@@ -27,6 +27,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/common/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -84,60 +85,6 @@ void NavigationManagerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
-}
-
-/**
- * @tc.name: RemoveNavigationDumpCallback001
- * @tc.desc: Branch: if (it != dumpMap_.end()) = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationManagerTestNg, RemoveNavigationDumpCallback001, TestSize.Level1)
-{
-    NavigationManagerTestNg::SetUpTestSuite();
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto pipelineContext = navigationGroupNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationManager = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationManager, nullptr);
-    int32_t nodeId = 101;
-    int32_t depth = 1;
-    navigationManager->AddNavigationDumpCallback(nodeId, depth, [](int depth) {});
-
-    navigationManager->RemoveNavigationDumpCallback(nodeId, depth);
-    EXPECT_EQ(navigationManager->dumpMap_.size(), 0);
-    NavigationManagerTestNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: RemoveNavigationDumpCallback002
- * @tc.desc: Branch: if (it != dumpMap_.end()) = false
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationManagerTestNg, RemoveNavigationDumpCallback002, TestSize.Level1)
-{
-    NavigationManagerTestNg::SetUpTestSuite();
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto pipelineContext = navigationGroupNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationManager = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationManager, nullptr);
-    int32_t nodeId = 101;
-    int32_t depth = 1;
-    navigationManager->AddNavigationDumpCallback(nodeId, depth, [](int depth) {});
-
-    navigationManager->RemoveNavigationDumpCallback(nodeId + 1, depth + 1);
-    EXPECT_EQ(navigationManager->dumpMap_.size(), 1);
-    NavigationManagerTestNg::TearDownTestSuite();
 }
 
 /**
@@ -672,7 +619,7 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo001, TestSize.Level1)
     auto navigationManager = GetNavigationManager();
     ASSERT_NE(navigationManager, nullptr);
     /**
-     * @tc.steps: step2. build serialized intent info.
+     * @tc.steps: step2. build serialized navigationIntent info.
      */
     const std::string navigationInspectorId = "navigation";
     const std::string navDestinationName = "name";
@@ -702,7 +649,7 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo002, TestSize.Level1)
     auto navigationManager = GetNavigationManager();
     ASSERT_NE(navigationManager, nullptr);
     /**
-     * @tc.steps: step2. build an empty serialized intent info.
+     * @tc.steps: step2. build an empty serialized navigationIntent info.
      */
     const auto intentJson = JsonUtil::Create(true);
     const std::string serializedIntentInfo = intentJson->ToString();
@@ -877,6 +824,9 @@ HWTEST_F(NavigationManagerTestNg, AddNavigationTest002, TestSize.Level1)
  */
 HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigationManager and mock properties.
+     */
     auto navigationManager = GetNavigationManager();
     ASSERT_TRUE(navigationManager->navigationMap_.empty());
     const int32_t routerPageId = 1;
@@ -886,6 +836,9 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Le
     navigationGroupNode->curId_ = navigationInspectorId;
     ASSERT_EQ(navigationGroupNode->GetCurId(), navigationInspectorId);
     navigationManager->AddNavigation(routerPageId, navigationGroupNode);
+    /**
+     * @tc.steps: step2. do verify, reset properties and verify again.
+     */
     ASSERT_FALSE(navigationManager->navigationMap_.empty());
     ASSERT_EQ(navigationManager->GetNavigationByInspectorId(navigationInspectorId), navigationGroupNode);
     navigationManager->navigationMap_.clear();
@@ -898,6 +851,9 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Le
  */
 HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigationManager and mock properties.
+     */
     auto navigationManager = GetNavigationManager();
     ASSERT_TRUE(navigationManager->navigationMap_.empty());
     const int32_t routerPageId = 1;
@@ -907,10 +863,587 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest002, TestSize.Le
     navigationGroupNode->curId_ = navigationInspectorId;
     ASSERT_EQ(navigationGroupNode->GetCurId(), navigationInspectorId);
     navigationManager->AddNavigation(routerPageId, navigationGroupNode);
+    /**
+     * @tc.steps: step2. do verify, reset properties and verify again.
+     */
     ASSERT_FALSE(navigationManager->navigationMap_.empty());
     const std::string wrongNavigationId = "wrongId";
     ASSERT_NE(navigationManager->GetNavigationByInspectorId(wrongNavigationId), navigationGroupNode);
     ASSERT_EQ(navigationManager->GetNavigationByInspectorId(wrongNavigationId), nullptr);
     navigationManager->navigationMap_.clear();
+}
+
+/**
+ * @tc.name: SetForceSplitEnable001
+ * @tc.desc: Branch: if (isForceSplitEnable_ == isForceSplit &&
+ *           homePageName_ == homePage && ignoreOrientation_ == ignoreOrientation) = true
+ *           Condition: isForceSplit = true, homePage = "homePage", ignoreOrientation = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, SetForceSplitEnable001, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_EQ(navigationManager->isForceSplitSupported_, false);
+    navigationManager->isForceSplitEnable_ = true;
+    navigationManager->homePageName_ = "homePage";
+    navigationManager->ignoreOrientation_ = true;
+
+    bool isForceSplit = true;
+    std::string homePage = "homePage";
+    bool ignoreOrientation = true;
+    navigationManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
+    ASSERT_EQ(navigationManager->isForceSplitSupported_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: SetForceSplitEnable002
+ * @tc.desc: Branch: if (isForceSplitEnable_ == isForceSplit &&
+ *           homePageName_ == homePage && ignoreOrientation_ == ignoreOrientation) = false
+ *           Condition: isForceSplit = false, homePage = "onePage", ignoreOrientation = false
+ *           Branch: if (listener.second) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, SetForceSplitEnable002, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_EQ(navigationManager->isForceSplitSupported_, false);
+    bool isShow = true;
+    navigationManager->isForceSplitEnable_ = true;
+    navigationManager->homePageName_ = "homePage";
+    navigationManager->ignoreOrientation_ = true;
+
+    bool isForceSplit = false;
+    std::string homePage = "onePage";
+    bool ignoreOrientation = false;
+    int32_t nodeId = 1;
+    std::function<void()> listener = [&isShow]() { isShow = false; };
+    navigationManager->AddForceSplitListener(nodeId, std::move(listener));
+    navigationManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
+    ASSERT_EQ(navigationManager->isForceSplitSupported_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: SetForceSplitEnable003
+ * @tc.desc: Branch: if (isForceSplitEnable_ == isForceSplit &&
+ *           homePageName_ == homePage && ignoreOrientation_ == ignoreOrientation) = false
+ *           Condition: isForceSplit = false, homePage = "twoPage", ignoreOrientation = false
+ *           Branch: if (listener.second) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, SetForceSplitEnable003, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_EQ(navigationManager->isForceSplitSupported_, false);
+    navigationManager->isForceSplitEnable_ = true;
+    navigationManager->homePageName_ = "homePage";
+    navigationManager->ignoreOrientation_ = true;
+
+    bool isForceSplit = false;
+    std::string homePage = "twopage";
+    bool ignoreOrientation = false;
+    int32_t nodeId = 1;
+    std::function<void()> listener = []() {};
+    navigationManager->AddForceSplitListener(nodeId, std::move(listener));
+    navigationManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
+    ASSERT_EQ(navigationManager->isForceSplitSupported_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation001
+ * @tc.desc: Branch: if (!hasCacheNavigationNodeEnable_) = true
+ *           Condition: hasCacheNavigationNodeEnable_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation001, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    navigationManager->hasCacheNavigationNodeEnable_ = false;
+    
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->preNodeNeverSet_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation002
+ * @tc.desc: Branch: if (!hasCacheNavigationNodeEnable_) = false
+ *           Branch: if (!hasCacheNavigationNodeEnable_) = true
+ *           Condition: IsNavigationInAnimation() = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation002, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    bool isInAnimation = false;
+    navigationManager->SetIsNavigationOnAnimation(isInAnimation);
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
+    
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->isInAnimation_, false);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation003
+ * @tc.desc: Branch: if (preNodeNeverSet_ || (isNodeAddAnimation_ && preNodeAnimationCached_)) = true
+ *           Condition: preNodeNeverSet_ = true, isNodeAddAnimation_ && preNodeAnimationCached_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation003, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto window = std::make_shared<MockWindow>();
+    pipelineContext->window_ = window;
+    
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    bool isInAnimation = true;
+    navigationManager->SetIsNavigationOnAnimation(isInAnimation);
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
+    navigationManager->preNodeNeverSet_ = true;
+    navigationManager->isNodeAddAnimation_ = true;
+    navigationManager->preNodeAnimationCached_ = true;
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->isInAnimation_, true);
+    ASSERT_EQ(navigationManager->isNodeAddAnimation_, false);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation004
+ * @tc.desc: Branch: if (preNodeNeverSet_ || (isNodeAddAnimation_ && preNodeAnimationCached_)) = false
+ *           Condition: preNodeNeverSet_ = false, isNodeAddAnimation_ && preNodeAnimationCached_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation004, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto window = std::make_shared<MockWindow>();
+    pipelineContext->window_ = window;
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    bool isInAnimation = true;
+    navigationManager->SetIsNavigationOnAnimation(isInAnimation);
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
+    navigationManager->preNodeNeverSet_ = false;
+    navigationManager->isNodeAddAnimation_ = false;
+    navigationManager->preNodeAnimationCached_ = false;
+
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->isInAnimation_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation005
+ * @tc.desc: Branch: if (currentNodeNeverSet_ && !curNodeAnimationCached_ && !pipeline->GetIsRequestVsync()) = true
+ *           Condition: curNodeAnimationCached_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation005, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto window = std::make_shared<MockWindow>();
+    pipelineContext->window_ = window;
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    bool isInAnimation = true;
+    navigationManager->SetIsNavigationOnAnimation(isInAnimation);
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
+    navigationManager->preNodeNeverSet_ = false;
+    navigationManager->isNodeAddAnimation_ = false;
+    navigationManager->preNodeAnimationCached_ = false;
+    navigationManager->curNodeAnimationCached_ = true;
+
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->isInAnimation_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation006
+ * @tc.desc: Branch: if (!currentNodeNeverSet_) = true
+ *           Condition: currentNodeNeverSet_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation006, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto window = std::make_shared<MockWindow>();
+    pipelineContext->window_ = window;
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    bool isInAnimation = true;
+    navigationManager->SetIsNavigationOnAnimation(isInAnimation);
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
+    navigationManager->preNodeNeverSet_ = false;
+    navigationManager->isNodeAddAnimation_ = false;
+    navigationManager->preNodeAnimationCached_ = false;
+    navigationManager->currentNodeNeverSet_ = false;
+
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->isInAnimation_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CacheNavigationNodeAnimation007
+ * @tc.desc: Branch: if (!currentNodeNeverSet_) = false
+ *           Condition: currentNodeNeverSet_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation007, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto window = std::make_shared<MockWindow>();
+    pipelineContext->window_ = window;
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    bool isInAnimation = true;
+    navigationManager->SetIsNavigationOnAnimation(isInAnimation);
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
+    navigationManager->preNodeNeverSet_ = false;
+    navigationManager->isNodeAddAnimation_ = false;
+    navigationManager->preNodeAnimationCached_ = false;
+    navigationManager->currentNodeNeverSet_ = true;
+
+    navigationManager->CacheNavigationNodeAnimation();
+    ASSERT_EQ(navigationManager->isInAnimation_, true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnOrientationChanged001
+ * @tc.desc: Branch: if (task) = true
+ *           Condition: task = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, OnOrientationChanged001, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+
+    bool flagCbk = true;
+    navigationManager->AddBeforeOrientationChangeTask([&flagCbk]() { flagCbk = !flagCbk; });
+    navigationManager->OnOrientationChanged();
+    ASSERT_NE(navigationManager->beforeOrientationChangeTasks_.empty(), 0);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnOrientationChanged002
+ * @tc.desc: Branch: if (task) = false
+ *           Condition: task = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, OnOrientationChanged002, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+
+    bool flagCbk = false;
+    navigationManager->AddBeforeOrientationChangeTask([&flagCbk]() { flagCbk = !flagCbk; });
+    navigationManager->OnOrientationChanged();
+    ASSERT_NE(navigationManager->beforeOrientationChangeTasks_.empty(), 0);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: SetNavigationIntentInfo001
+ * @tc.desc: Branch: if (intentInfoSerialized.empty()) = false
+ *           Condition: intentInfoSerialized.empty() = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, SetNavigationIntentInfo001, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+
+    std::string intentInfoSerialized = "";
+    bool isColdStart = false;
+    navigationManager->SetNavigationIntentInfo(intentInfoSerialized, isColdStart);
+    ASSERT_EQ(navigationManager->navigationIntentInfo_, std::nullopt);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: SetNavigationIntentInfo002
+ * @tc.desc: Branch: if (intentInfoSerialized.empty()) = true
+ *           Condition: intentInfoSerialized.empty() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, SetNavigationIntentInfo002, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+
+    std::string intentInfoSerialized = "asdf";
+    bool isColdStart = true;
+    navigationManager->SetNavigationIntentInfo(intentInfoSerialized, isColdStart);
+    ASSERT_NE(navigationManager->navigationIntentInfo_, std::nullopt);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: FireNavigationIntentActively001
+ * @tc.desc: Branch: if (navigationMap_.find(pageId) == navigationMap_.end()) = true
+ *           Condition: navigationMap_.find(pageId) == navigationMap_.end() = true
+ *           Expected: call FireNavigationIntentActively fail, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "navigation";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    int32_t pageId = 1;
+    bool needTransition = false;
+    ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), false);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: FireNavigationIntentActively002
+ * @tc.desc: Branch: if (!navigationIntentInfo_.has_value()) = true
+ *           Condition: navigationIntentInfo_.has_value() = false
+ *           Expected: call FireNavigationIntentActively fail, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "navigation";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    int32_t pageId = 1;
+    bool needTransition = false;
+    navigationManager->AddNavigation(pageId, navigationGroupNode);
+    ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), false);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: FireNavigationIntentActively003
+ * @tc.desc: Branch: if (navigation->curId_ == navigationIntentInfo_.value().navigationInspectorId) = true
+ *           Expected: call FireNavigationIntentActively success, return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "navigation";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    int32_t pageId = 1;
+    bool needTransition = false;
+    navigationManager->navigationIntentInfo_ = std::make_optional<NavigationIntentInfo>();
+    navigationManager->navigationIntentInfo_->navigationInspectorId = "navigation";
+    navigationManager->AddNavigation(pageId, navigationGroupNode);
+    ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), true);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: FireNavigationIntentActively004
+ * @tc.desc: Branch: if navigation->curId_ != navigationIntentInfo_.value().navigationInspectorId
+ *           Condition: navigation->curId_ != navigationIntentInfo_.value().navigationInspectorId
+ *           Expected: call FireNavigationIntentActively fail, return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "__invalid__";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    int32_t pageId = 1;
+    bool needTransition = false;
+    navigationManager->navigationIntentInfo_ = std::make_optional<NavigationIntentInfo>();
+    navigationManager->navigationIntentInfo_->navigationInspectorId = "navigation";
+    navigationManager->AddNavigation(pageId, navigationGroupNode);
+    ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), false);
+    NavigationManagerTestNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

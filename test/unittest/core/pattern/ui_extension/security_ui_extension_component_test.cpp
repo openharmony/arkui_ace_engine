@@ -897,7 +897,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionOnWindowTest, Te
 
 /**
  * @tc.name: SecurityUIExtensionVisibleTest
- * @tc.desc: Test pattern onVisibleChange function
+ * @tc.desc: Test pattern OnVisibleChangeInner function
  * @tc.type: FUNC
  */
 HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionVisibleTest, TestSize.Level1)
@@ -909,17 +909,17 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionVisibleTest, Tes
     auto pattern = CreateSecurityUEC();
 
     /**
-     * @tc.steps: step2. OnVisibleChange false, state change to BACKGROUND
+     * @tc.steps: step2. OnVisibleChangeInner false, state change to BACKGROUND
      */
     pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleChangeInner(false);
     EXPECT_FALSE(pattern->isVisible_);
     ASSERT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::BACKGROUND);
 
     /**
-     * @tc.steps: step3. OnVisibleChange true, state change to FOREGROUND
+     * @tc.steps: step3. OnVisibleChangeInner true, state change to FOREGROUND
      */
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChangeInner(true);
     EXPECT_TRUE(pattern->isVisible_);
     ASSERT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
 #endif
@@ -1689,14 +1689,14 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentLifeCyc
     pattern->OnWindowShow();
     EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
     /**
-     * @tc.steps: step6. test Life Cycle OnVisibleChange false
+     * @tc.steps: step6. test Life Cycle OnVisibleChangeInner false
      */
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleChangeInner(false);
     EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::BACKGROUND);
     /**
-     * @tc.steps: step7. test Life Cycle OnVisibleChange true
+     * @tc.steps: step7. test Life Cycle OnVisibleChangeInner true
      */
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChangeInner(true);
     EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
     /**
      * @tc.steps: step8. test Life Cycle OnTerminated
@@ -1765,5 +1765,50 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentLifeCyc
     pattern->OnDisconnect(true);
     EXPECT_EQ(host->TotalChildCount(), 0);
 #endif
+}
+
+/**
+ * @tc.name: UpdateWant001
+ * @tc.desc: Test func UpdateWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, UpdateWant001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    auto pattern = CreateSecurityUEC();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isVisible_ = true;
+    pattern->instanceId_= 2;
+    pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
+    pattern->needReNotifyForeground_ = false;
+    ValidSessionWrapper(pattern);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    InvalidSession(pattern);
+    ASSERT_TRUE(pattern->CheckConstraint());
+
+    pattern->sessionType_ = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    OHOS::AAFwk::Want want;
+    pattern->UpdateWant(want);
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
+
+    pattern->sessionType_ = SessionType::PREVIEW_UI_EXTENSION_ABILITY;
+    pattern->hasAttachContext_ = false;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasAttachContext_ = true;
+    pattern->hasMountToParent_ = false;
+    pattern->UpdateWant(want);
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasAttachContext_ = true;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
 }
 } //namespace OHOS::Ace::NG

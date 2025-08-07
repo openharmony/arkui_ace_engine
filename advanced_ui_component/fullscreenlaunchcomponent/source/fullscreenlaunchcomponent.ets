@@ -181,7 +181,6 @@ export struct FullScreenLaunchComponent {
       })
       .height('100%')
       .width('100%')
-      .backgroundColor($r(`sys.color.background_primary`))
       .onError(
         err => {
           if (this.onError != undefined) {

@@ -257,10 +257,10 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    double distanceThreshold = std::numeric_limits<double>::infinity();
+    Dimension distanceThreshold = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     if (info.Length() > 1 && info[1]->IsNumber()) {
-        distanceThreshold = info[1]->ToNumber<double>();
-        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        double jsDistanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(jsDistanceThreshold, DimensionUnit::VP);
     }
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick), distanceThreshold);

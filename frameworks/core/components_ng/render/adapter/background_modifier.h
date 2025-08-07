@@ -19,17 +19,20 @@
 #include <functional>
 #include <memory>
 
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
+#include "render_service_client/core/modifier_ng/custom/rs_background_style_modifier.h"
 
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-class BackgroundModifier : public Rosen::RSBackgroundStyleModifier {
+using RSBackgroundStyleModifier = Rosen::ModifierNG::RSBackgroundStyleModifier;
+using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
+
+class BackgroundModifier : public RSBackgroundStyleModifier {
 public:
     BackgroundModifier() = default;
     ~BackgroundModifier() override = default;
 
-    void Draw(Rosen::RSDrawingContext& context) const override
+    void Draw(RSDrawingContext& context) const override
     {
         auto host = host_.Upgrade();
         CHECK_NULL_VOID(host);
@@ -108,5 +111,4 @@ private:
     WeakPtr<FrameNode> host_;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_BACKGROUND_MODIFIER_H

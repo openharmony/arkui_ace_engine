@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,14 @@ constexpr int32_t MIRROR_FRAME_OFFSET_Y_ZERO = 0;
 const bool SELECT_STATE = true;
 const int32_t VERSION_TWELVE = 12;
 RefPtr<PipelineContext> pipeline = nullptr;
+const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
+const SizeF TEST_SIZE_100_200 = SizeF(100.0f, 200.0f);
+const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+const SizeF TEST_SIZE_50 = SizeF(50.0f, 50.0f);
+const SizeF TEST_SIZE_60 = SizeF(60.0f, 60.0f);
+constexpr float TEST_WIDTH_50 = 50.0f;
+constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
 
 class CheckBoxTestNG : public testing::Test {
@@ -2971,13 +2979,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0134, TestSize.Level1)
 HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest0135, TestSize.Level1)
 {
     /**
-     * @tc.steps: MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     * @tc.steps: step1. MockContainer.apiTargetVersion_ = VERSION_TWELVE.
      */
     MockContainer::SetUp();
     MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
 
     /**
-     * @tc.steps: create GeometryNode
+     * @tc.steps: step2. create GeometryNode.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2987,7 +2995,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest0135, TestSize.Level1)
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
-     * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox will be called.
+     * @tc.steps: step3. Create checkBoxModifier and call PaintCheckBox.
+     * @tc.expected: step3. expect DrawRoundRect call at least 1.
      */
     auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
         false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
@@ -3002,5 +3011,277 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest0135, TestSize.Level1)
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj
+ * @tc.desc: Test CheckBox CreateWithColorResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CreateWithColorResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBox frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create color resource object and verify resource manager.
+     * @tc.expected: step2. Resource is added to manager.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    checkBoxModelNG.CreateWithColorResourceObj(resObj, CheckBoxColorType::SELECTED_COLOR);
+
+    std::string key = "checkbox" + CheckBoxModelNG::ColorTypeToString(CheckBoxColorType::SELECTED_COLOR);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+
+    /**
+     * @tc.steps: step3. Create another color resource object with parameters.
+     * @tc.expected: step3. Resource is added to manager.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10001, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    checkBoxModelNG.CreateWithColorResourceObj(resObjWithParams, CheckBoxColorType::UN_SELECTED_COLOR);
+    key = "checkbox" + CheckBoxModelNG::ColorTypeToString(CheckBoxColorType::UN_SELECTED_COLOR);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+}
+
+/**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: test ColorTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, ColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test color type to string conversion.
+     * @tc.expected: step1. Conversion returns correct string values.
+     */
+    std::vector<std::pair<CheckBoxColorType, std::string>> types = {
+        { CheckBoxColorType::SELECTED_COLOR, "SelectedColor" },
+        { CheckBoxColorType::UN_SELECTED_COLOR, "UnSelectedColor" },
+        { static_cast<CheckBoxColorType>(2), "Unknown" } };
+    for (const auto& [type, val] : types) {
+        auto ret = CheckBoxModelNG::ColorTypeToString(type);
+        EXPECT_EQ(val, ret);
+    }
+}
+
+/**
+ * @tc.name: UpdateComponentColor
+ * @tc.desc: Test CheckBox UpdateComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, UpdateComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBox frame node and get necessary properties.
+     * @tc.expected: step1. Frame node and properties are not null.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update component color with different types.
+     * @tc.expected: step2. Color properties are updated correctly.
+     */
+    checkBoxModelNG.UpdateComponentColor(frameNode, static_cast<CheckBoxColorType>(2), Color::RED);
+    auto ret = paintProperty->GetCheckBoxSelectedColor();
+    EXPECT_FALSE(ret.has_value());
+    checkBoxModelNG.UpdateComponentColor(frameNode, CheckBoxColorType::SELECTED_COLOR, Color::RED);
+    ret = paintProperty->GetCheckBoxSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+    checkBoxModelNG.UpdateComponentColor(frameNode, CheckBoxColorType::UN_SELECTED_COLOR, Color::RED);
+    ret = paintProperty->GetCheckBoxUnSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+}
+
+/**
+ * @tc.name: ResetComponentColor
+ * @tc.desc: Test CheckBox ResetComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, ResetComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBox frame node and get necessary properties.
+     * @tc.expected: step1. Frame node and properties are not null.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset component color with different types.
+     * @tc.expected: step2. Color properties are reset to theme values.
+     */
+    checkBoxModelNG.ResetComponentColor(frameNode, static_cast<CheckBoxColorType>(2));
+    auto ret = paintProperty->GetCheckBoxSelectedColor();
+    EXPECT_FALSE(ret.has_value());
+    checkBoxModelNG.ResetComponentColor(frameNode, CheckBoxColorType::SELECTED_COLOR);
+    ret = paintProperty->GetCheckBoxSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetActiveColor());
+    checkBoxModelNG.ResetComponentColor(frameNode, CheckBoxColorType::UN_SELECTED_COLOR);
+    ret = paintProperty->GetCheckBoxUnSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetInactiveColor());
+}
+
+/**
+ * @tc.name: CheckBoxMeasureTest136
+ * @tc.desc: Test CheckBox MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest136, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node.
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm =
+        AceType::DynamicCast<CheckBoxLayoutAlgorithm>(checkBoxPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step3. switchSize is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = checkBoxLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
+ * @tc.name: CheckBoxLayoutPolicyIsMatchParentTest137
+ * @tc.desc: Test Checkbox LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxLayoutPolicyIsMatchParentTest137, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm =
+        AceType::DynamicCast<CheckBoxLayoutAlgorithm>(checkBoxPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. call LayoutPolicyIsMatchParent function.
+     * @tc.expected: step3. switchSize is equal to TEST_SIZE_0.
+     */
+    LayoutConstraintF contentConstraint;
+    auto layoutPolicy = checkBoxLayoutAlgorithm->GetLayoutPolicy(&layoutWrapper);
+    auto ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step4. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step4. ret is equal to TEST_SIZE_100.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+
+    /**
+     * @tc.steps: step5. set selfIdealSize.height_ to TEST_HEIGHT_60.
+     * @tc.expected: step5. ret is equal to TEST_SIZE_60.
+     */
+    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_60);
+
+    /**
+     * @tc.steps: step6. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step6. ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step7. set selfIdealSize.width_ to TEST_WIDTH_50.
+     * @tc.expected: step7. ret is equal to TEST_SIZE_50.
+     */
+    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_50);
+
+    /**
+     * @tc.steps: step8. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step8. ret is equal to TEST_SIZE_100.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = checkBoxLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
 }
 } // namespace OHOS::Ace::NG

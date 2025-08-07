@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,16 @@
  */
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "mock_uisession_manager.h"
+
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
 std::shared_mutex UiSessionManager::reportObjectMutex_;
+
 UiSessionManager* UiSessionManager::GetInstance()
 {
-    static UiSessionManager instance;
+    static MockUiSessionManager instance;
     return &instance;
 }
-
-void ReportInspectorTreeValue(const std::string& value) {};
-void AddValueForTree(int32_t id, const std::string& value) {};
 } // namespace OHOS::Ace

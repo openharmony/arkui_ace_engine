@@ -30,6 +30,7 @@ interface IView {
     getCardId(): number; // implemented in NativeViewPartialUpdate
     getParent(): IView | undefined;
     setParent(p: IView) : void;
+    setParentBuilderNode__(node: ViewBuildNodeBase): void;
     addChild(c: IView): boolean;
     getChildById(elmtId: number) : IView | undefined;
     removeChild(child: IView): boolean;
@@ -53,7 +54,7 @@ interface IView {
     isCompFreezeAllowed(): boolean;
     setActiveInternal(newState: boolean, isReuse: boolean): void;
 
-    findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
+    findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
 
     localStorage_ : LocalStorage;
 

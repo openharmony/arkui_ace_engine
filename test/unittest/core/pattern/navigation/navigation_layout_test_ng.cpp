@@ -1862,5 +1862,51 @@ HWTEST_F(NavigationLayoutTestNg, NeedForceMeasure001, TestSize.Level1)
     layoutWrapper->Measure(LayoutConstraint);
     ASSERT_FALSE(navDestNode->NeedForceMeasure());
 }
+
+/**
+ * @tc.name: ReCalcNavigationSize001
+ * @tc.desc: Test navigation constraintSize no branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, ReCalcNavigationSize001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    /**
+     * @tc.steps: step1. Create NavigationNode & NavigationPattern.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto layoutProperty = navigation->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Update CalcSize
+     */
+    auto size = CalcSize(CalcLength(500), CalcLength(500));
+    layoutProperty->UpdateCalcMaxSize(size);
+    auto layoutWrapper = navigation->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(600, 600));
+
+    auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    
+    SizeF frameSize = SizeF(600, 600);
+    navigationLayoutAlgorithm->ReCalcNavigationSize(AceType::RawPtr(layoutWrapper), frameSize);
+    
+    SizeF targetSize = SizeF(500, 500);
+    EXPECT_EQ(geometryNode->GetFrameSize(), targetSize);
+}
+
 } // namespace OHOS::Ace::NG
 

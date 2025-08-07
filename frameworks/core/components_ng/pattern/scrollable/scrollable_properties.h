@@ -34,12 +34,6 @@ constexpr float DEFAULT_SCROLL_TO_VELOCITY = 7.0f;
 // for add item and scrollEdge(Edge.Bottom) in one layout
 constexpr int32_t LAST_ITEM = -1;
 
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
-
 enum class NestedScrollMode {
     SELF_ONLY = 0,
     SELF_FIRST,
@@ -107,15 +101,6 @@ struct ScrollFrameInfo {
     bool operator==(const ScrollFrameInfo& scrollInfo) const
     {
         return offset == scrollInfo.offset && state == scrollInfo.state;
-    }
-};
-
-struct ScrollFrameResult {
-    Dimension offset;
-
-    bool operator==(const ScrollFrameResult& scrollRes) const
-    {
-        return offset == scrollRes.offset;
     }
 };
 
@@ -497,12 +482,16 @@ using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
+using OnWillStopDraggingEvent = std::function<void(Dimension)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
 using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
+using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
+using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
+    ScrollFrameResult&, ScrollState, ScrollSource)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
@@ -512,6 +501,8 @@ struct ScrollerObserver {
     OnScrollStopEvent onScrollStopEvent;
     OnDidScrollEvent onDidScrollEvent;
     OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
+    OnWillScrollEventEx onWillScrollEventEx;
+    TwoDimensionOnWillScrollEvent twoDimensionOnWillScrollEvent;
 };
 } // namespace OHOS::Ace
 

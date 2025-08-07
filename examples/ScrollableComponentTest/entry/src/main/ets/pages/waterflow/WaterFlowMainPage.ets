@@ -36,6 +36,9 @@ struct WaterFlowMainPage {
     new TextList(2, '延迟改变高度重叠现象', 'pages/waterflow/demo01/WaterFlowDemo'),
     new TextList(3, 'WaterFlowPinchToZoom1', 'pages/waterflow/demo01/WaterFlowPinchToZoom1'),
     new TextList(4, 'WaterFlowPinchToZoom2', 'pages/waterflow/demo01/WaterFlowPinchToZoom2'),
+    new TextList(5, '设置边缘渐隐效果', 'pages/waterflow/demo01/WaterFlowWithFading'),
+    new TextList(6, 'WaterFlowNodeFooter', 'pages/waterflow/demo01/WaterFlowNodeFooter'),
+    new TextList(7, 'WaterFlowNodeFooterContent', 'pages/waterflow/demo01/WaterFlowNodeFooterContent'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

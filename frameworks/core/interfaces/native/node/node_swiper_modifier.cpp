@@ -290,6 +290,24 @@ void GetDotIndicatorSpaceAndIgnoreSize(const std::vector<std::string>& dotIndica
     swiperParameters.setIgnoreSizeValue = (setIgnoreSize == "1" ? true : false);
 }
 
+void InitIndicatorParametersWithResObj(SwiperParameters& swiperParameters, const void* resObjs)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    CHECK_NULL_VOID(resObjs);
+    auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+    swiperParameters.resourceDimLeftValueObject = resourceObjs.at(INDICATOR_RESOURCE_LEFT);
+    swiperParameters.resourceDimTopValueObject = resourceObjs.at(INDICATOR_RESOURCE_TOP);
+    swiperParameters.resourceDimRightValueObject = resourceObjs.at(INDICATOR_RESOURCE_RIGHT);
+    swiperParameters.resourceDimBottomValueObject = resourceObjs.at(INDICATOR_RESOURCE_BOTTOM);
+    swiperParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
+    swiperParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
+    swiperParameters.resourceSelectedItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
+    swiperParameters.resourceSelectedItemHeightValueObject =
+        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
+    swiperParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
+    swiperParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
+}
+
 SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo,
     const void* resObjs)
 {
@@ -316,27 +334,16 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     }
     Color colorVal;
     parseOk = Color::ParseColorString(colorValue, colorVal);
-    swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+    swiperParameters.colorVal = parseOk ? (swiperParameters.parametersByUser.insert("colorVal"), colorVal)
+        : swiperIndicatorTheme->GetColor();
     parseOk = Color::ParseColorString(selectedColorValue, colorVal);
-    swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.selectedColorVal = parseOk
+        ? (swiperParameters.parametersByUser.insert("selectedColorVal"), colorVal)
+        : swiperIndicatorTheme->GetSelectedColor();
     ParseDotIndicatorSize(frameNode, dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     GetDotIndicatorSpaceAndIgnoreSize(dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
-    if (SystemProperties::ConfigChangePerform() && resObjs) {
-        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
-        swiperParameters.resourceDimLeftValueObject = resourceObjs.at(INDICATOR_RESOURCE_LEFT);
-        swiperParameters.resourceDimTopValueObject = resourceObjs.at(INDICATOR_RESOURCE_TOP);
-        swiperParameters.resourceDimRightValueObject = resourceObjs.at(INDICATOR_RESOURCE_RIGHT);
-        swiperParameters.resourceDimBottomValueObject = resourceObjs.at(INDICATOR_RESOURCE_BOTTOM);
-        swiperParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
-        swiperParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
-        swiperParameters.resourceSelectedItemWidthValueObject =
-            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
-        swiperParameters.resourceSelectedItemHeightValueObject =
-        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
-        swiperParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
-        swiperParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
-    }
+    InitIndicatorParametersWithResObj(swiperParameters, resObjs);
     return swiperParameters;
 }
 
@@ -600,7 +607,7 @@ void SetSwiperNextMarginRAw(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue,
     if (SystemProperties::ConfigChangePerform()) {
         auto* nextMargin = reinterpret_cast<ResourceObject*>(nextMarginRawPtr);
         auto nextMarginResObj = AceType::Claim(nextMargin);
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(nextMarginResObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
     }
 }
 
@@ -612,7 +619,7 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     SwiperModelNG::SetNextMargin(frameNode, value);
     if (SystemProperties::ConfigChangePerform()) {
         auto nextMarginResObj = AceType::MakeRefPtr<ResourceObject>();
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(nextMarginResObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
     }
 }
 
@@ -650,7 +657,7 @@ void SetSwiperPrevMarginRaw(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue,
     if (SystemProperties::ConfigChangePerform()) {
         auto* prevMargin = reinterpret_cast<ResourceObject*>(prevMarginRawPtr);
         auto prevMarginResObj = AceType::Claim(prevMargin);
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(prevMarginResObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
     }
 }
 
@@ -662,7 +669,7 @@ void ResetSwiperPrevMargin(ArkUINodeHandle node)
     SwiperModelNG::SetPreviousMargin(frameNode, value);
     if (SystemProperties::ConfigChangePerform()) {
         auto prevMarginResObj = AceType::MakeRefPtr<ResourceObject>();
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(prevMarginResObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
     }
 }
 
@@ -1565,8 +1572,7 @@ void SetSwiperOnChange(ArkUINodeHandle node, void* callback)
         auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
         SwiperModelNG::SetOnChange(frameNode, std::move(*onEvent));
     } else {
-        std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
-        SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
+        SwiperModelNG::SetOnChange(frameNode, nullptr);
     }
 }
 
@@ -1574,8 +1580,7 @@ void ResetSwiperOnChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
-    SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
+    SwiperModelNG::SetOnChange(frameNode, nullptr);
 }
 
 void SetSwiperOnSelected(ArkUINodeHandle node, void* callback)
@@ -1759,6 +1764,25 @@ ArkUI_Int32 GetMaintainVisibleContentPosition(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     return SwiperModelNG::GetMaintainVisibleContentPosition(frameNode);
 }
+
+void SetSwiperOnScrollStateChanged(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnScrollStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1874,6 +1898,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setMaintainVisibleContentPosition = SetMaintainVisibleContentPosition,
         .resetMaintainVisibleContentPosition = ResetMaintainVisibleContentPosition,
         .getMaintainVisibleContentPosition = GetMaintainVisibleContentPosition,
+        .setSwiperOnScrollStateChanged = SetSwiperOnScrollStateChanged,
+        .resetSwiperOnScrollStateChanged = ResetSwiperOnScrollStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2130,6 +2156,27 @@ void SetSwiperContentWillScroll(ArkUINodeHandle node, void* extraParam)
         return true;
     };
     SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(onEvent));
+}
+
+void SetSwiperScrollStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            LOGE("Swiper OnScrollStateChanged callback execute failed.");
+            return;
+        }
+        int32_t index = scrollStateInfo->GetIndex();
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_SCROLL_STATE_CHANGED;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        SendArkUISyncEvent(&event);
+    };
+    SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

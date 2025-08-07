@@ -48,6 +48,12 @@ void ListItemGroupResetDivider(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        ListItemGroupModelNG::ParseResObjDividerColor(frameNode, nullptr);
+        ListItemGroupModelNG::ParseResObjDividerStartMargin(frameNode, nullptr);
+        ListItemGroupModelNG::ParseResObjDividerStrokeWidth(frameNode, nullptr);
+        ListItemGroupModelNG::ParseResObjDividerEndMargin(frameNode, nullptr);
+    }
     const V2::ItemDivider divider;
     ListItemGroupModelNG::SetDivider(frameNode, divider);
     ListItemGroupModelNG::SetDividerColorByUser(frameNode, false);

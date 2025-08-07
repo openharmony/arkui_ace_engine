@@ -122,6 +122,11 @@ public:
         return textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -130,17 +135,25 @@ public:
     void UpdateTextColor(const Color& color);
     void UpdateFontSize(const CalcDimension& fontSize);
     void UpdateFontFamily(const std::vector<std::string>& fontFamilies);
-    void UpdateTextClockColor(const Color& color);
+    void UpdateTextClockColor(const Color& color, bool isFirstLoad = false);
     void UpdateTextClockFontSize(const CalcDimension& fontSize);
     void UpdateTextClockFontFamily(const std::vector<std::string>& fontFamilies);
+    void UpdateTextClockFormat(const std::string& format);
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void OnColorConfigurationUpdate() override;
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();

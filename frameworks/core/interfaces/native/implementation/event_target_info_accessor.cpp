@@ -53,4 +53,5 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
     };
     return &EventTargetInfoAccessorImpl;
 }
+
 }

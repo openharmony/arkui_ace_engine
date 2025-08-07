@@ -99,6 +99,9 @@ public:
     std::shared_ptr<TextPickerSettingData> CreateDefaultTextPickerSettingData();
     RefPtr<FrameNode> FindContentRowNodeTree(const RefPtr<FrameNode>& dialogNode);
     void SetColumnNodeIdealSize();
+    void CreateDialogEvent(std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+    RefPtr<FrameNode> GetNodeFromDialogByTag(const RefPtr<FrameNode>& dialogNode, std::string nodeTag);
 
 private:
     RefPtr<FrameNode> textPickerNode_;
@@ -235,6 +238,38 @@ RefPtr<FrameNode> TextPickerColumnExtendTestNg::FindContentRowNodeTree(const Ref
     return nullptr;
 }
 
+void TextPickerColumnExtendTestNg::CreateDialogEvent(std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
+{
+    auto func = [](const std::string& /* info */) {};
+    dialogEvent["changeId"] = func;
+    dialogEvent["acceptId"] = func;
+    dialogEvent["scrollStopId"] = func;
+
+    int32_t cancelCallbackInfo = 0;
+    auto cancelFunc = [&cancelCallbackInfo](
+                          const GestureEvent& /* info */) { cancelCallbackInfo = ONCANCEL_CALLBACK_INFO; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+}
+
+RefPtr<FrameNode> TextPickerColumnExtendTestNg::GetNodeFromDialogByTag(const RefPtr<FrameNode>& dialogNode,
+    std::string nodeTag)
+{
+    CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto children = customNode->GetChildren();
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        auto targetNode = AceType::DynamicCast<FrameNode>(*it);
+        if (targetNode && targetNode->GetTag() == nodeTag) {
+            return targetNode;
+        }
+    }
+    return nullptr;
+}
+
 /**
  * @tc.name: PlayTossAnimation001
  * @tc.desc: Test PlayTossAnimation scene.
@@ -314,7 +349,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths001, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH / 2.0f);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 50.0f);
 
     width.pop_back();
     width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
@@ -330,7 +365,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths001, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
 }
 
 /**
@@ -362,7 +397,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths002, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::LPX).ConvertToPx());
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
 
     width.pop_back();
     width.emplace_back(Dimension(10.0f, DimensionUnit::FP));
@@ -370,15 +405,13 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths002, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::FP).ConvertToPx());
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
 
     width.pop_back();
     width.emplace_back(Dimension(-10.0f, DimensionUnit::PX));
     TextPickerModelNG::GetInstance()->SetColumnWidths(width);
-    textPickerPattern->OnModifyDone();
-    SetColumnNodeIdealSize();
-    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+    auto columnWidth = textPickerPattern->CalculateColumnSize(0, 1, SizeF(COMPONENT_WIDTH, COMPONENT_HEIGHT));
+    EXPECT_EQ(columnWidth, COMPONENT_WIDTH);
 }
 
 /**
@@ -395,21 +428,11 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths003, TestSize.Level1)
     ASSERT_NE(textPickerNode, nullptr);
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
-    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
-    ASSERT_NE(textPickerColumnPattern, nullptr);
-    auto columnNode = textPickerColumnPattern->GetHost();
-    ASSERT_NE(columnNode, nullptr);
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
 
     std::vector<Dimension> width;
     TextPickerModelNG::GetInstance()->SetColumnWidths(width);
-    textPickerPattern->OnModifyDone();
-    SetColumnNodeIdealSize();
-    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+    auto columnWidth = textPickerPattern->CalculateColumnSize(0, 1, SizeF(COMPONENT_WIDTH, COMPONENT_HEIGHT));
+    EXPECT_EQ(columnWidth, COMPONENT_WIDTH);
 }
 
 /**
@@ -1280,4 +1303,133 @@ HWTEST_F(TextPickerColumnExtendTestNg, ColumnPatternInitHapticController001, Tes
     textPickerPattern->ColumnPatternInitHapticController();
     EXPECT_FALSE(textPickerPattern->isHapticChanged_);
 }
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test TextPickerColumnPattern OnAttachToMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->OnAttachToMainTreeMultiThread();
+    EXPECT_TRUE(columnPattern->tossAnimationController_);
+    EXPECT_FALSE(columnPattern->overscroller_.isFirstStart_);
+    EXPECT_NE(columnPattern->jumpInterval_, 0.f);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test TextPickerColumnPattern OnDetachFromMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    auto columnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(columnPattern, nullptr);
+    auto columnNode = columnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern->OnDetachFromMainTreeMultiThread();
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewShow012
+ * @tc.desc: Test TextPickerDialog columnWidths for a single width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShow012, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Set single column width and create a TextPickerDialog.
+     */
+    DialogProperties dialogProperties;
+    auto settingData = CreateDefaultTextPickerSettingData();
+    ASSERT_NE(settingData, nullptr);
+
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    CreateDialogEvent(dialogEvent, dialogCancelEvent);
+
+    settingData->columnWidths.emplace_back(Dimension(60.0f, DimensionUnit::PERCENT));
+
+    auto dialogNode =
+        TextPickerDialogView::Show(dialogProperties, *settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.step: step2. Get column width through TextPickerPattern.
+     * @tc.expected: The column width is consistent with the previous settings.
+     */
+    RefPtr<FrameNode> textPickerNode = GetNodeFromDialogByTag(dialogNode, V2::TEXT_PICKER_ETS_TAG);
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    std::vector<Dimension> columnWidths = textPickerPattern->GetColumnWidths();
+    EXPECT_EQ(columnWidths.size(), settingData->columnWidths.size());
+    for (size_t i = 0; i < columnWidths.size(); i++) {
+        EXPECT_EQ(columnWidths[i], settingData->columnWidths[i]);
+    }
+}
+
+/**
+ * @tc.name: TextPickerDialogViewShow013
+ * @tc.desc: Test TextPickerDialog columnWidths for a multi widths.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShow013, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Set multiple column widths and create a TextPickerDialog.
+     */
+    DialogProperties dialogProperties;
+    auto settingData = CreateDefaultTextPickerSettingData();
+    ASSERT_NE(settingData, nullptr);
+
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    CreateDialogEvent(dialogEvent, dialogCancelEvent);
+
+    settingData->columnWidths.emplace_back(Dimension(60.0f, DimensionUnit::VP));
+    settingData->columnWidths.emplace_back(Dimension(100.0f, DimensionUnit::FP));
+    settingData->columnWidths.emplace_back(Dimension(200.0f, DimensionUnit::PX));
+
+    auto dialogNode =
+        TextPickerDialogView::Show(dialogProperties, *settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.step: step2. Get column widths through TextPickerPattern.
+     * @tc.expected: The column widths are consistent with the previous settings.
+     */
+    RefPtr<FrameNode> textPickerNode = GetNodeFromDialogByTag(dialogNode, V2::TEXT_PICKER_ETS_TAG);
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    std::vector<Dimension> columnWidths = textPickerPattern->GetColumnWidths();
+    EXPECT_EQ(columnWidths.size(), settingData->columnWidths.size());
+    for (size_t i = 0; i < columnWidths.size(); i++) {
+        EXPECT_EQ(columnWidths[i], settingData->columnWidths[i]);
+    }
+}
+
 } // namespace OHOS::Ace::NG

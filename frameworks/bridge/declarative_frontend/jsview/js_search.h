@@ -110,6 +110,9 @@ public:
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
+    static void SetSearchButtonOptions(const JSCallbackInfo& info);
+    static void UnregisterResource(const std::string& key);
+    static void JsMargin(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

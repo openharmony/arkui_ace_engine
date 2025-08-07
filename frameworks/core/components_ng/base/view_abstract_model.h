@@ -62,6 +62,16 @@ enum class ResponseType : int32_t {
 };
 class SpanString;
 enum PopupType { POPUPTYPE_TEXTCOLOR, POPUPTYPE_POPUPCOLOR, POPUPTYPE_MASKCOLOR };
+enum PopupOptionsType {
+    POPUP_OPTIONTYPE_WIDTH,
+    POPUP_OPTIONTYPE_ARROWWIDTH,
+    POPUP_OPTIONTYPE_ARROWHEIGHT,
+    POPUP_OPTIONTYPE_RADIUS,
+    POPUP_OPTIONTYPE_OUTLINEWIDTH,
+    POPUP_OPTIONTYPE_BORDERWIDTH,
+    POPUP_OPTIONTYPE_OFFSETDX,
+    POPUP_OPTIONTYPE_OFFSETDY,
+};
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -72,6 +82,7 @@ public:
     virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetResObj(const std::string& key) {};
     
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
@@ -169,7 +180,7 @@ public:
     virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
-    virtual void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {};
+    virtual void SetBlender(const OHOS::Rosen::Blender* blender) {};
 
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;
@@ -199,6 +210,9 @@ public:
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetAlign(const std::string& localizedAlignment) = 0;
+    virtual void SetLayoutGravity(const Alignment& alignment) = 0;
+    virtual void SetIsMirrorable(const bool& isMirrorable) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetChainStyle(const ChainInfo& chainInfo) = 0;
     virtual void SetBias(const BiasPair& biasPair) = 0;
@@ -303,6 +317,8 @@ public:
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity()) = 0;
+    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
@@ -338,7 +354,7 @@ public:
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
-    virtual void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) = 0;
+    virtual void SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) = 0;
     virtual void SetOnDragSpringLoadingConfiguration(
         const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) = 0;
     virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
@@ -397,6 +413,8 @@ public:
     virtual void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) {}
     virtual void ResetNextFocus() {}
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
+    virtual void SetFocusBoxStyleUpdateFunc(
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property) {}
     virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
@@ -427,7 +445,7 @@ public:
     virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
     virtual void SetBackgroundAlign(const Alignment& align) = 0;
     virtual void SetCustomBackgroundColor(const Color& color) = 0;
-    virtual void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) = 0;
     virtual void SetIsTransitionBackground(bool val) = 0;
     virtual void SetIsBuilderBackground(bool val) = 0;
@@ -448,10 +466,7 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
-    virtual void BindContextMenu(const RefPtr<NG::FrameNode>& targetNode, ResponseType type,
-        std::function<void()>& buildFunc, const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) {};
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
-    virtual void BindDragWithContextMenuParams(NG::FrameNode* targetNode, const NG::MenuParam& menuParam) {};
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
@@ -493,7 +508,6 @@ public:
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
-    virtual void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) {};
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
@@ -524,14 +538,13 @@ public:
     virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-    virtual void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) = 0;
-    virtual void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) = 0;
-    virtual void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) = 0;
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) = 0;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) = 0;
+    virtual void RemoveResObj(const std::string& key) {};
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

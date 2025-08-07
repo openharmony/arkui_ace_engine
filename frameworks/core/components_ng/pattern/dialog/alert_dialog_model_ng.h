@@ -30,7 +30,7 @@ public:
         DialogProperties& arg) override;
     static void CreateWithResourceObj(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg);
     static void ProcessContentResourceObj(
-        const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& object, const DialogResourceType type);
+        const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, const DialogResourceType type);
     static void ProcessButtonInfo(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg);
     static void SetButtonText(
         const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index);

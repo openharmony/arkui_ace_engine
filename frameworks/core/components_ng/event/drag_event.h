@@ -331,6 +331,7 @@ public:
 
     void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
     void SetExecTimerCallback(bool isExecCallback);
+    void RemovePixelMap();
 protected:
     DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
 

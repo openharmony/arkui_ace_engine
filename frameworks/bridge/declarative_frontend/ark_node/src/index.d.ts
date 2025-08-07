@@ -69,6 +69,7 @@ declare interface BuildOptions {
   lazyBuildSupported?: boolean;
   bindedViewOfBuilderNode?:ViewPU;
   localStorage?:LocalStorage;
+  enableProvideConsumeCrossing?:boolean;
 }
 
 declare interface RegisterParams {
@@ -189,6 +190,12 @@ declare class ArkLazyVGridLayoutComponent extends ArkComponent {}
 declare class SwiperController {}
 
 declare class Scroller {}
+
+declare class TextController {}
+
+declare class TextInputController {}
+
+declare class TextAreaController {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

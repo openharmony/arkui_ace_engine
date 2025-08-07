@@ -357,6 +357,104 @@ class ScrollOnScrollFrameBeginModifier extends ModifierWithKey<(offset: number, 
   }
 }
 
+class ScrollMaxZoomScaleModifier extends ModifierWithKey<number> {
+  static identity: symbol = Symbol('maxZoomScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetMaxZoomScale(node);
+    } else {
+      getUINativeModule().scroll.setMaxZoomScale(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ScrollMinZoomScaleModifier extends ModifierWithKey<number> {
+  static identity: symbol = Symbol('minZoomScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetMinZoomScale(node);
+    } else {
+      getUINativeModule().scroll.setMinZoomScale(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ScrollZoomScaleModifier extends ModifierWithKey<number> {
+  static identity: symbol = Symbol('zoomScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetZoomScale(node);
+    } else {
+      getUINativeModule().scroll.setZoomScale(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ScrollEnableBouncesZoomModifier extends ModifierWithKey<boolean> {
+  static identity: symbol = Symbol('enableBouncesZoom');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetEnableBouncesZoom(node);
+    } else {
+      getUINativeModule().scroll.setEnableBouncesZoom(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ScrollOnDidZoomModifier extends ModifierWithKey<(scale: number) => void> {
+  constructor(value: (scale: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnDidZoom');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnDidZoom(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnDidZoom(node, this.value);
+    }
+  }
+}
+
+class ScrollOnZoomStartModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnZoomStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnZoomStart(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnZoomStart(node, this.value);
+    }
+  }
+}
+
+class ScrollOnZoomStopModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnZoomStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnZoomStop(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnZoomStop(node, this.value);
+    }
+  }
+}
+
 class ArkScrollComponent extends ArkScrollable<ScrollAttribute> implements ScrollAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -490,6 +588,34 @@ class ArkScrollComponent extends ArkScrollable<ScrollAttribute> implements Scrol
     modifierWithKey(this._modifiersWithKeys, ScrollFlingSpeedLimitModifier.identity, ScrollFlingSpeedLimitModifier, value);
     return this;
   }
+  maxZoomScale(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollMaxZoomScaleModifier.identity, ScrollMaxZoomScaleModifier, value);
+    return this;
+  }
+  minZoomScale(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollMinZoomScaleModifier.identity, ScrollMinZoomScaleModifier, value);
+    return this;
+  }
+  zoomScale(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollZoomScaleModifier.identity, ScrollZoomScaleModifier, value);
+    return this;
+  }
+  enableBouncesZoom(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollEnableBouncesZoomModifier.identity, ScrollEnableBouncesZoomModifier, value);
+    return this;
+  }
+  onDidZoom(callback: (scale: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnDidZoomModifier.identity, ScrollOnDidZoomModifier, callback);
+    return this;
+  }
+  onZoomStart(callback: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnZoomStartModifier.identity, ScrollOnZoomStartModifier, callback);
+    return this;
+  }
+  onZoomStop(callback: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnZoomStopModifier.identity, ScrollOnZoomStopModifier, callback);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.Scroll.attributeModifier = function (modifier: ArkComponent): void {
@@ -500,40 +626,7 @@ globalThis.Scroll.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 
-globalThis.Scroll.onScrollFrameBegin = function (value: (offset: number, state: ScrollState) => { offsetRemain: number }): void {
+globalThis.Scroll.onWillStopDragging = function (value: (velocity: number) => void) {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollFrameBegin(nodePtr, value);
-};
-globalThis.Scroll.onWillScroll = function (value: (xOffset: number, yOffset: number,
-  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnWillScroll(nodePtr, value);
-};
-globalThis.Scroll.onDidScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnDidScroll(nodePtr, value);
-};
-globalThis.Scroll.onScrollEdge = function (value: (side: Edge) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollEdge(nodePtr, value);
-};
-globalThis.Scroll.onScrollEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollEnd(nodePtr, value);
-};
-globalThis.Scroll.onScrollStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollStart(nodePtr, value);
-};
-globalThis.Scroll.onScrollStop = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollStop(nodePtr, value);
-};
-globalThis.Scroll.onReachStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnReachStart(nodePtr, value);
-};
-globalThis.Scroll.onReachEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnReachEnd(nodePtr, value);
+  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };

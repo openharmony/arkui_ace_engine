@@ -223,6 +223,9 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
 
     auto node = forEach->GetFrameNode(index);
     CHECK_NULL_RETURN(node, res);
+    if (!node->IsActive()) {
+        return res;
+    }
     auto geometry = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, res);
     auto nearRect = geometry->GetMarginFrameRect();
@@ -242,14 +245,28 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     float scale = 1 - sharped * 0.05f;
     SetNearbyNodeScale(node, scale);
     res.scale = scale;
-
-    float dis = std::abs((nearRect.GetOffset().GetMainOffset(axis) + nearRect.GetSize().MainSize(axis) -
-        rect.GetOffset().GetMainOffset(axis) - rect.GetSize().MainSize(axis)) / 2);
-
-    if (GreatNotEqual(axisDelta, dis) || LessNotEqual(axisDelta, -dis)) {
-        res.needMove = true;
-    }
+    res.needMove = IsNeedMove(nearRect, rect, axis, axisDelta);
+    
     return res;
+}
+
+bool ListItemDragManager::IsNeedMove(const RectF& nearRect, const RectF& rect, Axis axis, float axisDelta)
+{
+    bool needMove = false;
+    if (Positive(axisDelta)) {
+        float th = (nearRect.GetOffset().GetMainOffset(axis) + nearRect.GetSize().MainSize(axis) -
+            rect.GetOffset().GetMainOffset(axis) - rect.GetSize().MainSize(axis)) / 2;
+        if (GreatNotEqual(axisDelta, th)) {
+            needMove = true;
+        }
+    }
+    if (Negative(axisDelta)) {
+        float th = (nearRect.GetOffset().GetMainOffset(axis) - rect.GetOffset().GetMainOffset(axis)) / 2;
+        if (LessNotEqual(axisDelta, th)) {
+            needMove = true;
+        }
+    }
+    return needMove;
 }
 
 void ListItemDragManager::ScaleDiagonalItem(int32_t index, const RectF& rect, const OffsetF& delta)
@@ -435,7 +452,8 @@ void ListItemDragManager::HandleScrollCallback()
         pattern->SetHotZoneScrollCallback(nullptr);
         scrolling_ = false;
     }
-    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
+    auto paddingOffset = GetParentPaddingOffset();
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     if (to == from) {
         return;
     }

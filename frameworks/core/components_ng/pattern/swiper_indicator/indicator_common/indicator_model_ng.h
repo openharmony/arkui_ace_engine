@@ -48,6 +48,14 @@ public:
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetShowIndicator(FrameNode* frameNode, bool showIndicator);
     static int32_t GetCount(FrameNode* frameNode);
+    static void ProcessDotSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDotColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
     static void CreateDotWithResourceObj(FrameNode*  frameNode, const SwiperParameters& swiperParameters);
     static void CreateDigitWithResourceObj(FrameNode*  frameNode,
         const SwiperDigitalParameters& swiperDigitalParameters);

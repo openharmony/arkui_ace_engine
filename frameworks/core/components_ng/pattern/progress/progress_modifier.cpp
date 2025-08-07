@@ -17,6 +17,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1391,7 +1392,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double lengthOfScale = strokeWidth_->Get();
-    double pathDistance = FLOAT_TWO_ZERO * M_PI * radius / scaleCount_->Get();
+    double pathDistance = FLOAT_TWO_ZERO * ACE_PI * radius / scaleCount_->Get();
     if (scaleWidth_->Get() > pathDistance) {
         PaintRing(canvas, offset, contentSize);
         return;
@@ -1920,7 +1921,7 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
     if (lengthOfScale > radius) {
         lengthOfScale = radius / 2;
     }
-    double pathDistance = 2.0 * M_PI * radius / scaleCount_->Get();
+    double pathDistance = 2.0 * ACE_PI * radius / scaleCount_->Get();
     if (scaleWidth > pathDistance) {
         PaintRing(canvas, offset, frameSize);
         return;

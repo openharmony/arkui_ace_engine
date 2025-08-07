@@ -34,8 +34,19 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT();
+    auto tabsIdealSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+
+        // When the width or height parameter is MATCH_PARENT, set its value to the parent's value.
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(constraint.value(),
+            widthLayoutPolicy, heightLayoutPolicy, axis);
+        tabsIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+    }
+    auto idealSize = tabsIdealSize.ConvertToSizeT();
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         geometryNode->SetFrameSize(SizeF());
         return;

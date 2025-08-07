@@ -27,12 +27,10 @@ config("ace_napi_config") {
   defines = []
   if (use_mingw_win) {
     cflags_cc += [ "-std=c++17" ]
-    defines += [ "_USE_MATH_DEFINES" ]
   }
 
   if (use_linux) {
     cflags_cc += [ "-std=c++17" ]
-    defines += [ "_USE_MATH_DEFINES" ]
   }
 
   if (is_mac) {

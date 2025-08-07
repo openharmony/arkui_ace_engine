@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ListItemEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ListItemEventHub, EventHub)
+    DECLARE_ACE_TYPE(ListItemEventHub, EventHub);
 
 public:
     ListItemEventHub() = default;

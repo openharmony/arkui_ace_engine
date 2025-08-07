@@ -56,8 +56,100 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     contentNode->AddChild(child);
 }
 
-void NavBarNode::InitSystemTransitionPop()
+void NavBarNode::SystemTransitionPushStart(bool transitionIn)
 {
+    if (transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't push navBar");
+        return;
+    }
+
+    SetTransitionType(PageTransitionType::EXIT_PUSH);
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavBarNode::InitSoftTransitionPop()
+{
+    SetTransitionType(PageTransitionType::ENTER_POP);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto translate = CalcTranslateForTransitionPopStart(frameSize, true);
+    renderContext->UpdateTranslateInXY(translate);
+}
+
+void NavBarNode::SoftTransitionPushAction(bool isStart)
+{
+    if (isStart) {
+        SetTransitionType(PageTransitionType::EXIT_PUSH);
+    }
+    GetRenderContext()->UpdateTranslateInXY({0.0f, 0.0f});
+}
+
+void NavBarNode::StartSoftTransitionPush()
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto translate = CalcTranslateForTransitionPushEnd(frameSize, false);
+    renderContext->UpdateTranslateInXY(translate);
+}
+
+void NavBarNode::StartSoftTransitionPop()
+{
+    GetRenderContext()->UpdateTranslateInXY({0.0f, 0.0f});
+}
+
+void NavBarNode::SystemTransitionPushEnd(bool transitionIn)
+{
+    if (transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't push navBar");
+        return;
+    }
+
+    // start EXIT_PUSH transition animation
+    float isRTL = GetLanguageDirection();
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto translate = CalcTranslateForTransitionPushEnd(frameSize, false);
+    renderContext->UpdateTranslateInXY(translate);
+
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY(
+        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+}
+
+void NavBarNode::SystemTransitionPushFinish(bool transitionIn, int32_t animationId)
+{
+    if (transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't push navBar");
+        return;
+    }
+
+    GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavBarNode::SystemTransitionPopStart(bool transitionIn)
+{
+    if (!transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't pop navBar");
+        return;
+    }
+
     // navabr do enter pop initialization
     float isRTL = GetLanguageDirection();
     SetTransitionType(PageTransitionType::ENTER_POP);
@@ -75,40 +167,13 @@ void NavBarNode::InitSystemTransitionPop()
         { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::SystemTransitionPushAction(bool isStart)
+void NavBarNode::SystemTransitionPopEnd(bool transitionIn)
 {
-    // initialization or finish callBack
-    if (isStart) {
-        SetTransitionType(PageTransitionType::EXIT_PUSH);
-    } else {
-        GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    if (!transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't pop navBar");
+        return;
     }
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-}
 
-void NavBarNode::StartSystemTransitionPush()
-{
-    // start EXIT_PUSH transition animation
-    float isRTL = GetLanguageDirection();
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    auto renderContext = GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto translate = CalcTranslateForTransitionPushEnd(frameSize, false);
-    renderContext->UpdateTranslateInXY(translate);
-
-    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    titleNode->GetRenderContext()->UpdateTranslateInXY(
-        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
-}
-
-void NavBarNode::StartSystemTransitionPop()
-{
     // navabr start to do ENTER_POP animation
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
@@ -128,5 +193,19 @@ bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
 RefPtr<UINode> NavBarNode::GetNavigationNode()
 {
     return GetParentFrameNode();
+}
+
+std::string NavBarNode::ToDumpString()
+{
+    std::string dumpString;
+    dumpString.append("| [/]{ NavBar ");
+    dumpString.append("Visible? \"");
+    dumpString.append(IsVisible() ? "Yes" : "No");
+    int32_t count = 0;
+    int32_t depth = 0;
+    GetPageNodeCountAndDepth(&count, &depth);
+    dumpString.append("\", Count: " + std::to_string(count));
+    dumpString.append(", Depth: " + std::to_string(depth) + " }");
+    return dumpString;
 }
 } // namespace OHOS::Ace::NG

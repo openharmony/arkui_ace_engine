@@ -40,6 +40,11 @@ public:
         canSkip_ = value;
     }
 
+    bool MeasureInNextFrame() const override
+    {
+        return info_->measureInNextFrame_;
+    }
+
 private:
     void Init(const SizeF& frameSize);
     /* init WaterFlow without Sections */

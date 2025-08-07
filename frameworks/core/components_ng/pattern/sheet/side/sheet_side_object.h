@@ -43,6 +43,10 @@ public:
     void HandleDragEnd(float dragVelocity) override;
     void ModifyFireSheetTransition(float dragVelocity) override;
     void CreatePropertyCallback() override;
+    void BeforeCreateLayoutWrapper() override;
+    SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const override;
+    void AvoidKeyboardInDirtyLayoutProcess() override {};
+    void AvoidKeyboard(bool forceAvoid) override;
 
     ScrollResult HandleScroll(float scrollOffset, int32_t source, NestedState state, float velocity = 0.f) override
     {
@@ -55,12 +59,37 @@ public:
         return false;
     }
 
-    virtual uint32_t GetPanDirection() override
+    uint32_t GetPanDirection() const override
     {
         return PanDirection::HORIZONTAL;
     }
 
-    float GetSheetWidhtBeforeDragUpdate() const;
+    bool CheckIfNeedSetOuterBorderProp() const override
+    {
+        return false;
+    }
+
+    bool CheckIfNeedShadowByDefault() const override
+    {
+        return false;
+    }
+
+    float GetResizeDecreasedHeight() const
+    {
+        return resizeDecreasedHeight_;
+    }
+
+    bool CheckIfUpdateObject(SheetType newType) override
+    {
+        return newType != SheetType::SHEET_SIDE;
+    }
+
+    bool IsSheetObjectBase() const override
+    {
+        return false;
+    }
+
+    void FireHeightDidChange() override;
 
 private:
     void UpdateSidePosition();
@@ -71,6 +100,10 @@ private:
     void HandleDragUpdateForRTL(const GestureEvent& info);
     void TransformTranslateEnter();
     void TransformTranslateExit();
+    void DecreaseScrollHeightInSideSheet(uint32_t decreaseHeight);
+    float GetUpOffsetCaretNeed();
+
+    float resizeDecreasedHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

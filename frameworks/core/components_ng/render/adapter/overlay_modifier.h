@@ -20,8 +20,8 @@
 #include <string>
 
 #include "modifier/rs_animatable_arithmetic.h"
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_property.h"
+#include "render_service_client/core/modifier_ng/overlay/rs_overlay_style_modifier.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
@@ -56,12 +56,15 @@ private:
     OverlayOptions overlay_;
 };
 
-class OverlayTextModifier : public Rosen::RSOverlayStyleModifier {
+using RSOverlayStyleModifier = Rosen::ModifierNG::RSOverlayStyleModifier;
+using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
+
+class OverlayTextModifier : public RSOverlayStyleModifier {
 public:
     OverlayTextModifier() = default;
     ~OverlayTextModifier() override = default;
 
-    void Draw(Rosen::RSDrawingContext& context) const override
+    void Draw(RSDrawingContext& context) const override
     {
         CHECK_NULL_VOID(property_);
         auto overlayOptions = property_->Get().GetOverlayOptions();
@@ -160,7 +163,5 @@ private:
 
     std::shared_ptr<Rosen::RSProperty<OverlayTextData>> property_;
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_OVERLAY_MODIFIER_H

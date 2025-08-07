@@ -49,7 +49,10 @@ public:
 
     MOCK_METHOD(int32_t, GetDragState, (DragState& dragState), (const, override));
 
-    MOCK_METHOD(int32_t, GetDragSummary, ((std::map<std::string, int64_t>& summary)), (override));
+    MOCK_METHOD(int32_t, GetDragSummary, (
+        (std::map<std::string, int64_t>& summary), (std::map<std::string, int64_t>& detailedSummary),
+        (std::map<std::string, std::vector<int32_t>>& summaryFormat), (int32_t& version), (int64_t& totalSize)),
+        (override));
 
     MOCK_METHOD(int32_t, GetDragExtraInfo, (std::string& extraInfo), (override));
 
@@ -81,6 +84,7 @@ public:
 
     MOCK_METHOD(int32_t, EnableInternalDropAnimation, (const std::string& animationInfo), (override));
 
+    MOCK_METHOD(bool, IsDragStart, (), (const override));
 private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;

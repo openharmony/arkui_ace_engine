@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/event/key_event.h"
+#include "test/mock/base/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -635,6 +636,57 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
     ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
     EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
 }
+
+/**
+ * @tc.name: ViewAbstractBackground001
+ * @tc.desc: Test the background of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractBackground001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode.
+     */
+    const RefPtr<FrameNode> node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->Push(node);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pattern = node->GetPattern<Pattern>();
+    ASSERT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_TRUE(pattern->resourceMgr_);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    /**
+     * @tc.steps: step2. Set background options.
+     * @tc.expected: Options are set successfully.
+     */
+    Alignment align = Alignment::TOP_CENTER;
+    ViewAbstract::SetBackgroundAlign(node.GetRawPtr(), align);
+    auto backgroundAlign = renderContext->GetBackgroundAlign().value_or(Alignment::BOTTOM_CENTER);
+    EXPECT_EQ(backgroundAlign, align);
+
+    Color color = Color::RED;
+    ViewAbstract::SetBackgroundColor(node.GetRawPtr(), color);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), color);
+
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(node.GetRawPtr(), BLUE, resourceObject);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") != pattern->resourceMgr_->resMap_.end());
+
+    LayoutSafeAreaEdge edge = LAYOUT_SAFE_AREA_EDGE_START;
+    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(node.GetRawPtr(), edge);
+    ASSERT_NE(node->GetLayoutProperty(), nullptr);
+    EXPECT_EQ(node->GetLayoutProperty()->GetBackgroundIgnoresLayoutSafeAreaEdges(), edge);
+
+    ViewAbstract::SetIsTransitionBackground(node.GetRawPtr(), true);
+    EXPECT_TRUE(renderContext->GetIsTransitionBackground().value_or(false));
+
+    ViewAbstract::SetIsBuilderBackground(node.GetRawPtr(), true);
+    EXPECT_TRUE(renderContext->GetBuilderBackgroundFlag().value_or(false));
+}
+
 
 /**
  * @tc.name: ViewAbstractOffsetEdges001
@@ -1884,6 +1936,24 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveResObj
+ * @tc.desc: Test RemoveResObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest046, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    std::string key = "clipShape";
+    ViewAbstractModelNG::RemoveResObj(frameNode, key);
+    g_isConfigChangePerform = false;
+    ViewAbstractModelNG::RemoveResObj(frameNode, key);
+}
+
+/**
  * @tc.name: ViewAbstractDisableOnKeyEventDispatchTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
@@ -2021,4 +2091,102 @@ HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent003, TestSize.Level1)
 }
 #endif
 
+/**
+ * @tc.name: CheckLocalizedMarginOrPadding001
+ * @tc.desc: Test CheckLocalizedMarginOrPadding when start,top,bottom,left have values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckLocalizedMarginOrPadding001, TestSize.Level1)
+{
+    PaddingProperty paddingProperty;
+    paddingProperty.start = std::make_optional<CalcLength>(5.0);
+    paddingProperty.top = std::make_optional<CalcLength>(6.0);
+    paddingProperty.bottom = std::make_optional<CalcLength>(7.0);
+    paddingProperty.left = std::make_optional<CalcLength>(8.0);
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.left.value(), CalcLength(5.0));
+
+    textDirection = TextDirection::RTL;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.right.value(), CalcLength(5.0));
+}
+
+/**
+ * @tc.name: CheckLocalizedMarginOrPadding002
+ * @tc.desc: Test CheckLocalizedMarginOrPadding when end,right have values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckLocalizedMarginOrPadding002, TestSize.Level1)
+{
+    PaddingProperty paddingProperty;
+    paddingProperty.end = std::make_optional<CalcLength>(5.0);
+    paddingProperty.right = std::make_optional<CalcLength>(6.0);
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.right.value(), CalcLength(5.0));
+
+    textDirection = TextDirection::RTL;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.left.value(), CalcLength(5.0));
+}
+
+/**
+ * @tc.name: CheckLocalizedMarginOrPadding003
+ * @tc.desc: Test CheckLocalizedMarginOrPadding When neither start nor end has a value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckLocalizedMarginOrPadding003, TestSize.Level1)
+{
+    PaddingProperty paddingProperty;
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_FALSE(paddingProperty.right.has_value());
+    EXPECT_FALSE(paddingProperty.left.has_value());
+}
+
+/**
+ * @tc.name: CheckPositionOrOffsetLocalizedEdges001
+ * @tc.desc: Test CheckPositionOrOffsetLocalizedEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckPositionOrOffsetLocalizedEdges001, TestSize.Level1)
+{
+    auto top = CalcDimension(1.0);
+    auto bottom = CalcDimension(2.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
+
+    EdgesParam edges;
+    edges.SetTop(top);
+    edges.SetBottom(bottom);
+    edges.start = start;
+    edges.end = end;
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
+    EXPECT_EQ(edges.left.value(), start);
+
+    textDirection = TextDirection::RTL;
+    ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
+    EXPECT_EQ(edges.left.value(), end);
+}
+
+/**
+ * @tc.name: CheckPositionOrOffsetLocalizedEdges002
+ * @tc.desc: Test CheckPositionOrOffsetLocalizedEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckPositionOrOffsetLocalizedEdges002, TestSize.Level1)
+{
+    EdgesParam edges;
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
+    EXPECT_FALSE(edges.left.has_value());
+    EXPECT_FALSE(edges.right.has_value());
+}
 } // namespace OHOS::Ace::NG

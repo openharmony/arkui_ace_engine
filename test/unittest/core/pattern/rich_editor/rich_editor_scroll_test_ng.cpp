@@ -124,8 +124,11 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    // RichEditorPattern::OperationRecord record;
-    // richEditorPattern->DeleteSelectOperation(&record);
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
 
     RectF rect(0, 0, 5, 5);
     richEditorPattern->CreateHandles();

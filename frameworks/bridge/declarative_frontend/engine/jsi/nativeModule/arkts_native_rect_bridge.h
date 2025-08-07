@@ -31,7 +31,8 @@ public:
 private:
     static void SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
         std::vector<ArkUI_Float32>& radiusValues, std::vector<int32_t>& radiusUnits,
-        std::vector<uint32_t>& radiusValidPairs);
+        std::vector<uint32_t>& radiusValidPairs, std::vector<RefPtr<ResourceObject>>& radiusXResObjArray,
+        std::vector<RefPtr<ResourceObject>>& radiusYResObjArray);
     static void SetRadiusArraysInvalidValue(std::vector<ArkUI_Float32>& radiusValues,
         std::vector<int32_t>& radiusUnits,
         std::vector<uint32_t>& radiusValidPairs, int index);

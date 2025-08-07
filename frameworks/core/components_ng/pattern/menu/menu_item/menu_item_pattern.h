@@ -22,6 +22,7 @@
 #include "core/components/slider/render_slider.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/pattern/menu/menu_item/custom_menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
@@ -47,6 +48,11 @@ class ACE_EXPORT MenuItemPattern : public Pattern {
 public:
     MenuItemPattern(bool isOptionPattern = false, int index = -1) : index_(index), isOptionPattern_(isOptionPattern) {}
     ~MenuItemPattern() override = default;
+
+    bool HasHideTask()
+    {
+        return hideTask_;
+    }
 
     inline bool IsAtomicNode() const override
     {
@@ -75,6 +81,21 @@ public:
             focusPattern.SetStyleType(focusStyleType);
             return focusPattern;
         }
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
     }
 
     inline RefPtr<EventHub> CreateEventHub() override
@@ -190,6 +211,7 @@ public:
 
     RefPtr<FrameNode> GetBottomDivider()
     {
+        CreateBottomDivider();
         return bottomDivider_;
     }
 
@@ -409,6 +431,7 @@ public:
     void UpdateCheckMarkColor(const Color& color);
     void SetShowDefaultSelectedIcon(bool show);
     void SetCheckMarkVisibleType(VisibleType type);
+    void OnColorConfigurationUpdate() override;
 
 protected:
     void RegisterOnKeyEvent();
@@ -519,6 +542,7 @@ private:
 
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
+    RefPtr<SelectTheme> GetCurrentSelectTheme();
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -609,7 +633,7 @@ class CustomMenuItemPattern : public MenuItemPattern {
 public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BoxLayoutAlgorithm>();
+        return MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
     }
     void OnAttachToFrameNode() override;
 

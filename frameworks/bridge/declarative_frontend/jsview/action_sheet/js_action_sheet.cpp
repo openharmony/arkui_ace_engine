@@ -234,24 +234,11 @@ void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
         properties.borderWidth = borderWidth;
         auto colorValue = obj->GetProperty("borderColor");
         NG::BorderColorProperty borderColor;
-        if (SystemProperties::ConfigChangePerform()) {
-            RefPtr<ResourceObject> borderColorResObj;
-            Color border;
-            if (JSViewAbstract::ParseJsColor(colorValue, border, borderColorResObj)) {
-                properties.resourceBdColorObj = borderColorResObj;
-                borderColor.SetColor(border);
-                properties.borderColor = borderColor;
-            } else {
-                borderColor.SetColor(Color::BLACK);
-                properties.borderColor = borderColor;
-            }
+        if (JSActionSheet::ParseBorderColorProps(colorValue, borderColor)) {
+            properties.borderColor = borderColor;
         } else {
-            if (JSActionSheet::ParseBorderColorProps(colorValue, borderColor)) {
-                properties.borderColor = borderColor;
-            } else {
-                borderColor.SetColor(Color::BLACK);
-                properties.borderColor = borderColor;
-            }
+            borderColor.SetColor(Color::BLACK);
+            properties.borderColor = borderColor;
         }
     }
 }
@@ -530,7 +517,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     Color backgroundColor;
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> backGroundColorResObj;
-        if (ParseJsColor(backgroundColorValue, backgroundColor, backGroundColorResObj)) {
+        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor, backGroundColorResObj)) {
             properties.resourceBgColorObj = backGroundColorResObj;
             properties.backgroundColor = backgroundColor;
         }

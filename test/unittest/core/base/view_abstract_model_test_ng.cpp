@@ -48,6 +48,7 @@ namespace {
     RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
     int32_t flag = 0;
     const std::string TEST_TEXT_HINT = "testTextHint";
+    constexpr int32_t TEST_NODE_ID = 1;
 }; // namespace
 
 class ViewAbstractModelTestNg : public testing::Test {
@@ -68,6 +69,7 @@ void ViewAbstractModelTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**
@@ -1800,6 +1802,7 @@ HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder001, TestSize.Level1)
     viewAbstractModelNG.SetToolbarBuilder(nullptr);
     bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
     EXPECT_FALSE(ret);
+    rootNode->RemoveChild(containerModalNode);
 }
 
 /**
@@ -1829,21 +1832,17 @@ HWTEST_F(ViewAbstractModelTestNg, SetToolbarBuilder002, TestSize.Level1)
 
     auto builderFunc = []() -> RefPtr<UINode> {
         auto* stack = ViewStackProcessor::GetInstance();
-        CHECK_NULL_RETURN(stack, nullptr);
         auto frameNode = FrameNode::GetOrCreateFrameNode(
             V2::TOOLBAR_ETS_TAG, 11, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-        CHECK_NULL_RETURN(frameNode, nullptr);
-        stack->Push(frameNode);
-        auto childFrameNode = FrameNode::GetOrCreateFrameNode(
-            V2::TOOLBARITEM_ETS_TAG, 22, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-        CHECK_NULL_RETURN(childFrameNode, nullptr);
-        stack->Push(childFrameNode);
-        frameNode->AddChild(childFrameNode);
-        return frameNode;
+        if (stack) {
+            stack->Push(frameNode);
+        }
+        return frameNode ? frameNode : nullptr;
     };
     viewAbstractModelNG.SetToolbarBuilder(std::move(builderFunc));
     bool ret = mainNode->removeToolbarItemCallbacks_.size() > 0;
     EXPECT_TRUE(ret);
+    rootNode->RemoveChild(containerModalNode);
 }
 
 /**
@@ -1858,7 +1857,6 @@ HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest2, TestSize.Level1)
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     menuParam.anchorPosition = {10, 20};
-    menuParam.isAnchorPosition = true;
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
     EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
 
@@ -1893,7 +1891,6 @@ HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
     MenuParam menuParam;
     menuParam.setShow = true;
     menuParam.anchorPosition = {10, 20};
-    menuParam.isAnchorPosition = true;
     menuParam.isShow = true;
     menuParam.isShowInSubWindow = true;
     buildFunc = []() { flag++; };
@@ -1903,5 +1900,219 @@ HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
     params.push_back(OptionParam());
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     EXPECT_NE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode(), nullptr);
+}
+
+/**
+ * @tc.name: BindDragWithContextMenuParamsTest003
+ * @tc.desc: Verify IsNotNeedShowPreview returns correct result for different menu binding combinations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindDragWithContextMenuParamsTest003, TestSize.Level1)
+{
+    std::string tag = "uiNode3";
+    FrameNode frameNode(tag, TEST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode.GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step1. Set isBindCustomMenu = true, isShow = true
+     * @tc.expected: IsNotNeedShowPreview returns true
+     */
+    gestureHub->SetBindMenuStatus(true, true, MenuPreviewMode::IMAGE);
+    auto bindStatus1 = gestureHub->GetBindMenuStatus();
+    EXPECT_TRUE(bindStatus1.IsNotNeedShowPreview());
+
+    /**
+     * @tc.steps: step2. Set isBindCustomMenu = true, isShow = false
+     * @tc.expected: IsNotNeedShowPreview returns false
+     */
+    gestureHub->SetBindMenuStatus(true, false, MenuPreviewMode::CUSTOM);
+    auto bindStatus2 = gestureHub->GetBindMenuStatus();
+    EXPECT_FALSE(bindStatus2.IsNotNeedShowPreview());
+
+    /**
+     * @tc.steps: step3. Set isBindLongPressMenu = true
+     * @tc.expected: IsNotNeedShowPreview returns true
+     */
+    gestureHub->SetBindMenuStatus(false, false, MenuPreviewMode::CUSTOM);
+    auto bindStatus3 = gestureHub->GetBindMenuStatus();
+    EXPECT_TRUE(bindStatus3.IsNotNeedShowPreview());
+
+    /**
+     * @tc.steps: step4. Clear state and verify IsNotNeedShowPreview returns false
+     * @tc.expected: IsNotNeedShowPreview returns false
+     */
+    gestureHub->SetBindMenuStatus(false, false, MenuPreviewMode::NONE);
+    gestureHub->bindMenuStatus_.isBindCustomMenu = false;
+    gestureHub->bindMenuStatus_.isBindLongPressMenu = false;
+    auto bindStatus4 = gestureHub->GetBindMenuStatus();
+    EXPECT_FALSE(bindStatus4.IsNotNeedShowPreview());
+}
+
+/**
+ * @tc.name: CheckSkipMenuShowTest
+ * @tc.desc: Test the CheckSkipMenuShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, CheckSkipMenuShowTest, TestSize.Level1)
+{
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    /**
+     * @tc.expected: CheckSkipMenuShow returns false
+     */
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(targetNode, nullptr);
+    EXPECT_FALSE(viewAbstractModelNG.CheckSkipMenuShow(targetNode));
+}
+
+/**
+ * @tc.name: CheckMenuIsShowTest001
+ * @tc.desc: Test the CheckMenuIsShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, CheckMenuIsShowTest001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+
+    /**
+     * @tc.steps: step1. Set setShow = true, isShow = false
+     * @tc.expected: CheckMenuIsShow returns true
+     */
+    MenuParam menuParam;
+    menuParam.hasTransitionEffect = true;
+    menuParam.setShow = true;
+    menuParam.isShow = false;
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    EXPECT_TRUE(viewAbstractModelNG.CheckMenuIsShow(menuParam, targetId, targetNode));
+}
+
+/**
+ * @tc.name: PopupTypeStrTest001
+ * @tc.desc: Test the PopupTypeStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, PopupTypeStrTest001, TestSize.Level1)
+{
+    auto type = PopupType::POPUPTYPE_TEXTCOLOR;
+    EXPECT_EQ(viewAbstractModelNG.PopupTypeStr(type), "TextColor");
+
+    type = PopupType::POPUPTYPE_POPUPCOLOR;
+    EXPECT_EQ(viewAbstractModelNG.PopupTypeStr(type), "PopupColor");
+
+    type = PopupType::POPUPTYPE_MASKCOLOR;
+    EXPECT_EQ(viewAbstractModelNG.PopupTypeStr(type), "MaskColor");
+}
+
+/**
+ * @tc.name: BindDragWithContextMenuParamsTest001
+ * @tc.desc: Test the BindDragWithContextMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindDragWithContextMenuParamsTest001, TestSize.Level1)
+{
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ASSERT_NE(pageNode, nullptr);
+    auto column = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(column, nullptr);
+    auto navDestinaion = FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_NE(navDestinaion, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(targetNode, nullptr);
+    targetNode->MountToParent(navDestinaion);
+    targetNode->SetRootNodeId(1);
+    navDestinaion->MountToParent(column);
+    column->MountToParent(pageNode);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    /**
+     * @tc.steps: step1. Set contextMenuRegisterType = CUSTOM_TYPE, menuBindType = RIGHT_CLICK
+     * @tc.expected: isBindCustomMenu returns true
+     */
+    MenuParam menuParam;
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    viewAbstractModelNG.BindDragWithContextMenuParams(menuParam);
+    EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isBindCustomMenu, true);
+}
+
+/**
+ * @tc.name: BindContextMenuTest001
+ * @tc.desc: Test the BindContextMenu
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = false;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+
+    MenuParam menuParam;
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = false;
+    menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    std::function<void()> buildFunc;
+    std::function<void()> previewBuildFunc = nullptr;
+    auto type = ResponseType::RIGHT_CLICK;
+    buildFunc = []() { flag++; };
+
+    /**
+     * @tc.steps: step1. Set isShow = false, menuBindType = RIGHT_CLICK
+     * @tc.expected: subwindow is not nullptr
+     */
+    viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
+    EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: step1. Set isShow = true, menuBindType = RIGHT_CLICK
+     * @tc.expected: subwindow is not nullptr
+     */
+    menuParam.isShow = true;
+    viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
+    EXPECT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
 }
 } // namespace OHOS::Ace::NG

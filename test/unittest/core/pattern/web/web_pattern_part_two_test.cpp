@@ -405,7 +405,7 @@ HWTEST_F(WebPatternPartTwoTest, NotifyFillRequestSuccess001, TestSize.Level1)
     AceAutoFillType autoFillType = AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET;
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
     EXPECT_EQ(viewDataWrap, nullptr);
-    webPattern->lastPageNodeRectRelativeToWeb_ = RectF();
+    webPattern->requestedWebOffset_ = OffsetF();
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType);
 #endif
 }

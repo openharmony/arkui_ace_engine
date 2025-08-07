@@ -18,9 +18,12 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -172,6 +175,12 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     cancelButtonNodeGeometryNode->SetFrameSize(SizeF(100, 100));
     searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(cancelButtonNodeGeometryNode->GetFrameSize().Height(), 100);
+
+    // Multiple measurements will not affect each other.
+    searchLayoutAlgorithm->textFieldSizeMeasure_ = SizeF(80.0f, 10.0f);
+    searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(searchLayoutAlgorithm->textFieldSizeMeasure_, SizeF(100.0f, 50.0f));
 }
 
 /**
@@ -770,6 +779,9 @@ HWTEST_F(SearchTestNg, SetCaretWidth001, TestSize.Level1)
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(textPaintProperty, nullptr);
+    auto textFieldPattern = textFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->InitDragEvent();
     NG::DragPreviewOption option { false };
     searchModelInstance.SetDragPreviewOptions(option);
     searchModelInstance.SetCaretWidth(14.0_vp);
@@ -2549,4 +2561,105 @@ HWTEST_F(SearchTestNg, SearchEnableAutoSpacing, TestSize.Level1)
     EXPECT_EQ(SearchModelNG::GetEnableAutoSpacing(frameNode), false);
 }
 
+/**
+ * @tc.name: InitMargin
+ * @tc.desc: Test the margin setup method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(searchPattern, nullptr);
+
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    searchPattern->InitMargin(searchLayoutProperty);
+    const auto& marginProperty = searchLayoutProperty->GetMarginProperty();
+    ASSERT_NE(marginProperty, nullptr);
+    EXPECT_TRUE(marginProperty->top);
+    EXPECT_TRUE(marginProperty->bottom);
+
+    searchLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    searchPattern->InitMargin(searchLayoutProperty);
+    EXPECT_FALSE(marginProperty->top);
+    EXPECT_FALSE(marginProperty->bottom);
+
+    MarginProperty margin;
+    margin.top = CalcLength(10.0f);
+    margin.bottom = CalcLength(10.0f);
+    searchLayoutProperty->UpdateUserMargin(margin);
+    searchLayoutProperty->UpdateMargin(margin);
+    searchPattern->InitMargin(searchLayoutProperty);
+
+    EXPECT_TRUE(marginProperty->top);
+    EXPECT_TRUE(marginProperty->bottom);
+}
+
+/**
+ * @tc.name: SearchFieldPattern::ProcessSelection
+ * @tc.desc: Test the ProcessSelection method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, ProcessSelection, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Search node with default text and placeholder
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<SearchTextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateCursorColor(Color::RED);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayHolder_ = textFieldPattern->selectOverlay_;
+    textFieldPattern->selectOverlay_->OnBind(manager);
+
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = false;
+    manager->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
+    auto handleNode = SelectOverlayNode::CreateSelectOverlayNode(manager->shareOverlayInfo_);
+    ASSERT_NE(handleNode, nullptr);
+    auto root = AceType::MakeRefPtr<FrameNode>("TEMP", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(root, nullptr);
+    handleNode->MountToParent(root);
+    manager->selectOverlayNode_ = AceType::WeakClaim(AceType::RawPtr(handleNode));
+
+    textFieldPattern->ProcessSelection();
+    EXPECT_EQ(manager->shareOverlayInfo_->handlerColor, Color::RED);
+}
+
+/**
+ * @tc.name: SetAutoCapitalizationMode001
+ * @tc.desc: test SetAutoCapitalizationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetAutoCapitalizationMode001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->GetChildren().empty());
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    searchModelInstance.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
+    EXPECT_EQ(AutoCapitalizationMode::NONE, pattern->GetAutoCapitalizationMode());
+}
 } // namespace OHOS::Ace::NG

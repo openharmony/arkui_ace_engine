@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,36 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   responseRegion(value: Array<Rectangle> | Rectangle): this {
     modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity,
       RadioResponseRegionModifier, value);
+    return this;
+  }
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
+      }
+      modifierWithKey(this._modifiersWithKeys, RadioMarginModifier.identity, RadioMarginModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RadioMarginModifier.identity, RadioMarginModifier, undefined);
+    }
     return this;
   }
   contentModifier(value: ContentModifier<RadioConfiguration>): this {
@@ -363,6 +393,28 @@ class RadioOnChangeModifier extends ModifierWithKey<(isChecked: boolean) => void
   }
 }
 
+class RadioMarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetMargin(node);
+    } else {
+      getUINativeModule().radio.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
@@ -380,9 +432,4 @@ globalThis.Radio.contentModifier = function (modifier): void {
     return new ArkRadioComponent(nativeNode);
   });
   component.setContentModifier(modifier);
-};
-
-globalThis.Radio.onChange = function (value: (selected: boolean) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().radio.setRadioOnChange(nodePtr, value);
 };

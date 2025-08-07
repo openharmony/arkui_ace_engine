@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -106,8 +107,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest038, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
-
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -126,8 +129,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest039, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
-
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -146,8 +151,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest040, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
-
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -166,8 +173,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest041, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
-
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -186,8 +195,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest042, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
-
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -207,7 +218,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest043, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -227,7 +241,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest044, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -247,7 +264,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest045, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -267,7 +287,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest046, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -287,7 +310,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest047, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -307,7 +333,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest048, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -327,7 +356,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest049, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -347,7 +379,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest050, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -367,7 +402,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest051, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -387,7 +425,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest052, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -407,7 +448,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest053, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -427,7 +471,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest054, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -447,7 +494,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest055, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -580,8 +630,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest061, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
-   
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     pattern->ImageNodeCreate();
     auto Hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(Hasval, false);
@@ -602,7 +654,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest062, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     
     pattern->ImageNodeCreate();
     auto hasval = pattern->preTypeIsBuilder_;
@@ -624,7 +679,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest063, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     
     pattern->ImageNodeCreate();
     auto hasval = pattern->preTypeIsBuilder_;
@@ -667,7 +725,6 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest065, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    
     pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
@@ -930,7 +987,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest076, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -950,7 +1010,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest077, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -970,7 +1033,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest078, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -990,7 +1056,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest079, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -1010,7 +1079,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest080, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -1030,7 +1102,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest081, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -1050,7 +1125,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest082, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -1070,7 +1148,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest083, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -1090,7 +1171,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest084, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_NE(imageSourceInfo.isSvg_, false);
 }
 
@@ -1110,7 +1194,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest085, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1130,7 +1217,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest086, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1150,7 +1240,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest087, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1170,7 +1263,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest088, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1190,7 +1286,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest089, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1210,7 +1309,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest090, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_DOT, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1230,7 +1332,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest091, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1250,7 +1355,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest092, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1270,7 +1378,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest093, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
 
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_CUSTOM, theme);
     EXPECT_EQ(imageSourceInfo.pixmap_, false);
 }
 
@@ -1403,7 +1514,10 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest099, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
    
     pattern->ImageNodeCreate();
     auto Hasval = pattern->preTypeIsBuilder_;
@@ -1425,8 +1539,11 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest100, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
-    
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
+
     pattern->ImageNodeCreate();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
@@ -1447,8 +1564,11 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest101, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK);
-    
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
+
     pattern->ImageNodeCreate();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
@@ -1861,5 +1981,208 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest119, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnAfterModifyDone();
+}
+
+/**
+ * @tc.name: RadioPatternTest120
+ * @tc.desc: Test Radio OnDetachFromFrameNodeMultiThread.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest120, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: RadioPatternTest121
+ * @tc.desc: Test Radio OnDetachFromMainTree.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest121, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: RadioPatternTest122
+ * @tc.desc: Test Radio OnDetachFromMainTreeMultiThread.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest122, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+}
+
+/**
+ * @tc.name: InitDefaultMarginTest001
+ * @tc.desc: Test Radio InitDefaultMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, InitDefaultMarginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. make builderFunc
+     */
+    auto buildFunc = [](RadioConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    /**
+     * @tc.steps: step3. set builder func and call InitDefaultMargin.
+     * @tc.expected: step3. margin property is null.
+     */
+    radioModelNG.SetIsUserSetMargin(true);
+    pattern->SetBuilderFunc(buildFunc);
+    pattern->InitDefaultMargin();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetMarginProperty(), nullptr);
+    /**
+     * @tc.steps: step4. clear builderFunc and call InitDefaultMargin.
+     * @tc.expected: step4. margin property is not null.
+     */
+    radioModelNG.SetIsUserSetMargin(false);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+    pattern->SetBuilderFunc(nullptr);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateRadioComponentColor
+ * @tc.desc: Test UpdateRadioComponentColor for all RadioColorType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, UpdateRadioComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create radio frame node and initialize components.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update checked background color and verify.
+     * @tc.expected: step2. Checked background color is updated to RED.
+     */
+    pattern->UpdateRadioComponentColor(Color::RED, RadioColorType::CHECKED_BACKGROUND_COLOR);
+    auto color1 = paintProperty->GetRadioCheckedBackgroundColor();
+    ASSERT_TRUE(color1.has_value());
+    EXPECT_EQ(color1.value(), Color::RED);
+
+    /**
+     * @tc.steps: step3. Update unchecked border color and verify.
+     * @tc.expected: step3. Unchecked border color is updated to BLUE.
+     */
+    pattern->UpdateRadioComponentColor(Color::BLUE, RadioColorType::UNCHECKED_BORDER_COLOR);
+    auto color2 = paintProperty->GetRadioUncheckedBorderColor();
+    ASSERT_TRUE(color2.has_value());
+    EXPECT_EQ(color2.value(), Color::BLUE);
+
+    /**
+     * @tc.steps: step4. Update indicator color and verify.
+     * @tc.expected: step4. Indicator color is updated to GREEN.
+     */
+    pattern->UpdateRadioComponentColor(Color::GREEN, RadioColorType::INDICATOR_COLOR);
+    auto color3 = paintProperty->GetRadioIndicatorColor();
+    ASSERT_TRUE(color3.has_value());
+    EXPECT_EQ(color3.value(), Color::GREEN);
+
+    EXPECT_EQ(pattern->preTypeIsBuilder_, false);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: Test OnColorConfigurationUpdate updates paint properties correctly when user has not set colors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, OnColorConfigurationUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API version and create radio frame node.
+     * @tc.expected: step1. API version is set and frame node is created.
+     */
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    ASSERT_NE(radioTheme, nullptr);
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step2. Set theme colors and update with user color flags.
+     * @tc.expected: step2. Checked background color is updated to theme's active color (BLACK).
+     */
+    g_isConfigChangePerform = true;
+    radioTheme->activeColor_ = Color::BLACK;
+    radioTheme->inactiveColor_ = Color::BLACK;
+    radioTheme->pointColor_ = Color::BLACK;
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(false);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioCheckedBackgroundColorValue(), Color::BLACK);
+
+    /**
+     * @tc.steps: step3. Reverse user color flags and verify unchecked border color.
+     * @tc.expected: step3. Unchecked border color is updated to theme's inactive color (BLACK).
+     */
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(false);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), Color::BLACK);
+
+    /**
+     * @tc.steps: step4. Reverse user color flags again and verify indicator color.
+     * @tc.expected: step4. Indicator color is updated to theme's point color (BLACK).
+     */
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioIndicatorColorValue(), Color::BLACK);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

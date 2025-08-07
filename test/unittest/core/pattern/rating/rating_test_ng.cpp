@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
@@ -105,6 +106,10 @@ const std::string TEST_RESULT_THIRD = "test_ok_3";
 const std::string TEST_RESULT_FORTH = "test_ok_4";
 constexpr int32_t OFFSET_FIRST = 10;
 constexpr int32_t OFFSET_SECOND = 20;
+const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+constexpr float TEST_WIDTH_50 = 50.0f;
+constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
 
 class RatingTestNg : public testing::Test {
@@ -195,8 +200,8 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest004, TestSize.Level1)
     ASSERT_NE(ratingRenderProperty, nullptr);
 
     // Test ratingScore and stepSize default value.
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), DEFAULT_RATING_SCORE);
-    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.5), DEFAULT_STEP_SIZE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), DEFAULT_RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE);
 }
 
 /**
@@ -217,7 +222,7 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 
     // Test ratingScore and stepSize value.
     EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.0), RATING_STEP_SIZE);
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), RATING_SCORE);
     ViewStackProcessor::GetInstance()->Finish();
 }
 
@@ -1177,7 +1182,7 @@ HWTEST_F(RatingTestNg, RatingTestBuilderFunc001, TestSize.Level1)
      */
     RatingModelNG rating;
     rating.Create();
-    rating.SetIndicator(false);
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
     rating.SetStepSize(1); // Default step size as 1.
     rating.SetStars(5); // Default stars as 5.
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1255,7 +1260,7 @@ HWTEST_F(RatingTestNg, RatingTestBuilderFunc002, TestSize.Level1)
      */
     RatingModelNG rating;
     rating.Create();
-    rating.SetIndicator(false);
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
     rating.SetStepSize(1); // Default step size as 1.
     rating.SetStars(5); // Default stars as 5.
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -2273,4 +2278,305 @@ HWTEST_F(RatingTestNg, StyleTest001, TestSize.Level1)
         RATING_SECONDARY_URL);
 }
 
+/**
+ * @tc.name: MeasureTest001
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
+    EXPECT_NE(ret->Height(), TEST_SIZE_200.Height());
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
+    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+}
+
+/**
+ * @tc.name: LayoutPolicyIsMatchParentTest001
+ * @tc.desc: Test Rating LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call LayoutPolicyIsMatchParent function.
+     * @tc.expected: ret is equal to TEST_SIZE_0.
+     */
+    LayoutConstraintF contentConstraint;
+    int32_t stars = 1;
+    auto layoutPolicy = ratingLayoutProperty->GetLayoutPolicyProperty();
+    auto ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step3. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step4. set selfIdealSize.height_ to TEST_HEIGHT_60.
+     * @tc.expected: result equals.
+     */
+    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, SizeF({ TEST_SIZE_200.Width(), TEST_HEIGHT_60 }));
+
+    /**
+     * @tc.steps: step5. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step6. set selfIdealSize.width_ to TEST_WIDTH_50.
+     * @tc.expected: result equals.
+     */
+    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, SizeF({ TEST_WIDTH_50, TEST_SIZE_200.Height() }));
+}
+
+
+/**
+ * @tc.name: CreateWithMediaResourceObj
+ * @tc.desc: Test CreateWithMediaResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, CreateWithMediaResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RatingModelNG instance and get the main frame node.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string key = "rating" + rating.StringTypeToStr(RatingUriType::BACKGROUND_URI);
+
+    /**
+     * @tc.steps: step2. Test CreateWithMediaResourceObj with a valid ResourceObject.
+     * @tc.expected: count is equal to 1.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    rating.CreateWithMediaResourceObj(resObj, RatingUriType::BACKGROUND_URI);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+
+    /**
+     * @tc.steps: step3. Test CreateWithMediaResourceObj with a null ResourceObject.
+     * @tc.expected: The resource manager should be null.
+     */
+    rating.CreateWithMediaResourceObj(nullptr, RatingUriType::BACKGROUND_URI);
+    resMgr = pattern->resourceMgr_;
+    EXPECT_EQ(resMgr, nullptr);
+
+    /**
+     * @tc.steps: step4. Test CreateWithMediaResourceObj with a ResourceObject containing parameters.
+     * @tc.expected: count is equal to 1.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10003, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    rating.CreateWithMediaResourceObj(resObjWithParams, RatingUriType::BACKGROUND_URI);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+}
+
+/**
+ * @tc.name: UpdateStarStyleImage
+ * @tc.desc: Test UpdateStarStyleImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, UpdateStarStyleImage, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up the theme manager and pipeline context.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == RatingTheme::TypeId()) {
+            return AceType::MakeRefPtr<RatingTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps: step2. Create a RatingModelNG instance and get the main frame node.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Test UpdateStarStyleImage for background URI.
+     * @tc.expected: result is equal to RATING_BACKGROUND_URL.
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::BACKGROUND_URI, RATING_BACKGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_BACKGROUND_URL);
+
+    /**
+     * @tc.steps: step4. Test UpdateStarStyleImage for foreground URI.
+     * @tc.expected: result is equal to RATING_FOREGROUND_URL.
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::FOREGROUND_URI, RATING_FOREGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_FOREGROUND_URL);
+
+    /**
+     * @tc.steps: step5. Test UpdateStarStyleImage for secondary URI.
+     * @tc.expected: result is equal to RATING_SECONDARY_URL.
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::SECONDARY_URI, RATING_SECONDARY_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_SECONDARY_URL);
+
+    /**
+     * @tc.steps: step6. Test UpdateStarStyleImage with an empty secondary URI.
+     * @tc.expected: result is equal to "".
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::SECONDARY_URI, "");
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(), "");
+
+    /**
+     * @tc.steps: step7. Test UpdateStarStyleImage with an invalid URI type.
+     */
+    int32_t defaultValue = 999;
+    rating.UpdateStarStyleImage(frameNode, static_cast<RatingUriType>(defaultValue), "");
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_BACKGROUND_URL);
+}
+
+/**
+ * @tc.name: StringTypeToStr
+ * @tc.desc: test StringTypeToStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, StringTypeToStr, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define a list of RatingUriType and their expected string values.
+     * @tc.expected: The StringTypeToStr function should return the correct string values.
+     */
+    std::vector<std::pair<RatingUriType, std::string>> types = {
+        { RatingUriType::BACKGROUND_URI, "BackgroundUri" },
+        { RatingUriType::FOREGROUND_URI, "ForegroundUri" },
+        { RatingUriType::SECONDARY_URI, "SecondaryUri" } };
+    for (const auto& [type, val] : types) {
+        auto ret = RatingModelNG::StringTypeToStr(type);
+        EXPECT_EQ(val, ret);
+    }
+}
+
+/**
+ * @tc.name: OnColorModeChange
+ * @tc.desc: Test OnColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, OnColorModeChange, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->isNeedFocusStyle_ = true;
+    pattern->OnColorModeChange(colorMode);
+
+    EXPECT_TRUE(pattern->isForegroundImageInfoFromTheme_);
+    EXPECT_TRUE(pattern->isSecondaryImageInfoFromTheme_);
+    EXPECT_TRUE(pattern->isBackgroundImageInfoFromTheme_);
+
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG

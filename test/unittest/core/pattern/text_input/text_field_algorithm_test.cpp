@@ -430,6 +430,27 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateParagraph004
+ * @tc.desc: Test the function CreateParagraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, CreateParagraph004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
+    TextStyle textStyle;
+    textStyle.SetStrokeColor(textStyle.GetStrokeColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY_VALUE));
+    auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
+    EXPECT_NE(textInputLayoutAlgorithm->paragraph_, nullptr);
+}
+
+/**
  * @tc.name: AdaptInlineFocusFontSize001
  * @tc.desc: Test the function AdaptInlineFocusFontSize.
  * @tc.type: FUNC
@@ -650,6 +671,69 @@ HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations001, TestSize.Leve
 }
 
 /**
+ * @tc.name: AddAdaptFontSizeAndAnimations002
+ * @tc.desc: Test the function AddAdaptFontSizeAndAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    });
+    TextStyle textStyle;
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
+}
+
+/**
+ * @tc.name: AddAdaptFontSizeAndAnimations003
+ * @tc.desc: Test the function AddAdaptFontSizeAndAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    });
+    TextStyle textStyle;
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
+}
+
+/**
+ * @tc.name: AddAdaptFontSizeAndAnimations004
+ * @tc.desc: Test the function AddAdaptFontSizeAndAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    });
+    TextStyle textStyle;
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
+}
+
+/**
  * @tc.name: IsInlineFocusAdaptMinExceedLimit
  * @tc.desc: Test the function IsInlineFocusAdaptMinExceedLimit
  * @tc.type: FUNC
@@ -680,11 +764,11 @@ HWTEST_F(TextFieldAlgorithmTest, DidExceedMaxLines, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTextAreaMaxLines
+ * @tc.name: UpdateTextAreaMaxLines001
  * @tc.desc: Test the function UpdateTextAreaMaxLines
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldAlgorithmTest, UpdateTextAreaMaxLines, TestSize.Level1)
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextAreaMaxLines001, TestSize.Level1)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
     GetFocus();
@@ -710,5 +794,116 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextAreaMaxLines, TestSize.Level1)
     textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
     EXPECT_EQ(textStyle.GetMaxLines(), 1);
+    
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::DEFAULT);
+    textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
+    EXPECT_EQ(textStyle.GetMaxLines(), INT32_MAX);
+}
+
+/**
+ * @tc.name: UpdateTextAreaMaxLines002
+ * @tc.desc: Test the function UpdateTextAreaMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextAreaMaxLines002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    PaddingProperty paddingProperty { .top = CalcLength(300), .bottom = CalcLength(300) };
+    paintProperty->UpdatePaddingByUser(paddingProperty);
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    paintProperty->UpdateMarginByUser(margin);
+
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    TextStyle textStyle;
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::CLIP);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    textFieldLayoutProperty->UpdateNormalMaxViewLines(1);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+
+    textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
+    EXPECT_EQ(textStyle.GetMaxLines(), 1);
+}
+
+/**
+ * @tc.name: ShouldUseInfiniteMaxLines001
+ * @tc.desc: Test the function ShouldUseInfiniteMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ShouldUseInfiniteMaxLines001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    EXPECT_TRUE(textAreaLayoutAlgorithm->ShouldUseInfiniteMaxLines(textFieldLayoutProperty));
+}
+
+/**
+ * @tc.name: ShouldUseInfiniteMaxLines002
+ * @tc.desc: Test the function ShouldUseInfiniteMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ShouldUseInfiniteMaxLines002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    EXPECT_TRUE(textAreaLayoutAlgorithm->ShouldUseInfiniteMaxLines(textFieldLayoutProperty));
+}
+
+/**
+ * @tc.name: ShouldUseInfiniteMaxLines003
+ * @tc.desc: Test the function ShouldUseInfiniteMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ShouldUseInfiniteMaxLines003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::DEFAULT);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    EXPECT_TRUE(textAreaLayoutAlgorithm->ShouldUseInfiniteMaxLines(textFieldLayoutProperty));
+}
+
+/**
+ * @tc.name: ShouldUseInfiniteMaxLines004
+ * @tc.desc: Test the function ShouldUseInfiniteMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ShouldUseInfiniteMaxLines004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    EXPECT_FALSE(textAreaLayoutAlgorithm->ShouldUseInfiniteMaxLines(textFieldLayoutProperty));
+}
+
+/**
+ * @tc.name: ShouldUseInfiniteMaxLines005
+ * @tc.desc: Test the function ShouldUseInfiniteMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, ShouldUseInfiniteMaxLines005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::CLIP);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    EXPECT_FALSE(textAreaLayoutAlgorithm->ShouldUseInfiniteMaxLines(textFieldLayoutProperty));
 }
 } // namespace OHOS::Ace::NG //

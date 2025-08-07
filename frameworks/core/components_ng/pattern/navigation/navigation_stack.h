@@ -276,6 +276,11 @@ public:
 
     virtual void CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo) {}
 
+    virtual bool CreateHomeDestination(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
+    {
+        return false;
+    }
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

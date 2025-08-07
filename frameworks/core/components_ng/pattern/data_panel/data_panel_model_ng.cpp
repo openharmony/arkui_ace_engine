@@ -17,7 +17,6 @@
 
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -57,6 +56,11 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
     if (dataPanelType != TYPE_CYCLE) {
         SetDefaultBorderRadius();
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, false);
+    }
 }
 
 void DataPanelModelNG::SetEffect(bool isCloseEffect)
@@ -70,6 +74,99 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    std::string key = "dataPanel.ValueColors";
+    pattern->RemoveResObj(key);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [valueColors, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (!paintProperty->GetValueColorsSetByUser().value_or(false)) {
+            return;
+        }
+        for (auto& gradient : const_cast<std::vector<Gradient>&>(valueColors)) {
+            gradient.ReloadResources();
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors);
+}
+
+void DataPanelModelNG::SetTrackBackground(const Color& trackBackgroundColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true);
+}
+
+void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
+{
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true);
+}
+
+void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    std::string key = "dataPanel.ShadowOption";
+    pattern->RemoveResObj(key);
+    auto&& updateFunc = [shadowOption, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        DataPanelShadow& shadowValue = const_cast<DataPanelShadow&>(shadowOption);
+        shadowValue.ReloadResources();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowValue, frameNode);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption);
+}
+
+void DataPanelModelNG::SetCloseEffect(FrameNode* frameNode, bool isClose)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Effect, !isClose, frameNode);
+}
+
+void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true, frameNode);
+}
+
+void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true, frameNode);
+}
+
+void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [shadowOption, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        DataPanelShadow& shadowValue = const_cast<DataPanelShadow&>(shadowOption);
+        shadowValue.ReloadResources();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowValue, frameNode);
+    };
+    pattern->AddResObj("dataPanel.ShadowOption", resObj, std::move(updateFunc));
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption, frameNode);
+}
+
+void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [valueColors, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
@@ -82,61 +179,6 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
         ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
     };
     pattern->AddResObj("dataPanel.ValueColors", resObj, std::move(updateFunc));
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors);
-}
-
-void DataPanelModelNG::SetTrackBackground(const Color& trackBackgroundColor)
-{
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor);
-}
-
-void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
-{
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth);
-}
-
-void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    auto&& updateFunc = [shadowOption, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-        auto frameNode = weak.Upgrade();
-        if (!frameNode) {
-            return;
-        }
-        DataPanelShadow& shadowValue = const_cast<DataPanelShadow&>(shadowOption);
-        shadowValue.ReloadResources();
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowValue, frameNode);
-    };
-    pattern->AddResObj("dataPanel.ShadowOption", resObj, std::move(updateFunc));
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption);
-}
-
-void DataPanelModelNG::SetCloseEffect(FrameNode* frameNode, bool isClose)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Effect, !isClose, frameNode);
-}
-
-void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor, frameNode);
-}
-
-void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth, frameNode);
-}
-
-void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption, frameNode);
-}
-
-void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
-{
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
 }
 
@@ -151,32 +193,30 @@ void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCal
 void HandleTrackBackgroundColor(
     const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
 {
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
-        std::string color = pattern->GetResCacheMapByKey(key);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color result;
-        if (color.empty()) {
-            if (ResourceParseUtils::ParseResColor(resObj, result)) {
-                pattern->AddResCache(key, result.ColorToString());
-            } else {
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto theme = pipeline->GetTheme<DataPanelTheme>();
-                CHECK_NULL_VOID(theme);
-                result = theme->GetBackgroundColor();
-            }
-        } else {
-            result = Color::ColorFromString(color);
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<DataPanelTheme>();
+            CHECK_NULL_VOID(theme);
+            result = theme->GetBackgroundColor();
         }
         pattern->UpdateTrackBackground(result, isFirstLoad);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void HandleStrokeWidth(
     const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
 {
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension result;
         if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
             pattern->UpdateStrokeWidth(result, isFirstLoad);
@@ -189,7 +229,6 @@ void HandleStrokeWidth(
             pattern->UpdateStrokeWidth(result, isFirstLoad);
         }
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -197,16 +236,25 @@ void DataPanelModelNG::CreateWithResourceObj(DataPanelResourceType jsResourceTyp
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, jsResourceType, resObj);
+}
+
+void DataPanelModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, DataPanelResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     CHECK_NULL_VOID(pattern);
+    std::string key = "dataPanel." + std::to_string(static_cast<int>(jsResourceType));
+    pattern->RemoveResObj(key);
     if (resObj) {
         switch (jsResourceType) {
             case DataPanelResourceType::TRACK_BACKGROUND_COLOR: {
-                HandleTrackBackgroundColor(resObj, pattern, "dataPanel.trackBackgroundColor");
+                HandleTrackBackgroundColor(resObj, pattern, key);
                 break;
             }
             case DataPanelResourceType::STROKE_WIDTH: {
-                HandleStrokeWidth(resObj, pattern, "dataPanel.StrokeWidth");
+                HandleStrokeWidth(resObj, pattern, key);
                 break;
             }
             default:
@@ -215,4 +263,10 @@ void DataPanelModelNG::CreateWithResourceObj(DataPanelResourceType jsResourceTyp
     }
 }
 
+void DataPanelModelNG::SetValueColorsSetByUser(bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, value);
+    }
+}
 } // namespace OHOS::Ace::NG

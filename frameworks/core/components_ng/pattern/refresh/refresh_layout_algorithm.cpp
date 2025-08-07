@@ -32,8 +32,9 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
     int32_t index = 0;
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (!Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+    const auto& childlist = layoutWrapper->GetAllChildrenWithBuild();
+    for (auto&& child : childlist) {
+        if (!isHighVersion_) {
             child->Measure(layoutConstraint);
             ++index;
             continue;
@@ -56,7 +57,7 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutConstraint);
         ++index;
     }
-    PerformMeasureSelf(layoutWrapper);
+    PerformMeasureSelfWithChildList(layoutWrapper, childlist);
 }
 
 OptionalSizeF RefreshLayoutAlgorithm::CalculateBuilderSize(
@@ -88,15 +89,6 @@ OptionalSizeF RefreshLayoutAlgorithm::CalculateBuilderSize(
 void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (!child) {
-            continue;
-        }
-        child->Layout();
-    }
 }
 
 // Called to perform layout render node and child.
@@ -112,10 +104,6 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<RefreshPattern>();
-    CHECK_NULL_VOID(pattern);
     // Update child position.
     // if customBuilder exist, customBuilder is first child
     int32_t index = 0;
@@ -127,7 +115,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         }
         auto paddingOffsetChild = paddingOffset;
         if (HasCustomBuilderIndex()) {
-            if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
+            if (isHighVersion_) {
                 UpdateChildPosition(layoutWrapper, index, paddingOffsetChild);
             } else if (index == customBuilderIndex_.value_or(0)) {
                 paddingOffsetChild += OffsetF(0.0f, customBuilderOffset_);
@@ -149,6 +137,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
             Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), Alignment::TOP_CENTER) +
             paddingOffsetChild;
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        child->Layout();
         index++;
     }
 }

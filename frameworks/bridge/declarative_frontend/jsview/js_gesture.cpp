@@ -359,7 +359,7 @@ napi_value GetIteratorNext(const napi_env env, napi_value iterator, napi_value f
     return next;
 }
 
-napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMap& distanceMap)
+napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMapDimension& distanceMap)
 {
     napi_value emptyValue = nullptr;
     auto engine = EngineHelper::GetCurrentEngine();
@@ -404,19 +404,19 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         SourceTool st = static_cast<SourceTool>(sourceTool);
         if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distance, 0.0)) {
             Dimension dimension = Dimension(distance, DimensionUnit::VP);
-            distanceMap[st] = dimension.ConvertToPx();
+            distanceMap[st] = dimension;
         }
     }
     return next;
 }
 
-void JSPanGesture::ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& distanceMap)
+void JSPanGesture::ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMapDimension& distanceMap)
 {
     JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
     JSRef<JSVal> jsDistanceMap = obj->GetProperty(GESTURE_DISTANCE_MAP);
     if (jsDistanceMap->IsObject()) {
-        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() }, {
-            SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE }, {
+            SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
         ParsePanDistanceMap(jsDistanceMap, distanceMap);
         return;
     }
@@ -424,12 +424,12 @@ void JSPanGesture::ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& 
         double distanceNumber = distance->ToNumber<double>();
         if (!LessNotEqual(distanceNumber, 0.0)) {
             Dimension dimension = Dimension(distanceNumber, DimensionUnit::VP);
-            distanceMap[SourceTool::UNKNOWN] = dimension.ConvertToPx();
+            distanceMap[SourceTool::UNKNOWN] = dimension;
         } else {
-            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE;
         }
     } else {
-        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE;
     }
 }
 
@@ -438,9 +438,9 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     bool isLimitFingerCount = false;
     PanDirection panDirection;
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE } };
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE;
         PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
         return;
     }
@@ -754,8 +754,8 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     bool isLimitFingerCount = false;
     PanDirection panDirection;
-    PanDistanceMap distanceMap;
-    distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    PanDistanceMapDimension distanceMap;
+    distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE;
 
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -771,13 +771,12 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         if (distance->IsNumber()) {
             double distanceNumber = distance->ToNumber<double>();
             if (!LessNotEqual(distanceNumber, 0.0)) {
-                Dimension dimension = Dimension(distanceNumber, DimensionUnit::VP);
-                distanceMap[SourceTool::UNKNOWN] = dimension.ConvertToPx();
+                distanceMap[SourceTool::UNKNOWN] = Dimension(distanceNumber, DimensionUnit::VP);
             } else {
-                distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+                distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE;
             }
         } else {
-            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE;
         }
         if (directionNum->IsNumber()) {
             uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -792,7 +791,7 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
     }
     option->SetDirection(panDirection);
     option->SetDistanceMap(distanceMap);
-    option->SetDistance(distanceMap[SourceTool::UNKNOWN]);
+    option->SetDistance(distanceMap[SourceTool::UNKNOWN].ConvertToPx());
     option->SetFingers(fingersNum);
     option->SetIsLimitFingerCount(isLimitFingerCount);
 

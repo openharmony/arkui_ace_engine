@@ -18,10 +18,14 @@
 #include <ani.h>
 
 #include "auto_fill_manager.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
+#include "if_system_ability_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "iservice_registry.h"
 #include "scene_board_judgement.h"
 #include "ui/rs_surface_node.h"
 #include "ui_extension_context.h"
+#include "system_ability_definition.h"
 #include "wm_common.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -41,6 +45,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
+#include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/card_frontend/card_frontend.h"
@@ -71,9 +76,8 @@
 
 #include "base/ressched/ressched_report.h"
 
-#ifdef ACE_ENABLE_VK
 #include "accessibility_config.h"
-#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -239,6 +243,18 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     } else if (abilityInfo) {
         bundleName = abilityInfo->bundleName;
         moduleName = abilityInfo->moduleName;
+    } else {
+        auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_NULL_VOID(systemAbilityMgr);
+        auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHECK_NULL_VOID(bundleObj);
+        auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+        CHECK_NULL_VOID(bundleMgrProxy);
+        AppExecFwk::BundleInfo bundleInfo;
+        bundleMgrProxy->GetBundleInfoForSelf(
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        bundleName = bundleInfo.name;
+        moduleName = bundleInfo.entryModuleName;                
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
@@ -368,9 +384,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -393,9 +407,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 // for DynamicComponent
@@ -419,9 +431,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -438,9 +448,7 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
-#ifdef ACE_ENABLE_VK
     UnsubscribeHighContrastChange();
-#endif
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -473,7 +481,9 @@ void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
     // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ) {
+    // For STATIC_HYBRID_DYNAMIC and DYNAMIC_HYBRID_STATIC frontend, also initialize after AttachView
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ &&
+        type_ != FrontendType::STATIC_HYBRID_DYNAMIC && type_ != FrontendType::DYNAMIC_HYBRID_STATIC) {
         InitializeFrontend();
     }
 }
@@ -642,9 +652,17 @@ void AceContainer::InitializeFrontend()
             return;
         }
     } else if (type_ == FrontendType::ARK_TS) {
+        LOGI("Init ARK_TS Frontend");
         frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+    } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        // initialize after AttachView
+        LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");
+        InitializeStaticHybridDynamic(aceAbility);
+    } else if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
+        LOGI("Init DYNAMIC_HYBRID_STATIC Frontend");
+        InitializeDynamicHybridStatic(aceAbility);
     } else {
-        LOGE("Frontend type not supported");
+        LOGE("Frontend type not supported, error type: %{public}i", type_);
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
         return;
     }
@@ -655,6 +673,9 @@ void AceContainer::InitializeFrontend()
         frontend_->DisallowPopLastPage();
     }
     frontend_->Initialize(type_, taskExecutor_);
+    if (subFrontend_) {
+        subFrontend_->Initialize(type_, taskExecutor_);
+    }
 }
 
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
@@ -716,6 +737,21 @@ std::shared_ptr<void> AceContainer::SerializeValue(
         declarativeFrontend->GetJsEngine());
     CHECK_NULL_RETURN(jsEngine, nullptr);
     return jsEngine->SerializeValue(jsValue);
+}
+
+void AceContainer::TriggerModuleSerializer()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->TriggerModuleSerializer();
 }
 
 void AceContainer::SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder)
@@ -1160,8 +1196,13 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
-    bool isDebugAcc = (SystemProperties::GetTouchAccelarate() == static_cast<int32_t>(TouchPassMode::ACCELERATE));
-    pipelineContext_->SetTouchAccelarate((touchPassMode == TouchPassMode::ACCELERATE) || isDebugAcc);
+    int32_t debugMode = SystemProperties::GetTouchAccelarate();
+    if (debugMode != static_cast<int32_t>(touchPassMode)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
+        touchPassMode = static_cast<TouchPassMode>(debugMode);
+        AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
+    }
+    pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
                                     const std::function<void()>& markProcess,
@@ -1269,14 +1310,7 @@ void AceContainer::InitializeCallback()
                 RES_TYPE_CROWN_ROTATION_STATUS, static_cast<int32_t>(event.action), mapPayload);
         }
         ContainerScope scope(id);
-        bool result = false;
-        auto crownTask = [context, event, &result, markProcess, id]() {
-            ContainerScope scope(id);
-            result = context->OnNonPointerEvent(event);
-            CHECK_NULL_VOID(markProcess);
-            markProcess();
-        };
-        auto asyncCrownTask = [context, event, markProcess, id]() {
+        auto crownTask = [context, event, markProcess, id]() {
             ContainerScope scope(id);
             context->OnNonPointerEvent(event);
             CHECK_NULL_VOID(markProcess);
@@ -1285,11 +1319,10 @@ void AceContainer::InitializeCallback()
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
             crownTask();
-            return result;
+            return;
         }
         context->GetTaskExecutor()->PostTask(
-            asyncCrownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
-        return result;
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
@@ -1517,6 +1550,8 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     container->SetUIWindowInner(uiWindow);
     if (!container->IsSceneBoardWindow()) {
         ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
+    } else {
+        OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(true);
     }
 }
 
@@ -2434,6 +2469,11 @@ void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS:
             ReleaseStorageReference(sharedRuntime, storage);
             return;
         }
+#ifdef ACE_STATIC
+        if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<ani_ref>()) {
+            arktsFrontend->SetAniContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
+        }
+#endif
         arktsFrontend->RegisterLocalStorage(id, storage);
     }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
@@ -2488,6 +2528,12 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
+void AceContainer::SetIsFormRender(bool isFormRender)
+{
+    OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(isFormRender);
+    isFormRender_ = isFormRender;
+}
+
 void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
     float height, uint32_t windowId, UIEnvCallback callback)
 {
@@ -2514,7 +2560,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
-    auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>();
+    auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>(taskExecutor_);
 #ifndef NG_BUILD
     if (useNewPipeline_) {
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
@@ -2696,6 +2742,42 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         fontManager->SetStartAbilityOnJumpBrowserHandler(startAbilityOnJumpBrowserHandler);
     }
 
+    auto&& openLinkOnMapSearchHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), address]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnOpenLinkOnMapSearch(address);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleOpenLinkOnMapSearch");
+    };
+    if (fontManager) {
+        fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
+    }
+
+    auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](
+                                        const std::map<std::string, std::string>& params) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), params]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnStartAbilityOnCalendar(params);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbilityOnCalendar");
+    };
+    if (fontManager) {
+        fontManager->SetStartAbilityOnCalendar(startAbilityOnCalendar);
+    }
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
@@ -3007,6 +3089,17 @@ void AceContainer::InitWindowCallback()
             return container->GetTargetViewportConfig(
                 orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
         });
+    windowManager->SetIsSetOrientationNeededCallback(
+        [window = uiWindow_](std::optional<Orientation> orientation) -> bool {
+            auto ori = Rosen::Orientation::INVALID;
+            if (orientation.has_value()) {
+                ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation.value()));
+            }
+            bool need = window->isNeededForciblySetOrientation(ori);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "isNeededForciblySetOrientation ori:%{public}d, need:%{public}d",
+                static_cast<int32_t>(ori), need);
+            return need;
+        });
     windowManager->SetSetRequestedOrientationCallback(
         [window = uiWindow_](std::optional<Orientation> orientation, bool needAnimation) {
             auto ori = Rosen::Orientation::INVALID;
@@ -3040,11 +3133,35 @@ void AceContainer::InitWindowCallback()
         window->UseImplicitAnimation(useImplicit);
     });
 
+    windowManager->SetHeightBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> HeightBreakpoint {
+        CHECK_NULL_RETURN(window, HeightBreakpoint::HEIGHT_SM);
+        HeightLayoutBreakPoint layoutHeightBreakpoints =
+            SystemProperties::GetHeightLayoutBreakpoints();
+        return window->GetHeightBreakpoint(layoutHeightBreakpoints);
+    });
+    windowManager->SetWidthBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> WidthBreakpoint {
+        CHECK_NULL_RETURN(window, WidthBreakpoint::WIDTH_SM);
+        WidthLayoutBreakPoint layoutWidthBreakpoints =
+            SystemProperties::GetWidthLayoutBreakpoints();
+        return window->GetWidthBreakpoint(layoutWidthBreakpoints);
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
         auto windowRect = window->GetRect();
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return rect;
+    });
+
+    pipelineContext_->InitGetGlobalWindowRectCallback([window = uiWindow_]() -> Rect {
+        Rect rect;
+        CHECK_NULL_RETURN(window, rect);
+        auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
+        rect.SetRect(globalDisplayWindowRect.posX_, globalDisplayWindowRect.posY_, globalDisplayWindowRect.width_,
+            globalDisplayWindowRect.height_);
         return rect;
     });
 }
@@ -3292,6 +3409,7 @@ void AceContainer::ProcessColorModeUpdate(
     configurationChange.colorModeUpdate = true;
     if (SystemProperties::ConfigChangePerform()) {
         // reread all cache color of ark theme when configuration updates
+        ContainerScope scope(instanceId_);
         NG::TokenThemeStorage::GetInstance()->CacheResetColor();
     } else {
         // clear cache of ark theme instances when configuration updates
@@ -3349,6 +3467,17 @@ void  AceContainer::OnFrontUpdated(
     }
 }
 
+void AceContainer::UpdateSubContainerDensity(ResourceConfiguration& resConfig)
+{
+    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
+        auto parentContainer = Platform::AceContainer::GetContainer(GetParentId());
+        CHECK_NULL_VOID(parentContainer);
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        resConfig.SetDensity(parentPipeline->GetDensity());
+    }
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3368,23 +3497,20 @@ void AceContainer::UpdateConfiguration(
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
     }
     // The density of sub windows needs to be consistent with the main window.
-    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
-        auto parentContainer = Platform::AceContainer::GetContainer(GetParentId());
-        CHECK_NULL_VOID(parentContainer);
-        auto parentPipeline = parentContainer->GetPipelineContext();
-        CHECK_NULL_VOID(parentPipeline);
-        resConfig.SetDensity(parentPipeline->GetDensity());
-    }
+    UpdateSubContainerDensity(resConfig);
+
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     if (!abilityLevel) {
         themeManager->UpdateConfig(resConfig);
         if (SystemProperties::GetResourceDecoupling()) {
-            ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+            ResourceManager::GetInstance().UpdateResourceConfig(
+                GetBundleName(), GetModuleName(), instanceId_, resConfig, !parsedConfig.themeTag.empty());
         }
     }
     themeManager->LoadResourceThemes();
     if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
+        OnFrontUpdated(configurationChange, configuration);
         UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
         return;
     }
@@ -3423,10 +3549,49 @@ void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig,
     }
 }
 
+void AceContainer::FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange)
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    if (configurationChange.directionUpdate &&
+        (themeManager->GetResourceLimitKeys() & DIRECTION_KEY) == 0) {
+        return;
+    }
+    if (configurationChange.colorModeUpdate && !IsUseCustomBg() &&
+        !IsTransparentBg()) {
+        pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
+    }
+    pipeline->NotifyConfigurationChange();
+    pipeline->FlushReload(configurationChange);
+    if (needReloadTransition) {
+        // reload transition animation
+        pipeline->FlushReloadTransition();
+    }
+    pipeline->ChangeDarkModeBrightness();
+}
+
 void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const ConfigurationChange& configurationChange)
 {
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    if (useStageModel_) {
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition, configurationChange]() {
+                ContainerScope scope(instanceId);
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                auto frontend = container->GetFrontend();
+                if (frontend) {
+                    LOGI("AceContainer UpdateConfiguration frontend MarkNeedUpdate");
+                    frontend->FlushReload();
+                }
+                container->FlushReloadTask(needReloadTransition, configurationChange);
+                },
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+        return;
+    }
     taskExecutor->PostTask(
         [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition, configurationChange]() {
             ContainerScope scope(instanceId);
@@ -3444,25 +3609,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                     ContainerScope scope(instanceId);
                     auto container = weak.Upgrade();
                     CHECK_NULL_VOID(container);
-                    auto pipeline = container->GetPipelineContext();
-                    CHECK_NULL_VOID(pipeline);
-                    auto themeManager = pipeline->GetThemeManager();
-                    CHECK_NULL_VOID(themeManager);
-                    if (configurationChange.directionUpdate &&
-                        (themeManager->GetResourceLimitKeys() & DIRECTION_KEY) == 0) {
-                        return;
-                    }
-                    if (configurationChange.colorModeUpdate && !container->IsUseCustomBg() &&
-                        !container->IsTransparentBg()) {
-                        pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
-                    }
-                    pipeline->NotifyConfigurationChange();
-                    pipeline->FlushReload(configurationChange);
-                    if (needReloadTransition) {
-                        // reload transition animation
-                        pipeline->FlushReloadTransition();
-                    }
-                    pipeline->ChangeDarkModeBrightness();
+                    container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
         },
@@ -3852,16 +3999,26 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
-        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
-        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
-        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
+                                        ? pointerItem.GetDisplayX()
+                                        : static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = NearZero(pointerItem.GetDisplayYPos())
+                                        ? pointerItem.GetDisplayY()
+                                        : static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = NearZero(pointerItem.GetWindowXPos())
+                                       ? pointerItem.GetWindowX()
+                                       : static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = NearZero(pointerItem.GetWindowYPos())
+                                       ? pointerItem.GetWindowY()
+                                       : static_cast<float>(pointerItem.GetWindowYPos());
     } else {
         dragPointerEvent.displayX = pointerItem.GetDisplayX();
         dragPointerEvent.displayY = pointerItem.GetDisplayY();
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
@@ -3907,16 +4064,26 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         return false;
     }
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
-        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
-        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
-        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
+                                        ? pointerItem.GetDisplayX()
+                                        : static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = NearZero(pointerItem.GetDisplayYPos())
+                                        ? pointerItem.GetDisplayY()
+                                        : static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = NearZero(pointerItem.GetWindowXPos())
+                                       ? pointerItem.GetWindowX()
+                                       : static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = NearZero(pointerItem.GetWindowYPos())
+                                       ? pointerItem.GetWindowY()
+                                       : static_cast<float>(pointerItem.GetWindowYPos());
     } else {
         dragPointerEvent.displayX = pointerItem.GetDisplayX();
         dragPointerEvent.displayY = pointerItem.GetDisplayY();
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     return true;
 }
 
@@ -4234,7 +4401,8 @@ void AceContainer::UpdateResourceOrientation(int32_t orientation)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetOrientation(newOrientation);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }
     SetResourceConfiguration(resConfig);
 }
@@ -4244,8 +4412,9 @@ void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetDensity(density);
     SetResourceConfiguration(resConfig);
-    if (SystemProperties::GetResourceDecoupling() && isUpdateResConfig) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    if (SystemProperties::GetResourceDecoupling() && (isUpdateResConfig || !IsSceneBoardWindow())) {
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }
 }
 
@@ -4698,10 +4867,9 @@ bool AceContainer::SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, 
     return true;
 }
 
-#ifdef ACE_ENABLE_VK
 void AceContainer::SubscribeHighContrastChange()
 {
-    if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+    if (!Rosen::RSUIDirector::IsHybridRenderEnabled()) {
         return;
     }
     if (highContrastObserver_ != nullptr) {
@@ -4727,7 +4895,6 @@ void AceContainer::UnsubscribeHighContrastChange()
     }
     highContrastObserver_ = nullptr;
 }
-#endif
 
 void AceContainer::DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
     const std::function<void()>&& loadPageCallback)

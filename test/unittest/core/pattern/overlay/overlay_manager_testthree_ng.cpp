@@ -136,7 +136,7 @@ HWTEST_F(OverlayManagerTestThreeNg, RemoveMenuWrapperNode001, TestSize.Level1)
     ASSERT_NE(childTwo, nullptr);
     mainMenu->children_.push_back(childOne);
     mainMenu->children_.push_back(childTwo);
-    overlayManager->RemoveMenuWrapperNode(mainMenu);
+    overlayManager->RemoveMenuWrapperNode(mainMenu, pipelineContext);
     EXPECT_EQ(mainMenu->children_.size(), 1);
 }
 
@@ -296,7 +296,7 @@ HWTEST_F(OverlayManagerTestThreeNg, GetTipsStatus001, TestSize.Level1)
 
 /**
  * @tc.name: PopTipsBubble1
- * @tc.desc: Test PopTipsBubble1 function.
+ * @tc.desc: Test PopBubble function.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestThreeNg, PopTipsBubble1, TestSize.Level1)
@@ -318,7 +318,7 @@ HWTEST_F(OverlayManagerTestThreeNg, PopTipsBubble1, TestSize.Level1)
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(overlayNode, nullptr);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
-    bubblePattern->PopTipsBubble();
+    bubblePattern->PopBubble(true);
     EXPECT_EQ(overlayManager->GetTipsStatus(1), false);
 }
 } // namespace OHOS::Ace::NG

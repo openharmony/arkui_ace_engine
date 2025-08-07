@@ -955,7 +955,6 @@ bool ContainerModalToolBar::IsTragetNavigationNodeParse(const RefPtr<FrameNode>&
 void ContainerModalToolBar::ToInitNavOrSideBarNode()
 {
     auto sideBarNode = sideBarNode_.Upgrade();
-    CHECK_NULL_VOID(sideBarNode);
     if (sideBarNode) {
         auto sideBarPattern = AceType::DynamicCast<NG::SideBarContainerPattern>(sideBarNode->GetPattern());
         if (sideBarPattern) {
@@ -964,7 +963,6 @@ void ContainerModalToolBar::ToInitNavOrSideBarNode()
         }
     }
     auto navigationNode = navigationNode_.Upgrade();
-    CHECK_NULL_VOID(navigationNode);
     if (navigationNode) {
         auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode->GetPattern());
         if (navigationPattern) {

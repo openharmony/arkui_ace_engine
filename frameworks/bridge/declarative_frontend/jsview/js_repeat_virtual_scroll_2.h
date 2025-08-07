@@ -27,7 +27,6 @@ public:
 
     static void Create(const JSCallbackInfo& info);
 
-    static void IsInAnimation(const JSCallbackInfo& info);
     static void RemoveNode(const JSCallbackInfo& info);
     static void SetInvalid(const JSCallbackInfo& info);
     static void RequestContainerReLayout(const JSCallbackInfo& info);

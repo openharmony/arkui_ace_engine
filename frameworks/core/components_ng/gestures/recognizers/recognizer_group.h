@@ -147,6 +147,8 @@ public:
         disposal_ = GestureDisposal::NONE;
     }
 
+    void ForceCleanRecognizerWithGroup() override;
+
     void CleanRecognizerState() override;
 
     void SetIsPostEventResultRecursively(bool isPostEventResult)

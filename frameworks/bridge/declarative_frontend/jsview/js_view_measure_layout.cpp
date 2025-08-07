@@ -254,7 +254,10 @@ void FillSubComponentProperty(
 {
     info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
     info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
-    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        info->SetPropertyObject("constraint", GenConstraint(layoutProperty->GetLayoutConstraint()));
+    }
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
 }

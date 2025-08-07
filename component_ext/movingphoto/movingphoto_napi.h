@@ -22,7 +22,10 @@
 namespace OHOS::Ace {
 napi_value JsCreate(napi_env env, napi_callback_info info);
 napi_value SetWaterMask(napi_env env, napi_value object);
+napi_value SetDynamicRangeMode(napi_env env, napi_value object);
+napi_value SetMovingPhotoFormat(napi_env env, napi_value object);
 napi_value JsMuted(napi_env env, napi_callback_info info);
+napi_value JsHdrBrightness(napi_env env, napi_callback_info info);
 napi_value JsObjectFit(napi_env env, napi_callback_info info);
 napi_value JsOnComplete(napi_env env, napi_callback_info info);
 napi_value JsOnStart(napi_env env, napi_callback_info info);
@@ -30,8 +33,15 @@ napi_value JsOnStop(napi_env env, napi_callback_info info);
 napi_value JsOnPause(napi_env env, napi_callback_info info);
 napi_value JsOnFinish(napi_env env, napi_callback_info info);
 napi_value JsOnError(napi_env env, napi_callback_info info);
+napi_value JsOnPrepared(napi_env env, napi_callback_info info);
 napi_value StartPlayback(napi_env env, napi_callback_info info);
 napi_value StopPlayback(napi_env env, napi_callback_info info);
+napi_value PausePlayback(napi_env env, napi_callback_info info);
+napi_value Reset(napi_env env, napi_callback_info info);
+napi_value Restart(napi_env env, napi_callback_info info);
+napi_value EnableTransition(napi_env env, napi_callback_info info);
+napi_value SetPlaybackPeriod(napi_env env, napi_callback_info info);
+napi_value EnableAutoPlay(napi_env env, napi_callback_info info);
 napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info);
 napi_value JsAutoPlay(napi_env env, napi_callback_info info);
 napi_value JsRepeatPlay(napi_env env, napi_callback_info info);

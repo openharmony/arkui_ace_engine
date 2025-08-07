@@ -433,13 +433,15 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     std::map<int32_t, RefPtr<UINode>> children;
     caches_.ForEachL1IndexUINode(children);
     for (const auto& [index, child] : children) {
-        const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
+        if (child) {
+            const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
+        }
         children_.emplace_back(child);
     }
     return children_;
 }
 
-const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildrenForInspector() const
+const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildrenForInspector(bool needCacheNode) const
 {
     return children_;
 }

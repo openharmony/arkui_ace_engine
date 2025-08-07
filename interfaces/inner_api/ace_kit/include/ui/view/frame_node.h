@@ -18,15 +18,19 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 #include <optional>
 #include <string>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/geometry/ng/offset_t.h"
+#include "ui/base/macros.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
 #include "ui/properties/gradient_property.h"
 #include "ui/properties/ng/calc_length.h"
 #include "ui/resource/resource_configuration.h"
+#include "ui/view/ai_caller_helper.h"
 #include "ui/view/layout/layout_info.h"
 
 typedef struct _ArkUINode* ArkUINodeHandle;
@@ -93,12 +97,16 @@ public:
     virtual void SetLinearGradient(const NG::Gradient& gradient) = 0;
     virtual void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) = 0;
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) = 0;
+    virtual void ResetCompositingFilter() = 0;
+    virtual bool NeedAvoidContainerModal() = 0;
+    virtual NG::OffsetF GetParentGlobalOffsetDuringLayout() = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
     virtual void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) = 0;
     virtual int32_t GetMeasureWidth() = 0;
     virtual int32_t GetMeasureHeight() = 0;
     virtual NodeHandle GetParentHandle() = 0;
+    virtual void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper) = 0;
 };
 } // namespace OHOS::Ace::Kit
 

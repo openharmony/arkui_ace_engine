@@ -40,6 +40,21 @@ public:
     {
         return false;
     }
+    
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -99,6 +114,8 @@ public:
     {
         needInitRealSideBarWidth_ = value;
     }
+
+    void OnColorConfigurationUpdate() override;
 
     void SetControlButtonClick(bool value)
     {

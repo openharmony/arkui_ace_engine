@@ -27,8 +27,8 @@ export interface MenuAttrOptions {
   border?: BorderOptions,
 }
 //图标资源
-export let startIcon: Resource = $r('app.media.startIcon')
-export let endIcon: Resource = $r('app.media.startIcon')
+export let startIcon: Resource = $r('app.media.app_icon')
+export let endIcon: Resource = $r('app.media.app_icon')
 export let symbolStartIcon: SymbolGlyphModifier = new SymbolGlyphModifier($r('sys.symbol.checkmark_square_on_square_fill'))
   .fontSize('30')
   .fontColor([Color.Blue, Color.Orange])

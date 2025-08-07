@@ -35,6 +35,7 @@ private:
     static void OnMenuClick(const JSCallbackInfo& info);
     static void OnCloseClick(const JSCallbackInfo& info);
     static void RequestAtomicServiceTerminate(const JSCallbackInfo& info);
+    static void SetOnBackPressedConsumed(const JSCallbackInfo& info);
     static void OnDidBuild(const JSCallbackInfo& info);
     static void OnCreateServicePanel(const JSCallbackInfo& info);
     static std::string GetStringValueFromJSObject(const JSRef<JSObject>& object, const char* prop);

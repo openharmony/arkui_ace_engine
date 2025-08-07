@@ -46,7 +46,7 @@ class stateMgmtConsole {
     // aceConsole.error(...args)
   }
   public static applicationError(...args: any): void {
-    aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR: `, ...args);
+    aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR:`, ...args);
   }
 
   public static applicationWarn(...args: any): void {

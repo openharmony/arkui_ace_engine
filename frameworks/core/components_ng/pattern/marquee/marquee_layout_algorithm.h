@@ -15,12 +15,19 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MARQUEE_MARQUEE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MARQUEE_MARQUEE_LAYOUT_ALGORITHM_H
+#include "ui/base/geometry/ng/size_t.h"
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
+struct MeasureCalculationContext {
+    LayoutConstraintF layoutConstraint;
+    RefPtr<LayoutProperty> layoutProperty = nullptr;
+    OptionalSizeF optionalSize;
+};
+
 class ACE_EXPORT MarqueeLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MarqueeLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -32,6 +39,14 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureWithLayoutPolicy(
+        LayoutWrapper* marqueeLayoutWrapper, const RefPtr<LayoutWrapper>& textLayoutWrapper, OptionalSizeF& frameSize);
+    void HandleWidthConstraint(
+        LayoutCalPolicy policy, float childDimensionSize, MeasureCalculationContext& context);
+    void HandleHeightConstraint(
+        LayoutCalPolicy policy, float childDimensionSize, MeasureCalculationContext& context);
+    OptionalSizeF GetMeasureAdaptiveHeight(
+        LayoutWrapper* marqueeLayoutWrapper, const RefPtr<LayoutWrapper>& textLayoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -164,11 +164,6 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
-        auto manager = weakManager.Upgrade();
-        CHECK_NULL_VOID(manager);
-        if (!manager->IsMenuShow()) {
-            return;
-        }
         owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     });
 }
@@ -217,6 +212,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
     overlayInfo.menuCallback.onAIMenuOption =
         MakeMenuCallbackWithInfo(OptionMenuActionId::AI_MENU_OPTION, overlayInfo);
+    overlayInfo.menuCallback.onAskCelia = MakeMenuCallback(OptionMenuActionId::ASK_CELIA, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
     RegisterTouchCallback(overlayInfo);
     RegisterHandleCallback(overlayInfo);
@@ -485,7 +481,8 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             menuPattern->UpdateSelectMenuInfo(menuInfo);
         } else if (
             (dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM ||
-            (dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM) { // Diff specified flags
+            (dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM ||
+            (dirty & DIRTY_ASK_CELIA) == DIRTY_ASK_CELIA) {
             auto localReplacedMenuInfo = menuPattern->GetSelectMenuInfo();
             SelectMenuInfo menuInfo;
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
@@ -495,6 +492,9 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             }
             if ((dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM) {
                 localReplacedMenuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
+            }
+            if ((dirty & DIRTY_ASK_CELIA) == DIRTY_ASK_CELIA) {
+                localReplacedMenuInfo.isAskCeliaEnabled = menuInfo.isAskCeliaEnabled;
             }
             localReplacedMenuInfo.hasOnPrepareMenuCallback = menuInfo.hasOnPrepareMenuCallback;
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update select all menu: %{public}s - %{public}s",
@@ -801,7 +801,7 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
     auto owner = selectOverlayHolder_->GetOwner();
-    if (owner) {
+    if (owner && IsMenuShow()) {
         auto ownerTag = owner->GetTag();
         if (ownerTag != V2::RICH_EDITOR_ETS_TAG ||
             (reason != CloseReason::CLOSE_REASON_SELECT_ALL && reason != CloseReason::CLOSE_REASON_BY_RECREATE)) {
@@ -858,7 +858,6 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
     parentNode->RemoveChild(overlay);
     parentNode->MarkNeedSyncRenderTree();
     parentNode->RebuildRenderContextTree();
-    overlay->SetInDestroying();
     if (pattern && pattern->GetIsMenuShowInSubWindow()) {
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(pattern->GetContainerId(), overlay->GetId());
         SubwindowManager::GetInstance()->HideSelectOverlay(pattern->GetContainerId());
@@ -927,6 +926,11 @@ void SelectContentOverlayManager::ToggleOptionMenu()
     CHECK_NULL_VOID(shareOverlayInfo_);
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
+    SelectMenuInfo menuInfo;
+    selectOverlayHolder_->IsAIMenuOptionChanged(menuInfo);
+    shareOverlayInfo_->menuInfo.isShowAIMenuOptionChanged = menuInfo.isShowAIMenuOptionChanged;
+    shareOverlayInfo_->menuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
+    shareOverlayInfo_->menuInfo.isAskCeliaEnabled = menuInfo.isAskCeliaEnabled;
     pattern->UpdateMenuIsShow(!shareOverlayInfo_->menuInfo.menuIsShow);
 }
 
@@ -1029,7 +1033,7 @@ void SelectContentOverlayManager::HandleGlobalEvent(const TouchEvent& touchEvent
         HandleSelectionEvent(point, touchEvent);
         if (selectOverlayHolder_ && selectOverlayHolder_->GetCallback() && selectOverlayHolder_->GetOwner()) {
             auto localPoint = point;
-            ConvertPointRelativeToNode(selectOverlayHolder_->GetOwner(), localPoint);
+            ConvertPointRelativeToNode(selectOverlayHolder_->GetOwner(), localPoint, touchEvent.passThrough);
             selectOverlayHolder_->GetCallback()->OnHandleGlobalEvent(point, localPoint, touchEvent);
         }
     }
@@ -1090,7 +1094,7 @@ void SelectContentOverlayManager::HandleSelectionEvent(const PointF& point, cons
     CHECK_NULL_VOID(holdSelectionInfo_->checkTouchInArea);
     CHECK_NULL_VOID(holdSelectionInfo_->resetSelectionCallback);
     if (holdSelectionInfo_->IsAcceptEvent(rawTouchEvent.sourceType, rawTouchEvent.type) &&
-        !holdSelectionInfo_->checkTouchInArea(point) && !IsOpen()) {
+        !holdSelectionInfo_->checkTouchInArea(point, rawTouchEvent.passThrough) && !IsOpen()) {
         ResetSelectionRect();
     }
 }
@@ -1160,10 +1164,22 @@ float SelectContentOverlayManager::GetHandleDiameter()
     return SelectOverlayPattern::GetHandleDiameter();
 }
 
-void SelectContentOverlayManager::ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point)
+void SelectContentOverlayManager::ConvertPointRelativeToNode(
+    const RefPtr<FrameNode>& node, PointF& point, bool passThrough)
 {
     CHECK_NULL_VOID(node);
-    auto rootNode = GetSelectOverlayRoot();
+    RefPtr<FrameNode> rootNode;
+    // for post mouse event, need change the root node to the post node
+    if (passThrough) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto postEventManager = pipeline->GetPostEventManager();
+            rootNode = postEventManager ? postEventManager->GetPostTargetNode() : nullptr;
+        }
+    }
+    if (!rootNode) {
+        rootNode = GetSelectOverlayRoot();
+    }
     CHECK_NULL_VOID(rootNode);
     std::stack<RefPtr<FrameNode>> nodeStack;
     auto parent = node;

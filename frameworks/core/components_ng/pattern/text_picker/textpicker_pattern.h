@@ -49,6 +49,8 @@ public:
 
     ~TextPickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -108,7 +110,7 @@ public:
 
     void SetDefaultPickerItemHeight();
 
-    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes();
+    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes() const;
 
     RefPtr<FrameNode> GetColumnNode();
 
@@ -626,7 +628,7 @@ private:
     void AdjustFocusBoxOffset(float& centerX, float& centerY);
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
     void UpdateTextStyleCommon(
@@ -634,7 +636,9 @@ private:
         const TextStyle& defaultTextStyle,
         std::function<void(const Color&)> updateTextColorFunc,
         std::function<void(const Dimension&)> updateFontSizeFunc,
-        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc,
+        std::function<void(const Dimension&)> updateMinFontSizeFunc,
+        std::function<void(const Dimension&)> updateMaxFontSizeFunc);
 
     void ParseRangeResult(NG::TextCascadePickerOptions& option);
     void GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,

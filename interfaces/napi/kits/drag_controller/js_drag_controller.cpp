@@ -24,6 +24,7 @@
 #include "napi/native_common.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_value.h"
+#include "core/common/udmf/data_load_params.h"
 
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "jsnapi.h"
@@ -97,6 +98,7 @@ struct DragControllerAsyncCtx {
     napi_value customBuilder;
     std::vector<napi_ref> customBuilderList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
+    RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -634,13 +636,20 @@ void HandleSuccess(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragN
     }
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     if (dragStatus == DragStatus::ENDED) {
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->ResetDragging();
+        taskExecutor->PostTask(
+            [asyncCtx, dragNotifyMsg, dragStatus]() {
+                CHECK_NULL_VOID(asyncCtx);
+                GetCallBackDataForJs(asyncCtx, dragNotifyMsg, dragStatus);
+            },
+            TaskExecutor::TaskType::JS, "ArkUIDragHandleSuccess", PriorityType::VIP);
+        return;
     }
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
         [asyncCtx, dragNotifyMsg, dragStatus]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -686,12 +695,12 @@ void HandleDragEnd(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragN
     pipelineContext->ResetDragging();
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
+    taskExecutor->PostTask(
         [asyncCtx, dragNotifyMsg]() {
             CHECK_NULL_VOID(asyncCtx);
             GetCallBackDataForJs(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
         },
-        TaskExecutor::TaskType::JS, "ArkUIDragHandleDragEnd");
+        TaskExecutor::TaskType::JS, "ArkUIDragHandleDragEnd", PriorityType::VIP);
 }
 
 void HandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
@@ -780,21 +789,31 @@ bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 }
 
 int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& udKey,
-    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
+    DragSummaryInfo& dragSummaryInfo)
 {
     int32_t dataSize = 1;
+    int32_t ret = 1;
     CHECK_NULL_RETURN(asyncCtx, dataSize);
+    if (asyncCtx->dataLoadParams) {
+        ret = UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
+        }
+        auto recodeCount = asyncCtx->dataLoadParams->GetRecordCount();
+        dataSize = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
+    }
     if (asyncCtx->unifiedData) {
-        int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
+        ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
+    }
+    if (ret == 0) {
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
+        }
     }
     return dataSize;
 }
@@ -829,9 +848,8 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         return false;
     }
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
-    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
@@ -846,7 +864,9 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
-        asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary, false, detailedSummary };
+        asyncCtx->dragPointerEvent.displayId, windowId, true, false, dragSummaryInfo.summary, false,
+        dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
+        dragSummaryInfo.totalSize };
     return true;
 }
 
@@ -941,7 +961,9 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(pipeline, false);
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(dragNodePipeline, false);
-    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
+    auto scaleData =
+        NG::DragControllerFuncWrapper::GetScaleInfo(asyncCtx->instanceId, pixelMap->GetWidth(), pixelMap->GetHeight());
+    CHECK_NULL_RETURN(scaleData, false);
     auto scale = asyncCtx->windowScale;
     CHECK_NULL_RETURN(pixelMap, false);
     RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
@@ -953,10 +975,10 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     data = { false, asyncCtx->badgeNumber, 1.0f, false,
         NG::OffsetF(), NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(asyncCtx->instanceId), refPixelMap };
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
-    if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+    if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         auto overlayManager = dragNodePipeline->GetOverlayManager();
         auto imageNode = overlayManager->GetPixelMapContentNode();
-        scale = minScaleWidth / pixelMap->GetWidth() * asyncCtx->windowScale;
+        scale = scaleData->scale * asyncCtx->windowScale;
         data.previewScale = scale;
         NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
         CHECK_NULL_RETURN(imageNode, false);
@@ -1138,28 +1160,6 @@ void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     }
 }
 
-void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSize, std::string& udKey,
-    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
-{
-    CHECK_NULL_VOID(asyncCtx);
-    if (asyncCtx->unifiedData) {
-        int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
-        if (ret != 0) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
-        }
-        dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
-    }
-    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
-    if (badgeNumber.has_value()) {
-        dataSize = badgeNumber.value();
-    }
-}
-
 bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     Msdp::DeviceStatus::DragData& dragData, Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 {
@@ -1167,9 +1167,12 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(asyncCtx->pixelMap, false);
     int32_t dataSize = 1;
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
-    GetParams(asyncCtx, dataSize, udKey, summary, detailedSummary);
+    DragSummaryInfo dragSummaryInfo;
+    dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
+    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        dataSize = badgeNumber.value();
+    }
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
@@ -1188,7 +1191,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         arkExtraInfoJson->ToString(), asyncCtx->dragPointerEvent.sourceType, dataSize,
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->dragPointerEvent.displayX,
         asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, summary, false, detailedSummary };
+        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize };
     return true;
 }
 
@@ -1263,6 +1267,22 @@ bool ParseTouchPoint(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_valu
         return false;
     }
     return true;
+}
+
+bool ParseDataLoadParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_valuetype& valueType)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_value dataLoadParamsNApi = nullptr;
+    napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "dataLoadParams", &dataLoadParamsNApi);
+    napi_typeof(asyncCtx->env, dataLoadParamsNApi, &valueType);
+    if (valueType == napi_object) {
+        auto dataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(asyncCtx->env, dataLoadParamsNApi);
+        CHECK_NULL_RETURN(dataLoadParams, false);
+        asyncCtx->dataLoadParams = dataLoadParams;
+        asyncCtx->unifiedData = nullptr;
+        return true;
+    }
+    return false;
 }
 
 bool ParseDragItemInfoParam(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& errMsg)
@@ -1746,6 +1766,8 @@ bool ParseDragInfoParam(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::s
 
     GetCurrentDipScale(asyncCtx);
     asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
+
+    ParseDataLoadParams(asyncCtx, valueType);
     return true;
 }
 

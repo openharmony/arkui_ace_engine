@@ -121,8 +121,7 @@ public:
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter,
         const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
-    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount = 0,
-        bool isBindIndicator = false);
+    void PaintBackground(DrawingContext& context, ContentProperty& contentProperty);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property

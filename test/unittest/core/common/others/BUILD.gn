@@ -14,5 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("thread_checker_test") {
+  type = "new"
+  module_output = "common"
   sources = [ "thread_checker_test.cpp" ]
 }

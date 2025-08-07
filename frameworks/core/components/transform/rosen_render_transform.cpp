@@ -16,6 +16,7 @@
 #include "core/components/transform/rosen_render_transform.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -168,8 +169,8 @@ bool RosenRenderTransform::CheckNeedPaint() const
         rotateX = atan2(transform_[9], transform_[10]);
         rotateY = atan2(-transform_[8], sy);
     }
-    rotateX = std::abs(rotateX * (180.0f / M_PI));
-    rotateY = std::abs(rotateY * (180.0f / M_PI));
+    rotateX = std::abs(rotateX * (180.0f / ACE_PI));
+    rotateY = std::abs(rotateY * (180.0f / ACE_PI));
     if (NearEqual(rotateX, 90.0, 1e-5) || NearEqual(rotateY, 90.0, 1e-5)) {
         return false; // If RotateX or RotateY is 90 deg, not need to paint.
     }

@@ -489,6 +489,37 @@ class ArkPrefixOrSuffix {
   }
 }
 
+class ArkSliderStepOptions {
+  showSteps: boolean;
+  stepOptions?: SliderShowStepOptions;
+
+  constructor(value: boolean, options?: SliderShowStepOptions) {
+    this.showSteps = value;
+    this.stepOptions = options;
+  }
+
+  isEqual(another: ArkSliderStepOptions): boolean {
+    let isShowStepsEqual = this.showSteps === another.showSteps;
+    let isStepOptionsEqual = true;
+    if ((this.stepOptions === null) || (this.stepOptions === undefined)) {
+      isStepOptionsEqual = (another.stepOptions === null) || (another.stepOptions === undefined);
+    } else if ((another.stepOptions === null) || (another.stepOptions === undefined)) {
+      isStepOptionsEqual = false;
+    } else if (this.stepOptions.stepsAccessibility.size !== another.stepOptions.stepsAccessibility.size) {
+      isStepOptionsEqual = false;
+    } else {
+      for (const [key, val] of this.stepOptions.stepsAccessibility) {
+        if (!another.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsEqual = false;
+        } else if (!isBaseOrResourceEqual(another.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsEqual = false;
+        }
+      }
+    }
+    return isShowStepsEqual && isStepOptionsEqual;
+  }
+}
+
 class ArkSliderTips {
   showTip: boolean;
   tipText: string | ResourceStr;
@@ -534,6 +565,26 @@ class ArkRegisterNativeEmbedRule {
 
   isEqual(another: ArkRegisterNativeEmbedRule): boolean {
     return (this.tag === another.tag && this.type === another.type);
+  }
+}
+
+class ArkBackground {
+  content: ResourceColor | undefined;
+  align?: Alignment | undefined;
+  ignoresLayoutSafeAreaEdges?: Array<LayoutSafeAreaEdge> | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.align = undefined;
+    this.ignoresLayoutSafeAreaEdges = undefined;
+  }
+
+  isEqual(another: ArkBackground): boolean {
+    return (
+      this.content === another.content &&
+      this.align === another.align &&
+      deepCompareArrays(this.ignoresLayoutSafeAreaEdges, another.ignoresLayoutSafeAreaEdges)
+    );
   }
 }
 
@@ -1121,6 +1172,23 @@ class ArkNestedScrollOptionsExt {
   }
 }
 
+class ArkWebScriptItem {
+  scripts: Array<string> | undefined;
+  scriptRules: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.scripts = undefined;
+    this.scriptRules = undefined;
+  }
+
+  isEqual(another: ArkWebScriptItem): boolean {
+    return (
+      this.scripts === another.scripts &&
+      this.scriptRules === another.scriptRules
+    );
+  }
+}
+
 class ArkConstraintSizeOptions {
   minWidth?: Length | undefined;
   maxWidth?: Length | undefined;
@@ -1656,6 +1724,13 @@ class ArkDragPreview {
   }
 }
 
+class ArkShadowStyle {
+  shadowStyle: number;
+  constructor() {
+    this.shadowStyle = undefined;
+  }
+}
+
 class ArkOnDrop {
   event: (event?: DragEvent, extraParams?: string) => void;
   disableDataPrefetch: boolean | undefined;
@@ -1867,6 +1942,20 @@ class ArkNavigationTitle {
   }
 }
 
+class ArkNavigationToolBarConfiguration {
+  value: Array<ToolbarItem> | undefined;
+  options?: NavigationToolbarOptions | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkNavigationToolBarConfiguration): boolean {
+    return (this.value === another.value) && (this.options.backgroundColor === another.options.backgroundColor) &&
+      (this.options.backgroundBlurStyle === another.options.backgroundBlurStyle) &&
+      (this.options.barStyle === another.options.barStyle);
+  }
+}
 class ArkNavHideTitleBarOrToolBar {
   isHide: boolean;
   animated: boolean;

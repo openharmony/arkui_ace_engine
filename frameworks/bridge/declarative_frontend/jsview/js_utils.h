@@ -38,7 +38,7 @@ class WantWrap;
 namespace OHOS::Rosen {
 class VisualEffect;
 class Filter;
-class BrightnessBlender;
+class Blender;
 }
 
 namespace OHOS::Ace::Framework {
@@ -70,7 +70,7 @@ bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<Pi
 
 const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj);
 const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj);
-const Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(JSRef<JSVal> obj);
+const Rosen::Blender* CreateRSBlenderFromNapiValue(JSRef<JSVal> obj);
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args);
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
 bool IsDisableEventVersion();

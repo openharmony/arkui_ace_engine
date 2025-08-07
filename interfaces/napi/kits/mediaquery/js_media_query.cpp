@@ -115,7 +115,11 @@ public:
         MediaQueryer queryer;
         std::string mediaInfo;
         for (auto& listener : copyListeners) {
-            OHOS::Ace::ContainerScope scope(listener->GetInstanceId());
+            auto scopeId = listener->GetInstanceId();
+            if (scopeId == DEFAULT_INSTANCE_ID) {
+                TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "%{public}s:Invalid instance", listener->media_.c_str());
+            }
+            OHOS::Ace::ContainerScope scope(scopeId);
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             std::set<napi_ref> delayDeleteCallbacks;

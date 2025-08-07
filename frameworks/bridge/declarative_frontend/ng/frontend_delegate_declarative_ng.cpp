@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -868,7 +868,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
 {
     DialogProperties dialogProperties = {
         .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .onWillDismissRelease = dialogAttr.customOnWillDismissRelease, .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
@@ -1397,7 +1398,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
-void FrontendDelegateDeclarativeNG::GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID,
+void FrontendDelegateDeclarativeNG::GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID,
     const bool isStartRect,
     std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
     const NG::SnapshotOptions& options)

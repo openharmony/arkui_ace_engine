@@ -121,6 +121,7 @@ public:
 
     void HideSubMenu();
     void ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& host, const RefPtr<UINode>& subMenu);
+    void HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem);
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
     void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
@@ -471,7 +472,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
 
     MenuDumpInfo GetDumpInfo() const
     {
@@ -500,6 +501,7 @@ public:
         dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
         dumpInfo_.finalPosition = dumpInfo.finalPosition;
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+        dumpInfo_.anchorPosition = dumpInfo.anchorPosition;
     }
 
     bool GetHasCustomRadius() const

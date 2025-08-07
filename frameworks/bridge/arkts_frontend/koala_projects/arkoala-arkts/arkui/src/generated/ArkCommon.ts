@@ -1711,22 +1711,14 @@ export class ArkCommonMethodComponent extends ComponentBase {
         return this
     }
     /** @memo */
-    public bindMenu(isShow: Array<MenuElement> | CustomBuilder | boolean, content?: MenuOptions | undefined | Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
+    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         if (this.checkPriority("bindMenu")) {
-            const isShow_type = runtimeType(isShow)
             const content_type = runtimeType(content)
             const options_type = runtimeType(options)
-            if (((RuntimeType.OBJECT == isShow_type) || (RuntimeType.FUNCTION == isShow_type)) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.UNDEFINED == content_type)) && (RuntimeType.UNDEFINED == options_type)) {
-                const content_casted = isShow as (Array<MenuElement> | CustomBuilder)
-                const options_casted = content as (MenuOptions | undefined)
-                this.getPeer()?.bindMenu0Attribute(content_casted, options_casted)
-                return this
-            }
-            if ((RuntimeType.BOOLEAN == isShow_type) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
-                const isShow_casted = isShow as (boolean)
-                const content_casted = content as (Array<MenuElement> | CustomBuilder)
+            if (((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
+                const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
                 const options_casted = options as (MenuOptions | undefined)
-                this.getPeer()?.bindMenu1Attribute(isShow_casted, content_casted, options_casted)
+                this.getPeer()?.bindMenu0Attribute(content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1734,23 +1726,16 @@ export class ArkCommonMethodComponent extends ComponentBase {
         return this
     }
     /** @memo */
-    public bindContextMenu(content: CustomBuilder | boolean, responseType: ResponseType | CustomBuilder, options?: ContextMenuOptions): this {
+    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         if (this.checkPriority("bindContextMenu")) {
             const content_type = runtimeType(content)
             const responseType_type = runtimeType(responseType)
             const options_type = runtimeType(options)
             if ((RuntimeType.FUNCTION == content_type) && (TypeChecker.isResponseType(responseType)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
-                const content_casted = content as (CustomBuilder)
-                const responseType_casted = responseType as (ResponseType)
+                const content_casted = content as (CustomBuilder | undefined)
+                const responseType_casted = responseType as (ResponseType | undefined)
                 const options_casted = options as (ContextMenuOptions | undefined)
                 this.getPeer()?.bindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
-                return this
-            }
-            if ((RuntimeType.BOOLEAN == content_type) && (RuntimeType.FUNCTION == responseType_type) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
-                const isShown_casted = content as (boolean)
-                const content_casted = responseType as (CustomBuilder)
-                const options_casted = options as (ContextMenuOptions | undefined)
-                this.getPeer()?.bindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")

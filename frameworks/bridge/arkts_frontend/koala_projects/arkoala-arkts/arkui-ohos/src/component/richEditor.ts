@@ -16,38 +16,33 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TextEditControllerEx, TextEditControllerExInternal, TextBaseController, TextBaseControllerInternal, LayoutManager, LayoutManagerInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, DecorationStyleResult, TextRange, MenuType, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions } from "./textCommon"
-import { SelectionOptions, CustomBuilder, Tuple_Number_Number, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
+import { TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, DecorationStyleResult, MenuType, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
+import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { PixelMap, PixelMapInternal } from "./../generated/ArkPixelMapMaterialized"
-import { ResourceStr, ResourceColor, Length, Dimension, Margin, BorderRadiuses, Font, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions } from "./units"
-import { CustomNodeBuilder } from "./../generated/ArkCustomBuilderInterfaces"
-import { Resource } from "global/resource";
-import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface } from "./styledString"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { FontStyle, FontWeight, TextAlign, WordBreak, LineBreakStrategy, ImageSpanAlignment, ImageFit, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, CopyOptions, BarState } from "./enums"
-import { Tuple_Dimension_Dimension } from "./navigation"
-import { Callback_Void } from "./abilityComponent"
-import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
-import { Callback_GestureEvent_Void, GestureEvent, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { Callback_Boolean_Void } from "./checkbox"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { CopyOptions, BarState, ResponseType, Color, FontStyle, FontWeight, TextAlign, WordBreak, LineBreakStrategy, ImageSpanAlignment, ImageFit } from "./enums"
+import { ResourceColor, ResourceStr, Length, Dimension, Padding, BorderRadiuses, Font } from "./units"
+import { Callback_Boolean_Void, Tuple_Dimension_Dimension } from "./navigation"
 import { EnterKeyType, SubmitEvent } from "./textInput"
-import { ArkRichEditorComponent } from "./../generated/ArkRichEditor"
-import { ArkRichEditorPeer } from "./../generated/peers/ArkRichEditorPeer"
+import { Resource } from "global/resource"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { Tuple_Number_Number } from "./arkui-synthetics"
+import { DecorationStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal } from "./styledString"
+import { TextBackgroundStyle } from "./span"
+import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
+import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
+import { OnHoverCallback } from "./sdk-stubs"
+import { ColorMetrics } from "../Graphics"
+
+import { CustomNodeBuilder } from "./customBuilder"
 export class RichEditorBaseControllerInternal {
     public static fromPtr(ptr: KPointer): RichEditorBaseController {
         const obj : RichEditorBaseController = new RichEditorBaseController()
@@ -110,6 +105,9 @@ export class RichEditorBaseController implements MaterializedBase {
     public getPreviewText(): PreviewText {
         return this.getPreviewText_serialize()
     }
+    public getCaretRect(): RectResult | undefined {
+        return this.getCaretRect_serialize()
+    }
     private getCaretOffset_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretOffset(this.peer!.ptr)
         return retval
@@ -123,7 +121,7 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getTypingStyle_serialize(): RichEditorTextStyle {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RichEditorTextStyle = retvalDeserializer.readRichEditorTextStyle()
         return returnResult
     }
@@ -159,10 +157,1252 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getPreviewText_serialize(): PreviewText {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : PreviewText = retvalDeserializer.readPreviewText()
         return returnResult
     }
+    private getCaretRect_serialize(): RectResult | undefined {
+        const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretRect(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+}
+export class ArkRichEditorPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkRichEditorPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._RichEditor_construct(peerId, flags)
+        const _peer  = new ArkRichEditorPeer(_peerPtr, peerId, "RichEditor", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setRichEditorOptions0Attribute(value: RichEditorOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRichEditorOptions(value)
+        ArkUIGeneratedNativeModule._RichEditorInterface_setRichEditorOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setRichEditorOptions1Attribute(options: RichEditorStyledStringOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeRichEditorStyledStringOptions(options)
+        ArkUIGeneratedNativeModule._RichEditorInterface_setRichEditorOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onReadyAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSelectAttribute(value: ((parameter: RichEditorSelection) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onSelect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSelectionChangeAttribute(value: ((parameter: RichEditorRange) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    aboutToIMEInputAttribute(value: ((parameter: RichEditorInsertValue) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_aboutToIMEInput(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onIMEInputCompleteAttribute(value: ((parameter: RichEditorTextSpanResult) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onIMEInputComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDidIMEInputAttribute(value: ((parameter: TextRange) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onDidIMEInput(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    aboutToDeleteAttribute(value: ((parameter: RichEditorDeleteValue) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_aboutToDelete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDeleteCompleteAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onDeleteComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    copyOptionsAttribute(value: CopyOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as CopyOptions)
+            thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_copyOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPasteAttribute(value: PasteEventCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onPaste(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_enableDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enablePreviewTextAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_enablePreviewText(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dataDetectorConfigAttribute(value: TextDataDetectorConfig | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeTextDataDetectorConfig(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_dataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    caretColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_caretColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedBackgroundColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_selectedBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onEditingChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onEditingChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enterKeyTypeAttribute(value: EnterKeyType | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as EnterKeyType)
+            thisSerializer.writeInt32(TypeChecker.EnterKeyType_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_enterKeyType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSubmitAttribute(value: SubmitCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onSubmit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onWillChangeAttribute(value: ((parameter: RichEditorChangeValue) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onWillChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDidChangeAttribute(value: OnDidChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onDidChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onCutAttribute(value: ((parameter: CutEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onCopyAttribute(value: ((parameter: CopyEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_onCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    editMenuOptionsAttribute(value: EditMenuOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeEditMenuOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_editMenuOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableKeyboardOnFocusAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_enableKeyboardOnFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableHapticFeedbackAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_enableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    barStateAttribute(value: BarState | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BarState)
+            thisSerializer.writeInt32(TypeChecker.BarState_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_barState(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    maxLengthAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_maxLength(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    maxLinesAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_maxLines(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    keyboardAppearanceAttribute(value: KeyboardAppearance | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as KeyboardAppearance)
+            thisSerializer.writeInt32(TypeChecker.KeyboardAppearance_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_keyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    stopBackPressAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_stopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindSelectionMenuAttribute(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let spanType_type : int32 = RuntimeType.UNDEFINED
+        spanType_type = runtimeType(spanType)
+        thisSerializer.writeInt8(spanType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (spanType_type)) {
+            const spanType_value  = (spanType as RichEditorSpanType)
+            thisSerializer.writeInt32(TypeChecker.RichEditorSpanType_ToNumeric(spanType_value))
+        }
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        thisSerializer.writeInt8(content_type as int32)
+        if ((RuntimeType.UNDEFINED) != (content_type)) {
+            const content_value  = content!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
+        }
+        let responseType_type : int32 = RuntimeType.UNDEFINED
+        responseType_type = runtimeType(responseType)
+        thisSerializer.writeInt8(responseType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (responseType_type)) {
+            const responseType_value  = responseType!
+            let responseType_value_type : int32 = RuntimeType.UNDEFINED
+            responseType_value_type = runtimeType(responseType_value)
+            if (TypeChecker.isResponseType(responseType_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const responseType_value_0  = responseType_value as ResponseType
+                thisSerializer.writeInt32(TypeChecker.ResponseType_ToNumeric(responseType_value_0))
+            }
+            else if (TypeChecker.isRichEditorResponseType(responseType_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const responseType_value_1  = responseType_value as RichEditorResponseType
+                thisSerializer.writeInt32(TypeChecker.RichEditorResponseType_ToNumeric(responseType_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSelectionMenuOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_bindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    customKeyboardAttribute(value: CustomBuilder | undefined, options?: KeyboardOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeKeyboardOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_customKeyboard(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    placeholderAttribute(value: ResourceStr | undefined, style?: PlaceholderStyle): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        let style_type : int32 = RuntimeType.UNDEFINED
+        style_type = runtimeType(style)
+        thisSerializer.writeInt8(style_type as int32)
+        if ((RuntimeType.UNDEFINED) != (style_type)) {
+            const style_value  = style!
+            thisSerializer.writePlaceholderStyle(style_value)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_placeholder(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export enum RichEditorDeleteDirection {
+    BACKWARD = 0,
+    FORWARD = 1
+}
+export enum RichEditorSpanType {
+    TEXT = 0,
+    IMAGE = 1,
+    MIXED = 2,
+    BUILDER = 3,
+    DEFAULT = 4
+}
+export enum RichEditorResponseType {
+    RIGHT_CLICK = 0,
+    LONG_PRESS = 1,
+    SELECT = 2,
+    DEFAULT = 3
+}
+export interface RichEditorSpanPosition {
+    spanIndex: number;
+    spanRange: [ number, number ];
+}
+export interface RichEditorTextStyle {
+    fontColor?: ResourceColor;
+    fontSize?: Length | number;
+    fontStyle?: FontStyle;
+    fontWeight?: number | FontWeight | string;
+    fontFamily?: ResourceStr;
+    decoration?: DecorationStyleInterface;
+    textShadow?: ShadowOptions | Array<ShadowOptions>;
+    letterSpacing?: number | string;
+    lineHeight?: number | string | Resource;
+    halfLeading?: boolean;
+    fontFeature?: string;
+    textBackgroundStyle?: TextBackgroundStyle;
+}
+export interface LeadingMarginPlaceholder {
+    pixelMap: PixelMap;
+    size: [ Dimension, Dimension ];
+}
+export interface RichEditorParagraphStyle {
+    textAlign?: TextAlign;
+    leadingMargin?: Dimension | LeadingMarginPlaceholder;
+    wordBreak?: WordBreak;
+    lineBreakStrategy?: LineBreakStrategy;
+    paragraphSpacing?: number;
+}
+export interface PasteEvent {
+    preventDefault?: (() => void);
+}
+export interface RichEditorTextSpan {
+    spanPosition: RichEditorSpanPosition;
+    value: string;
+    textStyle?: RichEditorTextStyle;
+}
+export interface RichEditorLayoutStyle {
+    margin?: Dimension | Padding;
+    borderRadius?: Dimension | BorderRadiuses;
+}
+export interface RichEditorImageSpanStyle {
+    size?: [ Dimension, Dimension ];
+    verticalAlign?: ImageSpanAlignment;
+    objectFit?: ImageFit;
+    layoutStyle?: RichEditorLayoutStyle;
+}
+export interface RichEditorSymbolSpanStyle {
+    fontSize?: number | string | Resource;
+    fontColor?: Array<ResourceColor>;
+    fontWeight?: number | FontWeight | string;
+    effectStrategy?: SymbolEffectStrategy;
+    renderingStrategy?: SymbolRenderingStrategy;
+}
+export interface RichEditorTextStyleResult {
+    fontColor: ResourceColor;
+    fontSize: number;
+    fontStyle: FontStyle;
+    fontWeight: number;
+    fontFamily: string;
+    decoration: DecorationStyleResult;
+    textShadow?: Array<ShadowOptions>;
+    letterSpacing?: number;
+    lineHeight?: number;
+    halfLeading?: boolean;
+    fontFeature?: string;
+    textBackgroundStyle?: TextBackgroundStyle;
+}
+export interface RichEditorParagraphResult {
+    style: RichEditorParagraphStyle;
+    range: [ number, number ];
+}
+export interface RichEditorSymbolSpanStyleResult {
+    fontSize: number | string | Resource;
+    fontColor: Array<ResourceColor>;
+    fontWeight: number | FontWeight | string;
+    effectStrategy: SymbolEffectStrategy;
+    renderingStrategy: SymbolRenderingStrategy;
+}
+export interface RichEditorTextSpanResult {
+    spanPosition: RichEditorSpanPosition;
+    value: string;
+    textStyle: RichEditorTextStyleResult;
+    offsetInSpan: [ number, number ];
+    symbolSpanStyle?: RichEditorSymbolSpanStyle;
+    valueResource?: Resource;
+    paragraphStyle?: RichEditorParagraphStyle;
+    previewText?: string;
+    urlStyle?: RichEditorUrlStyle;
+}
+export interface RichEditorImageSpanStyleResult {
+    size: [ number, number ];
+    verticalAlign: ImageSpanAlignment;
+    objectFit: ImageFit;
+    layoutStyle?: RichEditorLayoutStyle;
+}
+export interface RichEditorImageSpanResult {
+    spanPosition: RichEditorSpanPosition;
+    valuePixelMap?: PixelMap;
+    valueResourceStr?: ResourceStr;
+    imageStyle: RichEditorImageSpanStyleResult;
+    offsetInSpan: [ number, number ];
+}
+export interface RichEditorImageSpan {
+    spanPosition: RichEditorSpanPosition;
+    value: PixelMap | ResourceStr;
+    imageStyle?: RichEditorImageSpanStyle;
+}
+export interface RichEditorRange {
+    start?: number;
+    end?: number;
+}
+export interface RichEditorGesture {
+    onClick?: ((event: ClickEvent) => void);
+    onLongPress?: ((event: GestureEvent) => void);
+    onDoubleClick?: ((event: GestureEvent) => void);
+}
+export interface RichEditorTextSpanOptions {
+    offset?: number;
+    style?: RichEditorTextStyle;
+    paragraphStyle?: RichEditorParagraphStyle;
+    gesture?: RichEditorGesture;
+    urlStyle?: RichEditorUrlStyle;
+}
+export interface KeyboardOptions {
+    supportAvoidance?: boolean;
+}
+export interface RichEditorImageSpanOptions {
+    offset?: number;
+    imageStyle?: RichEditorImageSpanStyle;
+    gesture?: RichEditorGesture;
+    onHover?: OnHoverCallback;
+}
+export interface RichEditorBuilderSpanOptions {
+    offset?: number;
+    dragBackgroundColor?: ColorMetrics;
+    isDragShadowNeeded?: boolean;
+}
+export interface PlaceholderStyle {
+    font?: Font;
+    fontColor?: ResourceColor;
+}
+export interface RichEditorSpanStyleOptions extends RichEditorRange {
+}
+export interface RichEditorParagraphStyleOptions extends RichEditorRange {
+    style: RichEditorParagraphStyle;
+}
+export interface RichEditorUpdateTextSpanStyleOptions extends RichEditorSpanStyleOptions {
+    textStyle: RichEditorTextStyle;
+    urlStyle?: RichEditorUrlStyle;
+}
+export interface RichEditorUpdateImageSpanStyleOptions extends RichEditorSpanStyleOptions {
+    imageStyle: RichEditorImageSpanStyle;
+}
+export interface RichEditorUpdateSymbolSpanStyleOptions extends RichEditorSpanStyleOptions {
+    symbolStyle: RichEditorSymbolSpanStyle;
+}
+export interface RichEditorSymbolSpanOptions {
+    offset?: number;
+    style?: RichEditorSymbolSpanStyle;
+}
+export interface RichEditorSelection {
+    selection: [ number, number ];
+    spans: Array<RichEditorTextSpanResult | RichEditorImageSpanResult>;
+}
+export interface RichEditorInsertValue {
+    insertOffset: number;
+    insertValue: string;
+    previewText?: string;
+}
+export interface RichEditorDeleteValue {
+    offset: number;
+    direction: RichEditorDeleteDirection;
+    length: number;
+    richEditorDeleteSpans: Array<RichEditorTextSpanResult | RichEditorImageSpanResult>;
+}
+export interface RichEditorChangeValue {
+    rangeBefore: TextRange;
+    replacedSpans: Array<RichEditorTextSpanResult>;
+    replacedImageSpans: Array<RichEditorImageSpanResult>;
+    replacedSymbolSpans: Array<RichEditorTextSpanResult>;
+}
+export interface RichEditorOptions {
+    controller: RichEditorController;
+}
+export interface RichEditorStyledStringOptions {
+    controller: RichEditorStyledStringController;
+}
+export interface SelectionMenuOptions {
+    onAppear?: MenuOnAppearCallback;
+    onDisappear?: (() => void);
+    menuType?: MenuType;
+    onMenuShow?: MenuCallback;
+    onMenuHide?: MenuCallback;
+    previewMenuOptions?: PreviewMenuOptions;
+}
+export interface PreviewMenuOptions {
+    hapticFeedbackMode?: HapticFeedbackMode;
+}
+export type RichEditorSpan = RichEditorImageSpanResult | RichEditorTextSpanResult;
+export type Callback_RichEditorSelection_Void = (parameter: RichEditorSelection) => void;
+export type Callback_RichEditorRange_Void = (parameter: RichEditorRange) => void;
+export type Callback_RichEditorInsertValue_Boolean = (parameter: RichEditorInsertValue) => boolean;
+export type Callback_RichEditorTextSpanResult_Void = (parameter: RichEditorTextSpanResult) => void;
+export type Callback_TextRange_Void = (parameter: TextRange) => void;
+export type Callback_RichEditorDeleteValue_Boolean = (parameter: RichEditorDeleteValue) => boolean;
+export type Callback_RichEditorChangeValue_Boolean = (parameter: RichEditorChangeValue) => boolean;
+export type Callback_CutEvent_Void = (parameter: CutEvent) => void;
+export type Callback_CopyEvent_Void = (parameter: CopyEvent) => void;
+export interface RichEditorAttribute extends CommonMethod {
+    onReady(value: (() => void) | undefined): this
+    onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this
+    onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this
+    aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean) | undefined): this
+    onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void) | undefined): this
+    onDidIMEInput(value: ((parameter: TextRange) => void) | undefined): this
+    aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean) | undefined): this
+    onDeleteComplete(value: (() => void) | undefined): this
+    copyOptions(value: CopyOptions | undefined): this
+    onPaste(value: PasteEventCallback | undefined): this
+    enableDataDetector(value: boolean | undefined): this
+    enablePreviewText(value: boolean | undefined): this
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
+    caretColor(value: ResourceColor | undefined): this
+    selectedBackgroundColor(value: ResourceColor | undefined): this
+    onEditingChange(value: ((isVisible: boolean) => void) | undefined): this
+    enterKeyType(value: EnterKeyType | undefined): this
+    onSubmit(value: SubmitCallback | undefined): this
+    onWillChange(value: ((parameter: RichEditorChangeValue) => boolean) | undefined): this
+    onDidChange(value: OnDidChangeCallback | undefined): this
+    onCut(value: ((parameter: CutEvent) => void) | undefined): this
+    onCopy(value: ((parameter: CopyEvent) => void) | undefined): this
+    editMenuOptions(value: EditMenuOptions | undefined): this
+    enableKeyboardOnFocus(value: boolean | undefined): this
+    enableHapticFeedback(value: boolean | undefined): this
+    barState(value: BarState | undefined): this
+    maxLength(value: number | undefined): this
+    maxLines(value: number | undefined): this
+    keyboardAppearance(value: KeyboardAppearance | undefined): this
+    stopBackPress(value: boolean | undefined): this
+    bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
+    placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
+}
+export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEditorAttribute {
+    onReady_value?: (() => void) | undefined
+    onSelect_value?: ((parameter: RichEditorSelection) => void) | undefined
+    onSelectionChange_value?: ((parameter: RichEditorRange) => void) | undefined
+    aboutToIMEInput_value?: ((parameter: RichEditorInsertValue) => boolean) | undefined
+    onIMEInputComplete_value?: ((parameter: RichEditorTextSpanResult) => void) | undefined
+    onDidIMEInput_value?: ((parameter: TextRange) => void) | undefined
+    aboutToDelete_value?: ((parameter: RichEditorDeleteValue) => boolean) | undefined
+    onDeleteComplete_value?: (() => void) | undefined
+    copyOptions_value?: CopyOptions | undefined
+    onPaste_value?: PasteEventCallback | undefined
+    enableDataDetector_value?: boolean | undefined
+    enablePreviewText_value?: boolean | undefined
+    dataDetectorConfig_value?: TextDataDetectorConfig | undefined
+    caretColor_value?: ResourceColor | undefined
+    selectedBackgroundColor_value?: ResourceColor | undefined
+    onEditingChange_value?: ((isVisible: boolean) => void) | undefined
+    enterKeyType_value?: EnterKeyType | undefined
+    onSubmit_value?: SubmitCallback | undefined
+    onWillChange_value?: ((parameter: RichEditorChangeValue) => boolean) | undefined
+    onDidChange_value?: OnDidChangeCallback | undefined
+    onCut_value?: ((parameter: CutEvent) => void) | undefined
+    onCopy_value?: ((parameter: CopyEvent) => void) | undefined
+    editMenuOptions_value?: EditMenuOptions | undefined
+    enableKeyboardOnFocus_value?: boolean | undefined
+    enableHapticFeedback_value?: boolean | undefined
+    barState_value?: BarState | undefined
+    maxLength_value?: number | undefined
+    maxLines_value?: number | undefined
+    keyboardAppearance_value?: KeyboardAppearance | undefined
+    stopBackPress_value?: boolean | undefined
+    public onReady(value: (() => void) | undefined): this {
+        return this
+    }
+    public onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this {
+        return this
+    }
+    public onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this {
+        return this
+    }
+    public aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean) | undefined): this {
+        return this
+    }
+    public onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void) | undefined): this {
+        return this
+    }
+    public onDidIMEInput(value: ((parameter: TextRange) => void) | undefined): this {
+        return this
+    }
+    public aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean) | undefined): this {
+        return this
+    }
+    public onDeleteComplete(value: (() => void) | undefined): this {
+        return this
+    }
+    public copyOptions(value: CopyOptions | undefined): this {
+        return this
+    }
+    public onPaste(value: PasteEventCallback | undefined): this {
+        return this
+    }
+    public enableDataDetector(value: boolean | undefined): this {
+        return this
+    }
+    public enablePreviewText(value: boolean | undefined): this {
+        return this
+    }
+    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        return this
+    }
+    public caretColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public onEditingChange(value: ((isVisible: boolean) => void) | undefined): this {
+        return this
+    }
+    public enterKeyType(value: EnterKeyType | undefined): this {
+        return this
+    }
+    public onSubmit(value: SubmitCallback | undefined): this {
+        return this
+    }
+    public onWillChange(value: ((parameter: RichEditorChangeValue) => boolean) | undefined): this {
+        return this
+    }
+    public onDidChange(value: OnDidChangeCallback | undefined): this {
+        return this
+    }
+    public onCut(value: ((parameter: CutEvent) => void) | undefined): this {
+        return this
+    }
+    public onCopy(value: ((parameter: CopyEvent) => void) | undefined): this {
+        return this
+    }
+    public editMenuOptions(value: EditMenuOptions | undefined): this {
+        return this
+    }
+    public enableKeyboardOnFocus(value: boolean | undefined): this {
+        return this
+    }
+    public enableHapticFeedback(value: boolean | undefined): this {
+        return this
+    }
+    public barState(value: BarState | undefined): this {
+        return this
+    }
+    public maxLength(value: number | undefined): this {
+        return this
+    }
+    public maxLines(value: number | undefined): this {
+        return this
+    }
+    public keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        return this
+    }
+    public stopBackPress(value: boolean | undefined): this {
+        return this
+    }
+    public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
+        return this
+    }
+    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+        return this
+    }
+    public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
+        return this
+        }
+}
+export interface CutEvent {
+    preventDefault?: (() => void);
+}
+export interface CopyEvent {
+    preventDefault?: (() => void);
+}
+export interface RichEditorUrlStyle {
+    url?: ResourceStr;
+}
+export type SubmitCallback = (enterKey: EnterKeyType, event: SubmitEvent) => void;
+export type MenuOnAppearCallback = (start: number, end: number) => void;
+export type MenuCallback = (start: number, end: number) => void;
+export type PasteEventCallback = (event?: PasteEvent) => void;
+export class ArkRichEditorComponent extends ArkCommonMethodComponent implements RichEditorAttribute {
+    getPeer(): ArkRichEditorPeer {
+        return (this.peer as ArkRichEditorPeer)
+    }
+    public setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
+        if (this.checkPriority("setRichEditorOptions")) {
+            const value_type = runtimeType(value)
+            if (TypeChecker.isRichEditorOptions(value, true)) {
+                const value_casted = value as (RichEditorOptions)
+                this.getPeer()?.setRichEditorOptions0Attribute(value_casted)
+                return this
+            }
+            if (TypeChecker.isRichEditorStyledStringOptions(value, true)) {
+                const options_casted = value as (RichEditorStyledStringOptions)
+                this.getPeer()?.setRichEditorOptions1Attribute(options_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onReady(value: (() => void) | undefined): this {
+        if (this.checkPriority("onReady")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onReadyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this {
+        if (this.checkPriority("onSelect")) {
+            const value_casted = value as (((parameter: RichEditorSelection) => void) | undefined)
+            this.getPeer()?.onSelectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this {
+        if (this.checkPriority("onSelectionChange")) {
+            const value_casted = value as (((parameter: RichEditorRange) => void) | undefined)
+            this.getPeer()?.onSelectionChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean) | undefined): this {
+        if (this.checkPriority("aboutToIMEInput")) {
+            const value_casted = value as (((parameter: RichEditorInsertValue) => boolean) | undefined)
+            this.getPeer()?.aboutToIMEInputAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void) | undefined): this {
+        if (this.checkPriority("onIMEInputComplete")) {
+            const value_casted = value as (((parameter: RichEditorTextSpanResult) => void) | undefined)
+            this.getPeer()?.onIMEInputCompleteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidIMEInput(value: ((parameter: TextRange) => void) | undefined): this {
+        if (this.checkPriority("onDidIMEInput")) {
+            const value_casted = value as (((parameter: TextRange) => void) | undefined)
+            this.getPeer()?.onDidIMEInputAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean) | undefined): this {
+        if (this.checkPriority("aboutToDelete")) {
+            const value_casted = value as (((parameter: RichEditorDeleteValue) => boolean) | undefined)
+            this.getPeer()?.aboutToDeleteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDeleteComplete(value: (() => void) | undefined): this {
+        if (this.checkPriority("onDeleteComplete")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onDeleteCompleteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public copyOptions(value: CopyOptions | undefined): this {
+        if (this.checkPriority("copyOptions")) {
+            const value_casted = value as (CopyOptions | undefined)
+            this.getPeer()?.copyOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPaste(value: PasteEventCallback | undefined): this {
+        if (this.checkPriority("onPaste")) {
+            const value_casted = value as (PasteEventCallback | undefined)
+            this.getPeer()?.onPasteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enablePreviewText(value: boolean | undefined): this {
+        if (this.checkPriority("enablePreviewText")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enablePreviewTextAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        if (this.checkPriority("dataDetectorConfig")) {
+            const value_casted = value as (TextDataDetectorConfig | undefined)
+            this.getPeer()?.dataDetectorConfigAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public caretColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("caretColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.caretColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("selectedBackgroundColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.selectedBackgroundColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onEditingChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (this.checkPriority("onEditingChange")) {
+            const value_casted = value as (((isVisible: boolean) => void) | undefined)
+            this.getPeer()?.onEditingChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enterKeyType(value: EnterKeyType | undefined): this {
+        if (this.checkPriority("enterKeyType")) {
+            const value_casted = value as (EnterKeyType | undefined)
+            this.getPeer()?.enterKeyTypeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSubmit(value: SubmitCallback | undefined): this {
+        if (this.checkPriority("onSubmit")) {
+            const value_casted = value as (SubmitCallback | undefined)
+            this.getPeer()?.onSubmitAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillChange(value: ((parameter: RichEditorChangeValue) => boolean) | undefined): this {
+        if (this.checkPriority("onWillChange")) {
+            const value_casted = value as (((parameter: RichEditorChangeValue) => boolean) | undefined)
+            this.getPeer()?.onWillChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidChange(value: OnDidChangeCallback | undefined): this {
+        if (this.checkPriority("onDidChange")) {
+            const value_casted = value as (OnDidChangeCallback | undefined)
+            this.getPeer()?.onDidChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onCut(value: ((parameter: CutEvent) => void) | undefined): this {
+        if (this.checkPriority("onCut")) {
+            const value_casted = value as (((parameter: CutEvent) => void) | undefined)
+            this.getPeer()?.onCutAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onCopy(value: ((parameter: CopyEvent) => void) | undefined): this {
+        if (this.checkPriority("onCopy")) {
+            const value_casted = value as (((parameter: CopyEvent) => void) | undefined)
+            this.getPeer()?.onCopyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public editMenuOptions(value: EditMenuOptions | undefined): this {
+        if (this.checkPriority("editMenuOptions")) {
+            const value_casted = value as (EditMenuOptions | undefined)
+            this.getPeer()?.editMenuOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableKeyboardOnFocus(value: boolean | undefined): this {
+        if (this.checkPriority("enableKeyboardOnFocus")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableKeyboardOnFocusAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableHapticFeedback(value: boolean | undefined): this {
+        if (this.checkPriority("enableHapticFeedback")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableHapticFeedbackAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public barState(value: BarState | undefined): this {
+        if (this.checkPriority("barState")) {
+            const value_casted = value as (BarState | undefined)
+            this.getPeer()?.barStateAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public maxLength(value: number | undefined): this {
+        if (this.checkPriority("maxLength")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.maxLengthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public maxLines(value: number | undefined): this {
+        if (this.checkPriority("maxLines")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.maxLinesAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        if (this.checkPriority("keyboardAppearance")) {
+            const value_casted = value as (KeyboardAppearance | undefined)
+            this.getPeer()?.keyboardAppearanceAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public stopBackPress(value: boolean | undefined): this {
+        if (this.checkPriority("stopBackPress")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.stopBackPressAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
+        if (this.checkPriority("bindSelectionMenu")) {
+            const spanType_casted = spanType as (RichEditorSpanType | undefined)
+            const content_casted = content as (CustomBuilder | undefined)
+            const responseType_casted = responseType as (ResponseType | RichEditorResponseType | undefined)
+            const options_casted = options as (SelectionMenuOptions)
+            this.getPeer()?.bindSelectionMenuAttribute(spanType_casted, content_casted, responseType_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+        if (this.checkPriority("customKeyboard")) {
+            const value_casted = value as (CustomBuilder | undefined)
+            const options_casted = options as (KeyboardOptions)
+            this.getPeer()?.customKeyboardAttribute(value_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
+        if (this.checkPriority("placeholder")) {
+            const value_casted = value as (ResourceStr | undefined)
+            const style_casted = style as (PlaceholderStyle)
+            this.getPeer()?.placeholderAttribute(value_casted, style_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+/** @memo */
+export function RichEditor(
+    /** @memo */
+    style: ((attributes: RichEditorAttribute) => void) | undefined,
+    value: RichEditorOptions | RichEditorStyledStringOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
+    const receiver = remember(() => {
+        return new ArkRichEditorComponent()
+    })
+    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer) => {
+        receiver.setRichEditorOptions(value)
+        style?.(receiver)
+        content_?.()
+        receiver.applyAttributesFinish()
+    })
 }
 export class RichEditorControllerInternal {
     public static fromPtr(ptr: KPointer): RichEditorController {
@@ -319,7 +1559,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        if (TypeChecker.isRichEditorUpdateTextSpanStyleOptions(value, false)) {
+        if (TypeChecker.isRichEditorUpdateTextSpanStyleOptions(value, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as RichEditorUpdateTextSpanStyleOptions
             thisSerializer.writeRichEditorUpdateTextSpanStyleOptions(value_0)
@@ -366,7 +1606,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSpans(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -397,7 +1637,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -408,13 +1648,13 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     }
     private getSelection_serialize(): RichEditorSelection {
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSelection(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RichEditorSelection = retvalDeserializer.readRichEditorSelection()
         return returnResult
     }
     private fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> {
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_fromStyledString(this.peer!.ptr, toPeerPtr(value))
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<RichEditorSpan> = new Array<RichEditorSpan>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -489,7 +1729,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
     }
     private getSelection_serialize(): RichEditorRange {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RichEditorRange = retvalDeserializer.readRichEditorRange()
         return returnResult
     }
@@ -499,300 +1739,4 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         ArkUIGeneratedNativeModule._RichEditorStyledStringController_onContentChanged(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-}
-export enum RichEditorDeleteDirection {
-    BACKWARD = 0,
-    FORWARD = 1
-}
-export enum RichEditorSpanType {
-    TEXT = 0,
-    IMAGE = 1,
-    MIXED = 2,
-    BUILDER = 3
-}
-export enum RichEditorResponseType {
-    RIGHT_CLICK = 0,
-    LONG_PRESS = 1,
-    SELECT = 2
-}
-export interface RichEditorSpanPosition {
-    spanIndex: number;
-    spanRange: [ number, number ];
-}
-export interface RichEditorTextStyle {
-    fontColor?: ResourceColor;
-    fontSize?: Length | number;
-    fontStyle?: FontStyle;
-    fontWeight?: number | FontWeight | string;
-    fontFamily?: ResourceStr;
-    decoration?: DecorationStyleInterface;
-    textShadow?: ShadowOptions | Array<ShadowOptions>;
-    letterSpacing?: number | string;
-    lineHeight?: number | string | Resource;
-    fontFeature?: string;
-}
-export interface LeadingMarginPlaceholder {
-    pixelMap: PixelMap;
-    size: [ Dimension, Dimension ];
-}
-export interface RichEditorParagraphStyle {
-    textAlign?: TextAlign;
-    leadingMargin?: Dimension | LeadingMarginPlaceholder;
-    wordBreak?: WordBreak;
-    lineBreakStrategy?: LineBreakStrategy;
-}
-export interface PasteEvent {
-    preventDefault?: (() => void);
-}
-export interface RichEditorTextSpan {
-    spanPosition: RichEditorSpanPosition;
-    value: string;
-    textStyle?: RichEditorTextStyle;
-}
-export interface RichEditorLayoutStyle {
-    margin?: Dimension | Margin;
-    borderRadius?: Dimension | BorderRadiuses;
-}
-export interface RichEditorImageSpanStyle {
-    size?: [ Dimension, Dimension ];
-    verticalAlign?: ImageSpanAlignment;
-    objectFit?: ImageFit;
-    layoutStyle?: RichEditorLayoutStyle;
-}
-export interface RichEditorSymbolSpanStyle {
-    fontSize?: number | string | Resource;
-    fontColor?: Array<ResourceColor>;
-    fontWeight?: number | FontWeight | string;
-    effectStrategy?: SymbolEffectStrategy;
-    renderingStrategy?: SymbolRenderingStrategy;
-}
-export interface RichEditorTextStyleResult {
-    fontColor: ResourceColor;
-    fontSize: number;
-    fontStyle: FontStyle;
-    fontWeight: number;
-    fontFamily: string;
-    decoration: DecorationStyleResult;
-    textShadow?: Array<ShadowOptions>;
-    letterSpacing?: number;
-    lineHeight?: number;
-    fontFeature?: string;
-}
-export interface RichEditorParagraphResult {
-    style: RichEditorParagraphStyle;
-    range: [ number, number ];
-}
-export interface RichEditorSymbolSpanStyleResult {
-    fontSize: number | string | Resource;
-    fontColor: Array<ResourceColor>;
-    fontWeight: number | FontWeight | string;
-    effectStrategy: SymbolEffectStrategy;
-    renderingStrategy: SymbolRenderingStrategy;
-}
-export interface RichEditorTextSpanResult {
-    spanPosition: RichEditorSpanPosition;
-    value: string;
-    textStyle: RichEditorTextStyleResult;
-    offsetInSpan: [ number, number ];
-    symbolSpanStyle?: RichEditorSymbolSpanStyle;
-    valueResource?: Resource;
-    paragraphStyle?: RichEditorParagraphStyle;
-    previewText?: string;
-}
-export interface RichEditorImageSpanStyleResult {
-    size: [ number, number ];
-    verticalAlign: ImageSpanAlignment;
-    objectFit: ImageFit;
-    layoutStyle?: RichEditorLayoutStyle;
-}
-export interface RichEditorImageSpanResult {
-    spanPosition: RichEditorSpanPosition;
-    valuePixelMap?: PixelMap;
-    valueResourceStr?: ResourceStr;
-    imageStyle: RichEditorImageSpanStyleResult;
-    offsetInSpan: [ number, number ];
-}
-export interface RichEditorImageSpan {
-    spanPosition: RichEditorSpanPosition;
-    value: PixelMap | ResourceStr;
-    imageStyle?: RichEditorImageSpanStyle;
-}
-export interface RichEditorRange {
-    start?: number;
-    end?: number;
-}
-export interface RichEditorGesture {
-    onClick?: ((event: ClickEvent) => void);
-    onLongPress?: ((event: GestureEvent) => void);
-}
-export interface RichEditorTextSpanOptions {
-    offset?: number;
-    style?: RichEditorTextStyle;
-    paragraphStyle?: RichEditorParagraphStyle;
-    gesture?: RichEditorGesture;
-}
-export interface KeyboardOptions {
-    supportAvoidance?: boolean;
-}
-export interface RichEditorImageSpanOptions {
-    offset?: number;
-    imageStyle?: RichEditorImageSpanStyle;
-    gesture?: RichEditorGesture;
-}
-export interface RichEditorBuilderSpanOptions {
-    offset?: number;
-}
-export interface PlaceholderStyle {
-    font?: Font;
-    fontColor?: ResourceColor;
-}
-export interface RichEditorSpanStyleOptions extends RichEditorRange {
-}
-export interface RichEditorParagraphStyleOptions extends RichEditorRange {
-    style: RichEditorParagraphStyle;
-}
-export interface RichEditorUpdateTextSpanStyleOptions extends RichEditorSpanStyleOptions {
-    textStyle: RichEditorTextStyle;
-}
-export interface RichEditorUpdateImageSpanStyleOptions extends RichEditorSpanStyleOptions {
-    imageStyle: RichEditorImageSpanStyle;
-}
-export interface RichEditorUpdateSymbolSpanStyleOptions extends RichEditorSpanStyleOptions {
-    symbolStyle: RichEditorSymbolSpanStyle;
-}
-export interface RichEditorSymbolSpanOptions {
-    offset?: number;
-    style?: RichEditorSymbolSpanStyle;
-}
-export interface RichEditorSelection {
-    selection: [ number, number ];
-    spans: Array<RichEditorTextSpanResult | RichEditorImageSpanResult>;
-}
-export interface RichEditorInsertValue {
-    insertOffset: number;
-    insertValue: string;
-    previewText?: string;
-}
-export interface RichEditorDeleteValue {
-    offset: number;
-    direction: RichEditorDeleteDirection;
-    length: number;
-    richEditorDeleteSpans: Array<RichEditorTextSpanResult | RichEditorImageSpanResult>;
-}
-export interface RichEditorChangeValue {
-    rangeBefore: TextRange;
-    replacedSpans: Array<RichEditorTextSpanResult>;
-    replacedImageSpans: Array<RichEditorImageSpanResult>;
-    replacedSymbolSpans: Array<RichEditorTextSpanResult>;
-}
-export interface RichEditorOptions {
-    controller: RichEditorController;
-}
-export interface RichEditorStyledStringOptions {
-    controller: RichEditorStyledStringController;
-}
-export interface SelectionMenuOptions {
-    onAppear?: MenuOnAppearCallback;
-    onDisappear?: (() => void);
-    menuType?: MenuType;
-}
-export type RichEditorSpan = RichEditorImageSpanResult | RichEditorTextSpanResult;
-export type Callback_RichEditorSelection_Void = (parameter: RichEditorSelection) => void;
-export type Callback_RichEditorRange_Void = (parameter: RichEditorRange) => void;
-export type Callback_RichEditorInsertValue_Boolean = (parameter: RichEditorInsertValue) => boolean;
-export type Callback_RichEditorTextSpanResult_Void = (parameter: RichEditorTextSpanResult) => void;
-export type Callback_TextRange_Void = (parameter: TextRange) => void;
-export type Callback_RichEditorDeleteValue_Boolean = (parameter: RichEditorDeleteValue) => boolean;
-export type Callback_RichEditorChangeValue_Boolean = (parameter: RichEditorChangeValue) => boolean;
-export type Callback_CutEvent_Void = (parameter: CutEvent) => void;
-export type Callback_CopyEvent_Void = (parameter: CopyEvent) => void;
-export interface CutEvent {
-    preventDefault?: (() => void);
-}
-export interface CopyEvent {
-    preventDefault?: (() => void);
-}
-export type SubmitCallback = (enterKey: EnterKeyType, event: SubmitEvent) => void;
-export type MenuOnAppearCallback = (start: number, end: number) => void;
-export type PasteEventCallback = (event?: PasteEvent) => void;
-/** @memo:stable */
-export interface RichEditorAttribute extends CommonMethod {
-    /** @memo */
-    setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this
-    /** @memo */
-    onReady(value: (() => void)): this
-    /** @memo */
-    onSelect(value: ((parameter: RichEditorSelection) => void)): this
-    /** @memo */
-    onSelectionChange(value: ((parameter: RichEditorRange) => void)): this
-    /** @memo */
-    aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean)): this
-    /** @memo */
-    onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void)): this
-    /** @memo */
-    onDidIMEInput(value: ((parameter: TextRange) => void)): this
-    /** @memo */
-    aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean)): this
-    /** @memo */
-    onDeleteComplete(value: (() => void)): this
-    /** @memo */
-    copyOptions(value: CopyOptions): this
-    /** @memo */
-    onPaste(value: PasteEventCallback): this
-    /** @memo */
-    enableDataDetector(value: boolean): this
-    /** @memo */
-    enablePreviewText(value: boolean): this
-    /** @memo */
-    dataDetectorConfig(value: TextDataDetectorConfig): this
-    /** @memo */
-    caretColor(value: ResourceColor): this
-    /** @memo */
-    selectedBackgroundColor(value: ResourceColor): this
-    /** @memo */
-    onEditingChange(value: ((parameter: boolean) => void)): this
-    /** @memo */
-    enterKeyType(value: EnterKeyType): this
-    /** @memo */
-    onSubmit(value: SubmitCallback): this
-    /** @memo */
-    onWillChange(value: ((parameter: RichEditorChangeValue) => boolean)): this
-    /** @memo */
-    onDidChange(value: OnDidChangeCallback): this
-    /** @memo */
-    onCut(value: ((parameter: CutEvent) => void)): this
-    /** @memo */
-    onCopy(value: ((parameter: CopyEvent) => void)): this
-    /** @memo */
-    editMenuOptions(value: EditMenuOptions): this
-    /** @memo */
-    enableKeyboardOnFocus(value: boolean): this
-    /** @memo */
-    enableHapticFeedback(value: boolean): this
-    /** @memo */
-    barState(value: BarState): this
-    /** @memo */
-    bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType | RichEditorResponseType, options?: SelectionMenuOptions): this
-    /** @memo */
-    customKeyboard(value: CustomBuilder, options?: KeyboardOptions): this
-    /** @memo */
-    placeholder(value: ResourceStr, style?: PlaceholderStyle): this
-}
-/** @memo */
-export function RichEditor(
-  /** @memo */
-  style: ((attributes: RichEditorAttribute) => void) | undefined,
-  value: RichEditorOptions | RichEditorStyledStringOptions, 
-  /** @memo */
-  content_?: () => void,
-) {
-    const receiver = remember(() => {
-        return new ArkRichEditorComponent()
-    })
-    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer) => {
-        receiver.setRichEditorOptions(value)
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
 }

@@ -35,6 +35,7 @@ public:
 
     void RunScopeUITaskSync(Task&& task, const std::string& name) override;
     void RunScopeUITask(Task&& task, const std::string& name) override;
+    void RunScopeUIDelayedTask(Task&& task, const std::string& name, uint32_t delayTime) override;
 
     void OnBackPressed() override;
 
@@ -51,6 +52,24 @@ public:
     bool GreatOrEqualTargetAPIVersion(int32_t version) override;
     int32_t GetContainerModalTitleHeight() override;
     int32_t GetContainerModalButtonsWidth() override;
+    NG::OffsetF GetContainerModalButtonsOffset() override;
+    void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) override;
+    void UnregisterArkUIObjectLifecycleCallback() override;
+    sptr<IRemoteObject> GetToken() override;
+
+    RefPtr<DisplayInfo> GetDisplayInfo() override;
+    WindowMode GetWindowMode() override;
+    bool GetIsMidScene() override;
+    bool IsAccessibilityEnabled() override;
+
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback) override;
+    void UnregisterSurfaceChangedCallback(int32_t callbackId) override;
+    int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback) override;
+    void UnRegisterFoldStatusChangedCallback(int32_t callbackId) override;
+    int32_t RegisterRotationEndCallback(std::function<void()>&& callback) override;
+    void UnregisterRotationEndCallback(int32_t callbackId) override;
+
 private:
     NG::PipelineContext* context_ = nullptr;
     RefPtr<OverlayManager> overlayManager_;

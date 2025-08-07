@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,13 @@
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
-
-class BuilderNode {
+/// <reference path="./disposable.ts" />
+class BuilderNode extends Disposable {
   private _JSBuilderNode: JSBuilderNode;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options: RenderOptions) {
+    super();
     let jsBuilderNode = new JSBuilderNode(uiContext, options);
     this._JSBuilderNode = jsBuilderNode;
     let id = Symbol('BuilderRootFrameNode');
@@ -55,7 +56,11 @@ class BuilderNode {
     return ret;
   }
   public dispose(): void {
+    super.dispose();
     this._JSBuilderNode.dispose();
+  }
+  public isDisposed(): boolean {
+    return super.isDisposed() && (this._JSBuilderNode ? this._JSBuilderNode.isDisposed() : true);
   }
   public reuse(param?: Object): void {
     this._JSBuilderNode.reuse(param);
@@ -72,9 +77,12 @@ class BuilderNode {
   public onRecycleWithBindObject(): void {
     this._JSBuilderNode.onRecycleWithBindObject();
   }
+  public inheritFreezeOptions(enable: boolean): void {
+    this._JSBuilderNode.inheritFreezeOptions(enable);
+  }
 }
 
-class JSBuilderNode extends BaseNode {
+class JSBuilderNode extends BaseNode implements IDisposable {
   private params_: Object;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
@@ -82,27 +90,53 @@ class JSBuilderNode extends BaseNode {
   private _supportNestingBuilder: boolean;
   private _proxyObjectParam: Object;
   private bindedViewOfBuilderNode:ViewPU;
-
+  private disposable_: Disposable;
+  private inheritFreeze: boolean;
+  private allowFreezeWhenInactive: boolean;
+  private parentallowFreeze: boolean;
+  private isFreeze: boolean;
+  public __parentViewOfBuildNode?: ViewBuildNodeBase;
+  private updateParams_: Object;
+  private activeCount_: number;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
     this._supportNestingBuilder = false;
+    this.disposable_ = new Disposable();
+    this.inheritFreeze = false;
+    this.allowFreezeWhenInactive = false;
+    this.parentallowFreeze = false;
+    this.isFreeze = false;
+    this.__parentViewOfBuildNode = undefined;
+    this.updateParams_ = null;
+    this.activeCount_ = 1;
+  }
+  public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
+      return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+    }
+    return undefined;
   }
   public reuse(param: Object): void {
     this.updateStart();
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        if (child instanceof ViewPU) {
-          child.aboutToReuseInternal(param);
-        }
-        else {
-          // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
-        }
-      } // if child
-    });
+    try {
+      this.childrenWeakrefMap_.forEach((weakRefChild) => {
+        const child = weakRefChild.deref();
+        if (child) {
+          if (child instanceof ViewPU) {
+            child.aboutToReuseInternal(param);
+          }
+          else {
+            // FIXME fix for mixed V2 - V3 Hierarchies
+            throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+          }
+        } // if child
+      });
+    } catch (err) {
+      this.updateEnd();
+      throw err;
+    }
     this.updateEnd();
   }
   public recycle(): void {
@@ -128,6 +162,32 @@ class JSBuilderNode extends BaseNode {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     super.onRecycleWithBindObject();
     __JSScopeUtil__.restoreInstanceId();
+  }
+  public inheritFreezeOptions(enable: boolean): void {
+    this.inheritFreeze = enable;
+    if (enable) {
+      this.setAllowFreezeWhenInactive(this.getParentAllowFreeze());
+    } else {
+      this.setAllowFreezeWhenInactive(false);
+    }
+  }
+  public getInheritFreeze(): boolean {
+    return this.inheritFreeze;
+  }
+  public setAllowFreezeWhenInactive(enable: boolean): void {
+    this.allowFreezeWhenInactive = enable;
+  }
+  public getAllowFreezeWhenInactive(): boolean {
+    return this.allowFreezeWhenInactive;
+  }
+  public setParentAllowFreeze(enable: boolean): void {
+    this.parentallowFreeze = enable;
+  }
+  public getParentAllowFreeze(): boolean {
+    return this.parentallowFreeze;
+  }
+  public getIsFreeze(): boolean {
+    return this.isFreeze;
   }
   public getCardId(): number {
     return -1;
@@ -161,6 +221,7 @@ class JSBuilderNode extends BaseNode {
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing)? (options?.enableProvideConsumeCrossing) : false; 
     this.params_ = params;
     if (options?.localStorage instanceof LocalStorage) {
       this.setShareLocalStorage(options.localStorage);
@@ -180,33 +241,55 @@ class JSBuilderNode extends BaseNode {
     this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
     this.frameNode_.setRenderNode(this._nativeRef);
     this.frameNode_.setBaseNode(this);
+    this.frameNode_.setBuilderNode(this);
+    let id = this.frameNode_.getUniqueId();
+    if (this.id_ && this.id_ !== id) {
+      this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+    }
+    this.id_ = id;
+    this.__parentViewOfBuildNode?.addChildBuilderNode(this);
+    FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
     __JSScopeUtil__.restoreInstanceId();
   }
   public update(param: Object) {
+    if (this.isFreeze) {
+      this.updateParams_ = param;
+      return;
+    }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
-    this.purgeDeletedElmtIds();
-    this.params_ = param;
-    Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
-      return (a < b) ? -1 : (a > b) ? 1 : 0;
-    }).forEach(elmtId => this.UpdateElement(elmtId));
+    try {
+      this.purgeDeletedElmtIds();
+      this.params_ = param;
+      Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
+        return (a < b) ? -1 : (a > b) ? 1 : 0;
+      }).forEach(elmtId => this.UpdateElement(elmtId));
+    } catch (err) {
+      this.updateEnd();
+      throw err;
+    }
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
   public updateConfiguration(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
-    this.purgeDeletedElmtIds();
-    Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
-      return (a < b) ? -1 : (a > b) ? 1 : 0;
-    }).forEach(elmtId => this.UpdateElement(elmtId));
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childView = child.deref();
-      if (childView) {
-        childView.forceCompleteRerender(true);
+    try {
+      this.purgeDeletedElmtIds();
+      Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
+        return (a < b) ? -1 : (a > b) ? 1 : 0;
+      }).forEach(elmtId => this.UpdateElement(elmtId));
+      for (const child of this.childrenWeakrefMap_.values()) {
+        const childView = child.deref();
+        if (childView) {
+          childView.forceCompleteRerender(true);
+        }
       }
+      getUINativeModule().frameNode.updateConfiguration(this.getFrameNode()?.getNodePtr());
+    } catch (err) {
+      this.updateEnd();
+      throw err;
     }
-    getUINativeModule().frameNode.updateConfiguration(this.getFrameNode()?.getNodePtr());
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
@@ -218,6 +301,29 @@ class JSBuilderNode extends BaseNode {
       updateFunc(elmtId, /* isFirstRender */ false);
       this.finishUpdateFunc();
     }
+  }
+
+  private isBuilderNodeActive(): boolean {
+    return this.activeCount_ > 0;
+  }
+
+  public setActiveInternal(active: boolean, isReuse: boolean = false): void {
+    stateMgmtProfiler.begin('BuilderNode.setActive');
+    if (!isReuse) {
+      this.activeCount_ += active ? 1 : -1;
+      if (this.isBuilderNodeActive() && this.isFreeze && this.updateParams_ !== null) {
+        this.isFreeze = false;
+        this.update(this.updateParams_);
+        this.updateParams_ = null;
+      } else if (!this.isBuilderNodeActive()) {
+        this.isFreeze = this.allowFreezeWhenInactive;
+      }
+    }
+    if (this.inheritFreeze) {
+      this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+      this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+    }
+    stateMgmtProfiler.end();
   }
 
   public purgeDeleteElmtId(rmElmtId: number): boolean {
@@ -390,7 +496,14 @@ class JSBuilderNode extends BaseNode {
     return this._nativeRef?.getNativeHandle();
   }
   public dispose(): void {
+    if (this.nodePtr_) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+    }
+    this.disposable_.dispose();
     this.frameNode_?.dispose();
+  }
+  public isDisposed(): boolean {
+    return this.disposable_.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
   }
   public disposeNode(): void {
     super.disposeNode();

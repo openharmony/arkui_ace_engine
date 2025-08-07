@@ -81,4 +81,16 @@ HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg002, TestSize.Level1)
     geometryNode->SetAccumulatedSafeAreaEdges(edge);
     EXPECT_EQ(geometryNode->accumulatedSafeAreaExpand_->left, edge.left);
 }
+/**
+ * @tc.name: GeometryNodeTestNg003
+ * @tc.desc: Test SetIgnoreAdjust and GetIgnoreAdjust
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg003, TestSize.Level1)
+{
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    OffsetF selfIgnoreAdjust(15.0f, 30.0f);
+    geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
+    EXPECT_EQ(geometryNode->GetIgnoreAdjust(), OffsetF(15.0f, 30.0f));
+}
 } // namespace OHOS::Ace::NG

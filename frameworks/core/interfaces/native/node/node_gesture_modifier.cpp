@@ -97,8 +97,9 @@ ArkUIGesture* createTapGestureWithDistanceThreshold(
     ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, bool limitFingerCount = false,
     void* userData = nullptr)
 {
-    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
-    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold, limitFingerCount);
+    auto distanceThresholdDimension = Dimension(distanceThreshold, DimensionUnit::VP);
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(
+        count, fingers, distanceThresholdDimension, limitFingerCount);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
@@ -233,6 +234,8 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].windowY = fingureIterator == fingureEnd ? 0.0f : fingureIterator->globalLocation_.GetY();
         points[i].screenX = touchPoint.screenX;
         points[i].screenY = touchPoint.screenY;
+        points[i].globalDisplayX = touchPoint.globalDisplayX;
+        points[i].globalDisplayY = touchPoint.globalDisplayY;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -280,6 +283,8 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
         touchEvent.actionTouchPoint.windowY = touchEvent.touchPointes[0].windowY;
         touchEvent.actionTouchPoint.screenX = touchEvent.touchPointes[0].screenX;
         touchEvent.actionTouchPoint.screenY = touchEvent.touchPointes[0].screenY;
+        touchEvent.actionTouchPoint.globalDisplayX = touchEvent.touchPointes[0].globalDisplayX;
+        touchEvent.actionTouchPoint.globalDisplayY = touchEvent.touchPointes[0].globalDisplayY;
         touchEvent.actionTouchPoint.toolType = touchEvent.touchPointes[0].toolType;
         touchEvent.actionTouchPoint.operatingHand = touchEvent.touchPointes[0].operatingHand;
     }
@@ -471,6 +476,8 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.actionTouchPoint.windowY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetY();
     mouseEvent.actionTouchPoint.screenX = tempMouseEvent.screenX;
     mouseEvent.actionTouchPoint.screenY = tempMouseEvent.screenY;
+    mouseEvent.actionTouchPoint.globalDisplayX = tempMouseEvent.globalDisplayX;
+    mouseEvent.actionTouchPoint.globalDisplayY = tempMouseEvent.globalDisplayY;
     mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
     mouseEvent.targetDisplayId = info.GetTargetDisplayId();
 }
@@ -507,6 +514,10 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.actionTouchPoint.windowY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetY();
     axisEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
     axisEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
+    axisEvent.actionTouchPoint.globalDisplayX =
+        fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetX();
+    axisEvent.actionTouchPoint.globalDisplayY =
+        fingureBegin == fingureEnd ? 0.0 : fingureBegin->globalDisplayLocation_.GetY();
     axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
     axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }
@@ -603,6 +614,12 @@ void registerGestureEventExt(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
         };
         gestureRef->SetOnActionEndId(onActionEnd);
     }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
+        auto onActionCancel = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->cancelFunction(gestureData);
+        };
+        gestureRef->SetOnActionCancelId(onActionCancel);
+    }
 }
 
 void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)
@@ -657,6 +674,13 @@ void addGestureToNodeWithRefCountDecrease(
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
+    GestureEventFunc clickEvent = NG::GetTapGestureEventFunc(gesturePtr);
+    if (clickEvent) {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
+        focusHub->SetOnClickCallback(std::move(clickEvent));
+    }
     gesturePtr->DecRefCount();
 }
 
@@ -1099,12 +1123,13 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
 
 ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
 {
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() },
-        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.Value() } };
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN,
+        Dimension(DEFAULT_PAN_DISTANCE.Value(), DimensionUnit::PX) },
+        { SourceTool::PEN, Dimension(DEFAULT_PEN_PAN_DISTANCE.Value(), DimensionUnit::PX) } };
     for (int i = 0; i < size; i++) {
         SourceTool st = ConvertCInputEventToolTypeToSourceTool(toolTypeArray[i]);
         if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
-            distanceMap[st] = distanceArray[i];
+            distanceMap[st] = Dimension(distanceArray[i], DimensionUnit::PX);
         }
     }
     auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
@@ -1120,12 +1145,12 @@ ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolTy
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
-    PanDistanceMap distanceMap = panRecognizer->GetDistanceMap();
+    PanDistanceMapDimension distanceMap = panRecognizer->GetDistanceMap();
     auto iter = distanceMap.find(ConvertCInputEventToolTypeToSourceTool(toolType));
     if (iter == distanceMap.end()) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    *distance = static_cast<double>(iter->second);
+    *distance = static_cast<double>(iter->second.ConvertToPx());
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1360,6 +1385,8 @@ void GetTouchPoints(const std::shared_ptr<BaseGestureEvent>& info, std::array<Ar
         points[i].windowY = fingureIterator.globalLocation_.GetY();
         points[i].screenX = fingureIterator.screenLocation_.GetX();
         points[i].screenY = fingureIterator.screenLocation_.GetY();
+        points[i].globalDisplayX = fingureIterator.globalDisplayLocation_.GetX();
+        points[i].globalDisplayY = fingureIterator.globalDisplayLocation_.GetY();
         points[i].operatingHand = fingureIterator.operatingHand_;
         points[i].tiltX = info->GetTiltX().value_or(0.0f);
         points[i].tiltY = info->GetTiltY().value_or(0.0f);
@@ -1377,6 +1404,8 @@ void GetTouchPoints(const std::shared_ptr<BaseGestureEvent>& info, std::array<Ar
         rawInputEvent.actionTouchPoint.windowY = rawInputEvent.touchPointes[0].windowY;
         rawInputEvent.actionTouchPoint.screenX = rawInputEvent.touchPointes[0].screenX;
         rawInputEvent.actionTouchPoint.screenY = rawInputEvent.touchPointes[0].screenY;
+        rawInputEvent.actionTouchPoint.globalDisplayX = rawInputEvent.touchPointes[0].globalDisplayX;
+        rawInputEvent.actionTouchPoint.globalDisplayY = rawInputEvent.touchPointes[0].globalDisplayY;
         rawInputEvent.actionTouchPoint.operatingHand = rawInputEvent.touchPointes[0].operatingHand;
         rawInputEvent.actionTouchPoint.tiltX = rawInputEvent.touchPointes[0].tiltX;
         rawInputEvent.actionTouchPoint.tiltY = rawInputEvent.touchPointes[0].tiltY;

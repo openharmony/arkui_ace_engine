@@ -76,9 +76,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     padding(value: Padding | Length): this;
     safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this;
     margin(value: Margin | Length): this;
-    background(builder: CustomBuilder, options?: {
-        align?: Alignment;
-    }): this;
+    background(content: CustomBuilder | ResourceColor, options?: BackgroundOptions): this;
     backgroundColor(value: ResourceColor): this;
     backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this;
     backgroundImageSize(value: SizeOptions | ImageSize): this;
@@ -1047,7 +1045,7 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     selectedColor(value: ResourceColor): this;
     minLabel(value: string): this;
     maxLabel(value: string): this;
-    showSteps(value: boolean): this;
+    showSteps(value: boolean, options?: SliderShowStepOptions): this;
     showTips(value: boolean, content?: any): this;
     trackThickness(value: Length): this;
     onChange(callback: (value: number, mode: SliderChangeMode) => void): this;
@@ -1516,6 +1514,10 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onInterceptRequest(callback: (event?: {
         request: WebResourceRequest;
     } | undefined) => WebResourceResponse): this;
+    onOverrideErrorPage(callback: (event?: {
+        webResourceRequest: WebResourceRequest;
+        error: WebResourceError;
+    } | undefined) => string): this;
     onPermissionRequest(callback: (event?: {
         request: PermissionRequest;
     } | undefined) => void): this;
@@ -1929,6 +1931,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     pageFlipMode(value: PageFlipMode): this;
     onContentWillScroll(handler: ContentWillScrollCallback): this;
     maintainVisibleContentPosition(value: boolean): this;
+    onScrollStateChanged(event: Callback<ScrollState>): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2103,6 +2106,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    symbolShadow(value: Optional<ShadowOptions>): SymbolGlyphAttribute;
+    shaderStyle(value: ShaderStyle[]): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

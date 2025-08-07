@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,13 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
+constexpr int XS = 0;
+constexpr int SM = 1;
+constexpr int MD = 2;
+constexpr int LG = 3;
+constexpr int XL = 4;
+constexpr int XXL = 5;
+constexpr int BREAKPOINTSIZE = 5;
 RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
 {
     auto sizeInfo = AceType::MakeRefPtr<GridSizeInfo>();
@@ -42,6 +49,18 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 
 } // namespace
 
+int GridContainerUtils::CalcBreakPoint(const RefPtr<GridSizeInfo> &threshold, double windowWidth)
+{
+    int index = 0;
+    for (const auto &cur : threshold->sizeInfo) {
+        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
+            break;
+        }
+        index++;
+    }
+    return index;
+}
+
 GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
     const WindowMode& mode, const RefPtr<PipelineBase>& pipeline)
 {
@@ -53,21 +72,60 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
             return GridSizeType::UNDEFINED;
         }
         windowWidth = pipeline->GetDisplayWindowRectInfo().GetSize().Width();
-        if (mode == WindowMode::WINDOW_MODE_FLOATING
-            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+        if (mode == WindowMode::WINDOW_MODE_FLOATING &&
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            windowWidth =
+                pipeline->CalcPageWidth(windowWidth - 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+            int index = CalcBreakPoint(threshold, windowWidth);
+            return static_cast<GridSizeType>(index);
         }
+        windowWidth = pipeline->CalcPageWidth(windowWidth);
+        std::vector<double> breakPoint(BREAKPOINTSIZE, -1.0);
+        std::transform(threshold->sizeInfo.begin(), threshold->sizeInfo.end(), breakPoint.begin(), [](Dimension x) {
+            return x.ConvertToVp();
+        });
+        auto custlayoutBreakpoints = WidthLayoutBreakPoint(breakPoint);
+        auto breakpoint = GetWidthBreakpoint(custlayoutBreakpoints, pipeline, breakpoints.userDefine);
+        return static_cast<GridSizeType>(breakpoint);
     } else {
         windowWidth = size.Width();
     }
-    int index = 0;
-    for (const auto& cur : threshold->sizeInfo) {
-        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
-            break;
-        }
-        index++;
-    }
+    int index = CalcBreakPoint(threshold, windowWidth);
     return static_cast<GridSizeType>(index);
+}
+
+WidthBreakpoint GetCalcWidthBreakpoint(
+    const OHOS::Ace::WidthLayoutBreakPoint &finalBreakpoints, double density, double width)
+{
+    WidthBreakpoint breakpoint;
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XXL;
+    }
+    return breakpoint;
+}
+
+WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
+    const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline, bool userDefine)
+{
+    auto finalBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0);
+    auto configBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    if (userDefine) {  // cust has value
+        finalBreakpoints = custlayoutBreakpoints;
+    } else if (configBreakpoints != WidthLayoutBreakPoint()) {  // ccm has value
+        finalBreakpoints = configBreakpoints;
+    }
+    double density = pipeline->GetCurrentDensity();
+    return GetCalcWidthBreakpoint(finalBreakpoints, density, pipeline->GetPageWidth());
 }
 
 GridSizeType GridContainerUtils::ProcessGridSizeType(
@@ -156,4 +214,28 @@ double GridContainerUtils::ProcessColumnWidth(const std::pair<double, double>& g
     return 0.0;
 }
 
+void GridContainerUtils::InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    int32_t *containerSizeArray, int32_t size)
+{
+    for (auto i = 0; i < size; ++i) {
+        if (containerSizeArray[i] > 0) {
+            containerSizeArray[0] = containerSizeArray[i];
+            break;
+        }
+    }
+    if (containerSizeArray[0] <= 0) {
+        return;
+    }
+    for (auto i = 1; i < size; ++i) {
+        if (containerSizeArray[i] <= 0) {
+            containerSizeArray[i] = containerSizeArray[i - 1];
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[XS];
+    gridContainerSize->sm = containerSizeArray[SM];
+    gridContainerSize->md = containerSizeArray[MD];
+    gridContainerSize->lg = containerSizeArray[LG];
+    gridContainerSize->xl = containerSizeArray[XL];
+    gridContainerSize->xxl = containerSizeArray[XXL];
+}
 } // namespace OHOS::Ace::V2

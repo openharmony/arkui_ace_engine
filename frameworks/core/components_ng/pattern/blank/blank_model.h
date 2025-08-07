@@ -32,6 +32,7 @@ public:
     virtual void SetHeight(const Dimension& height) = 0;
     virtual void SetColor(const Color& color) = 0;
     virtual void SetColor(const RefPtr<ResourceObject>& resobj) {};
+    virtual void ResetResObj(const std::string& key) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_H

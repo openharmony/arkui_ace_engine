@@ -89,11 +89,36 @@ void DragDropInitiatingStateReady::HandleLongPressOnAction(const GestureEvent& i
 void DragDropInitiatingStateReady::HandleTouchEvent(const TouchEvent& touchEvent)
 {
     UpdatePointInfoForFinger(touchEvent);
+    if (touchEvent.type == TouchType::UP) {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        auto machine = GetStateMachine();
+        CHECK_NULL_VOID(machine);
+        auto params = machine->GetDragDropInitiatingParams();
+        if (params.idleFingerId != touchEvent.id) {
+            return;
+        }
+        auto touchTask = [weakMachine = WeakPtr<DragDropInitiatingStateMachine>(machine)]() {
+            bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+            if (!isMenuShow) {
+                auto machine = weakMachine.Upgrade();
+                CHECK_NULL_VOID(machine);
+                machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+            }
+        };
+        pipelineContext->GetTaskExecutor()->PostTask(
+            touchTask, TaskExecutor::TaskType::UI, "DragDropInitiatingStateTouchUp", PriorityType::HIGH);
+    }
 }
 
 void DragDropInitiatingStateReady::HandlePanOnActionEnd(const GestureEvent& info)
 {
     OnActionEnd(info);
+}
+
+void DragDropInitiatingStateReady::HandlePanOnActionCancel(const GestureEvent& info)
+{
+    OnActionCancel(info);
 }
 
 void DragDropInitiatingStateReady::HandlePanOnReject()

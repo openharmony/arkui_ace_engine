@@ -27,9 +27,19 @@
 #include "arkoala_api_generated.h"
 #include "Serializers.h"
 
+const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result = nullptr);
 
-const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI();
-const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI();
+const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI() {
+    return reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI*>(
+        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
+        GENERATED_ARKUI_BASIC_NODE_API_VERSION, nullptr));
+}
+
+const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
+    return reinterpret_cast<const GENERATED_ArkUIExtendedNodeAPI*>(
+        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_EXTENDED),
+        GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
+}
 
 CustomDeserializer* DeserializerBase::customDeserializers = nullptr;
 
@@ -426,6 +436,12 @@ void impl_SetChildTotalCount(Ark_NativePointer nodePtr, Ark_Int32 totalCount)
 }
 KOALA_INTEROP_DIRECT_V2(SetChildTotalCount, Ark_NativePointer, Ark_Int32)
 
+static const std::string PAGE_SUFFIX = "GeneratedEntry";
+[[maybe_unused]] static bool isPageClass(const std::string& className)
+{
+    return (PAGE_SUFFIX.size() < className.size()) && std::equal(PAGE_SUFFIX.rbegin(), PAGE_SUFFIX.rend(), className.rbegin());
+}
+
 KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, const KStringPtr& viewParams) {
 #ifdef KOALA_USE_JAVA_VM
     JNIEnv* env = reinterpret_cast<JNIEnv*>(vm);
@@ -433,7 +449,7 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     std::replace(className.begin(), className.end(), '.', '/');
     jclass viewClassClass = env->FindClass(className.c_str());
     if (!viewClassClass) {
-        fprintf(stderr, "Cannot find user class %s\n", viewClass.c_str());
+        LOGE("Cannot find user class %" LOG_PUBLIC "s", viewClass.c_str());
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
             env->ExceptionClear();
@@ -442,7 +458,7 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     }
     jmethodID viewClassCtor = env->GetMethodID(viewClassClass, "<init>", "(Ljava/lang/String;)V");
     if (!viewClassCtor) {
-        fprintf(stderr, "Cannot find user class ctor\n");
+        LOGE("Cannot find user class ctor");
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
             env->ExceptionClear();
@@ -451,7 +467,7 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     }
     jobject result = env->NewObject(viewClassClass, viewClassCtor, env->NewStringUTF(viewParams.c_str()));
     if (!result) {
-        fprintf(stderr, "Cannot instantiate user class\n");
+        LOGE("Cannot instantiate user class");
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
             env->ExceptionClear();
@@ -466,7 +482,9 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     if (className == "ViewLoaderApp") {
         className = "Page.App";
     } else if (className == "EtsHarness") {
-        className = "@koalaui.ets-harness.build.unmemoized.src.Page.EtsHarness";
+        className = "@koalaui.ets-harness.build.unmemoized.build.Page.EtsHarness";
+    } else if (isPageClass(className)) {
+        className = "@koalaui.user.build.unmemoized.build.generated." + className;
     } else {
         className = "@koalaui.user.build.unmemoized.src.Page." + className;
     }
@@ -506,7 +524,9 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     if (className == "UserApp") {
         className = "L@koalaui.arkts-arkui.Application.UserView;";
     } if (className == "EtsHarness") {
-        className = "L@koalaui.ets-harness.build.unmemoized.src.Page.EtsHarness;";
+        className = "L@koalaui.ets-harness.build.unmemoized.build.Page.EtsHarness";
+    } else if (isPageClass(className)) {
+        className = "L@koalaui.user.build.unmemoized.build.generated." + className + ";";
     } else {
         className = "L@koalaui.user.build.unmemoized.src.Page." + className + ";";
     }
@@ -514,7 +534,7 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     ani_class viewClassClass = nullptr;
     env->FindClass(className.c_str(), &viewClassClass);
     if (!viewClassClass) {
-        LOGE("Cannot find user class %s\n", viewClass.c_str());
+        LOGE("Cannot find user class %" LOG_PUBLIC "s\n", viewClass.c_str());
         ani_boolean hasError = false;
         env->ExistUnhandledError(&hasError);
         if (hasError) {
@@ -551,7 +571,7 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     }
     return (KVMObjectHandle)result;
 #else
-    fprintf(stderr, "LoadUserView() is not implemented yet\n");
+    LOGE("LoadUserView() is not implemented yet");
     return nullptr;
 #endif
 }

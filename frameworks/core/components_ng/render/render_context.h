@@ -51,7 +51,7 @@ class DrawCmdList;
 class VisualEffect;
 class Filter;
 enum class Gravity;
-class BrightnessBlender;
+class Blender;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
@@ -247,6 +247,7 @@ public:
     virtual void ClearFocusState() {}
 
     virtual void CreateBackgroundPixelMap(const RefPtr<FrameNode>& value) {}
+    virtual uint32_t GetCurrentBackgroundTaskId() const { return 0; }
 
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
@@ -348,7 +349,7 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
-    virtual void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {}
+    virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -367,6 +368,8 @@ public:
     virtual void SetShadowElevation(float elevation) {}
     virtual void SetShadowRadius(float radius) {}
     virtual void SetScale(float scaleX, float scaleY) {}
+    virtual void SetScrollScale(float scale) {}
+    virtual void ResetScrollScale() {}
     virtual void SetBackgroundColor(uint32_t colorValue) {}
     virtual void SetRenderPivot(float pivotX, float pivotY) {}
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
@@ -456,11 +459,12 @@ public:
 
     virtual void ClearDrawCommands() {}
 
+    virtual void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) {}
     virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
@@ -533,7 +537,7 @@ public:
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
     virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
-    virtual void SetIsWideColorGamut(bool isWideColorGamut) {}
+    virtual void SetColorGamut(uint32_t colorGamut) {}
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
@@ -621,7 +625,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, CustomBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsTransitionBackground, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BuilderBackgroundFlag, bool);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundIgnoresLayoutSafeAreaEdges, uint32_t);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -813,6 +816,8 @@ public:
 
     virtual void SetDrawNode() {}
 
+    static void SetNeedCallbackNodeChange(bool needCallback);
+
     virtual void UpdateOcclusionCullingStatus(bool enable) {}
 
     virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}
@@ -827,6 +832,10 @@ public:
     virtual void SyncRSPropertyToRenderContext(AnimationPropertyType property) {}
 
     virtual void RemoveFromTree() {}
+
+    virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
+
+    virtual void UpdateCustomBackground() {}
 
 protected:
     RenderContext() = default;
@@ -854,7 +863,6 @@ protected:
     virtual void OnCustomBackgroundColorUpdate(const Color& color) {}
     virtual void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) {}
     virtual void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) {}
-    virtual void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}
@@ -932,7 +940,9 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
+    void RequestNextFrameMultiThread() const;
     friend class ViewAbstract;
+    friend class ViewAbstractModelStatic;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;

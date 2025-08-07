@@ -1397,6 +1397,11 @@ HWTEST_F(EventRecorderTest, AddApiTest001, TestSize.Level1)
     pageNode->AddChild(pageNode2, 1, false);
     builder.SetHost(pageNode);
     EXPECT_EQ(builder.params_->empty(), false);
+
+    auto pageNode3 = CreatePageNode("pages/Index3");
+    pageNode3->UpdateInspectorId("abc");
+    builder.SetHost(pageNode3);
+    EXPECT_EQ(builder.params_->empty(), false);
 }
 
 /**
@@ -1428,6 +1433,22 @@ HWTEST_F(EventRecorderTest, AddApiTest002, TestSize.Level1)
     vector<std::string> params2 = {"df", "rfds", "fd"};
     EventRecorder::Get().globalSwitch_[7] = true;
     Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params2);
+    EXPECT_EQ(builder.params_->empty(), false);
+}
+
+/**
+ * @tc.name: EventRecorderTest016
+ * @tc.desc: Test builder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, EventRecorderTest016, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder;
+    string value = "";
+    builder.params_->emplace(KEY_TEXT, value);
+    auto pageNode = CreatePageNode("pages/Index");
+    builder.eventType_ = Recorder::EventType::CLICK;
+    builder.SetHost(pageNode);
     EXPECT_EQ(builder.params_->empty(), false);
 }
 } // namespace OHOS::Ace

@@ -17,21 +17,46 @@
 #include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureInterfaceAccessor {
+namespace {
+    constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+    constexpr int32_t DEFAULT_TAP_COUNT = 1;
+    constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
+    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+}
 void DestroyPeerImpl(Ark_TapGestureInterface peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
-Ark_TapGestureInterface CtorImpl()
+Ark_TapGestureInterface CtorImpl(const Opt_TapGestureParameters* value)
 {
-    auto peer = new TapGestureInterfacePeer();
-    peer->gesture = Referenced::MakeRefPtr<TapGesture>();
+    bool isLimitFingerCount = DEFAULT_IS_LIMIT_FINGER_COUNT;
+    int32_t fingers = DEFAULT_TAP_FINGERS;
+    int32_t count = DEFAULT_TAP_COUNT;
+    double distance = DEFAULT_TAP_DISTANCE;
+    auto peer = PeerUtils::CreatePeer<TapGestureInterfacePeer>();
+    std::optional<Ark_TapGestureParameters> params = value ? Converter::GetOpt(*value) : std::nullopt;
+    if (params.has_value()) {
+        fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_TAP_FINGERS);
+        fingers = fingers <= DEFAULT_TAP_FINGERS ? DEFAULT_TAP_FINGERS : fingers;
+        count = Converter::OptConvert<int32_t>(params->count).value_or(DEFAULT_TAP_COUNT);
+        count = count <= DEFAULT_TAP_COUNT ? DEFAULT_TAP_COUNT : count;
+        auto distanceThreshold = Converter::OptConvert<float>(params->distanceThreshold);
+        if (distanceThreshold.has_value()) {
+            distance = static_cast<double>(distanceThreshold.value());
+            distance = LessNotEqual(distance, 0.0) ? DEFAULT_TAP_DISTANCE : distance;
+            distance = Dimension(distance, DimensionUnit::VP).ConvertToPx();
+        }
+        isLimitFingerCount =
+            Converter::OptConvert<bool>(params->isFingerCountLimited).value_or(DEFAULT_IS_LIMIT_FINGER_COUNT);
+    }
+    peer->gesture = Referenced::MakeRefPtr<TapGesture>(count, fingers, distance, isLimitFingerCount);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

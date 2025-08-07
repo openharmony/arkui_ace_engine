@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -77,7 +78,9 @@ public:
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
         bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, bubbleMethod);
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
         CHECK_NULL_RETURN(theme, bubbleMethod);
@@ -173,6 +176,11 @@ public:
     void UpdateBubbleBackGroundColor(const Color& value);
     void UpdateMaskColor(const Color& value);
     void UpdateMask(bool maskValue);
+    void UpdateArrowWidth(const CalcDimension& dimension);
+    void UpdateArrowHeight(const CalcDimension& dimension);
+    void UpdateWidth(const CalcDimension& dimension);
+    void UpdateRadius(const CalcDimension& dimension);
+
     void SetMessageColor(bool isSetMessageColor)
     {
         isSetMessageColor_ = isSetMessageColor;
@@ -256,6 +264,36 @@ public:
     bool GetAvoidKeyboard()
     {
         return avoidKeyboard_;
+    }
+
+    void SetHasPlacement(bool hasPlacement)
+    {
+        hasPlacement_ = hasPlacement;
+    }
+
+    bool HasPlacement() const
+    {
+        return hasPlacement_;
+    }
+
+    void SetHasWidth(bool hasWidth)
+    {
+        hasWidth_ = hasWidth;
+    }
+
+    bool HasWidth() const
+    {
+        return hasWidth_;
+    }
+
+    void SetAvoidTarget(std::optional<AvoidanceMode> avoidTarget)
+    {
+        avoidTarget_ = avoidTarget;
+    }
+    
+    std::optional<AvoidanceMode> GetAvoidTarget() const
+    {
+        return avoidTarget_;
     }
 
     bool GetHasTransition() const
@@ -378,8 +416,7 @@ private:
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
-    void PopBubble();
-    void PopTipsBubble();
+    void PopBubble(bool tips = false);
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
@@ -391,6 +428,7 @@ private:
     void StartAlphaEnteringAnimation(std::function<void()> finish);
     void StartOffsetExitingAnimation();
     void StartAlphaExitingAnimation(std::function<void()> finish);
+    void UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
@@ -421,6 +459,9 @@ private:
     bool isSetMessageColor_ = false;
     Border border_;
     bool avoidKeyboard_ = false;
+    bool hasPlacement_ = false;
+    bool hasWidth_ = false;
+    std::optional<AvoidanceMode> avoidTarget_ = std::nullopt;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

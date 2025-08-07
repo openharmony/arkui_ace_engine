@@ -76,6 +76,7 @@ public:
     virtual void Create(NG::SplitType splitType) = 0;
     virtual void SetResizable(NG::SplitType splitType, bool resizable) = 0;
     virtual void SetDivider(NG::SplitType splitType, const NG::ColumnSplitDivider& divider) = 0;
+    virtual void ResetResObj(const std::string& key) {};
 
 private:
     static std::unique_ptr<LinearSplitModel> instance_;

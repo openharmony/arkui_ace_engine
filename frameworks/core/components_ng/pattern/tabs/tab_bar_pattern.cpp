@@ -103,7 +103,7 @@ void TabBarPattern::SetController(const RefPtr<SwiperController>& controller)
     tabsController->SetTabBarTranslateImpl([weak](const TranslateOptions& options) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetTabBarTranslate(options);
+        pattern->SetTabBarTranslate(options, true);
     });
     tabsController->SetTabBarOpacityImpl([weak](float opacity) {
         auto pattern = weak.Upgrade();
@@ -162,11 +162,14 @@ void TabBarPattern::StartShowTabBarImmediately()
 
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto translate = options.y.ConvertToPx();
+    if (NearEqual(translate, userDefinedTranslateY_)) {
+        return;
+    }
     tabBarProperty_->Set(translate);
     auto propertyCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->tabBarProperty_->Set(0.0f);
+        pattern->tabBarProperty_->Set(pattern->GetUserDefinedTranslateY());
     };
     auto finishCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -328,13 +331,16 @@ void TabBarPattern::UpdateTabBarHiddenOffset(float offset)
     }
 }
 
-void TabBarPattern::SetTabBarTranslate(const TranslateOptions& options)
+void TabBarPattern::SetTabBarTranslate(const TranslateOptions& options, bool isUserDefined)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate(options);
+    if (isUserDefined) {
+        userDefinedTranslateY_ = options.y.ConvertToPx();
+    }
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto divider = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
@@ -2755,10 +2761,15 @@ Color TabBarPattern::GetTabBarBackgroundColor() const
 
 void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect)
 {
-    if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size())) {
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    int32_t showingIndicator = indicator_;
+    if (paintProperty && paintProperty->HasIndicator()) {
+        showingIndicator = paintProperty->GetIndicatorValue();
+    }
+    if (showingIndicator < 0 || showingIndicator >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
     }
-    indicatorStyle = indicatorStyles_[indicator_];
+    indicatorStyle = indicatorStyles_[showingIndicator];
     if (NonPositive(indicatorStyle.width.Value())) {
         indicatorStyle.width = Dimension(tabBarItemRect.Width());
     }
@@ -3748,5 +3759,16 @@ void TabBarPattern::ChangeIndex(int32_t index)
         index = 0;
     }
     HandleClick(SourceType::NONE, index);
+}
+
+void TabBarPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    jumpIndex_ = layoutProperty->GetIndicatorValue(0);
 }
 } // namespace OHOS::Ace::NG

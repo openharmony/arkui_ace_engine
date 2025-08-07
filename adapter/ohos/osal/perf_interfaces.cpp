@@ -15,6 +15,7 @@
 
 #include "base/perfmonitor/perf_interfaces.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/ace_application_info.h"
 #include "perf_monitor_adapter.h"
 #include "xcollie/watchdog.h"
@@ -27,7 +28,7 @@ OHOS::HiviewDFX::AceAppInfo GetAceAppInfo()
 {
     OHOS::HiviewDFX::AceAppInfo appInfo;
     appInfo.pid = AceApplicationInfo::GetInstance().GetPid();
-    appInfo.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    appInfo.bundleName = Container::CurrentBundleName();
     appInfo.versionCode = static_cast<int32_t>(AceApplicationInfo::GetInstance().GetAppVersionCode());
     appInfo.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     appInfo.processName = AceApplicationInfo::GetInstance().GetProcessName();
@@ -129,6 +130,11 @@ void PerfInterfaces::SetFrameTime(int64_t vsyncTime, int64_t duration, double ja
     PerfMonitorAdapter::GetInstance().SetFrameTime(vsyncTime, duration, jank, windowName);
 }
 
+void PerfInterfaces::SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration)
+{
+    PerfMonitorAdapter::GetInstance().SetSubHealthInfo(info, reason, duration);
+}
+
 void PerfInterfaces::ReportJankFrameApp(double jank, int32_t jankThreshold)
 {
     PerfMonitorAdapter::GetInstance().ReportJankFrameApp(jank, jankThreshold);
@@ -138,6 +144,12 @@ void PerfInterfaces::ReportPageShowMsg(const std::string& pageUrl, const std::st
     const std::string& pageName)
 {
     PerfMonitorAdapter::GetInstance().ReportPageShowMsg(pageUrl, bundleName, pageName);
+}
+
+void PerfInterfaces::SetApplicationInfo()
+{
+    auto appInfo = GetAceAppInfo();
+    PerfMonitorAdapter::GetInstance().SetAppInfo(appInfo);
 }
 
 } // namespace OHOS::Ace

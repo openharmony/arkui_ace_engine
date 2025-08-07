@@ -29,7 +29,6 @@ class AlignItemsModifier extends ModifierWithKey<VerticalAlign | undefined> {
     applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
         let rowPeerNode = node as ArkRowPeer
         if (reset) {
-            // rowPeerNode.resetAlignItemsAttribute();
         } else {
             if (this.value != undefined) {
                 rowPeerNode.alignItemsAttribute(this.value as VerticalAlign);

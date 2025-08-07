@@ -104,6 +104,7 @@ const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
 constexpr float SLIDER_PERCENTAGE = 100.0f;
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -1036,14 +1037,14 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
      * @tc.cases: case1. when sliderPaintProperty's direction is HORIZONTAL.
      */
     sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(sliderLayoutAlgorithm->GetTrackThickness(), SLIDER_OUTSET_TRACK_THICKNRESS.ConvertToPx());
+    EXPECT_NE(sliderLayoutAlgorithm->trackThickness_, SLIDER_OUTSET_TRACK_THICKNRESS.ConvertToPx());
     /**
      * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
      */
     sliderLayoutProperty->UpdateThickness(Dimension(40.0));
     sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
     sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(sliderLayoutAlgorithm->GetTrackThickness(), SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx());
+    EXPECT_NE(sliderLayoutAlgorithm->trackThickness_, SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx());
 }
 
 /**
@@ -2056,5 +2057,258 @@ HWTEST_F(SliderTestNg, SliderTestNgMinResponse004, TestSize.Level1)
         EXPECT_EQ(sliderPattern->value_, startValue - testData.second);
         sliderPattern->FireChangeEvent(SliderPattern::SliderChangeMode::End);
     }
+}
+
+/**
+ * @tc.name: SliderTestNgMeasureContent0001
+ * @tc.desc: Test Slider MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgMeasureContent0001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    SliderModelNG sliderModelNG;
+    constexpr float stepValue = 10.0f;
+    constexpr float startValue = 70.0f;
+    sliderModelNG.Create(startValue, stepValue, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set sliderLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
+    ASSERT_NE(sliderLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
+}
+
+/**
+ * @tc.name: ColorTypeToStringTest001
+ * @tc.desc: test ColorTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, ColorTypeToStringTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data with SliderColorType and expected string mappings.
+     * @tc.expected: step1. Test data contains valid color type to string mappings.
+     */
+    std::vector<std::pair<SliderColorType, std::string>> types = { { SliderColorType::BLOCK_COLOR, "BlockColor" },
+        { SliderColorType::TRACK_COLOR, "TrackColor" }, { SliderColorType::SELECT_COLOR, "SelectColor" },
+        { SliderColorType::BLOCK_BORDER_COLOR, "BlockBorderColor" }, { SliderColorType::STEP_COLOR, "StepColor" },
+        { static_cast<SliderColorType>(5), "Unknown" } };
+
+    /**
+     * @tc.steps: step2. Iterate through each test pair and call ColorTypeToString.
+     * @tc.expected: step2. The function returns the expected string for each color type.
+     */
+    for (const auto& [type, val] : types) {
+        auto ret = SliderModelNG::ColorTypeToString(type);
+        EXPECT_EQ(val, ret);
+    }
+}
+
+/**
+ * @tc.name: UpdateComponentColorTest001
+ * @tc.desc: test UpdateComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, UpdateComponentColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider model and validate frame node, context and paint property.
+     * @tc.expected: step1. Frame node, pipeline context and paint property are created and valid.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Test individual color updates for all SliderColorType values.
+     * @tc.expected: step2. Each color property is updated and retrievable with the set value.
+     */
+    paintProperty->UpdateBlockColor(Color::RED);
+    auto ret = paintProperty->GetBlockColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    Gradient gradientRet;
+    gradientRet.AddColor(GradientColor(Color::RED));
+    paintProperty->UpdateTrackBackgroundColor(gradientRet);
+    EXPECT_TRUE(paintProperty->GetTrackBackgroundColor().has_value());
+    ret = paintProperty->GetTrackBackgroundColor()->GetColors().front().GetColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    paintProperty->UpdateBlockBorderColor(Color::RED);
+    ret = paintProperty->GetBlockBorderColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    paintProperty->UpdateStepColor(Color::RED);
+    ret = paintProperty->GetStepColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    /**
+     * @tc.steps: step3. Test UpdateComponentColor under different system color change and rerenderable states.
+     * @tc.expected: step3. When system color changes and node is rerenderable, color properties are reset.
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (const auto& pair : vec) {
+        pipelineContext->SetIsSystemColorChange(pair.first);
+        frameNode->SetRerenderable(pair.second);
+        sliderModelNG.UpdateComponentColor(frameNode, static_cast<SliderColorType>(5));
+        if (pipelineContext->IsSystmColorChange() && pair.second) {
+            sliderModelNG.UpdateComponentColor(frameNode, SliderColorType::BLOCK_COLOR);
+            ret = paintProperty->GetBlockColor();
+            EXPECT_FALSE(ret.has_value());
+            sliderModelNG.UpdateComponentColor(frameNode, SliderColorType::SELECT_COLOR);
+            ret = paintProperty->GetSelectColor();
+            EXPECT_FALSE(ret.has_value());
+            sliderModelNG.UpdateComponentColor(frameNode, SliderColorType::BLOCK_BORDER_COLOR);
+            ret = paintProperty->GetBlockBorderColor();
+            EXPECT_FALSE(ret.has_value());
+            sliderModelNG.UpdateComponentColor(frameNode, SliderColorType::STEP_COLOR);
+            ret = paintProperty->GetStepColor();
+            EXPECT_FALSE(ret.has_value());
+            sliderModelNG.UpdateComponentColor(frameNode, SliderColorType::TRACK_COLOR);
+            auto gradientRe = paintProperty->GetTrackBackgroundColor();
+            EXPECT_FALSE(gradientRe.has_value());
+        }
+    }
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj
+ * @tc.desc: Test Slider CreateWithColorResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, CreateWithColorResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider model and validate frame node.
+     * @tc.expected: step1. Frame node is created and not null.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    std::cout << "frameNode addr " << frameNode << std::endl;
+
+    /**
+     * @tc.steps: step2. Create color resource object and associate with SELECT_COLOR type.
+     * @tc.expected: step2. Resource object is created and associated with the correct key in resource manager.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    sliderModelNG.CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+
+    /**
+     * @tc.steps: step3. Validate resource object is registered in pattern's resource manager.
+     * @tc.expected: step3. Resource manager contains exactly one entry with the generated key.
+     */
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::cout << "pattern addr" << AceType::RawPtr(pattern) << std::endl;
+    std::string key = "slider" + sliderModelNG.ColorTypeToString(SliderColorType::SELECT_COLOR);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: CreateWithMediaResourceObj
+ * @tc.desc: Test Slider CreateWithMediaResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, CreateWithMediaResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider model and validate frame node.
+     * @tc.expected: step1. Frame node is created and not null.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create media resource object with specified bundle and module names.
+     * @tc.expected: step2. Resource object is created and registered with correct key in resource manager.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    sliderModelNG.CreateWithMediaResourceObj(resObj, "bundleName", "ModuleName");
+
+    /**
+     * @tc.steps: step3. Validate resource object is registered in pattern's resource manager.
+     * @tc.expected: step3. Resource manager contains exactly one entry with the key "sliderImage".
+     */
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string key = "sliderImage";
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: CreateWithStringResourceObj
+ * @tc.desc: Test Slider CreateWithStringResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, CreateWithStringResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider model and validate frame node.
+     * @tc.expected: step1. Frame node is created and not null.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create string resource object with specified parameter.
+     * @tc.expected: step2. Resource object is created and registered with correct key in resource manager.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    sliderModelNG.CreateWithStringResourceObj(resObj, true);
+
+    /**
+     * @tc.steps: step3. Validate resource object is registered in pattern's resource manager.
+     * @tc.expected: step3. Resource manager contains exactly one entry with the key "sliderShowTips".
+     */
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string key = "sliderShowTips";
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
 }
 } // namespace OHOS::Ace::NG

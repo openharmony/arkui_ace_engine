@@ -140,6 +140,18 @@ void SwiperTestNg::CreateSwiperItems(int32_t itemNumber)
     }
 }
 
+RefPtr<FrameNode> SwiperTestNg::CreateSwiper(const std::function<void(SwiperModelNG)>& callback)
+{
+    SwiperModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
 void SwiperTestNg::CreateItemWithSize(float width, float height)
 {
     ButtonModelNG buttonModelNG;
@@ -301,6 +313,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
      * @tc.expected: Related function is called.
      */
     auto pipeline = frameNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
     pattern_->surfaceChangedCallbackId_.emplace(1);
     pattern_->InitSurfaceChangedCallback();
     pipeline->callbackId_ = 0;
@@ -1448,6 +1461,7 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     CreateSwiperDone();
     int32_t expectedRate = 60;
     auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, expectedRate);
+    EXPECT_NE(frameRateRange, nullptr);
     pattern_->SetFrameRateRange(frameRateRange, SwiperDynamicSyncSceneType::GESTURE);
     auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
     int32_t nodeId = frameNode_->GetId();
@@ -1618,6 +1632,7 @@ HWTEST_F(SwiperTestNg, OnModifyDone_StopAndResetSpringAnimation, TestSize.Level1
     swiperPattern->isBindIndicator_ = true;
     swiperPattern->currentDelta_ = 2.0f;
     swiperPattern->OnModifyDone();
+    EXPECT_EQ(frameNode->layoutProperty_->GetPropertyChangeFlag(), PROPERTY_UPDATE_MEASURE_SELF);
     EXPECT_EQ(swiperPattern->currentDelta_, 0.0f);
 }
 
@@ -1690,22 +1705,47 @@ HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
     };
     SwiperModelNG model = CreateSwiper();
     model.SetOnChange(std::move(onChange));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->currentIndex_ = currentIndex;
+    std::map<std::string, int32_t> commands = { { R"({"cmd":"changeIndex","params":{"index":2}})", 2 },
+        { R"({"cmd":"changeIndex","params":{"index":100}})", 0 },
+        { R"({"cmd":"changeIndex","params":{"index":-10}})", 0 },
+        { R"({"cmd":"changeIndex","params":{"index":1}})", 1 } };
+
+    for (const auto& command : commands) {
+        bool ret = pattern_->OnInjectionEvent(command.first);
+        ASSERT_NE(ret, false);
+        EXPECT_EQ(pattern_->targetIndex_, command.second);
+    }
+}
+
+/**
+ * @tc.name: ReportComponentChangeEvent001
+ * @tc.desc: test ReportComponentChangeEvent func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, ReportComponentChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    int32_t currentIndex = 3;
+    auto onChange = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (swiperInfo != nullptr) {
+            currentIndex = swiperInfo->GetIndex();
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChange(std::move(onChange));
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(pattern);
-    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 2);
-    command = R"({"cmd":"changeIndex","params":{"index":100}})";
-    pattern->OnInjectionEvent(command);
-    EXPECT_EQ(currentIndex, 0);
-    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
-    EXPECT_EQ(currentIndex, 0);
-    pattern->OnInjectionEvent(command);
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, 0.0f);
 }
 
 /**
@@ -2255,5 +2295,61 @@ HWTEST_F(SwiperTestNg, NotifyDataChange005, TestSize.Level1)
     swiperPattern->jumpIndex_ = std::nullopt;
     swiperPattern->NotifyDataChange(4, 2);
     EXPECT_FALSE(swiperPattern->jumpIndex_.has_value());
+}
+
+/**
+ * @tc.name: NotifyDataChange006
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange006, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    swiperNode->children_.clear();
+    swiperNode->children_ = { frameNode, frameNode };
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    swiperNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = swiperNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 0;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 1);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 1);
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding001
+ * @tc.desc: Test SwiperPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomizeSafeAreaPadding001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = swiperPattern->CustomizeSafeAreaPadding(padding, false);
+    EXPECT_EQ(padding.top, 10);
+    EXPECT_EQ(padding.bottom, 10);
+    EXPECT_EQ(padding.left, std::nullopt);
+    EXPECT_EQ(padding.right, std::nullopt);
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding002
+ * @tc.desc: Test SwiperPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = swiperPattern->CustomizeSafeAreaPadding(padding, true);
+    EXPECT_EQ(padding.top, std::nullopt);
+    EXPECT_EQ(padding.bottom, std::nullopt);
+    EXPECT_EQ(padding.left, 10);
+    EXPECT_EQ(padding.right, 10);
 }
 } // namespace OHOS::Ace::NG

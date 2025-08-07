@@ -53,6 +53,10 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targe
         return nullptr;
     }
 
+    if (targetNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+        return targetNode;
+    }
+
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FindWindowScene start.");
     auto parent = targetNode->GetParent();
     while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
@@ -198,13 +202,16 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
     auto rect = renderContext->GetPaintRectWithoutTransform();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(pointerId, item)) {
+        auto windowX = item.GetWindowX();
+        auto windowY = item.GetWindowY();
         PointF tmp(item.GetWindowX() + rect.GetX(), item.GetWindowY() + rect.GetY());
         renderContext->GetPointTransform(tmp);
         item.SetWindowX(static_cast<int32_t>(std::round(tmp.GetX())));
         item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
         if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             // CaculatePoint for double XY Position.
-            PointF tmpPos(item.GetWindowXPos() + rect.GetX(), item.GetWindowYPos() + rect.GetY());
+            PointF tmpPos((NearZero(item.GetWindowXPos()) ? windowX : item.GetWindowXPos()) + rect.GetX(),
+                (NearZero(item.GetWindowYPos()) ? windowY : item.GetWindowYPos()) + rect.GetY());
             renderContext->GetPointTransform(tmpPos);
             item.SetWindowXPos(tmpPos.GetX());
             item.SetWindowYPos(tmpPos.GetY());

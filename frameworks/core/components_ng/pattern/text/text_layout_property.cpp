@@ -128,6 +128,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
     json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
         GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
+    json->PutExtAttr("symbolShadow", GetSymbolShadowInJson(GetSymbolShadow()), filter);
 
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecorationFirst());
@@ -183,6 +184,18 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("privacySensitive", host ? host->IsPrivacySensitive() : false, filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
+    json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("optimizeTrailingSpace", GetOptimizeTrailingSpace().value_or(false) ? "true" : "false", filter);
+
+    if (GetTextEffectStrategyValue(TextEffectStrategy::NONE) != TextEffectStrategy::NONE) {
+        auto jsonNumericTransiton = JsonUtil::Create(true);
+        std::string direction = StringUtils::ToString(GetTextFlipDirectionValue(TextFlipDirection::DOWN));
+        std::string enableBlur = GetTextFlipEnableBlurValue(false) ? "true" : "false";
+        jsonNumericTransiton->Put("flipDirection", direction.c_str());
+        jsonNumericTransiton->Put("enableBlur", enableBlur.c_str());
+        json->PutExtAttr("numericTextTransitionOptions", jsonNumericTransiton->ToString().c_str(), filter);
+    }
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

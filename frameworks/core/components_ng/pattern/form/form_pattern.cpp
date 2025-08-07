@@ -55,6 +55,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -104,7 +105,8 @@ public:
         }
         formPattern_->OnSnapshot(pixelMap);
     }
-
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 private:
     WeakPtr<FormPattern> weakFormPattern_ = nullptr;
 };
@@ -178,6 +180,7 @@ void FormPattern::OnAttachToFrameNode()
     InitClickEvent();
 
     scopeId_ = Container::CurrentId();
+    EventReport::StartFormModifyTimeoutReportTimer(cardInfo_.id, cardInfo_.bundleName, cardInfo_.cardName);
 }
 
 void FormPattern::InitClickEvent()
@@ -634,6 +637,7 @@ void FormPattern::OnVisibleChange(bool isVisible)
 
 void FormPattern::OnModifyDone()
 {
+    EventReport::StopFormModifyTimeoutReportTimer(cardInfo_.id);
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -792,13 +796,8 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
 #endif
 
     bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
-    if (formInfo.transparencyEnabled && isFormBundleForbidden) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "transparencyEnabled.");
-        formSpecialStyle_.SetInitDone();
-        return;
-    }
     bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
-    if (isFormProtected || isFormBundleForbidden)  {
+    if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden))  {
         auto newFormSpecialStyle = formSpecialStyle_;
         newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
@@ -1246,9 +1245,7 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenTextNode(std::string resourceName,
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     if (isRowStyle) {
-        PaddingProperty padding;
-        padding.right = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
-        textLayoutProperty->UpdatePadding(padding);
+        textLayoutProperty->UpdateLayoutWeight(1);
     }
     textLayoutProperty->UpdateContent(content);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
@@ -1529,8 +1526,25 @@ void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
         DelayDeleteImageNode(want.GetBoolParam(
             OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
     } else {
-        RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+        DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     }
+}
+
+void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this), formChildNodeType] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->RemoveFormChildNode(formChildNodeType);
+        },
+        STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE, "DelayRemoveFormChildNode" + nodeIdStr);
 }
 
 void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
@@ -1854,7 +1868,7 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");  
+    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");
     if (!formManagerBridge_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "OnActionEvent failed, form manager deleget is null!");
         return;
@@ -2553,7 +2567,7 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    
+
     subContainer_->SetFormPattern(WeakClaim(this));
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
@@ -2679,6 +2693,10 @@ bool FormPattern::IsFormBundleProtected(const std::string& bundleName, int64_t f
 
 void FormPattern::HandleLockEvent(bool isLock)
 {
+    if (cardInfo_.exemptAppLock) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "Is funInteraction form, no need continue.");
+        return;
+    }
     auto newFormSpecialStyle = formSpecialStyle_;
     newFormSpecialStyle.SetIsLockedByAppLock(isLock);
     HandleFormStyleOperation(newFormSpecialStyle);

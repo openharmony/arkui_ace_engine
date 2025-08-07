@@ -47,6 +47,10 @@ public:
     void ResetIndicatorIconPath() override {}
     void ResetIndicatorSpace() override {}
     void CreateWithResourceObj(GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
+    void SetUseGradient(bool useGradient) override {};
+    void SetUseSpecialDefaultIndicator(bool useSpecialDefaultIndicator) override {};
+    void SetGradientColorModeInit() override {};
+    void SetGradientInit(const std::vector<NG::ColorStopArray>& colors) override {};
 };
 
 } // namespace OHOS::Ace::Framework

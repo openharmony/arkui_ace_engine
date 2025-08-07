@@ -79,6 +79,8 @@ const DIALOG_DIVIDER_SHOW: number = getNumberByResourceId(125831202, 1, true);
 const ALERT_BUTTON_STYLE: number = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT: number = getEnumNumberByResourceId(125831126, 1);
+// 'sys.float.dialog_content_font_size'
+const CONTENT_FONT_SIZE = getNumberByResourceId(125835677, BODY_L);
 const SCROLL_BAR_OFFSET: number = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET: number = 4;
 
@@ -222,7 +224,7 @@ export struct TipsDialogV2 {
           })
           .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
         Text(this.checkTips)
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -330,7 +332,7 @@ export struct TipsDialogV2 {
   }
 
   private getContentFontSize(): Length {
-    return BODY_L + 'fp';
+    return CONTENT_FONT_SIZE + 'fp';
   }
 }
 
@@ -558,7 +560,7 @@ export struct SelectDialogV2 {
               .onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
-                this.getDialogController()?.close();
+                closeDialog(this.getDialogController(), 'onClick');
               })
             }
             .paddingStyle()
@@ -729,7 +731,7 @@ export struct ConfirmDialogV2 {
             .focusBox({
               strokeWidth: LengthMetrics.px(0)
             })
-            .fontSize(`${BODY_L}fp`)
+            .fontSize(`${CONTENT_FONT_SIZE}fp`)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.fontColorWithTheme)
             .textAlign(TextAlign.Center)
@@ -876,7 +878,7 @@ export struct AlertDialogV2 {
           .focusBox({
             strokeWidth: LengthMetrics.px(0)
           })
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
@@ -1044,10 +1046,8 @@ struct CustomDialogContentComponent {
   private titleIndex: number = 0;
   private contentIndex: number = 1;
   private buttonIndex: number = 2;
-  private primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
-  private primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  private secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
-  private secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  private primaryTitleFontSize: Length = `${TITLE_S}fp`;
+  private secondaryTitleFontSize: Length = `${SUBTITLE_S}fp`;
   private scroller: Scroller = new Scroller();
   @Param@Once isHasDefaultFocus: boolean = false;
   @Param@Once isAllFocusFalse: boolean = false;
@@ -1251,8 +1251,7 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Bold)
           .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.primaryTitleMaxFontSize)
-          .minFontSize(this.primaryTitleMinFontSize)
+          .fontSize(this.primaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
@@ -1271,8 +1270,7 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Regular)
           .fontColor(this.secondaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.secondaryTitleMaxFontSize)
-          .minFontSize(this.secondaryTitleMinFontSize)
+          .fontSize(this.secondaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
@@ -1543,7 +1541,7 @@ function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
       if (buttonOptions?.action) {
         buttonOptions.action();
       }
-      controller?.close();
+      closeDialog(controller, 'onKeyEvent');
       event.stopPropagation();
     }
   })
@@ -1551,13 +1549,22 @@ function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
     if (buttonOptions?.action) {
       buttonOptions.action();
     }
-    controller?.close();
+    closeDialog(controller, 'onClick');
   })
   .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
   .enabled(buttonOptions?.enabled ?? true)
+}
+
+function closeDialog(controller: CustomDialogController | undefined, funcName: string) {
+  if (controller) {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller true`);
+    controller?.close();
+  } else {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller false`);
+  }
 }
 
 /**
@@ -1741,7 +1748,7 @@ export struct LoadingDialogV2 {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)

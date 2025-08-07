@@ -68,6 +68,7 @@ struct SwiperParameters {
     RefPtr<ResourceObject> resourceSelectedItemWidthValueObject;
     RefPtr<ResourceObject> resourceSelectedItemHeightValueObject;
     RefPtr<ResourceObject> resourceItemSizeValueObject;
+    std::unordered_set<std::string> parametersByUser;
 };
 
 struct SwiperDigitalParameters {
@@ -210,6 +211,8 @@ public:
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
     virtual void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) {}
+    virtual void SetOnScrollStateChanged(
+        std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
@@ -219,8 +222,8 @@ public:
     virtual void SetIndicatorController(Framework::JSIndicatorController* controller) {}
     virtual Framework::JSIndicatorController* GetIndicatorController() { return nullptr; }
     virtual void SetMaintainVisibleContentPosition(bool value) {}
-    virtual void ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) {}
-    virtual void ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {}
+    virtual void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

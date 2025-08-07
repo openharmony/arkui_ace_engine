@@ -70,7 +70,7 @@ export class PermissionRequest implements MaterializedBase {
     }
     private getAccessibleResource_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_getAccessibleResource(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

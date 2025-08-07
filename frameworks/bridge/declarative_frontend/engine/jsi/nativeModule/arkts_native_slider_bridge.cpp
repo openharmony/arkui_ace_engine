@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,12 @@ constexpr int SLIDER_MIN = 0;
 constexpr int SLIDER_MAX = 100;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
+constexpr char STEPS_STRING[] = "stepsAccessibility";
+constexpr char ENTRIES_STRING[] = "entries";
+constexpr char NEXT_STRING[] = "next";
+constexpr char VALUE_STRING[] = "value";
+constexpr char TEXT_STRING[] = "text";
+constexpr char DONE_STRING[] = "done";
 namespace {
 bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient)
 {
@@ -99,10 +106,12 @@ ArkUINativeModuleValue SliderBridge::SetShowTips(ArkUIRuntimeCallInfo* runtimeCa
     }
     
     std::string content;
-    if (ArkTSUtils::ParseJsString(vm, contentArg, content)) {
-        GetArkUINodeModifiers()->getSliderModifier()->setShowTips(nativeNode, showTips, content.c_str());
+    RefPtr<ResourceObject> strResObj;
+    if (ArkTSUtils::ParseJsString(vm, contentArg, content, strResObj)) {
+        auto strRawPtr = AceType::RawPtr(strResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setShowTipsPtr(nativeNode, showTips, content.c_str(), strRawPtr);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setShowTips(nativeNode, showTips, nullptr);
+        GetArkUINodeModifiers()->getSliderModifier()->setShowTipsPtr(nativeNode, showTips, nullptr, nullptr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -227,10 +236,13 @@ ArkUINativeModuleValue SliderBridge::SetStepColor(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetStepColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setStepColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setStepColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -254,10 +266,13 @@ ArkUINativeModuleValue SliderBridge::SetBlockBorderColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setBlockBorderColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setBlockBorderColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -314,10 +329,13 @@ ArkUINativeModuleValue SliderBridge::SetBlockColor(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setBlockColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setBlockColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -341,16 +359,17 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Gradient gradient;
     Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
         std::vector<uint32_t> colorValues;
         std::vector<ArkUILengthType> offsetValues;
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
         if (colorLength <= 0) {
-            GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
-
         for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
             colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
             offsetValues.push_back(ArkUILengthType {
@@ -362,8 +381,10 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
         gradientObj.offset = &(*offsetValues.begin());
         GetArkUINodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
             nativeNode, &gradientObj, colorLength);
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     } else {
         GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
     }
@@ -389,6 +410,8 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Gradient gradient;
     Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
@@ -409,8 +432,9 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
         gradientObj.color = &(*colorValues.begin());
         gradientObj.offset = &(*offsetValues.begin());
         GetArkUINodeModifiers()->getSliderModifier()->setLinearSelectColor(nativeNode, &gradientObj, colorLength);
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getSliderModifier()->setSelectColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setSelectColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     } else {
         GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
     }
@@ -435,7 +459,28 @@ ArkUINativeModuleValue SliderBridge::SetShowSteps(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool flag = secondArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getSliderModifier()->setShowSteps(nativeNode, flag);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if ((info.Length() < NUM_3) || (!info[NUM_2]->IsObject())) {
+        GetArkUINodeModifiers()->getSliderModifier()->setShowSteps(nativeNode, flag);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    StepOptions optionsMap{};
+    auto optionsObject = Framework::JSRef<Framework::JSObject>::Cast(info[NUM_2]);
+    Framework::JSRef<Framework::JSVal> jsOptionsMap = optionsObject->GetProperty(STEPS_STRING);
+    if (jsOptionsMap->IsObject()) {
+        SliderBridge::ParseStepOptionsMap(vm, jsOptionsMap, optionsMap);
+    }
+    if (optionsMap.size() > 0) {
+        auto optionLength = NUM_0;
+        auto options = new ArkUISliderShowStepOptions[optionsMap.size()];
+        for (auto& option : optionsMap) {
+            options[optionLength].step = option.first;
+            options[optionLength].text = option.second.c_str();
+            optionLength++;
+        }
+        GetArkUINodeModifiers()->getSliderModifier()->setShowStepsWithOptions(nativeNode, flag, options, optionLength);
+        delete[] options;
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -499,8 +544,9 @@ ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtime
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
+        RefPtr<ResourceObject> mediaResObj;
         auto image = jsObj->GetProperty("image");
-        if (!Framework::JSShapeAbstract::ParseJsMedia(image, src)) {
+        if (!Framework::JSShapeAbstract::ParseJsMedia(image, src, mediaResObj)) {
             SliderBridge::ResetBlockStyle(runtimeCallInfo);
             return panda::JSValueRef::Undefined(vm);
         }
@@ -508,6 +554,9 @@ ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtime
         std::string moduleName;
         Framework::JSViewAbstract::GetJsMediaBundleInfo(image, bundleName, moduleName);
         SliderModelNG::SetBlockImage(frameNode, src, bundleName, moduleName);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModelNG::CreateWithMediaResourceObj(frameNode, mediaResObj, bundleName, moduleName);
+        }
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {
@@ -1040,5 +1089,98 @@ ArkUINativeModuleValue SliderBridge::ResetSuffix(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
     SliderModifier->resetSuffix(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+napi_value SliderBridge::GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done)
+{
+    napi_value next = nullptr;
+    NAPI_CALL_BASE(env, napi_call_function(env, iterator, func, 0, nullptr, &next), nullptr);
+    CHECK_NULL_RETURN(next, nullptr);
+    napi_value doneValue = nullptr;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, next, DONE_STRING, &doneValue), nullptr);
+    CHECK_NULL_RETURN(doneValue, nullptr);
+    NAPI_CALL_BASE(env, napi_get_value_bool(env, doneValue, done), nullptr);
+    return next;
+}
+
+int32_t SliderBridge::ParseStepOptionItemKey(const napi_env env, napi_value item)
+{
+    int32_t result = INT32_MIN;
+    napi_value entry = nullptr;
+    napi_value key = nullptr;
+    napi_valuetype kType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, item, VALUE_STRING, &entry), result);
+    CHECK_NULL_RETURN(entry, result);
+    NAPI_CALL_BASE(env, napi_get_element(env, entry, NUM_0, &key), result);
+    CHECK_NULL_RETURN(key, result);
+    NAPI_CALL_BASE(env, napi_typeof(env, key, &kType), result);
+    CHECK_NULL_RETURN(kType, result);
+    if (napi_number == kType) {
+        double step = NUM_0;
+        NAPI_CALL_BASE(env, napi_get_value_double(env, key, &step), result);
+        if ((step >= 0) && (NearZero(std::abs(step - std::floor(step)))) && (step <= INT32_MAX)) {
+            result = static_cast<int32_t>(step);
+        }
+    }
+    return result;
+}
+
+bool SliderBridge::ParseStepOptionItemValue(EcmaVM* vm, const napi_env env, napi_value item, std::string& stepText)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(vm, result);
+    napi_value entry = nullptr;
+    napi_value value = nullptr;
+    napi_value textObject = nullptr;
+    napi_valuetype vType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, item, VALUE_STRING, &entry), result);
+    CHECK_NULL_RETURN(entry, result);
+    NAPI_CALL_BASE(env, napi_get_element(env, entry, NUM_1, &value), result);
+    CHECK_NULL_RETURN(value, result);
+    NAPI_CALL_BASE(env, napi_typeof(env, value, &vType), result);
+    CHECK_NULL_RETURN(vType, result);
+    if (napi_object == vType) {
+        NAPI_CALL_BASE(env, napi_get_named_property(env, value, TEXT_STRING, &textObject), result);
+        CHECK_NULL_RETURN(textObject, result);
+        panda::Local<panda::JSValueRef> localValue = NapiValueToLocalValue(textObject);
+        result = ArkTSUtils::ParseJsString(vm, localValue, stepText);
+    }
+    return result;
+}
+
+napi_value SliderBridge::ParseStepOptionsMap(
+    EcmaVM* vm, Framework::JSRef<Framework::JSVal> jsStepOptionsMap, StepOptions& stepOptionsMap)
+{
+    CHECK_NULL_RETURN(vm, nullptr);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    panda::Local<Framework::JsiValue> localValue = jsStepOptionsMap.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = localValue;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_value entriesFunc = nullptr;
+    napi_value iterator = nullptr;
+    napi_value nextFunc = nullptr;
+    bool done = false;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, nativeValue, ENTRIES_STRING, &entriesFunc), nullptr);
+    CHECK_NULL_RETURN(entriesFunc, nullptr);
+    NAPI_CALL_BASE(env, napi_call_function(env, nativeValue, entriesFunc, NUM_0, nullptr, &iterator), nullptr);
+    CHECK_NULL_RETURN(iterator, nullptr);
+    NAPI_CALL_BASE(env, napi_get_named_property(env, iterator, NEXT_STRING, &nextFunc), nullptr);
+    CHECK_NULL_RETURN(nextFunc, nullptr);
+    napi_value next = SliderBridge::GetIteratorNext(env, iterator, nextFunc, &done);
+    while ((nullptr != next) && !done) {
+        auto optionKey = SliderBridge::ParseStepOptionItemKey(env, next);
+        std::string optionStr = "";
+        auto praseResult = SliderBridge::ParseStepOptionItemValue(vm, env, next, optionStr);
+        next = SliderBridge::GetIteratorNext(env, iterator, nextFunc, &done);
+        if ((optionKey < 0) || (!praseResult)) {
+            continue;
+        }
+        stepOptionsMap[static_cast<uint32_t>(optionKey)] = optionStr;
+    }
+    return next;
 }
 } // namespace OHOS::Ace::NG

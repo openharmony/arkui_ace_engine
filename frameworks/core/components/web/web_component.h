@@ -676,6 +676,11 @@ public:
         isIntrinsicSize_ = isEnabled;
     }
 
+    void SetCssDisplayChangeEnabled(bool isEnabled)
+    {
+        isCssDisplayChangeEnabled_ = isEnabled;
+    }
+
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
     {
         return native_video_player_config_;
@@ -952,6 +957,23 @@ public:
         onInterceptRequestImpl_ = std::move(onInterceptRequestImpl);
     }
 
+    using OnOverrideErrorPageImpl = std::function<std::string(const BaseEventInfo* info)>;
+    std::string OnOverrideErrorPage(const BaseEventInfo* info) const
+    {
+        if (onOverrideErrorPageImpl_) {
+            return onOverrideErrorPageImpl_(info);
+        }
+        return "";
+    }
+    void SetOnOverrideErrorPage(OnOverrideErrorPageImpl&& onOverrideErrorPageImpl)
+    {
+        if (!onOverrideErrorPageImpl) {
+            return;
+        }
+
+        onOverrideErrorPageImpl_ = onOverrideErrorPageImpl;
+    }
+
     void SetOnMouseEventCallback(const OnMouseCallback& onMouseId)
     {
         onMouseEvent_ = onMouseId;
@@ -1190,6 +1212,7 @@ private:
     OnContextMenuImpl onContextMenuImpl_;
     OnContextMenuHideImpl onContextMenuHideImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
+    OnOverrideErrorPageImpl onOverrideErrorPageImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
     OnWindowNewImpl onWindowNewImpl_ = nullptr;
 
@@ -1226,6 +1249,7 @@ private:
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
     bool isIntrinsicSize_ = false;
+    bool isCssDisplayChangeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;

@@ -262,9 +262,9 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 }
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
+#ifndef ARKUI_WEARABLE
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_TextPickerDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_TextPickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();
@@ -294,6 +294,7 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     TextPickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 #else
     MockTextPickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+#endif
 #endif
 }
 } // TextPickerDialogAccessor

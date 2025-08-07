@@ -69,6 +69,39 @@ void ParseReferencedId(EcmaVM* vm, int32_t referenceSize,
         }
     }
 }
+
+void ParseGuideLine(const EcmaVM *vm, panda::Local<panda::ArrayRef>& positionsArr, const int32_t& i,
+    ArkUIGuidelineStyle& info, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    Local<JSValueRef> posStartVal = panda::ArrayRef::GetValueAt(vm, positionsArr, i * POSITION_DIMENSION);
+    CalcDimension startPos;
+    RefPtr<ResourceObject> startPosResObj;
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, posStartVal, startPos, startPosResObj)) {
+        info.start = startPos.Value();
+        info.hasStart = true;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (startPosResObj) {
+            resObjs.push_back(startPosResObj);
+        } else {
+            resObjs.push_back(nullptr);
+        }
+    }
+    Local<JSValueRef> posEndVal = panda::ArrayRef::GetValueAt(vm, positionsArr, i * POSITION_DIMENSION + 1);
+    CalcDimension endPos;
+    RefPtr<ResourceObject> endPosResObj;
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, posEndVal, endPos, endPosResObj)) {
+        info.end = endPos.Value();
+        info.hasEnd = true;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (endPosResObj) {
+            resObjs.push_back(endPosResObj);
+        } else {
+            resObjs.push_back(nullptr);
+        }
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -89,6 +122,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
     auto positionsArr = panda::Local<panda::ArrayRef>(positionsArg);
     int32_t size = static_cast<int32_t>(idsArr->Length(vm));
+    std::vector<RefPtr<ResourceObject>> resObjs;
     for (int32_t i = 0; i < size; i++) {
         ArkUIGuidelineStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
@@ -100,24 +134,12 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
         if (directionVal->IsNumber()) {
             info.direction = directionVal->Int32Value(vm);
         }
-        Local<JSValueRef> posStartVal = panda::ArrayRef::GetValueAt(vm,
-            positionsArr, i * POSITION_DIMENSION);
-        CalcDimension startPos;
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, posStartVal, startPos)) {
-            info.start = startPos.Value();
-            info.hasStart = true;
-        }
-        Local<JSValueRef> posEndVal = panda::ArrayRef::GetValueAt(vm,
-            positionsArr, i * POSITION_DIMENSION + 1);
-        CalcDimension endPos;
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, posEndVal, endPos)) {
-            info.end = endPos.Value();
-            info.hasEnd = true;
-        }
+        ParseGuideLine(vm, positionsArr, i, info, resObjs);
         guidelineInfos.push_back(info);
     }
     ArkUIGuidelineStyle* values = guidelineInfos.data();
-    GetArkUINodeModifiers()->getRelativeContainerModifier()->setGuideLine(nativeNode, values, size);
+    auto rawPtr = static_cast<void*>(&resObjs);
+    GetArkUINodeModifiers()->getRelativeContainerModifier()->setGuideLine(nativeNode, values, size, rawPtr);
     FreeGuideLineCharPtr(values, size);
     return panda::JSValueRef::Undefined(vm);
 }

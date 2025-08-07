@@ -23,6 +23,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/interaction/interaction_data.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
@@ -71,11 +72,6 @@ public:
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
-
-    void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
-    {
-        dragFrameNodes_.try_emplace(id, dragFrameNode);
-    }
 
     void RemoveDragFrameNode(int32_t id);
 
@@ -391,6 +387,7 @@ public:
         RectF dragPreviewRect;
         bool isMenuShow = false;
         NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+        bool isDragController = false;
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const DragPointerEvent& pointerEvent);
@@ -500,10 +497,8 @@ public:
         return dragAnimationPointerEvent_;
     }
 
-    void SetDragAnimationPointerEvent(const DragPointerEvent& pointerEvent)
-    {
-        dragAnimationPointerEvent_ = pointerEvent;
-    }
+    void SetDragAnimationPointerEvent(
+        const DragPointerEvent& pointerEvent, const RefPtr<NG::FrameNode>& node = nullptr);
 
     bool IsDragFwkShow() const
     {
@@ -674,13 +669,18 @@ public:
 
     void UpdatePointInfoForFinger(int32_t pointerId, Point point);
 
-    void HandleTouchEvent(const TouchEvent& event);
+    void HandleTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void HandleMouseEvent(const MouseEvent& event);
     void HandlePipelineOnHide();
 
     void ResetBundleInfo();
 
     void RequireBundleInfo();
+
+    void SetRootNode(RefPtr<FrameNode>& rootNode)
+    {
+        rootNode_ = rootNode;
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -747,7 +747,6 @@ private:
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
         const RefPtr<NG::PipelineContext>& pipeline);
 
-    std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;
@@ -756,6 +755,7 @@ private:
     RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> itemDragOverlayNode_;
+    RefPtr<FrameNode> rootNode_ = nullptr;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
     DragPointerEvent preDragPointerEvent_;
@@ -771,6 +771,7 @@ private:
     std::unordered_map<int32_t, std::function<void(const DragPointerEvent&)>> pullEventListener_;
     DragCursorStyleCore dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     std::map<std::string, int64_t> summaryMap_;
+    DragSummaryInfo dragSummaryInfo_;
     uint32_t recordSize_ = 0;
     int64_t currentId_ = -1;
     int32_t currentPointerId_ = -1;

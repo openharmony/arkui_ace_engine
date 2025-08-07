@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
+#include "base/utils/feature_param.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -94,15 +95,33 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto isMainWrap = false;
+    if (layoutPolicy.has_value()) {
+        auto isVertical = axis == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            layoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+        if (isMainFix) {
+            idealSize.SetMainSize(Infinity<float>(), axis);
+        }
+    }
     if (NearZero(GetCrossAxisSize(idealSize, axis))) {
         TAG_LOGI(AceLogTag::ACE_WATERFLOW, "cross size is 0, skip measure");
         skipMeasure_ = true;
         return;
     }
-    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis));
+    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis)) || isMainWrap;
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
+    const float prevOffset = pattern->GetPrevOffset();
+    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+                layoutInfo_->targetIndex_.has_value() || !NearEqual(layoutInfo_->currentOffset_, prevOffset);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     GetExpandArea(layoutProperty, layoutInfo_);
@@ -138,7 +157,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureToTarget(layoutWrapper, layoutInfo_->endIndex_, std::nullopt);
     }
     if (matchChildren) {
-        mainSize_ = layoutInfo_->GetMaxMainHeight() + footerMainSize_;
+        mainSize_ = std::min(mainSize_, layoutInfo_->GetMaxMainHeight() + footerMainSize_);
         idealSize.SetMainSize(mainSize_, axis_);
         AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -147,6 +166,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     const int32_t cacheCnt = layoutProperty->GetCachedCountValue(layoutInfo_->defCachedCount_);
     layoutWrapper->SetCacheCount(cacheCnt);
+    if (layoutInfo_->measureInNextFrame_) {
+        return;
+    }
     if (layoutProperty->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(layoutWrapper, layoutInfo_, cacheCnt);
     } else {
@@ -345,15 +367,7 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (layoutInfo_->currentOffset_ >= 0) {
-        if (!canOverScrollStart_) {
-            layoutInfo_->currentOffset_ = 0;
-        }
-        layoutInfo_->itemStart_ = true;
-    } else {
-        layoutInfo_->itemStart_ = false;
-    }
-
+    layoutInfo_->UpdateItemStart(canOverScrollStart_);
     layoutInfo_->UpdateStartIndex();
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     const float expandMainSize = mainSize + layoutInfo_->expandHeight_;
@@ -418,6 +432,10 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         }
         position = GetItemPosition(++currentIndex);
         fill = true;
+        if (!syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+            layoutInfo_->measureInNextFrame_ = true;
+            break;
+        }
     }
     layoutInfo_->endIndex_ = !fill ? currentIndex : currentIndex - 1;
 

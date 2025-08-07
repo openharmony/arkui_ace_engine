@@ -14,8 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("resource_manager_test") {
+  type = "new"
+  module_output = "common"
   sources = [
     "resource_manager_test.cpp",
-    "resource_theme_style_test.cpp",
   ]
 }

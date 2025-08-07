@@ -51,7 +51,7 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
-    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) override;
     void UpdateTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) override;
     void SetOnShown(std::function<void()>&& onShow) override;
@@ -76,7 +76,8 @@ public:
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true,
+        const RefPtr<ResourceObject>& backgroundColorResObj = nullptr);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
     static void SetBackButtonIcon(FrameNode* frameNode, bool noPixMap, RefPtr<PixelMap>& pixMap,
@@ -91,14 +92,15 @@ public:
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetMenuOptions(NavigationMenuOptions&& opt) override;
-    void SetBackgroundColor(const Color& color, bool isVaild = true) override;
-    void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
-    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    void SetBackgroundColor(const Color& color, bool isVaild = true,
+        const RefPtr<ResourceObject>& backgroundColorResObj = nullptr) override;
+    void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) override;
+    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts);
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);
-    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
-        const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
+    static void ParseCommonTitle(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
     static void UpdateMainTitleInfo(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj);
     static void UpdateSubTitleInfo(
@@ -140,13 +142,18 @@ public:
     void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
     static void SetEnableNavigationIndicator(
         FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
+    void ResetResObj(NavDestinationPatternType type, const std::string& key) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+        const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateSubTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
-    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
+    static CalcDimension ParseTitleHeight(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj);
+    static void ResetResObj(FrameNode* frameNode, NavDestinationPatternType type, const std::string& key);
+    static void SetBeforeCreateLayoutWrapperCallBack(
+        FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

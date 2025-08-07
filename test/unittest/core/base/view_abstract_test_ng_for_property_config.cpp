@@ -16,6 +16,7 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 
 
@@ -1490,6 +1491,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest002, TestSize.L
     ASSERT_NE(overlayManager, nullptr);
 
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    param->SetAnchorType(TipsAnchorType::CURSOR);
     ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, false);
     auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -1640,19 +1642,219 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest002, TestSize.Level1)
 HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1.The FrameNode is null, related function is called.
+     * @tc.steps: step1.Test backgroundColor.
      */
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
     ViewAbstract::SetBackgroundColorWithResourceObj(BLUE, resourceObject);
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    ViewAbstract::SetBackgroundColorWithResourceObj(BLUE, nullptr);
+    EXPECT_TRUE(resMap.find("backgroundColor") == resMap.end());
     ViewAbstract::SetBackgroundColor(nullptr, BLUE, resourceObject);
-    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, imageSourceInfo);
-    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
-    ViewAbstract::SetCustomBackgroundColorWithResourceObj(resourceObject);
-    ViewAbstract::SetCustomBackgroundColor(BLUE);
 
     /**
      * @tc.expected: Return expected results..
      */
     EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+ 
+/**
+ * @tc.name: BackgroundResourceTest002
+ * @tc.desc: Test SetBackgroundImageWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test SetBackgroundImageWithResourceObj.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetBackgroundImageWithResourceObj(resourceObject, imageSourceInfo);
+    auto pipeline = frameNode->GetContext();
+    EXPECT_TRUE(pipeline);
+    pipeline->SetIsFormRender(true);
+    pattern->resourceMgr_->ReloadResources();
+    pipeline->SetIsFormRender(false);
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    frameNode->renderContext_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    frameNode->renderContext_ = RenderContext::Create();
+    ViewAbstract::SetBackgroundImageWithResourceObj(nullptr, imageSourceInfo);
+    EXPECT_TRUE(resMap.find("backgroundImageSrc") == resMap.end());
+    ViewAbstract::SetBackgroundImage(nullptr, imageSourceInfo, resourceObject);
+
+    /**
+     * @tc.expected: Return expected results..
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+
+/**
+ * @tc.name: BackgroundResourceTest003
+ * @tc.desc: Test SetBackgroundImageSizeUpdateFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test SetBackgroundImageSizeUpdateFunc.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    ASSERT_NE(instance, nullptr);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "");
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "width");
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "height");
+    pattern->resourceMgr_->ReloadResources();
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, nullptr, "width");
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, nullptr, "height");
+    EXPECT_TRUE(resMap.find("backgroundImageSizeWidth") == resMap.end());
+}
+
+/**
+ * @tc.name: CustomBackgroundResourceTest001
+ * @tc.desc: Test set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test customBackgroundColor.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_TRUE(pattern->resourceMgr_);
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, resourceObject);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") != pattern->resourceMgr_->resMap_.end());
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, nullptr);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") == pattern->resourceMgr_->resMap_.end());
+    ViewAbstract::SetCustomBackgroundColor(BLUE);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+
+/**
+ * @tc.name: ViewAbstractClearJSFrameNodeOnClickTest001
+ * @tc.desc: Test ClearJsFrameNodeOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractClearJSFrameNodeOnClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a FrameNode and set a native onClick event via SetJSFrameNodeOnClick.
+     * @tc.expected: The nodeEventRegistered should be true.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc onClick = [](GestureEvent&) {};
+    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(onClick));
+
+    auto* uiNode = reinterpret_cast<UINode*>(AceType::RawPtr(frameNode));
+    ASSERT_NE(uiNode, nullptr);
+    auto currentInfo = uiNode->GetInteractionEventBindingInfo();
+    EXPECT_EQ(currentInfo.nodeEventRegistered, true);
+
+    /**
+     * @tc.steps2: ClearJSFrameNodeOnClick.
+     * @tc.expected: The nodeEventRegistered should be false.
+     */
+    ViewAbstract::ClearJSFrameNodeOnClick(AceType::RawPtr(frameNode));
+    currentInfo = uiNode->GetInteractionEventBindingInfo();
+    EXPECT_EQ(currentInfo.nodeEventRegistered, false);
+}
+
+/**
+ * @tc.name: FocusBoxTest001
+ * @tc.desc: Test SetFocusBoxStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, FocusBoxTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test SetFocusBoxStyle.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    ASSERT_NE(instance, nullptr);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    NG::FocusBoxStyle style;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetFocusBoxStyle(style);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
+
+    ViewAbstract::SetFocusBoxStyle(frameNode, style, false);
+    ViewAbstract::SetFocusBoxStyle(frameNode, style, true);
+    EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
+
+    /**
+     * @tc.steps: step2.Test SetFocusBoxStyleUpdateFunc.
+     */
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "focusBoxStyleColor");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "focusBoxStyleMargin");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "focusBoxStyleWidth");
+    style.ReloadResources();
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleColor");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleMargin");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleWidth");
+    EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
 }
 } // namespace OHOS::Ace::NG

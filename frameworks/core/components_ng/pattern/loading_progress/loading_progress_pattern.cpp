@@ -14,6 +14,9 @@
  */
 
 #include "base/log/dump_log.h"
+
+#include "base/utils/multi_thread.h"
+
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
@@ -38,6 +41,7 @@ void LoadingProgressPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
     RegisterVisibleAreaChange();
@@ -45,11 +49,26 @@ void LoadingProgressPattern::OnAttachToFrameNode()
 
 void LoadingProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     hasVisibleChangeRegistered_ = false;
+}
+
+void LoadingProgressPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void LoadingProgressPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void LoadingProgressPattern::OnModifyDone()
@@ -331,6 +350,26 @@ void LoadingProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)
     }
     if (host->GetRerenderable()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+void LoadingProgressPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    if (!pops->HasColorSetByUser() || (pops->HasColorSetByUser() && !pops->GetColorSetByUserValue())) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            Color progressColor = theme->GetLoadingColor();
+            UpdateColor(progressColor);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

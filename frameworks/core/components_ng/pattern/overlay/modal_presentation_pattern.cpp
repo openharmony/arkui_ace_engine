@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -67,12 +68,51 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto inset = context->GetSafeAreaWithoutProcess();
-        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+        NG::CalcLength safeAreaPaddingTop(inset.top_.Length());
+        NG::CalcLength safeAreaPaddingBottom(inset.bottom_.Length());
+        NG::CalcLength safeAreaPaddingLeft(inset.left_.Length());
+        NG::CalcLength safeAreaPaddingRight(inset.right_.Length());
+        PaddingProperty safeAreaPadding;
+        safeAreaPadding.top = safeAreaPaddingTop;
+        safeAreaPadding.bottom = safeAreaPaddingBottom;
+        safeAreaPadding.left = safeAreaPaddingLeft;
+        safeAreaPadding.right = safeAreaPaddingRight;
+        modalNodeLayoutProperty->UpdateSafeAreaPadding(safeAreaPadding);
         inset.top_ = { 0, 0 };
         inset.bottom_ = { 0, 0 };
+        inset.left_ = { 0, 0 };
+        inset.right_ = { 0, 0 };
         modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
         return;
     }
+    modalNodeLayoutProperty->ResetSafeAreaPadding();
     ContentRootPattern::BeforeCreateLayoutWrapper();
+}
+
+void ModalPresentationPattern::RegisterModalBgColorResFunc(
+    const RefPtr<NG::FrameNode>& modalNode, NG::ModalStyle& modalStyle)
+{
+    CHECK_NULL_VOID(modalNode);
+    auto pattern = modalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto resObj = modalStyle.GetBackgroundColorResObj();
+    if (resObj) {
+        auto modalWK = AceType::WeakClaim(AceType::RawPtr(modalNode));
+        auto&& updateFunc = [modalWK](const RefPtr<ResourceObject>& resObj) {
+            auto modalNode = modalWK.Upgrade();
+            CHECK_NULL_VOID(modalNode);
+            Color backgroundColor;
+
+            // Reparse modal background color and update it.
+            bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+            CHECK_NULL_VOID(result);
+            auto renderContext = modalNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+        };
+        pattern->AddResObj("modalPage.backgroundColor", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("modalPage.backgroundColor");
+    }
 }
 } // namespace OHOS::Ace::NG

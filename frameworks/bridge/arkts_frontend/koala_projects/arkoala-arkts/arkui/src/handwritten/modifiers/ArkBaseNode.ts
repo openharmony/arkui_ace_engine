@@ -38,4 +38,5 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().heightAttribute(value)
         return this;
     }
+    
 }

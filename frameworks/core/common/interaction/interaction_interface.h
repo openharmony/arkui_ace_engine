@@ -57,7 +57,9 @@ public:
 
     virtual int32_t GetDragState(DragState& dragState) const = 0;
 
-    virtual int32_t GetDragSummary(std::map<std::string, int64_t>& summary) = 0;
+    virtual int32_t GetDragSummary(std::map<std::string, int64_t>& summary,
+        std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
+        int32_t& version, int64_t& totalSize) = 0;
 
     virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 
@@ -76,6 +78,8 @@ public:
     virtual void SetDraggableStateAsync(bool state, int64_t downTime) = 0;
 
     virtual int32_t EnableInternalDropAnimation(const std::string& animationInfo) = 0;
+
+    virtual bool IsDragStart() const = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H

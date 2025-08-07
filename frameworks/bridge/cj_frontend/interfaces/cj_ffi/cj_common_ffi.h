@@ -249,11 +249,13 @@ struct CJClickInfo {
     double windowY;
     double displayX;
     double displayY;
+    double globalDisplayX;
+    double globalDisplayY;
     std::string ToString() const;
 };
 
 struct CJKeyEvent {
-    const char* keyText;
+    char keyText[128];
     int32_t type;
     int32_t keyCode;
     int32_t keySource;

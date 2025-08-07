@@ -134,16 +134,63 @@ std::string ParseFontFamily(const EcmaVM* vm, const Local<JSValueRef>& fontFamil
 }
 
 Color ParseTextColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t argIndex,
-    RefPtr<ResourceObject>& textColorResObj, uint32_t defaultTextColor)
+    RefPtr<ResourceObject>& textColorResObj, uint32_t defaultTextColor,
+    ArkUINodeHandle nativeNode, int32_t& isSetByUser)
 {
     Color textColor;
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(argIndex);
 
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
         textColor.SetValue(defaultTextColor);
+        isSetByUser = false;
+    } else {
+        isSetByUser = true;
     }
     return textColor;
+}
+
+void ParseSelectedBackgroundStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool* isHasValue,
+    ArkUIPickerBackgroundStyleStruct& backgroundStyleStruct, RefPtr<ResourceObject>* radiusResObjs)
+{
+    ArkUI_Float32 value[VALUE_MAX_SIZE] = {
+        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
+        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS};
+    ArkUI_Int32 unit[VALUE_MAX_SIZE] = {UNIT_VP, UNIT_VP, UNIT_VP, UNIT_VP};
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    CalcDimension calcDimension;
+    RefPtr<ResourceObject> tmpResObj;
+    for (int i = 0; i < VALUE_MAX_SIZE; i++) {
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension, tmpResObj) &&
+            !calcDimension.IsNegative()) {
+            isHasValue[i + COLOR_ARG_INDEX] = true;
+            value[i] = calcDimension.Value();
+            unit[i] = static_cast<int>(calcDimension.Unit());
+            radiusResObjs[i] = tmpResObj;
+        }
+        if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension, tmpResObj) &&
+            !calcDimension.IsNegative()) {
+            isHasValue[i + COLOR_ARG_INDEX] = true;
+            value[i] = calcDimension.Value();
+            unit[i] = static_cast<int>(calcDimension.Unit());
+            radiusResObjs[i] = tmpResObj;
+        }
+    }
+    if (isRightToLeft && (value[TOPLEFT] != value[BOTTOMLEFT] || value[TOPRIGHT] != value[BOTTOMRIGHT]) &&
+        (unit[TOPLEFT] != unit[BOTTOMLEFT] || unit[TOPRIGHT] != unit[BOTTOMRIGHT])) {
+        std::swap(value[TOPLEFT], value[BOTTOMLEFT]);
+        std::swap(value[TOPRIGHT], value[BOTTOMRIGHT]);
+        std::swap(unit[TOPLEFT], unit[BOTTOMLEFT]);
+        std::swap(unit[TOPRIGHT], unit[BOTTOMRIGHT]);
+        std::swap(isHasValue[GETTOPLEFT], isHasValue[GETTOPRIGHT]);
+        std::swap(isHasValue[GETBOTTOMLEFT], isHasValue[GETBOTTOMRIGHT]);
+        std::swap(radiusResObjs[TOPLEFT], radiusResObjs[BOTTOMLEFT]);
+        std::swap(radiusResObjs[TOPRIGHT], radiusResObjs[BOTTOMRIGHT]);
+    }
+    backgroundStyleStruct.values = value;
+    backgroundStyleStruct.units = unit;
+    backgroundStyleStruct.length = VALUE_MAX_SIZE;
 }
 
 } // namespace
@@ -234,11 +281,13 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_INDEX);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_INDEX);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(FONT_STYLE_ARG_INDEX);
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -257,16 +306,30 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         styleVal = fontStyleArg->Int32Value(vm);
     }
 
+    RefPtr<ResourceObject> minFontSizeResObj;
+    std::string minSize = ParseFontSize(vm, runtimeCallInfo, MIN_FONT_SIZE_ARG_INDEX, minFontSizeResObj);
+
+    RefPtr<ResourceObject> maxFontSizeResObj;
+    std::string maxSize = ParseFontSize(vm, runtimeCallInfo, MAX_FONT_SIZE_ARG_INDEX, maxFontSizeResObj);
+
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.textOverflow = overflowVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.minFontSize = minSize.c_str();
+    textStyleStruct.maxFontSize = maxSize.c_str();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
     textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
     textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    textStyleStruct.minFontSizeRawPtr = AceType::RawPtr(minFontSizeResObj);
+    textStyleStruct.maxFontSizeRawPtr = AceType::RawPtr(maxFontSizeResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerTextStyleWithResObj(nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -279,11 +342,13 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_INDEX);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_INDEX);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(FONT_STYLE_ARG_INDEX);
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -301,16 +366,30 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         styleVal = fontStyleArg->Int32Value(vm);
     }
 
+    RefPtr<ResourceObject> minFontSizeResObj;
+    std::string minSize = ParseFontSize(vm, runtimeCallInfo, MIN_FONT_SIZE_ARG_INDEX, minFontSizeResObj);
+
+    RefPtr<ResourceObject> maxFontSizeResObj;
+    std::string maxSize = ParseFontSize(vm, runtimeCallInfo, MAX_FONT_SIZE_ARG_INDEX, maxFontSizeResObj);
+
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.textOverflow = overflowVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.minFontSize = minSize.c_str();
+    textStyleStruct.maxFontSize = maxSize.c_str();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
     textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
     textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    textStyleStruct.minFontSizeRawPtr = AceType::RawPtr(minFontSizeResObj);
+    textStyleStruct.maxFontSizeRawPtr = AceType::RawPtr(maxFontSizeResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerSelectedTextStyleWithResObj(nativeNode,
         &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
@@ -324,11 +403,13 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_INDEX);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_INDEX);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(FONT_STYLE_ARG_INDEX);
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -347,16 +428,30 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         styleVal = fontStyleArg->Int32Value(vm);
     }
 
+    RefPtr<ResourceObject> minFontSizeResObj;
+    std::string minSize = ParseFontSize(vm, runtimeCallInfo, MIN_FONT_SIZE_ARG_INDEX, minFontSizeResObj);
+
+    RefPtr<ResourceObject> maxFontSizeResObj;
+    std::string maxSize = ParseFontSize(vm, runtimeCallInfo, MAX_FONT_SIZE_ARG_INDEX, maxFontSizeResObj);
+
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.textOverflow = overflowVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.minFontSize = minSize.c_str();
+    textStyleStruct.maxFontSize = maxSize.c_str();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
     textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
     textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    textStyleStruct.minFontSizeRawPtr = AceType::RawPtr(minFontSizeResObj);
+    textStyleStruct.maxFontSizeRawPtr = AceType::RawPtr(maxFontSizeResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDisappearTextStyleWithResObj(nativeNode,
         &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
@@ -473,8 +568,12 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     if (ParseDividerDimension(vm, dividerStrokeWidthArgs, dividerStrokeWidth, strokeWidthResObj)) {
         dividerStrokeWidth = pickerTheme ? pickerTheme->GetDividerThickness() : 0.0_vp;
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj)) {
+
+    ArkUI_Bool isDefaultColor = false;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
         colorObj = pickerTheme ? pickerTheme->GetDividerColor() : Color::TRANSPARENT;
+        isDefaultColor = true;
     }
     if (ParseDividerDimension(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj)) {
         dividerStartMargin = 0.0_vp;
@@ -494,7 +593,7 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     dividerResObjStr.startMarginRawPtr = AceType::RawPtr(startMarginResObj);
     dividerResObjStr.endMarginRawPtr = AceType::RawPtr(endMarginResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDividerWithResObj(
-        nativeNode, colorObj.GetValue(), values, units, size, &dividerResObjStr);
+        nativeNode, colorObj.GetValue(), values, units, size, &dividerResObjStr, isDefaultColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -587,9 +686,10 @@ ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInf
     Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSize = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -617,7 +717,6 @@ ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInf
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.textOverflow = overflowVal;
@@ -684,52 +783,36 @@ ArkUINativeModuleValue TextPickerBridge::SetTextPickerSelectedBackgroundStyle(Ar
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // framenode
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // frameNode
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1); // background color
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
-    ArkUI_Bool getValue[GETVALUE_MAX_SIZE] = {false, false, false, false, false};
-    ArkUI_Uint32 colorValue = DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_COLOR;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
+    ArkUI_Bool isHasValue[GETVALUE_MAX_SIZE] = {false, false, false, false, false};
+    ArkUIPickerBackgroundStyleStruct backgroundStyleStruct;
+    backgroundStyleStruct.colorValue = DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_COLOR;
     Color color;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        colorValue = color.GetValue();
-        getValue[GETCOLOR] = true;
+    RefPtr<ResourceObject> colorResObj;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        isHasValue[GETCOLOR] = true;
+        backgroundStyleStruct.isColorSetByUser = true;
+        backgroundStyleStruct.colorValue = color.GetValue();
     }
-    ArkUI_Float32 value[VALUE_MAX_SIZE] = {DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
-        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
-        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS};
-    ArkUI_Int32 unit[VALUE_MAX_SIZE] = {UNIT_VP, UNIT_VP, UNIT_VP, UNIT_VP};
-    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    CalcDimension calcDimension;
-    for (int i = NUM_0; i < VALUE_MAX_SIZE; i++) {
-        if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension) &&
-            !calcDimension.IsNegative()) {
-            getValue[i + NUM_1] = true;
-            value[i] = calcDimension.Value();
-            unit[i] = static_cast<int>(calcDimension.Unit());
-        }
-        if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension) &&
-            !calcDimension.IsNegative()) {
-            getValue[i + NUM_1] = true;
-            value[i] = calcDimension.Value();
-            unit[i] = static_cast<int>(calcDimension.Unit());
-        }
-    }
-    if (isRightToLeft && (value[TOPLEFT] != value[BOTTOMLEFT] || value[TOPRIGHT] != value[BOTTOMRIGHT]) &&
-        (unit[TOPLEFT] != unit[BOTTOMLEFT] || unit[TOPRIGHT] != unit[BOTTOMRIGHT])) {
-        std::swap(value[TOPLEFT], value[BOTTOMLEFT]);
-        std::swap(value[TOPRIGHT], value[BOTTOMRIGHT]);
-        std::swap(unit[TOPLEFT], unit[BOTTOMLEFT]);
-        std::swap(unit[TOPRIGHT], unit[BOTTOMRIGHT]);
-        std::swap(getValue[GETTOPLEFT], getValue[GETTOPRIGHT]);
-        std::swap(getValue[GETBOTTOMLEFT], getValue[GETBOTTOMRIGHT]);
-    }
+    backgroundStyleStruct.colorRawPtr = AceType::RawPtr(colorResObj);
+
+    RefPtr<ResourceObject> radiusResObjs[VALUE_MAX_SIZE] = {nullptr, nullptr, nullptr, nullptr};
+    ParseSelectedBackgroundStyleRadius(vm, runtimeCallInfo, isHasValue, backgroundStyleStruct, radiusResObjs);
+    backgroundStyleStruct.topLeftRawPtr = AceType::RawPtr(radiusResObjs[TOPLEFT]);
+    backgroundStyleStruct.topRightRawPtr = AceType::RawPtr(radiusResObjs[TOPRIGHT]);
+    backgroundStyleStruct.bottomLeftRawPtr = AceType::RawPtr(radiusResObjs[BOTTOMLEFT]);
+    backgroundStyleStruct.bottomRightRawPtr = AceType::RawPtr(radiusResObjs[BOTTOMRIGHT]);
+
     auto modifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
     auto textPickerModifier = modifiers->getTextPickerModifier();
     CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
-    textPickerModifier->setTextPickerSelectedBackgroundStyle(nativeNode, getValue, colorValue, value, unit,
-        VALUE_MAX_SIZE);
+    textPickerModifier->setTextPickerSelectedBackgroundStyleWithResObj(nativeNode, isHasValue, &backgroundStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -296,7 +296,6 @@ void CustomNodeBase::FireRecycleSelf()
 void CustomNodeBase::FireRecycleRenderFunc()
 {
     if (recycleRenderFunc_) {
-        ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
         auto node = AceType::DynamicCast<UINode>(Claim(this));
         recycleInfo_.Reuse();
         RecycleManager::Pop(node->GetId());
@@ -323,6 +322,16 @@ void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
 void CustomNodeBase::SetClearAllRecycleFunc(std::function<void()>&& func)
 {
     clearAllRecycleFunc_ = func;
+}
+
+void CustomNodeBase::SetReuseId(const std::string& reuseId)
+{
+    reuseId_ = reuseId;
+}
+
+const std::string& CustomNodeBase::GetReuseId() const
+{
+    return reuseId_;
 }
 
 void CustomNodeBase::SetOnRecycleFunc(std::function<void()>&& func)

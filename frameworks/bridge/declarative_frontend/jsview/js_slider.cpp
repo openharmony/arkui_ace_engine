@@ -22,12 +22,21 @@
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_custom_content_options.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
 namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
 constexpr int SLIDER_SHOW_TIPS_MAX_PARAMS = 2;
+constexpr char STEPS_STRING[] = "stepsAccessibility";
+constexpr char ENTRIES_STRING[] = "entries";
+constexpr char NEXT_STRING[] = "next";
+constexpr char VALUE_STRING[] = "value";
+constexpr char TEXT_STRING[] = "text";
+constexpr char DONE_STRING[] = "done";
 } // namespace
 
 std::unique_ptr<SliderModel> SliderModel::instance_ = nullptr;
@@ -237,11 +246,15 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetBlockColor();
-        return;
+    } else {
+        SliderModel::GetInstance()->SetBlockColor(colorVal);
     }
-    SliderModel::GetInstance()->SetBlockColor(colorVal);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+    }
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -253,14 +266,21 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetTrackColor();
+            if (SystemProperties::ConfigChangePerform()) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+            }
             return;
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+        }
     }
     // Set track gradient color to NG::SliderModelNG
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
@@ -306,13 +326,20 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (!ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetSelectColor();
+            if (SystemProperties::ConfigChangePerform()) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+            }
             return;
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         SliderModel::GetInstance()->SetSelectColor(colorVal);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+        }
     }
     SliderModel::GetInstance()->SetSelectColor(gradient, isResourceColor);
 }
@@ -389,7 +416,19 @@ void JSSlider::SetShowSteps(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         showSteps = info[0]->ToBoolean();
     }
-    SliderModel::GetInstance()->SetShowSteps(showSteps);
+    std::optional<SliderModel::SliderShowStepOptions> options = std::nullopt;
+    if ((info.Length() >= SLIDER_SHOW_TIPS_MAX_PARAMS) && (info[1]->IsObject())) {
+        auto optionsObject = JSRef<JSObject>::Cast(info[1]);
+        SliderModel::SliderShowStepOptions optionsMap{};
+        JSRef<JSVal> jsOptionsMap = optionsObject->GetProperty(STEPS_STRING);
+        if (jsOptionsMap->IsObject()) {
+            JSSlider::ParseStepOptionsMap(jsOptionsMap, optionsMap);
+        }
+        if (optionsMap.size() > 0) {
+            options = optionsMap;
+        }
+    }
+    SliderModel::GetInstance()->SetShowSteps(showSteps, options);
 }
 
 void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
@@ -425,11 +464,15 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
     }
 
     std::optional<std::string> content;
+    RefPtr<ResourceObject> resObj;
     if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
         std::string str;
-        if (ParseJsString(info[1], str)) {
+        if (ParseJsString(info[1], str, resObj)) {
             content = str;
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithStringResourceObj(resObj, showTips);
     }
 
     SliderModel::GetInstance()->SetShowTips(showTips, content);
@@ -442,11 +485,15 @@ void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetBlockBorderColor();
-        return;
+    } else {
+        SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
     }
-    SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_BORDER_COLOR);
+    }
 }
 
 void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
@@ -474,11 +521,15 @@ void JSSlider::SetStepColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetStepColor();
-        return;
+    } else {
+        SliderModel::GetInstance()->SetStepColor(colorVal);
     }
-    SliderModel::GetInstance()->SetStepColor(colorVal);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::STEP_COLOR);
+    }
 }
 
 void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
@@ -564,15 +615,20 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
+        RefPtr<ResourceObject> resObj;
         auto image = jsObj->GetProperty("image");
-        if (!ParseJsMedia(image, src)) {
-            ResetBlockStyle();
-            return;
-        }
         std::string bundleName;
         std::string moduleName;
-        GetJsMediaBundleInfo(image, bundleName, moduleName);
-        SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
+        if (!ParseJsMedia(image, src, resObj)) {
+            ResetBlockStyle();
+            return;
+        } else {
+            GetJsMediaBundleInfo(image, bundleName, moduleName);
+            SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithMediaResourceObj(resObj, bundleName, moduleName);
+        }
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {
@@ -767,5 +823,97 @@ void JSSlider::ResetBlockStyle()
     SliderModel::GetInstance()->ResetBlockType();
     SliderModel::GetInstance()->ResetBlockImage();
     SliderModel::GetInstance()->ResetBlockShape();
+}
+
+napi_value JSSlider::GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done)
+{
+    napi_value next = nullptr;
+    NAPI_CALL_BASE(env, napi_call_function(env, iterator, func, 0, nullptr, &next), nullptr);
+    CHECK_NULL_RETURN(next, nullptr);
+    napi_value doneValue = nullptr;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, next, DONE_STRING, &doneValue), nullptr);
+    CHECK_NULL_RETURN(doneValue, nullptr);
+    NAPI_CALL_BASE(env, napi_get_value_bool(env, doneValue, done), nullptr);
+    return next;
+}
+
+int32_t JSSlider::ParseStepOptionItemKey(const napi_env env, napi_value item)
+{
+    int32_t result = INT32_MIN;
+    napi_value entry = nullptr;
+    napi_value key = nullptr;
+    napi_valuetype kType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, item, VALUE_STRING, &entry), result);
+    CHECK_NULL_RETURN(entry, result);
+    NAPI_CALL_BASE(env, napi_get_element(env, entry, NUM_0, &key), result);
+    CHECK_NULL_RETURN(key, result);
+    NAPI_CALL_BASE(env, napi_typeof(env, key, &kType), result);
+    CHECK_NULL_RETURN(kType, result);
+    if (napi_number == kType) {
+        double step = NUM_0;
+        NAPI_CALL_BASE(env, napi_get_value_double(env, key, &step), result);
+        if ((step >= 0) && (NearZero(std::abs(step - std::floor(step)))) && (step <= INT32_MAX)) {
+            result = static_cast<int32_t>(step);
+        }
+    }
+    return result;
+}
+
+bool JSSlider::ParseStepOptionItemValue(const napi_env env, napi_value item, std::string& stepText)
+{
+    bool result = false;
+    napi_value entry = nullptr;
+    napi_value value = nullptr;
+    napi_value textObject = nullptr;
+    napi_valuetype vType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, item, VALUE_STRING, &entry), result);
+    CHECK_NULL_RETURN(entry, result);
+    NAPI_CALL_BASE(env, napi_get_element(env, entry, NUM_1, &value), result);
+    CHECK_NULL_RETURN(value, result);
+    NAPI_CALL_BASE(env, napi_typeof(env, value, &vType), result);
+    CHECK_NULL_RETURN(vType, result);
+    if (napi_object == vType) {
+        NAPI_CALL_BASE(env, napi_get_named_property(env, value, TEXT_STRING, &textObject), result);
+        CHECK_NULL_RETURN(textObject, result);
+        panda::Local<panda::JSValueRef> localValue = NapiValueToLocalValue(textObject);
+        JSVal jsValue(localValue);
+        JSRef<JSVal> jsValueRef = JsiRef<JSVal>::Claim(std::move(jsValue));
+        result = ParseJsString(jsValueRef, stepText);
+    }
+    return result;
+}
+
+napi_value JSSlider::ParseStepOptionsMap(JSRef<JSVal> jsStepOptionsMap, StepOptions& stepOptionsMap)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    panda::Local<JsiValue> localValue = jsStepOptionsMap.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = localValue;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_value entriesFunc = nullptr;
+    napi_value iterator = nullptr;
+    napi_value nextFunc = nullptr;
+    bool done = false;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, nativeValue, ENTRIES_STRING, &entriesFunc), nullptr);
+    CHECK_NULL_RETURN(entriesFunc, nullptr);
+    NAPI_CALL_BASE(env, napi_call_function(env, nativeValue, entriesFunc, NUM_0, nullptr, &iterator), nullptr);
+    CHECK_NULL_RETURN(iterator, nullptr);
+    NAPI_CALL_BASE(env, napi_get_named_property(env, iterator, NEXT_STRING, &nextFunc), nullptr);
+    CHECK_NULL_RETURN(nextFunc, nullptr);
+    napi_value next = JSSlider::GetIteratorNext(env, iterator, nextFunc, &done);
+    while ((nullptr != next) && !done) {
+        auto optionKey = JSSlider::ParseStepOptionItemKey(env, next);
+        std::string optionStr = "";
+        auto praseResult = JSSlider::ParseStepOptionItemValue(env, next, optionStr);
+        next = JSSlider::GetIteratorNext(env, iterator, nextFunc, &done);
+        if ((optionKey < 0) || (!praseResult)) {
+            continue;
+        }
+        stepOptionsMap[static_cast<uint32_t>(optionKey)] = optionStr;
+    }
+    return next;
 }
 } // namespace OHOS::Ace::Framework

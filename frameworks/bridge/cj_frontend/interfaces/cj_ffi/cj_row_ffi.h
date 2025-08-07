@@ -28,6 +28,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkRowSetAlignItems(int32_t alignItems);
 CJ_EXPORT void FfiOHOSAceFrameworkRowSetJustifyContent(int32_t justifyContent);
 CJ_EXPORT void FfiOHOSAceFrameworkRowSetHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkRowSetWidth(double width, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkRowSetReverse(bool value);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_ROW_FFI_H

@@ -252,7 +252,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     }
     auto&& ratingGroup = ratingLayoutProperty->GetOrCreateRatingPropertyGroup();
     CHECK_NULL_RETURN(ratingGroup, nullptr);
-    ratingModifier_->SetIndicator(ratingGroup->GetIndicatorValue());
+    ratingModifier_->SetIndicator(ratingGroup->HasIndicator() ? ratingGroup->GetIndicatorValue() : false);
     ratingModifier_->SetImageInfoFromTheme(isForegroundImageInfoFromTheme_ &&
         isSecondaryImageInfoFromTheme_ && isBackgroundImageInfoFromTheme_);
     ratingModifier_->SetUseContentModifier(UseContentModifier());
@@ -1113,7 +1113,8 @@ void RatingPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
-        host->RemoveChildAtIndex(0);
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -1121,11 +1122,14 @@ void RatingPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
-    host->RemoveChildAtIndex(0);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+    if (ratingModifier_) {
+        ratingModifier_->SetUseContentModifier(UseContentModifier());
+    }
 }
 
 RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
@@ -1148,5 +1152,30 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
     return (makeFunc_.value())(ratingConfiguration);
+}
+
+void RatingPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    LoadForeground(layoutProperty, ratingTheme, iconTheme);
+    LoadSecondary(layoutProperty, ratingTheme, iconTheme);
+    LoadBackground(layoutProperty, ratingTheme, iconTheme);
+    if (IsNeedFocusStyle()) {
+        LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
+    }
 }
 } // namespace OHOS::Ace::NG

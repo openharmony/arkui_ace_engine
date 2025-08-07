@@ -46,9 +46,24 @@
       "buildFunction": "DialogFocusableBuilder"
     },
     {
+      "name": "AlertDialogAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialogAvoidTest.ets",
+      "buildFunction": "AlertDialogAvoidBuilder"
+    },
+    {
+      "name": "CustomDialogAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialogAvoidTest.ets",
+      "buildFunction": "CustomDialogAvoidBuilder"
+    },
+    {
       "name": "EmbeddedDialogPageOne",
       "pageSourceFile": "src/main/ets/pages/components/dialog/embeddedDialogPageOne.ets",
       "buildFunction": "EmbeddedDialogPageOneBuilder"
+    },
+    {
+      "name": "DialogLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogLevel0.ets",
+      "buildFunction": "DialogLevelOBuilder"
     },
     {
       "name": "MenuIndex",
@@ -181,6 +196,61 @@
       "buildFunction": "bindContextMenuLeftBuilder"
     },
     {
+      "name": "bindContextMenuPreview",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreview.ets",
+      "buildFunction": "bindContextMenuPreviewBuilder"
+    },
+    {
+      "name": "MenuLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel0.ets",
+      "buildFunction": "MenuLevel0Builder"
+    },
+    {
+      "name": "MenuLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel1.ets",
+      "buildFunction": "MenuLevel1Builder"
+    },
+    {
+      "name": "MenuLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel2.ets",
+      "buildFunction": "MenuLevel2Builder"
+    },
+    {
+      "name": "stackMenuAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/menu/stackMenuAvoid.ets",
+      "buildFunction": "stackMenuAvoidBuilder"
+    },
+    {
+      "name": "MultiLevelSubMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MultiLevelSubMenu.ets",
+      "buildFunction": "MultiLevelSubMenuBuilder"
+    },
+    {
+      "name": "MenuTestLevel0_0",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel0_0.ets",
+      "buildFunction": "MenuTestLevel0_0Builder"
+    },
+    {
+      "name": "MenuTestLevel01",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel01.ets",
+      "buildFunction": "MenuTestLevel01Builder"
+    },
+    {
+      "name": "MenuTestLevel010",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel010.ets",
+      "buildFunction": "MenuTestLevel010Builder"
+    },
+    {
+      "name": "MenuTestLevel011",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel011.ets",
+      "buildFunction": "MenuTestLevel011Builder"
+    },
+    {
+      "name": "MenuTestLevel012",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel012.ets",
+      "buildFunction": "MenuTestLevel012Builder"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"
@@ -250,6 +320,41 @@
       "name": "PopupComplexTest",
       "pageSourceFile": "src/main/ets/pages/components/popup/popupComplexTest.ets",
       "buildFunction": "PopupComplexBuilder"
+    },
+    {
+      "name": "popupMutiTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupMutiTest.ets",
+      "buildFunction": "PopupMutiBuilder"
+    },
+    {
+      "name": "openPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/openPopupTest.ets",
+      "buildFunction": "OpenPopupBuilder"
+    },
+    {
+      "name": "popupBlurTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBlurTest.ets",
+      "buildFunction": "PopupBlurBuilder"
+    },
+    {
+      "name": "popupBuilderTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBuilderTest.ets",
+      "buildFunction": "PopupBuilderTestBuilder"
+    },
+    {
+      "name": "PopupKeyboardTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupKeyboardTest.ets",
+      "buildFunction": "PopupKeyboardBuilder"
+    },
+    {
+      "name": "UIContextPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/UIContextPopup.ets",
+      "buildFunction": "UIContextPopupBuilder"
+    },
+    {
+      "name": "PopupBigTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBigTest.ets",
+      "buildFunction": "PopupBigBuilder"
     },
     {
       "name": "ToastIndex",

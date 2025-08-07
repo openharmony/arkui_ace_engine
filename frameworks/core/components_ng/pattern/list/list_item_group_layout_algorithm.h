@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -378,14 +378,14 @@ public:
         prevMeasureBreak_ = value;
     }
 
-    bool MeasureInNextFrame() const
+    bool GroupMeasureInNextFrame() const
     {
         return measureInNextFrame_;
     }
 
     bool ReachResponseDeadline(LayoutWrapper* layoutWrapper) const
     {
-        return !itemPosition_.empty() && isNeedSyncLoad_ && layoutWrapper->ReachResponseDeadline();
+        return !itemPosition_.empty() && !isNeedSyncLoad_ && layoutWrapper->ReachResponseDeadline();
     }
 
     ListItemGroupLayoutInfo GetLayoutInfo() const;
@@ -440,6 +440,7 @@ public:
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    void UpdateRecycledItems();
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutListItemAll(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
@@ -557,6 +558,7 @@ private:
     bool isNeedSyncLoad_ = false;
     bool measureInNextFrame_ = false;
     bool prevMeasureBreak_ = false;
+    int32_t pauseMeasureCacheItem_ = -1;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
@@ -564,6 +566,7 @@ private:
 
     std::optional<ListItemGroupCacheParam> cacheParam_;
     PositionMap cachedItemPosition_;
+    PositionMap recycledItemPosition_;
 
     bool isStackFromEnd_ = false;
     bool isLayouted_ = true;

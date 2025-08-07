@@ -260,11 +260,18 @@ int32_t FrameNodeImpl::GetId() const
     return frameNode_->GetId();
 }
 
+void FrameNodeImpl::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper)
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->SetAICallerHelper(aiCallerHelper);
+}
+
 void FrameNodeImpl::SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& measureCallback)
 {
     CHECK_NULL_VOID(frameNode_);
-    auto frameNode = frameNode_;
-    auto onMeasureCallback = [frameNode, measureCallback](int32_t nodeId) {
+    auto onMeasureCallback = [weakNode = WeakClaim(frameNode_), measureCallback](int32_t nodeId) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         RefPtr<FrameNode> node = frameNode->GetKitNode();
         if (!node) {
             node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
@@ -292,6 +299,9 @@ NodeHandle FrameNodeImpl::GetParentHandle()
     auto* frameNode = reinterpret_cast<AceNode*>(frameNode_);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto parent = frameNode->GetParent();
+    while (parent != nullptr && !AceType::InstanceOf<NG::FrameNode>(parent)) {
+        parent = parent->GetParent();
+    }
     CHECK_NULL_RETURN(parent, nullptr);
     return reinterpret_cast<NodeHandle>(OHOS::Ace::AceType::RawPtr(parent));
 }
@@ -299,8 +309,9 @@ NodeHandle FrameNodeImpl::GetParentHandle()
 void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);
-    auto frameNode = frameNode_;
-    auto onDestroyCallback = [frameNode, destroyCallback](int32_t nodeId) {
+    auto onDestroyCallback = [weakNode = WeakClaim(frameNode_), destroyCallback](int32_t nodeId) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         RefPtr<FrameNode> node = frameNode->GetKitNode();
         if (!node) {
             node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
@@ -366,7 +377,31 @@ void FrameNodeImpl::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blur
 
 void FrameNodeImpl::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
-    NG::ViewAbstract::SetCompositingFilter(compositingFilter);
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetCompositingFilter(frameNode_, compositingFilter);
 }
 
+void FrameNodeImpl::ResetCompositingFilter()
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetCompositingFilter(frameNode_, nullptr);
+}
+
+bool FrameNodeImpl::NeedAvoidContainerModal()
+{
+    CHECK_NULL_RETURN(frameNode_, false);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    return avoidInfoMgr->NeedAvoidContainerModal();
+}
+
+NG::OffsetF FrameNodeImpl::GetParentGlobalOffsetDuringLayout()
+{
+    NG::OffsetF offset {};
+    CHECK_NULL_RETURN(frameNode_, offset);
+    offset = frameNode_->GetParentGlobalOffsetDuringLayout();
+    return offset;
+}
 } // namespace OHOS::Ace::Kit

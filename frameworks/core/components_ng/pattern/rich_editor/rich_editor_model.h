@@ -323,8 +323,13 @@ public:
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
+#if defined(ACE_STATIC)
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
+#else
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
+#endif
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
     virtual ColorMode GetColorMode() = 0;
@@ -395,8 +400,9 @@ public:
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
+    virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
     virtual void SetBarState(DisplayMode mode) {}

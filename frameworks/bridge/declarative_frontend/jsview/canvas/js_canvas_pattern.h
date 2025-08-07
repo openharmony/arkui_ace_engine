@@ -37,44 +37,21 @@ public:
     TransformParam GetTransform() const;
     void SetTransform(const TransformParam& transform);
 
-    void SetCanvasRenderer(const WeakPtr<JSCanvasRenderer>& canvasRenderer)
+    std::shared_ptr<Pattern> GetPattern() const
     {
-        canvasRenderWeak_ = canvasRenderer;
+        return pattern_;
     }
 
-    void SetId(int32_t id)
+    void SetPattern(const std::shared_ptr<Pattern>& pattern)
     {
-        id_ = id;
-    }
-
-    int32_t GetId() const
-    {
-        return id_;
-    }
-
-    void SetUnit(CanvasUnit unit)
-    {
-        unit_ = unit;
-    }
-
-    CanvasUnit GetUnit()
-    {
-        return unit_;
-    }
-
-    double GetDensity()
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
+        pattern_ = pattern;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasPattern);
 
 private:
-    int32_t id_ = 0;
     TransformParam transform_;
-    WeakPtr<JSCanvasRenderer> canvasRenderWeak_;
-    CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    std::shared_ptr<Pattern> pattern_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CANVAS_PATTERN_H

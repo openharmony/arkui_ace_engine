@@ -114,9 +114,18 @@ public:
 
     void AddDistanceThreshold(double distanceThreshold)
     {
+        distanceThreshold_ = Dimension(
+            Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+        if (distanceThreshold <= 0) {
+            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+        }
+    }
+
+    void AddDistanceThreshold(Dimension distanceThreshold)
+    {
         distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_ <= 0) {
-            distanceThreshold_ = std::numeric_limits<double>::infinity();
+        if (distanceThreshold_.ConvertToPx() <= 0) {
+            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
         }
     }
 
@@ -194,7 +203,7 @@ private:
     RefPtr<ClickEvent> userCallback_;
     RefPtr<ClickEvent> jsFrameNodeCallback_;
     RefPtr<ClickRecognizer> clickRecognizer_;
-    double distanceThreshold_ = std::numeric_limits<double>::infinity();
+    Dimension distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
 
     ACE_DISALLOW_COPY_AND_MOVE(ClickEventActuator);
 };

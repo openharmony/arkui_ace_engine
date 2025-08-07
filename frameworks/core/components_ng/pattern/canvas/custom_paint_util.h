@@ -41,7 +41,6 @@ const std::string IMAGE_WEBP = "image/webp";
 
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
 constexpr double DEFAULT_QUALITY = 0.92;
-constexpr double HANGING_PERCENT = 0.8;
 constexpr double QUALITY_COEFFICIENT = 100.0;
 
 struct CanvasModifierDump {

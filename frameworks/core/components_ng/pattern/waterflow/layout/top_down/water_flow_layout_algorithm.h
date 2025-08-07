@@ -33,6 +33,10 @@ public:
 
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
+    bool MeasureInNextFrame() const override
+    {
+        return layoutInfo_->measureInNextFrame_;
+    }
 private:
     FlowItemPosition GetItemPosition(int32_t index);
     bool MeasureToTarget(LayoutWrapper* layoutWrapper, int32_t startFrom, std::optional<int64_t> cacheDeadline);

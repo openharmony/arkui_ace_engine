@@ -19,15 +19,13 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/layout/section/dummy_fill_algorithm.h"
-#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
@@ -70,8 +68,8 @@ struct ListMainSizeValues {
     bool backward = false;
 };
 
-class ACE_EXPORT ListItemGroupPattern : public LazyContainer {
-    DECLARE_ACE_TYPE(ListItemGroupPattern, LazyContainer);
+class ACE_EXPORT ListItemGroupPattern : public Pattern {
+    DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
 public:
     explicit ListItemGroupPattern(
@@ -115,6 +113,12 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
 
     void AddHeader(const RefPtr<NG::UINode>& header)
     {
@@ -368,13 +372,31 @@ public:
     void OnColorModeChange(uint32_t colorMode) override;
     void UpdateDefaultColor();
 
-private:
-    RefPtr<FillAlgorithm> CreateFillAlgorithm() override
+    bool ChildPreMeasureHelperEnabled() override
     {
-        return MakeRefPtr<DummyFillAlgorithm>();
+        return true;
     }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    bool ChildTentativelyLayouted() override
+    {
+        return true;
+    }
+
+private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
@@ -402,9 +424,12 @@ private:
     bool IsIndexInValidRange(int32_t index, int32_t maxIndex);
     bool IsFocusMovementBlock(int32_t nextIndex, int32_t curIndex, int32_t maxIndex) const;
     WeakPtr<FocusHub> FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup, int32_t curGroupIndexInList,
-        int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode);
+        int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode, FocusStep step);
     void AdjustMountTreeSequence(int32_t footerCount);
     void MappingPropertiesFromLayoutAlgorithm(const RefPtr<ListItemGroupLayoutAlgorithm>& layoutAlgorithm);
+    const ListItemGroupInfo* GetPosition(int32_t index) const;
+    bool NextPositionBlocksMove(
+        const ListItemGroupInfo* curPos, const ListItemGroupInfo* nextPos, bool isVertical) const;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;

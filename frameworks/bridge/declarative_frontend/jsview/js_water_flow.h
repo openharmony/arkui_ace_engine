@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@ protected:
     static void SetFriction(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEdgeEffect(const JSCallbackInfo& info);
+    static void SetSyncLoad(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnScrollStart(const JSCallbackInfo& args);

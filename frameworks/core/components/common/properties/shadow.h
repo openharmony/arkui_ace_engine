@@ -79,6 +79,10 @@ public:
 
     static Shadow CreateShadow(ShadowStyle style);
 
+    static void RegisterShadowResourceObj(Shadow& shadow,
+        RefPtr<ResourceObject>& radiusObj, RefPtr<ResourceObject>& colorObj,
+        RefPtr<ResourceObject>& offsetXObj, RefPtr<ResourceObject>& offsetYObj);
+
     bool operator==(const Shadow& rhs) const
     {
         return color_ == rhs.color_ && NearEqual(blurRadius_, rhs.blurRadius_) && offset_ == rhs.offset_ &&

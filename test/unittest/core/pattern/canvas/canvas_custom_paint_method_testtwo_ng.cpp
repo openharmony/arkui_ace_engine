@@ -34,7 +34,6 @@
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_mem.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
@@ -858,11 +857,11 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo029, Te
     Ace::Gradient gradient;
     gradient.type_ = Ace::GradientType::LINEAR;
     Color colorRed = Color::RED;
-    colorRed.colorSpace_ = ColorSpace::DISPLAY_P3;
+    colorRed.SetColorSpace(ColorSpace::DISPLAY_P3);
     OHOS::Ace::GradientColor gradientColorRed(colorRed);
     gradient.colors_.emplace_back(gradientColorRed);
     Color colorBlue = Color ::BLUE;
-    colorBlue.colorSpace_ = ColorSpace::DISPLAY_P3;
+    colorBlue.SetColorSpace(ColorSpace::DISPLAY_P3);
     OHOS::Ace::GradientColor gradientColorBlue(colorBlue);
     gradient.colors_.emplace_back(gradientColorBlue);
     paintMethod->UpdatePaintShader(nullptr, nullptr, gradient);

@@ -14,7 +14,7 @@
  */
 
 import { int32 } from "@koalaui/common"
-import { nullptr, pointer } from "@koalaui/interop"
+import { pointer } from "@koalaui/interop"
 import { Finalizable } from "@koalaui/interop"
 import { ArkUINativeModule } from "#components"
 import { PeerNode } from "./PeerNode"

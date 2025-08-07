@@ -18,6 +18,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "ability_process.h"
+#include "ability_loader.h"
 #include "dm/display_manager.h"
 #include "form_utils_impl.h"
 #include "ohos/init_data.h"
@@ -485,6 +486,14 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             CHECK_NULL_RETURN(window, rect);
             auto windowRect = window->GetRect();
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+            return rect;
+        });
+        context->InitGetGlobalWindowRectCallback([window]() -> Rect {
+            Rect rect;
+            CHECK_NULL_RETURN(window, rect);
+            auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
+            rect.SetRect(globalDisplayWindowRect.posX_, globalDisplayWindowRect.posY_, globalDisplayWindowRect.width_,
+                globalDisplayWindowRect.height_);
             return rect;
         });
         auto rsConfig = window->GetKeyboardAnimationConfig();

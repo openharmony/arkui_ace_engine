@@ -389,7 +389,7 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            return false;
+            return;
         }
         context->GetTaskExecutor()->PostTask(
             [context, event, id]() {
@@ -397,7 +397,6 @@ void AceContainer::InitializeCallback()
                 context->OnNonPointerEvent(event);
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent");
-        return true;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
@@ -589,7 +588,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
     }
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+        ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
     }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
@@ -812,7 +811,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     }
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+        ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
     }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,

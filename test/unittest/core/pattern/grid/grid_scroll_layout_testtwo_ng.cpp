@@ -148,5 +148,47 @@ HWTEST_F(GridScrollLayoutTestNg, GetTotalHeight002, TestSize.Level1)
     ScrollToIndex(10, false, ScrollAlign::START);
     EXPECT_TRUE(GreatNotEqual(pattern_->GetTotalHeight(), pattern_->info_.lastMainSize_));
 }
+
+/**
+ * @tc.name: Cache003
+ * @tc.desc: Test Grid cached items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, Cache003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    model.SetCachedCount(1);
+    model.SetLayoutOptions({});
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+
+    GetItem(7, true)->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 23);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 9);
+    EXPECT_EQ(pattern_->info_.endIndex_, 32);
+    EXPECT_NE(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetItem(6, true));
+    EXPECT_FALSE(GetItem(5, true));
+    EXPECT_NE(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
+
+    UpdateCurrentOffset(60.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    ASSERT_TRUE(GetItem(5, true));
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+    EXPECT_NE(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
+
+    GetItem(5, true)->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    GetItem(5, true)->SetActive(true); // ::Layout would reset PropertyFlag if item is active
+    UpdateCurrentOffset(1.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+    EXPECT_TRUE(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_LAYOUT);
+}
 } // namespace OHOS::Ace::NG
  

@@ -278,6 +278,8 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
         if (dxResObj || dyResObj) {
             std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
             CalendarPickerModel::GetInstance()->ParseEdgeAlignResObj(resArray);
+        } else {
+            CalendarPickerModel::GetInstance()->CalendarPickerRemoveResObj("CalendarPicker.EdgeAlign");
         }
     } else {
         ParseJsDimensionVp(dxValue, dx);
@@ -354,9 +356,21 @@ void JSCalendarPicker::JsHeight(const JSCallbackInfo& info)
     CalcDimension value;
     if (ParseJsDimensionVpNG(jsValue, value) && value.IsValid()) {
         JSViewAbstract::JsHeight(info);
-    } else {
-        CalendarPickerModel::GetInstance()->ClearHeight();
+        return;
     }
+
+    LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        CHECK_NULL_VOID(!object->IsEmpty());
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        CHECK_NULL_VOID(!layoutPolicy->IsEmpty());
+        if (layoutPolicy->IsString()) {
+            policy = ParseLayoutPolicy(layoutPolicy->ToString());
+        }
+    }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+    CalendarPickerModel::GetInstance()->ClearHeight();
 }
 
 void JSCalendarPicker::JsBorderColor(const JSCallbackInfo& info)
@@ -542,6 +556,7 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
     Color color;
     if (ParseJsColor(fontColor, color, textStyle.textColorResObj)) {
         textStyle.textColor = color;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontStyle->IsObject()) {
@@ -911,6 +926,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
         properties.borderRadius = dialogRadius;
     }
+
+    properties.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
     JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
     JSViewAbstract::SetDialogEffectOption(paramObj, properties);

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -20,6 +21,7 @@
 
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -30,6 +32,10 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string APP_NAME_MAP = "app.name";
+const std::string CALENDAR_ABILITY_NAME = "AgendaPreviewUIExtensionAbility";
+const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
+const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
+constexpr Dimension PADDING_SIZE = 12.0_vp;
 } // namespace
 class PreviewMenuControllerTest : public testing::Test {
 public:
@@ -154,6 +160,7 @@ HWTEST_F(PreviewMenuControllerTest, CreatePreviewMenuTest, TestSize.Level1)
     aiSpan1.content = SPAN_PHONE;
     aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
     aiSpanMap[0] = aiSpan1;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     auto textForAI = u"Test1234";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
@@ -184,17 +191,150 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingNodeTest, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
 
-    auto callback = []() {};
     // Test with URL type
-    auto urlNode = controller.CreateLinkingNode(TextDataDetectType::URL, callback);
+    auto urlNode = controller.CreatePreview(TextDataDetectType::URL);
     EXPECT_NE(urlNode, nullptr);
 
-    // Test with DATE_TIME type
-    auto dateNode = controller.CreateLinkingNode(TextDataDetectType::DATE_TIME, callback);
-    EXPECT_NE(dateNode, nullptr);
+    // Test with PHONE_NUMBER type
+    auto node = controller.CreatePreview(TextDataDetectType::PHONE_NUMBER);
+    EXPECT_NE(node, nullptr);
+
+    auto flexLayoutProperty = node->GetLayoutProperty<FlexLayoutProperty>();
+
+    // Verify flex layout properties
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::CENTER);
+
+    // Verify padding
+    const auto& padding = flexLayoutProperty->GetPaddingProperty();
+    EXPECT_NE(padding, nullptr);
+    EXPECT_EQ(padding->left.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
+    EXPECT_EQ(padding->right.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
 
     // Test with ADDRESS type
-    auto addrNode = controller.CreateLinkingNode(TextDataDetectType::ADDRESS, callback);
+    auto addrNode = controller.CreatePreview(TextDataDetectType::ADDRESS);
     EXPECT_NE(addrNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateContactErrorNodeTest001
+ * @tc.desc: Test layout properties are correctly set
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateContactErrorNodeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<FlexLayoutPattern>(false); });
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    PreviewMenuController::CreateContactErrorNode(frameNode, "Test", nullptr);
+    auto avatarNode = frameNode->GetChildByIndex(0);
+    EXPECT_NE(avatarNode, nullptr);
+    auto textNode = frameNode->GetChildByIndex(1);
+    EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name:  GetErrorCallback001
+ * @tc.desc: Test GetErrorCallback creates node with correct properties for different types
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto previewNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto callback = []() {};
+    const std::string testContent = "test_content";
+    auto errorCallback = PreviewMenuController::GetErrorCallback(
+        previewNode, TextDataDetectType::PHONE_NUMBER, testContent, std::move(callback));
+
+    // 模拟调用errorCallback
+    errorCallback(0, "test_error", "test_message");
+    // 验证previewNode挂孩子节点
+    EXPECT_FALSE(previewNode->GetChildren().empty());
+}
+
+/**
+ * @tc.name: DateTimeClickCallbackTest001
+ * @tc.desc: Test DATE_TIME click callback triggers ability correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, DateTimeClickCallbackTest001, TestSize.Level1)
+{
+    // 执行测试
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto previewNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto pipeline = previewNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    std::map<std::string, std::string> aiParams = { { "date", "2023-01-01" } };
+    PreviewMenuController::PreviewNodeClickCallback(TextDataDetectType::DATE_TIME, previewNode, aiParams);
+
+    // 触发点击事件
+    auto gestureHub = previewNode->GetOrCreateGestureEventHub();
+    GestureEvent dummyEvent;
+    auto click = gestureHub->GetClickEvent();
+    EXPECT_NE(click, nullptr);
+}
+
+/**
+ * @tc.name: CreateWantConfigDateTimeTest001
+ * @tc.desc: Test CreateWantConfig sets correct parameters for DATE_TIME type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateWantConfigDateTimeTest001, TestSize.Level1)
+{
+    // 1. 准备测试数据
+    TextDataDetectType type = TextDataDetectType::DATE_TIME;
+    std::string bundleName;
+    std::string abilityName;
+    std::map<std::string, std::string> params;
+    std::map<std::string, std::string> AIparams = { { "date", "2023-01-01" }, { "time", "15:30" } };
+
+    // 2. 执行测试
+    PreviewMenuController::CreateWantConfig(type, bundleName, abilityName, params, AIparams);
+
+    // 3. 验证结果
+    // 验证 abilityName
+    EXPECT_EQ(abilityName, CALENDAR_ABILITY_NAME);
+
+    // 验证基础参数
+    EXPECT_EQ(params[UIEXTENSION_PARAM], UIEXTENSION_PARAM_VALUE);
+
+    // 验证 AIparams 合并
+    EXPECT_EQ(params["date"], "2023-01-01");
+    EXPECT_EQ(params["time"], "15:30");
+
+    // 验证参数总数 = 基础参数 + AIparams
+    EXPECT_EQ(params.size(), 3);
+}
+
+/**
+ * @tc.name: GetCopyAndSelectableWhenTextEffect001
+ * @tc.desc: Verify copy and selectable status when textEffect_ is not null
+ * @tc.require: AR000H0F6A
+ */
+HWTEST_F(PreviewMenuControllerTest, GetCopyAndSelectableWhenTextEffect001, TestSize.Level1)
+{
+    // 1. Prepare textPattern with textEffect_
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+
+    // 2. Set different copyOption modes (should be overridden by textEffect_)
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    
+    // Case 1: copyOption = InApp (should return true)
+    textPattern->copyOption_ = CopyOptions::InApp;
+    auto result1 = textPattern->GetCopyAndSelectable();
+    EXPECT_TRUE(result1.first);  // isShowCopy
+
+    // Case 2: copyOption = InApp (should still return false due to textEffect_)
+    textPattern->textEffect_ = TextEffect::CreateTextEffect(); // Set textEffect_
+    auto result2 = textPattern->GetCopyAndSelectable();
+    EXPECT_FALSE(result2.first);
 }
 } // namespace OHOS::Ace::NG

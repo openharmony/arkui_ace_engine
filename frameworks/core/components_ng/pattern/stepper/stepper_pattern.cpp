@@ -42,6 +42,14 @@ void StepperPattern::OnModifyDone()
 
     auto swiperEventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty();
+    auto layoutPolicy = stepperLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        swiperNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), true);
+        swiperNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), false);
+    }
     maxIndex_ = TotalCount();
     if (index_ > maxIndex_) {
         index_ = 0;

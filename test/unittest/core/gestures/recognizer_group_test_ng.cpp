@@ -324,4 +324,37 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest012, TestSize.Level1)
     auto result = recognizerTest->IsReady();
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: RecognizerGroupTest013
+ * @tc.desc: Test ForceCleanRecognizerWithGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest013, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create gestureGroup.
+     * @tc.expected: GestureGroup is not nullptr.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> longPressRecognizers;
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, true);
+    longPressRecognizers.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer));
+    ExclusiveRecognizer excluRecognizer(longPressRecognizers);
+    auto recognizerTest = AceType::DynamicCast<RecognizerGroup>(&excluRecognizer);
+    recognizerTest->refereeState_ = RefereeState::DETECTING;
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer };
+    auto testRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    auto gestureRecognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(testRecognizer);
+    recognizerTest->recognizers_.push_back(gestureRecognizer);
+    recognizerTest->recognizers_.push_back(nullptr);
+    /**
+     * @tc.step2: Call ForceCleanRecognizerWithGroup.
+     * @tc.expected: RecognizerTest->recognizers_.empty() is true.
+     */
+    recognizerTest->ForceCleanRecognizerWithGroup();
+    EXPECT_EQ(recognizerTest->recognizers_.empty(), true);
+}
 }; // namespace OHOS::Ace::NG

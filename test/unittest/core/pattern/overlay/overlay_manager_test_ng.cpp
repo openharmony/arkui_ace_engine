@@ -42,6 +42,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -62,6 +63,7 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -94,6 +96,9 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr float MINUS_HEIGHT = -5.0f;
+constexpr float PIXELMAP_WIDTH = 100.0;
+constexpr float PIXELMAP_HEIGHT = 100.0;
+constexpr float BORDER_VALUE = 10.0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 
@@ -1626,9 +1631,12 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll002, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     auto targetNode = CreateTargetNode();
+    CHECK_NULL_VOID(targetNode);
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    CHECK_NULL_VOID(stageNode);
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode);
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
@@ -1639,6 +1647,7 @@ HWTEST_F(OverlayManagerTestNg, HandleScroll002, TestSize.Level1)
     CreateSheetBuilder();
     SheetStyle sheetStyle;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CHECK_NULL_VOID(overlayManager);
     overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -3885,6 +3894,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern9, TestSize.Level1)
      * @tc.expected: sheetTransition is called, isAnimationProcess_ = false.
      */
     topSheetPattern->isAnimationBreak_ = false;
+    topSheetPattern->SetStartProp(1.0);
     topSheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(topSheetPattern->isAnimationProcess_);
 
@@ -3893,6 +3903,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern9, TestSize.Level1)
      * @tc.expected: sheetTransition is called, isAnimationBreak_ = false.
      */
     topSheetPattern->isAnimationBreak_ = true;
+    topSheetPattern->SetStartProp(1.0);
     topSheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(topSheetPattern->isAnimationBreak_);
 
@@ -4524,10 +4535,13 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     style.sheetSubtitle = MESSAGE;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. call Measure function.
-     * @tc.expected: sheetHeight_ equal 560.
+     * @tc.expected: sheetHeight_ equal 320.
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
@@ -4548,7 +4562,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize.Height(), maxSize.Height(), AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
     sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize.Height(), maxSize.Width(), AceType::RawPtr(sheetNode));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 560);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 320);
 }
 
 /**
@@ -4906,5 +4920,231 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage006, TestSize.Level1)
     ASSERT_NE(operationColumn, nullptr);
     EXPECT_TRUE(scrollNode->GetParent() == sheetNode->GetPattern()->frameNode_.Upgrade());
     EXPECT_EQ(operationColumn->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: PlaySheetTransition001
+ * @tc.desc: Test PlaySheetTransition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PlaySheetTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    /**
+     * @tc.steps: step. set sheetHeight_ is 0.0f, PlaySheetTransition.
+     * @tc.expected: NearZero(overlayManager->sheetHeight_) is true.
+     */
+    overlayManager->sheetHeight_ = 0.0f;
+    overlayManager->PlaySheetTransition(sheetNode, true, true);
+    EXPECT_TRUE(NearZero(overlayManager->sheetHeight_));
+}
+
+/**
+ * @tc.name: RebuildCustomBuilder001
+ * @tc.desc: Test OverlayManager::RebuildCustomBuilder
+ * @tc.type: FUNC
+ */
+ HWTEST_F(OverlayManagerTestNg, RebuildCustomBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    RefPtr<UINode> customNode;
+    /**
+     * @tc.steps: step2. test RebuildCustomBuilder
+     */
+    auto result = overlayManager->RebuildCustomBuilder(customNode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest001
+ * @tc.desc: Verify early return when isOnAnimation_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = true;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_TRUE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest002
+ * @tc.desc: Verify early return when hasPixelMap_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest002, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = false;
+
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest003
+ * @tc.desc: Verify RemovePixelMap is triggered when startDrag = true and isSubwindowOverlay = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest003, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_FALSE(overlayManager->hasPixelMap_);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest004
+ * @tc.desc: Verify RemovePixelMap is skipped when isSubwindowOverlay = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest004, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->RemovePixelMapAnimation(true, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, true);
+    EXPECT_TRUE(overlayManager->hasPixelMap_);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: RemovePixelMapAnimationTest005
+ * @tc.desc: Verify RemoveEventColumn is called when pixmapColumnNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemovePixelMapAnimationTest005, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>();
+    overlayManager->RemovePixelMapAnimation(false, PIXELMAP_WIDTH, PIXELMAP_HEIGHT, false);
+    EXPECT_FALSE(overlayManager->hasPixelMap_);
+    EXPECT_FALSE(overlayManager->isOnAnimation_);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest001
+ * @tc.desc: Return default radius when mainPipeline is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest001, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    MockPipelineContext::SetUp();
+
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_EQ(result, defaultRadius);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest002
+ * @tc.desc: Return default radius when dragDropManager is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest002, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    MockPipelineContext::GetCurrent()->dragDropManager_ = nullptr;
+    MockPipelineContext::SetUp();
+
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_EQ(result, defaultRadius);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest003
+ * @tc.desc: Return default radius when dragFrameNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest003, TestSize.Level1)
+{
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    MockPipelineContext::SetUp();
+
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(WeakPtr<FrameNode>());
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_EQ(result, defaultRadius);
+}
+
+/**
+ * @tc.name: GetPrepareDragFrameNodeBorderRadiusTest004
+ * @tc.desc: Return computed radius when all dependencies valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest004, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_NE(overlayManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(
+        Dimension(BORDER_VALUE), Dimension(BORDER_VALUE), Dimension(BORDER_VALUE), Dimension(BORDER_VALUE)));
+
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
+
+    auto result = overlayManager->GetPrepareDragFrameNodeBorderRadius();
+    BorderRadiusProperty defaultRadius(Dimension(0), Dimension(0), Dimension(0), Dimension(0));
+    EXPECT_NE(result.radiusTopLeft, defaultRadius.radiusTopLeft);
+    EXPECT_NE(result.radiusTopRight, defaultRadius.radiusTopRight);
+    EXPECT_NE(result.radiusBottomLeft, defaultRadius.radiusBottomLeft);
+    EXPECT_NE(result.radiusBottomRight, defaultRadius.radiusBottomRight);
 }
 }

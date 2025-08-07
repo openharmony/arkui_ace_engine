@@ -1130,4 +1130,29 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level1)
     EXPECT_EQ(optionResult.Height(), std::nullopt);
     EXPECT_EQ(optionResult.Width(), std::nullopt);
 }
+
+/**
+ * @tc.name: AdjacentExpandToRectTest
+ * @tc.desc: Test cast to AdjacentExpandToRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, AdjacentExpandToRectTest, TestSize.Level1)
+{
+    RectF adjustingRect(20.0f, 10.0f, 60.0f, 100.0f);
+    RectF frameRect(10.0f, 10.0f, 100.0f, 100.0f);
+    PaddingPropertyF frameExpand = {
+        .left = 10.0f,
+        .right = 20.0f,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    PaddingPropertyF expectRes = {
+        .left = std::nullopt,
+        .right = std::nullopt,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    auto filteredExpand = AdjacentExpandToRect(adjustingRect, frameExpand, frameRect);
+    EXPECT_EQ(filteredExpand, expectRes);
+}
 } // namespace OHOS::Ace::NG

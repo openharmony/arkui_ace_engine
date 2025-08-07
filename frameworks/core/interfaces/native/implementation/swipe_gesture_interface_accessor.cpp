@@ -17,23 +17,43 @@
 #include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/gestures/gesture_info.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeGestureInterfaceAccessor {
+namespace {
+    constexpr int32_t DEFAULT_SWIPE_FINGERS = 1;
+    constexpr double DEFAULT_SWIPE_SPEED = 100.0;
+    constexpr auto DEFAULT_SWIPE_DIRECTION = SwipeDirection{};
+    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+}
 void DestroyPeerImpl(Ark_SwipeGestureInterface peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
-Ark_SwipeGestureInterface CtorImpl()
+Ark_SwipeGestureInterface CtorImpl(const Opt_Literal_Number_fingers_speed_SwipeDirection_direction* value)
 {
-    int32_t fingersNum = DEFAULT_SLIDE_FINGER;
-    double speedNum = DEFAULT_SLIDE_SPEED;
-    SwipeDirection slideDirection;
-    auto peer = new SwipeGestureInterfacePeer();
-    peer->gesture = AceType::MakeRefPtr<SwipeGesture>(fingersNum, slideDirection, speedNum);
+    auto peer =  PeerUtils::CreatePeer<SwipeGestureInterfacePeer>();
+    int32_t fingers = DEFAULT_SWIPE_FINGERS;
+    SwipeDirection direction = DEFAULT_SWIPE_DIRECTION;
+    double speed = DEFAULT_SWIPE_SPEED;
+    bool isLimitFingerCount = DEFAULT_IS_LIMIT_FINGER_COUNT;
+    std::optional<Ark_Literal_Number_fingers_speed_SwipeDirection_direction> params =
+        value ? Converter::GetOpt(*value) : std::nullopt;
+    if (params.has_value()) {
+        fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_SWIPE_FINGERS);
+        fingers = fingers <= DEFAULT_SWIPE_FINGERS ? DEFAULT_SWIPE_FINGERS : fingers;
+        direction = Converter::OptConvert<SwipeDirection>(params->direction).value_or(DEFAULT_SWIPE_DIRECTION);
+        auto speedOpt = Converter::OptConvert<float>(params->speed);
+        if (speedOpt.has_value()) {
+            speed = static_cast<double>(speedOpt.value());
+            speed = LessOrEqual(speed, 0.0) ? DEFAULT_SWIPE_SPEED : speed;
+        }
+        LOGE("Arkoala method SwipeGestureInterfaceAccessor.CtorImpl use default value for isLimitFingerCount");
+    }
+    peer->gesture = AceType::MakeRefPtr<SwipeGesture>(fingers, direction, speed, isLimitFingerCount);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

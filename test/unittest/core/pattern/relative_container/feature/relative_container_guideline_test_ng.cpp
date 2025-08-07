@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
 using namespace std;
 namespace OHOS::Ace::NG {
@@ -226,5 +227,74 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level1)
     relativeContainerModelNG.SetGuideline(guidelineInfos);
     auto layoutProperty = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
     EXPECT_EQ(layoutProperty->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: ResObjGuidelineTest2
+ * @tc.desc: Test ResObjGuidelineTest2 of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest2, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {};
+    GuidelineInfo guidelineInfo;
+    guidelineInfo.AddResource("relativeContainer.guideLine.position.start", resObj, std::move(updateFunc));
+    EXPECT_EQ(guidelineInfo.resMap_.empty(), false);
+    std::vector<GuidelineInfo> guidelineInfos;
+    guidelineInfos.emplace_back(guidelineInfo);
+    RelativeContainerModelNG::SetGuideline(frameNode, guidelineInfos);
+    auto layoutProperty = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: ResObjGuidelineTest3
+ * @tc.desc: Test ResObjGuidelineTest3 of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level1)
+{
+    g_isConfigChangePerform = false;
+    SystemProperties::ConfigChangePerform();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    RelativeContainerModelNG::ResetResObj(frameNode, "");
+    auto layoutProperty1 = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty1->HasGuideline(), true);
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    RelativeContainerModelNG::ResetResObj(frameNode, "");
+    auto layoutProperty2 = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(layoutProperty2->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: SetPositionResObj
+ * @tc.desc: Test SetPositionResObj of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, SetPositionResObj, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    GuidelineInfo guidelineInfo;
+    RelativeContainerModelNG::SetPositionResObj(resObj, guidelineInfo, "relativeContainer.guideLine.position.start");
+    guidelineInfo.ReloadResources();
+    EXPECT_EQ(guidelineInfo.resMap_.size(), 1);
+    RelativeContainerModelNG::SetPositionResObj(resObj, guidelineInfo, "relativeContainer.guideLine.position.end");
+    guidelineInfo.ReloadResources();
+    EXPECT_EQ(guidelineInfo.resMap_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

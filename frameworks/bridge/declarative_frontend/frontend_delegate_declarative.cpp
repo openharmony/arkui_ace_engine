@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,10 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "context is null in MainWindowOverlay.");
+        return ;
+    }
     auto overlayManager = context->GetOverlayManager();
     if (overlay) {
         overlayManager = overlay;
@@ -1944,7 +1947,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
 {
     DialogProperties dialogProperties = {
         .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .onWillDismissRelease = dialogAttr.customOnWillDismissRelease, .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
@@ -2006,8 +2010,8 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
 void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
 {
     auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
-        CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
@@ -2215,10 +2219,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with attr");
     DialogProperties dialogProperties = {
-        .onDidAppear = dialogAttr.onDidAppear,
-        .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear,
         .title = dialogAttr.title,
         .autoCancel = true,
         .isMenu = true,
@@ -2226,6 +2226,10 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
@@ -3636,7 +3640,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
-void FrontendDelegateDeclarative::GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID,
+void FrontendDelegateDeclarative::GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID,
     const bool isStartRect,
     std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
     const NG::SnapshotOptions& options)

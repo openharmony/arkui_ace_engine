@@ -213,7 +213,7 @@ void TextTimerPattern::RegisterVisibleAreaChangeCallback()
         pattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
 void TextTimerPattern::OnVisibleAreaChange(bool visible)
@@ -226,6 +226,10 @@ void TextTimerPattern::OnVisibleAreaChange(bool visible)
         if (!childNode) {
             host->AddChild(textNode_);
             host->RebuildRenderContextTree();
+            if (SystemProperties::ConfigChangePerform()) {
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
         }
     } else {
         host->RemoveChild(textNode_);
@@ -473,6 +477,37 @@ void TextTimerPattern::UpdateFontFamily(const std::vector<std::string>& fontFami
     CHECK_NULL_VOID(pipelineContext);
     if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
         layoutProperty->UpdateFontFamily(fontFamilies);
+    }
+}
+
+void TextTimerPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto pops = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(pops);
+
+    if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
+        UpdateTextColor(theme->GetTextStyle().GetTextColor(), false);
+    }
+    if (!pops->GetTextFontSizeSetByUserValue(false)) {
+        UpdateFontSize(theme->GetTextStyle().GetFontSize(), false);
+    }
+    if (!pops->GetTextFontWeightSetByUserValue(false)) {
+        UpdateFontWeight(theme->GetTextStyle().GetFontWeight(), false);
+    }
+    if (!pops->GetTextFontFamilySetByUserValue(false)) {
+        UpdateFontFamily(theme->GetTextStyle().GetFontFamilies(), false);
     }
 }
 } // namespace OHOS::Ace::NG

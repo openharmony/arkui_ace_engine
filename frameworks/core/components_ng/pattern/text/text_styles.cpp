@@ -91,6 +91,8 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
     }
 
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
@@ -151,6 +153,8 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
             UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
             UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
             UPDATE_TEXT_STYLE(fontStyle, SymbolType, SetSymbolType);
+            UPDATE_TEXT_STYLE(fontStyle, SymbolShadow, SetSymbolShadow);
+            UPDATE_TEXT_STYLE(fontStyle, ShaderStyle, SetShaderStyle);
         }
     }
     if (textLineStyle) {
@@ -258,6 +262,72 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
     return text;
 }
 
+std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value)
+{
+    auto res = JsonUtil::Create(true);
+    if (!value.has_value()) {
+        return res;
+    }
+    const auto& shadow = value.value();
+    res->Put("color", (shadow.color).ColorToString().c_str());
+    std::string offsetStr = "[" + std::to_string(shadow.offset.first) + ", "
+                           + std::to_string(shadow.offset.second) + "]";
+    res->Put("offset", offsetStr.c_str());
+    res->Put("radius", std::to_string(shadow.radius).c_str());
+    return res;
+}
+
+std::string GradientTypeToString(SymbolGradientType type)
+{
+    switch (type) {
+        case SymbolGradientType::COLOR_SHADER:
+            return "COLOR_SHADER";
+        case SymbolGradientType::RADIAL_GRADIENT:
+            return "RADIAL_GRADIENT";
+        case SymbolGradientType::LINEAR_GRADIENT:
+            return "LINEAR_GRADIENT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value)
+{
+    auto array = JsonUtil::CreateArray(true);
+    if (!value.has_value() || value->empty()) {
+        return array;
+    }
+    for (const auto& gradient : *value) {
+        auto obj = JsonUtil::Create(true);
+        obj->Put("type", GradientTypeToString(gradient.type).c_str());
+        auto colorsArray = JsonUtil::CreateArray(true);
+        for (const auto& color : gradient.symbolColor) {
+            colorsArray->Put("", color.ColorToString().c_str());
+        }
+        obj->Put("symbolColor", colorsArray);
+        auto opacitiesArray = JsonUtil::CreateArray(true);
+        for (float opacity : gradient.symbolOpacities) {
+            opacitiesArray->Put("", std::to_string(opacity).c_str());
+        }
+        obj->Put("symbolOpacities", opacitiesArray);
+        obj->Put("repeating", gradient.repeating ? "true" : "false");
+        if (gradient.angle.has_value()) {
+            obj->Put("angle", std::to_string(*gradient.angle).c_str());
+        }
+        if (gradient.radius.has_value()) {
+            obj->Put("radius", gradient.radius->ToString().c_str());
+        }
+        if (gradient.radialCenterX.has_value()) {
+            obj->Put("radialCenterX", gradient.radialCenterX->ToString().c_str());
+        }
+        if (gradient.radialCenterY.has_value()) {
+            obj->Put("radialCenterY", gradient.radialCenterY->ToString().c_str());
+        }
+        array->Put(obj);
+    }
+    return array;
+}
+
 void FontStyle::UpdateColorByResourceId()
 {
     if (propTextColor) {
@@ -274,5 +344,31 @@ void FontStyle::UpdateColorByResourceId()
         auto& colors = propSymbolColorList.value();
         std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
     }
+}
+
+PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign)
+{
+    PlaceholderAlignment alignment;
+    switch (verticalAlign) {
+        case VerticalAlign::TOP:
+            alignment = PlaceholderAlignment::TOP;
+            break;
+        case VerticalAlign::CENTER:
+            alignment = PlaceholderAlignment::MIDDLE;
+            break;
+        case VerticalAlign::BOTTOM:
+        case VerticalAlign::NONE:
+            alignment = PlaceholderAlignment::BOTTOM;
+            break;
+        case VerticalAlign::BASELINE:
+            alignment = PlaceholderAlignment::ABOVEBASELINE;
+            break;
+        case VerticalAlign::FOLLOW_PARAGRAPH:
+            alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
+            break;
+        default:
+            alignment = PlaceholderAlignment::BOTTOM;
+    }
+    return alignment;
 }
 } // namespace OHOS::Ace::NG

@@ -47,6 +47,14 @@ Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
 {
     return {};
 }
+Opt_Number GetUniqueIdImpl(Ark_Measurable peer)
+{
+    return {};
+}
+void SetUniqueIdImpl(Ark_Measurable peer,
+                     const Ark_Number* uniqueId)
+{
+}
 } // MeasurableAccessor
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
 {
@@ -58,11 +66,10 @@ const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
         MeasurableAccessor::GetMarginImpl,
         MeasurableAccessor::GetPaddingImpl,
         MeasurableAccessor::GetBorderWidthImpl,
+        MeasurableAccessor::GetUniqueIdImpl,
+        MeasurableAccessor::SetUniqueIdImpl,
     };
     return &MeasurableAccessorImpl;
 }
 
-struct MeasurablePeer {
-    virtual ~MeasurablePeer() = default;
-};
 }

@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
@@ -1256,6 +1257,9 @@ HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
  */
 HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
     RefPtr<FrameNode> column;
     auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this, &column](LinearSplitModelNG model) {
         column = CreateColumn([this](ColumnModelNG model) {
@@ -1265,10 +1269,10 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(350.0f, DimensionUnit::PX)));
     PaddingProperty padding;
-    padding.left = CalcLength(0.0f);
-    padding.right = CalcLength(0.0f);
-    padding.top = CalcLength(0.0f);
-    padding.bottom = CalcLength(0.0f);
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
     layoutProperty->UpdateSafeAreaPadding(padding);
     auto childLayoutProperty = column->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
@@ -1282,5 +1286,66 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
     EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
     EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
     EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(100.0f, 0.0f))  << column->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeArea002
+ * @tc.desc: Test MeasureSelfByLayoutPolicy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    RefPtr<FrameNode> column;
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT,
+        [this, &column](LinearSplitModelNG model) { column = CreateColumn([this](ColumnModelNG model) {}); });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(300.0f, DimensionUnit::PX)));
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdateSafeAreaPadding(padding);
+    auto childLayoutProperty = column->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    childLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX)));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->CreateLayoutTask();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
+        << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 100.0f))
+        << column->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: RegisterResObj
+ * @tc.desc: Test RegisterResObj of linear_split
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::ColumnSplitDivider divider;
+    LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.startMargin");
+    divider.ReloadResources();
+    EXPECT_EQ(divider.resMap_.size(), 1);
+    LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.endMargin");
+    divider.ReloadResources();
+    EXPECT_EQ(divider.resMap_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

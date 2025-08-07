@@ -134,8 +134,8 @@ public:
 
     void FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
 
-    void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
-    
+    void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
+
     void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
     uint32_t GetStatusBarHeight() const override;
@@ -148,13 +148,21 @@ public:
 
     void NotifySnapshotUpdate() override;
 
+    void SetDVSyncUpdate(uint64_t dvsyncTime) override;
+
+    void ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
+
 private:
+    void RemoveVsyncTimeoutDFXTask(uint64_t frameCount);
+    void PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor);
+
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
     bool isFirstRequestVsync_ = true;
+    bool directorFromWindow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };

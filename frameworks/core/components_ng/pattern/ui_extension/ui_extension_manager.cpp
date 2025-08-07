@@ -551,16 +551,7 @@ void UIExtensionManager::SendPageModeRequestToHost(const RefPtr<PipelineContext>
 {
     AAFwk::Want data;
     data.SetParam("requestPageMode", std::string("yes"));
-    AAFwk::Want reply;
-    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, data, reply);
-    if (reply.HasParameter("pageMode")) {
-        auto pageMode = reply.GetStringParam("pageMode");
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "UEA received a reply, pageMode: %{public}s.", pageMode.c_str());
-        auto accessibilityManager = pipeline->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        accessibilityManager->UpdatePageMode(pageMode);
-    }
+    SendBusinessToHost(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST, data, BusinessDataSendType::ASYNC);
 }
 
 void UIExtensionManager::TransferAccessibilityRectInfo()

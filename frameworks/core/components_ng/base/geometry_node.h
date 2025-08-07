@@ -233,6 +233,8 @@ public:
     void SetParentAdjust(RectF parentAdjust);
     RectF GetSelfAdjust() const;
     void SetSelfAdjust(RectF selfAdjust);
+    OffsetF GetIgnoreAdjust() const;
+    void SetIgnoreAdjust(const OffsetF& ignoreAdjust);
     RectF GetFrameRectWithoutSafeArea() const;
     RectF GetFrameRectWithSafeArea() const;
 
@@ -259,6 +261,7 @@ private:
 
     RectF parentAdjust_;
     RectF selfAdjust_;
+    OffsetF ignoreAdjust_;
 
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;

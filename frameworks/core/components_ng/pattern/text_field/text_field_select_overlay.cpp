@@ -349,7 +349,12 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
         if (NearZero(res.Width())) {
-            pattern->AdjustSelectedBlankLineWidth(res);
+            auto tempRes = res;
+            // need to convert to local coordinates before AdjustSelectedBlankLineWidth
+            tempRes -= textPaintOffset;
+            pattern->AdjustSelectedBlankLineWidth(tempRes);
+            res.SetLeft(tempRes.Left() + textPaintOffset.GetX());
+            res.SetWidth(tempRes.Width());
         }
     }
     auto globalContentRect = GetVisibleContentRect(true);
@@ -431,6 +436,7 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
 int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
     auto contentRect = pattern->GetContentRect();
     auto selectController = pattern->GetTextSelectController();
     auto wideText = pattern->GetTextUtf16Value();
@@ -731,5 +737,16 @@ bool TextFieldSelectOverlay::IsStopBackPress() const
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, true);
     return pattern->IsStopBackPress();
+}
+
+void TextFieldSelectOverlay::BeforeOnPrepareMenu()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto selectController = pattern->GetTextSelectController();
+    CHECK_NULL_VOID(selectController);
+    // If the onPrepareMenu property exists, the onTextSelectionChange event needs to be triggered first to ensure the
+    // application side can obtain the latest selected area.
+    selectController->FireSelectEvent();
 }
 } // namespace OHOS::Ace::NG

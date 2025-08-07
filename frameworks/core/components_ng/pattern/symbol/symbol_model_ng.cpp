@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 void SymbolModelNG::Create(const std::uint32_t& unicode)
@@ -109,6 +110,45 @@ void SymbolModelNG::SetMaxFontScale(const float value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
 }
 
+void SymbolModelNG::RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+    const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    RegisterSymbolFontColorResource(frameNode, key, symbolColor, resObjArr);
+}
+
+void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const std::string& key,
+    std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    for (auto i = 0; i < static_cast<int32_t>(resObjArr.size()); ++i) {
+        auto resObjIndex = resObjArr[i].first;
+        auto resObj = resObjArr[i].second;
+        auto storeKey = key + "_" + std::to_string(resObjIndex);
+        pattern->EmplaceSymbolColorIndex(resObjIndex);
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), storeKey, resObjIndex]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            Color fontColor;
+            ResourceParseUtils::ParseResColor(resObj, fontColor);
+            auto colorVec = layoutProperty->GetSymbolColorList();
+            if (colorVec.has_value() && GreatNotEqual(colorVec.value().size(), resObjIndex)) {
+                auto colorVecArr = colorVec.value();
+                colorVecArr[resObjIndex] = fontColor;
+                layoutProperty->UpdateSymbolColorList(colorVecArr);
+            }
+        };
+
+        pattern->AddResObj(storeKey, resObj, std::move(updateFunc));
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
+}
+
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
@@ -196,5 +236,25 @@ void SymbolModelNG::UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t
     symbolEffectOptions.SetIsTxtActiveSource(isTxtActiveSource);
     property->UpdateSymbolEffectOptions(symbolEffectOptions);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SymbolModelNG::SetSymbolShadow(const SymbolShadow& symbolShadow)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadow);
+}
+
+void SymbolModelNG::SetSymbolShadow(FrameNode* frameNode, const SymbolShadow& symbolShadow)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadow, frameNode);
+}
+
+void SymbolModelNG::SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, shaderStyle);
+}
+
+void SymbolModelNG::SetShaderStyle(FrameNode* frameNode, const std::vector<SymbolGradient>& shaderStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, shaderStyle, frameNode);
 }
 } // namespace OHOS::Ace::NG

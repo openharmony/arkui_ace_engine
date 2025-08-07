@@ -77,10 +77,13 @@ protected:
     static void SetPageFlipMode(const JSCallbackInfo& info);
     static void SetOnSelected(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObj);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
-    static void ResetSwiperNode();
+    static void ResetSwiperNode(const JSCallbackInfo& info);
     static void SetMaintainVisibleContentPosition(const JSCallbackInfo& info);
+    static void SetOnScrollStateChanged(const JSCallbackInfo& info);
 
     private:
         static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);

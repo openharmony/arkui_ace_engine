@@ -827,9 +827,10 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto uiNode = AceType::DynamicCast<NG::UINode>(node);
         if (uiNode) {
-            auto codeInfo = EngineHelper::GetPositionOnJsCode();
-            uiNode->SetRow(codeInfo.first);
-            uiNode->SetCol(codeInfo.second);
+            auto [sources, row, col] = EngineHelper::GetPositionOnJsCode();
+            uiNode->SetRow(row);
+            uiNode->SetCol(col);
+            uiNode->SetFilePath(sources);
         }
     }
     return node;
@@ -1066,6 +1067,11 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
         AceType::DynamicCast<NG::CustomNodeBase>(node)->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
     } else {
         node = view->CreateViewNode();
+    }
+
+    auto customNodeBase = AceType::DynamicCast<NG::CustomNodeBase>(node);
+    if (customNodeBase) {
+        customNodeBase->SetReuseId(nodeName);
     }
     auto* stack = NG::ViewStackProcessor::GetInstance();
     auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node, stack->GetRecycleNodeId());

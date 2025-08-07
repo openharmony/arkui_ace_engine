@@ -318,7 +318,7 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
+class ACE_FORCE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
     DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState)
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
@@ -603,10 +603,7 @@ public:
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
     /* Manipulation on node-tree is forbidden in operation. */
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
-    bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false,
-        bool checkOnMainTree = true);
-    bool AllChildFocusHubInMainTree(const std::function<void(const RefPtr<FocusHub>&)>& operation,
-        RefPtr<FocusHub>& lastFocusNode, bool isReverse = false);
+    bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
 
     bool IsChild() const
     {
@@ -886,6 +883,12 @@ public:
     }
 
     RefPtr<FocusHub> GetHeadOrTailChild(bool isHead);
+
+    // multi thread function start
+    void RemoveSelfMultiThread(BlurReason reason);
+    void RemoveSelfExecuteFunction(BlurReason reason);
+    // multi thread function end
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();

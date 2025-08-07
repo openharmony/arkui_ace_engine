@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_SCROLLABLE_PROPERTIES_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_SCROLLABLE_PROPERTIES_H
 
+#include "ui/base/geometry/dimension.h"
 namespace OHOS::Ace {
 
 enum class ScrollSource {
@@ -29,6 +30,20 @@ enum class ScrollSource {
     SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 };
 
+enum class ScrollState {
+    IDLE = 0,
+    SCROLL,
+    FLING,
+};
+
+struct ScrollFrameResult {
+    Dimension offset;
+
+    bool operator==(const ScrollFrameResult& scrollRes) const
+    {
+        return offset == scrollRes.offset;
+    }
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_SCROLLABLE_PROPERTIES_H

@@ -266,4 +266,8 @@ bool BorderRadiusPropertyT<Dimension>::operator==(const BorderRadiusPropertyT<Di
     return (radiusTopLeft == value.radiusTopLeft) && (radiusTopRight == value.radiusTopRight) &&
            (radiusBottomLeft == value.radiusBottomLeft) && (radiusBottomRight == value.radiusBottomRight);
 }
+bool BorderRadiusPropertyT<Dimension>::operator!=(const BorderRadiusPropertyT<Dimension>& value) const
+{
+    return !(*this == value);
+}
 } // namespace OHOS::Ace::NG

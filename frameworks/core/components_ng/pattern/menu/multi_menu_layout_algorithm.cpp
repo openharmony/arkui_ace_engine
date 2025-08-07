@@ -17,11 +17,11 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -128,6 +128,27 @@ bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColu
     return true;
 }
 
+void MultiMenuLayoutAlgorithm::RemoveParentRestrictionsForFixIdeal(
+    const LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (menuPattern->IsEnabledContentForFixIdeal() && layoutPolicyProperty.has_value()) {
+        auto& layoutPolicy = layoutPolicyProperty.value();
+        if (layoutPolicy.IsWidthFix()) {
+            childConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (layoutPolicy.IsHeightFix()) {
+            childConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
+}
+
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -137,6 +158,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
     auto childConstraint = layoutProperty->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width());
+    RemoveParentRestrictionsForFixIdeal(layoutWrapper, childConstraint);
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto node = layoutWrapper->GetHostNode();
@@ -146,6 +168,8 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!pattern->IsEmbedded()) {
         MinusPaddingToSize(padding, childConstraint.maxSize);
     } else {
+        const auto& safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+        MinusPaddingToSize(safeAreaPadding, childConstraint.maxSize);
         UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
     }
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
@@ -196,7 +220,9 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
 
     // only 2in1 device has restrictions on the menu width in API13
     CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -217,19 +243,47 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
     }
 }
 
+void MultiMenuLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& translate, bool isEmbed, OffsetF& embedCorrect)
+{
+    CHECK_NULL_VOID(childLayoutWrapper);
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto property = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (!property->IsIgnoreOptsValid()) {
+        return;
+    };
+    auto saeCorrect = translate;
+    IgnoreLayoutSafeAreaOpts& opts = *(property->GetIgnoreLayoutSafeAreaOpts());
+    auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto offsetX = sae.left.value_or(0.0f);
+    auto offsetY = sae.top.value_or(0.0f);
+    if (isEmbed) {
+        if (sae.left.has_value())
+            offsetX += embedCorrect.GetX();
+        if (sae.top.has_value())
+            offsetY += embedCorrect.GetY();
+    }
+    OffsetF saeTrans = OffsetF(offsetX, offsetY);
+    saeCorrect -= saeTrans;
+    childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeCorrect);
+    translate.AddY(-offsetY);
+}
+
 void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto node = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(node);
     auto pattern = node->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
     OffsetF translate(0.0f, 0.0f);
@@ -285,8 +339,60 @@ void MultiMenuLayoutAlgorithm::UpdateEmbeddedPercentReference(LayoutWrapper* lay
     }
 }
 
-void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
-    LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
+void MultiMenuLayoutAlgorithm::MarkChildForDelayedMeasurement(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutPolicyChildren_.clear();
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value()) {
+            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+            auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+            if (widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH ||
+                heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH) {
+                layoutPolicyChildren_.emplace_back(child);
+            }
+        }
+    }
+}
+
+void MultiMenuLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& childConstraint)
+{
+    MarkChildForDelayedMeasurement(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+    if (!pattern->IsEmbedded()) {
+        MinusPaddingToNonNegativeSize(padding, frameSize);
+    } else {
+        MinusPaddingToNonNegativeSize(safeAreaPadding, frameSize);
+    }
+
+    for (const auto& child : layoutPolicyChildren_) {
+        auto childNode = child->GetHostNode();
+        auto resetLayoutConstraint = ResetLayoutConstraintMinWidth(child, childConstraint);
+        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraints(resetLayoutConstraint, child, layoutWrapper);
+        if (pattern->IsEmbedded() && (resetLayoutConstraint.minSize.Width() > resetLayoutConstraint.maxSize.Width())) {
+            resetLayoutConstraint.minSize.SetWidth(resetLayoutConstraint.maxSize.Width());
+        }
+        resetLayoutConstraint.parentIdealSize.SetSize(frameSize);
+        if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+            child->GetGeometryNode()->SetParentLayoutConstraint(resetLayoutConstraint);
+        }
+    }
+}
+
+void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+    std::optional<LayoutConstraintF>& layoutConstraint)
 {
     auto node = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(node);
@@ -317,7 +423,7 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-    
+
     // Stack or Embedded submenu must follow parent width
     if (pattern->IsStackSubmenu() || pattern->IsEmbedded()) {
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -334,6 +440,9 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         idealSize.SetWidth(idealWidth);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    }
+    if (pattern->IsEnableChildrenMatchParent()) {
+        MeasureAdaptiveLayoutChildren(layoutWrapper, childConstraint);
     }
 }
 
@@ -359,6 +468,13 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
             childConstraint.minSize.SetWidth(childConstraint.maxSize.Width());
         }
         SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraintsAutoWidth(child, layoutWrapper);
+        auto childLayoutProperty = child->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy->IsMatch()) {
+                continue;
+            }
+        }
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());

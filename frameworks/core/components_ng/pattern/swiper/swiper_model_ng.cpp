@@ -39,14 +39,7 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } SwiperArrow;
 
-namespace {
-static const Dimension& TrimToPositive(const Dimension& val)
-{
-    static Dimension zeroVp(0, DimensionUnit::VP);
-    return val.IsNegative() ? zeroVp : val;
-}
-} // namespace
-
+constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -436,20 +429,6 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
     });
 }
 
-void SwiperModelNG::SetOnChangeEvent(FrameNode* frameNode,
-    std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(pattern);
-
-    pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
-        CHECK_NULL_VOID(event);
-        SwiperChangeEvent eventInfo(index);
-        event(&eventInfo);
-    });
-}
-
 void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -648,28 +627,24 @@ void SwiperModelNG::SetDigitalCrownSensitivity(int32_t sensitivity)
 #endif
 }
 
-void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
-    const std::optional<bool> &ignoreBlank)
+void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, TrimToPositive(nextMargin), frameNode);
-    CHECK_NULL_VOID(ignoreBlank);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetNextMarginIgnoreBlank(*ignoreBlank);
+    pattern->SetNextMarginIgnoreBlank(ignoreBlank);
 }
 
-void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
-    const std::optional<bool> &ignoreBlank)
+void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlank)
 {
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, TrimToPositive(prevMargin), frameNode);
-    CHECK_NULL_VOID(ignoreBlank);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPrevMarginIgnoreBlank(*ignoreBlank);
+    pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
 }
 
 void SwiperModelNG::SetIndex(FrameNode* frameNode, uint32_t index)
@@ -894,14 +869,6 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
     });
-}
-
-void SwiperModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->UpdateChangeEvent(std::move(onChange));
 }
 
 void SwiperModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
@@ -1274,6 +1241,33 @@ void SwiperModelNG::SetMaintainVisibleContentPosition(FrameNode* frameNode, bool
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode);
 }
 
+void SwiperModelNG::SetOnScrollStateChanged(
+    std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnScrollStateChangedEvent([event = std::move(onScrollStateChanged)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnScrollStateChanged(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnScrollStateChangedEvent([event = std::move(onScrollStateChanged)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 bool SwiperModelNG::GetMaintainVisibleContentPosition(FrameNode* frameNode)
 {
     bool value = false;
@@ -1282,79 +1276,370 @@ bool SwiperModelNG::GetMaintainVisibleContentPosition(FrameNode* frameNode)
     return value;
 }
 
-template<typename T>
-void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
+void SwiperModelNG::ProcessDotPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
 {
-    if constexpr (std::is_same_v<T, Color>) {
-        ResourceParseUtils::ParseResColor(resObj, result);
-    } else if constexpr (std::is_same_v<T, CalcDimension>) {
-        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
+            result = parseOk && result.ConvertToPx() >= 0.0f ? result : 0.0_vp;
+            auto params = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(params);
+            if (name == "dimLeft") {
+                params->dimLeft = result;
+            } else if (name == "dimTop") {
+                params->dimTop = result;
+            } else if (name == "dimRight") {
+                params->dimRight = result;
+            } else if (name == "dimBottom") {
+                params->dimBottom = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
     }
 }
 
-#define UPDATE_DOT_VALUE(frameNode, name, resObj, resultType)                                                  \
-    do {                                                                                                       \
-        CHECK_NULL_VOID(frameNode);                                                                            \
-        auto pattern = frameNode->GetPattern<SwiperPattern>();                                                 \
-        CHECK_NULL_VOID(pattern);                                                                              \
-        if (resObj) {                                                                                          \
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-                auto node = weak.Upgrade();                                                                    \
-                CHECK_NULL_VOID(node);                                                                         \
-                auto pattern = node->GetPattern<SwiperPattern>();                                              \
-                resultType result;                                                                             \
-                ParseType(resObj, result);                                                                     \
-                auto params = pattern->GetSwiperParameters();                                                  \
-                params->name = result;                                                                         \
-            };                                                                                                 \
-            pattern->AddResObj("swiper." #name, resObj, std::move(updateFunc));                                \
-        } else {                                                                                               \
-            pattern->RemoveResObj("swiper." #name);                                                            \
-        }                                                                                                      \
-    } while (false)
+void SwiperModelNG::ProcessDotSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
+            if (!(parseOk && result > 0.0_vp)) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetSize();
+            }
+            auto param = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(param);
+            if (name == "itemWidth") {
+                param->itemWidth = result;
+            } else if (name == "itemHeight") {
+                param->itemHeight = result;
+            } else if (name == "selectedItemWidth") {
+                param->selectedItemWidth = result;
+            } else if (name == "selectedItemHeight") {
+                param->selectedItemHeight = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
 
-#define UPDATE_DIGITAL_VALUE(frameNode, name, resObj, resultType)                                              \
-    do {                                                                                                       \
-        CHECK_NULL_VOID(frameNode);                                                                            \
-        auto pattern = frameNode->GetPattern<SwiperPattern>();                                                 \
-        CHECK_NULL_VOID(pattern);                                                                              \
-        if (resObj) {                                                                                          \
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-                auto node = weak.Upgrade();                                                                    \
-                CHECK_NULL_VOID(node);                                                                         \
-                auto pattern = node->GetPattern<SwiperPattern>();                                              \
-                resultType result;                                                                             \
-                ParseType(resObj, result);                                                                     \
-                auto params = pattern->GetSwiperDigitalParameters();                                           \
-                params->name = result;                                                                         \
-            };                                                                                                 \
-            pattern->AddResObj("swiper." #name, resObj, std::move(updateFunc));                                \
-        } else {                                                                                               \
-            pattern->RemoveResObj("swiper." #name);                                                            \
-        }                                                                                                      \
-    } while (false)
+void SwiperModelNG::ProcessDotColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            auto param = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(param);
+            if (!parseOk) {
+                param->parametersByUser.erase(name);
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = name == "colorVal" ? theme->GetColor() : theme->GetSelectedColor();
+            } else {
+                param->parametersByUser.insert(name);
+            }
+            name == "colorVal" ? param->colorVal = result : param->selectedColorVal = result;
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
 
-#define UPDATE_ARROW_VALUE(frameNode, name, resObj, resultType)                                                \
-    do {                                                                                                       \
-        CHECK_NULL_VOID(frameNode);                                                                            \
-        auto pattern = frameNode->GetPattern<SwiperPattern>();                                                 \
-        CHECK_NULL_VOID(pattern);                                                                              \
-        if (resObj) {                                                                                          \
-            auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-                auto node = weak.Upgrade();                                                                    \
-                CHECK_NULL_VOID(node);                                                                         \
-                auto pattern = node->GetPattern<SwiperPattern>();                                              \
-                resultType result;                                                                             \
-                ParseType(resObj, result);                                                                     \
-                ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, name, result, node);                     \
-            };                                                                                                 \
-            pattern->AddResObj("swiper." #name, resObj, std::move(updateFunc));                                \
-        } else {                                                                                               \
-            pattern->RemoveResObj("swiper." #name);                                                            \
-        }                                                                                                      \
-    } while (false)
+void SwiperModelNG::ProcessDigitalPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
+            result = parseOk && result.ConvertToPx() >= 0.0f ? result : 0.0_vp;
+            auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
+            if (name == "dimLeft") {
+                params->dimLeft = result;
+            } else if (name == "dimTop") {
+                params->dimTop = result;
+            } else if (name == "dimRight") {
+                params->dimRight = result;
+            } else if (name == "dimBottom") {
+                params->dimBottom = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
 
-void SwiperModelNG::ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj)
+void SwiperModelNG::ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionFpNG(theObj, result);
+            if (!parseOk || LessOrEqual(result.Value(), 0.0) || result.Unit() == DimensionUnit::PERCENT) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetDigitalIndicatorTextStyle().GetFontSize();
+            }
+            auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
+            if (name == "fontSize") {
+                params->fontSize = result;
+            } else if (name == "selectedFontSize") {
+                params->selectedFontSize = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
+
+void SwiperModelNG::ProcessDigitalColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), name](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            auto params = pattern->GetSwiperDigitalParameters();
+            CHECK_NULL_VOID(params);
+            if (!parseOk) {
+                params->parametersByUser.erase(name);
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = theme->GetDigitalIndicatorTextStyle().GetTextColor();
+            } else {
+                params->parametersByUser.insert(name);
+            }
+            if (name == "fontColor") {
+                params->fontColor = result;
+            } else if (name == "selectedFontColor") {
+                params->selectedFontColor = result;
+            }
+        };
+        pattern->AddResObj("swiper." + name, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper." + name);
+    }
+}
+
+void SwiperModelNG::ProcessArrowColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            auto param = pattern->GetSwiperArrowParameters();
+            CHECK_NULL_VOID(param);
+            if (!parseOk) {
+                param->parametersByUser.erase("arrowColor");
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = param->isSidebarMiddle.value() ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
+            } else {
+                param->parametersByUser.insert("arrowColor");
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, result, node);
+        };
+        pattern->AddResObj("swiper.ArrowColor", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.ArrowColor");
+    }
+}
+
+void SwiperModelNG::ProcessArrowBackgroundColorWithResourceObj(FrameNode* frameNode,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& theObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
+            auto param = pattern->GetSwiperArrowParameters();
+            CHECK_NULL_VOID(param);
+            if (!parseOk) {
+                param->parametersByUser.erase("backgroundColor");
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(theme);
+                result = param->isSidebarMiddle.value() ? theme->GetBigArrowBackgroundColor()
+                    : theme->GetSmallArrowBackgroundColor();
+            } else {
+                param->parametersByUser.insert("backgroundColor");
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundColor, result, node);
+        };
+        pattern->AddResObj("swiper.BackgroundColor", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.BackgroundColor");
+    }
+}
+
+void SwiperModelNG::ProcessArrowSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto swiperArrowParameters = pattern->GetSwiperArrowParameters();
+            CHECK_NULL_VOID(swiperArrowParameters);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            if (!parseOk || LessOrEqual(result.ConvertToVp(), 0.0) ||
+                (result.Unit() == DimensionUnit::PERCENT)) {
+                    auto pipelineContext = node->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                    CHECK_NULL_VOID(swiperIndicatorTheme);
+                    result = swiperArrowParameters->isSidebarMiddle.value()
+                        ? swiperIndicatorTheme->GetBigArrowSize()
+                        : swiperIndicatorTheme->GetSmallArrowSize();
+            }
+            swiperArrowParameters->arrowSize = result;
+            if (swiperArrowParameters->isShowBackground.value()) {
+                swiperArrowParameters->arrowSize = swiperArrowParameters->backgroundSize.value()
+                    * ARROW_SIZE_COEFFICIENT;
+            } else {
+                swiperArrowParameters->backgroundSize = swiperArrowParameters->arrowSize;
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize,
+                    swiperArrowParameters->backgroundSize.value(), node);
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize,
+                swiperArrowParameters->arrowSize.value(), node);
+        };
+        pattern->AddResObj("swiper.ArrowSize", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.ArrowSize");
+    }
+}
+
+void SwiperModelNG::ProcessBackgroundSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto swiperArrowParameters = pattern->GetSwiperArrowParameters();
+            CHECK_NULL_VOID(swiperArrowParameters);
+            CalcDimension result;
+            bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            if (!parseOk || LessOrEqual(result.ConvertToVp(), 0.0) ||
+                (result.Unit() == DimensionUnit::PERCENT)) {
+                    auto pipelineContext = node->GetContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                    CHECK_NULL_VOID(swiperIndicatorTheme);
+                    result = swiperArrowParameters->isSidebarMiddle.value()
+                        ? swiperIndicatorTheme->GetBigArrowBackgroundSize()
+                        : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
+            }
+            swiperArrowParameters->backgroundSize = result;
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, result, node);
+            if (swiperArrowParameters->isShowBackground.value()) {
+                swiperArrowParameters->arrowSize = swiperArrowParameters->backgroundSize.value()
+                    * ARROW_SIZE_COEFFICIENT;
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize,
+                    swiperArrowParameters->arrowSize.value(), node);
+            }
+        };
+        pattern->AddResObj("swiper.BackgroundSize", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.BackgroundSize");
+    }
+}
+
+void SwiperModelNG::ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1367,7 +1652,9 @@ void SwiperModelNG::ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject
             auto pattern = node->GetPattern<SwiperPattern>();
             CHECK_NULL_VOID(pattern);
             CalcDimension result;
-            ParseType(resObj, result);
+            if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) || LessNotEqual(result.Value(), 0.0)) {
+                result.SetValue(0.0);
+            }
             pattern->ResetOnForceMeasure();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, result, node);
         };
@@ -1377,7 +1664,7 @@ void SwiperModelNG::ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject
     }
 }
 
-void SwiperModelNG::ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceObject>& resObj)
+void SwiperModelNG::ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1390,7 +1677,9 @@ void SwiperModelNG::ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceOb
             auto pattern = node->GetPattern<SwiperPattern>();
             CHECK_NULL_VOID(pattern);
             CalcDimension result;
-            ParseType(resObj, result);
+            if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) || LessNotEqual(result.Value(), 0.0)) {
+                result.SetValue(0.0);
+            }
             pattern->ResetOnForceMeasure();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, result, node);
         };
@@ -1400,32 +1689,11 @@ void SwiperModelNG::ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceOb
     }
 }
 
-void SwiperModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperParameters& swiperParameters)
+void SwiperModelNG::ProcessDotStyleSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    auto resObj = swiperParameters.resourceColorValueObject;
-    UPDATE_DOT_VALUE(frameNode, colorVal, resObj, Color);
-    resObj = swiperParameters.resourceSelectedColorValueObject;
-    UPDATE_DOT_VALUE(frameNode, selectedColorVal, resObj, Color);
-    resObj = swiperParameters.resourceItemWidthValueObject;
-    UPDATE_DOT_VALUE(frameNode, itemWidth, resObj, CalcDimension);
-    resObj = swiperParameters.resourceItemHeightValueObject;
-    UPDATE_DOT_VALUE(frameNode, itemHeight, resObj, CalcDimension);
-    resObj = swiperParameters.resourceSelectedItemWidthValueObject;
-    UPDATE_DOT_VALUE(frameNode, selectedItemWidth, resObj, CalcDimension);
-    resObj = swiperParameters.resourceSelectedItemHeightValueObject;
-    UPDATE_DOT_VALUE(frameNode, selectedItemHeight, resObj, CalcDimension);
-    resObj = swiperParameters.resourceDimLeftValueObject;
-    UPDATE_DOT_VALUE(frameNode, dimLeft, resObj, CalcDimension);
-    resObj = swiperParameters.resourceDimRightValueObject;
-    UPDATE_DOT_VALUE(frameNode, dimRight, resObj, CalcDimension);
-    resObj = swiperParameters.resourceDimTopValueObject;
-    UPDATE_DOT_VALUE(frameNode, dimTop, resObj, CalcDimension);
-    resObj = swiperParameters.resourceDimBottomValueObject;
-    UPDATE_DOT_VALUE(frameNode, dimBottom, resObj, CalcDimension);
-    resObj = swiperParameters.resourceItemSizeValueObject;
     if (resObj) {
         auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto node = weak.Upgrade();
@@ -1433,8 +1701,16 @@ void SwiperModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperP
             auto pattern = node->GetPattern<SwiperPattern>();
             CHECK_NULL_VOID(pattern);
             CalcDimension result;
-            ParseType(resObj, result);
+            if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) ||
+                result.Unit() == DimensionUnit::PERCENT || LessNotEqual(result.Value(), 0.0)) {
+                auto pipelineContext = node->GetContext();
+                CHECK_NULL_VOID(pipelineContext);
+                auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+                CHECK_NULL_VOID(swiperIndicatorTheme);
+                result = swiperIndicatorTheme->GetSize();
+            }
             auto params = pattern->GetSwiperParameters();
+            CHECK_NULL_VOID(params);
             params->itemWidth = result;
             params->itemHeight = result;
             params->selectedItemWidth = result;
@@ -1446,40 +1722,70 @@ void SwiperModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperP
     }
 }
 
+void SwiperModelNG::CreateDotWithResourceObj(FrameNode* frameNode, const SwiperParameters& swiperParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto resObj = swiperParameters.resourceColorValueObject;
+    ProcessDotColorWithResourceObj(frameNode, "colorVal", resObj);
+    resObj = swiperParameters.resourceSelectedColorValueObject;
+    ProcessDotColorWithResourceObj(frameNode, "selectedColorVal", resObj);
+    resObj = swiperParameters.resourceItemWidthValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "itemWidth", resObj);
+    resObj = swiperParameters.resourceItemHeightValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "itemHeight", resObj);
+    resObj = swiperParameters.resourceSelectedItemWidthValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "selectedItemWidth", resObj);
+    resObj = swiperParameters.resourceSelectedItemHeightValueObject;
+    ProcessDotSizeWithResourceObj(frameNode, "selectedItemHeight", resObj);
+    resObj = swiperParameters.resourceDimLeftValueObject;
+    ProcessDotPositionWithResourceObj(frameNode, "dimLeft", resObj);
+    resObj = swiperParameters.resourceDimRightValueObject;
+    ProcessDotPositionWithResourceObj(frameNode, "dimRight", resObj);
+    resObj = swiperParameters.resourceDimTopValueObject;
+    ProcessDotPositionWithResourceObj(frameNode, "dimTop", resObj);
+    resObj = swiperParameters.resourceDimBottomValueObject;
+    ProcessDotPositionWithResourceObj(frameNode, "dimBottom", resObj);
+    resObj = swiperParameters.resourceItemSizeValueObject;
+    ProcessDotStyleSizeWithResourceObj(frameNode, resObj);
+}
 
 void SwiperModelNG::CreateDigitWithResourceObj(FrameNode* frameNode,
     const SwiperDigitalParameters& swiperDigitalParameters)
 {
     CHECK_NULL_VOID(frameNode);
     auto resObj = swiperDigitalParameters.resourceDimLeftValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, dimLeft, resObj, CalcDimension);
+    ProcessDigitalPositionWithResourceObj(frameNode, "dimLeft", resObj);
     resObj = swiperDigitalParameters.resourceDimRightValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, dimRight, resObj, CalcDimension);
+    ProcessDigitalPositionWithResourceObj(frameNode, "dimRight", resObj);
     resObj = swiperDigitalParameters.resourceDimTopValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, dimTop, resObj, CalcDimension);
+    ProcessDigitalPositionWithResourceObj(frameNode, "dimTop", resObj);
     resObj = swiperDigitalParameters.resourceDimBottomValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, dimBottom, resObj, CalcDimension);
+    ProcessDigitalPositionWithResourceObj(frameNode, "dimBottom", resObj);
     resObj = swiperDigitalParameters.resourceFontColorValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, fontColor, resObj, Color);
-    resObj = swiperDigitalParameters.resourceFontSizeValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, fontSize, resObj, CalcDimension);
+    ProcessDigitalColorWithResourceObj(frameNode, "fontColor", resObj);
     resObj = swiperDigitalParameters.resourceSelectedFontColorValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, selectedFontColor, resObj, Color);
+    ProcessDigitalColorWithResourceObj(frameNode, "selectedFontColor", resObj);
+    resObj = swiperDigitalParameters.resourceFontSizeValueObject;
+    ProcessDigitalFontSizeWithResourceObj(frameNode, "fontSize", resObj);
     resObj = swiperDigitalParameters.resourceSelectedFontSizeValueObject;
-    UPDATE_DIGITAL_VALUE(frameNode, selectedFontSize, resObj, CalcDimension);
+    ProcessDigitalFontSizeWithResourceObj(frameNode, "selectedFontSize", resObj);
 }
 
 void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
     auto resObj = swiperArrowParameters.resourceArrowColorValueObject;
-    UPDATE_ARROW_VALUE(swiperNode, ArrowColor, resObj, Color);
-    resObj = swiperArrowParameters.resourceArrowSizeValueObject;
-    UPDATE_ARROW_VALUE(swiperNode, ArrowSize, resObj, CalcDimension);
-    resObj = swiperArrowParameters.resourceBackgroundSizeValueObject;
-    UPDATE_ARROW_VALUE(swiperNode, BackgroundSize, resObj, CalcDimension);
+    ProcessArrowColorWithResourceObj(swiperNode, resObj);
     resObj = swiperArrowParameters.resourceBackgroundColorValueObject;
-    UPDATE_ARROW_VALUE(swiperNode, BackgroundColor, resObj, Color);
+    ProcessArrowBackgroundColorWithResourceObj(swiperNode, resObj);
+    resObj = swiperArrowParameters.resourceArrowSizeValueObject;
+    ProcessArrowSizeWithResourceObj(swiperNode, resObj);
+    resObj = swiperArrowParameters.resourceBackgroundSizeValueObject;
+    ProcessBackgroundSizeWithResourceObj(swiperNode, resObj);
 }
 } // namespace OHOS::Ace::NG

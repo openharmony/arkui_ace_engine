@@ -41,7 +41,7 @@ struct DeleteValueInfo {
 };
 
 struct PreviewText {
-    int32_t offset;
+    int32_t offset = -1;
     std::u16string value;
 
     bool operator==(const PreviewText& other) const

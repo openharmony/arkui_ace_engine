@@ -18,7 +18,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 pattern_test_output_path = "ace_engine/ace_engine/components"
 event_test_output_path = "ace_engine/ace_engine/events"
 base_test_output_path = "ace_engine/ace_engine/base"
-image_test_output_path = "ace_engine/ace_engine/image"
+image_test_output_path = "ace_engine/Component-Image"
 basic_test_output_path = "ace_engine/ace_engine/basic"
 interface_test_output_path = "ace_engine/ace_engine/interfaces"
 adapter_test_output_path = "ace_engine/ace_engine/adapter"
@@ -31,6 +31,7 @@ template("ace_unittest") {
 
   type = "components"
   module_output = "components"
+  module_name = "ace_engine"
   flutter_skia = false
   render = false
   ace_unittest_name = target_name
@@ -56,6 +57,10 @@ template("ace_unittest") {
 
   if (defined(invoker.module_output)) {
     module_output = invoker.module_output
+  }
+
+  if (defined(invoker.module_name)) {
+    module_name = invoker.module_name
   }
 
   if (defined(invoker.flutter_skia)) {
@@ -86,7 +91,7 @@ template("ace_unittest") {
 
   if (type == "components") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = "ace_engine/ace_engine/${module_output}"
+      module_out_path = "ace_engine/${module_name}/${module_output}"
 
       sources = []
       sources += invoker.sources
@@ -117,9 +122,11 @@ template("ace_unittest") {
     }
   } else if (type == "new") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = "ace_engine/ace_engine/${module_output}"
+      module_out_path = "ace_engine/${module_name}/${module_output}"
       if (ace_unittest_name == "display_sync_manager_test_ng") {
         module_out_path = "ace_engine/Graphic_2d_LTPO_DisplaySync/${module_output}"
+      } else if (ace_unittest_name == "window_scene_test") {
+        module_out_path = "ace_engine/window_manager/${module_output}"
       }
       sources = []
       sources += invoker.sources
@@ -164,7 +171,7 @@ template("ace_unittest") {
     }
   } else if (type == "pipeline") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = "ace_engine/ace_engine/${module_output}"
+      module_out_path = "ace_engine/${module_name}/${module_output}"
       sources = []
       sources += invoker.sources
       sources += flutter_sources

@@ -28,7 +28,7 @@ public:
 
     ~JsAccessibilityActionInterceptFunction() override = default;
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }
@@ -45,7 +45,7 @@ public:
 
     ~JsAccessibilityHoverTransparentFunction() override = default;
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

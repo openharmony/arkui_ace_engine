@@ -16,6 +16,7 @@
 #include "core/common/container.h"
 
 #include <dirent.h>
+#include "iremote_object.h"
 
 #include "base/utils/utils.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -131,16 +132,16 @@ RefPtr<Container> Container::GetDefault()
     return defaultContainer;
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
-    RefPtr<Container> foucsContainer;
-    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && pipeline->IsWindowFocused()) {
-            foucsContainer = container;
+            focusContainer = container;
         }
     });
-    return foucsContainer;
+    return focusContainer;
 }
 
 RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
@@ -185,6 +186,13 @@ ColorMode Container::CurrentColorMode()
     auto curContainer = CurrentSafely();
     CHECK_NULL_RETURN(curContainer, ColorMode::LIGHT);
     return curContainer->GetColorMode();
+}
+
+std::string Container::CurrentBundleName()
+{
+    auto curContainer = CurrentSafely();
+    CHECK_NULL_RETURN(curContainer, "");
+    return curContainer->GetBundleName();
 }
 
 bool Container::UpdateState(const Frontend::State& state)
@@ -411,5 +419,10 @@ bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
 {
     return PipelineBase::GetCurrentContextSafelyWithCheck() &&
            PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+}
+
+sptr<IRemoteObject> Container::GetToken()
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

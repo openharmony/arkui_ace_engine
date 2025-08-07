@@ -18,7 +18,6 @@
 #include <securec.h>
 #include <vector>
 
-#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -32,6 +31,7 @@
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
+#include "core/interfaces/native/node/node_api_multi_thread.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
@@ -59,6 +59,7 @@
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/runtime/runtime_init.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
 #include "interfaces/native/native_type.h"
@@ -271,6 +272,11 @@ ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
 }
 
+ArkUINodeHandle CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeByNodeId(tag, nodeId));
+}
+
 ArkUI_Bool IsRightToLeft()
 {
     return AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -444,6 +450,10 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScrollEdge,
     NodeModifier::SetOnScrollReachStart,
     NodeModifier::SetOnScrollReachEnd,
+    NodeModifier::SetOnWillStopDragging,
+    NodeModifier::SetOnDidZoom,
+    NodeModifier::SetOnZoomStart,
+    NodeModifier::SetOnZoomStop,
 };
 
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -550,6 +560,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperSelected,
     NodeModifier::SetSwiperUnselected,
     NodeModifier::SetSwiperContentWillScroll,
+    NodeModifier::SetSwiperScrollStateChanged,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -652,7 +663,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     NodeModifier::ResetOnAxisEvent,
-    nullptr,
+    NodeModifier::ResetOnClick,
     nullptr,
     NodeModifier::ResetOnHoverMove,
 };
@@ -667,6 +678,10 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnScrollEdge,
     NodeModifier::ResetOnScrollReachStart,
     NodeModifier::ResetOnScrollReachEnd,
+    NodeModifier::ResetOnWillStopDragging,
+    NodeModifier::ResetOnDidZoom,
+    NodeModifier::ResetOnZoomStart,
+    NodeModifier::ResetOnZoomStop,
 };
 
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -757,6 +772,7 @@ const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 };
 
 const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1864,70 +1880,10 @@ ArkUI_Int32 PostIdleCallback(ArkUI_Int32 instanceId, void* userData,
     return ERROR_CODE_NO_ERROR;
 }
 
-void SetIsFreeNodeScope(ArkUI_Bool isFreeNodeScope)
+ArkUI_Int32 GreatOrEqualTargetAPIVersion(ArkUI_Int32 version)
 {
-    MultiThreadBuildManager::SetIsFreeNodeScope(isFreeNodeScope);
-}
-
-int32_t CheckNodeOnValidThread(ArkUINodeHandle node)
-{
-    UINode* currentNode = reinterpret_cast<UINode*>(node);
-    return static_cast<int32_t>(MultiThreadBuildManager::CheckNodeOnValidThread(currentNode));
-}
-
-int32_t CheckOnUIThread()
-{
-    return MultiThreadBuildManager::CheckOnUIThread();
-}
-
-int32_t PostAsyncUITask(ArkUI_Int32 contextId,
-    void* asyncUITaskData, void (*asyncUITask)(void* asyncUITaskData), void(*onFinish)(void* asyncUITaskData))
-{
-    auto asyncUITaskFunc = [asyncUITaskData, asyncUITask]() {
-        if (asyncUITask == nullptr) {
-            return;
-        }
-        asyncUITask(asyncUITaskData);
-    };
-    auto onFinishFunc = [asyncUITaskData, onFinish]() {
-        if (onFinish == nullptr) {
-            return;
-        }
-        onFinish(asyncUITaskData);
-    };
-    if (!MultiThreadBuildManager::GetInstance().PostAsyncUITask(
-        contextId, std::move(asyncUITaskFunc), std::move(onFinishFunc))) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    return ERROR_CODE_NO_ERROR;
-}
-
-int32_t PostUITask(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData))
-{
-    auto taskFunc = [taskData, task]() {
-        if (task == nullptr) {
-            return;
-        }
-        task(taskData);
-    };
-    if (!MultiThreadBuildManager::GetInstance().PostUITask(contextId, std::move(taskFunc))) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    return ERROR_CODE_NO_ERROR;
-}
-
-int32_t PostUITaskAndWait(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData))
-{
-    auto taskFunc = [taskData, task]() {
-        if (task == nullptr) {
-            return;
-        }
-        task(taskData);
-    };
-    if (!MultiThreadBuildManager::GetInstance().PostUITaskAndWait(contextId, std::move(taskFunc))) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    return ERROR_CODE_NO_ERROR;
+    auto platformVersion = static_cast<PlatformVersion>(version);
+    return AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(platformVersion);
 }
 
 const ArkUIBasicAPI* GetBasicAPI()
@@ -1960,22 +1916,10 @@ const ArkUIBasicAPI* GetBasicAPI()
         .getContextByNode = GetContextByNode,
         .postFrameCallback = PostFrameCallback,
         .postIdleCallback = PostIdleCallback,
+        .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
-}
-
-const ArkUIMultiThreadManagerAPI* GetMultiThreadManagerAPI()
-{
-    static const ArkUIMultiThreadManagerAPI multiThreadImpl = {
-        .setIsFreeNodeScope = SetIsFreeNodeScope,
-        .checkNodeOnValidThread = CheckNodeOnValidThread,
-        .checkOnUIThread = CheckOnUIThread,
-        .postAsyncUITask = PostAsyncUITask,
-        .postUITask = PostUITask,
-        .postUITaskAndWait = PostUITaskAndWait,
-    };
-    return &multiThreadImpl;
 }
 
 const CJUIBasicAPI* GetCJUIBasicAPI()
@@ -2362,6 +2306,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .createNewScope = CreateNewScope,
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
+    .createCustomNodeByNodeId = CreateCustomNodeByNodeId,
 };
 /* clang-format on */
 
@@ -2750,6 +2695,7 @@ ArkUIFullNodeAPI impl_full = {
     .getStyledStringAPI = GetStyledStringAPI,     // StyledStringAPI
     .getSnapshotAPI = GetComponentSnapshotAPI,     // SyncSnapshot
     .getMultiThreadManagerAPI = GetMultiThreadManagerAPI, // MultiThreadManagerAPI
+    .getRuntimeInit = RuntimeInit::GetRuntimeInit, // RuntimeInit
 };
 /* clang-format on */
 

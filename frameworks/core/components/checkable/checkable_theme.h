@@ -23,7 +23,7 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
+constexpr Color DEFAULT_UNCHECK_BORDER_COLOR = Color(0x4B181819);
 class CheckableTheme : public virtual Theme {
     DECLARE_ACE_TYPE(CheckableTheme, Theme);
 
@@ -235,7 +235,10 @@ public:
     {
         return hotZoneVerticalSize_;
     }
-
+    const Color& GetUnCheckBorderColor() const
+    {
+        return uncheckBorderColor_;
+    }
 protected:
     CheckableTheme() = default;
 
@@ -283,6 +286,7 @@ protected:
     InternalResource::ResourceId dotResourceId_ = InternalResource::ResourceId::RADIO_DOT_SVG;
     Dimension hotZoneHorizontalSize_;
     Dimension hotZoneVerticalSize_;
+    Color uncheckBorderColor_;
 };
 
 class CheckboxTheme : public CheckableTheme {
@@ -486,6 +490,19 @@ public:
         }
 
     protected:
+        void ParseUncheckBorderColor(
+            const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+            if (!radioPattern) {
+                LOGW("find pattern of radio fail");
+                return;
+            }
+
+            theme->uncheckBorderColor_ =
+                radioPattern->GetAttr<Color>("radio_uncheck_border_color", DEFAULT_UNCHECK_BORDER_COLOR);
+        }
+
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
         {
             RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
@@ -493,6 +510,7 @@ public:
                 LOGW("find pattern of radio fail");
                 return;
             }
+            ParseUncheckBorderColor(themeConstants, theme);
             theme->width_ = radioPattern->GetAttr<Dimension>("radio_size", 0.0_vp);
             theme->height_ = theme->width_;
             theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>("radio_hotzone_padding", 0.0_vp);

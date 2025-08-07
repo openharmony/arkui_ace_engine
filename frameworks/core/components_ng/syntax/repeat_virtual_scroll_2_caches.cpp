@@ -208,57 +208,63 @@ OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
                 "Internal error!", static_cast<int32_t>(index));
             return nullptr;
         }
-
         const RIDType rid = result.first;
-        if (rid < 0) {
-            TAG_LOGE(AceLogTag::ACE_REPEAT, "CallOnGetRid4Index(index %{public}d: Node creation failed. Invalid rid. "
-                "Internal error!", static_cast<int32_t>(index));
-            return std::nullopt;
-        }
-
-        // add to L1 index -> rid
-        l1Rid4Index_[index] = rid;
-
-        // add to cache
-        cacheItem4Rid_[rid] = RepeatVirtualScroll2CacheItem::MakeCacheItem(node4Index, true);
-
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "REPEAT TRACE ABNORMAL (after startup) ...CallOnGetRid4Index"
-            "(index %{public}d -> rid %{public}d) returns CacheItem with newly created node %{public}s .",
-            index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
-
-        return cacheItem4Rid_[rid];
+        return GetNewRid4Index(index, rid, node4Index);
     } // case OnGetRid4IndexResult::CREATED_NEW_NODE)
 
     if (result.second == OnGetRid4IndexResult::UPDATED_NODE) {
         // case: TS updated existing node that's in the cache already
         const RIDType rid = result.first;
-        if (rid < 0) {
-            TAG_LOGE(AceLogTag::ACE_REPEAT, "Node update for index %{public}d failed. Invalid rid. "
-                "Internal error!", static_cast<int32_t>(index));
-            return std::nullopt;
-        }
-        const auto& optCacheItem = GetCacheItem4RID(rid);
-        if (!optCacheItem.has_value() || optCacheItem.value()->node_ == nullptr) {
-            TAG_LOGE(AceLogTag::ACE_REPEAT, "Node update for index %{public}d failed. No node in CacheItem. "
-                "Internal error!", static_cast<int32_t>(index));
-            return std::nullopt;
-        }
-
-        // add to L1 but do not Set Active or add to render tree.
-        l1Rid4Index_[index] = rid;
-        optCacheItem.value()->isL1_ = true;
-
-        TAG_LOGD(AceLogTag::ACE_REPEAT,
-            "CallOnGetRid4Index(index %{public}d -> rid %{public}d): returns CacheItem with updated node "
-            "%{public}s .", index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
-
-        return optCacheItem;
+        return GetUpdatedRid4Index(index, rid);
     } // case OnGetRid4IndexResult::UPDATED_NODE
 
     // TS was not able to deliver UINode
     TAG_LOGE(AceLogTag::ACE_REPEAT, "New node creation failed for index %{public}d. TS unable to create/update node. "
         "Application error!", static_cast<int32_t>(index));
     return std::nullopt;
+}
+
+OptCacheItem RepeatVirtualScroll2Caches::GetNewRid4Index(IndexType index, RIDType rid, RefPtr<UINode>& node4Index)
+{
+    if (rid == 0) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "CallOnGetRid4Index(index %{public}d: Node creation failed. Invalid rid. "
+            "Internal error!", static_cast<int32_t>(index));
+        return std::nullopt;
+    }
+    // add to L1 index -> rid
+    l1Rid4Index_[index] = rid;
+    // add to cache
+    cacheItem4Rid_[rid] = RepeatVirtualScroll2CacheItem::MakeCacheItem(node4Index, true);
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "REPEAT TRACE ABNORMAL (after startup) ...CallOnGetRid4Index"
+        "(index %{public}d -> rid %{public}d) returns CacheItem with newly created node %{public}s .",
+        index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
+    ACE_SCOPED_TRACE("RepeatVirtualScroll:CallOnGetRid4Index CREATED_NEW_NODE [index] %d, [rid] %d, [item] %s",
+        index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
+    return cacheItem4Rid_[rid];
+}
+
+OptCacheItem RepeatVirtualScroll2Caches::GetUpdatedRid4Index(IndexType index, RIDType rid)
+{
+    if (rid == 0) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "Node update for index %{public}d failed. Invalid rid. "
+            "Internal error!", static_cast<int32_t>(index));
+        return std::nullopt;
+    }
+    const auto& optCacheItem = GetCacheItem4RID(rid);
+    if (!optCacheItem.has_value() || optCacheItem.value()->node_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "Node update for index %{public}d failed. No node in CacheItem. "
+            "Internal error!", static_cast<int32_t>(index));
+        return std::nullopt;
+    }
+    // add to L1 but do not Set Active or add to render tree.
+    l1Rid4Index_[index] = rid;
+    optCacheItem.value()->isL1_ = true;
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "CallOnGetRid4Index(index %{public}d -> rid %{public}d): returns CacheItem with updated node "
+        "%{public}s .", index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
+    ACE_SCOPED_TRACE("RepeatVirtualScroll:CallOnGetRid4Index UPDATED_NODE [index] %d, [rid] %d, [item] %s",
+        index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
+    return optCacheItem;
 }
 
 /**

@@ -28,12 +28,16 @@ public:
     void SetRadiusWidth(const Dimension& value) override;
     void SetRadiusHeight(const Dimension& value) override;
     void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
+    void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, const RefPtr<ResourceObject>& radiusXResObj,
+        const RefPtr<ResourceObject>& radiusYResObj, int32_t index) override;
 
     void SetShapeRectRadius(
         const RefPtr<ShapeRect>& shapeRect, const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
     static void SetRadiusWidth(FrameNode* frameNode, const Dimension& value);
     static void SetRadiusHeight(FrameNode* frameNode, const Dimension& value);
     static void SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
+    static void SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY,
+        const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index);
 
 private:
     static void SetTopLeftRadius(const Radius& topLeftRadius);

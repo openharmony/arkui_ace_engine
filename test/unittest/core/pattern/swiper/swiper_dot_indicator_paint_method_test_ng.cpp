@@ -926,7 +926,7 @@ HWTEST_F(SwiperIndicatorTestNg, NeedBottomAnimation001, TestSize.Level1)
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     paintMethod->targetIndex_ = 0;
-    paintMethod->touchBottomPageRate_ = 0;
+    paintMethod->touchBottomPageRate_ = 0.2;
     paintMethod->currentIndexActual_ = 0;
     EXPECT_TRUE(paintMethod->NeedBottomAnimation());
 
@@ -940,6 +940,14 @@ HWTEST_F(SwiperIndicatorTestNg, NeedBottomAnimation001, TestSize.Level1)
     EXPECT_TRUE(paintMethod->NeedBottomAnimation());
 
     paintMethod->touchBottomPageRate_ = 0.6;
+    EXPECT_FALSE(paintMethod->NeedBottomAnimation());
+
+    paintMethod->touchBottomPageRate_ = 0;
+    EXPECT_TRUE(paintMethod->NeedBottomAnimation());
+
+    paintMethod->itemCount_ = 4;
+    paintMethod->currentIndexActual_ = 3;
+    paintMethod->firstIndex_ = 0;
     EXPECT_FALSE(paintMethod->NeedBottomAnimation());
 
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;

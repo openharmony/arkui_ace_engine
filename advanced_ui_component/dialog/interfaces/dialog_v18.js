@@ -239,6 +239,16 @@ const CONTENT_FONT_WEIGHT = lazyInit(() => {
     let fontWeight = FontWeight[getString(125834682) || 'Medium'];
     return fontWeight;
 });
+// 'sys.string.dialog_content_font_size'
+const CONTENT_FONT_SIZE = lazyInit(() => {
+    return getLengthMetricsByResource({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.dialog_content_font_size'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    }, BODY_L);
+});
 const SCROLL_BAR_OFFSET = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 export class TipsDialog extends ViewPU {
@@ -646,7 +656,7 @@ export class TipsDialog extends ViewPU {
                     Checkbox.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.checkTips);
-                        Text.fontSize(`${BODY_L}fp`);
+                        Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.maxLines(CONTENT_MAX_LINES);
@@ -783,7 +793,7 @@ export class TipsDialog extends ViewPU {
         this.initMargin();
     }
     getContentFontSize() {
-        return BODY_L + 'fp';
+        return CONTENT_FONT_SIZE() + 'fp';
     }
     initButtons() {
         if (!this.primaryButton && !this.secondaryButton) {
@@ -1222,7 +1232,7 @@ export class SelectDialog extends ViewPU {
                             Column.onClick(() => {
                                 this.selectedIndex = index;
                                 item.action && item.action();
-                                this.controller?.close();
+                                closeDialog(this.controller, 'onClick');
                             });
                         }, Column);
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1740,7 +1750,7 @@ export class ConfirmDialog extends ViewPU {
             Text.focusBox({
                 strokeWidth: LengthMetrics.px(0)
             });
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
             Text.fontWeight(CONTENT_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.textAlign(this.textAlign);
@@ -2183,7 +2193,7 @@ export class AlertDialog extends ViewPU {
             Text.focusBox({
                 strokeWidth: LengthMetrics.px(0)
             });
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
@@ -2510,11 +2520,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.__customStyle = new ObservedPropertySimplePU(undefined, this, 'customStyle');
         this.__buttonMaxFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'buttonMaxFontSize');
         this.__buttonMinFontSize = new ObservedPropertyObjectPU(9, this, 'buttonMinFontSize');
-        this.__primaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleMaxFontSize');
-        this.__primaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'primaryTitleMinFontSize');
-        this.__secondaryTitleMaxFontSize =
-            new ObservedPropertyObjectPU(`${SUBTITLE_SIZE()}fp`, this, 'secondaryTitleMaxFontSize');
-        this.__secondaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_S}fp`, this, 'secondaryTitleMinFontSize');
+        this.__primaryTitleFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleFontSize');
+        this.__secondaryTitleFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_SIZE()}fp`, this, 'secondaryTitleFontSize');
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
@@ -2592,17 +2599,11 @@ class CustomDialogContentComponent extends ViewPU {
         if (params.buttonMinFontSize !== undefined) {
             this.buttonMinFontSize = params.buttonMinFontSize;
         }
-        if (params.primaryTitleMaxFontSize !== undefined) {
-            this.primaryTitleMaxFontSize = params.primaryTitleMaxFontSize;
+        if (params.primaryTitleFontSize !== undefined) {
+            this.primaryTitleFontSize = params.primaryTitleFontSize;
         }
-        if (params.primaryTitleMinFontSize !== undefined) {
-            this.primaryTitleMinFontSize = params.primaryTitleMinFontSize;
-        }
-        if (params.secondaryTitleMaxFontSize !== undefined) {
-            this.secondaryTitleMaxFontSize = params.secondaryTitleMaxFontSize;
-        }
-        if (params.secondaryTitleMinFontSize !== undefined) {
-            this.secondaryTitleMinFontSize = params.secondaryTitleMinFontSize;
+        if (params.secondaryTitleFontSize !== undefined) {
+            this.secondaryTitleFontSize = params.secondaryTitleFontSize;
         }
         if (params.primaryTitleFontColorWithTheme !== undefined) {
             this.primaryTitleFontColorWithTheme = params.primaryTitleFontColorWithTheme;
@@ -2655,10 +2656,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.__customStyle.purgeDependencyOnElmtId(rmElmtId);
         this.__buttonMaxFontSize.purgeDependencyOnElmtId(rmElmtId);
         this.__buttonMinFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__primaryTitleMaxFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__primaryTitleMinFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__secondaryTitleMaxFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__secondaryTitleMinFontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__primaryTitleFontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTitleFontSize.purgeDependencyOnElmtId(rmElmtId);
         this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
         this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
         this.__titleTextAlign.purgeDependencyOnElmtId(rmElmtId);
@@ -2674,10 +2673,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.__customStyle.aboutToBeDeleted();
         this.__buttonMaxFontSize.aboutToBeDeleted();
         this.__buttonMinFontSize.aboutToBeDeleted();
-        this.__primaryTitleMaxFontSize.aboutToBeDeleted();
-        this.__primaryTitleMinFontSize.aboutToBeDeleted();
-        this.__secondaryTitleMaxFontSize.aboutToBeDeleted();
-        this.__secondaryTitleMinFontSize.aboutToBeDeleted();
+        this.__primaryTitleFontSize.aboutToBeDeleted();
+        this.__secondaryTitleFontSize.aboutToBeDeleted();
         this.__primaryTitleFontColorWithTheme.aboutToBeDeleted();
         this.__secondaryTitleFontColorWithTheme.aboutToBeDeleted();
         this.__titleTextAlign.aboutToBeDeleted();
@@ -2736,29 +2733,17 @@ class CustomDialogContentComponent extends ViewPU {
     set buttonMinFontSize(newValue) {
         this.__buttonMinFontSize.set(newValue);
     }
-    get primaryTitleMaxFontSize() {
-        return this.__primaryTitleMaxFontSize.get();
+    get primaryTitleFontSize() {
+        return this.__primaryTitleFontSize.get();
     }
-    set primaryTitleMaxFontSize(newValue) {
-        this.__primaryTitleMaxFontSize.set(newValue);
+    set primaryTitleFontSize(newValue) {
+        this.__primaryTitleFontSize.set(newValue);
     }
-    get primaryTitleMinFontSize() {
-        return this.__primaryTitleMinFontSize.get();
+    get secondaryTitleFontSize() {
+        return this.__secondaryTitleFontSize.get();
     }
-    set primaryTitleMinFontSize(newValue) {
-        this.__primaryTitleMinFontSize.set(newValue);
-    }
-    get secondaryTitleMaxFontSize() {
-        return this.__secondaryTitleMaxFontSize.get();
-    }
-    set secondaryTitleMaxFontSize(newValue) {
-        this.__secondaryTitleMaxFontSize.set(newValue);
-    }
-    get secondaryTitleMinFontSize() {
-        return this.__secondaryTitleMinFontSize.get();
-    }
-    set secondaryTitleMinFontSize(newValue) {
-        this.__secondaryTitleMinFontSize.set(newValue);
+    set secondaryTitleFontSize(newValue) {
+        this.__secondaryTitleFontSize.set(newValue);
     }
     get primaryTitleFontColorWithTheme() {
         return this.__primaryTitleFontColorWithTheme.get();
@@ -3225,8 +3210,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.fontWeight(TITLE_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
-            Text.maxFontSize(ObservedObject.GetRawObject(this.primaryTitleMaxFontSize));
-            Text.minFontSize(ObservedObject.GetRawObject(this.primaryTitleMinFontSize));
+            Text.fontSize(ObservedObject.GetRawObject(this.primaryTitleFontSize));
             Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
@@ -3266,8 +3250,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
-            Text.maxFontSize(ObservedObject.GetRawObject(this.secondaryTitleMaxFontSize));
-            Text.minFontSize(ObservedObject.GetRawObject(this.secondaryTitleMinFontSize));
+            Text.fontSize(ObservedObject.GetRawObject(this.secondaryTitleFontSize));
             Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
@@ -3792,7 +3775,7 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
             if (buttonOptions.action) {
                 buttonOptions.action();
             }
-            controller?.close();
+            closeDialog(controller, 'onKeyEvent');
             event.stopPropagation();
         }
     });
@@ -3800,13 +3783,21 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
         if (buttonOptions.action) {
             buttonOptions.action();
         }
-        controller?.close();
+        closeDialog(controller, 'onClick');
     });
     Button.defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse));
     Button.buttonStyle(buttonOptions.buttonStyle ??
         (buttonOptions.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE() : ALERT_BUTTON_STYLE()));
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
     Button.type(ButtonType.ROUNDED_RECTANGLE);
+}
+function closeDialog(controller, funcName) {
+    if (controller) {
+        hilog?.info(0x3900, 'Ace', `AdvancedDialog button ${funcName} controller true`);
+        controller?.close();
+    } else {
+        hilog?.info(0x3900, 'Ace', `AdvancedDialog button ${funcName} controller false`);
+    }
 }
 function isDefaultFocus(singleButton, isHasDefaultFocus, isAllFocusFalse) {
     try {
@@ -4090,7 +4081,7 @@ export class LoadingDialog extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.content);
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);

@@ -552,19 +552,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         return true;
     }
 
-    // process exit overlay
-    if (event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
-        auto overlayManager = GetOverlayManager(GetInstanceId());
-        CHECK_NULL_RETURN(overlayManager, false);
-        auto currentContainer = Container::Current();
-        CHECK_NULL_RETURN(currentContainer, false);
-        if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
-            return overlayManager->RemoveOverlayInSubwindow();
-        } else {
-            return overlayManager->RemoveOverlay(false) || SheetManager::GetInstance().RemoveSheetByESC();
-        }
-    }
-    return false;
+    return RemoveOverlayByESC(event);
 }
 
 bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
@@ -654,6 +642,25 @@ void KeyEventManager::ReDispatch(KeyEvent& keyEvent)
     if (DispatchTabKey(keyEvent, curFocusView)) {
         return;
     }
-    DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
+    if (DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame)) {
+        return;
+    }
+    RemoveOverlayByESC(keyEvent);
+}
+
+bool KeyEventManager::RemoveOverlayByESC(const KeyEvent& keyEvent)
+{
+    if (keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
+        auto overlayManager = GetOverlayManager(GetInstanceId());
+        CHECK_NULL_RETURN(overlayManager, false);
+        auto currentContainer = Container::Current();
+        CHECK_NULL_RETURN(currentContainer, false);
+        if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
+            return overlayManager->RemoveOverlayInSubwindow();
+        } else {
+            return overlayManager->RemoveOverlay(false) || SheetManager::GetInstance().RemoveSheetByESC();
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "core/components_ng/event/focus_hub.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -36,8 +37,7 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
 namespace {
 template <bool isReverse>
-bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation,
-    bool checkOnMainTree = true)
+bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
 {
     const auto& children = node->GetChildren(true);
     using IterType = std::conditional_t<isReverse, decltype(children.crbegin()), decltype(children.cbegin())>;
@@ -51,7 +51,7 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
     }
     for (auto iter = begin; iter != end; ++iter) {
         const auto& uiChild = *iter;
-        if (!uiChild || (checkOnMainTree && !uiChild->IsOnMainTree())) {
+        if (!uiChild || !uiChild->IsOnMainTree()) {
             continue;
         }
         auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
@@ -60,43 +60,7 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
             if (focusHub && operation(focusHub)) {
                 return true;
             }
-        } else if (AnyOfUINode<isReverse>(uiChild, operation, checkOnMainTree)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-template<bool isReverse>
-bool AnyOfUINodeInMainTree(const RefPtr<UINode>& node, RefPtr<FocusHub>& lastFocusNode,
-    const std::function<bool(const RefPtr<FocusHub>&)>& operation)
-{
-    const auto& children = node->GetChildren(true);
-    using IterType = std::conditional_t<isReverse, decltype(children.crbegin()), decltype(children.cbegin())>;
-    IterType begin;
-    IterType end;
-    if constexpr (isReverse) {
-        begin = children.crbegin();
-        end = children.crend();
-    } else {
-        begin = children.cbegin();
-        end = children.cend();
-    }
-    for (auto iter = begin; iter != end; ++iter) {
-        const auto& uiChild = *iter;
-        if (!uiChild) {
-            continue;
-        }
-        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
-        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
-            const auto focusHub = frameChild->GetFocusHub();
-            if (!uiChild->IsOnMainTree() && lastFocusNode != focusHub) {
-                continue;
-            }
-            if (focusHub && operation(focusHub)) {
-                return true;
-            }
-        } else if (AnyOfUINodeInMainTree<isReverse>(uiChild, lastFocusNode, operation)) {
+        } else if (AnyOfUINode<isReverse>(uiChild, operation)) {
             return true;
         }
     }
@@ -214,8 +178,7 @@ bool FocusHub::AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&
     return isReverse ? AnyOfUINode<true>(node, operation) : AnyOfUINode<false>(node, operation);
 }
 
-bool FocusHub::AllChildFocusHub(
-    const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse, bool checkOnMainTree)
+bool FocusHub::AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse)
 {
     RefPtr<UINode> node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
@@ -223,21 +186,7 @@ bool FocusHub::AllChildFocusHub(
         operation(focusHub);
         return false;
     };
-    return isReverse ? AnyOfUINode<true>(node, wrappedOpration, checkOnMainTree)
-                     : AnyOfUINode<false>(node, wrappedOpration, checkOnMainTree);
-}
-
-bool FocusHub::AllChildFocusHubInMainTree(
-    const std::function<void(const RefPtr<FocusHub>&)>& operation, RefPtr<FocusHub>& lastFocusNode, bool isReverse)
-{
-    RefPtr<UINode> node = GetFrameNode();
-    CHECK_NULL_RETURN(node, false);
-    auto wrappedOpration = [&operation](const RefPtr<FocusHub>& focusHub) {
-        operation(focusHub);
-        return false;
-    };
-    return isReverse ? AnyOfUINodeInMainTree<true>(node, lastFocusNode, wrappedOpration)
-                     : AnyOfUINodeInMainTree<false>(node, lastFocusNode, wrappedOpration);
+    return isReverse ? AnyOfUINode<true>(node, wrappedOpration) : AnyOfUINode<false>(node, wrappedOpration);
 }
 
 bool FocusHub::SkipFocusMoveBeforeRemove()
@@ -252,20 +201,14 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     decltype(focusNodes.begin()) lastIter;
     bool hasLastFocus = false;
-    AllChildFocusHub(
-        [&focusNodes, &lastIter, &hasLastFocus, lastFocusNode](const RefPtr<FocusHub>& child) {
-            auto host = child->GetFrameNode();
-            if (host && !host->IsOnMainTree() && lastFocusNode != child) {
-                return false;
-            }
-            auto iter = focusNodes.emplace(focusNodes.end(), child);
-            if (child && lastFocusNode == child) {
-                lastIter = iter;
-                hasLastFocus = true;
-            }
-            return false;
-        },
-        false, false);
+    AllChildFocusHub([&focusNodes, &lastIter, &hasLastFocus, lastFocusNode](const RefPtr<FocusHub>& child) {
+        auto iter = focusNodes.emplace(focusNodes.end(), child);
+        if (child && lastFocusNode == child) {
+            lastIter = iter;
+            hasLastFocus = true;
+        }
+        return false;
+    });
     return hasLastFocus ? lastIter : focusNodes.end();
 }
 
@@ -562,11 +505,14 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf(BlurReason reason)
 {
+    auto frameNode = GetFrameNode();
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(frameNode, RemoveSelf, reason);
+#endif
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " remove self focus.",
             GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     }
-    auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto focusView = frameNode->GetPattern<FocusView>();
     auto* pipeline = frameNode->GetContext();

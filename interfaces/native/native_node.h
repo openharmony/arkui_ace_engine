@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,11 @@ typedef enum {
      * @since 20
      */
     ARKUI_NODE_EMBEDDED_COMPONENT,
+    /**
+     * Undefined.
+     * @since 20
+     */
+    ARKUI_NODE_UNDEFINED,
 } ArkUI_NodeType;
 
 /**
@@ -2735,6 +2740,18 @@ typedef enum {
      */
     NODE_IMAGE_RESIZABLE,
     /**
+     * @brief Defines the synchronous image loading attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to load the image synchronously. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to load the image synchronously. \n
+     *
+     */
+    NODE_IMAGE_SYNC_LOAD = 4012,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -5072,7 +5089,8 @@ typedef enum {
      * The parameter type is {@link ArkUI_EdgeEffect}. The default value is <b>ARKUI_EDGE_EFFECT_NONE</b>.\n
      * .value[1]?.i32: whether to enable the scroll effect when the component content size is smaller than the
      * component itself. Optional. The value <b>1</b> means to enable the scroll effect, and <b>0</b> means the
-     * opposite. The default value is <b>1</b>. \n
+     * opposite. The default value for the List/Grid/WaterFlow component is <b>0</b>, and the default value for the
+     * Scroll component is <b>1</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: effect used at the edges of the component when the boundary of the scrollable content is reached.
@@ -5350,6 +5368,60 @@ typedef enum {
      * @since 20
      */
     NODE_SCROLL_BAR_MARGIN = 1002022,
+
+    /**
+     * @brief Sets the maximum zoom scale for scrollable content.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: maximum zoom scale to set. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: current maximum zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_MAX_ZOOM_SCALE = 1002023,
+
+    /**
+     * @brief Sets the minimum zoom scale for scrollable content.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: minimum zoom scale to set. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: current minimum zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_MIN_ZOOM_SCALE = 1002024,
+
+    /**
+     * @brief Sets the zoom scale for scrollable content.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: zoom scale to set. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: current zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_ZOOM_SCALE = 1002025,
+
+    /**
+     * @brief Sets whether to enable the zoom bounce effect when the scaling exceeds the limits.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable the zoom bounce effect when the scaling exceeds the limits.
+     * The value <b>1</b> means to enable the effect, and <b>0</b> means the opposite. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable the zoom bounce effect when the scaling exceeds the limits.
+     * The value <b>1</b> means to enable the effect, and <b>0</b> means the opposite. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_ENABLE_BOUNCES_ZOOM = 1002026,
     
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -5578,6 +5650,22 @@ typedef enum {
      * @since 16
      */
     NODE_LIST_STACK_FROM_END = 1003014,
+
+    /**
+     * @brief Defines whether the <b>List</b> component loads child nodes synchronously.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>List</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>List</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     *
+     * @since 20
+     */
+    NODE_LIST_SYNC_LOAD = 1003016,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -6364,6 +6452,22 @@ typedef enum {
     NODE_WATER_FLOW_LAYOUT_MODE,
 
     /**
+     * @brief Defines whether the <b>WaterFlow</b> component loads child nodes synchronously.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>WaterFlow</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>WaterFlow</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     *
+     * @since 20
+     */
+    NODE_WATER_FLOW_SYNC_LOAD = 1010012,
+
+    /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
      * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
@@ -6444,6 +6548,38 @@ typedef enum {
      * .value[0].i32: number of cached items in the water flow adapter. \n
      */
     NODE_GRID_CACHED_COUNT,
+
+    /**
+     * @brief Defines the focus wrap mode for the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: focus wrap mode of the <b>Grid</b> component.
+     *                The parameter type is {@link ArkUI_FocusWrapMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: focus wrap mode of the <b>Grid</b> component.
+     *                The parameter type is {@link ArkUI_FocusWrapMode}. \n
+     *
+     * @since 20
+     */
+    NODE_GRID_FOCUS_WRAP_MODE = 1013006,
+
+    /**
+     * @brief Defines whether the <b>Grid</b> component loads child nodes synchronously.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>Grid</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>Grid</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     *
+     * @since 20
+     */
+    NODE_GRID_SYNC_LOAD = 1013007,
 
     /**
     * @brief Defines the column width of the text picker.
@@ -7675,6 +7811,20 @@ typedef enum {
     NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL = 1001007,
 
     /**
+     * @brief Defines the <b>ARKUI_NODE_SWIPER</b> scroll state change event.
+     * This event is triggered when the scroll state of the <b>Swiper</b> component changes during user dragging,
+     * during the animation phase after the user lifts their finger, or upon stopping of scrolling.
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: current scroll state. The parameter type is
+     * {@link ArkUI_ScrollState}. \n
+     *
+     * @since 20
+     */
+    NODE_SWIPER_EVENT_ON_SCROLL_STATE_CHANGED = 1001008,
+
+    /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
      *
      * Notes for triggering the event:\n
@@ -7803,6 +7953,50 @@ typedef enum {
      * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
      */
     NODE_SCROLL_EVENT_ON_REACH_END,
+    /**
+     * @brief Defines the callback for when the user is about to release the drag on the scrollable container component.
+     *
+     * Notes for triggering the event:\n
+     * This event is triggered when the user is about to release the drag on the scrollable container component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: speed at which the user releases the drag, in vp. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING,
+    /**
+     * @brief Defines the callback for the <b>Scroll</b> component's zoom event,
+     * triggered at the end of each frame during zooming. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: current zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_DID_ZOOM,
+    /**
+     * @brief Defines the callback for the <b>Scroll</b> component's zoom start event,
+     * triggered when zooming begins. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_ZOOM_START,
+    /**
+     * @brief Defines the callback for the <b>Scroll</b> component's zoom end event,
+     * triggered when zooming ends. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_ZOOM_STOP,
 
     /**
      * @brief Defines the event triggered when a child component enters or leaves the list display area.
@@ -8100,7 +8294,6 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
  * @return 错误码。
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
  *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中参数长度超限。
- *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
 int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
@@ -8128,7 +8321,6 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index,
     * @param size 数组长度。
     * @return 错误码。
     *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
-    *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
     * @since 12
     */
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
@@ -9183,6 +9375,19 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* screenOffset);
 
 /**
+ * @brief Obtains the offset of a component relative to the global display.
+ * The relative position does not count in transformation attributes, such as translate.
+ *
+ * @param node Pointer to the <b>ArkUI_NodeHandle</b> representing the component.
+ * @param offset Offset of the component relative to the global display, in px.
+ * @return Result code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset);
+
+/**
  * @brief Obtain the position of the component in the window, including the properties of graphic translation changes.
  *
  * @param node ArkUI_NodeHandle pointer.
@@ -9696,6 +9901,24 @@ int32_t OH_ArkUI_PostUITask(ArkUI_ContextHandle context, void* taskData, void (*
  * @since 20
  */
 int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, void (*task)(void* taskData));
+
+/**
+ * @brief Sets the inverse color algorithm for components and instances.
+ *
+ * @param uiContext Indicates the context in which the inverse color feature should take effect. If the value is null,
+ *                  the feature applies to the entire application process.
+ * @param forceDark Indicates whether the inverse color feature is enabled.
+ * @param nodeType Indicates the component type for which to enable the inverse color feature. If the value is null,
+ *                 enabling the feature for all components.
+ * @param colorInvertFunc Indicates the user-defined inverse color algorithm.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
+           Returns {@link ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID} if force dark config is invalid.
+ * @since 20
+ */
+int32_t OH_ArkUI_SetForceDarkConfig(ArkUI_ContextHandle uiContext, bool forceDark, ArkUI_NodeType nodeType,
+    uint32_t (*colorInvertFunc)(uint32_t color));
 
 #ifdef __cplusplus
 }

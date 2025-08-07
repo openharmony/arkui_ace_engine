@@ -61,7 +61,8 @@ class ShapeContainerPatternTestNg : public BaseShapePatternTestNg {
 public:
     RefPtr<FrameNode> CreadFrameNode() override
     {
-        return nullptr;
+        ShapeModelNG().Create();
+        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     }
 
     void Draw(RefPtr<FrameNode> frameNode) override {}
@@ -308,5 +309,43 @@ HWTEST_F(ShapeContainerPatternTestNg, IsEnableMatchParentTest, TestSize.Level1)
      * @tc.expected: Function IsEnableMatchParent returns true.
      */
     EXPECT_TRUE(pattern->IsEnableMatchParent());
+}
+
+/**
+ * @tc.name: IsEnableChildrenMatchParentTest
+ * @tc.desc: Test IsEnableChildrenMatchParent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, IsEnableChildrenMatchParentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto shapeModel01 = ShapeModelNG();
+    shapeModel01.Create();
+    shapeModel01.SetViewPort(Dimension(ZERO), Dimension(ZERO), Dimension(ZERO), Dimension(ZERO));
+    shapeModel01.SetBitmapMesh(MESH, COLUMN, ROW);
+    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Function IsEnableChildrenMatchParent's return value.
+     * @tc.expected: Function IsEnableChildrenMatchParent returns true.
+     */
+    EXPECT_TRUE(pattern->IsEnableChildrenMatchParent());
+}
+
+/**
+ * @tc.name: Paint001
+ * @tc.desc: set stroke and draw
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeTest, TestSize.Level1)
+{
+    CheckStroke(true);
 }
 } // namespace OHOS::Ace::NG

@@ -49,7 +49,7 @@ public:
         CHECK_NULL_RETURN(progressLayoutProperty, nullptr);
         progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
         if (!progressModifier_) {
-            ProgressAnimatableProperty progressAnimatableProperty{};
+            ProgressAnimatableProperty progressAnimatableProperty {};
             InitAnimatableProperty(progressAnimatableProperty);
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(GetHost(), progressAnimatableProperty);
         }
@@ -62,7 +62,7 @@ public:
         progressModifier_->SetUseContentModifier(UseContentModifier());
         if ((progressLayoutProperty->GetType() == ProgressType::RING ||
                 progressLayoutProperty->GetType() == ProgressType::SCALE) &&
-                progressLayoutProperty->GetPaddingProperty()) {
+            progressLayoutProperty->GetPaddingProperty()) {
             const auto& padding = progressLayoutProperty->GetPaddingProperty();
             auto leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension();
             progressModifier_->SetRingProgressLeftPadding(leftPadding);
@@ -165,6 +165,16 @@ public:
         isModifierInitiatedBgColor_ = value;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void UpdateGradientColor(const NG::Gradient& gradient, bool isFirstLoad);
     void UpdateColor(const Color& color, bool isFirstLoad);
@@ -180,7 +190,7 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void OnLanguageConfigurationUpdate() override;
     void InitTouchEvent();
     void RemoveTouchEvent();
@@ -208,6 +218,7 @@ private:
     void ObscureText(bool isSensitive);
     void FireBuilder();
     void ReportProgressEvent();
+    void OnColorConfigurationUpdate() override;
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

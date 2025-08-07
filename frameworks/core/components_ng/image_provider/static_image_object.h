@@ -30,6 +30,8 @@ public:
     {}
     ~StaticImageObject() override = default;
 
+    RefPtr<CanvasImage> QueryWeakCanvasFromCache(const ImageSourceInfo& src, const SizeF& size);
+
     RefPtr<CanvasImage> QueryCanvasFromCache(const ImageSourceInfo& src, const SizeF& size);
 
     void MakeCanvasImage(

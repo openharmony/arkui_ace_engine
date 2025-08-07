@@ -25,19 +25,11 @@ namespace OHOS::Ace::NG::GeneratedViewModel {
 
 void* createColumnSplitNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = LinearSplitModelNG::CreateFrameNode(nodeId, NG::SplitType::COLUMN_SPLIT);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
 void* createRowSplitNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = LinearSplitModelNG::CreateFrameNode(nodeId, NG::SplitType::ROW_SPLIT);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -47,6 +39,16 @@ void* createPanelNode(ArkUI_Int32 nodeId)
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
     // return AceType::RawPtr(frameNode);
+    return nullptr;
+}
+
+void* createLazyGridLayoutNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createLazyVGridLayoutNode(ArkUI_Int32 nodeId)
+{
     return nullptr;
 }
 

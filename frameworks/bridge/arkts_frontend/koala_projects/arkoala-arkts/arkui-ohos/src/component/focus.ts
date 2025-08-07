@@ -17,10 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { ColorMetrics } from "./../generated/ArkColorMetricsMaterialized"
+import { ColorMetrics } from "../Graphics"
 export interface FocusBoxStyle {
     margin?: LengthMetrics;
     strokeColor?: ColorMetrics;
@@ -30,4 +30,8 @@ export enum FocusPriority {
     AUTO = 0,
     PRIOR = 2000,
     PREVIOUS = 3000
+}
+export enum KeyProcessingMode {
+    FOCUS_NAVIGATION = 0,
+    ANCESTOR_EVENT = 1
 }

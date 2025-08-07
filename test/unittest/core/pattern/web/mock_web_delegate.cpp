@@ -26,6 +26,13 @@ static std::string g_setReturnStatus = "";
 const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
+std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
+    { "existhtmlElementIdOther", "existSurfaceIdOther" } };
+std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
+    { "existSurfaceIdOther", "existhtmlElementIdOther" } };
+std::map<std::string, int64_t> surfaceToWebAccessibilityMap = { { "existSurfaceId", 123 },
+    { "existSurfaceIdOther", 456 } };
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
     std::string GetHint() override
@@ -607,6 +614,14 @@ public:
         delegate->HandleAutoFillEvent(result);
     }
 
+    void OnReceiveValueV2(std::shared_ptr<NWeb::NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(value);
+    }
+
 private:
     WeakPtr<WebDelegate> delegate_;
 };
@@ -675,7 +690,9 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
 void WebDelegate::UpdateOverlayScrollbarEnabled(bool isEnabled) {}
 void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
 void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
+void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) {}
 void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition) {}
+void WebDelegate::UpdateGestureFocusMode(const GestureFocusMode& mode) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
@@ -726,8 +743,17 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid) {}
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const {}
 void WebDelegate::OnPageStarted(const std::string& param) {}
 void WebDelegate::OnPageFinished(const std::string& param) {}
+void WebDelegate::SetPageFinishedState(const bool& state)
+{
+    isPageFinished_ = state;
+}
+
+bool WebDelegate::GetPageFinishedState()
+{
+    return isPageFinished_;
+}
 void WebDelegate::OnProgressChanged(int param) {}
-void WebDelegate::OnReceivedTitle(const std::string& param) {}
+void WebDelegate::OnReceivedTitle(const std::string& title, bool isRealTitle) {}
 void WebDelegate::ExitFullScreen() {}
 void WebDelegate::OnFullScreenExit()
 {
@@ -790,9 +816,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
 void WebDelegate::OnAccessibilityEvent(
     int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
 {}
-void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId) {}
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId) {}
-void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId) {}
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
 {}
@@ -810,6 +834,12 @@ bool WebDelegate::IsEmptyOnInterceptRequest()
 RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
     return nullptr;
+}
+std::string WebDelegate::OnOverrideErrorPage(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    return "";
 }
 void WebDelegate::OnTooltip(const std::string& tooltip) {}
 void WebDelegate::OnRequestFocus() {}
@@ -971,7 +1001,46 @@ bool WebDelegate::GetPendingSizeStatus()
 {
     return false;
 }
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter) {}
+
+void WebDelegate::HandleAccessibilityHoverEvent(
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
+{
+    std::string surfaceId = "";
+    if (point.GetX() >= 0 && point.GetY() >= 0) {
+        surfaceId = "existSurfaceId";
+    }
+    if (GetWebAccessibilityIdBySurfaceId(surfaceId) == -1) {
+        surfaceToWebAccessibilityMap.erase("hoverSurfaceId");
+    } else {
+        surfaceToWebAccessibilityMap["hoverSurfaceId"] = 1;
+    }
+}
+
+std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
+{
+    auto it = htmlElementToSurfaceMap.find(htmlElementId);
+    if (it != htmlElementToSurfaceMap.end()) {
+        return it->second;
+    }
+    return "";
+}
+std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceId)
+{
+    auto it = surfaceToHtmlElementMap.find(surfaceId);
+    if (it != surfaceToHtmlElementMap.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
+{
+    auto it = surfaceToWebAccessibilityMap.find(surfaceId);
+    if (it != surfaceToWebAccessibilityMap.end()) {
+        return it->second;
+    }
+    return -1;
+}
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
@@ -1110,6 +1179,9 @@ void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1118,6 +1190,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAc
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1126,6 +1201,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1136,6 +1214,10 @@ OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() cons
     return OHOS::NWeb::NWebPreference::CopyOptionMode::NONE;
 }
 bool WebDelegate::OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    return false;
+}
+bool WebDelegate::OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param)
 {
     return false;
 }
@@ -1169,6 +1251,18 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
 std::string WebDelegate::GetSelectInfo() const
 {
     return "";
+}
+std::string WebDelegate::GetAllTextInfo() const
+{
+    return "";
+}
+int WebDelegate::GetSelectStartIndex() const
+{
+    return 0;
+}
+int WebDelegate::GetSelectEndIndex() const
+{
+    return 0;
 }
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
@@ -1219,6 +1313,10 @@ void SetReturnStatus(const std::string& status)
 {
     g_setReturnStatus = status;
 }
+void SetReturnNode(std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node)
+{
+    g_customAccessibilityNode = node;
+}
 void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
@@ -1237,6 +1335,10 @@ void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFont
 bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
+}
+OHOS::NWeb::WebDestroyMode GetWebDestroyMode()
+{
+    return OHOS::NWeb::WebDestroyMode::NORMAL_MODE;
 }
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
@@ -1266,7 +1368,12 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
     return false;
 }
 
-void WebDelegate::RemoveSnapshotFrameNode() {}
+void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
+void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath) {}
+void WebDelegate::SetVisibility(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
@@ -1275,4 +1382,10 @@ void WebDelegate::SetPipNativeWindow(int delegate_id,
 void WebDelegate::SendPipEvent(int delegate_id,
     int child_id, int frame_routing_id, int event) {}
 
+void WebDelegate::UpdateSingleHandleVisible(bool isVisible) {}
+bool WebDelegate::ShowMagnifier() { return false; }
+bool WebDelegate::HideMagnifier() { return false; }
+void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
+void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
+    double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 } // namespace OHOS::Ace

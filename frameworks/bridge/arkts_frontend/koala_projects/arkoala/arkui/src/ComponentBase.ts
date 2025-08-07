@@ -84,7 +84,6 @@ export abstract class ComponentBase implements PeerReceiver {
                 console.log("stop implicit animation", this.currentAnimation)
                 ArkUINativeModule._ApplyModifierFinish(this.getNativePeerNode().ptr)
                 // TODO: think about it
-                //nativeModule()._CloseImplicitAnimation();
             }
             this.currentAnimation = animation
             startImplicitAnimations(this.currentAnimation!)

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 
 #include "base/log/log.h"
+#include "core/common/udmf/data_load_params.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
@@ -109,6 +110,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
     JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
     JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+    JSClass<JsDragEvent>::CustomMethod("getGlobalDisplayX", &JsDragEvent::GetGlobalDisplayX);
+    JSClass<JsDragEvent>::CustomMethod("getGlobalDisplayY", &JsDragEvent::GetGlobalDisplayY);
     JSClass<JsDragEvent>::CustomMethod("getDragSource", &JsDragEvent::GetDragSource);
     JSClass<JsDragEvent>::CustomMethod("isRemote", &JsDragEvent::IsRemote);
     JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
@@ -136,6 +139,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
     JSClass<JsDragEvent>::CustomMethod("getDisplayId", &JsDragEvent::GetDisplayId);
     JSClass<JsDragEvent>::CustomMethod("enableInternalDropAnimation", &JsDragEvent::EnableInternalDropAnimation);
+    JSClass<JsDragEvent>::CustomMethod("setDataLoadParams", &JsDragEvent::SetDataLoadParams);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -167,6 +171,20 @@ void JsDragEvent::GetScreenX(const JSCallbackInfo& args)
 void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
 {
     auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetScreenY())));
+    auto yValueRef = JSRef<JSVal>::Make(yValue);
+    args.SetReturnValue(yValueRef);
+}
+
+void JsDragEvent::GetGlobalDisplayX(const JSCallbackInfo& args)
+{
+    auto xValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetGlobalDisplayX())));
+    auto xValueRef = JSRef<JSVal>::Make(xValue);
+    args.SetReturnValue(xValueRef);
+}
+
+void JsDragEvent::GetGlobalDisplayY(const JSCallbackInfo& args)
+{
+    auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetGlobalDisplayY())));
     auto yValueRef = JSRef<JSVal>::Make(yValue);
     args.SetReturnValue(yValueRef);
 }
@@ -227,7 +245,29 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
+    dragEvent_->SetUseDataLoadParams(false);
     dragEvent_->SetData(udData);
+}
+
+void JsDragEvent::SetDataLoadParams(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+    CHECK_NULL_VOID(dragEvent_);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scope(env);
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    RefPtr<DataLoadParams> udDataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(env, nativeValue);
+    CHECK_NULL_VOID(udDataLoadParams);
+    dragEvent_->SetUseDataLoadParams(true);
+    dragEvent_->SetDataLoadParams(udDataLoadParams);
 }
 
 void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)
@@ -576,7 +616,7 @@ void JsDragSpringLoadingContext::GetDragInfos(const JSCallbackInfo& args)
     auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
     dragInfosObj->SetPropertyObject("dataSummary", jsValue);
     dragInfosObj->SetProperty<std::string>("extraInfos", context_->GetExtraInfos());
-    JSRef<JSVal> dragInfosRef = JSRef<JSObject>::Cast(dragInfosObj);
+    JSRef<JSVal> dragInfosRef = dragInfosObj;
     args.SetReturnValue(dragInfosRef);
 }
 
@@ -595,7 +635,7 @@ void JsDragSpringLoadingContext::GetCurrentConfig(const JSCallbackInfo& args)
     curConfigObj->SetProperty<int32_t>("updateInterval", config->updateInterval);
     curConfigObj->SetProperty<int32_t>("updateNotifyCount", config->updateNotifyCount);
     curConfigObj->SetProperty<int32_t>("updateToFinishInterval", config->updateToFinishInterval);
-    JSRef<JSVal> curConfigRef = JSRef<JSObject>::Cast(curConfigObj);
+    JSRef<JSVal> curConfigRef = curConfigObj;
     args.SetReturnValue(curConfigRef);
 }
 
@@ -623,11 +663,11 @@ void JsDragSpringLoadingContext::UpdateConfiguration(const JSCallbackInfo& args)
     int32_t updateNotifyCount = jsObj->GetPropertyValue<int32_t>("updateNotifyCount", NG::DEFAULT_UPDATE_NOTIFY_COUNT);
     int32_t updateToFinishInterval =
         jsObj->GetPropertyValue<int32_t>("updateToFinishInterval", NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL);
-    config->stillTimeLimit = (stillTimeLimit >= 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
-    config->updateInterval = (updateInterval >= 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
-    config->updateNotifyCount = (updateNotifyCount >= 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
+    config->stillTimeLimit = (stillTimeLimit > 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
+    config->updateInterval = (updateInterval > 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
+    config->updateNotifyCount = (updateNotifyCount > 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
     config->updateToFinishInterval =
-        (updateToFinishInterval >= 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
+        (updateToFinishInterval > 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
     context_->SetDragSpringLoadingConfiguration(std::move(config));
 }
 
@@ -675,7 +715,7 @@ JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info)
 
 JSRef<JSVal> JsDragFunction::DragSpringLoadingExecute(const RefPtr<DragSpringLoadingContext>& info)
 {
-    JSRef<JSVal> springLoadingContext = JSRef<JSObject>::Cast(CreateSpringLoadingContext(info));
+    JSRef<JSVal> springLoadingContext = CreateSpringLoadingContext(info);
     JSRef<JSVal> params[] = { springLoadingContext };
     return JsFunction::ExecuteJS(1, params);
 }
@@ -767,4 +807,24 @@ JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)
     return itemDragInfoObj;
 }
 
+// use for ArkTs1.2 interop begin
+int64_t JsDragEvent::GetDragEventPointer()
+{
+    CHECK_NULL_RETURN(dragEvent_, 0);
+    return reinterpret_cast<int64_t>(AceType::RawPtr(dragEvent_));
+}
+
+JSRef<JSObject> JsDragEvent::CreateDragEvent(void* dragEventPtr)
+{
+    JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
+    CHECK_NULL_RETURN(dragEventPtr, dragObj);
+    auto dragInfoPtr = reinterpret_cast<DragEvent*>(dragEventPtr);
+    auto dragEvent = AceType::Claim(dragInfoPtr);
+    CHECK_NULL_RETURN(dragEvent, dragObj);
+    auto jsDragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    CHECK_NULL_RETURN(jsDragEvent, dragObj);
+    jsDragEvent->SetDragEvent(dragEvent);
+    return dragObj;
+}
+//use for ArkTs1.2 end
 } // namespace OHOS::Ace::Framework

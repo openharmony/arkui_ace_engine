@@ -53,6 +53,7 @@ void JSNavPathStack::JSBind(BindingTarget globalObj)
     JSClass<JSNavPathStack>::CustomMethod("onPopCallback", &JSNavPathStack::OnPopCallback);
     JSClass<JSNavPathStack>::CustomMethod("getPathStack", &JSNavPathStack::GetPathStack);
     JSClass<JSNavPathStack>::CustomMethod("setPathStack", &JSNavPathStack::SetPathStack);
+    JSClass<JSNavPathStack>::CustomMethod("isHomeName", &JSNavPathStack::IsHomeName);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
 }
 
@@ -281,6 +282,17 @@ void JSNavPathStack::SetPathStack(const JSCallbackInfo& info)
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set path stack, new size :%{public}zu, animated %{public}d",
         setPathLength, finalAnimate);
     OnStateChanged();
+}
+
+void JSNavPathStack::IsHomeName(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsString() || !isHomeNameCallback_) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto name = info[0]->ToString();
+    bool isHomeName = isHomeNameCallback_(name);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isHomeName)));
 }
 
 bool JSNavPathStack::FindNavInfoInPreArray(

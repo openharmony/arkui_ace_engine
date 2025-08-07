@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "grid_row_base_test_ng.h"
+#include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -901,6 +902,61 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnBreakpointChangeTest03
+ * @tc.desc: Test OnBreakpointChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GridRow
+     */
+    auto gridRow = CreateGridRow([this](GridRowModelNG model) {
+        V2::BreakPoints breakpoints;
+        breakpoints.reference = V2::BreakPointsReference::ComponentSize;
+        breakpoints.breakpoints.assign({ "100px", "200px", "300px" });
+        ViewAbstract::SetWidth(CalcLength(400));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
+    });
+    auto eventHub = gridRow->GetOrCreateEventHub<GridRowEventHub>();
+    bool eventTriggerFlag = false;
+    auto layoutProperty = gridRow->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    /**
+     * @tc.steps: step2. Set OnBreakpointChange callback
+     * @tc.expected: breakpoint is changed to lg
+     */
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("lg")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+    eventTriggerFlag = false;
+    /**
+     * @tc.expected: breakpoint is changed to xl
+     */
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(250), CalcLength(DEFAULT_CHILD_HEIGHT)));
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("md")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+    eventTriggerFlag = false;
+    /**
+     * @tc.expected: breakpoint is changed to xxl
+     */
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(150), CalcLength(DEFAULT_CHILD_HEIGHT)));
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("sm")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+}
+
+/**
  * @tc.name: MeasureSelfTest
  * @tc.desc: Test MeasureSelf
  * @tc.type: FUNC
@@ -1635,5 +1691,39 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
     selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
     EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 50));
+}
+
+/**
+* @tc.name  : ProcessGridSizeType_ShouldReturnUndefined_WhenPipelineIsNull
+* @tc.number: ProcessGridSizeType_Test_001
+* @tc.desc  : Test case to verify that ProcessGridSizeType returns UNDEFINED when pipeline is null
+*/
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_ShouldReturnUndefined_WhenPipelineIsNull, TestSize.Level1) {
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size;
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    RefPtr<PipelineBase> pipeline = nullptr;
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+
+    EXPECT_EQ(result, V2::GridSizeType::UNDEFINED);
+}
+
+/**
+* @tc.name  : ProcessGridSizeType_ShouldReturnCorrectType_WhenReferenceIsNotWindowSize
+* @tc.number: ProcessGridSizeType_Test_004
+* @tc.desc  : Test ProcessGridSizeType returns the correct GridSizeType when reference is not WindowSize
+*/
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowSize, TestSize.Level1) {
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::ComponentSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    // Assuming CalcBreakPoint returns 3 for windowWidth = 1000
+    EXPECT_EQ(result, V2::GridSizeType::LG);
 }
 } // namespace OHOS::Ace::NG

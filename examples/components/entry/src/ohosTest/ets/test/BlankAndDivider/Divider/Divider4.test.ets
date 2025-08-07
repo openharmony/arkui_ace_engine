@@ -31,6 +31,11 @@ import { DividerStart } from './Divider';
 
 const driver = Driver.create();
 
+const BLEND_MODE_VALUE_9 = 9;
+const BLEND_MODE_VALUE_10 = 10;
+const BLEND_MODE_VALUE_16 = 16;
+const LINEAR_GRADIENT_DIRECTION_2 = 2;
+
 export default function Divider4() {
   describe('Divider4', () => {
     /**
@@ -133,13 +138,13 @@ export default function Divider4() {
     it('ArkUI_Divider_Comp_0294', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
-        radioClickObj: 9,
+        radioClickObj: BLEND_MODE_VALUE_9,
         id: 'Divider',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('blendMode', JsonType.obj)
         ],
-        assertEqual: 9
+        assertEqual: BLEND_MODE_VALUE_9
       })
 
       done();
@@ -148,7 +153,7 @@ export default function Divider4() {
     it('ArkUI_Divider_Comp_0295', 0, async (done: Function) => {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
-        radioClickObj: 10,
+        radioClickObj: BLEND_MODE_VALUE_10,
         id: 'Divider',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
@@ -244,7 +249,7 @@ export default function Divider4() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('blendMode', JsonType.obj)
         ],
-        assertEqual: 16
+        assertEqual: BLEND_MODE_VALUE_16
       })
 
       done();
@@ -803,7 +808,7 @@ export default function Divider4() {
       await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
       await radioClick({
-        radioClickObj: 2,
+        radioClickObj: LINEAR_GRADIENT_DIRECTION_2,
         id: 'Divider',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),

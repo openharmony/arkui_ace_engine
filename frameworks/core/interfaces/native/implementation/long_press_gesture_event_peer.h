@@ -19,5 +19,8 @@
 
 struct LongPressGestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::LongPressGestureEvent> {
+protected:
+    LongPressGestureEventPeer() = default;
     ~LongPressGestureEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

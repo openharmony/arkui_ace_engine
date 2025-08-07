@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-struct IndicatorComponentControllerPeer {};
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
@@ -57,7 +55,4 @@ const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponent
     return &IndicatorComponentControllerAccessorImpl;
 }
 
-struct IndicatorComponentControllerPeer {
-    virtual ~IndicatorComponentControllerPeer() = default;
-};
 }

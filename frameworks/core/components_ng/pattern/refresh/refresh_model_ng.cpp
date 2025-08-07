@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "frameworks/base/geometry/dimension.h"
@@ -45,7 +46,7 @@ void RefreshModelNG::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->UpdateNestedModeForChildren(NestedScrollOptions({
@@ -62,7 +63,7 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
     CHECK_NULL_RETURN(frameNode, frameNode);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_RETURN(pattern, frameNode);
         pattern->UpdateNestedModeForChildren(NestedScrollOptions({
@@ -119,9 +120,10 @@ void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
         CHECK_NULL_VOID(node);
         std::string result;
         if (!ResourceParseUtils::ParseResString(resObj, result)) {
-            return;
+            ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, AceType::RawPtr(node));
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
         }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
     };
     pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
 }
@@ -228,6 +230,8 @@ void RefreshModelNG::SetIsCustomBuilderExist(bool isCustomBuilderExist)
 
 void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
 {
+    // call SetCustomBuilderMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetCustomBuilder, frameNode, customBuilder);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
@@ -323,5 +327,13 @@ void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& c
     auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStepOffsetChange(std::move(dragOffset));
 }
 } // namespace OHOS::Ace::NG

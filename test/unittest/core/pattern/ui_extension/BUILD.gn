@@ -41,7 +41,9 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -117,7 +119,9 @@ ace_unittest("ui_extension_manager_test") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -190,7 +194,9 @@ ace_unittest("platform_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -308,7 +314,9 @@ ace_unittest("isolated_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -382,7 +390,9 @@ ace_unittest("platform_event_proxy_test") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -452,7 +462,9 @@ ace_unittest("security_ui_extension_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -495,12 +507,9 @@ ace_unittest("security_ui_extension_pattern_test") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
-    cflags = []
 
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-      cflags +=
-          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }
@@ -529,7 +538,9 @@ ace_unittest("session_wrapper_impl_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -604,7 +615,9 @@ ace_unittest("session_wrapper_impl_test_new_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -683,7 +696,9 @@ ace_unittest("security_session_wrapper_impl_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -752,6 +767,7 @@ ace_unittest("preview_session_wrapper_impl_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.cpp",
@@ -760,7 +776,9 @@ ace_unittest("preview_session_wrapper_impl_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -828,13 +846,16 @@ ace_unittest("preview_ui_extension_compontent_test") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
@@ -878,12 +899,9 @@ ace_unittest("preview_ui_extension_compontent_test") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
-    cflags = []
 
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-      cflags +=
-          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }

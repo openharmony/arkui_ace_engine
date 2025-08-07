@@ -19,6 +19,7 @@
 #include "ui/base/geometry/calc_dimension.h"
 #include "ui/base/macros.h"
 #include "ui/base/referenced.h"
+#include "ui/properties/gradient_property.h"
 
 
 namespace OHOS::Ace::Kit {
@@ -33,6 +34,7 @@ public:
 
     void SetWidth(const CalcDimension& width);
     void SetHeight(const CalcDimension& height);
+    void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
 
 protected:
     View();

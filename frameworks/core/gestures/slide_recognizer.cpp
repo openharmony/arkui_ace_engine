@@ -14,6 +14,7 @@
  */
 
 #include "core/gestures/slide_recognizer.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -468,12 +469,12 @@ double SlideRecognizer::ComputeAngle()
     double fy = touchPoints_[0].y;
     double sx = touchPoints_[1].x;
     double sy = touchPoints_[1].y;
-    return atan2(fy - sy, fx - sx) * ANGLE_SUM_OF_TRIANGLE / M_PI;
+    return atan2(fy - sy, fx - sx) * ANGLE_SUM_OF_TRIANGLE / ACE_PI;
 }
 
 double SlideRecognizer::ComputeAngle(AxisEvent event)
 {
-    return atan2(event.verticalAxis, event.horizontalAxis) * ANGLE_SUM_OF_TRIANGLE / M_PI;
+    return atan2(event.verticalAxis, event.horizontalAxis) * ANGLE_SUM_OF_TRIANGLE / ACE_PI;
 }
 
 } // namespace OHOS::Ace

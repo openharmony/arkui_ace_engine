@@ -46,6 +46,9 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 #ifdef ENABLE_ROSEN_BACKEND
     ContainerScope scope(id);
     auto container = Container::Current();
+    if (container != nullptr) {
+        uiContentType_ = container->GetUIContentType();
+    }
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         frameRateLinker_ = Rosen::RSFrameRateLinker::Create();
@@ -102,7 +105,21 @@ void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (receiver_ != nullptr) {
+        if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+            CHECK_NULL_VOID(!isRequestVsync_);
+            isRequestVsync_ = true;
+        }
         receiver_->RequestNextVSync(frameCallback_);
+    }
+#endif
+}
+
+void FormRenderWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        CHECK_NULL_VOID(rsUIDirector_);
+        rsUIDirector_->SetTimeStamp(timeStamp, name);
     }
 #endif
 }
@@ -113,6 +130,7 @@ void FormRenderWindow::Destroy()
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
+    rsSurfaceNode_ = nullptr;
     if (rsUIDirector_) {
         rsUIDirector_->Destroy();
         rsUIDirector_.reset();
@@ -199,7 +217,9 @@ void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFram
     decltype(frameRateData_) frameRateData{rate, animatorExpectedFrameRate, rateType};
     if (frameRateData_ != frameRateData) {
         frameRateData_ = frameRateData;
-        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType}, animatorExpectedFrameRate);
+        auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType},
+            animatorExpectedFrameRate, rsUIContext);
     }
 #endif
 }

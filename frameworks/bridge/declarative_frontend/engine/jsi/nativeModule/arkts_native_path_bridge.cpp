@@ -30,12 +30,13 @@ ArkUINativeModuleValue PathBridge::SetPathCommands(ArkUIRuntimeCallInfo* runtime
     }
 
     std::string commands;
+    RefPtr<ResourceObject> resObj;
     if (secondArg->IsString(vm)) {
         commands = secondArg->ToString(vm)->ToString(vm);
     } else if (secondArg->IsObject(vm)) {
-        ArkTSUtils::ParseJsStringFromResource(vm, secondArg, commands);
+        ArkTSUtils::ParseJsStringFromResource(vm, secondArg, commands, resObj);
     }
-    GetArkUINodeModifiers()->getPathModifier()->setPathCommands(nativeNode, commands.c_str());
+    GetArkUINodeModifiers()->getPathModifier()->setPathCommands(nativeNode, commands.c_str(), AceType::RawPtr(resObj));
     return panda::JSValueRef::Undefined(vm);
 }
 

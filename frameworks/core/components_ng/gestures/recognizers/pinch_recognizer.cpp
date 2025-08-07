@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
@@ -57,7 +58,7 @@ void PinchRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pinch accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PINCH RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     lastRefereeState_ = refereeState_;
@@ -180,6 +181,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+        pinchCenter_ = ComputePinchCenter();
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
@@ -242,12 +244,13 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         if (GreatOrEqual(fabs(currentDev_ - initialDev_), distance_)) {
             scale_ = currentDev_ / initialDev_;
+            if (CheckLimitFinger()) {
+                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+                return;
+            }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-                return;
-            }
-            if (CheckLimitFinger()) {
                 return;
             }
             if (!isLastPinchFinished_) {
@@ -258,6 +261,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
+        pinchCenter_ = ComputePinchCenter();
         if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
             return;
         }
@@ -316,6 +320,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "cancel received.";
     if (!IsActiveFinger(event.id)) {
         return;
     }
@@ -337,6 +342,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -445,16 +451,18 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
             info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
         } else {
             info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
             info.SetSourceTool(lastTouchEvent_.sourceTool);
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+            info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         }
         info.SetPointerEvent(lastPointEvent_);
         info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::PINCH);
         callbackFunction(info);
         HandleReports(info, type);
     }
@@ -511,6 +519,13 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
+        info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "test/mock/base/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 class TabsAttrTestNg : public TabsTestNg {
@@ -1890,5 +1892,57 @@ HWTEST_F(TabsTestNg, TabContentSetIndicatorColorByUser001, TestSize.Level1)
     tabContentModel.SetIndicatorColorByUser(true);
     EXPECT_TRUE(tabContentLayoutProperty->GetIndicatorColorSetByUserValue());
     tabContentModel.Pop();
+}
+
+/**
+ * @tc.name: TabContentCreateWithResourceObj001
+ * @tc.desc: test CreateWithResourceObj of TabContentModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentCreateWithResourceObj001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+
+    LabelStyle labelStyle;
+    labelStyle.selectedColor = Color::FromString("#FF0000");
+    labelStyle.unselectedColor = Color::FromString("#00FF00");
+    labelStyle.fontSize = Dimension(16.0, DimensionUnit::VP);
+    tabContentPattern->SetLabelStyle(labelStyle);
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().selectedColor, Color::FromString("#FF0000"));
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().unselectedColor, Color::FromString("#00FF00"));
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().fontSize, Dimension(16.0, DimensionUnit::VP));
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "#FFE4B5";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithStringColor = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    tabContentModel.CreateWithResourceObj(TabContentJsType::LABEL_SELECT_COLOR, resObjWithStringColor);
+    tabContentModel.CreateWithResourceObj(TabContentJsType::LABEL_UNSELECT_COLOR, resObjWithStringColor);
+    tabContentPattern->resourceMgr_->ReloadResources();
+    EXPECT_FALSE(tabContentPattern->GetLabelStyle().selectedColor.has_value());
+    EXPECT_FALSE(tabContentPattern->GetLabelStyle().unselectedColor.has_value());
+
+    ResourceObjectParams paramSize;
+    paramSize.type = ResourceObjectParamType::STRING;
+    paramSize.value = "20";
+    std::vector<ResourceObjectParams> paramsSize;
+    paramsSize.push_back(paramSize);
+    auto resObjWithStringSize = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), paramsSize, "", "", Container::CurrentIdSafely());
+    tabContentModel.CreateWithResourceObj(TabContentJsType::FONT_SIZE, resObjWithStringSize);
+    tabContentPattern->resourceMgr_->ReloadResources();
+    EXPECT_EQ(tabContentPattern->GetLabelStyle().fontSize->Value(), 0.0);
+    tabContentModel.Pop();
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

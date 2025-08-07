@@ -28,6 +28,8 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -68,8 +70,56 @@ struct TextDetectConfig {
         decorationJson->Put("color", entityDecorationColor.ToString().c_str());
         decorationJson->Put("style", static_cast<int64_t>(entityDecorationStyle));
         jsonValue->Put("decoration", decorationJson);
+        jsonValue->Put("enablePreviewMenu", enablePreviewMenu ? "true" : "false");
         return jsonValue->ToString();
     }
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, TextDetectConfig&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        detectConfigResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : detectConfigResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    static void RegisterColorResource(TextDetectConfig& textDetectConfig, RefPtr<ResourceObject>& resObj)
+    {
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, TextDetectConfig& textDetectConfig) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(resObj, colorValue);
+                textDetectConfig.entityColor = colorValue;
+            };
+            textDetectConfig.AddResource("textDetectConfig.Color", resObj, std::move(updateFunc));
+        }
+    }
+
+    static void RegisterDecoColorResource(TextDetectConfig& textDetectConfig, RefPtr<ResourceObject>& resObj)
+    {
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, TextDetectConfig& textDetectConfig) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(resObj, colorValue);
+                textDetectConfig.entityDecorationColor = colorValue;
+            };
+            textDetectConfig.AddResource("textDetectConfig.DecoColor", resObj, std::move(updateFunc));
+        }
+    }
+
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, TextDetectConfig&)> updateFunc;
+    };
+
+    std::unordered_map<std::string, ResourceUpdater> detectConfigResMap_;
 };
 
 class ACE_EXPORT SpanStringBase : public AceType {
@@ -122,6 +172,8 @@ public:
     virtual void SetAdaptMinFontSize(const Dimension& value) = 0;
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
+    virtual void SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur) {};
+    virtual void ResetContentTransition() {};
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void OnSetWidth() {};
@@ -160,7 +212,9 @@ public:
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetLineThicknessScale(float value) = 0;
     virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
+    virtual void SetColorShaderStyle(const Color& value) = 0;
     virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
+    virtual void ResetGradientShaderStyle() = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

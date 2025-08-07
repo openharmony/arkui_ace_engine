@@ -43,6 +43,11 @@ public:
     static void ResetBackgroundColor(FrameNode* frameNode);
     static void SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc);
     static void SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, JsCounterResourceType resourceType, const RefPtr<ResourceObject>& resObj);
+    static void HandleHeightResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleWidthResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleBackgroundColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
 private:
     RefPtr<FrameNode> CreateButtonChild(

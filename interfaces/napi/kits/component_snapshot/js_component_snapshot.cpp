@@ -672,13 +672,19 @@ bool JudgeRangeType(napi_env env, napi_callback_info info, int32_t argNum)
     JsComponentSnapshot helper(env, info);
 
     napi_valuetype type = napi_undefined;
-    napi_typeof(env, helper.GetArgv(argNum), &type);
+    napi_value argv = helper.GetArgv(argNum);
+    if (argv == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return false;
+    }
+    napi_typeof(env, argv, &type);
     if (type != napi_valuetype::napi_number && type != napi_valuetype::napi_string) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing argument failed, not of number or string type.");
         NapiThrow(env, "parameter uniqueId is not of type number or string", ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);
         return false;
     }
+    napi_close_escapable_handle_scope(env, scope);
     return true;
 }
 
@@ -689,16 +695,18 @@ bool JudgeRectValue(napi_env env, napi_callback_info info)
 
     JsComponentSnapshot helper(env, info);
 
-    if (GETWITHRANGE_ISSTARTRECT_NUMBER >= JsComponentSnapshot::ARGC_MAX) {
+    napi_valuetype type = napi_undefined;
+    napi_value argv = helper.GetArgv(GETWITHRANGE_ISSTARTRECT_NUMBER);
+    if (argv == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
         return true;
     }
-
-    napi_valuetype type = napi_undefined;
-    napi_typeof(env, helper.GetArgv(GETWITHRANGE_ISSTARTRECT_NUMBER), &type);
+    napi_typeof(env, argv, &type);
     bool isRect = true;
     if (type == napi_valuetype::napi_boolean) {
-        napi_get_value_bool(env, helper.GetArgv(GETWITHRANGE_ISSTARTRECT_NUMBER), &isRect);
+        napi_get_value_bool(env, argv, &isRect);
     }
+    napi_close_escapable_handle_scope(env, scope);
     return isRect;
 }
 
@@ -711,13 +719,19 @@ NG::NodeIdentity GetNodeIdentity(napi_env env, napi_callback_info info, int32_t 
 
     NG::NodeIdentity nodeIdentity;
     napi_valuetype type = napi_undefined;
-    napi_typeof(env, helper.GetArgv(index), &type);
+    napi_value argv = helper.GetArgv(index);
+    if (argv == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nodeIdentity;
+    }
+    napi_typeof(env, argv, &type);
     if (type == napi_valuetype::napi_number) {
-        napi_get_value_int32(env, helper.GetArgv(index), &nodeIdentity.second);
+        napi_get_value_int32(env, argv, &nodeIdentity.second);
     } else {
         napi_valuetype valueType = napi_null;
-        GetNapiString(env, helper.GetArgv(index), nodeIdentity.first, valueType);
+        GetNapiString(env, argv, nodeIdentity.first, valueType);
     }
+    napi_close_escapable_handle_scope(env, scope);
     return nodeIdentity;
 }
 

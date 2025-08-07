@@ -123,7 +123,7 @@ void BubblePattern::OnAttachToFrameNode()
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->PopTipsBubble();
+            pattern->PopBubble(true);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
@@ -263,9 +263,7 @@ void BubblePattern::ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& but
 {
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PopupTheme>();
+    auto theme = GetPopupTheme();
     CHECK_NULL_VOID(theme);
     isHover_ = isHover;
     auto hoverColor = theme->GetButtonHoverColor();
@@ -327,9 +325,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
     auto touchType = info.GetTouches().front().GetTouchType();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PopupTheme>();
+    auto theme = GetPopupTheme();
     CHECK_NULL_VOID(theme);
     auto pressColor = theme->GetButtonPressColor();
     auto hoverColor = theme->GetButtonHoverColor();
@@ -378,16 +374,17 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     return buttonRowNode;
 }
 
-void BubblePattern::PopBubble()
+void BubblePattern::PopBubble(bool tips)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
+    auto instanceId = pipelineNg->GetInstanceId();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
-    if (!popupInfo.isCurrentOnShow) {
+    if (!popupInfo.isCurrentOnShow || (tips && !popupInfo.isTips)) {
         return;
     }
     popupInfo.markNeedUpdate = true;
@@ -398,42 +395,9 @@ void BubblePattern::PopBubble()
     auto isTips = layoutProp->GetIsTips().value_or(false);
     if (showInSubWindow) {
         if (isTips) {
-            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
+            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0, instanceId);
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
-        }
-    } else {
-        if (isTips) {
-            overlayManager->HideTips(targetNodeId_, popupInfo, 0);
-        } else {
-            overlayManager->HidePopup(targetNodeId_, popupInfo);
-        }
-    }
-}
-
-void BubblePattern::PopTipsBubble()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineNg = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineNg);
-    auto overlayManager = pipelineNg->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
-    if (!popupInfo.isCurrentOnShow || !popupInfo.isTips) {
-        return;
-    }
-    popupInfo.markNeedUpdate = true;
-    CHECK_NULL_VOID(host);
-    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    auto isTips = layoutProp->GetIsTips().value_or(false);
-    if (showInSubWindow) {
-        if (isTips) {
-            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
-        } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_, instanceId);
         }
     } else {
         if (isTips) {
@@ -446,7 +410,9 @@ void BubblePattern::PopTipsBubble()
 
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
@@ -466,7 +432,9 @@ void BubblePattern::Animation(
 
 bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
@@ -862,8 +830,39 @@ void BubblePattern::UpdateBubbleText()
     host->MarkDirtyNode();
 }
 
+void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_VOID(popupTheme);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+    auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = blurStyle;
+    styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+    renderContext->UpdateBackBlurStyle(styleOption);
+    if (needUpdateShadow) {
+        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        renderContext->UpdateBackShadow(shadow);
+    }
+}
+
 void BubblePattern::OnColorConfigurationUpdate()
 {
+    // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
+    if (isTips_) {
+        UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
+    } else if (SystemProperties::ConfigChangePerform()) {
+        UpdateStyleOption(popupParam_->GetBlurStyle(), false);
+    }
     if (isCustomPopup_) {
         return;
     }
@@ -871,24 +870,6 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
     UpdateBubbleText();
-    if (isTips_) {
-        auto host = GetHost();
-        auto popupTheme = GetPopupTheme();
-        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
-        auto renderContext = childNode->GetRenderContext();
-        CHECK_NULL_VOID(popupTheme);
-        auto defaultBGcolor = popupTheme->GetDefaultBGColor();
-        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-        styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
-        renderContext->UpdateBackBlurStyle(styleOption);
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-        renderContext->UpdateBackShadow(shadow);
-    }
 }
 
 void BubblePattern::UpdateAgingTextSize()
@@ -902,29 +883,13 @@ void BubblePattern::UpdateAgingTextSize()
 
 void BubblePattern::UpdateBubbleText(const Color& value)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto popupTheme = context->GetTheme<PopupTheme>();
-    CHECK_NULL_VOID(popupTheme);
-    auto textNode = DynamicCast<FrameNode>(host);
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto parentNode = host->GetParent();
-    if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
-        !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-        textLayoutProperty->UpdateTextColor(value);
-    } else if (!isSetMessageColor_) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
-        } else {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetFontPrimaryColor());
-        }
-    }
-    textNode->MarkModifyDone();
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto messagenode = GetMessageNode();
+    CHECK_NULL_VOID(messagenode);
+    auto textLayoutProps = messagenode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProps);
+    textLayoutProps->UpdateTextColor(value);
+    messagenode->MarkModifyDone();
+    messagenode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
@@ -934,6 +899,8 @@ void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
     auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(popupPaintProp);
     popupPaintProp->UpdateBackgroundColor(value);
+    CHECK_NULL_VOID(popupParam_);
+    UpdateStyleOption(popupParam_->GetBlurStyle(), false);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -959,4 +926,60 @@ void BubblePattern::UpdateMask(bool maskValue)
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
+
+void BubblePattern::UpdateArrowWidth(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupLayoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    if (dimension.Value() > 0 && dimension.Unit() != DimensionUnit::PERCENT) {
+        popupLayoutProp->UpdateArrowWidth(dimension);
+    }
+
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void BubblePattern::UpdateArrowHeight(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupLayoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    if (dimension.Value() > 0 && dimension.Unit() != DimensionUnit::PERCENT) {
+        popupLayoutProp->UpdateArrowHeight(dimension);
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void BubblePattern::UpdateWidth(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    if (dimension.Value() > 0) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dimension), std::nullopt));
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void BubblePattern::UpdateRadius(const CalcDimension& dimension)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProps = host->GetLayoutProperty<BubbleLayoutProperty>();
+    if (dimension.Value() >= 0) {
+        layoutProps->UpdateRadius(dimension);
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+
 } // namespace OHOS::Ace::NG

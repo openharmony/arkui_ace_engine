@@ -176,6 +176,14 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             }
             builder_->ProcessOffscreenNode(node, true);
         }
+        auto pipeline = GetContext();
+        if (pipeline && !pipeline->GetOnShow()) {
+            pipeline->AddAfterLayoutTask(
+                [node = std::move(node)]() mutable {
+                    node = nullptr;
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
@@ -306,6 +314,15 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
             builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
+        auto pipeline = GetContext();
+        bool isShow = pipeline ? pipeline->GetOnShow() : true;
+        if (pipeline && !isShow) {
+            pipeline->AddAfterLayoutTask(
+                [nodes = std::move(nodeList)]() mutable {
+                    nodes.clear();
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
@@ -479,9 +496,19 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
-const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
 {
-    return children_;
+    if (needCacheNode) {
+        std::vector<UINode*> childList;
+        builder_->GetAllItems(childList);
+        childrenWithCache_.clear();
+        for (const auto& uiNode : childList) {
+            childrenWithCache_.emplace_back(Claim(uiNode));
+        }
+        return childrenWithCache_;
+    } else {
+        return children_;
+    }
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -643,6 +670,13 @@ void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperat
                 }
                 break;
         }
+    }
+}
+
+void LazyForEachNode::EnablePreBuild(bool enable)
+{
+    if (builder_) {
+        builder_->EnablePreBuild(enable);
     }
 }
 } // namespace OHOS::Ace::NG

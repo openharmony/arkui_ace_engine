@@ -52,13 +52,14 @@ public:
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge,
         const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
     static void SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& rect);
+    static void SetMaxFlingSpeed(double max);
+    static void SetOnWillStopDragging(OnWillStopDraggingEvent&& onWillStopDragging);
 
     static void SetEdgeEffect(
         FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
-    static void SetMaxFlingSpeed(double max);
     static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
     static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
 
@@ -80,6 +81,7 @@ public:
     static void ResetContentClip(FrameNode* frameNode);
     static bool GetFadingEdge(FrameNode* frameNode);
     static float GetFadingEdgeLength(FrameNode* frameNode);
+    static void SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDraggingEvent&& onWillStopDragging);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
@@ -92,12 +94,15 @@ public:
     static void SetBackToTop(bool backToTop);
     static void ResetBackToTop();
     static void SetBackToTop(FrameNode* frameNode, bool backToTop);
+    static void SetBackToTopMultiThread(FrameNode* frameNode, bool backToTop);
     static void ResetBackToTop(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
     static void SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin);
     static void SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin);
     static void ResetScrollBarMargin(FrameNode* frameNode);
     static void GetScrollBarMargin(FrameNode* frameNode, ScrollBarMargin& scrollBarMargin);
+
+    static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

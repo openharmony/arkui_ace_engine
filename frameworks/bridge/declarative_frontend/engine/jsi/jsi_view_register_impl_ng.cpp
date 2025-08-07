@@ -145,6 +145,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_text_layout.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
 #ifdef USE_COMPONENTS_LIB
@@ -341,20 +342,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsUpdateDirty2ForAnimateTo(BindingTarget globalObj)
-{
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> updateDirty2ForAnimateToFunc = globalObject->GetProperty("updateDirty2ForAnimateTo");
-    if (updateDirty2ForAnimateToFunc->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(updateDirty2ForAnimateToFunc);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUpdateDirty2ForAnimateTo(callback);
-    }
-}
-
-void JsBindViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
@@ -392,6 +380,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
+    JSTextLayout::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);

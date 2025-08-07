@@ -14,14 +14,19 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include <cstdlib>
+#include <unistd.h>
 #include <vector>
 
 #include "base/error/error_code.h"
+#include "core/common/builder_util.h"
+#include "core/common/color_inverter.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/frame_node_modifier_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
 
@@ -78,6 +83,21 @@ RefPtr<FrameNode> GetParentNode(UINode* node)
                ? nullptr : AceType::DynamicCast<FrameNode>(parent);
 }
 
+void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto* childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_VOID(childNode);
+    auto childRef = Referenced::Claim<UINode>(childNode);
+    CHECK_NULL_VOID(childRef);
+    auto parentNode = childRef->GetParent();
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
+    std::list<RefPtr<UINode>> nodes;
+    BuilderUtils::GetBuilderNodes(childRef, nodes);
+    BuilderUtils::AddBuilderToParent(childRef->GetParent(), nodes);
+}
+
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -110,6 +130,20 @@ ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle chi
     return true;
 }
 
+void RemoveBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto* childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_VOID(childNode);
+    auto childRef = Referenced::Claim<UINode>(childNode);
+    auto parentNode = childRef->GetParent();
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
+    std::list<RefPtr<UINode>> nodes;
+    BuilderUtils::GetBuilderNodes(childRef, nodes);
+    BuilderUtils::RemoveBuilderFromParent(parentNode, nodes);
+}
+
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -119,9 +153,24 @@ void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
+void ClearBuilderNodeInFrameNode(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto currentRef = Referenced::Claim<UINode>(currentNode);
+    std::list<RefPtr<NG::UINode>> nodes;
+    CHECK_NULL_VOID(currentRef);
+    for (const auto& child : currentRef->GetChildren()) {
+        BuilderUtils::GetBuilderNodes(child, nodes);
+    }
+    BuilderUtils::RemoveBuilderFromParent(currentRef, nodes);
+}
+
 void ClearChildrenInFrameNode(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(currentNode, ClearChildrenInFrameNode, node);
     CHECK_NULL_VOID(currentNode);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
@@ -297,6 +346,20 @@ void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2],
     } else {
         (*windowOffset)[0] = offset.GetX();
         (*windowOffset)[1] = offset.GetY();
+    }
+}
+
+void GetGlobalPositionOnDisplay(ArkUINodeHandle node, ArkUI_Float32 (*globalDisplayPosition)[2], ArkUI_Bool useVp)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetGlobalPositionOnDisplay();
+    if (useVp) {
+        (*globalDisplayPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*globalDisplayPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    } else {
+        (*globalDisplayPosition)[0] = offset.GetX();
+        (*globalDisplayPosition)[1] = offset.GetY();
     }
 }
 
@@ -590,9 +653,16 @@ ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
-    static const std::vector<const char*> nodeTypeArray = {
-        OHOS::Ace::V2::SCROLL_ETS_TAG,
-    };
+    static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
+        OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
+        OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
+        OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
+        OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
+        OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
+        OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG,
+        OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG,
+        OHOS::Ace::V2::CHECKBOX_ETS_TAG, OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG,
+        OHOS::Ace::V2::TOGGLE_ETS_TAG, OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
     if (pos == nodeTypeArray.end()) {
         return ERROR_CODE_PARAM_INVALID;
@@ -913,6 +983,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
         oldParent->RemoveChild(moveNodeRef);
+        OHOS::Ace::BuilderUtils::RemoveBuilderFromParent(oldParent, moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
@@ -921,6 +992,9 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
         toNode->AddChildBefore(moveNodeRef, indexChild);
+    }
+    if (moveNodeRef->GetParent() == AceType::Claim(toNode)) {
+        OHOS::Ace::BuilderUtils::AddBuilderToParent(AceType::Claim(toNode), moveNodeRef);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);
@@ -967,6 +1041,46 @@ void RemoveSupportedUIStates(ArkUINodeHandle node, int32_t state)
     eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
 }
 
+ArkUI_Int32 SetForceDarkConfig(
+    ArkUI_Int32 instanceId, bool forceDark, ArkUI_CharPtr nodeTag, uint32_t (*colorInvertFunc)(uint32_t color))
+{
+#ifdef OHOS_PLATFORM
+    if (getpid() != gettid()) {
+        LOGF_ABORT("SetForceDarkConfig doesn't run on UI thread");
+    }
+#endif
+    if (!forceDark && colorInvertFunc) {
+        return ERROR_CODE_NATIVE_IMPL_FORCE_DARK_CONFIG_INVALID;
+    }
+    if (forceDark) {
+        auto invertFunc = [colorInvertFunc](uint32_t color) {
+            return colorInvertFunc ? colorInvertFunc(color) : ColorInverter::DefaultInverter(color);
+        };
+        ColorInverter::GetInstance().EnableColorInvert(instanceId, nodeTag, std::move(invertFunc));
+    } else {
+        ColorInverter::GetInstance().DisableColorInvert(instanceId, nodeTag);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void SetFocusDependence(ArkUINodeHandle node, ArkUI_Uint32 focusDependence)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(static_cast<FocusDependence>(focusDependence));
+}
+
+void ResetFocusDependence(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::CHILD);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -975,9 +1089,12 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
         .invalidate = InvalidateInFrameNode,
+        .addBuilderNode = AddBuilderNodeInFrameNode,
         .appendChild = AppendChildInFrameNode,
         .insertChildAfter = InsertChildAfterInFrameNode,
+        .removeBuilderNode = RemoveBuilderNodeInFrameNode,
         .removeChild = RemoveChildInFrameNode,
+        .clearBuilderNode = ClearBuilderNodeInFrameNode,
         .clearChildren = ClearChildrenInFrameNode,
         .getChildrenCount = GetChildrenCount,
         .getChild = GetChild,
@@ -991,6 +1108,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
+        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,
@@ -1048,6 +1166,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .updateConfiguration = UpdateConfiguration,
         .addSupportedUIStates = AddSupportedUIStates,
         .removeSupportedUIStates = RemoveSupportedUIStates,
+        .setForceDarkConfig = SetForceDarkConfig,
+        .setFocusDependence = SetFocusDependence,
+        .resetFocusDependence = ResetFocusDependence,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1076,6 +1197,7 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
+        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,

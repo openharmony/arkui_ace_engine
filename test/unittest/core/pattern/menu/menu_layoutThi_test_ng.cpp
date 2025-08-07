@@ -26,6 +26,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -421,6 +422,11 @@ HWTEST_F(MenuLayout3TestNg, InitializeParam001, TestSize.Level1)
     int32_t backApiVersion = context->GetMinPlatformVersion();
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
     auto layoutWrapper = new LayoutWrapperNode(menuNode, geometryNode, menuNode->GetLayoutProperty());
     menuAlgorithm->InitializeParam(layoutWrapper, menuPattern);
     EXPECT_EQ(menuAlgorithm->param_.topSecurity, PORTRAIT_TOP_SECURITY_API12.ConvertToPx());
@@ -446,6 +452,11 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect001, TestSize.Level1)
     ASSERT_NE(menuAlgorithm, nullptr);
     auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
     ASSERT_NE(menuNode, nullptr);
+
+    auto nodeContainer = Container::Current();
+    menuNode->instanceId_ = nodeContainer->GetInstanceId();
+    AceEngine::Get().AddContainer(nodeContainer->GetInstanceId(), nodeContainer);
+
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     auto props = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -466,7 +477,7 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect001, TestSize.Level1)
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     EXPECT_TRUE(safeAreaManager->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT));
-    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    menuAlgorithm->param_.menuWindowRect = Rect(ZERO, ZERO, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     context->SetWindowModal(WindowModal::CONTAINER_MODAL);
     windowManager->SetWindowGetModeCallBack([]() -> WindowMode {
         return WindowMode::WINDOW_MODE_FLOATING;
@@ -527,6 +538,11 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     ASSERT_NE(menuAlgorithm, nullptr);
     auto menuNode = GetOrCreateMenu();
     ASSERT_NE(menuNode, nullptr);
+
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    
     auto wrapper = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
     ASSERT_NE(wrapper, nullptr);
     auto wrapperProps = wrapper->GetLayoutProperty();
@@ -656,6 +672,11 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
      * @tc.expected: menu wrapperRect is equal to the size of the security box on the upper half screen.
      */
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, creaseYTop - top));
+
+    float windowsOffsetY = 0.0f;
+    layoutAlgorithm->canExpandCurrentWindow_= true;
+    layoutAlgorithm->param_.windowsOffsetY = windowsOffsetY;
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top + windowsOffsetY, width - left - right, creaseYTop - top));
 }
 
 /**
@@ -1069,9 +1090,13 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg060, TestSize.Level1)
 {
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
     double rectWidth = 10.0f;
     double rectHeight = 15.0f;
-    layoutAlgorithm->LimitContainerModalMenuRect(rectWidth, rectHeight);
+    layoutAlgorithm->LimitContainerModalMenuRect(rectWidth, rectHeight, menuPattern);
     EXPECT_EQ(rectWidth, 10);
     EXPECT_EQ(rectHeight, 15);
 }
@@ -1154,6 +1179,11 @@ HWTEST_F(MenuLayout3TestNg, UpdateConstraintHeight001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
     ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
     auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
@@ -1182,6 +1212,11 @@ HWTEST_F(MenuLayout3TestNg, UpdateConstraintHeight002, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
     ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
     auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
@@ -1285,6 +1320,11 @@ HWTEST_F(MenuLayout3TestNg, SelectLayoutAvoidAlgorithm001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     frameNode->MountToParent(wrapperNode);
     frameNode->SetLayoutProperty(prop);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
     auto menuPattern = frameNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     SizeF size(TWENTY, TWENTY);
@@ -1315,6 +1355,11 @@ HWTEST_F(MenuLayout3TestNg, SelectLayoutAvoidAlgorithm002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     frameNode->MountToParent(wrapperNode);
     frameNode->SetLayoutProperty(prop);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
     auto menuPattern = frameNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     SizeF size(TWENTY, TWENTY);
@@ -1346,6 +1391,11 @@ HWTEST_F(MenuLayout3TestNg, SelectLayoutAvoidAlgorithm003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     frameNode->MountToParent(wrapperNode);
     frameNode->SetLayoutProperty(prop);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
     auto menuPattern = frameNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     SizeF size(TWENTY, TWENTY);
@@ -1622,6 +1672,10 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect003, TestSize.Level1)
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
     ASSERT_NE(menuPattern, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    menuPattern->AttachToFrameNode(menuNode);
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutAlgorithm->canExpandCurrentWindow_ = true;
@@ -1916,6 +1970,9 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
     menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
     menuLayoutAlgorithm.ModifyTargetOffset();
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    menuPattern->AttachToFrameNode(menuNode);
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
     EXPECT_EQ(menuLayoutAlgorithm.GetMenuWindowRectInfo(menuPattern).width_, TEN);
 

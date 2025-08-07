@@ -229,7 +229,7 @@ void JSPanRecognizer::GetPanDistanceMap(const JSCallbackInfo& args)
     CHECK_NULL_VOID(context);
     auto panDistanceMap = panRecognizer->GetDistanceMap();
     for (const auto& item : panDistanceMap) {
-        double distance = context->ConvertPxToVp(Dimension(item.second, DimensionUnit::PX));
+        double distance = context->ConvertPxToVp(item.second);
         distanceMap->Set(vm, panda::NumberRef::New(vm, static_cast<int32_t>(item.first)),
             panda::NumberRef::New(vm, RoundToMaxPrecision(distance)));
     }

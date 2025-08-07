@@ -52,7 +52,7 @@ const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 namespace SliderModifier {
 
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
 {
@@ -68,12 +68,32 @@ void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
     SliderModelNG::SetShowTips(frameNode, static_cast<bool>(isShow), content);
 }
 
+void SetShowTipsPtr(ArkUINodeHandle node, ArkUI_Bool isShow, const char* value, void* strRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetShowTips(node, isShow, value);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (strRawPtr) {
+            auto* str = reinterpret_cast<ResourceObject*>(strRawPtr);
+            auto strResObj = AceType::Claim(str);
+            SliderModelNG::CreateWithStringResourceObj(frameNode, strResObj, static_cast<bool>(isShow));
+        } else {
+            SliderModelNG::CreateWithStringResourceObj(frameNode, nullptr, static_cast<bool>(isShow));
+        }
+    }
+}
+
 void ResetShowTips(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<std::string> content;
     SliderModelNG::SetShowTips(frameNode, DEFAULT_SHOW_TIPS, content);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModelNG::CreateWithStringResourceObj(frameNode, nullptr, false);
+    }
 }
 
 void SetSliderStepSize(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -147,11 +167,31 @@ void SetStepColor(ArkUINodeHandle node, uint32_t color)
     SliderModelNG::SetStepColor(frameNode, Color(color));
 }
 
+void SetStepColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetStepColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::STEP_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::STEP_COLOR);
+        }
+    }
+}
+
 void ResetStepColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetStepColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::STEP_COLOR);
+    }
 }
 
 void SetBlockBorderColor(ArkUINodeHandle node, uint32_t color)
@@ -161,11 +201,31 @@ void SetBlockBorderColor(ArkUINodeHandle node, uint32_t color)
     SliderModelNG::SetBlockBorderColor(frameNode, Color(color));
 }
 
+void SetBlockBorderColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetBlockBorderColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_BORDER_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_BORDER_COLOR);
+        }
+    }
+}
+
 void ResetBlockBorderColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetBlockBorderColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_BORDER_COLOR);
+    }
 }
 
 void SetBlockBorderWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -191,11 +251,31 @@ void SetBlockColor(ArkUINodeHandle node, uint32_t color)
     SliderModelNG::SetBlockColor(frameNode, Color(color));
 }
 
+void SetBlockColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetBlockColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_COLOR);
+        }
+    }
+}
+
 void ResetBlockColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetBlockColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_COLOR);
+    }
 }
 
 void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -203,6 +283,23 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
+}
+
+void SetTrackBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetTrackBackgroundColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::TRACK_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::TRACK_COLOR);
+        }
+    }
 }
 
 void SetLinearTrackBackgroundColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient,
@@ -227,6 +324,9 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetTrackColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::TRACK_COLOR);
+    }
 }
 
 void SetSelectColor(ArkUINodeHandle node, uint32_t color)
@@ -234,6 +334,23 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
+}
+
+void SetSelectColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetSelectColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::SELECT_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::SELECT_COLOR);
+        }
+    }
 }
 
 void SetLinearSelectColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength)
@@ -257,6 +374,9 @@ void ResetSelectColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetSelectColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::SELECT_COLOR);
+    }
 }
 
 void SetShowSteps(ArkUINodeHandle node, int showSteps)
@@ -264,6 +384,24 @@ void SetShowSteps(ArkUINodeHandle node, int showSteps)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::SetShowSteps(frameNode, static_cast<bool>(showSteps));
+}
+
+void SetShowStepsWithOptions(
+    ArkUINodeHandle node, int showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length)
+{
+    std::unordered_map<uint32_t, std::string> optionMaps;
+    std::optional<std::unordered_map<uint32_t, std::string>> showStepOptions = std::nullopt;
+    while (options && (length > 0)) {
+        optionMaps [options->step] = std::string(options->text);
+        options++;
+        length--;
+    }
+    if (optionMaps.size() > 0) {
+        showStepOptions = optionMaps;
+    }
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetShowSteps(frameNode, static_cast<bool>(showSteps), showStepOptions);
 }
 
 void ResetShowSteps(ArkUINodeHandle node)
@@ -831,10 +969,6 @@ const ArkUISliderModifier* GetSliderModifier()
         .resetMinResponsiveDistance = SliderModifier::ResetMinResponsiveDistance,
         .setOnChange = SliderModifier::SetOnChange,
         .resetOnChange = SliderModifier::ResetOnChange,
-        .setPrefix = SliderModifier::SetPrefix,
-        .resetPrefix = SliderModifier::ResetPrefix,
-        .setSuffix = SliderModifier::SetSuffix,
-        .resetSuffix = SliderModifier::ResetSuffix,
         .getBlockColor = SliderModifier::GetBlockColor,
         .getTrackBackgroundColor = SliderModifier::GetTrackBackgroundColor,
         .getSelectColor = SliderModifier::GetSelectColor,
@@ -854,8 +988,19 @@ const ArkUISliderModifier* GetSliderModifier()
         .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
         .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
         .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
+        .setPrefix = SliderModifier::SetPrefix,
+        .resetPrefix = SliderModifier::ResetPrefix,
+        .setSuffix = SliderModifier::SetSuffix,
+        .resetSuffix = SliderModifier::ResetSuffix,
+        .setShowTipsPtr = SliderModifier::SetShowTipsPtr,
+        .setStepColorPtr = SliderModifier::SetStepColorPtr,
+        .setBlockBorderColorPtr = SliderModifier::SetBlockBorderColorPtr,
+        .setBlockColorPtr = SliderModifier::SetBlockColorPtr,
+        .setTrackBackgroundColorPtr = SliderModifier::SetTrackBackgroundColorPtr,
+        .setSelectColorPtr = SliderModifier::SetSelectColorPtr,
         .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
         .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
+        .setShowStepsWithOptions = SliderModifier::SetShowStepsWithOptions,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -919,10 +1064,6 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .resetInteractionMode = SliderModifier::ResetInteractionMode,
         .setMinResponsiveDistance = SliderModifier::SetMinResponsiveDistance,
         .resetMinResponsiveDistance = SliderModifier::ResetMinResponsiveDistance,
-        .setPrefix = SliderModifier::SetPrefix,
-        .resetPrefix = SliderModifier::ResetPrefix,
-        .setSuffix = SliderModifier::SetSuffix,
-        .resetSuffix = SliderModifier::ResetSuffix,
         .getBlockColor = SliderModifier::GetBlockColor,
         .getTrackBackgroundColor = SliderModifier::GetTrackBackgroundColor,
         .getSelectColor = SliderModifier::GetSelectColor,
@@ -942,6 +1083,10 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
         .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
         .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
+        .setPrefix = SliderModifier::SetPrefix,
+        .resetPrefix = SliderModifier::ResetPrefix,
+        .setSuffix = SliderModifier::SetSuffix,
+        .resetSuffix = SliderModifier::ResetSuffix,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

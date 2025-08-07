@@ -28,13 +28,13 @@ class NativeNavigationUtils {
 public:
     static void ParseBarItems(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vector<ArkUIBarItem>& items);
     static void ParseTitleOptions(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        ArkUINavigationTitlebarOptions& options);
+       ArkUINodeHandle nativeNode,  ArkUINavigationTitlebarOptions& options);
     static void ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runtimeCallInfo, const Local<JSValueRef>& jsValue,
         ParamSendFunction& actionSendFunc, ParamSendFunction& symbolSendFunc);
     static void ParseBarItemsValue(EcmaVM* vm, const Local<panda::ObjectRef>& itemObject, ArkUIBarItem& toolBarItem);
     static void ParseBarItemsIcon(EcmaVM* vm, const Local<panda::ObjectRef>& itemObject, ArkUIBarItem& toolBarItem);
     static void UpdateNavigationBackgroundColor(const EcmaVM* vm, const Local<panda::ObjectRef>& obj,
-        ArkUINavigationTitlebarOptions& options);
+        ArkUINodeHandle nativeNode, ArkUINavigationTitlebarOptions& options);
     static void AddBackgroundColorResource(
         const RefPtr<ResourceObject>& backgroundColorResObj, ArkUINavigationTitlebarOptions& options);
 

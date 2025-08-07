@@ -740,4 +740,26 @@ HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestGetPreviewTextStyle00
     property->UpdatePreviewTextStyle("unknown");
     EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
 }
+
+/**
+ * @tc.name: SetResultObjectText001
+ * @tc.desc: test SetResultObjectText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, SetResultObjectText001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ResultObject resultObject;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    EXPECT_NE(spanItem, nullptr);
+    spanItem->content = u"test";
+    richEditorPattern->previewTextRecord_.previewContent = u"text";
+    richEditorPattern->SetResultObjectText(resultObject, spanItem);
+    EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->SetResultObjectText(resultObject, spanItem);
+    EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
+}
+
 } // namespace OHOS::Ace::NG

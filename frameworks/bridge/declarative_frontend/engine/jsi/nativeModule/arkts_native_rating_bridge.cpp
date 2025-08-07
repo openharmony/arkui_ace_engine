@@ -113,26 +113,35 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> foregroundUriArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> secondaryUriArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
+    ArkUIRatingStyleStruct resObj;
     std::string backgroundUri;
-    if (!ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, backgroundUri)) {
-        ArkTSUtils::ParseJsString(vm, backgroundUriArg, backgroundUri);
+    RefPtr<ResourceObject> backgroundResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, backgroundUri, backgroundResObj)) {
+        ArkTSUtils::ParseJsString(vm, backgroundUriArg, backgroundUri, backgroundResObj);
     }
+    resObj.backgroundResObj = AceType::RawPtr(backgroundResObj);
+
     std::string foregroundUri;
-    if (!ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, foregroundUri)) {
-        ArkTSUtils::ParseJsString(vm, foregroundUriArg, foregroundUri);
+    RefPtr<ResourceObject> foregroundResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, foregroundUri, foregroundResObj)) {
+        ArkTSUtils::ParseJsString(vm, foregroundUriArg, foregroundUri, foregroundResObj);
     }
+    resObj.foregroundResObj = AceType::RawPtr(foregroundResObj);
+
     std::string secondaryUri;
-    if (!ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri)) {
-        ArkTSUtils::ParseJsString(vm, secondaryUriArg, secondaryUri);
+    RefPtr<ResourceObject> secondaryResObj;
+    if (!ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri, secondaryResObj)) {
+        ArkTSUtils::ParseJsString(vm, secondaryUriArg, secondaryUri, secondaryResObj);
     }
+    resObj.secondaryResObj = AceType::RawPtr(secondaryResObj);
 
     if (secondaryUri.empty() && !backgroundUri.empty()) {
         secondaryUri = backgroundUri;
+        resObj.secondaryResObj = AceType::RawPtr(backgroundResObj);
     }
 
-    GetArkUINodeModifiers()->getRatingModifier()->setStarStyle(
-        nativeNode, backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());
+    GetArkUINodeModifiers()->getRatingModifier()->setStarStylePtr(
+        nativeNode, backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str(), resObj);
     return panda::JSValueRef::Undefined(vm);
 }
 

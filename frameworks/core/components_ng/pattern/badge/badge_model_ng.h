@@ -23,12 +23,15 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT BadgeModelNG : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
+    void CreateByFrameNode(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters) override;
+    RefPtr<FrameNode> CreateBadgeFrameNode() override;
     void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) override
     {
         isDefaultFontSize_ = isDefaultFontSize;
         isDefaultBadgeSize_ = isDefaultBadgeSize;
     };
     void CreateWithResourceObj(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
+    void CreateWithResourceObjFlag(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
     void ProcessBadgeValue(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgeTextColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgeColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);

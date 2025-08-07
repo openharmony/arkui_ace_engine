@@ -57,6 +57,8 @@ ohos_shared_library("ace_ndk") {
     "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components_v2/inspector/inspector_constants.cpp",
+    "build_check_for_c.c",
+    "build_check_for_cpp.cpp",
     "event/drag_and_drop_impl.cpp",
     "event/key_event_impl.cpp",
     "event/ui_input_event.cpp",
@@ -88,6 +90,7 @@ ohos_shared_library("ace_ndk") {
     "node/node_transition_imp.cpp",
     "node/node_utils.cpp",
     "node/progress_option.cpp",
+    "node/render_node.cpp",
     "node/style_modifier.cpp",
     "node/textpicker_option.cpp",
     "node/waterflow_section_option.cpp",
@@ -107,9 +110,11 @@ ohos_shared_library("ace_ndk") {
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
     ]
     external_deps += [
+      "c_utils:utils",
       "graphic_2d:native_drawing_ndk",
       "hilog:libhilog",
       "image_framework:pixelmap",
+      "ipc:ipc_core",
       "napi:ace_napi",
       "resource_management:global_resmgr",
       "udmf:libudmf",

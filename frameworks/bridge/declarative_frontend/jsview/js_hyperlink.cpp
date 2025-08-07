@@ -103,6 +103,7 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
 {
     Color color;
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("Color");
     if (!ParseJsColor(info[0], color, resObj)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -111,7 +112,6 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
         color = theme->GetTextColor();
     } else if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("Color", resObj, color);
-        return;
     }
     HyperlinkModel::GetInstance()->SetColor(color);
 }

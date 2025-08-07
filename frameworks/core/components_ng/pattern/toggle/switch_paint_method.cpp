@@ -214,6 +214,24 @@ float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
     return switchWidth;
 }
 
+void SwitchModifier::FixPointOffset()
+{
+    if (!isSizeChange_) {
+        return;
+    }
+    auto currentOffset = pointOffset_->Get();
+    if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
+        if (currentOffset > actualSize_.Width() - actualSize_.Height()) {
+            pointOffset_->Set(actualSize_.Width() - actualSize_.Height());
+        }
+    } else {
+        if (currentOffset > actualSize_.Width() - actualTrackRadius_) {
+            pointOffset_->Set(actualSize_.Width() - actualTrackRadius_);
+        }
+    }
+    isSizeChange_ = false;
+}
+
 int32_t SwitchPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
 {
     const int32_t defaultThemeScopeId = 0;

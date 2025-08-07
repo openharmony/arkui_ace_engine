@@ -43,22 +43,32 @@ void JSWithTheme::RemoveThemeInNative(const JSCallbackInfo& info)
 
 void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
 {
-    auto jsColors = info[0];
-    if (!jsColors->IsArray()) {
+    auto jsLightColors = info[0];
+    if (!jsLightColors->IsArray()) {
         return;
     }
-    auto jsThemeScopeId = info[1];
+    auto jsLightColorsArray = JSRef<JSArray>::Cast(jsLightColors);
+
+    auto jsDarkColors = info[1];
+    if (!jsDarkColors->IsArray()) {
+        return;
+    }
+    auto jsDarkColorsArray = JSRef<JSArray>::Cast(jsDarkColors);
+
+    auto jsThemeScopeId = info[2];
     if (!jsThemeScopeId->IsNumber()) {
         return;
     }
-
-    auto jsColorsArray = JSRef<JSArray>::Cast(jsColors);
     auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
 
     auto colors = JSThemeColors();
-    colors.SetColors(jsColorsArray);
+    colors.SetColors(jsLightColorsArray);
+
+    auto darkColors = JSThemeColors();
+    darkColors.SetColors(jsDarkColorsArray);
 
     JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
+    JSThemeScope::jsThemes[themeScopeId].SetDarkColors(darkColors);
     // save the current theme when Theme was created by WithTheme container
     if (JSThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
         std::optional<JSTheme> themeOpt = std::make_optional(JSThemeScope::jsThemes[themeScopeId]);

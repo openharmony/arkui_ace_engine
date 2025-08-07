@@ -31,7 +31,7 @@ bool CheckCalcIsValid(const std::string& formula);
 
 void ReplaceSignNumber(std::string& formula);
 
-std::vector<std::string> ConvertDal2Rpn(std::string formula);
+void ConvertDal2Rpn(std::string formula, std::vector<std::string> &result);
 
 double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc,
     const std::vector<std::string>& lengthString = std::vector<std::string>());

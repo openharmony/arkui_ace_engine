@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
@@ -58,7 +59,7 @@ void LongPressRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LONG RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
         auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
@@ -123,7 +124,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
-    lastAction_ = static_cast<int32_t>(TouchType::DOWN);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
+                                                                  : static_cast<int32_t>(MouseAction::PRESS);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -189,7 +191,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(TouchType::UP);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
+                                                                  : static_cast<int32_t>(MouseAction::RELEASE);
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -230,7 +233,8 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
-    lastAction_ = static_cast<int32_t>(TouchType::MOVE);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
+                                                                  : static_cast<int32_t>(MouseAction::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -255,7 +259,8 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
-    lastAction_ = static_cast<int32_t>(TouchType::CANCEL);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
+                                                                  : static_cast<int32_t>(MouseAction::CANCEL);
     lastTouchEvent_ = event;
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
@@ -294,6 +299,11 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
             return;
         }
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
@@ -304,10 +314,6 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->SetIsDragUserReject(true);
         }
-        return;
-    }
-    if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -420,6 +426,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalLocation(lastTouchEvent_.GetOffset())
             .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -437,9 +444,10 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetInputEventType(inputEventType_);
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetPassThrough(lastTouchEvent_.passThrough);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::LONG_PRESS);
         callbackFunction(info);
         HandleReports(info, type);
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {
@@ -561,6 +569,27 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<LongPressGestureEvent>();
+    UpdateGestureEventInfo(info);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
+    if (gestureRecognizerJudgeFunc &&
+        gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
+        return GestureJudgeResult::REJECT;
+    }
+    if (!gestureRecognizerJudgeFunc && callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    return GestureJudgeResult::CONTINUE;
+}
+
+void LongPressRecognizer::UpdateGestureEventInfo(std::shared_ptr<LongPressGestureEvent>& info)
+{
     info->SetTimeStamp(time_);
     info->SetDeviceId(deviceId_);
     info->SetRepeat(repeat_);
@@ -572,9 +601,6 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(trackPoint.force);
-    if (gestureInfo_) {
-        gestureInfo_->SetInputEventType(inputEventType_);
-    }
     if (trackPoint.tiltX.has_value()) {
         info->SetTiltX(trackPoint.tiltX.value());
     }
@@ -589,19 +615,8 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     info->SetLastAction(lastAction_);
-    if (gestureRecognizerJudgeFunc &&
-        gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
-        return GestureJudgeResult::REJECT;
-    }
-    if (!gestureRecognizerJudgeFunc && callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
-        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
-        return GestureJudgeResult::REJECT;
-    }
-    if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
-        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
-        return GestureJudgeResult::REJECT;
-    }
-    return GestureJudgeResult::CONTINUE;
+    info->SetPressedKeyCodes(trackPoint.pressedKeyCodes_);
+    info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()

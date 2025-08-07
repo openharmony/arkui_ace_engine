@@ -389,6 +389,46 @@ HWTEST_F(ImageProviderTestNg, GetImageSize004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetImageSize006
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize006, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::UP_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_63, LENGTH_128));
+}
+
+/**
+ * @tc.name: GetImageSize007
+ * @tc.desc: Test GetImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetImageSize007, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_63, LENGTH_128), nullptr);
+    ctx->GetImageObject()->SetOrientation(ImageRotateOrientation::DOWN_MIRRORED);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_63, LENGTH_128));
+}
+
+/**
  * @tc.name: MakeCanvasImageIfNeed001
  * @tc.desc: Test MakeCanvasImageIfNeed
  * @tc.type: FUNC
@@ -1895,6 +1935,35 @@ HWTEST_F(ImageProviderTestNg, ImageProviderCancelTask001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StaticImageDecoder001
+ * @tc.desc: Test MakeCanvasImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, StaticImageDecoder001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_THUMBNAIL);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    SizeF size(LENGTH_100, LENGTH_100);
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, true);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
+    EXPECT_NE(pixmapObj, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+
+    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
+}
+
+/**
  * @tc.name: ImageProviderCancelTask002
  * @tc.desc: Test ImageProvider::CancelTask when context is not registered
  * @tc.type: FUNC
@@ -2036,5 +2105,29 @@ HWTEST_F(ImageProviderTestNg, StaticImageMakeCanvasImage001, TestSize.Level1)
 
     pixmapObj->MakeCanvasImage(ctx, size, true, false);
     EXPECT_NE(ctx->canvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImageFileSizeTest001
+ * @tc.desc: Test ImageFileSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageFileSizeTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_128));
+    auto imageObj = ctx->imageObj_;
+    EXPECT_NE(imageObj, nullptr);
+    imageObj->SetImageFileSize(100);
+    EXPECT_EQ(imageObj->GetImageFileSize(), 100);
+    EXPECT_EQ(imageObj->GetImageDataSize(), 0);
 }
 } // namespace OHOS::Ace::NG

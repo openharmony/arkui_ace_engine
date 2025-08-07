@@ -45,7 +45,7 @@ bool ArcScrollBar::InBarRectRegion(const Point& point) const
     return arcAarRect_.IsInRegion(point, static_cast<float>(MIN_HOTREGION.ConvertToPx()));
 }
 
-void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size)
+void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context)
 {
     double normalWidth = GetNormalWidthToPx();
     Point centerPoint(size.Width() * HALF, size.Height() * HALF);
@@ -165,7 +165,7 @@ float ArcScrollBar::CalcPatternOffset(float scrollBarOffset) const
     return offset;
 }
 
-void ArcScrollBar::CalcReservedHeight()
+void ArcScrollBar::CalcReservedHeight(const RefPtr<PipelineContext>& context)
 {
     SetStartReservedHeight(Dimension(0.0, DimensionUnit::PX));
     SetEndReservedHeight(Dimension(0.0, DimensionUnit::PX));

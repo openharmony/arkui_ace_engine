@@ -75,6 +75,7 @@ constexpr uint32_t ENABLE_APP_SUB_WINDOW_AVOID_AREA = 1 << 1;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 #endif
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
+constexpr int32_t DEFAULT_NODE_ID = -1;
 } // namespace
 
 int32_t SubwindowOhos::id_ = 0;
@@ -255,6 +256,35 @@ void SubwindowOhos::InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>&
 #endif
 }
 
+void SubwindowOhos::SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId)
+{
+    CHECK_NULL_VOID(window_);
+    auto windowAnchorInfo = WindowAnchorInfoConverter(offset, type);
+    window_->SetWindowAnchorInfo(windowAnchorInfo);
+}
+
+Rosen::WindowAnchorInfo SubwindowOhos::WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type)
+{
+    Rosen::WindowAnchorInfo windowAnchorInfo(true);
+    switch (type) {
+        case SubwindowType::TYPE_SYSTEM_TOP_MOST_TOAST:
+        case SubwindowType::TYPE_TOP_MOST_TOAST:
+        case SubwindowType::TYPE_MENU:
+        case SubwindowType::TYPE_POPUP:
+        case SubwindowType::TYPE_DIALOG:
+        case SubwindowType::TYPE_SELECT_MENU:
+        case SubwindowType::TYPE_TIPS:
+        case SubwindowType::SUB_WINDOW_TYPE_COUNT:
+            break;
+        case SubwindowType::TYPE_SHEET:
+        default:
+            windowAnchorInfo.windowAnchor_ = Rosen::WindowAnchor::CENTER;
+    }
+    windowAnchorInfo.offsetX_ = offset.GetX();
+    windowAnchorInfo.offsetY_ = offset.GetY();
+    return windowAnchorInfo;
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -268,14 +298,16 @@ void SubwindowOhos::InitContainer()
         sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
         CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
-        auto windowType = parentWindow->GetType();
+        auto parentWindowType = parentWindow->GetType();
         std::string windowTag = "";
         bool isAppSubwindow = false;
         bool needFollowScreen = false;
+        std::string windowName = "";
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
             windowTag = "TOAST_SYSTEM_";
             needFollowScreen = true;
+            windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
@@ -283,24 +315,30 @@ void SubwindowOhos::InitContainer()
             auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
             windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
-        } else if (parentContainer->IsSceneBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-            needFollowScreen = true;
-        } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
-            auto hostWindowId = parentPipeline->GetFocusWindowId();
-            windowOption->SetIsUIExtFirstSubWindow(true);
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetParentId(hostWindowId);
-            SetUIExtensionHostWindowId(hostWindowId);
-            isAppSubwindow = true;
-        } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
-            windowOption->SetParentId(parentWindowId);
-            needFollowScreen = true;
+            windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
         } else {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetParentId(parentWindowId);
-            isAppSubwindow = true;
+            windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
+            Rosen::WindowType subwindowType = Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            OHOS::Rosen::WMError ret = OHOS::Rosen::Window::GetAndVerifyWindowTypeForArkUI(parentWindowId, windowName,
+                parentWindowType, subwindowType);
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "get and verify window type, ret = %{public}d,"
+                " parentWindowType = %{public}d, subwindowType = %{public}d", static_cast<int32_t>(ret),
+                static_cast<int32_t>(parentWindowType), static_cast<int32_t>(subwindowType));
+            if (ret != OHOS::Rosen::WMError::WM_OK) {
+                return;
+            }
+            windowOption->SetWindowType(subwindowType);
+            needFollowScreen = parentContainer->IsSceneBoardWindow() ||
+                parentWindowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE;
+            isAppSubwindow = subwindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            bool isUIExt = parentWindowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+            if (isAppSubwindow || subwindowType == Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+                windowOption->SetParentId(isUIExt ? parentPipeline->GetFocusWindowId() : parentWindowId);
+            }
+            if (isUIExt) {
+                windowOption->SetIsUIExtFirstSubWindow(true);
+                SetUIExtensionHostWindowId(parentPipeline->GetFocusWindowId());
+            }
         }
         auto displayId = parentContainer->GetCurrentDisplayId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -321,8 +359,7 @@ void SubwindowOhos::InitContainer()
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         windowOption->SetDisplayId(displayId);
         OHOS::Rosen::WMError ret;
-        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
-            std::to_string(windowId_), windowOption, parentWindow->GetContext(), ret);
+        window_ = OHOS::Rosen::Window::Create(windowName, windowOption, parentWindow->GetContext(), ret);
         if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
             SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
@@ -1218,6 +1255,11 @@ void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::s
     ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    if (parentAceContainer->IsUIExtensionWindow()) {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+    }
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
     overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc),
@@ -1251,9 +1293,9 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     }
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
+    ResizeWindow();
     if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
         SetFollowParentWindowLayoutEnabled(false);
-        ResizeWindow();
     } else {
         SetFollowParentWindowLayoutEnabled(true);
     }
@@ -1297,9 +1339,9 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     }
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
+    ResizeWindow();
     if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
         SetFollowParentWindowLayoutEnabled(false);
-        ResizeWindow();
     } else {
         SetFollowParentWindowLayoutEnabled(true);
     }
@@ -1357,9 +1399,9 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     }
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    ResizeWindow();
     if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
         SetFollowParentWindowLayoutEnabled(false);
-        ResizeWindow();
     } else {
         SetFollowParentWindowLayoutEnabled(true);
     }
@@ -1545,6 +1587,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     Platform::AceViewOhos::SurfaceCreated(aceView, dialogWindow_);
     // set view
     Platform::DialogContainer::SetView(aceView, density, width, height, dialogWindow_);
+    container->CheckAndSetFontFamily();
     Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, dialogWindow_);
     ViewportConfig config(width, height, density);
     Platform::AceViewOhos::SetViewportMetrics(aceView, config);
@@ -1641,8 +1684,8 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
-    SetIsToastWindow(toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
-                     toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST || parentContainer->IsSceneBoardWindow());
+    SetIsToastWindow(
+        toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId : %{public}d", childContainerId_);
@@ -2379,13 +2422,16 @@ bool SubwindowOhos::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
 
 void SubwindowOhos::SwitchFollowParentWindowLayout(bool freeMultiWindowEnable)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "subwindow switch followParentWindowLayout, enable: %{public}d", freeMultiWindowEnable);
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow switch followParentWindowLayout, enable: %{public}d",
+        freeMultiWindowEnable);
+    if (nodeId_ != DEFAULT_NODE_ID) {
+        LOGI("modal dialog subwindows created by UEC always follow parent.");
+        return;
+    }
     auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
     if (NeedFollowParentWindowLayout() && !expandDisplay && !freeMultiWindowEnable) {
         SetFollowParentWindowLayoutEnabled(true);
-    } else {
-        SetFollowParentWindowLayoutEnabled(false);
+    } else if (SetFollowParentWindowLayoutEnabled(false)) {
         ResizeWindow();
     }
 }

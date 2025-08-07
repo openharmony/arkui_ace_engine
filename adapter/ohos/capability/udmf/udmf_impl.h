@@ -31,14 +31,15 @@ class UdmfClientImpl : public UdmfClient {
 public:
     RefPtr<UnifiedData> CreateUnifiedData() override;
     RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) override;
+    RefPtr<DataLoadParams> TransformDataLoadParams(napi_env env, napi_value napiValue) override;
     RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) override;
+    RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) override;
     void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) override;
     napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) override;
     napi_value TransformSummary(std::map<std::string, int64_t>& summary) override;
     int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) override;
     int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) override;
-    int32_t GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
-        std::map<std::string, int64_t>& detailedSummaryMap) override;
+    int32_t GetSummary(std::string& key, DragSummaryInfo& dragSummaryInfo) override;
     bool GetRemoteStatus(std::string& key) override;
     void AddFormRecord(
         const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo) override;
@@ -64,6 +65,7 @@ public:
         const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) override;
     std::vector<uint8_t> GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData) override;
     int32_t StartAsyncDataRetrieval(napi_env env, napi_value napiValue, const std::string& key) override;
+    int32_t SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std::string& key) override;
     int32_t Cancel(const std::string& key) override;
 
     void SetTagProperty(const RefPtr<UnifiedData>& unifiedData, const std::string& tag) override;
@@ -73,7 +75,11 @@ public:
     void GetLinkEntry(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) override;
     bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) override;
     std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) override;
-    bool IsBelongsTo(const std::string& summary, const std::string& allowDropType) override;
+    bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) override;
+#if defined(ACE_STATIC)
+    RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) override;
+    void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) override;
+#endif
 };
 
 class UnifiedDataImpl : public UnifiedData {
@@ -89,6 +95,21 @@ public:
 
 private:
     std::shared_ptr<UDMF::UnifiedData> unifiedData_;
+};
+
+class DataLoadParamsImpl : public DataLoadParams {
+    DECLARE_ACE_TYPE(DataLoadParamsImpl, DataLoadParams);
+
+public:
+    DataLoadParamsImpl() = default;
+    ~DataLoadParamsImpl() = default;
+
+    uint32_t GetRecordCount() override;
+    std::shared_ptr<UDMF::DataLoadParams> GetDataLoadParams() const;
+    void SetDataLoadParams(const std::shared_ptr<UDMF::DataLoadParams>& dataLoadParams);
+
+private:
+    std::shared_ptr<UDMF::DataLoadParams> dataLoadParams_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_UDMF_IMPL_H

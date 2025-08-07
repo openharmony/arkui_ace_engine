@@ -60,13 +60,12 @@ class FontManager;
 }
 
 namespace OHOS::Ace::Platform {
-#ifdef ACE_ENABLE_VK
 class HighContrastObserver;
-#endif
 
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
+using AbilityOnCalendarCallback = std::function<void(const std::map<std::string, std::string>& params)>;
 using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
 using SubSystemId = OHOS::Rosen::SubSystemId;
 using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
@@ -303,6 +302,7 @@ public:
     std::shared_ptr<Framework::JsValue> GetJsContext();
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
     std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue);
+    void TriggerModuleSerializer() override;
     void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder);
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
 
@@ -402,6 +402,20 @@ public:
     {
         if (abilityOnJumpBrowser_) {
             abilityOnJumpBrowser_(address);
+        }
+    }
+
+    void OnOpenLinkOnMapSearch(const std::string& address)
+    {
+        if (linkOnMapSearch_) {
+            linkOnMapSearch_(address);
+        }
+    }
+
+    void OnStartAbilityOnCalendar(const std::map<std::string, std::string>& params)
+    {
+        if (abilityOnCalendar_) {
+            abilityOnCalendar_(params);
         }
     }
 
@@ -509,6 +523,16 @@ public:
         abilityOnJumpBrowser_ = std::move(callback);
     }
 
+    void SetOpenLinkOnMapSearch(AbilityOnQueryCallback&& callback)
+    {
+        linkOnMapSearch_ = std::move(callback);
+    }
+
+    void SetAbilityOnCalendar(AbilityOnCalendarCallback&& callback)
+    {
+        abilityOnCalendar_ = std::move(callback);
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
@@ -597,11 +621,6 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender) override
-    {
-        isFormRender_ = isFormRender;
-    }
-
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -645,7 +664,7 @@ public:
     }
 
     void SetToken(sptr<IRemoteObject>& token);
-    sptr<IRemoteObject> GetToken();
+    sptr<IRemoteObject> GetToken() override;
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
     uint32_t GetParentWindowType() const;
@@ -817,10 +836,24 @@ public:
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
+    Rect GetGlobalScaledRect() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rect());
+        Rosen::Rect rect{};
+        uiWindow_->GetGlobalScaledRect(rect);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+
     bool IsWaterfallWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->IsWaterfallModeEnabled();
+    }
+
+    bool IsPcOrFreeMultiWindowCapability() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsPcOrFreeMultiWindowCapabilityEnabled();
     }
 
     Rect GetUIExtensionHostWindowRect() override
@@ -886,6 +919,36 @@ public:
         const std::function<void()>&& loadPageCallback);
 
     UIContentErrorCode RunIntentPage();
+    void SetIsFormRender(bool isFormRender) override;
+
+    RefPtr<Frontend> GetSubFrontend() const override
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, nullptr);
+        std::lock_guard<std::mutex> lock(subFrontendMutex_);
+        return subFrontend_;
+    }
+
+    FrontendType GetFrontendType() const override
+    {
+        return type_;
+    }
+
+    bool IsArkTsFrontEnd() const override
+    {
+        return type_ == FrontendType::ARK_TS;
+    }
+
+    FrontendType GetSubFrontendType() const
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, type_);
+        if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+            return FrontendType::DECLARATIVE_JS;
+        } else {
+            return FrontendType::ARK_TS;
+        }
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -927,6 +990,13 @@ private:
 
     static bool SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, SystemBarType type,
         std::optional<bool> enable, std::optional<bool> animation);
+
+    void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
+
+    void UpdateSubContainerDensity(ResourceConfiguration& resConfig);
+
+    void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
+    void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -992,6 +1062,8 @@ private:
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
     AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
     AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
+    AbilityOnQueryCallback linkOnMapSearch_ = nullptr;
+    AbilityOnCalendarCallback abilityOnCalendar_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
@@ -1011,11 +1083,13 @@ private:
 
     bool lastThemeHasSkin_ = false;
 
-#ifdef ACE_ENABLE_VK
     void SubscribeHighContrastChange();
     void UnsubscribeHighContrastChange();
     std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
-#endif
+    // for multiple frontEnd
+    // valid only when type_ is STATIC_HYBRID_DYNAMIC or DYNAMIC_HYBRID_STATIC
+    RefPtr<Frontend> subFrontend_ = nullptr;
+    mutable std::mutex subFrontendMutex_;
 };
 
 } // namespace OHOS::Ace::Platform

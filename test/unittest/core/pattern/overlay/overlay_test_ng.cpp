@@ -2752,9 +2752,209 @@ HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest001, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     topModalPattern->SetEnableSafeArea(true);
     topModalPattern->BeforeCreateLayoutWrapper();
+    auto modalNodeLayoutProperty = topModalNode->GetLayoutProperty();
+    EXPECT_NE(modalNodeLayoutProperty->safeAreaPadding_, nullptr);
     EXPECT_TRUE(topModalPattern->enableSafeArea_);
     topModalPattern->SetEnableSafeArea(false);
     topModalPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(modalNodeLayoutProperty->safeAreaPadding_, nullptr);
     EXPECT_FALSE(topModalPattern->enableSafeArea_);
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapperTest002
+ * @tc.desc: Test OverlayManager::BeforeCreateLayoutWrapper safeAreaPadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create target node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        IgnoreLayoutSafeAreaOpts opts;
+        opts.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM | NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
+        frameNode->layoutProperty_->UpdateIgnoreLayoutSafeAreaOpts(opts);
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create modal node and get modal node, get pattern.
+     * @tc.expected: related function is called.
+     */
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, ContentCoverParam(), targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_NE(topModalNode, nullptr);
+    auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    topModalPattern->SetEnableSafeArea(true);
+    EXPECT_TRUE(topModalPattern->enableSafeArea_);
+    auto host = topModalPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto context = host->GetContext();
+    EXPECT_NE(context, nullptr);
+    auto inset = context->GetSafeAreaWithoutProcess();
+    NG::CalcLength safeAreaPaddingLeft(inset.left_.Length());
+    NG::CalcLength safeAreaPaddingRight(inset.right_.Length());
+    topModalPattern->BeforeCreateLayoutWrapper();
+    auto modalNodeLayoutProperty = topModalNode->layoutProperty_;
+    ASSERT_NE(modalNodeLayoutProperty, nullptr);
+    const std::unique_ptr<PaddingProperty>& modalSafeAreaPaddingProp =
+        modalNodeLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(modalSafeAreaPaddingProp, nullptr);
+    EXPECT_EQ(modalSafeAreaPaddingProp->left, safeAreaPaddingLeft);
+    EXPECT_EQ(modalSafeAreaPaddingProp->right, safeAreaPaddingRight);
+}
+
+/**
+ * @tc.name: DialogWithNodeTest001
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->UpdateCustomDialogWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogWithNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+    dialogParam.alignment = DialogAlignment::TOP_START;
+    dialogParam.offset = DimensionOffset(Dimension(0.0), Dimension(0.0));
+    dialogParam.autoCancel = false;
+    auto contentNodeNew = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParamNew;
+    dialogParamNew.contentNode = contentNodeNew;
+    dialogParamNew.alignment = DialogAlignment::BOTTOM_END;
+    dialogParamNew.offset = DimensionOffset(Dimension(10.0), Dimension(10.0));
+    dialogParamNew.autoCancel = true;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog and then check dialogLayoutProp.
+     * @tc.expected: OpenCustomDialog succeed and dialogLayoutProp is correct.
+     */
+    auto openCallback = [](int32_t dialogId) {};
+    overlayManager->OpenCustomDialog(dialogParam, openCallback);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    EXPECT_NE(dialogLayoutProp, nullptr);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::TOP_START);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(0.0), Dimension(0.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, false);
+
+    /**
+     * @tc.steps: step4. call UpdateCustomDialog for contentNodeNew.
+     * @tc.expected: UpdateCustomDialog failed because contentNodeNew has not been opened.
+     */
+    auto updateCallbackFst = [](int32_t dialogId) {};
+    overlayManager->UpdateCustomDialogWithNode(contentNodeNew, dialogParamNew, updateCallbackFst);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::TOP_START);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(0.0), Dimension(0.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, false);
+
+    /**
+     * @tc.steps: step5. call UpdateCustomDialog for contentNode.
+     * @tc.expected: UpdateCustomDialog succeed and dialogLayoutProp is updated.
+     */
+    auto updateCallbackSnd = [](int32_t dialogId) {};
+    overlayManager->UpdateCustomDialog(contentNode, dialogParamNew, updateCallbackSnd);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::BOTTOM_END);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(10.0), Dimension(10.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, true);
+}
+
+/**
+ * @tc.name: OverlayManagerContetx001
+ * @tc.desc: Test OverlayManager GetPipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, OverlayManagerContetx001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto geometryNode = stageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1.0, 1.0));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->stageManager_->stageNode_ = stageNode;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    EXPECT_NE(overlayManager->context_.Upgrade(), nullptr);
+    auto context = overlayManager->GetPipelineContext();
+    ASSERT_NE(context, nullptr);
+
+    overlayManager = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    ASSERT_EQ(overlayManager->context_.Upgrade(), nullptr);
+    context = overlayManager->GetPipelineContext();
+    ASSERT_NE(context, nullptr);
+}
+
+/**
+ * @tc.name: DialogTransitionTest006
+ * @tc.desc: Test OverlayManager::ShowDialog->Set no transition effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTransitionTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    ASSERT_NE(dialog, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. get transitionEffect from dialog.
+     * @tc.expected: transitionEffect is nullptr.
+     */
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    EXPECT_EQ(transitionEffect, nullptr);
 }
 } // namespace OHOS::Ace::NG

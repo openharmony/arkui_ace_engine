@@ -24,7 +24,6 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
         if (value) {
             this.getPeer().imageBorderRadiusAttribute(value);
         } else {
-            //this.getPeer().imageBorderRadiusAttribute(0);
         }
         return this;
     }

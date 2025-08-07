@@ -962,7 +962,7 @@ HWTEST_F(ScrollBarEventTestNg, PanDirection001, TestSize.Level1)
     CreateScrollBarChild();
     CreateDone();
     EXPECT_EQ(pattern_->panRecognizer_->direction_.type, PanDirection::VERTICAL);
-    
+
     /**
      * @tc.steps: step1. change scrollbar axis to HORIZONTAL
      * @tc.expected: scrollBar panDirection is HORIZONTAL

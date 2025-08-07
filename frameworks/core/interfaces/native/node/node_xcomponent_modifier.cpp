@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t ERROR_UINT_CODE = -1;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
 {
@@ -163,6 +163,7 @@ void* GetNativeXComponent(ArkUINodeHandle node)
         return nullptr;
     }
     auto pair = xcPattern->GetNativeXComponent();
+    xcPattern->SetHasGotNativeXComponent(true);
     return reinterpret_cast<void*>(pair.second.lock().get());
 }
 

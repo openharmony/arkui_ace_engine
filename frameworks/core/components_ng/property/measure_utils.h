@@ -20,16 +20,24 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/magic_layout_property.h"
 
 namespace OHOS::Ace::NG {
+#ifdef ACE_STATIC
+ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
+    float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
+#else
 std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
+#endif
 
 std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
@@ -56,6 +64,14 @@ PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty
 PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, bool roundPixel = true, bool nonNegative = false);
 
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference = -1.0f,
+    bool nonNegative = false);
+
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const PaddingProperty& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference = -1.0f,
+    bool nonNegative = false);
+
 MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
 
@@ -81,6 +97,8 @@ void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
+PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
+
 float GetCrossAxisSize(const SizeF& size, Axis axis);
 
 float GetMainAxisOffset(const OffsetF& offset, Axis axis);
@@ -99,6 +117,13 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
 
 void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
     const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize, const SizeT<float> percentReference, bool IsMaxSize);
+
+OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyProperty>& childLayoutPolicy,
+    const std::unique_ptr<MeasureProperty>& childCalcLayoutConstraint,
+    const std::optional<LayoutConstraintF>& parentConstraint, const MagicItemProperty& magicItemProperty);
+void UpdateSingleSideByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
+    const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize,
+    const std::optional<LayoutConstraintF>& parentConstraint, bool IsMaxSize);
 
 ACE_FORCE_EXPORT PaddingProperty ConvertToCalcPaddingProperty(const std::optional<CalcDimension>& top,
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,

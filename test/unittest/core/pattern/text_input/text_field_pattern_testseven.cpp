@@ -403,4 +403,151 @@ HWTEST_F(TextFieldPatternTestSeven, ProvideabilityNameText, TestSize.Level1)
     EXPECT_NE(count, 0);
 #endif
 }
+
+/**
+ * @tc.name: FireOnWillAttachIME001
+ * @tc.desc: Test TextFieldPattern FireOnWillAttachIME
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, FireOnWillAttachIME001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    bool fireOnWillAttachIME = false;
+    auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
+
+    eventHub_->SetOnWillAttachIME(std::move(onWillAttachIME));
+    pattern_->RequestKeyboard(false, true, true);
+
+#if defined(ENABLE_STANDARD_INPUT)
+    EXPECT_EQ(fireOnWillAttachIME, true);
+#else
+    EXPECT_EQ(fireOnWillAttachIME, false);
+#endif
+}
+
+/**
+ * @tc.name: FireOnWillAttachIME002
+ * @tc.desc: Test TextFieldPattern FireOnWillAttachIME
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, FireOnWillAttachIME002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    bool fireOnWillAttachIME = false;
+    auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
+
+    eventHub_->SetOnWillAttachIME(std::move(onWillAttachIME));
+    pattern_->FireOnWillAttachIME();
+    EXPECT_EQ(fireOnWillAttachIME, true);
+}
+
+/**
+ * @tc.name: GetIMEClientInfo001
+ * @tc.desc: Test TextFieldPattern GetIMEClientInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, GetIMEClientInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    auto host = pattern_->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    IMEClient iMEClientInfo = pattern_->GetIMEClientInfo();
+    EXPECT_EQ(iMEClientInfo.nodeId, host->GetId());
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText001
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "error");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText002
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", false);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText003
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+        model.SetInputStyle(InputStyle::INLINE);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText004
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText004, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+    ASSERT_NE(eventHub_, nullptr);
+    eventHub_->SetEnabled(false);
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
 }

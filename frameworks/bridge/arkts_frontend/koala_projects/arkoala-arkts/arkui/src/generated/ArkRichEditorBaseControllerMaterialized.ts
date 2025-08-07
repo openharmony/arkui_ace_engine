@@ -104,7 +104,7 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getTypingStyle_serialize(): RichEditorTextStyle {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RichEditorTextStyle = retvalDeserializer.readRichEditorTextStyle()
         return returnResult
     }
@@ -140,7 +140,7 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getPreviewText_serialize(): PreviewText {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : PreviewText = retvalDeserializer.readPreviewText()
         return returnResult
     }

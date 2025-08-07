@@ -42,6 +42,7 @@ void SetSideBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.sideBarWidth");
     Dimension sideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
     if (!SystemProperties::ConfigChangePerform() || !sideBarWidthPtr) {
         SideBarContainerModelNG::SetSideBarWidth(frameNode, sideBarWidthDimension);
@@ -56,6 +57,7 @@ void ResetSideBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.sideBarWidth");
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         SideBarContainerModelNG::SetSideBarWidth(frameNode, DEFAULT_SIDE_BAR_WIDTH_V10);
         return;
@@ -67,6 +69,7 @@ void SetMinSideBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 u
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.minSideBarWidth");
     Dimension minSideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
     if (!SystemProperties::ConfigChangePerform() || !minSideBarWidthPtr) {
         SideBarContainerModelNG::SetMinSideBarWidth(frameNode, minSideBarWidthDimension);
@@ -81,6 +84,7 @@ void ResetMinSideBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.minSideBarWidth");
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         SideBarContainerModelNG::SetMinSideBarWidth(frameNode, DEFAULT_MIN_SIDE_BAR_WIDTH_V10);
         return;
@@ -93,6 +97,9 @@ void SetControlButton(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.buttonIconOptions.shown");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.buttonIconOptions.hidden");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.buttonIconOptions.switching");
     Dimension left = Dimension(values[0], DimensionUnit::VP);
     Dimension top = Dimension(values[1], DimensionUnit::VP);
     Dimension width = Dimension(values[2], DimensionUnit::VP);
@@ -134,6 +141,9 @@ void ResetControlButton(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.buttonIconOptions.shown");
+        SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.buttonIconOptions.hidden");
+        SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.buttonIconOptions.switching");
         SideBarContainerModelNG::SetControlButtonWidth(frameNode, DEFAULT_CONTROL_BUTTON_WIDTH);
         SideBarContainerModelNG::SetControlButtonHeight(frameNode, DEFAULT_CONTROL_BUTTON_HEIGHT);
         SideBarContainerModelNG::ResetControlButtonLeft(frameNode);
@@ -178,6 +188,7 @@ void SetSideBarContainerMaxSideBarWidth(
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.maxSideBarWidth");
     Dimension maxSideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
     if (!SystemProperties::ConfigChangePerform() || !maxSideBarWidthPtr) {
         SideBarContainerModelNG::SetMaxSideBarWidth(frameNode, maxSideBarWidthDimension);
@@ -192,6 +203,7 @@ void ResetSideBarContainerMaxSideBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.maxSideBarWidth");
     SideBarContainerModelNG::SetMaxSideBarWidth(frameNode, DEFAULT_SIDE_BAR_CONTAINER_MAX_SIDE_BAR_WIDTH);
 }
 
@@ -200,6 +212,7 @@ void SetSideBarContainerMinContentWidth(
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.minContentWidth");
     Dimension maxSideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
     if (!SystemProperties::ConfigChangePerform() || !minContentWidthPtr) {
         SideBarContainerModelNG::SetMinContentWidth(frameNode, maxSideBarWidthDimension);
@@ -214,6 +227,7 @@ void ResetSideBarContainerMinContentWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.minContentWidth");
     SideBarContainerModelNG::SetMinContentWidth(frameNode, -1.0_vp);
 }
 
@@ -251,6 +265,10 @@ void SetSideBarContainerDivider(ArkUINodeHandle node, const ArkUI_Float32* value
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.strokeWidth");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.startMargin");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.endMargin");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.color");
     CHECK_NULL_VOID(values);
     CHECK_NULL_VOID(units);
     if (length != NUM_3) {
@@ -297,6 +315,10 @@ void ResetSideBarContainerDivider(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.strokeWidth");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.startMargin");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.endMargin");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.dividerStyle.color");
     SideBarContainerModelNG::SetDividerStrokeWidth(frameNode, DEFAULT_DIVIDER_STROKE_WIDTH);
     SideBarContainerModelNG::SetDividerColor(frameNode, Color(DEFAULT_SIDE_BAR_DIVIDER_COLOR));
     SideBarContainerModelNG::SetDividerStartMargin(frameNode, DEFAULT_START_MARGIN);

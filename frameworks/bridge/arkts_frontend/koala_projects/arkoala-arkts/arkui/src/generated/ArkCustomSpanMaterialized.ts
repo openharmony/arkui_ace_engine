@@ -67,7 +67,7 @@ export class CustomSpan implements MaterializedBase {
         thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
         return returnResult
     }

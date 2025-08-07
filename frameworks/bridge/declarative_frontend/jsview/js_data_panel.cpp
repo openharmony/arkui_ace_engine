@@ -155,9 +155,12 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
     if (!info[0]->IsArray() || info[0]->IsEmpty()) {
         ConvertThemeColor(valueColors);
         DataPanelModel::GetInstance()->SetValueColors(valueColors);
+        if (SystemProperties::ConfigChangePerform()) {
+            DataPanelModel::GetInstance()->SetValueColorsSetByUser(false);
+        }
         return;
     }
-
+    bool valueColorsSetByUser = true;
     auto paramArray = JSRef<JSArray>::Cast(info[0]);
     size_t length = paramArray->Length();
     size_t count = std::min(length, MAX_COUNT);
@@ -167,11 +170,15 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
         if (!ConvertGradientColor(item, gradient)) {
             valueColors.clear();
             ConvertThemeColor(valueColors);
+            valueColorsSetByUser = false;
             break;
         }
         valueColors.emplace_back(gradient);
     }
     DataPanelModel::GetInstance()->SetValueColors(valueColors);
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModel::GetInstance()->SetValueColorsSetByUser(valueColorsSetByUser);
+    }
 }
 
 void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
@@ -183,10 +190,9 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         bool state = ParseJsColor(info[0], color, resObj);
-        if (resObj) {
-            DataPanelModel::GetInstance()->CreateWithResourceObj(
-                OHOS::Ace::DataPanelResourceType::TRACK_BACKGROUND_COLOR, resObj);
-        } else if (state) {
+        DataPanelModel::GetInstance()->CreateWithResourceObj(
+            OHOS::Ace::DataPanelResourceType::TRACK_BACKGROUND_COLOR, resObj);
+        if (state) {
             DataPanelModel::GetInstance()->SetTrackBackground(color);
         } else {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
@@ -214,10 +220,8 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsDimensionVp(info[0], strokeWidthDimension, resObj);
-        if (resObj) {
-            DataPanelModel::GetInstance()->CreateWithResourceObj(
-                OHOS::Ace::DataPanelResourceType::STROKE_WIDTH, resObj);
-        } else if (state) {
+        DataPanelModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::DataPanelResourceType::STROKE_WIDTH, resObj);
+        if (state) {
             DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
         } else {
             strokeWidthDimension = theme->GetThickness();
@@ -384,10 +388,10 @@ void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
     }
 }
 
-void JSDataPanel::ParseShadowColors(const JSRef<JSVal>& colors, std::vector<OHOS::Ace::NG::Gradient>& shadowColors)
+void JSDataPanel::ParseShadowColors(
+    const JSRef<JSArray>& colorsArray, std::vector<OHOS::Ace::NG::Gradient>& shadowColors)
 {
     shadowColors.clear();
-    auto colorsArray = JSRef<JSArray>::Cast(colors);
     for (size_t i = 0; i < colorsArray->Length(); ++i) {
         auto item = colorsArray->GetValueAt(i);
         OHOS::Ace::NG::Gradient gradient;

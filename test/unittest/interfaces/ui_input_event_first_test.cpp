@@ -320,6 +320,30 @@ HWTEST_F(UIInputEventTest, PointerEventGetPointerId008, TestSize.Level1)
 }
 
 /**
+ * @tc.name:PointerEventGetPointerId009
+ * @tc.desc: Test the UIInputEvent property functions touch event case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventGetPointerId009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_UIInputEvent.
+     */
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(event, nullptr);
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    auto touchPoint = std::make_unique<ArkUITouchPoint>();
+    touchEvent->touchPointSize = 1;
+    touchEvent->touchPointes = touchPoint.get();
+    event->inputEvent = touchEvent.get();
+    uint32_t pointerIndex = 0;
+
+    OH_ArkUI_PointerEvent_GetPointerId(event.get(), pointerIndex);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
  * @tc.name:PointerEventGetXByIndex001 OH_ArkUI_PointerEvent_GetXByIndex
  * @tc.desc: Test the UIInputEvent property functions in focus axis event case.
  * @tc.type: FUNC

@@ -408,17 +408,18 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateKeyboardSafeArea12
- * @tc.desc: Test UpdateKeyboardSafeArea.
+ * @tc.name: MenuAvoidKeyboard
+ * @tc.desc: Test MenuAvoidKeyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTest, UpdateKeyboardSafeArea012, TestSize.Level1)
+HWTEST_F(WebPatternTest, MenuAvoidKeyboard, TestSize.Level1)
 {
     MockPipelineContext::SetUp();
-    bool result = g_webPattern->UpdateKeyboardSafeArea(true, 0.0);
+    bool result = g_webPattern->MenuAvoidKeyboard(true, 0.0);
     EXPECT_TRUE(result);
-    result = g_webPattern->UpdateKeyboardSafeArea(false, 0.0);
+    result = g_webPattern->MenuAvoidKeyboard(false, 0.0);
     EXPECT_TRUE(result);
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -436,5 +437,119 @@ HWTEST_F(WebPatternTest, SetLinkPreviewSelectionMenu001, TestSize.Level1)
         WebElementType::LINK, ResponseType::LONG_PRESS, menuBuilder, previewBuilder, menuParam);
     g_webPattern->SetPreviewSelectionMenu(param);
 #endif
+}
+
+/**
+ * @tc.name: ProcessVirtualKeyBoardShowAvoidMenu
+ * @tc.desc: Test ProcessVirtualKeyBoardShowAvoidMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardShowAvoidMenu, TestSize.Level1)
+{
+    bool result;
+    result = g_webPattern->ProcessVirtualKeyBoardShowAvoidMenu(0, 1280, 0.0, false);
+    EXPECT_TRUE(result);
+    result = g_webPattern->ProcessVirtualKeyBoardShowAvoidMenu(0, 1280, 0.0, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ProcessVirtualKeyBoardHideAvoidMenu
+ * @tc.desc: Test ProcessVirtualKeyBoardHideAvoidMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
+{
+    bool result;
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    result = g_webPattern->ProcessVirtualKeyBoardHideAvoidMenu(0, 1280, false);
+    EXPECT_TRUE(result);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    result = g_webPattern->ProcessVirtualKeyBoardHideAvoidMenu(0, 1280, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateScrollBarWithBorderRadius
+ * @tc.desc: Test UpdateScrollBarWithBorderRadius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, UpdateScrollBarWithBorderRadius, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto renderContext = host->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BorderRadiusProperty borderRadius;
+
+    webPattern->UpdateScrollBarWithBorderRadius();
+    bool borderRadiusStructHasValue = renderContext->GetBorderRadius().has_value();
+    EXPECT_FALSE(borderRadiusStructHasValue);
+    webPattern->UpdateScrollBarWithBorderRadius();
+    bool hasBorderRadiusValue = borderRadius.radiusTopLeft.has_value();
+    EXPECT_FALSE(hasBorderRadiusValue);
+    
+    borderRadius.radiusTopLeft = Dimension(10.0f);
+    borderRadius.radiusTopRight = Dimension(20.0f);
+    borderRadius.radiusBottomLeft = Dimension(30.0f);
+    borderRadius.radiusBottomRight = Dimension(40.0f);
+    renderContext->UpdateBorderRadius(borderRadius);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto clipState = renderContext->GetClipEdge().value_or(false);
+    webPattern->UpdateScrollBarWithBorderRadius();
+    renderContext->UpdateClipEdge(true);
+    clipState = renderContext->GetClipEdge().value_or(false);
+    webPattern->UpdateScrollBarWithBorderRadius();
+
+    borderRadiusStructHasValue = renderContext->GetBorderRadius().has_value();
+    webPattern->UpdateScrollBarWithBorderRadius();
+    EXPECT_TRUE(borderRadiusStructHasValue);
+    hasBorderRadiusValue = !borderRadius.radiusTopLeft.has_value();
+    webPattern->UpdateScrollBarWithBorderRadius();
+    EXPECT_FALSE(hasBorderRadiusValue);
+}
+
+/**
+ * @tc.name: IsShowHandle
+ * @tc.desc: Test IsShowHandle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, IsShowHandle, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto result = webPattern->IsShowHandle();
+    EXPECT_FALSE(result);
+    webPattern->webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(webPattern);
+    ASSERT_NE(webPattern->webSelectOverlay_, nullptr);
+    webPattern->webSelectOverlay_->isShowHandle_ = true;
+    result = webPattern->IsShowHandle();
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

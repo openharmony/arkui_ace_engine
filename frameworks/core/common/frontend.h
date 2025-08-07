@@ -78,7 +78,11 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS };
+enum class FrontendType {
+    JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS,
+    DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
+};
+
 struct PageTarget;
 
 class ACE_FORCE_EXPORT Frontend : public AceType {
@@ -165,6 +169,29 @@ public:
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
+
+#if defined(ACE_STATIC)
+    // For ArkTS1.2
+    virtual void* PushExtender(
+        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    {
+        return nullptr;
+    };
+    virtual void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
+    {
+        return nullptr;
+    };
+    virtual void* RunPageExtender(
+        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    {
+        return nullptr;
+    };
+    virtual void BackExtender(const std::string& url, const std::string& params) {};
+    virtual void ClearExtender() {};
+    virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {};
+    virtual void HideAlertBeforeBackPageExtender() {};
+#endif
 
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
@@ -320,6 +347,11 @@ public:
         return value;
     }
 
+    virtual bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+    {
+        return false;
+    }
+
     virtual napi_value GetFrameNodeValueByNodeId(int32_t nodeId)
     {
         return nullptr;
@@ -354,6 +386,7 @@ public:
     {
         return "";
     }
+    virtual void* GetEnv() { return nullptr; }
 
 protected:
     virtual bool MaybeRelease() override;

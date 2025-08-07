@@ -294,13 +294,6 @@ void Engine::runNode() {
     nodeRuntime->platform->DrainTasks(nodeScopedState->isolate);
 }
 
-/* TODO: make native function for that!
-static int64_t timestamp() {
-    struct timespec res = {0};
-    clock_gettime(CLOCK_REALTIME, &res);
-    return static_cast<int64_t>(1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6);
-} */
-
 int Engine::initDisplay() {
     const EGLint attributes[] = {
                 EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -358,7 +351,6 @@ int Engine::initDisplay() {
      * ANativeWindow buffers to match, using EGL_NATIVE_VISUAL_ID. */
     eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
 
-    //eglBindAPI(EGL_OPENGL_ES_API);
     surface = eglCreateWindowSurface(display, config, app->window, nullptr);
     EGLint contextAttribs[] = {
             EGL_CONTEXT_CLIENT_VERSION, 2,
@@ -463,9 +455,6 @@ int Engine::handleInput(AInputEvent *event) {
         }
 
         case AINPUT_EVENT_TYPE_MOTION: {
-            /* LOGI_ANDROID("Motion event: action=%d source=%d",
-                    AMotionEvent_getAction(event),
-                    AMotionEvent_getFlags(event)); */
             int action  = getCurrentAction(event);
             int count   = getPointersCount(event);
             int pointer = getCurrentPointerIndex(event);
@@ -544,7 +533,6 @@ int Engine::getUnicodeChar(AInputEvent *event) {
 
 void Engine::handleCommand(int command)
 {
-    // LOGE("command %d arrived", command);
     switch (command)
     {
     case APP_CMD_INPUT_CHANGED:

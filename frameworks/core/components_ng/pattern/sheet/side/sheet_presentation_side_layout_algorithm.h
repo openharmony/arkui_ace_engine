@@ -67,7 +67,7 @@ public:
         return sheetWidth_;
     }
 
-    float GetCenterHeight() const
+    float GetSheetHeight() const
     {
         return sheetHeight_;
     }

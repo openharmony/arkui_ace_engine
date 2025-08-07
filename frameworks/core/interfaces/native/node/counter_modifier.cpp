@@ -49,7 +49,33 @@ void SetCounterHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 uni
     Dimension height = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     CounterModelNG::SetHeight(frameNode, height);
 }
-void ResetCounterHeight(ArkUINodeHandle node) {}
+
+void SetCounterHeightRes(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* heightRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension height = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    CounterModelNG::SetHeight(frameNode, height);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (heightRawPtr) {
+            auto* fontWeight = reinterpret_cast<ResourceObject*>(heightRawPtr);
+            auto heightResObj = AceType::Claim(fontWeight);
+            CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::Height, heightResObj);
+        } else {
+            CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::Height, nullptr);
+        }
+    }
+}
+
+void ResetCounterHeight(ArkUINodeHandle node)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::Height, nullptr);
+    }
+}
+
 void SetCounterWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -58,7 +84,31 @@ void SetCounterWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit
     CounterModelNG::SetWidth(frameNode, width);
 }
 
-void ResetCounterWidth(ArkUINodeHandle node) {}
+void SetCounterWidthRes(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* widthRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    CounterModelNG::SetWidth(frameNode, width);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (widthRawPtr) {
+            auto* fontWeight = reinterpret_cast<ResourceObject*>(widthRawPtr);
+            auto widthResObj = AceType::Claim(fontWeight);
+            CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::Width, widthResObj);
+        } else {
+            CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::Width, nullptr);
+        }
+    }
+}
+
+void ResetCounterWidth(ArkUINodeHandle node)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::Width, nullptr);
+    }
+}
 
 void SetCounterBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -80,11 +130,37 @@ void SetCounterBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 
     CounterModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
+void SetCounterBackgroundColorRes(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    CounterModelNG::SetBackgroundColor(frameNode, backgroundColor);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (colorRawPtr) {
+            auto* colorResObj = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            CounterModelNG::CreateWithResourceObj(
+                frameNode, JsCounterResourceType::BackgroundColor, AceType::Claim(colorResObj));
+        } else {
+            CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::BackgroundColor, nullptr);
+        }
+    }
+}
+
 void ResetCounterBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CounterModelNG::ResetBackgroundColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        CounterModelNG::CreateWithResourceObj(
+            frameNode, JsCounterResourceType::BackgroundColor, nullptr);
+    }
 }
 
 void SetCounterOnInc(ArkUINodeHandle node, void* callback)
@@ -135,11 +211,14 @@ const ArkUICounterModifier* GetCounterModifier()
         .setEnableDec = SetEnableDec,
         .resetEnableDec = ResetEnableDec,
         .setCounterHeight = SetCounterHeight,
+        .setCounterHeightRes = SetCounterHeightRes,
         .resetCounterHeight = ResetCounterHeight,
         .setCounterWidth = SetCounterWidth,
+        .setCounterWidthRes = SetCounterWidthRes,
         .resetCounterWidth = ResetCounterWidth,
         .setCounterBackgroundColor = SetCounterBackgroundColor,
         .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpace,
+        .setCounterBackgroundColorRes = SetCounterBackgroundColorRes,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
         .setCounterOnInc = SetCounterOnInc,
         .resetCounterOnInc = ResetCounterOnInc,
@@ -160,11 +239,14 @@ const CJUICounterModifier* GetCJUICounterModifier()
         .setEnableDec = SetEnableDec,
         .resetEnableDec = ResetEnableDec,
         .setCounterHeight = SetCounterHeight,
+        .setCounterHeightRes = SetCounterHeightRes,
         .resetCounterHeight = ResetCounterHeight,
         .setCounterWidth = SetCounterWidth,
+        .setCounterWidthRes = SetCounterWidthRes,
         .resetCounterWidth = ResetCounterWidth,
         .setCounterBackgroundColor = SetCounterBackgroundColor,
         .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpace,
+        .setCounterBackgroundColorRes = SetCounterBackgroundColorRes,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

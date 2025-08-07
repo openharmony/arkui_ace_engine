@@ -81,7 +81,7 @@ public:
 
     std::string InteractionModeToJson() const
     {
-        static const std::array<std::string, 3> SLIDER_INTERACTION_MODE_TO_STRING = {
+        const std::array<std::string, 3> SLIDER_INTERACTION_MODE_TO_STRING = {
             "SliderInteraction.SLIDE_AND_CLICK",
             "SliderInteraction.SLIDE_ONLY",
             "SliderInteraction.SLIDE_AND_CLICK_UP",
@@ -96,7 +96,7 @@ public:
 
     std::string BlockTypeToJson() const
     {
-        static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
+        const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
             "BlockStyleType.IMAGE",
             "BlockStyleType.SHAPE",
@@ -196,6 +196,14 @@ public:
                 .c_str(),
             filter);
 #endif
+        auto sliderShowStepOptions = GetSliderShowStepOptions();
+        if ((sliderShowStepOptions.has_value()) && (!sliderShowStepOptions.value().empty())) {
+            auto stepOptions = JsonUtil::Create(true);
+            for (auto option : sliderShowStepOptions.value()) {
+                stepOptions->Put(std::to_string(option.first).c_str(), option.second.c_str());
+            }
+            json->PutExtAttr("sliderShowStepOptions", stepOptions, filter);
+        }
     }
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
@@ -236,17 +244,22 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Reverse, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectGradientColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, SliderInteractionMode, SliderModel::SliderInteraction, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderWidth, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectedBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
@@ -264,6 +277,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, DigitalCrownSensitivity, CrownSensitivity, PROPERTY_UPDATE_RENDER)
 #endif
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, SliderShowStepOptions, SliderModel::SliderShowStepOptions, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)

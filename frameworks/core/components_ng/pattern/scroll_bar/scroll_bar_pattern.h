@@ -253,7 +253,7 @@ public:
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             auto paint = MakeRefPtr<ScrollBarPaintMethod>(hasChild_);
             paint->SetScrollBar(scrollBar_);
-            if (!HasChild()) {
+            if (scrollBar_ && !HasChild()) {
                 auto activeRect = scrollBar_->GetActiveRect();
                 auto offset = activeRect.GetOffset();
                 auto offsetF = OffsetF(offset.GetX(), offset.GetY());
@@ -325,6 +325,7 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+    void OnColorModeChange(uint32_t colorMode) override;
 
     RefPtr<ScrollBarProxy> GetScrollBarProxy()
     {

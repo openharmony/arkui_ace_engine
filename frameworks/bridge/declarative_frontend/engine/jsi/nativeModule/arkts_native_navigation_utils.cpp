@@ -110,10 +110,10 @@ void NativeNavigationUtils::ParseBarItemsIcon(
 }
 
 void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    ArkUINavigationTitlebarOptions& options)
+    ArkUINodeHandle nativeNode, ArkUINavigationTitlebarOptions& options)
 {
     auto obj = jsValue->ToObject(vm);
-    UpdateNavigationBackgroundColor(vm, obj, options);
+    UpdateNavigationBackgroundColor(vm, obj, nativeNode, options);
     auto blurProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundBlurStyle"));
     if (blurProperty->IsNumber()) {
         auto blurStyle = blurProperty->Int32Value(vm);
@@ -153,8 +153,8 @@ void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSVa
     }
 }
 
-void NativeNavigationUtils::UpdateNavigationBackgroundColor(
-    const EcmaVM* vm, const Local<panda::ObjectRef>& obj, ArkUINavigationTitlebarOptions& options)
+void NativeNavigationUtils::UpdateNavigationBackgroundColor(const EcmaVM* vm, const Local<panda::ObjectRef>& obj,
+    ArkUINodeHandle nativeNode, ArkUINavigationTitlebarOptions& options)
 {
     auto colorProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundColor"));
     Color color;
@@ -165,7 +165,8 @@ void NativeNavigationUtils::UpdateNavigationBackgroundColor(
         return;
     }
     RefPtr<ResourceObject> backgroundColorResObj;
-    if (ArkTSUtils::ParseJsColor(vm, colorProperty, color, backgroundColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, colorProperty, color, backgroundColorResObj, nodeInfo)) {
         options.colorValue = ArkUIOptionalUint { 1, color.GetValue() };
     }
     if (backgroundColorResObj) {

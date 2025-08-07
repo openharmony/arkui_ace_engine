@@ -32,7 +32,9 @@ constexpr int32_t LEFT_FIRST_POINT_INDEX = 0;
 constexpr int32_t SECOND_POINT_INDEX = 1;
 constexpr int32_t THIRD_POINT_INDEX = 2;
 constexpr uint32_t ITEM_HALF_WIDTH = 0;
+constexpr uint32_t ITEM_HALF_HEIGHT = 1;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
+constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 constexpr float HALF_FLOAT = 0.5f;
 constexpr int32_t OVERLONG_SMALL_COUNT = 2;
 constexpr int32_t DOUBLE_INT = 2;
@@ -58,6 +60,51 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 
     PaintBackground(context, contentProperty, maxDisplayCount_, isBindIndicator_);
     PaintContent(context, contentProperty);
+}
+
+void OverlengthDotIndicatorModifier::PaintBackground(
+    DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount, bool isBindIndicator)
+{
+    CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
+    auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
+    auto itemHeight = contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
+    auto selectedItemWidth = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+    auto selectedItemHeight = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
+    auto pointNumber = static_cast<float>(contentProperty.vectorBlackPointCenterX.size());
+    float allPointDiameterSum = itemWidth * static_cast<float>(pointNumber + 1);
+    if (isCustomSize_) {
+        allPointDiameterSum = itemWidth * static_cast<float>(pointNumber - 1) + selectedItemWidth;
+    }
+    float allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (pointNumber - 1);
+
+    if (maxDisplayCount > 0) {
+        allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (maxDisplayCount - 1);
+        allPointDiameterSum = itemWidth * (maxDisplayCount - OVERLONG_SMALL_COUNT - 1) + selectedItemWidth +
+                              itemWidth * SECOND_SMALLEST_POINT_RATIO + itemWidth * SMALLEST_POINT_RATIO;
+    }
+
+    // Background necessary property
+    float rectWidth =
+        contentProperty.indicatorPadding + allPointDiameterSum + allPointSpaceSum + contentProperty.indicatorPadding;
+    auto indicatorTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(indicatorTheme);
+    auto indicatorHeightPadding = indicatorTheme->GetIndicatorBgHeight().ConvertToPx();
+    float rectHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
+    if (selectedItemHeight > itemHeight) {
+        rectHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
+    }
+
+    auto [rectLeft, rectRight, rectTop, rectBottom] =
+        CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    // Paint background
+    RSCanvas& canvas = context.canvas;
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(contentProperty.backgroundColor));
+    canvas.AttachBrush(brush);
+    auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
+    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
+    canvas.DetachBrush();
 }
 
 std::pair<float, float> OverlengthDotIndicatorModifier::GetTouchBottomCenterX(ContentProperty& contentProperty)

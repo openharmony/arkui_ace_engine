@@ -186,8 +186,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.resetRecycleCustomNode();
   }
  
-  public queryNavDestinationInfo(): object {
-    return this.nativeViewPartialUpdate.queryNavDestinationInfo();
+  public queryNavDestinationInfo(isInner: boolean | undefined): object {
+    return this.nativeViewPartialUpdate.queryNavDestinationInfo(isInner);
   }
  
   public queryNavigationInfo(): object {
@@ -864,7 +864,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
   }
 
-  protected isNeedBuildPrebuildCmd(): boolean {
+  public static isNeedBuildPrebuildCmd(): boolean {
     const needBuild: boolean = PUV2ViewBase.prebuildPhase_ === PrebuildPhase.BuildPrebuildCmd;
     return needBuild;
   }

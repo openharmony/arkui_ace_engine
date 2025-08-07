@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
@@ -33,6 +34,7 @@ void MarqueePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);  // call OnAttachToFrameNodeMultiThread() by multi thread
     host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
     auto pipeline = host->GetContext();
@@ -44,11 +46,30 @@ void MarqueePattern::OnAttachToFrameNode()
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode,
+        frameNode);  // call OnDetachFromFrameNodeMultiThread() by multi thread
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+void MarqueePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void MarqueePattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call OnDetachFromMainTreeMultiThread() by multi thread Pattern::OnDetachFromMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 MarqueePattern::~MarqueePattern()
@@ -109,7 +130,7 @@ void MarqueePattern::OnModifyDone()
     auto gestureHub = textChild->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -721,12 +742,13 @@ void MarqueePattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyV
     CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutPropertyPtr<MarqueeLayoutProperty>();
     CHECK_NULL_VOID(property);
+    CHECK_NULL_VOID(value);
     using Handler = std::function<void(MarqueeLayoutProperty*, RefPtr<PropertyValueBase>)>;
-    static const std::unordered_map<std::string, Handler> handlers = {
+    const std::unordered_map<std::string, Handler> handlers = {
         { "FontSize",
             [](MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
-                    prop->UpdateFontSize(intVal->value);
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    prop->UpdateFontSize(*realValue);
                 }
             } },
         { "TextColor",
@@ -734,17 +756,17 @@ void MarqueePattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyV
                 MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
                     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
-                    prop->UpdateFontColor(intVal->value);
+                    prop->UpdateFontColor(*realValue);
                 }
             } },
         { "FontFamily",
             [](MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::vector<std::string>>>(value)) {
-                    prop->UpdateFontFamily(intVal->value);
+                if (auto realValue = std::get_if<std::vector<std::string>>(&(value->GetValue()))) {
+                    prop->UpdateFontFamily(*realValue);
                 }
             } },
     };
@@ -755,5 +777,13 @@ void MarqueePattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyV
     if (frameNode->GetRerenderable()) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void MarqueePattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

@@ -39,12 +39,12 @@ void AceTraceEnd()
 
 void AceTraceBeginCommercial(const char* name)
 {
-    StartTrace(ACE_TRACE_COMMERCIAL, name);
+    StartTraceEx(HITRACE_LEVEL_COMMERCIAL, ACE_TRACE_COMMERCIAL, name);
 }
 
 void AceTraceEndCommercial()
 {
-    FinishTrace(ACE_TRACE_COMMERCIAL);
+    FinishTraceEx(HITRACE_LEVEL_COMMERCIAL, ACE_TRACE_COMMERCIAL);
 }
 
 void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace)

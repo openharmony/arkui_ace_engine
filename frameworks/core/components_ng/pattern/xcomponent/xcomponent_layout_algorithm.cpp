@@ -14,9 +14,9 @@
  */
 
 #include "base/utils/utils.h"
+#include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> XComponentLayoutAlgorithm::MeasureContent(
@@ -28,10 +28,12 @@ std::optional<SizeF> XComponentLayoutAlgorithm::MeasureContent(
     if (xcomponentType == XComponentType::COMPONENT) {
         return LayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
     }
+    SizeF layoutSize = contentConstraint.maxSize;
     if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
+        layoutSize = contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-    return contentConstraint.maxSize;
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
+    return layoutSize;
 }
 
 void XComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

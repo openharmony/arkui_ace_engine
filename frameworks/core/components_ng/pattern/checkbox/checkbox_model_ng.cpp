@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -91,7 +92,6 @@ void CheckBoxModelNG::SetCheckboxStyle(CheckBoxStyle checkboxStyle)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle);
 }
-
 
 void CheckBoxModelNG::SetCheckMarkColor(const Color& color)
 {
@@ -173,6 +173,12 @@ void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, true, frameNode);
 }
 
+void CheckBoxModelNG::SetSelectedColorFlagByUser(FrameNode* frameNode, const bool isByUser)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, isByUser, frameNode);
+}
+
 void CheckBoxModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);
@@ -219,14 +225,9 @@ void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<
     pattern->SetIsUserSetResponseRegion(true);
 }
 
-void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle)
+void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (checkboxStyle.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
 }
 
 void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name)
@@ -355,14 +356,6 @@ void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void CheckBoxModelNG::SetChangeEvent(FrameNode* frameNode, ChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(onChange));
-}
-
 std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
@@ -379,6 +372,95 @@ std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
     return eventHub->GetGroupName();
 }
 
+void CheckBoxModelNG::CreateWithColorResourceObj(
+    const RefPtr<ResourceObject>& resObj, const CheckBoxColorType checkBoxColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, checkBoxColorType, resObj);
+}
+
+void CheckBoxModelNG::ResetComponentColor(FrameNode* frameNode, const CheckBoxColorType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    Color color;
+    switch (type) {
+        case CheckBoxColorType::SELECTED_COLOR:
+            ResetSelectedColor(frameNode);
+            color = theme->GetActiveColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color, frameNode);
+            break;
+        case CheckBoxColorType::UN_SELECTED_COLOR:
+            ResetUnSelectedColor(frameNode);
+            color = theme->GetInactiveColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType type, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (type) {
+        case CheckBoxColorType::SELECTED_COLOR:
+            SetSelectedColor(frameNode, color);
+            break;
+        case CheckBoxColorType::UN_SELECTED_COLOR:
+            SetUnSelectedColor(frameNode, color);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, const CheckBoxColorType type, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "checkbox" + ColorTypeToString(type);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [type, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            ResetComponentColor(AceType::RawPtr(frameNode), type);
+        } else {
+            UpdateComponentColor(AceType::RawPtr(frameNode), type, result);
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string CheckBoxModelNG::ColorTypeToString(const CheckBoxColorType checkBoxColorType)
+{
+    std::string rst;
+    switch (checkBoxColorType) {
+        case CheckBoxColorType::SELECTED_COLOR:
+            rst = "SelectedColor";
+            break;
+        case CheckBoxColorType::UN_SELECTED_COLOR:
+            rst = "UnSelectedColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
 void CheckBoxModelNG::ResetSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor, PROPERTY_UPDATE_RENDER);
@@ -387,25 +469,25 @@ void CheckBoxModelNG::ResetSelectedColor()
 
 void CheckBoxModelNG::ResetSelectedColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor,
-        PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void CheckBoxModelNG::ResetUnSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxModelNG::ResetUnSelectedColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor,
-        PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void CheckBoxModelNG::ResetCheckMarkColor()
@@ -416,9 +498,24 @@ void CheckBoxModelNG::ResetCheckMarkColor()
 
 void CheckBoxModelNG::ResetCheckMarkColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColor,
-        PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxCheckMarkColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxModelNG::SetIsUserSetMargin(bool isUserSet)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetIsUserSetMargin(frameNode, isUserSet);
+}
+
+void CheckBoxModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetMargin(isUserSet);
 }
 } // namespace OHOS::Ace::NG

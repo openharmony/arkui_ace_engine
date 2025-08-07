@@ -237,4 +237,9 @@ bool DragDropGlobalController::IsAlreadyGetAppGlobalDrag() const
     return isAlreadyGetAppGlobalDrag_;
 }
 
+bool DragDropGlobalController::IsCurrentDrag(int32_t requestId) const
+{
+    return requestId_ == requestId;
+}
+
 } // namespace OHOS::Ace

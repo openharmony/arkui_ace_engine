@@ -54,6 +54,11 @@
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -70,7 +75,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
-using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 
 class PipelineBase;
 
@@ -345,13 +350,14 @@ public:
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
-    static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetFocused();
     static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
     static ColorMode CurrentColorMode();
+    static std::string CurrentBundleName();
 
     void SetUseNewPipeline()
     {
@@ -697,6 +703,15 @@ public:
     {
         return false;
     }
+    virtual Rect GetGlobalScaledRect() const
+    {
+        return Rect();
+    }
+
+    virtual bool IsPcOrFreeMultiWindowCapability() const
+    {
+        return false;
+    }
 
     virtual Rect GetUIExtensionHostWindowRect()
     {
@@ -764,6 +779,18 @@ public:
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
     virtual void UpdateColorMode(uint32_t colorMode) {};
+
+    virtual void TriggerModuleSerializer() {};
+
+    virtual sptr<IRemoteObject> GetToken();
+
+    // Get the subFrontend of container
+    virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
+
+    virtual FrontendType GetFrontendType() const { return FrontendType::JS; }
+
+    virtual bool IsArkTsFrontEnd() const { return false; }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

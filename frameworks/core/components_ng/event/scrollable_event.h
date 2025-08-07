@@ -43,7 +43,7 @@ using GetAnimateVelocityCallback = std::function<double()>;
 using ClickJudgeCallback = std::function<bool(const PointF&)>;
 
 class ScrollableEvent : public AceType {
-    DECLARE_ACE_TYPE(ScrollableEvent, AceType)
+    DECLARE_ACE_TYPE(ScrollableEvent, AceType);
 public:
     explicit ScrollableEvent(Axis axis);
     ~ScrollableEvent() override;
@@ -158,7 +158,7 @@ public:
 
     void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, int32_t touchId);
 
 private:
     Axis axis_ = Axis::VERTICAL;
@@ -174,7 +174,7 @@ private:
 };
 
 class ScrollableActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(ScrollableActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(ScrollableActuator, GestureEventActuator);
 public:
     explicit ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ScrollableActuator() override = default;
@@ -207,7 +207,7 @@ public:
     void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, int32_t touchId);
 
     void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,

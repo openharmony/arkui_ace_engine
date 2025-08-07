@@ -869,11 +869,11 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
-                overlayManager->UpdateCustomDialog(node, g_dialogProperties, std::move(callback));
+                overlayManager->UpdateCustomDialogWithNode(node, g_dialogProperties, std::move(callback));
             },
             TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(
+        SubwindowManager::GetInstance()->UpdateCustomDialogNGWithNode(
             g_dialogProperties.customCNode, promptDialogAttr, std::move(callback));
     }
     return ERROR_CODE_NO_ERROR;

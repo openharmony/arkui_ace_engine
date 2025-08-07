@@ -44,6 +44,8 @@ public:
 
     void onDraw(DrawingContext& context) override;
     // paint
+    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount,
+        bool isBindIndicator);
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty) override;
     void PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty);
     void PaintUnselectedIndicator(

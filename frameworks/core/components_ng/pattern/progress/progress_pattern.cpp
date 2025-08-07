@@ -910,4 +910,49 @@ void ProgressPattern::OnColorModeChange(uint32_t colorMode)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+void ProgressPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    const auto& type = pops->GetProgressType();
+    if (!pops->GetGradientColorSetByUserValue(false)) {
+        Color colorVal;
+        Color endColor;
+        Color beginColor;
+        NG::Gradient gradient;
+        endColor = theme->GetRingProgressEndSideColor();
+        beginColor = theme->GetRingProgressBeginSideColor();
+        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
+                                                                 : theme->GetTrackParseFailedSelectedColor();
+        NG::GradientColor endSideColor;
+        NG::GradientColor beginSideColor;
+        endSideColor.SetLinearColor(LinearColor(endColor));
+        endSideColor.SetDimension(Dimension(0.0f));
+        beginSideColor.SetLinearColor(LinearColor(beginColor));
+        beginSideColor.SetDimension(Dimension(1.0f));
+        gradient.AddColor(endSideColor);
+        gradient.AddColor(beginSideColor);
+        pops->UpdateGradientColor(gradient);
+        pops->UpdateColor(colorVal);
+    }
+    if (pops->GetCapsuleStyleSetByUserValue(false) && !pops->GetCapsuleStyleFontColorSetByUserValue(false)) {
+        auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(theme->GetTextColor());
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        pops->UpdateTextColor(theme->GetTextColor());
+    }
+}
 } // namespace OHOS::Ace::NG

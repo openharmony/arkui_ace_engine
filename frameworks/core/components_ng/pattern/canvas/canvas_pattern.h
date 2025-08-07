@@ -32,7 +32,6 @@ class ImageAnalyzerManager;
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
-class OffscreenCanvasPattern;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
 class ACE_FORCE_EXPORT CanvasPattern : public Pattern {
@@ -46,6 +45,11 @@ public:
     void SetOnContext2DDetach(std::function<void()>&& callback);
 
     bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
     {
         return true;
     }
@@ -197,12 +201,11 @@ public:
     void Reset();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnDetachFromMainTree() override;
     void FireOnContext2DAttach();
     void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -228,6 +231,7 @@ private:
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
     bool isAttached_ = false;
+    int32_t id_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG

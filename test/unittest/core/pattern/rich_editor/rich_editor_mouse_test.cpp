@@ -273,6 +273,49 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseRightFocus003
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(u"test1");
+    AddImageSpan();
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->moveLength_ = 0;
+    MouseInfo info;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: MouseRightFocus006
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(u"test1");
+    AddImageSpan();
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->textSelector_.Update(4, 5);
+    MouseInfo info;
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
+}
+
+/**
  * @tc.name: RichEditorPatternTestInitMouseEvent001
  * @tc.desc: test InitMouseEvent
  * @tc.type: FUNC
@@ -1132,6 +1175,29 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseLeftButtonRelease005
+ * @tc.desc: test HandleMouseLeftButtonRelease
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
+    richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->isEditing_ = false;
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    MouseInfo info;
+    richEditorPattern->HandleMouseLeftButtonRelease(info);
+
+    EXPECT_TRUE(richEditorPattern->isEditing_);
+}
+
+/**
  * @tc.name: OnHandleMouseEvent001
  * @tc.desc: test OnHandleMouseEvent
  * @tc.type: FUNC
@@ -1161,6 +1227,151 @@ HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent002, TestSize.Level1)
     event.SetAction(MouseAction::RELEASE);
     richEditorPattern->selectOverlay_->OnHandleMouseEvent(event);
     EXPECT_EQ(event.GetAction(), MouseAction::RELEASE);
+}
+
+/**
+ * @tc.name: AdjustMouseLocalOffset
+ * @tc.desc: test AdjustMouseLocalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(140.0f));
+    auto offsetStart = Offset(0, 0);
+    auto offsetEnd = Offset(100, 200);
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offsetStart, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offsetEnd, _)).WillRepeatedly(Return(6));
+    PositionWithAffinity defaultPositionWithAffinity(0, TextAffinity::DOWNSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(defaultPositionWithAffinity));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
+
+    MouseInfo info;
+    info.localLocation_ = Offset(0, 0);
+    info.globalLocation_ = Offset(0, 0);
+    richEditorPattern->HandleMouseLeftButtonPress(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    richEditorPattern->textSelector_.Update(3, 3);
+    richEditorPattern->HandleMouseLeftButtonMove(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
+
+    richEditorPattern->ResetSelection();
+    info.localLocation_ = Offset(50, 200);
+    info.globalLocation_ = Offset(50, 200);
+    richEditorPattern->HandleMouseLeftButtonPress(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->textSelector_.Update(3, 3);
+    richEditorPattern->HandleMouseLeftButtonMove(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
+}
+
+/**
+ * @tc.name: HandleImageHoverEventTest001
+ * @tc.desc: test HandleImageHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation(MOUSE_LOCAL_LOCATION);
+    richEditorPattern->isMousePressed_ = false;
+    OffsetF frameOffset{ 0.0f, 0.0f };
+    SizeF frameSize{ 10.0f, 10.0f };
+
+    WeakPtr<ImageSpanNode> hoverableNode1;
+
+    auto imageSpanNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    WeakPtr<ImageSpanNode> hoverableNode2 = imageSpanNode2;
+
+    auto imageSpanNode3 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode3->SetImageItem(nullptr);
+    WeakPtr<ImageSpanNode> hoverableNode3 = imageSpanNode3;
+    
+    auto imageSpanNode4 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode4->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    WeakPtr<ImageSpanNode> hoverableNode4 = imageSpanNode4;
+    
+    auto imageSpanNode5 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode5->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    imageSpanNode5->GetGeometryNode()->SetFrameOffset(frameOffset);
+    imageSpanNode5->GetGeometryNode()->SetFrameSize(frameSize);
+    WeakPtr<ImageSpanNode> hoverableNode5 = imageSpanNode5;
+
+    richEditorPattern->hoverableNodes.push_back(hoverableNode1);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode2);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode3);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode4);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode5);
+
+    richEditorPattern->lastHoverSpanItem_ = nullptr;
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+
+    richEditorPattern->lastHoverSpanItem_ = imageSpanNode4->GetSpanItem();
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+}
+
+/**
+ * @tc.name: MouseRightFocus004
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_VALUE2;
+    spanItem->spanItemType = SpanItemType::IMAGE;
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    MouseInfo info;
+    info.SetGlobalLocation({ 0, 0 });
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_NE(richEditorPattern->selectedType_, TextSpanType::IMAGE);
+}
+
+/**
+ * @tc.name: MouseRightFocus005
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_VALUE2;
+    spanItem->spanItemType = SpanItemType::NORMAL;
+    spanItem->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem);
+    MouseInfo info;
+    info.SetGlobalLocation({ 0, 0 });
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->previewLongPress_ = true;
+    focusHub->RequestFocusImmediately();
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->isEditing_, true);
 }
 
 }

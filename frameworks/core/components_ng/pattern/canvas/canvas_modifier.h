@@ -21,10 +21,10 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-struct CanvasModifierDump;
 class RenderContext;
 class CanvasModifier : public ContentModifier {
     DECLARE_ACE_TYPE(CanvasModifier, ContentModifier)

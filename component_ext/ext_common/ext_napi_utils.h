@@ -49,6 +49,7 @@ public:
                                         void* data);
     static int32_t GetCInt32(napi_env env, napi_value value);
     static int64_t GetCInt64(napi_env env, napi_value value);
+    static double GetDouble(napi_env env, napi_value value);
     static napi_value CreateNull(napi_env env);
     static bool GetBool(napi_env env, napi_value value);
     static napi_valuetype GetValueType(napi_env env, napi_value value);

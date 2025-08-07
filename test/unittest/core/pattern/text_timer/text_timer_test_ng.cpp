@@ -18,10 +18,13 @@
 
 #include "gtest/gtest.h"
 
+#define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -86,6 +89,10 @@ protected:
 void TextTimerTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
     MockParagraph::GetOrCreateMockParagraph();
 }
 
@@ -134,7 +141,7 @@ RefPtr<FrameNode> TextTimerTestNg::CreateTextTimerParagraph(const TestProperty& 
  * @tc.desc: Test all the properties of texttimer.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of texttimer.
@@ -281,7 +288,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest002, TestSize.Level1)
  * @tc.desc: Test event function of texttimer.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer and set event.
@@ -319,7 +326,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
  * @tc.desc: Test IsScrollable of textTimerAccessibilityProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSize.Level0)
 {
     TestProperty testProperty;
     testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
@@ -344,7 +351,7 @@ HWTEST_F(TextTimerTestNg, TextTimerAccessibilityPropertyIsScrollable001, TestSiz
  * @tc.desc: Test InitTimerDisplay of TextTimerPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest004, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -384,7 +391,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest004, TestSize.Level1)
  * @tc.desc: Test InitTimerDisplay of TextTimerPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest005, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -430,7 +437,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest005, TestSize.Level1)
  * @tc.desc: Test GetFormatDuration of TextTimerPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -495,7 +502,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level1)
  * @tc.desc: Test GetTextNode of TextTimerPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -542,7 +549,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level1)
  * @tc.desc: Test OnVisibleAreaChange of TextTimerPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -590,7 +597,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level1)
  * @tc.desc: Test LayoutAlgorithm of TextTimer.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerLayoutAlgorithmTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -650,7 +657,7 @@ HWTEST_F(TextTimerTestNg, TextTimerLayoutAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test UpdateTextTimer of TextTimerPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -699,7 +706,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level1)
  * @tc.desc: Test the text shadows of texttimer.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest010, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of texttimer.
@@ -754,7 +761,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest010, TestSize.Level1)
  * @tc.desc: Test the SetBuilderFunc and get value.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest011, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode and init property.
@@ -785,7 +792,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest011, TestSize.Level1)
  * @tc.desc: Test the SetBuilderFunc and get value.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest012, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -815,7 +822,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest012, TestSize.Level1)
  * @tc.desc: Test the SetBuilderFunc and get value.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -860,7 +867,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level1)
  * @tc.desc: Test the SetBuilderFunc and get value.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create texttimer frameNode.
@@ -887,7 +894,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level1)
  * @tc.desc: Test TextTimer property.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create framenode and Init.
@@ -917,11 +924,38 @@ HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextTimerSetTextColorByUserTest001
+ * @tc.desc: Test SetTextColorByUser with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerSetTextColorByUserTest001, TestSize.Level0)
+{
+    TextTimerModelNG textTimerModel;
+    textTimerModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    textTimerModel.SetTextColorByUser(frameNode, true);
+    textTimerModel.SetFontSizeByUser(frameNode, false);
+    textTimerModel.SetFontWeightByUser(frameNode, false);
+    textTimerModel.SetFontFamilyByUser(frameNode, false);
+    textTimerModel.SetFontSizeByUser(false);
+    textTimerModel.SetFontWeightByUser(false);
+    textTimerModel.SetFontFamilyByUser(false);
+
+    EXPECT_TRUE(layoutProperty->GetTextColorSetByUser());
+    EXPECT_FALSE(layoutProperty->GetTextFontFamilySetByUserValue(false));
+    EXPECT_FALSE(layoutProperty->GetTextFontWeightSetByUserValue(false));
+    EXPECT_FALSE(layoutProperty->GetTextFontSizeSetByUserValue(false));
+}
+
+/**
  * @tc.name: TextTimerPatternTest001
  * @tc.desc: Test UpdateTextColor with different conditions
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create TextTimer node and get pattern
@@ -954,7 +988,7 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level1)
  * @tc.desc: Test UpdateFontWeight
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
 {
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
@@ -979,7 +1013,7 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level1)
  * @tc.desc: Test UpdateFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level0)
 {
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
@@ -1000,7 +1034,7 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level1)
  * @tc.desc: Test OnColorModeChange
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerTestNg, TextTimerPatternTest005, TestSize.Level1)
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest005, TestSize.Level0)
 {
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
@@ -1013,5 +1047,170 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest005, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetFontFamily(), fontFamilies);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest006
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest006, TestSize.Level0)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = false;
+    pattern->OnColorConfigurationUpdate();
+
+    g_isConfigChangePerform = true;
+    pattern->OnColorConfigurationUpdate();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->ResetTextColorSetByUser();
+    pattern->OnColorConfigurationUpdate();
+
+    layoutProperty->UpdateTextColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+
+    layoutProperty->UpdateTextColorSetByUser(false);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetTextStyle().GetTextColor();
+    pattern->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest007
+ * @tc.desc: Test model ng  SetTextShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest007, TestSize.Level0)
+{
+    TextTimerModelNG textTimerModel;
+    textTimerModel.Create();
+    textTimerModel.SetTextColorByUser(false);
+
+    g_isConfigChangePerform = false;
+    Shadow shadow;
+    shadow.SetBlurRadius(10);
+    shadow.SetOffsetX(10);
+    shadow.SetOffsetY(10);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> setShadows;
+    textTimerModel.SetTextShadow(setShadows);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetTextShadow().has_value());
+
+    setShadows.emplace_back(shadow);
+    textTimerModel.SetTextShadow(setShadows);
+    g_isConfigChangePerform = true;
+    textTimerModel.SetTextShadow(setShadows);
+
+    EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest008
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest008, TestSize.Level0)
+{
+    TextTimerModelNG textTimerModel;
+    textTimerModel.Create();
+    auto jsResourceType = JsTextTimerResourceType::TEXTCOLOR;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    ASSERT_NE(resObj, nullptr);
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObj);
+    jsResourceType = JsTextTimerResourceType::FONTWEIGHT;
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObj);
+    jsResourceType = JsTextTimerResourceType::FONTSIZE;
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObj);
+    jsResourceType = JsTextTimerResourceType::FONTFAMILY;
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObj);
+    textTimerModel.CreateWithResourceObj(static_cast<JsTextTimerResourceType>(5), resObj);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetTextStyle().GetTextColor();
+    EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 100001, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjId =
+        AceType::MakeRefPtr<ResourceObject>(-1, 100001, resObjParamsList, "com.example.test", "entry", 100000);
+    jsResourceType = JsTextTimerResourceType::TEXTCOLOR;
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObjId);
+    jsResourceType = JsTextTimerResourceType::FONTSIZE;
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObjWithId);
+    jsResourceType = JsTextTimerResourceType::FONTFAMILY;
+    textTimerModel.CreateWithResourceObj(jsResourceType, resObjWithId);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest009
+ * @tc.desc: Test OnVisibleAreaChange of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest009, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->textNode_ = FrameNode::GetOrCreateFrameNode("text", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+
+    /**
+     * @tc.steps: step3.OnVisibleAreaChange function is called.
+     * @tc.expected: step3. Check whether the value is correct.
+     */
+    g_isConfigChangePerform = false;
+    int32_t length = host->GetChildren().size();
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_EQ(host->GetChildren().size(), length);
+
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    g_isConfigChangePerform = true;
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_EQ(host->GetChildren().size(), length);
 }
 } // namespace OHOS::Ace::NG

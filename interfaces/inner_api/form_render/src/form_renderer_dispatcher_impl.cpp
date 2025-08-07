@@ -347,6 +347,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
 void FormRendererDispatcherImpl::SetMultiInstanceEnabled(bool isMultiInstanceEnabled)
 {
     isMultiInstanceEnabled_ = isMultiInstanceEnabled;
+    HILOG_INFO("current isMultiInstanceEnabled: %{public}d", isMultiInstanceEnabled_);
 }
 
 std::shared_ptr<Rosen::RSUIContext> FormRendererDispatcherImpl::GetRSUIContext(

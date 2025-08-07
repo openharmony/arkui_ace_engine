@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
@@ -64,78 +65,78 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    if (options->tag != ARK_TAG_UNDEFINED) {
-        auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(options->value);
-        if (textClockOptionsOpt.has_value()) {
-            // TextClockModelNG::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
+    auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(*options);
+    if (textClockOptionsOpt.has_value()) {
+        TextClockModelStatic::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
 
-            auto controller = TextClockModelNG::InitTextController(frameNode);
-            CHECK_NULL_VOID(controller);
-            auto peerImplPtr = textClockOptionsOpt.value().peerController;
-            CHECK_NULL_VOID(peerImplPtr);
-            peerImplPtr->controller = std::move(controller);
-        }
+        auto controller = TextClockModelNG::InitTextController(frameNode);
+        CHECK_NULL_VOID(controller);
+        auto peerImplPtr = textClockOptionsOpt.value().peerController;
+        CHECK_NULL_VOID(peerImplPtr);
+        peerImplPtr->controller = std::move(controller);
     }
 }
 } // TextClockInterfaceModifier
 namespace TextClockAttributeModifier {
 void FormatImpl(Ark_NativePointer node,
-                const Ark_String* value)
+                const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
-    // TextClockModelNG::SetFormat(frameNode, convValue);
+    TextClockModelStatic::SetFormat(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
-                      const Callback_Number_Void* value)
+                      const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onDateChange = [arkCallback = CallbackHelper(*value)](const std::string& data) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onDateChange = [arkCallback = CallbackHelper(*optValue)](const std::string& data) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(std::stof(data)));
     };
     TextClockModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }
 void FontColorImpl(Ark_NativePointer node,
-                   const Ark_ResourceColor* value)
+                   const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
-    // TextClockModelNG::SetFontColor(frameNode, convValue);
+    TextClockModelStatic::SetFontColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
-                  const Ark_Length* value)
+                  const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    // TextClockModelNG::SetFontSize(frameNode, convValue);
+    TextClockModelStatic::SetFontSize(frameNode, convValue);
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_FontStyle value)
+                   const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Ace::FontStyle>(value) : std::nullopt;
-    // TextClockModelNG::SetFontStyle(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Ace::FontStyle>(*value) : std::nullopt;
+    TextClockModelStatic::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Ark_Union_Number_FontWeight_String* value)
+                    const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Ace::FontWeight>(*value) : std::nullopt;
-    // TextClockModelNG::SetFontWeight(frameNode, convValue);
+    TextClockModelStatic::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
-                    const Ark_ResourceStr* value)
+                    const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,11 +147,10 @@ void FontFamilyImpl(Ark_NativePointer node,
     TextClockModelNG::SetFontFamily(frameNode, families);
 }
 void TextShadowImpl(Ark_NativePointer node,
-                    const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
+                    const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     std::vector<Shadow> shadowListResult;
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     if (shadowList.has_value()) {
@@ -159,30 +159,35 @@ void TextShadowImpl(Ark_NativePointer node,
     TextClockModelNG::SetTextShadow(frameNode, shadowListResult);
 }
 void FontFeatureImpl(Ark_NativePointer node,
-                     const Ark_String* value)
+                     const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto fontFeatureSettings = Converter::Convert<std::string>(*value);
-    TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextClockModelNG::SetContentModifier(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
                          const Opt_DateTimeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextClockModelNG::SetDateTimeOptions(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto dateTimeOptions = Converter::OptConvert<DateTimeType>(*value);
+    std::optional<ZeroPrefixType> hourType;
+    if (dateTimeOptions) {
+        hourType = dateTimeOptions->hourType;
+    }
+    TextClockModelStatic::SetDateTimeOptions(frameNode, hourType);
 }
 } // TextClockAttributeModifier
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier()

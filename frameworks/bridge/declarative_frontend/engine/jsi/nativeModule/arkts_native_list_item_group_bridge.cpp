@@ -66,7 +66,8 @@ ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* run
     Color colorObj;
     RefPtr<ResourceObject> resObjColor;
     bool setByUser = false;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, resObjColor)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, resObjColor, nodeInfo)) {
         color = listTheme->GetDividerColor().GetValue();
         setByUser = false;
     } else {
@@ -116,12 +117,6 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStrokeWidth(nativeNode, nullptr);
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerColor(nativeNode, nullptr);
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStartMargin(nativeNode, nullptr);
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerEndMargin(nativeNode, nullptr);
-    }
     return panda::JSValueRef::Undefined(vm);
 }
 

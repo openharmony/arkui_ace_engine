@@ -19,13 +19,27 @@
 #include <functional>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/geometry/ng/offset_t.h"
 #include "ui/base/utils/system_param.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/overlay/overlay_manager.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
+namespace OHOS::Ace {
+class DisplayInfo;
+enum class FoldStatus : uint32_t;
+enum class WindowMode : uint32_t;
+enum class WindowSizeChangeReason : uint32_t;
+}; // namespace OHOS::Ace
+
 namespace OHOS::Ace::Kit {
 
 using Task = std::function<void()>;
+using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
 class OverlayManager;
 
 class ACE_FORCE_EXPORT UIContext : public AceType {
@@ -36,6 +50,7 @@ public:
     // task schedule
     virtual void RunScopeUITaskSync(Task&& task, const std::string& name) = 0;
     virtual void RunScopeUITask(Task&& task, const std::string& name) = 0;
+    virtual void RunScopeUIDelayedTask(Task&& task, const std::string& name, uint32_t delayTime) = 0;
 
     // page operation
     virtual void OnBackPressed() = 0;
@@ -57,6 +72,25 @@ public:
     virtual bool GreatOrEqualTargetAPIVersion(int32_t version) = 0;
     virtual int32_t GetContainerModalTitleHeight() = 0;
     virtual int32_t GetContainerModalButtonsWidth() = 0;
+    virtual NG::OffsetF GetContainerModalButtonsOffset() = 0;
+    virtual void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) = 0;
+    virtual void UnregisterArkUIObjectLifecycleCallback() = 0;
+
+    virtual sptr<IRemoteObject> GetToken() = 0;
+
+    // Display Info
+    virtual RefPtr<DisplayInfo> GetDisplayInfo() = 0;
+    virtual WindowMode GetWindowMode() = 0;
+    virtual bool GetIsMidScene() = 0;
+    virtual bool IsAccessibilityEnabled() = 0;
+
+    virtual int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback) = 0;
+    virtual void UnregisterSurfaceChangedCallback(int32_t callbackId) = 0;
+    virtual int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback) = 0;
+    virtual void UnRegisterFoldStatusChangedCallback(int32_t callbackId) = 0;
+    virtual int32_t RegisterRotationEndCallback(std::function<void()>&& callback) = 0;
+    virtual void UnregisterRotationEndCallback(int32_t callbackId) = 0;
 };
 
 }

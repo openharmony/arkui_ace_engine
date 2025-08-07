@@ -759,6 +759,22 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest019, TestSize.Level1)
     focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
     EXPECT_EQ(focusManager->GetIsFocusActive(), false);
     EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+
+    /**
+     * @tc.steps: step8. sendKeyEvent dwon and joystick space.
+     * expected: unactive and button1 blur
+     */
+    focusManager->SetIsFocusActive(false);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.pressedCodes = { KeyCode::KEY_SPACE };
+    event.code = KeyCode::KEY_SPACE;
+    event.sourceType = SourceType::JOYSTICK;
+    event.action = KeyAction::DOWN;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
 }
 
 /**

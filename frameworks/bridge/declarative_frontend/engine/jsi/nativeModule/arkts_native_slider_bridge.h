@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
+using StepOptions = std::unordered_map<uint32_t, std::string>;
 class SliderBridge {
 public:
     static ArkUINativeModuleValue SetShowTips(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -65,6 +66,11 @@ public:
     static ArkUINativeModuleValue ResetPrefix(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSuffix(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSuffix(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static napi_value GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done);
+    static napi_value ParseStepOptionsMap(
+        EcmaVM* vm, Framework::JSRef<Framework::JSVal> jsStepOptionsMap, StepOptions& stepOptionsMap);
+    static int32_t ParseStepOptionItemKey(const napi_env env, napi_value item);
+    static bool ParseStepOptionItemValue(EcmaVM* vm, const napi_env env, napi_value item, std::string& stepText);
 };
 } // namespace OHOS::Ace::NG
 

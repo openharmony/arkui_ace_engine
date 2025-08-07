@@ -140,4 +140,24 @@ HWTEST_F(SnapshotTest, SnapshotTest005, TestSize.Level1)
     EXPECT_EQ(result, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
+/**
+ * @tc.name: SnapshotTest006
+ * @tc.desc: Test OH_ArkUI_SnapshotOptions_SetScale function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, SnapshotTest006, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto button = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    ArkUI_NumberValue value[] = { { .f32 = 150 } };
+    ArkUI_AttributeItem item = { value, 1 };
+    nodeAPI->setAttribute(button, NODE_WIDTH, &item);
+    nodeAPI->setAttribute(button, NODE_HEIGHT, &item);
+    nodeAPI->addChild(node, button);
+    auto options = OH_ArkUI_CreateSnapshotOptions();
+    ASSERT_NE(options, nullptr);
+    EXPECT_EQ(OH_ArkUI_SnapshotOptions_SetScale(options, -1.0f), ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace

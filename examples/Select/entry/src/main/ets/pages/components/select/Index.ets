@@ -40,6 +40,12 @@ export struct SelectIndex {
     { name: 'SelectModifier', path: 'SelectOptionTextModifier' },
     { name: 'SelectLevel00', path: 'SelectLevel00' },
     { name: 'SelectLevel11', path: 'SelectLevel11' },
+    { name: 'SelectLevel2', path: 'SelectLevel2' },
+    { name: 'SelectLevel3', path: 'SelectLevel3' },
+    { name: 'SelectLevel4', path: 'SelectLevel4' },
+    { name: 'SelectLevel5', path: 'SelectLevel5' },
+    { name: 'SelectLevel6', path: 'SelectLevel6' },
+    { name: 'SelectLevel7', path: 'SelectLevel7' }
   ]
 
   build() {

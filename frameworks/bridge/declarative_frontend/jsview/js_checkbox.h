@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,11 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void SetSelect(const JSCallbackInfo& info);
+    static void SetOnChange(const JSCallbackInfo& args);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void JsWidth(const JSRef<JSVal>& jsValue);
     static void JsHeight(const JSRef<JSVal>& jsValue);

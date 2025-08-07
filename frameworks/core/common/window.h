@@ -36,7 +36,7 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
+enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL, WIDTH_XXL, UNDEFINED};
 enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 
 class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {
@@ -51,6 +51,7 @@ public:
     }
 
     virtual void RequestFrame();
+    virtual void ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
     virtual void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateTyte) {}
 
@@ -102,7 +103,7 @@ public:
         return false;
     }
 
-    virtual void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount);
 
     virtual void SetVsyncCallback(AceVsyncCallback&& callback);
 
@@ -138,11 +139,25 @@ public:
         windowRectImpl_ = std::move(callback);
     }
 
+    void InitGetGlobalWindowRectCallback(std::function<Rect()>&& callback)
+    {
+        globalDisplayWindowRectImpl_ = std::move(callback);
+    }
+
     virtual Rect GetCurrentWindowRect() const
     {
         Rect rect;
         if (windowRectImpl_) {
             rect = windowRectImpl_();
+        }
+        return rect;
+    }
+
+    virtual Rect GetGlobalDisplayWindowRect() const
+    {
+        Rect rect;
+        if (globalDisplayWindowRectImpl_) {
+            rect = globalDisplayWindowRectImpl_();
         }
         return rect;
     }
@@ -218,7 +233,7 @@ public:
     virtual void Unlock() {}
 
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
-    
+
     virtual uint32_t GetStatusBarHeight() const
     {
         return 0;
@@ -243,6 +258,7 @@ public:
     WidthBreakpoint GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const;
     HeightBreakpoint GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const;
 
+    virtual void SetDVSyncUpdate(uint64_t dvsyncTime) {}
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
@@ -265,6 +281,7 @@ protected:
 
 private:
     std::function<Rect()> windowRectImpl_;
+    std::function<Rect()> globalDisplayWindowRectImpl_;
     std::unique_ptr<PlatformWindow> platformWindow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);

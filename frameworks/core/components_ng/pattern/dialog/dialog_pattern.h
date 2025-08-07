@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -50,8 +51,12 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
+class DialogPattern : public PopupBasePattern,
+                      public FocusView,
+                      public AutoFillTriggerStateHolder,
+                      public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView,
+        AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -67,6 +72,11 @@ public:
     void SetOnWillDismiss(const std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
     {
         onWillDismiss_ = onWillDismiss;
+    }
+
+    void SetOnWillDismissRelease(const std::function<void()>& onWillDismissRelease)
+    {
+        onWillDismissRelease_ = onWillDismissRelease;
     }
 
     bool ShouldDismiss() const
@@ -102,10 +112,7 @@ public:
         return AceType::MakeRefPtr<DialogLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -178,6 +185,8 @@ public:
         InitHostWindowRect();
     }
 
+    bool GetWindowButtonRect(NG::RectF& floatButtons);
+
     const DialogProperties& GetDialogProperties() const
     {
         return dialogProperties_;
@@ -189,7 +198,6 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -365,7 +373,7 @@ public:
     void UpdateContent(const Color& color, ActionSheetType type);
     void UpdateBorderWidth(const NG::BorderWidthProperty& width);
     void UpdateBorderColor(const NG::BorderColorProperty& color);
-    void UpdateCornerRadius(const NG::BorderRadiusProperty& radius);
+    void UpdateCornerRadius(NG::BorderRadiusProperty& radius);
     void UpdateButtonBackgroundColor(const Color& color, int32_t buttonIndex);
     void UpdateButtonFontColor(const std::string colorStr, int32_t buttonIndex);
     void UpdateButtonText(const std::string text, int32_t buttonIndex);
@@ -389,6 +397,9 @@ private:
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
 
     void PopDialog(int32_t buttonIdx);
     bool NeedUpdateHostWindowRect();
@@ -469,6 +480,7 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss_;
+    std::function<void()> onWillDismissRelease_;
     std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;

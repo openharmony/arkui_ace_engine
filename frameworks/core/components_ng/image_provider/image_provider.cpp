@@ -84,8 +84,9 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
             dfxConfig.ToStringWithoutSrc().c_str(), dfxConfig.GetImageSrc().c_str());
         return false;
     }
-    ImageErrorInfo errorInfo;
-    auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), errorInfo, WeakClaim(RawPtr(pipeline)));
+    NG::ImageLoadResultInfo loadResultInfo;
+    auto newLoadedData =
+        imageLoader->GetImageData(imageObj->GetSourceInfo(), loadResultInfo, WeakClaim(RawPtr(pipeline)));
     CHECK_NULL_RETURN(newLoadedData, false);
     // load data success
     imageObj->SetData(newLoadedData);
@@ -170,27 +171,31 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
     const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
     ACE_SCOPED_TRACE("CreateImageObj %s", imageDfxConfig.ToStringWithSrc().c_str());
-    ImageErrorInfo errorInfo;
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        errorInfo = { ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE, "unknown source type." };
-        FailCallback(src.GetTaskKey(), "Failed to create image loader.", errorInfo, sync, src.GetContainerId());
+        FailCallback(src.GetTaskKey(), "Failed to create image loader.",
+            { ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE, "unknown source type." }, sync, src.GetContainerId());
         return;
     }
+    ImageLoadResultInfo loadResultInfo;
     auto pipeline = PipelineContext::GetCurrentContext();
-    RefPtr<ImageData> data = imageLoader->GetImageData(src, errorInfo, WeakClaim(RawPtr(pipeline)));
+    RefPtr<ImageData> data = imageLoader->GetImageData(src, loadResultInfo, WeakClaim(RawPtr(pipeline)));
     if (!data) {
-        FailCallback(src.GetTaskKey(), "Failed to load image data", errorInfo, sync, src.GetContainerId());
+        FailCallback(
+            src.GetTaskKey(), "Failed to load image data", loadResultInfo.errorInfo, sync, src.GetContainerId());
         return;
     }
 
     // build ImageObject
-    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, errorInfo, data);
+    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, loadResultInfo.errorInfo, data);
     if (!imageObj) {
-        FailCallback(src.GetTaskKey(), "Failed to build image object", errorInfo, sync, src.GetContainerId());
+        FailCallback(
+            src.GetTaskKey(), "Failed to build image object", loadResultInfo.errorInfo, sync, src.GetContainerId());
         return;
     }
+
+    imageObj->SetImageFileSize(loadResultInfo.fileSize);
 
     auto cloneImageObj = imageObj->Clone();
 

@@ -48,6 +48,7 @@ template("ace_core_interfaces_native_node") {
       "node/extension_custom_node.cpp",
       "node/flex_modifier.cpp",
       "node/frame_node_modifier.cpp",
+      "node/frame_node_modifier_multi_thread.cpp",
       "node/gauge_modifier.cpp",
       "node/grid_col_modifier.cpp",
       "node/grid_item_modifier.cpp",
@@ -68,9 +69,11 @@ template("ace_core_interfaces_native_node") {
       "node/node_adapter_impl.cpp",
       "node/node_animate.cpp",
       "node/node_api.cpp",
+      "node/node_api_multi_thread.cpp",
       "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
+      "node/node_common_modifier_multi_thread.cpp",
       "node/node_container_modifier.cpp",
       "node/node_container_span_modifier.cpp",
       "node/node_content_modifier.cpp",
@@ -88,6 +91,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
       "node/node_relative_container_modifier.cpp",
+      "node/node_render_node_modifier.cpp",
       "node/node_scroll_bar_modifier.cpp",
       "node/node_scroll_modifier.cpp",
       "node/node_slider_modifier.cpp",
@@ -133,7 +137,18 @@ template("ace_core_interfaces_native_node") {
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
+      "node/view_model_multi_thread.cpp",
       "node/water_flow_modifier.cpp",
+      "runtime/runtime_init.cpp"
+    ]
+
+    sources += [
+      "$ace_root/frameworks/bridge/arkts_frontend/ani_context_module.cpp",
+      "ani/common_ani_modifier.cpp",
+      "ani/content_slot_ani_modifier.cpp",
+      "ani/image_ani_modifier.cpp",
+      "ani/node_ani_modifier.cpp",
+      "ani/web_ani_modifier.cpp",
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -151,6 +166,7 @@ template("ace_core_interfaces_native_node") {
       "${ace_root}/interfaces/inner_api/ace",
       "${ace_root}/interfaces/native",
       "${ace_root}/interfaces/native/node",
+      "${ace_root}/interfaces/native/runtime",
     ]
 
     if (qrcodegen_support) {
@@ -189,9 +205,21 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/embeddedComponent_modifier.cpp" ]
     }
 
+    if (is_arkui_x) {
+      deps += [
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
+
+    if (ace_engine_feature_enable_upgrade_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
+    
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
+      "napi:ace_napi",
+      "runtime_core:ani",
     ]
     if (defined(config.model_component_support) &&
         config.model_component_support) {

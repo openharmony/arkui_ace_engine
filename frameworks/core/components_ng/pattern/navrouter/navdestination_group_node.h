@@ -136,6 +136,11 @@ public:
     {
         return navDestinationPathInfo_;
     }
+
+    const std::string& GetNavDestinationModuleName() const
+    {
+        return navDestinationModuleName_;
+    }
     
     int32_t GetNavigationNodeId() const;
 
@@ -167,13 +172,19 @@ public:
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
 
-    void InitSystemTransitionPush(bool transitionIn);
-    void StartSystemTransitionPush(bool transitionIn);
-    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
-    void InitSystemTransitionPop(bool isTransitionIn);
-    void StartSystemTransitionPop(bool transitionIn);
+    void SystemTransitionPushStart(bool transitionIn) override;
+    void SystemTransitionPushEnd(bool transitionIn) override;
+    void SystemTransitionPushFinish(bool transitionIn, int32_t animationId) override;
+
+    void SystemTransitionPopStart(bool transitionIn) override;
+    void SystemTransitionPopEnd(bool transitionIn) override;
+    bool SystemTransitionPopFinish(int32_t animationId = -1, bool isNeedCleanContent = true) override;
+
+    void InitSoftTransitionPush(bool transitionIn);
+    void StartSoftTransitionPush(bool transitionIn);
+    void InitSoftTransitionPop(bool isTransitionIn);
+    void StartSoftTransitionPop(bool transitionIn);
     bool CheckTransitionPop(const int32_t animationId);
-    bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
@@ -245,7 +256,7 @@ public:
     {
         return isShowInPrimaryPartition_;
     }
-    RefPtr<NavDestinationGroupNode> GetOrCreatePlaceHolder();
+    RefPtr<NavDestinationGroupNode> GetOrCreateProxyNode();
     void SetPrimaryNode(const WeakPtr<NavDestinationGroupNode>& node)
     {
         primaryNode_ = node;
@@ -297,7 +308,7 @@ private:
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
 
     bool isShowInPrimaryPartition_ = false;
-    RefPtr<NavDestinationGroupNode> placeHolderNode_;
+    RefPtr<NavDestinationGroupNode> proxyNode_;
     WeakPtr<NavDestinationGroupNode> primaryNode_;
 };
 

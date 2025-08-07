@@ -215,6 +215,9 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
+    if (formRendererDispatcher_) {
+        formRendererDispatcher_->SetMultiInstanceEnabled(SystemProperties::GetMultiInstanceEnabled());
+    }
 }
 
 void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
@@ -806,7 +809,6 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
     }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
         static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
-    formRendererDispatcher_->SetMultiInstanceEnabled(isMultiInstanceEnabled);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)

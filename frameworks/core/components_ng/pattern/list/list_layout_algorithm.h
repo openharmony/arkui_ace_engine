@@ -441,6 +441,8 @@ public:
 
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
+    void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -466,7 +468,7 @@ public:
         isRoundingMode_ = true;
     }
 
-    bool MeasureInNextFrame() const
+    bool MeasureInNextFrame() const override
     {
         return measureInNextFrame_;
     }
@@ -489,6 +491,8 @@ public:
     {
         draggingIndex_ = index;
     }
+
+    void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -543,6 +547,7 @@ protected:
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
+    void UpdateNoLayoutedItems();
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
@@ -613,6 +618,8 @@ protected:
         return 0.0f;
     }
 
+    void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
+
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
     virtual void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) {}
     virtual void CalcContentOffset(const RefPtr<ListLayoutProperty>& property);
@@ -630,6 +637,7 @@ protected:
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
     PositionMap cachedItemPosition_;
+    PositionMap noLayoutedItems_;
     int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
@@ -679,6 +687,9 @@ private:
 
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
+
+    std::pair<int32_t, float> FindIndexAndDeltaInPosMap(float delta) const;
+    bool CanUseInfoInPosMap(int32_t index, float delta) const;
 
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();

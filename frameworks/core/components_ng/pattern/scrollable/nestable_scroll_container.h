@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class NestableScrollContainer : public virtual Pattern {
-    DECLARE_ACE_TYPE(NestableScrollContainer, Pattern)
+    DECLARE_ACE_TYPE(NestableScrollContainer, Pattern);
 public:
     NestableScrollContainer() = default;
     ~NestableScrollContainer() override = default;
@@ -118,6 +118,16 @@ public:
         return webNestedScrollExisted_;
     }
 
+    bool GetNeedLinked() const
+    {
+        return needLinked_;
+    }
+
+    void SetNeedLinked(bool needLinked)
+    {
+        needLinked_ = needLinked;
+    }
+
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
@@ -179,6 +189,7 @@ private:
     bool isSearchRefresh_ = true;
     bool isNestedInterrupt_ = false; // nested scroll interrupted by change of nested mode
     bool webNestedScrollExisted_ = false;
+    bool needLinked_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(NestableScrollContainer);
 };
 } // namespace OHOS::Ace::NG

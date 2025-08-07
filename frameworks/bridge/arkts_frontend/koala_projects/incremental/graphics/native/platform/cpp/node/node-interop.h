@@ -29,7 +29,7 @@
 
 static inline v8::Local<v8::Value> V8LocalValueFromJsValue(napi_value v) {
   v8::Local<v8::Value> local;
-  memcpy(static_cast<void*>(&local), &v, sizeof(v));
+  memcpy_s(static_cast<void*>(&local), sizeof(local), &v, sizeof(v));
   return local;
 }
 

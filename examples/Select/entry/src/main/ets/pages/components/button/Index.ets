@@ -33,6 +33,17 @@ export struct ButtonIndex {
     { name: 'ButtonCustom', path: 'ButtonCustom' },
     { name: 'ButtonType', path: 'ButtonType' },
     { name: 'ButtonModifier', path: 'ButtonModifier' },
+    { name: 'Button组合场景1', path: 'ButtonLevel1' },
+    { name: 'Button组合场景2', path: 'ButtonLevel2' },
+    { name: 'Button组合场景3', path: 'ButtonLevel3' },
+    { name: 'Button组合场景4', path: 'ButtonLevel4' },
+    { name: 'Button组合场景5', path: 'ButtonLevel5' },
+    { name: 'Button组合场景6', path: 'ButtonLevel6' },
+    { name: 'Button组合场景7', path: 'ButtonLevel7' },
+    { name: 'Button组合场景8', path: 'ButtonLevel8' },
+    { name: 'Button组合场景9', path: 'ButtonLevel9' },
+    { name: 'Button组合场景10', path: 'ButtonLevel10' },
+    { name: 'Button组合场景11', path: 'ButtonLevel11' }
   ]
 
   build() {

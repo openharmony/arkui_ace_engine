@@ -27,7 +27,9 @@ TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPoin
 
 void ConvertToMouseEvent(MouseEvent& mouseEvent, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
 {
-    Platform::ConvertMouseEvent(srcPointerEvent, mouseEvent, Container::Current()->IsSceneBoardWindow());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    Platform::ConvertMouseEvent(srcPointerEvent, mouseEvent, container->IsSceneBoardWindow());
 }
 
 void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)

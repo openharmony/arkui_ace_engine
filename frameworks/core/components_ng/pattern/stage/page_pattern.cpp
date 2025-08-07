@@ -220,6 +220,9 @@ void PagePattern::OnAttachToMainTree()
 
 void PagePattern::OnDetachFromMainTree()
 {
+#if defined(ACE_STATIC)
+    FireOnNodeDisposeCallback();
+#endif
 #if defined(ENABLE_SPLIT_MODE)
     if (!needFireObserver_) {
         return;
@@ -240,7 +243,7 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
 {
-    if (type == WindowSizeChangeReason::RESIZE) {
+    if (type != WindowSizeChangeReason::ROTATION) {
         return;
     }
     if (!isPageInTransition_) {
@@ -854,6 +857,10 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
+    if (!CheckEnableCustomNodeDel()) {
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }

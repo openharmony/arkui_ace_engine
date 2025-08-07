@@ -26,6 +26,8 @@ public:
     virtual ~BadgeModel() = default;
 
     virtual void Create(BadgeParameters& badgeParameters) = 0;
+    virtual void CreateByFrameNode(const RefPtr<NG::FrameNode>& frameNode, BadgeParameters& badgeParameters) = 0;
+    virtual RefPtr<NG::FrameNode> CreateBadgeFrameNode() = 0;
     virtual void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) = 0;
 
 private:

@@ -28,6 +28,7 @@
 namespace OHOS::Ace::Framework::CommonUtils {
     JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);
     JSRef<JSObject> CreateEventTargetObject(const std::shared_ptr<BaseGestureEvent>& info);
+    JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info);
     bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGestureEvent>& info);
     JSRef<JSObject> CreateFingerInfosObject(const std::shared_ptr<BaseGestureEvent>& info, JSRef<JSObject>& obj);
 } // namespace OHOS::Ace::Framework::CommonUtils

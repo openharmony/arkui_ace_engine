@@ -142,10 +142,21 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView, bool isDet
     }
     if (focusViewStack_.empty()) {
         lastFocusView_ = nullptr;
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "viewStack empty");
         return;
     }
     if (focusViewStack_.back() != lastFocusView_) {
         lastFocusView_ = focusViewStack_.back();
+        auto lastFocusView = lastFocusView_.Upgrade();
+        CHECK_NULL_VOID(lastFocusView);
+        auto lastFocusViewHub = lastFocusView->GetFocusHub();
+        CHECK_NULL_VOID(lastFocusViewHub);
+        if (!lastFocusViewHub->IsFocusableNode()) {
+            TAG_LOGW(AceLogTag::ACE_FOCUS,
+                "unfocusable view:%{public}s enable:%{public}d show:%{public}d focusable:%{public}d",
+                lastFocusViewHub->GetFrameName().c_str(), lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow(),
+                lastFocusViewHub->focusable_);
+        }
     }
 }
 

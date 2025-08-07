@@ -33,6 +33,8 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.h"
+#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.h"
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 #include "core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.h"
 #include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
@@ -78,6 +80,11 @@ public:
         overlayManager_ = overlayManager;
     }
 
+    WeakPtr<OverlayManager> GetOverlay()
+    {
+        return overlayManager_;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -85,9 +92,12 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         if (sheetType == SheetType::SHEET_SIDE) {
             return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+        }
+        if (sheetType == SheetType::SHEET_CONTENT_COVER) {
+            return MakeRefPtr<SheetContentCoverLayoutAlgorithm>();
         }
         return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
     }
@@ -294,15 +304,18 @@ public:
 
     void InitialLayoutProps();
     void UpdateDragBarStatus();
-
+    bool IsSingleDetents(const NG::SheetStyle& sheetStyle);
     bool IsScrollable() const;
     void AvoidAiBar();
 
+    void BeforeCreateLayoutWrapper() override;
     void AvoidSafeArea(bool forceAvoid = false);
+    void AvoidKeyboard(bool forceAvoid);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
+    void SetColumnMinSize(bool reset = false);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
     float GetSheetTopSafeArea();
     float UpdateSheetTransitionOffset();
@@ -336,8 +349,6 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
-    void SetSheetAnimationOption(AnimationOption& option) const;
-
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
     void SetCurrentOffset(float currentOffset)
@@ -352,7 +363,7 @@ public:
 
     void SetCurrentHeight(float currentHeight)
     {
-        if (height_ != currentHeight) {
+        if (height_ != currentHeight || typeChanged_) {
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
@@ -575,6 +586,16 @@ public:
         sheetOffsetY_ = offsetY;
     }
 
+    bool IsWindowRotate() const
+    {
+        return windowRotate_;
+    }
+
+    void SetWindowRotate(bool windowRotate)
+    {
+        windowRotate_ = windowRotate;
+    }
+
     void SetWindowChanged(bool change)
     {
         windowChanged_ = change;
@@ -603,6 +624,11 @@ public:
     void SetIsScrolling(bool value)
     {
        isScrolling_ = value;
+    }
+
+    SheetKeyboardAvoidMode GetKeyboardAvoidMode() const
+    {
+        return keyboardAvoidMode_;
     }
 
     float GetScrollHeightNoProcess() const
@@ -683,6 +709,11 @@ public:
     void SetProperty(const RefPtr<NodeAnimatablePropertyFloat>& property)
     {
         property_ = property;
+    }
+
+    float GetPreDidHeight() const
+    {
+        return preDidHeight_;
     }
 
     void SetPreDidHeight(float height)
@@ -782,6 +813,8 @@ public:
     void UpdateMaskBackgroundColorRender();
 
     void UpdateTitleTextColor();
+    void UpdateSheetCloseIcon();
+    void UpdateSheetBackgroundColor();
 
     Color GetMaskBackgroundColor() const
     {
@@ -897,7 +930,7 @@ public:
     // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
     bool IsSheetBottom() const
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
                  sheetType == SheetType::SHEET_BOTTOM_OFFSET);
     }
@@ -927,11 +960,14 @@ public:
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
     void InitSheetObject();
-    void UpdateSheetObject(SheetType type);
+    void UpdateSheetObject(SheetType newType);
     void ResetLayoutInfo();
     void ResetScrollUserDefinedIdealSize(const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject);
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
+        if (!NearEqual(sheetPopupInfo_.sheetOffsetY, sheetPopupInfo.sheetOffsetY)) {
+            sheetOffsetYChanged_ = true;
+        }
         sheetPopupInfo_ = sheetPopupInfo;
     }
 
@@ -989,6 +1025,12 @@ public:
         auto scrollNode = scrolNode_.Upgrade();
         return scrollNode;
     }
+
+    const SheetEffectEdge& GetSheetEffectEdge() const
+    {
+        return sheetEffectEdge_;
+    }
+
     void SetBottomStyleHotAreaInSubwindow();
 
     bool IsNotBottomStyleInSubwindow() const
@@ -1021,6 +1063,7 @@ public:
         return windowSize_;
     }
 
+    void TranslateTo(float height);
     void GetArrowOffsetByPlacement(const RefPtr<SheetPresentationLayoutAlgorithm>& layoutAlgorithm);
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ResetClipShape();
@@ -1034,7 +1077,6 @@ public:
     void RecoverScrollOrResizeAvoidStatus();
     bool IsNeedChangeScrollHeight(float height);
     bool IsResizeWhenAvoidKeyboard();
-    void InitScrollProps();
     uint32_t GetCurrentBroadcastDetentsIndex();
     void HandleFollowAccessibilityEvent(float currHeight);
     void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
@@ -1043,6 +1085,26 @@ public:
     void CreatePropertyCallback();
     void HandleDragEndAccessibilityEvent();
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+
+    // Create Dark Light Resource Method.
+    void UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
+    void RegisterWidthRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterHeightRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& sheetHeightResObj);
+    void UpdateSheetDetents(const RefPtr<ResourceObject>& resObj,
+        const WeakPtr<FrameNode>& sheetNodeWK, const WeakPtr<OverlayManager>& overlayWk);
+    void RegisterDetentsRes(const RefPtr<FrameNode>& sheetNode,
+        std::vector<RefPtr<ResourceObject>>& sheetHeightResObj);
+    void RegisterBgColorRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& colorResObj);
+    void UpdateBgColor(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
+    void RegisterTitleRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& mainTitleResObj);
+    void RegisterDetentSelectionRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterShowCloseRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode);
+    void RegisterShadowRes(const RefPtr<FrameNode>& sheetNode);
+    void UpdateBorderWidth(const RefPtr<FrameNode>& sheetNodeWK);
+    void UpdateBorderColor(const RefPtr<FrameNode>& sheetNodeWK);
+    void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode);
+    void HandleMultiDetentKeyboardAvoid();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -1058,8 +1120,6 @@ private:
 
     void RegisterHoverModeChangeCallback();
     void InitPageHeight();
-    void TranslateTo(float height);
-    void SetColumnMinSize(bool reset = false);
     void UpdateCloseIconStatus();
     void UpdateTitlePadding();
     RefPtr<FrameNode> GetTitleNode();
@@ -1093,6 +1153,7 @@ private:
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     PipelineContext* GetSheetMainPipeline() const;
     float GetBottomSafeArea();
+    void StopModifySheetTransition();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     void UpdateSheetWhenSheetTypeChanged();
@@ -1107,7 +1168,9 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
-    
+
+    SheetType GetSheetTypeFromSheetManager() const;
+
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 
@@ -1140,7 +1203,7 @@ private:
     float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float wrapperWidth_ = 0.0f; // sheetWrapper frameSize Width
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
-    float scrollHeight_ = 0.0f;
+    float scrollHeight_ = 0.0f; // not scroll frameHeight, it is scroll Height after ScrollTo.
     float preWidth_ = 0.0f;
     int32_t preType_ = -1;
     float sheetTopSafeArea_ = .0f;
@@ -1209,6 +1272,7 @@ private:
     bool isPlayTransition_ = false;
     Placement finalPlacement_ = Placement::BOTTOM;
     bool showArrow_ = true;
+    bool sheetOffsetYChanged_ = false;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
     WeakPtr<FrameNode> closeButtonNode_;

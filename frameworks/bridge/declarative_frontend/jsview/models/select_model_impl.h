@@ -85,6 +85,10 @@ public:
     void ResetShowInSubWindow() override {};
     void SetShowDefaultSelectedIcon(bool show) override {};
     void ResetShowDefaultSelectedIcon() override {};
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override {};
+    void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override {};
+    void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

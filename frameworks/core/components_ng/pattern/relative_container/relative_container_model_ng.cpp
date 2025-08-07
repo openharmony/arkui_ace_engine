@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 
@@ -58,9 +59,21 @@ void RelativeContainerModelNG::SetGuideline(const std::vector<GuidelineInfo>& gu
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfoValue, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         };
-        pattern->AddResObj("RelativeContainer.guideLine", resObj, std::move(updateFunc));
+        pattern->AddResObj("relativeContainer.guideLine", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo);
+}
+
+void RelativeContainerModelNG::ResetResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 
 RefPtr<FrameNode> RelativeContainerModelNG::CreateFrameNode(int32_t nodeId)
@@ -80,7 +93,51 @@ void RelativeContainerModelNG::SetBarrier(FrameNode* frameNode, const std::vecto
 void RelativeContainerModelNG::SetGuideline(FrameNode* frameNode, const std::vector<GuidelineInfo>& guidelineInfo)
 {
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [guidelineInfo, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            std::vector<GuidelineInfo>& guidelineInfoValue = const_cast<std::vector<GuidelineInfo>&>(guidelineInfo);
+            for (size_t i = 0; i < guidelineInfoValue.size(); i++) {
+                guidelineInfoValue[i].ReloadResources();
+            }
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfoValue, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        };
+        pattern->AddResObj("relativeContainer.guideLine", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo, frameNode);
+}
+
+void RelativeContainerModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+}
+
+void RelativeContainerModelNG::SetPositionResObj(
+    const RefPtr<ResourceObject>& ResObj, GuidelineInfo& guidelineInfoItem, const std::string key)
+{
+    if (SystemProperties::ConfigChangePerform() && ResObj) {
+        auto&& updateFunc = [key](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            if (key == "relativeContainer.guideLine.position.start") {
+                guidelineInfo.start = result;
+            } else if (key == "relativeContainer.guideLine.position.end") {
+                guidelineInfo.end = result;
+            }
+        };
+        guidelineInfoItem.AddResource(key, ResObj, std::move(updateFunc));
+    }
 }
 
 std::vector<BarrierInfo> RelativeContainerModelNG::GetBarrier(FrameNode* frameNode)

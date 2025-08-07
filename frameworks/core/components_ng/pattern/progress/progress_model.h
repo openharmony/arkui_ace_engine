@@ -86,6 +86,9 @@ public:
     virtual void SetBorderRadius(const Dimension& value) {}
     virtual void ResetBorderRadius() {}
     virtual void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetCapsuleStyleFontColor(bool value) = 0;
+    virtual void SetCapsuleStyle(bool value) = 0;
+    virtual void SetGradientColorByUser(bool value) = 0;
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

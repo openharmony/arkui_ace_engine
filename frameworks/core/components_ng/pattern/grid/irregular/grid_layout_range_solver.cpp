@@ -23,9 +23,7 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
     : info_(info), wrapper_(wrapper)
 {
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    if (props->GetLayoutOptions()) {
-        opts_ = &props->GetLayoutOptions().value();
-    }
+    opts_ = &props->GetLayoutOptions().value();
 };
 
 using Result = GridLayoutRangeSolver::StartingRowInfo;
@@ -176,7 +174,7 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
 
         // skip the columns occupied by this item
         const int32_t itemIdx = std::abs(it->second);
-        if (opts_ && opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
+        if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
             if (opts_->getSizeByIndex) {
                 auto size = opts_->getSizeByIndex(itemIdx);
                 c += (info_->axis_ == Axis::VERTICAL ? size.columns : size.rows) - 1;

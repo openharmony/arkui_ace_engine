@@ -17,6 +17,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/divider/divider_model_ng_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerModifier {
@@ -38,40 +39,44 @@ void SetDividerOptionsImpl(Ark_NativePointer node)
 
 namespace DividerAttributeModifier {
 void VerticalImpl(Ark_NativePointer node,
-                  Ark_Boolean value)
+                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetVertical(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    DividerModelNG::SetVertical(frameNode, *convValue);
 }
 
 void ColorImpl(Ark_NativePointer node,
-               const Ark_ResourceColor* value)
+               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
+    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Ark_Union_Number_String* value)
+                     const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
     if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
         optValue.reset();
     }
-    DividerModelNG::StrokeWidth(frameNode, optValue);
+    DividerModelNGStatic::StrokeWidth(frameNode, optValue);
 }
 
 void LineCapImpl(Ark_NativePointer node,
-                 Ark_LineCapStyle value)
+                 const Opt_LineCapStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::LineCap(frameNode, Converter::OptConvert<LineCap>(value));
+    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvert<LineCap>(*value));
 }
 
 } // DividerAttributeModifier

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -319,5 +319,21 @@ HWTEST_F(WaterFlowLayoutInfoTest, InitSegments001, TestSize.Level1)
     info.InitSegments(mod, 2);
     EXPECT_EQ(info.items_.size(), 5);
     EXPECT_EQ(info.items_[1].size(), 2);
+}
+
+/**
+ * @tc.name: UpdateStartIndexWhenMeasureInNextFrame
+ * @tc.desc: Test UpdateStartIndex in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, UpdateStartIndexWhenMeasureInNextFrame, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.childrenCount_ = 100;
+    info.startIndex_ = 0;
+    info.endIndex_ = 80;
+    info.measureInNextFrame_ = true;
+    info.UpdateStartIndex();
+    EXPECT_EQ(info.startIndex_, info.endIndex_);
 }
 } // namespace OHOS::Ace::NG

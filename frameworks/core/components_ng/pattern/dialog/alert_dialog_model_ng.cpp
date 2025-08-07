@@ -107,64 +107,63 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
 
 void AlertDialogModelNG::CreateWithResourceObj(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg)
 {
-    if (arg.resourceTitleObj) {
-        ProcessContentResourceObj(pattern, arg.resourceTitleObj, DialogResourceType::TITLE);
-    }
-    if (arg.resourceSubTitleObj) {
-        ProcessContentResourceObj(pattern, arg.resourceSubTitleObj, DialogResourceType::SUBTITLE);
-    }
-    if (arg.resourceContentObj) {
-        ProcessContentResourceObj(pattern, arg.resourceContentObj, DialogResourceType::MESSAGE);
-    }
+    ProcessContentResourceObj(pattern, arg.resourceTitleObj, DialogResourceType::TITLE);
+    ProcessContentResourceObj(pattern, arg.resourceSubTitleObj, DialogResourceType::SUBTITLE);
+    ProcessContentResourceObj(pattern, arg.resourceContentObj, DialogResourceType::MESSAGE);
     ProcessButtonInfo(pattern, arg);
 }
 
 void AlertDialogModelNG::ProcessContentResourceObj(
     const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& object, const DialogResourceType type)
 {
+    CHECK_NULL_VOID(pattern);
     std::string key = "dialog." + DialogTypeUtils::ConvertDialogTypeToString(type);
-    auto&& updateFunc = [pattern, key, type](const RefPtr<ResourceObject>& resObj) {
-        std::string result = pattern->GetResCacheMapByKey(key);
-        if (result.empty()) {
-            ResourceParseUtils::ParseResString(resObj, result);
-            pattern->AddResCache(key, result);
+    if (!object) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [pattern, type](const RefPtr<ResourceObject>& resObj) {
+        std::string result;
+        if (!ResourceParseUtils::ParseResString(resObj, result)) {
+            return;
         }
         pattern->UpdateContentValue(result, type);
     };
-    updateFunc(object);
     pattern->AddResObj(key, object, std::move(updateFunc));
 }
 
 void AlertDialogModelNG::SetButtonText(
     const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index)
 {
-    CHECK_NULL_VOID(pattern && resObj);
+    CHECK_NULL_VOID(pattern);
     std::string key = "dialog.button.text" + std::to_string(index);
-    auto&& updateFunc = [pattern, key, index](const RefPtr<ResourceObject>& resObj) {
-        std::string result = pattern->GetResCacheMapByKey(key);
-        if (result.empty()) {
-            ResourceParseUtils::ParseResString(resObj, result);
-            pattern->AddResCache(key, result);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [pattern, index](const RefPtr<ResourceObject>& resObj) {
+        std::string result;
+        if (!ResourceParseUtils::ParseResString(resObj, result)) {
+            return;
         }
         pattern->UpdateButtonText(result, index);
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void AlertDialogModelNG::SetButtonFontColor(
     const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index)
 {
-    CHECK_NULL_VOID(pattern && resObj);
+    CHECK_NULL_VOID(pattern);
     std::string key = "dialog.button.fontColor" + std::to_string(index);
-    auto&& updateFunc = [pattern, key, index](const RefPtr<ResourceObject>& resObj) {
-        std::string result = pattern->GetResCacheMapByKey(key);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [pattern, index](const RefPtr<ResourceObject>& resObj) {
         Color color;
-        if (result.empty()) {
-            ResourceParseUtils::ParseResColor(resObj, color);
-            pattern->AddResCache(key, color.ToString());
-        } else {
-            color = Color::ColorFromString(result);
+        if (!ResourceParseUtils::ParseResColor(resObj, color)) {
+            return;
         }
         pattern->UpdateButtonFontColor(color.ToString(), index);
     };
@@ -175,20 +174,19 @@ void AlertDialogModelNG::SetButtonFontColor(
 void AlertDialogModelNG::SetButtonBackgroundColor(
     const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index)
 {
-    CHECK_NULL_VOID(pattern && resObj);
+    CHECK_NULL_VOID(pattern);
     std::string key = "dialog.button.backgroundColor" + std::to_string(index);
-    auto&& updateFunc = [pattern, key, index](const RefPtr<ResourceObject>& resObj) {
-        std::string result = pattern->GetResCacheMapByKey(key);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [pattern, index](const RefPtr<ResourceObject>& resObj) {
         Color color;
-        if (result.empty()) {
-            ResourceParseUtils::ParseResColor(resObj, color);
-            pattern->AddResCache(key, color.ToString());
-        } else {
-            color = Color::ColorFromString(result);
+        if (!ResourceParseUtils::ParseResColor(resObj, color)) {
+            return;
         }
         pattern->UpdateButtonBackgroundColor(color, index);
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 

@@ -365,6 +365,19 @@ let Alignment;
   Alignment[Alignment.BottomEnd = 8] = 'BottomEnd';
 })(Alignment || (Alignment = {}));
 
+let LocalizedAlignment;
+(function (LocalizedAlignment) {
+  LocalizedAlignment.TOP_START = 'top_start';
+  LocalizedAlignment.TOP = 'top';
+  LocalizedAlignment.TOP_END = 'top_end';
+  LocalizedAlignment.START = 'start';
+  LocalizedAlignment.CENTER = 'center';
+  LocalizedAlignment.END = 'end';
+  LocalizedAlignment.BOTTOM_START = 'bottom_start';
+  LocalizedAlignment.BOTTOM = 'bottom';
+  LocalizedAlignment.BOTTOM_END = 'bottom_end';
+})(LocalizedAlignment || (LocalizedAlignment = {}));
+
 let ChainStyle;
 (function (ChainStyle) {
   ChainStyle[ChainStyle.SPREAD = 0] = 'SPREAD';
@@ -673,6 +686,12 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
+let FlipDirection;
+(function (FlipDirection) {
+  FlipDirection[FlipDirection.DOWN = 0] = 'DOWN';
+  FlipDirection[FlipDirection.UP = 1] = 'UP';
+})(FlipDirection || (FlipDirection = {}));
+
 class LayoutPolicy {
   id_ = '';
 
@@ -744,6 +763,7 @@ let ScrollDirection;
   ScrollDirection[ScrollDirection.Horizontal = 1] = 'Horizontal';
   ScrollDirection[ScrollDirection.Free = 2] = 'Free';
   ScrollDirection[ScrollDirection.None = 3] = 'None';
+  ScrollDirection[ScrollDirection.FREE = 4] = 'FREE';
 })(ScrollDirection || (ScrollDirection = {}));
 
 let Sticky;
@@ -796,7 +816,6 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
-  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1218,6 +1237,18 @@ let ModalMode;
   ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
 })(ModalMode || (ModalMode = {}));
 
+let PreviewScaleMode;
+(function (PreviewScaleMode) {
+  PreviewScaleMode[PreviewScaleMode.AUTO = 0] = 'AUTO';
+  PreviewScaleMode[PreviewScaleMode.CONSTANT = 1] = 'CONSTANT';
+  PreviewScaleMode[PreviewScaleMode.MAINTAIN = 2] = 'MAINTAIN';
+})(PreviewScaleMode || (PreviewScaleMode = {}));
+
+let AvailableLayoutArea;
+(function (AvailableLayoutArea) {
+  AvailableLayoutArea[AvailableLayoutArea.SAFE_AREA = 0] = 'SAFE_AREA';
+})(AvailableLayoutArea || (AvailableLayoutArea = {}));
+
 let TextChangeReason;
 (function (TextChangeReason) {
   TextChangeReason[TextChangeReason.UNKNOWN = 0] = 'UNKNOWN';
@@ -1591,6 +1622,81 @@ class PulseSymbolEffect extends SymbolEffect {
   }
 }
 
+class DisableSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'DisableSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class QuickReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'QuickReplaceSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class ContentTransition{
+}
+
+class NumericTextTransition extends ContentTransition {
+  constructor(options) {
+    super();
+    this.type = 'NumericTextTransition';
+    this.flipDirection = options.flipDirection;
+    this.enableBlur = options.enableBlur;
+  }
+}
+
+class ShaderStyle {
+}
+
+class RadialGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'RadialGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class LinearGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'LinearGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class ColorShaderStyle extends ShaderStyle {
+  constructor(color) {
+    super();
+    this.type = 'ColorShaderStyle';
+    this.color = color;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+}
+
 let RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType.TEXT = 0] = 'TEXT';
@@ -1706,6 +1812,8 @@ let HitTestMode;
   HitTestMode[HitTestMode.Block = 1] = 'Block';
   HitTestMode[HitTestMode.Transparent = 2] = 'Transparent';
   HitTestMode[HitTestMode.None = 3] = 'None';
+  HitTestMode[HitTestMode.BLOCK_HIERARCHY = 4] = 'BLOCK_HIERARCHY';
+  HitTestMode[HitTestMode.BLOCK_DESCENDANTS = 5] = 'BLOCK_DESCENDANTS';
 })(HitTestMode || (HitTestMode = {}));
 
 let GridDirection;
@@ -1770,6 +1878,13 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
 
+let EffectLayer;
+(function (EffectLayer) {
+  EffectLayer.NONE = 0;
+  EffectLayer.CHARGE_MOTION = 1;
+  EffectLayer.CHARGE_TEXT = 2;
+})(EffectLayer || (EffectLayer = {}));
+
 let ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition.Default = 0] = 'Default';
@@ -1800,6 +1915,7 @@ let SheetType;
   SheetType[SheetType.CENTER = 1] = 'CENTER';
   SheetType[SheetType.POPUP = 2] = 'POPUP';
   SheetType[SheetType.SIDE = 3] = 'SIDE';
+  SheetType[SheetType.CONTENT_COVER = 4] = 'CONTENT_COVER';
 })(SheetType || (SheetType = {}));
 
 let SheetMode;
@@ -1820,6 +1936,7 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.RESIZE_ONLY = 2] = 'RESIZE_ONLY';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL = 3] = 'TRANSLATE_AND_SCROLL';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 let FunctionKey;
@@ -2292,6 +2409,11 @@ class TextMenuItemId {
   static get dateTime() {
     return new TextMenuItemId('OH_DEFAULT_AI_MENU_DATETIME');
   }
+
+  static get askAI() {
+    return new TextMenuItemId('OH_DEFAULT_ASK_CELIA');
+  }
+
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;
@@ -2419,7 +2541,7 @@ class NavPathStack {
   initNavPathIndex(pathName) {
     this.popArray = [];
     for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
-      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+      if (pathName[i] === this.pathArray[i].name) {
         this.pathArray[i].index = i;
       }
     }
@@ -2725,7 +2847,12 @@ class NavPathStack {
   popToName(name, result, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
-      return -1;
+      if (this.pathArray.length === 0) {
+        return -1;
+      }
+      if (!this.nativeStack?.isHomeName(name)) {
+        return -1;
+      }
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
@@ -2955,7 +3082,17 @@ class NavPathStack {
       return '';
     }
     try {
-      return JSON.stringify(this.pathArray[index].param);
+      let serializeCount = 0;
+      const MAX_COUNT = 1000;
+      const serializeFilter = (key, value) => {
+        serializeCount++;
+        if (serializeCount > MAX_COUNT) {
+          console.warn('AceNavigation', 'too many iterations during serialize navigation param!');
+          throw new Error('too many iterations');
+        }
+        return value;
+      }
+      return JSON.stringify(this.pathArray[index].param, serializeFilter);
     } catch (error) {
       return '';
     }
@@ -4135,3 +4272,18 @@ let KeyboardFluidLightMode;
   KeyboardFluidLightMode[KeyboardFluidLightMode.NONE = 0] = 'NONE';
   KeyboardFluidLightMode[KeyboardFluidLightMode.BACKGROUND_FLUID_LIGHT = 1] = 'BACKGROUND_FLUID_LIGHT';
 })(KeyboardFluidLightMode || (KeyboardFluidLightMode = {}));
+
+let GestureFocusMode;
+(function (GestureFocusMode) {
+  GestureFocusMode[GestureFocusMode.DEFAULT = 0] = 'DEFAULT';
+  GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
+})(GestureFocusMode || (GestureFocusMode = {}));
+
+let PdfLoadResult;
+(function (PdfLoadResult) {
+  PdfLoadResult[PdfLoadResult.LOAD_SUCCESS = 0] = 'LOAD_SUCCESS';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FILE = 1] = 'PARSE_ERROR_FILE';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FORMAT = 2] = 'PARSE_ERROR_FORMAT';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
+})(PdfLoadResult || (PdfLoadResult = {}));

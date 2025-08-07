@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework::CommonUtils {
 
@@ -23,13 +24,19 @@ JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo)
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
+    fingerInfoObj->SetProperty<int32_t>("hand", fingerInfo.operatingHand_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     fingerInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     fingerInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     return fingerInfoObj;
 }
 
@@ -59,6 +66,32 @@ JSRef<JSObject> CreateEventTargetObject(const std::shared_ptr<BaseGestureEvent>&
     return target;
 }
 
+JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> target = objectTemplate->NewInstance();
+    JSRef<JSObject> area = objectTemplate->NewInstance();
+    JSRef<JSObject> offset = objectTemplate->NewInstance();
+    JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
+    const auto& localOffset = info.GetTarget().area.GetOffset();
+    const auto& origin = info.GetTarget().origin;
+    offset->SetProperty<double>("x", localOffset.GetX().ConvertToVp());
+    offset->SetProperty<double>("y", localOffset.GetY().ConvertToVp());
+    globalOffset->SetProperty<double>("x", (origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp()));
+    globalOffset->SetProperty<double>("y", (origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp()));
+    area->SetPropertyObject("position", offset);
+    area->SetPropertyObject("globalPosition", globalOffset);
+    area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
+    area->SetProperty<double>("height", info.GetTarget().area.GetHeight().ConvertToVp());
+    target->SetPropertyObject("area", area);
+    if (info.GetTarget().id.empty()) {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    } else {
+        target->SetProperty<const char*>("id", info.GetTarget().id.c_str());
+    }
+    return target;
+}
+
 bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGestureEvent>& info)
 {
     CHECK_NULL_RETURN(info, false);
@@ -73,6 +106,8 @@ bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGest
     obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     obj->SetProperty<float>("axisVertical", info->GetVerticalAxis());
     obj->SetProperty<float>("axisHorizontal", info->GetHorizontalAxis());
+    obj->SetPropertyObject(
+        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     CreateFingerInfosObject(info, obj);
     return true;
 }

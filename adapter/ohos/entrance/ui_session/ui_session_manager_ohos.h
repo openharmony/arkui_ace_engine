@@ -29,7 +29,8 @@ public:
     void ReportComponentChangeEvent(const std::string& key, const std::string& value) override;
     void ReportComponentChangeEvent(
         int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) override;
-    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
+    void ReportWebUnfocusEvent(
+        int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId) override;
     void SetClickEventRegistered(bool status) override;
     void SetSearchEventRegistered(bool status) override;
@@ -72,11 +73,15 @@ public:
     void SendTranslateResult(int32_t nodeId, std::string res) override;
     void ResetTranslate(int32_t nodeId) override;
     void GetPixelMap() override;
-    void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
+    void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) override;
     void GetVisibleInspectorTree() override;
     bool IsHasReportObject() override;
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;
+    void RegisterPipeLineExeAppAIFunction(
+        std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) override;
+    void ExeAppAIFunction(const std::string& funcName, const std::string& params) override;
+    void SendExeAppAIFunctionResult(uint32_t result) override;
 };
 
 } // namespace OHOS::Ace

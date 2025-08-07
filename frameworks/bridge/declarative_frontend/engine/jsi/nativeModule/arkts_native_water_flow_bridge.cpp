@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
 constexpr int32_t NUM_3 = 3;
 constexpr int32_t NUM_4 = 4;
+constexpr int32_t NUM_5 = 5;
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
@@ -430,6 +431,19 @@ ArkUINativeModuleValue WaterFlowBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(argNode->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     std::string color = "";
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (!ArkTSUtils::ParseJsString(vm, argColor, color, resObj, nodeInfo) || argColor->IsUndefined() ||
+            color.empty()) {
+            GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(nativeNode, color.c_str());
+            GetArkUINodeModifiers()->getWaterFlowModifier()->createWaterFlowScrollBarColorWithResourceObj(nativeNode,
+                AceType::RawPtr(resObj));
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (!ArkTSUtils::ParseJsString(vm, argColor, color) || argColor->IsUndefined() || color.empty()) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(nativeNode);
     } else {
@@ -479,6 +493,35 @@ ArkUINativeModuleValue WaterFlowBridge::ResetCachedCount(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetCachedCount(nativeNode);
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetShowCached(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> argSyncLoad = runtimeCallInfo->GetCallArgRef(NUM_1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool syncLoad = true;
+    if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
+        syncLoad = argSyncLoad->BooleaValue(vm);
+    }
+
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setSyncLoad(nativeNode, syncLoad);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetSyncLoad(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -593,10 +636,28 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallI
             layoutMode = static_cast<uint32_t>(NG::WaterFlowLayoutMode::TOP_DOWN);
         }
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(nativeNode, layoutMode);
-        if (layoutMode != static_cast<uint32_t>(NG::WaterFlowLayoutMode::SLIDING_WINDOW)) {
-            SetWaterFlowFooter(runtimeCallInfo);
-            SetWaterFlowFooterContent(runtimeCallInfo);
+        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+        Framework::JSRef<Framework::JSVal> sectionsArgs = info[NUM_2];  // sections parameter
+        Framework::JSRef<Framework::JSVal> footerContentArgs = info[NUM_4];  // footerContent parameter
+        Framework::JSRef<Framework::JSVal> footerArgs = info[NUM_5]; // footer parameter
+
+        if (!sectionsArgs->IsNull() && sectionsArgs->IsObject()) {
+            // set sections only when sections exist
             SetWaterFlowSections(runtimeCallInfo);
+        } else {
+            // reset sections and set footer when no sections exist
+            GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+
+            // check footerContent first
+            if (!footerContentArgs->IsNull() && footerContentArgs->IsObject()) {
+                SetWaterFlowFooterContent(runtimeCallInfo);
+                return panda::JSValueRef::Undefined(vm);
+            }
+
+            // set footer if no footerContent
+            if (!footerArgs->IsNull() && footerArgs->IsFunction()) {
+                SetWaterFlowFooter(runtimeCallInfo);
+            }
         }
     }
 

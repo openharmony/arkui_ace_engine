@@ -30,7 +30,8 @@ public:
     static void StrokeWidth(const JSCallbackInfo& info);
     static void ShadowOption(const JSCallbackInfo& info);
     static void BorderRadius(const JSCallbackInfo& info);
-    static void ParseShadowColors(const JSRef<JSVal>& colors, std::vector<OHOS::Ace::NG::Gradient>& shadowColors);
+    static void ParseShadowColors(
+        const JSRef<JSArray>& colorsArray, std::vector<OHOS::Ace::NG::Gradient>& shadowColors);
     static void HandleShadowRadius(const JSRef<JSVal>& jsRadius, double& radius, RefPtr<ResourceObject>& resR,
         OHOS::Ace::NG::DataPanelShadow& shadow);
     static void HandleShadowOffsetX(const JSRef<JSVal>& jsOffsetX, double& offsetX, RefPtr<ResourceObject>& resX,

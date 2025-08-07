@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/matrix4.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -54,7 +55,7 @@ Matrix4 Matrix4::CreateRotate(double angle, double dx, double dy, double dz)
     double x = dx / sqrt(sum);
     double y = dy / sqrt(sum);
     double z = dz / sqrt(sum);
-    double redian = static_cast<double>(angle * (M_PI / 180.0f));
+    double redian = static_cast<double>(angle * (ACE_PI / 180.0f));
     double cosValue = cosf(redian);
     double sinValue = sinf(redian);
 

@@ -51,7 +51,6 @@ const makeConfig = ({ os, arch, tsconfig, unmemoized }) => ({
             // Bundle already existing source maps for dependencies
             { test: /\.js$/, loader: "source-map-loader", enforce: "pre" },
             // Copy skoala-runtime node binary file (disabled since @koalaui/@koalaui/skoala-sys is not bundled)
-            // { test: /\.node$/, loader: "node-loader" },
         ]
     },
 

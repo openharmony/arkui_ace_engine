@@ -25,7 +25,7 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
-void PluginSubContainer::Initialize() {}
+void PluginSubContainer::Initialize(const std::string& codeLanguage) {}
 
 void PluginSubContainer::Destroy() {}
 

@@ -173,4 +173,11 @@ int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
     UiSessionManager::GetInstance()->GetVisibleInspectorTree();
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::ExeAppAIFunction(
+    const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
+{
+    UiSessionManager::GetInstance()->ExeAppAIFunction(funcName, params);
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

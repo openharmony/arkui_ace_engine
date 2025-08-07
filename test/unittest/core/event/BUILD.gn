@@ -17,6 +17,7 @@ ace_unittest("event_manager_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "$ace_root/frameworks/core/event/resample_algo.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
@@ -24,6 +25,8 @@ ace_unittest("event_manager_test_ng") {
     "event_manager_test_ng.cpp",
     "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
+    "event_manager_test_ng_two.cpp",
+    "event_manager_pen_test_ng.cpp",
   ]
 }
 
@@ -172,6 +175,12 @@ ace_unittest("axis_event_test_ng") {
   sources = [ "axis_event_test_ng.cpp" ]
 }
 
+ace_unittest("focus_event_handler_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "focus_event_handler_test_ng.cpp" ]
+}
+
 group("core_event_unittest") {
   testonly = true
   deps = [
@@ -193,5 +202,6 @@ group("core_event_unittest") {
     ":scrollable_event_test_ng",
     ":state_style_test_ng",
     ":touch_event_test_ng",
+    ":focus_event_handler_test_ng",
   ]
 }

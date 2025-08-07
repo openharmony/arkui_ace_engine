@@ -107,6 +107,31 @@ public:
         return !NearZero(scrollOffset_);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -118,6 +143,9 @@ private:
     float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     float GetFollowRatio();
     void HandleCustomBuilderDragUpdateStage();
     void SetAccessibilityAction();
@@ -148,15 +176,18 @@ private:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     void FireOnOffsetChange(float value);
+    void FireOnStepOffsetChange(float value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
+    void BeginTrailingTrace();
+    void EndTrailingTrace();
     float GetLoadingProgressOpacity();
     float GetLoadingTextOpacity();
     Color GetLoadingProgressColor();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_ = 0.0f;
@@ -178,6 +209,7 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<float> ratio_;
+    bool hasBeginTrailingTrace_ = false;
     // API version 10
     void InitLowVersionOffset();
     void UpdateChild();
@@ -202,7 +234,6 @@ private:
     Dimension loadingProgressSizeTheme_ = 32.0_vp;
     Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
     bool isHigherVersion_ = true;
-    RefPtr<RefreshThemeNG> refreshTheme_;
 };
 } // namespace OHOS::Ace::NG
 

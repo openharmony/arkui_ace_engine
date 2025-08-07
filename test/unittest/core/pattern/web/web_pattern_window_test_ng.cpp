@@ -1069,6 +1069,35 @@ HWTEST_F(WebPatternWindowTestNg, InitRotationEventCallback_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AdjustRotationRenderFitTest001
+ * @tc.desc: Test AdjustRotationRenderFit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, AdjustRotationRenderFitTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto type = WindowSizeChangeReason::UNDEFINED;
+    webPattern->AdjustRotationRenderFit(type);
+    type = WindowSizeChangeReason::ROTATION;
+    webPattern->AdjustRotationRenderFit(type);
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = false;
+    webPattern->AdjustRotationRenderFit(type);
+    webPattern->isVisible_ = true;
+    webPattern->delegate_ = nullptr;
+    webPattern->AdjustRotationRenderFit(type);
+    EXPECT_EQ(webPattern->rotationEndCallbackId_, 0);
+#endif
+}
+
+/**
  * @tc.name: UninitRotationEventCallback_001
  * @tc.desc: UninitRotationEventCallback
  * @tc.type: FUNC

@@ -15,9 +15,10 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_proxy.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "pixel_map.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace {
 void UiReportProxy::ReportClickEvent(const std::string& data)
@@ -247,43 +248,44 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
         LOGW("SendShowingImage write interface token failed");
         return;
     }
-    if (!messageData.WriteInt32(maps.size())) {
-        LOGW("SendShowingImage write size failed");
-        return;
-    }
+    std::vector<std::pair<int32_t, sptr<Ashmem>>> tempMaps;
     for (auto& map : maps) {
-        if (!messageData.WriteInt32(map.first)) {
-            LOGW("SendShowingImage write id failed");
-            return;
-        }
         std::vector<uint8_t> buf;
         map.second->EncodeTlv(buf);
         auto dataSize = buf.size();
         sptr<Ashmem> ashmem = Ashmem::CreateAshmem((std::to_string(map.first)).c_str(), dataSize);
         if (ashmem == nullptr) {
             LOGW("Create shared memory failed");
-            return;
+            continue;
         }
         // Set the read/write mode of the ashme.
         if (!ashmem->MapReadAndWriteAshmem()) {
             ClearAshmem(ashmem);
             LOGW("Map shared memory fail");
-            return;
+            continue;
         }
         // Write the size and content of each item to the ashmem.
         int32_t offset = 0;
         if (!ashmem->WriteToAshmem(reinterpret_cast<uint8_t*>(buf.data()), dataSize, offset)) {
             LOGW("Write info to shared memory fail");
             ClearAshmem(ashmem);
-            return;
+            continue;
         }
 
-        if (!messageData.WriteAshmem(ashmem)) {
-            ClearAshmem(ashmem);
-            LOGW("Write ashmem to tempParcel fail");
+        tempMaps.push_back({map.first, ashmem});
+    }
+    LOGI("before send images,collect tempMaps size:%{public}zu", tempMaps.size());
+    if (!messageData.WriteInt32(tempMaps.size())) {
+        LOGW("SendShowingImage write size failed");
+        return;
+    }
+    for (auto& map : tempMaps) {
+        if (!messageData.WriteInt32(map.first) || !messageData.WriteAshmem(map.second)) {
+            ClearAshmem(map.second);
+            LOGW("SendShowingImage write data failed");
             return;
         }
-        ClearAshmem(ashmem);
+        ClearAshmem(map.second);
     }
     if (Remote()->SendRequest(SEND_IMAGES, messageData, reply, option) != ERR_NONE) {
         LOGW("SendShowingImage send request failed");
@@ -295,6 +297,24 @@ void UiReportProxy::ClearAshmem(sptr<Ashmem>& optMem)
     if (optMem != nullptr) {
         optMem->UnmapAshmem();
         optMem->CloseAshmem();
+    }
+}
+
+void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendExeAppAIFunctionResult write interface token failed");
+        return;
+    }
+    if (!messageData.WriteUint32(result)) {
+        LOGW("SendExeAppAIFunctionResult write result  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_EXE_APP_AI_FUNCTION_RESULT, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendExeAppAIFunctionResult send request failed");
     }
 }
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -98,6 +99,18 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     }
     if (destPage) {
         destPage->SetNodeFreeze(false);
+        auto pagePattern = destPage->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        auto pagePath = pageInfo->GetFullPath();
+        std::string routeType("routerPageChange");
+        if (type == RouteType::PUSH) {
+            routeType = "routerPushPage";
+        } else if (type == RouteType::POP) {
+            routeType = "routerPopPage";
+        }
+        UiSessionManager::GetInstance()->OnRouterChange(pagePath, routeType);
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -186,7 +199,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        
+
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -599,6 +612,7 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
         return nullptr;
     }
     auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    CHECK_NULL_RETURN(lastChildFrame, nullptr);
     auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
     if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());
@@ -646,7 +660,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
-    ResSchedReport::GetInstance().HandlePageTransition(GetPagePath(srcPage), destPageInfo->GetPagePath(), "Rounter");
+    ResSchedReport::GetInstance().HandlePageTransition(srcFullPath, destFullPath, "Router");
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -781,17 +795,18 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     return info->GetPagePath();
 }
 
-void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
 {
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
-        isForceSplit, homePage.c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s, "
+        "ignoreOrientation: %{public}d", isForceSplit, homePage.c_str(), ignoreOrientation);
     //app support split mode, whether force split is enable or disable, the homepage will be recognized
     isDetectPrimaryPage_ = true;
-    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage) {
+    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage && ignoreOrientation_ == ignoreOrientation) {
         return;
     }
     isForceSplit_ = isForceSplit;
     homePageConfig_ = homePage;
+    ignoreOrientation_ = ignoreOrientation;
     OnForceSplitConfigUpdate();
 }
 

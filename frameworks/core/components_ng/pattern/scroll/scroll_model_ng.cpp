@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -43,6 +44,8 @@ void ScrollModelNG::Create()
 
 RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
 {
+    // call CreateFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
     auto frameNode = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, AceType::MakeRefPtr<ScrollPattern>());
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -123,8 +126,11 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 int32_t ScrollModelNG::GetAxis(FrameNode *frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    if (layoutProperty->GetAxis() == Axis::FREE) {
+        return ArkUI_ScrollDirection::ARKUI_SCROLL_DIRECTION_FREE;
+    }
+    int32_t value = 0;
     if (layoutProperty->GetAxis()) {
         value = static_cast<int32_t>(layoutProperty->GetAxisValue());
     }
@@ -340,9 +346,8 @@ void ScrollModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const Re
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         double friction = -1.0;
-        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
-            pattern->SetFriction(friction);
-        }
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("ScrollFriction", resObj, std::move(updateFunc));
 }
@@ -375,23 +380,6 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     }
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
-}
-
-void ScrollModelNG::SetScrollSnap(
-    FrameNode* frameNode,
-    std::optional<ScrollSnapAlign> scrollSnapAlign,
-    const std::optional<Dimension>& intervalSize,
-    const std::vector<Dimension>& snapPaginations,
-    const std::optional<bool>& enableSnapToStart,
-    const std::optional<bool>& enableSnapToEnd)
-{
-    SetScrollSnap(
-        frameNode,
-        scrollSnapAlign.value_or(ScrollSnapAlign::NONE),
-        intervalSize.value_or(Dimension()),
-        snapPaginations,
-        std::make_pair(enableSnapToStart.value_or(true), enableSnapToEnd.value_or(true))
-    );
 }
 
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
@@ -432,6 +420,13 @@ uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(color);
 }
 
 int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -498,12 +493,21 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
+    if (axis == Axis::FREE || pattern->GetAxis() == Axis::FREE) {
+        return; // calling SetAxis would disrupt the axisChanged signal in ::OnModifyDone and initialization of FreeScroll
+    }
     pattern->SetAxis(axis);
 }
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(color);
 }
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
@@ -627,9 +631,8 @@ void ScrollModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& 
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         double friction = -1.0;
-        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
-            pattern->SetFriction(friction);
-        }
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("ScrollFriction", resObj, std::move(updateFunc));
 }
@@ -645,68 +648,303 @@ void ScrollModelNG::CreateWithResourceObjIntervalSize(const RefPtr<ResourceObjec
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto layoutProperty = pattern->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto scrollSnapAlign = layoutProperty->GetScrollSnapAlignValue(ScrollSnapAlign::NONE);
         CalcDimension intervalSize;
-        if (ResourceParseUtils::ParseResDimensionVp(resObj, intervalSize)) {
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, intervalSize)) {
+            intervalSize = CalcDimension(0.0);
+        }
+        if (scrollSnapAlign != ScrollSnapAlign::NONE) {
             pattern->SetIntervalSize(intervalSize);
         }
     };
     pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
 }
 
-void ScrollModelNG::CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs)
+void ScrollModelNG::CreateWithResourceObjIntervalSize(
+    FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ScrollIntervalSize");
+    CHECK_NULL_VOID(HasResObj(resObjs));
+    RefPtr<ResourceObject> resObj;
+    if (resObjs.size() == 1) {
+        resObj = resObjs[0];
+    }
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto layoutProperty = pattern->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto scrollSnapAlign = layoutProperty->GetScrollSnapAlignValue(ScrollSnapAlign::NONE);
+        CalcDimension intervalSize;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, intervalSize)) {
+            intervalSize = CalcDimension(0.0);
+        }
+        if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+            pattern->SetIntervalSize(intervalSize);
+        }
+    };
+    pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
+}
+
+bool ScrollModelNG::CheckSnapPaginations(const std::vector<Dimension>& snapPaginations)
+{
+    CHECK_NULL_RETURN(!snapPaginations.empty(), false);
+    float preValue = (*snapPaginations.begin()).Value();
+    CHECK_NULL_RETURN(!Negative(preValue), false);
+    auto unit = (*snapPaginations.begin()).Unit();
+    for (auto iter = snapPaginations.begin() + 1; iter < snapPaginations.end(); ++iter) {
+        if (Negative((*iter).Value()) || (*iter).Unit() != unit || LessOrEqual((*iter).Value(), preValue)) {
+            return false;
+        }
+        preValue = (*iter).Value();
+    }
+    return true;
+}
+
+bool ScrollModelNG::HasResObj(const std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    for (size_t i = 0; i < resObjs.size(); ++i) {
+        CHECK_NULL_CONTINUE(resObjs[i]);
+        return true;
+    }
+    return false;
+}
+
+void ScrollModelNG::CreateWithResourceObjSnapPaginations(
+    const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    for (unsigned long i = 0; pattern->GetSnapPaginations().size(); ++i) {
-        pattern->RemoveResObj("ScrollIntervalSize" + std::to_string(i));
-    }
-    for (unsigned long i = 0; i < resObjs.size(); ++i) {
-        if (!resObjs[i]) {
-            continue;
-        }
-        auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), i](
-                                const RefPtr<ResourceObject>& resObj) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CalcDimension SnapPagination;
-            std::vector<Dimension> SnapPaginations = pattern->GetSnapPaginations();
-            if (ResourceParseUtils::ParseResDimensionVp(resObj, SnapPagination)) {
-                SnapPaginations[i] = SnapPagination;
-                pattern->SetSnapPaginations(SnapPaginations);
+    pattern->RemoveResObj("ScrollSnapPaginations");
+    CHECK_NULL_VOID(HasResObj(resObjs));
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), resObjs, snapPaginations](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        std::vector<Dimension> snapPaginationsTmp(snapPaginations);
+        CHECK_NULL_VOID(snapPaginationsTmp.size() == resObjs.size());
+        for (size_t i = 0; i < resObjs.size(); ++i) {
+            CHECK_NULL_CONTINUE(resObjs[i]);
+            CalcDimension snapPagination;
+            if (ResourceParseUtils::ParseResDimensionVp(resObjs[i], snapPagination)) {
+                snapPaginationsTmp[i] = snapPagination;
+            } else {
+                std::vector<Dimension>().swap(snapPaginationsTmp);
+                break;
             }
-        };
-        pattern->AddResObj("ScrollIntervalSize" + std::to_string(i), resObjs[i], std::move(updateFunc));
-    }
+        }
+        if (!CheckSnapPaginations(snapPaginationsTmp)) {
+            std::vector<Dimension>().swap(snapPaginationsTmp);
+        }
+        pattern->SetSnapPaginations(snapPaginationsTmp);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj("ScrollSnapPaginations", resObj, std::move(updateFunc));
 }
 
-void ScrollModelNG::CreateWithResourceObjSnapPaginations(FrameNode* frameNode,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+void ScrollModelNG::CreateWithResourceObjSnapPaginations(
+    FrameNode* frameNode, const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    for (unsigned long i = 0; pattern->GetSnapPaginations().size(); ++i) {
-        pattern->RemoveResObj("ScrollIntervalSize" + std::to_string(i));
-    }
-    for (unsigned long i = 0; i < resObjs.size(); ++i) {
-        if (!resObjs[i]) {
-            continue;
-        }
-        auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), i](
-                                const RefPtr<ResourceObject>& resObj) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CalcDimension SnapPagination;
-            std::vector<Dimension> SnapPaginations = pattern->GetSnapPaginations();
-            if (ResourceParseUtils::ParseResDimensionVp(resObj, SnapPagination) && SnapPaginations.size() > i) {
-                SnapPaginations[i] = SnapPagination;
-                pattern->SetSnapPaginations(SnapPaginations);
+    pattern->RemoveResObj("ScrollSnapPaginations");
+    CHECK_NULL_VOID(HasResObj(resObjs));
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), resObjs, snapPaginations](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        std::vector<Dimension> snapPaginationsTmp(snapPaginations);
+        CHECK_NULL_VOID(snapPaginationsTmp.size() == resObjs.size());
+        for (size_t i = 0; i < resObjs.size(); ++i) {
+            CHECK_NULL_CONTINUE(resObjs[i]);
+            CalcDimension snapPagination;
+            if (ResourceParseUtils::ParseResDimensionVp(resObjs[i], snapPagination)) {
+                snapPaginationsTmp[i] = snapPagination;
+            } else {
+                std::vector<Dimension>().swap(snapPaginationsTmp);
+                break;
             }
-        };
-        pattern->AddResObj("ScrollIntervalSize" + std::to_string(i), resObjs[i], std::move(updateFunc));
-    }
+        }
+        if (!CheckSnapPaginations(snapPaginationsTmp)) {
+            std::vector<Dimension>().swap(snapPaginationsTmp);
+        }
+        pattern->SetSnapPaginations(snapPaginationsTmp);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj("ScrollSnapPaginations", resObj, std::move(updateFunc));
 }
 
+void ScrollModelNG::SetMaxZoomScale(float scale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetMaxZoomScale(frameNode, scale);
+}
+
+void ScrollModelNG::SetMaxZoomScale(FrameNode* frameNode, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxZoomScale(scale);
+}
+
+float ScrollModelNG::GetMaxZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetMaxZoomScale();
+}
+
+void ScrollModelNG::SetMinZoomScale(float scale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetMinZoomScale(frameNode, scale);
+}
+
+void ScrollModelNG::SetMinZoomScale(FrameNode* frameNode, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMinZoomScale(scale);
+}
+
+float ScrollModelNG::GetMinZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetMinZoomScale();
+}
+
+void ScrollModelNG::SetZoomScale(float scale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetZoomScale(frameNode, scale);
+}
+
+void ScrollModelNG::SetZoomScale(FrameNode* frameNode, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetZoomScale(scale);
+}
+
+void ScrollModelNG::ResetZoomScale()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetZoomScale(frameNode);
+}
+
+void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetZoomScale(std::nullopt);
+}
+
+float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetZoomScale();
+}
+
+void ScrollModelNG::SetZoomScaleChangeEvent(std::function<void(float)>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnZoomScaleChange(std::move(event));
+}
+
+void ScrollModelNG::SetEnableBouncesZoom(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableBouncesZoom(frameNode, enable);
+}
+
+void ScrollModelNG::SetEnableBouncesZoom(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableBouncesZoom(enable);
+}
+
+bool ScrollModelNG::GetEnableBouncesZoom(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->GetEnableBouncesZoom();
+}
+
+void ScrollModelNG::SetOnDidZoom(std::function<void(float)>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOnDidZoom(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStart(std::function<void()>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOnZoomStart(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStop(std::function<void()>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOnZoomStop(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidZoom(std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnZoomStart(std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnZoomStop(std::move(event));
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
 } // namespace OHOS::Ace::NG

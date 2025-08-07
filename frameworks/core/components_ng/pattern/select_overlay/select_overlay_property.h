@@ -28,6 +28,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/manager/safe_area/safe_area_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,6 +41,7 @@ struct OnMenuItemCallback {
     OnMenuItemClickCallback onMenuItemClick;
     OnPrepareMenuCallback onPrepareMenuCallback;
     std::function<void(int32_t&, int32_t&)> textRangeCallback;
+    std::function<void()> beforeOnPrepareMenuCallback;
 };
 
 struct SelectHandlePaintInfo {
@@ -134,6 +136,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
 inline constexpr SelectOverlayDirtyFlag DIRTY_VIEWPORT = 1 << 6;
 inline constexpr SelectOverlayDirtyFlag DIRTY_HANDLE_COLOR_FLAG = 1 << 7;
 inline constexpr SelectOverlayDirtyFlag DIRTY_AI_MENU_ITEM = 1 << 8;
+inline constexpr SelectOverlayDirtyFlag DIRTY_ASK_CELIA = 1 << 9;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
@@ -154,6 +157,7 @@ inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_URL_FLAG = 1 << 8;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_EMAIL_FLAG = 1 << 9;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_ADDRESS_FLAG = 1 << 10;
 inline constexpr SystemServiceMenuDisableFlag DISABLE_AI_MENU_DATETIME_FLAG = 1 << 11;
+inline constexpr SystemServiceMenuDisableFlag DISABLE_ASK_CELIA_FLAG = 1 << 12;
 
 inline constexpr char OH_DEFAULT_CUT[] = "OH_DEFAULT_CUT";
 inline constexpr char OH_DEFAULT_COPY[] = "OH_DEFAULT_COPY";
@@ -169,6 +173,7 @@ inline constexpr char OH_DEFAULT_AI_MENU_URL[] = "OH_DEFAULT_AI_MENU_URL";
 inline constexpr char OH_DEFAULT_AI_MENU_EMAIL[] = "OH_DEFAULT_AI_MENU_EMAIL";
 inline constexpr char OH_DEFAULT_AI_MENU_ADDRESS[] = "OH_DEFAULT_AI_MENU_ADDRESS";
 inline constexpr char OH_DEFAULT_AI_MENU_DATETIME[] = "OH_DEFAULT_AI_MENU_DATETIME";
+inline constexpr char OH_DEFAULT_ASK_CELIA[] = "OH_DEFAULT_ASK_CELIA";
 
 inline constexpr char OH_DEFAULT_COLLABORATION_SERVICE[] = "OH_DEFAULT_COLLABORATION_SERVICE";
 
@@ -185,7 +190,8 @@ enum class OptionMenuActionId {
     AI_WRITE,
     APPEAR,
     DISAPPEAR,
-    AI_MENU_OPTION
+    AI_MENU_OPTION,
+    ASK_CELIA
 };
 enum class CloseReason {
     CLOSE_REASON_NORMAL = 1,
@@ -200,7 +206,7 @@ enum class CloseReason {
 };
 
 struct HoldSelectionInfo {
-    std::function<bool(const PointF&)> checkTouchInArea;
+    std::function<bool(const PointF&, bool)> checkTouchInArea;
     std::function<void()> resetSelectionCallback;
     std::function<bool(SourceType, TouchType)> eventFilter;
 
@@ -232,6 +238,8 @@ struct SelectMenuInfo {
     OHOS::Ace::TextDataDetectType aiMenuOptionType = TextDataDetectType::INVALID;
     std::optional<OffsetF> menuOffset;
     OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
+    bool isAskCeliaEnabled = false;
+    bool isShowAIMenuOptionChanged = false;
 
     // Customize menu information.
     std::optional<int32_t> responseType;
@@ -247,7 +255,8 @@ struct SelectMenuInfo {
                  (showCut == info.showCut) && (showTranslate == info.showTranslate) &&
                  (showSearch == info.showSearch) && (showShare == info.showShare) &&
                  (showCameraInput == info.showCameraInput) && (showAIWrite == info.showAIWrite) &&
-                 (aiMenuOptionType == info.aiMenuOptionType) && !info.hasOnPrepareMenuCallback);
+                 (aiMenuOptionType == info.aiMenuOptionType) && !info.hasOnPrepareMenuCallback &&
+                 (isAskCeliaEnabled == info.isAskCeliaEnabled));
     }
 
     std::string ToString() const
@@ -266,6 +275,7 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
         JSON_STRING_PUT_INT(jsonValue, aiMenuOptionType);
         JSON_STRING_PUT_INT(jsonValue, hasOnPrepareMenuCallback);
+        JSON_STRING_PUT_INT(jsonValue, isAskCeliaEnabled);
         return jsonValue->ToString();
     }
 };
@@ -281,6 +291,7 @@ struct SelectMenuCallback {
     std::function<void()> onCameraInput;
     std::function<void()> onAIWrite;
     std::function<void(std::string)> onAIMenuOption;
+    std::function<void()> onAskCelia;
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
@@ -415,6 +426,10 @@ struct SelectOverlayInfo {
     const RectF& GetSecondHandlePaintRect();
     bool enableSubWindowMenu = false;
     OffsetF containerModalOffset;
+
+    // menu avoid keyboard adjust ark_ui and web
+    std::function<bool(LayoutWrapper *, OffsetF &, const RectF, OffsetF &, std::shared_ptr<SelectOverlayInfo> &)>
+        computeMenuOffset = nullptr;
 };
 
 enum class TextMenuShowMode {
@@ -456,6 +471,7 @@ DEFINE_MENU_CHECK_METHOD(AIPhone);
 DEFINE_MENU_CHECK_METHOD(AIEmail);
 DEFINE_MENU_CHECK_METHOD(AIAddress);
 DEFINE_MENU_CHECK_METHOD(AIDatetime);
+DEFINE_MENU_CHECK_METHOD(AskCelia);
 } // namespace TextSystemMenu
 } // namespace OHOS::Ace::NG
 

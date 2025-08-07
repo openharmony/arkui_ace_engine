@@ -187,6 +187,27 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleOnCopy004
+ * @tc.desc: test HandleOnCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy004, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->clipboard_ = AceType::MakeRefPtr<MockClipBoard>(taskExecutor);
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    bool isUsingExternalKeyboard = true;
+    richEditorPattern->selectOverlay_->isUsingMouse_ = true;
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    richEditorPattern->HandleOnCopy(isUsingExternalKeyboard);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+}
+
+/**
  * @tc.name: CopyGestureOption001
  * @tc.desc: test CopyGestureOption
  * @tc.type: FUNC
@@ -265,27 +286,6 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, OnCopyOperationExt001, TestSize.Level1)
     ASSERT_NE(clipboard, nullptr);
     auto pasteDataMix = clipboard->CreatePasteDataMix();
     richEditorPattern->OnCopyOperationExt(pasteDataMix);
-}
-
-/**
- * @tc.name: HandleOnCopy004
- * @tc.desc: test HandleOnCopy
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy004, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->clipboard_ = AceType::MakeRefPtr<MockClipBoard>(taskExecutor);
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    bool isUsingExternalKeyboard = true;
-    richEditorPattern->selectOverlay_->isUsingMouse_ = true;
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-    richEditorPattern->HandleOnCopy(isUsingExternalKeyboard);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**
@@ -439,55 +439,6 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnCut004
- * @tc.desc: test HandleOnCut
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init callback
-     */
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    bool isEventCalled = false;
-    auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
-        isEventCalled = true;
-        event.SetPreventDefault(true);
-    };
-    richEditorModel.SetOnCut(std::move(onCutWithEvent));
-    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
-
-    auto changeReason = TextChangeReason::UNKNOWN;
-    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
-        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::CUT);
-        changeReason = changeValue.changeReason_;
-        return true;
-    };
-    richEditorModel.SetOnWillChange(onWillChange);
-
-    /**
-     * @tc.steps: step2. call the callback function
-     * @tc.expected: when PreventDefault is true, UpdateType_ and isEventCalled is valid
-     */
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleOnCut();
-    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN); // preventDefault
-    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
-    EXPECT_EQ(isEventCalled, true);
-}
-
-/**
  * @tc.name: HandleOnCut002
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
@@ -562,6 +513,190 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut003, TestSize.Level1)
     richEditorPattern->HandleOnCut();
     EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
     EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: HandleOnCut004
+ * @tc.desc: test HandleOnCut
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init callback
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool isEventCalled = false;
+    auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
+        isEventCalled = true;
+        event.SetPreventDefault(true);
+    };
+    richEditorModel.SetOnCut(std::move(onCutWithEvent));
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::CUT);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    richEditorModel.SetOnWillChange(onWillChange);
+
+    /**
+     * @tc.steps: step2. call the callback function
+     * @tc.expected: when PreventDefault is true, UpdateType_ and isEventCalled is valid
+     */
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->HandleOnCut();
+    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN); // preventDefault
+    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_EQ(isEventCalled, true);
+}
+
+/**
+ * @tc.name: SetSubSpans001
+ * @tc.desc: test SetSubSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, SetSubSpans001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem1->spanItemType = SpanItemType::NORMAL;
+    spanItem1->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem1);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    richEditorPattern->SetSubSpans(spanString, 1, 1, spanString->spans_);
+    EXPECT_EQ(spanString->spans_.size(), 0);
+}
+
+/**
+ * @tc.name: CopySpansForClipboard
+ * @tc.desc: test CopySpansForClipboard function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, CopySpansForClipboard, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem1->spanItemType = SpanItemType::NORMAL;
+    int32_t position = 2;
+    spanItem1->position = position;
+    std::u16string content = u"123";
+    spanItem1->content = content;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem1);
+    auto copySpans = richEditorPattern->CopySpansForClipboard(richEditorPattern->spans_);
+    std::u16string resultContent = u"";
+    int32_t resultPosition = -1;
+    if (!copySpans.empty()) {
+        for (const auto& spanItem : copySpans) {
+            if (spanItem->spanItemType == SpanItemType::NORMAL) {
+                resultContent = spanItem->content;
+                resultPosition = spanItem->position;
+            }
+        }
+    }
+    EXPECT_EQ(resultContent, content);
+    EXPECT_EQ(resultPosition, position);
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, OnModifyDone001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->clipboard_ = nullptr;
+    richEditorPattern->OnModifyDone();
+    EXPECT_TRUE(richEditorPattern->clipboard_);
+}
+
+/**
+ * @tc.name: AddUdmfData001
+ * @tc.desc: test AddUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, AddUdmfData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ResultObject resultObject;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPESYMBOLSPAN;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valueString = INIT_VALUE_1;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valueString.clear();
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    ASSERT_NE(resultObject.valuePixelMap, nullptr);
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    richEditorPattern->AddUdmfData(event);
+    if (UdmfClient::GetInstance()->CreateUnifiedData()) {
+        EXPECT_NE(event->GetData(), 0);
+    } else {
+        EXPECT_EQ(event->GetData(), 0);
+    }
+}
+
+/**
+ * @tc.name: AsyncHandleOnCopyStyledStringHtml
+ * @tc.desc: Test AsyncHandleOnCopyStyledStringHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, AsyncHandleOnCopyStyledStringHtml, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. set AsyncHandleOnCopyStyledStringHtml func param.
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"123456789");
+    /**
+     * @tc.steps: step3. Excute function for AsyncHandleOnCopyStyledStringHtml.
+     */
+    richEditorPattern->AsyncHandleOnCopyStyledStringHtml(spanString);
+    EXPECT_EQ(spanString->GetString(), "123456789");
+    EXPECT_EQ(spanString->GetLength(), 9);
 }
 
 }

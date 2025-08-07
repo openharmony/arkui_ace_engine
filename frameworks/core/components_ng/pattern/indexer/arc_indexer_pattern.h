@@ -83,11 +83,6 @@ public:
         return { FocusType::NODE, true };
     }
 
-    int32_t GetSelected() const
-    {
-        return selected_;
-    }
-
     void SetIsScreenReaderOn(bool isScreenReaderOn)
     {
         isScreenReaderOn_ = isScreenReaderOn;
@@ -118,6 +113,7 @@ private:
     void ApplyIndexChanged(bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false,
         bool indexerSizeChanged = false);
     void OnSelect();
+    void ItemSelectedChangedAnimation();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent ();
     void ResetArrayValue (bool isModeChanged);

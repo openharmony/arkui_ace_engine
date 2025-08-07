@@ -50,8 +50,10 @@ RefPtr<Modifier> CheckBoxPaintMethod::GetContentModifier(PaintWrapper* paintWrap
         auto isSelect = paintProperty->GetCheckBoxSelectValue(false);
         auto boardColor = isSelect ? paintProperty->GetCheckBoxSelectedColorValue(checkBoxTheme->GetActiveColor())
                                    : checkBoxTheme->GetInactivePointColor();
-        auto checkColor = isSelect ? checkBoxTheme->GetPointColor() : Color::TRANSPARENT;
-        auto borderColor = isSelect ? Color::TRANSPARENT : checkBoxTheme->GetInactiveColor();
+        auto checkColor = isSelect ? paintProperty->GetCheckBoxCheckMarkColorValue(checkBoxTheme->GetPointColor())
+                                   : Color::TRANSPARENT;
+        auto borderColor = isSelect ? Color::TRANSPARENT
+                                    : paintProperty->GetCheckBoxUnSelectedColorValue(checkBoxTheme->GetInactiveColor());
         auto shadowColor = isSelect ? checkBoxTheme->GetShadowColor() : Color::TRANSPARENT;
         float strokePaintSize = size.Width();
         auto checkStroke = static_cast<float>(checkBoxTheme->GetCheckStroke().ConvertToPx());

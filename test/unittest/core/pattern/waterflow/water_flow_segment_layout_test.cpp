@@ -1640,6 +1640,30 @@ HWTEST_F(WaterFlowSegmentTest, Jump004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+    CreateItemsInLazyForEach(37, [](int32_t) { return 100.0f; });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    // @tc.steps: limit the number of frame-by-frame loads.
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    // @tc.steps: scrollby large offset to trigger jump in waterflow
+    ScrollBy(0, 800 * 3);
+    // @tc.expected: fill current page in one frame
+    EXPECT_GE(info->endIndex_ - info->startIndex_, 2);
+}
+
+/**
  * @tc.name: EstimateTotalHeight001
  * @tc.desc: Test EstimateTotalHeight.
  * @tc.type: FUNC
@@ -1913,5 +1937,195 @@ HWTEST_F(WaterFlowSegmentTest, ChangeHeight004, TestSize.Level1)
     EXPECT_EQ(info->itemInfos_[32].mainOffset, 1921.0f);
     EXPECT_EQ(info->itemInfos_[32].mainSize, 100.0f);
     EXPECT_EQ(info->itemInfos_[33].mainOffset, 2023.0f);
+}
+
+/**
+ * @tc.name: WaterFlowInitializeWithSectionsTest001
+ * @tc.desc: Test SetWaterFlowInitialize with sections parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowInitializeWithSectionsTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(NG::WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    // Create sections to test the sections branch
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+
+    CreateWaterFlowItems(5);
+    CreateDone();
+
+    // Verify sections are properly set
+    EXPECT_NE(pattern_->GetOrCreateWaterFlowSections(), nullptr);
+    EXPECT_EQ(secObj->GetSectionInfo().size(), 4);
+    // When sections exist, footer should be ignored/reset
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+
+/**
+ * @tc.name: WaterFlowRTLPaddingWithSections001
+ * @tc.desc: Test WaterFlow with sections padding in RTL mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowRTLPaddingWithSections001, TestSize.Level1)
+{
+    // Create WaterFlow with RTL direction and padding
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetLayoutDirection(TextDirection::RTL);
+
+    PaddingProperty padding;
+    padding.start = CalcLength(20.0f);
+    padding.end = CalcLength(20.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty_->UpdatePadding(padding);
+
+    CreateWaterFlowItems(20);
+
+    // Configure sections
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        WaterFlowSections::Section {
+            .itemsCount = 1,
+            .crossCount = 1,
+            .columnsGap = Dimension(0.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(0.0f, DimensionUnit::VP)
+        },
+        WaterFlowSections::Section {
+            .itemsCount = 15,
+            .crossCount = 3,
+            .columnsGap = Dimension(12.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(12.0f, DimensionUnit::VP)
+        },
+        WaterFlowSections::Section {
+            .itemsCount = 4,
+            .crossCount = 2,
+            .columnsGap = Dimension(8.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(8.0f, DimensionUnit::VP)
+        }
+    };
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    // Verify RTL padding
+    auto item0Rect = pattern_->GetItemRect(0);
+    float expectedRightPosition = WATER_FLOW_WIDTH - 20.0f;
+    EXPECT_NEAR(item0Rect.Right(), expectedRightPosition, 1.0f);
+    EXPECT_GE(item0Rect.Left(), 20.0f);
+    EXPECT_NEAR(item0Rect.Top(), 10.0f, 1.0f);
+}
+
+/**
+ * @tc.name: WaterFlowRTLPaddingWithSections002
+ * @tc.desc: Compare LTR vs RTL padding behavior with sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowRTLPaddingWithSections002, TestSize.Level1)
+{
+    // Test LTR mode
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetLayoutDirection(TextDirection::LTR);
+
+    PaddingProperty padding;
+    padding.start = CalcLength(25.0f);
+    padding.end = CalcLength(25.0f);
+    padding.top = CalcLength(15.0f);
+    padding.bottom = CalcLength(15.0f);
+    layoutProperty_->UpdatePadding(padding);
+
+    CreateWaterFlowItems(12);
+
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        WaterFlowSections::Section {
+            .itemsCount = 6,
+            .crossCount = 3,
+            .columnsGap = Dimension(10.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(10.0f, DimensionUnit::VP),
+        },
+        WaterFlowSections::Section {
+            .itemsCount = 6,
+            .crossCount = 2,
+            .columnsGap = Dimension(15.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(15.0f, DimensionUnit::VP),
+        }
+    };
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    // Store LTR positions
+    auto ltrItem0Rect = pattern_->GetItemRect(0);
+    auto ltrItem1Rect = pattern_->GetItemRect(1);
+    auto ltrItem2Rect = pattern_->GetItemRect(2);
+
+    // Switch to RTL and verify
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks();
+
+    auto rtlItem0Rect = pattern_->GetItemRect(0);
+    auto rtlItem1Rect = pattern_->GetItemRect(1);
+    auto rtlItem2Rect = pattern_->GetItemRect(2);
+
+    float containerWidth = WATER_FLOW_WIDTH;
+
+    EXPECT_NEAR(rtlItem0Rect.Right(), containerWidth - 25.0f, 1.0f);
+    EXPECT_NEAR(rtlItem2Rect.Left(), 25.0f, 1.0f);
+
+    EXPECT_NEAR(rtlItem0Rect.Top(), ltrItem0Rect.Top(), 1.0f);
+    EXPECT_NEAR(rtlItem1Rect.Top(), ltrItem1Rect.Top(), 1.0f);
+    EXPECT_NEAR(rtlItem2Rect.Top(), ltrItem2Rect.Top(), 1.0f);
+}
+
+/**
+ * @tc.name: WaterFlowRTLPaddingWithSections003
+ * @tc.desc: Test edge cases with different section configurations in RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowRTLPaddingWithSections003, TestSize.Level1)
+{
+    // Setup asymmetric padding in RTL
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetLayoutDirection(TextDirection::RTL);
+
+    PaddingProperty padding;
+    padding.start = CalcLength(30.0f);
+    padding.end = CalcLength(10.0f);
+    padding.top = CalcLength(5.0f);
+    padding.bottom = CalcLength(5.0f);
+    layoutProperty_->UpdatePadding(padding);
+
+    CreateWaterFlowItems(15);
+
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        WaterFlowSections::Section {
+            .itemsCount = 5,
+            .crossCount = 1,
+            .columnsGap = Dimension(0.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(8.0f, DimensionUnit::VP),
+        },
+        WaterFlowSections::Section {
+            .itemsCount = 10,
+            .crossCount = 4,
+            .columnsGap = Dimension(12.0f, DimensionUnit::VP),
+            .rowsGap = Dimension(12.0f, DimensionUnit::VP),
+        }
+    };
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    // Verify padding in RTL mode
+    auto singleColumnItem = pattern_->GetItemRect(0);
+    EXPECT_NEAR(singleColumnItem.Right(), WATER_FLOW_WIDTH - 30.0f, 1.0f);
+    EXPECT_NEAR(singleColumnItem.Left(), 10.0f, 1.0f);
+    EXPECT_NEAR(singleColumnItem.Top(), 5.0f, 1.0f);
+
+    auto multiColumnItem = pattern_->GetItemRect(5);
+    EXPECT_LE(multiColumnItem.Right(), WATER_FLOW_WIDTH - 30.0f + 1.0f);
+    EXPECT_GE(multiColumnItem.Left(), 10.0f - 1.0f);
 }
 } // namespace OHOS::Ace::NG

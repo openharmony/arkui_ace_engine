@@ -21,8 +21,12 @@
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
+#if defined(ACE_STATIC)
+#include "core/gestures/gesture_info.h"
+#endif
 #include "core/gestures/velocity.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
@@ -171,6 +175,26 @@ public:
     void SetDisplayY(double y)
     {
         displayY_ = y;
+    }
+
+    double GetGlobalDisplayX() const
+    {
+        return globalDisplayX_;
+    }
+
+    double GetGlobalDisplayY() const
+    {
+        return globalDisplayY_;
+    }
+
+    void SetGlobalDisplayX(double x)
+    {
+        globalDisplayX_ = x;
+    }
+
+    void SetGlobalDisplayY(double y)
+    {
+        globalDisplayY_ = y;
     }
 
     void SetDescription(const std::string& description)
@@ -363,7 +387,7 @@ public:
         bundleName_ = bundleName;
     }
 
-    std::string GetDragSource() const
+    const std::string& GetDragSource() const
     {
         return bundleName_;
     }
@@ -399,6 +423,35 @@ public:
         return needDoInternalDropAnimation_;
     }
 
+    void SetDataLoadParams(const RefPtr<DataLoadParams>& dataLoadParams)
+    {
+        dataLoadParams_ = dataLoadParams;
+    }
+
+    RefPtr<DataLoadParams> GetDataLoadParams() const
+    {
+        return dataLoadParams_;
+    }
+
+    void SetUseDataLoadParams(bool useDataLoadParams)
+    {
+        useDataLoadParams_ = useDataLoadParams;
+    }
+
+    bool IsUseDataLoadParams() const
+    {
+        return useDataLoadParams_;
+    }
+
+#if defined(ACE_STATIC)
+    RefPtr<PixelMap> GetDragDropInfoPixelMap() const;
+    void* GetDragDropInfoCustomNode() const;
+    std::string GetDragDropInfoExtraInfo() const;
+    void SetDragDropInfoPixelMap(RefPtr<PixelMap> pixelMap);
+    void SetDragDropInfoCustomNode(void* customNode);
+    void SetDragDropInfoExtraInfo(std::string& extraInfo);
+#endif
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -407,6 +460,8 @@ private:
     double y_ = 0.0;
     double displayX_ = 0.0;
     double displayY_ = 0.0;
+    double globalDisplayX_ = 0.0;
+    double globalDisplayY_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
     std::map<std::string, int64_t> summary_;
@@ -430,6 +485,13 @@ private:
     bool isRemoteDev_ { false };
     int32_t displayId_ = -1;
     bool needDoInternalDropAnimation_ = false;
+    RefPtr<DataLoadParams> dataLoadParams_ = nullptr;
+    bool useDataLoadParams_ { false };
+#if defined(ACE_STATIC)
+    RefPtr<PixelMap> dragDropInfoPixelMap_;
+    void* dragDropInfoCustomNode_;
+    std::string dragDropInfoExtraInfo_;
+#endif
 };
 
 class NotifyDragEvent : public DragEvent {

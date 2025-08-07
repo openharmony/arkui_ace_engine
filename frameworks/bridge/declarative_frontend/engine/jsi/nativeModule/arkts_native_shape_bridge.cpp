@@ -42,13 +42,17 @@ ArkUINativeModuleValue ShapeBridge::SetViewPort(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     CalcDimension dimLeft;
-    ArkTSUtils::ParseJsDimensionVp(vm, xArg, dimLeft);
+    RefPtr<ResourceObject> dimLeftResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, xArg, dimLeft, dimLeftResObj);
     CalcDimension dimTop;
-    ArkTSUtils::ParseJsDimensionVp(vm, yArg, dimTop);
+    RefPtr<ResourceObject> dimTopResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, yArg, dimTop, dimLeftResObj);
     CalcDimension dimWidth;
-    ArkTSUtils::ParseJsDimensionVp(vm, widthArg, dimWidth);
+    RefPtr<ResourceObject> dimWidthResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, widthArg, dimWidth, dimLeftResObj);
     CalcDimension dimHeight;
-    ArkTSUtils::ParseJsDimensionVp(vm, heightArg, dimHeight);
+    RefPtr<ResourceObject> dimHeightResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, heightArg, dimHeight, dimLeftResObj);
     std::vector<ArkUI_Float32> dimValues;
     std::vector<int32_t> dimUnits;
     dimValues.push_back(static_cast<ArkUI_Float32>(dimLeft.Value()));
@@ -59,7 +63,9 @@ ArkUINativeModuleValue ShapeBridge::SetViewPort(ArkUIRuntimeCallInfo* runtimeCal
     dimUnits.push_back(static_cast<int32_t>(dimTop.Unit()));
     dimUnits.push_back(static_cast<int32_t>(dimWidth.Unit()));
     dimUnits.push_back(static_cast<int32_t>(dimHeight.Unit()));
-    GetArkUINodeModifiers()->getShapeModifier()->setShapeViewPort(nativeNode, dimValues.data(), dimUnits.data());
+    std::vector<RefPtr<ResourceObject>> resObjArray = { dimLeftResObj, dimTopResObj, dimWidthResObj, dimHeightResObj };
+    GetArkUINodeModifiers()->getShapeModifier()->setShapeViewPort(
+        nativeNode, dimValues.data(), dimUnits.data(), resObjArray.data());
     return panda::JSValueRef::Undefined(vm);
 }
 

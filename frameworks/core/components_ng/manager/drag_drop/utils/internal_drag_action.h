@@ -29,6 +29,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/gestures/drag_event.h"
@@ -52,6 +53,7 @@ struct ArkUIInteralDragAction {
     OHOS::Ace::NG::DragPreviewOption previewOption;
     DragAdapterState dragState = DragAdapterState::INIT;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
+    RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams;
     std::string extraParams;
     DragPointerEvent dragPointerEvent;
     float dipScale = 0.0;

@@ -18,6 +18,7 @@
 #ifdef USE_NEW_SKIA
 #include "include/core/SkPixmap.h"
 #include "include/core/SkData.h"
+#include "include/encode/SkPngEncoder.h"
 #include "src/base/SkBase64.h"
 #else
 #include "include/utils/SkBase64.h"
@@ -29,6 +30,7 @@
 #include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/entrance/rs_adapter.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 #include "base/log/ace_checker.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -45,6 +47,9 @@ namespace OHOS::Ace {
 namespace {
 constexpr size_t SNAP_PARTITION_SIZE = 100;
 constexpr int64_t FIND_RSNODE_ERROR = -1;
+constexpr int32_t UI_TREE = 0;
+constexpr int32_t THREE_DIMENSIONS_TREE = 1;
+constexpr int32_t QUERY_ABILITY = 2;
 #ifndef USE_NEW_SKIA
 constexpr int32_t PNG_ENCODE_QUALITY = 100;
 #endif
@@ -124,6 +129,7 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+static std::vector<std::string> inspectorAbilities = {"3DLayers"};
 constexpr static char RECNODE_SELFID[] = "selfId";
 constexpr static char RECNODE_NODEID[] = "nodeID";
 constexpr static char RECNODE_PARENTID[] = "parentID";
@@ -317,7 +323,7 @@ void LayoutInspector::CreateContainer3DLayoutInfo(RefPtr<Container>& container)
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     return CreateContainerLayoutInfo(container);
 }
 
@@ -328,6 +334,21 @@ void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
     }
     return CreateContainerLayoutInfo(container);
+}
+
+void LayoutInspector::SendInspctorAbilities()
+{
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put("type", "inspectorAbilities");
+    auto contentArray = JsonUtil::CreateArray(true);
+    for (size_t i = 0; i < inspectorAbilities.size(); ++i) {
+        contentArray->Put(std::to_string(i).c_str(), inspectorAbilities[i].c_str());
+    }
+    jsonRoot->PutRef("content", std::move(contentArray));
+    auto sendInspctorAbilitiesTask = [abilitiesJsonStr = jsonRoot->ToString()]() {
+        WebSocketManager::SendMessage(abilitiesJsonStr);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendInspctorAbilitiesTask));
 }
 
 void LayoutInspector::Create3DLayoutInfoByWinId(uint32_t windId)
@@ -373,6 +394,9 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
     image = SkImages::RasterFromPixmap(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
     auto data = image->refEncodedData();
+    if (!data) {
+        data = SkPngEncoder::Encode(nullptr, image.get(), {});
+    }
 #else
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
@@ -404,7 +428,10 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
 
 int64_t LayoutInspector::RsNodeIdToFrameNodeId(uint64_t rsNodeId)
 {
-    auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(rsNodeId);
+    auto context = PipelineContext::GetCurrentContext();
+    auto rsUIContext = RsAdapter::GetRSUIContext(context);
+    auto rsNode = rsUIContext ? rsUIContext->GetNodeMap().GetNode(rsNodeId)
+                    : Rosen::RSNodeMap::Instance().GetNode(rsNodeId);
     if (rsNode == nullptr) {
         return FIND_RSNODE_ERROR;
     }
@@ -450,7 +477,7 @@ void LayoutInspector::Get3DSnapshotJson(const RefPtr<NG::FrameNode>& node)
         SendEmpty3DSnapJson();
         return;
     }
-    int totalParts = (filterSnapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
+    size_t totalParts = (filterSnapInfos.size() + SNAP_PARTITION_SIZE - 1) / SNAP_PARTITION_SIZE;
     int partNum = 1;
     for (size_t i = 0; i < filterSnapInfos.size(); i += SNAP_PARTITION_SIZE) {
         auto message = JsonUtil::Create(true);
@@ -498,6 +525,9 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     image = SkImages::RasterFromPixmap(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
     auto data = image->refEncodedData();
+    if (!data) {
+        data = SkPngEncoder::Encode(nullptr, image.get(), {});
+    }
 #else
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
@@ -553,7 +583,7 @@ void LayoutInspector::RegisterConnectCallback()
     }
 }
 
-void LayoutInspector::ProcessMessages(const std::string& message)
+std::pair<uint32_t, int32_t> LayoutInspector::ProcessMessages(const std::string& message)
 {
     if (message.find(START_PERFORMANCE_CHECK_MESSAGE, 0) != std::string::npos) {
         TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "performance check start");
@@ -564,17 +594,26 @@ void LayoutInspector::ProcessMessages(const std::string& message)
     }
     auto windowResult = NG::Inspector::ParseWindowIdFromMsg(message);
     uint32_t windowId = windowResult.first;
-    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID) {
+    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID && windowResult.second != QUERY_ABILITY) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
-        return;
+        return windowResult;
     }
 
-    int32_t methodIndex = windowResult.second;
-    if (methodIndex == 1) {
-        Create3DLayoutInfoByWinId(windowId);
-    } else {
-        CreateLayoutInfoByWinId(windowId);
+    switch (windowResult.second) {
+        case UI_TREE:
+            CreateLayoutInfoByWinId(windowId);
+            break;
+        case THREE_DIMENSIONS_TREE:
+            Create3DLayoutInfoByWinId(windowId);
+            break;
+        case QUERY_ABILITY:
+            SendInspctorAbilities();
+            break;
+        default:
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "unsupport message: %{public}s", message.c_str());
+            break;
     }
+    return windowResult;
 }
 
 void LayoutInspector::HandleStopRecord()
@@ -612,7 +651,7 @@ void LayoutInspector::HandleStartRecord()
     std::unique_lock<std::mutex> lock(recMutex_);
     SetRsProfilerNodeMountCallback(LayoutInspector::HandleInnerCallback);
     lock.unlock();
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
         container = Container::CurrentSafely();

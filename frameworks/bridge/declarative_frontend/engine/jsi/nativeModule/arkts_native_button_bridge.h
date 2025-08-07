@@ -74,6 +74,8 @@ private:
         ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<const char*>& stringParameters);
     static void PutButtonValuesParameters(
         ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<int32_t>& valuesVector);
+    static RefPtr<ResourceObject> ParseFontSizeResObj(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
+        int32_t argIndex);
 };
 } // namespace OHOS::Ace::NG
 

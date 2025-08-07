@@ -36,21 +36,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    float GetTrackThickness() const
-    {
-        return trackThickness_;
-    }
-
-    SizeF GetBlockSize() const
-    {
-        return blockSize_;
-    }
-
-    SizeF GetBlockHotSize() const
-    {
-        return blockHotSize_;
-    }
-
 private:
     void CalculateBlockOffset(
         LayoutWrapper* layoutWrapper, const RectF& contentRect, float selectOffset, Axis axis, bool reverse);
@@ -65,6 +50,7 @@ private:
         float width, float height, Axis direction, const Dimension& hotBlockShadowWidth, SliderModel::SliderMode mode);
     float CalculateSliderLength(float width, float height, Axis direction, SliderModel::SliderMode mode, bool Ends);
     void SetChildConstraint(RefPtr<LayoutWrapper> child, float maxWidth, float maxHeight);
+    std::optional<NG::LayoutPolicyProperty> GetLayoutPolicy(LayoutWrapper* layoutWrapper);
     
 private:
     float trackThickness_ = 0.0f;

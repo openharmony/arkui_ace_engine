@@ -106,17 +106,34 @@ public:
         colorLock_ = colorLock;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
 private:
     void RegisterVisibleAreaChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
     void OnModifyDone() override;
     void OnWindowHide() override;
     void OnWindowShow() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void StartAnimation();
     void StopAnimation();
     void FireBuilder();
@@ -129,6 +146,7 @@ private:
     void ClearFocusStyle();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    void OnColorConfigurationUpdate() override;
 
     Color defaultColor_;
     Color focusedColor_;

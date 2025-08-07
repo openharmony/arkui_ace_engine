@@ -42,6 +42,11 @@ public:
 
 private:
     static void HandleDifferentRadius(const JSRef<JSVal>& args);
+    static void ParseBorderRadiusResourceObj(const RefPtr<ResourceObject>& topLeftResObj,
+        const RefPtr<ResourceObject>& topRightResObj, const RefPtr<ResourceObject>& bottomLeftResObj,
+        const RefPtr<ResourceObject>& bottomRightResObj, NG::BorderRadiusProperty& borderRadius);
+    static void HandleFontObject(const JSCallbackInfo& info, CalcDimension& fontSize, std::string& weight,
+        RefPtr<ResourceObject>& fontSizeResObj);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MENU_H

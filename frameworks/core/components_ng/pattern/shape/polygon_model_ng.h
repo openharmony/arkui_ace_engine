@@ -27,6 +27,9 @@ public:
     void SetPoints(const ShapePoints& points) override;
 
     static void SetPoints(FrameNode* frameNode, const ShapePoints& points);
+    static void SetPoints(FrameNode* frameNode, const ShapePoints& points,
+        const std::vector<RefPtr<ResourceObject>>& xResObjArray,
+        const std::vector<RefPtr<ResourceObject>>& yResObjArray);
 };
 
 } // namespace OHOS::Ace::NG

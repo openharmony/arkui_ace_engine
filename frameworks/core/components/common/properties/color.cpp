@@ -235,6 +235,13 @@ std::string Color::ToString() const
     return ColorToString();
 }
 
+std::string Color::ToSvgFillColorKey() const
+{
+    std::ostringstream oss;
+    oss << ColorToString() << "_cs" << static_cast<int32_t>(colorSpace_);
+    return oss.str();
+}
+
 Color Color::FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
 {
     ColorParam colorValue {

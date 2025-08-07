@@ -18,7 +18,8 @@
 
 namespace OHOS::Ace::NG {
 
-void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, uint64_t nanoTimestamp)
+void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode,
+    uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
     ACE_SCOPED_TRACE("DynamicComponent TriggerOnAreaChangeCallback");
     auto context = PipelineContext::GetCurrentContext();
@@ -44,8 +45,8 @@ void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, 
                 static_cast<float>(renderPosition.second)});
         }
         bool logFlag = frameNode->IsDebugInspectorId();
-        auto currParentOffset =
-            frameNode->CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag) - currFrameRect.GetOffset();
+        auto currParentOffset = frameNode->CalculateOffsetRelativeToWindow(
+            nanoTimestamp, logFlag, areaChangeMinDepth) - currFrameRect.GetOffset();
         auto currHostParentOffset = OffsetF(context->GetHostParentOffsetToWindow().GetX(),
             context->GetHostParentOffsetToWindow().GetY());
         bool isCurrentNotSameRect = currFrameRect != frameNode->GetLastFrameRect() ||

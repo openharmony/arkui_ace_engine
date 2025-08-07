@@ -62,6 +62,7 @@ void RefreshNestedTestNg::SetUpTestSuite()
     RefreshTestNg::SetUpTestSuite();
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 }
 
 void RefreshNestedTestNg::TearDownTestSuite()

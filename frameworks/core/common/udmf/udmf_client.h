@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/common/frontend.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/form/resource/form_request_data.h"
 
@@ -35,21 +36,31 @@ struct PixelMapRecordDetails {
     AlphaType alphaType = AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
 };
 
+struct DragSummaryInfo {
+    std::map<std::string, int64_t> summary;
+    std::map<std::string, int64_t> detailedSummary;
+    std::map<std::string, std::vector<int32_t>> summaryFormat;
+    int32_t version { 0 };
+    int64_t totalSize { -1 };
+};
+
 class ACE_FORCE_EXPORT UdmfClient : public AceType {
     DECLARE_ACE_TYPE(UdmfClient, AceType);
 
 public:
     static UdmfClient* GetInstance();
     virtual RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) = 0;
+    virtual RefPtr<DataLoadParams> TransformDataLoadParams(napi_env env, napi_value napiValue) = 0;
     virtual RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) = 0;
+    virtual RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) = 0;
     virtual void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
+    virtual int32_t SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std::string& key) = 0;
     virtual int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) = 0;
-    virtual int32_t GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
-        std::map<std::string, int64_t>& detailedSummaryMap) = 0;
+    virtual int32_t GetSummary(std::string& key, DragSummaryInfo& dragSummaryInfo) = 0;
     virtual bool GetRemoteStatus(std::string& key) = 0;
     virtual void AddFormRecord(
         const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo) = 0;
@@ -83,7 +94,11 @@ public:
     virtual void GetLinkEntry(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
     virtual bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
-    virtual bool IsBelongsTo(const std::string& summary, const std::string& allowDropType) = 0;
+    virtual bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) = 0;
+#if defined(ACE_STATIC)
+    virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
+    virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) = 0;
+#endif
 };
 } // namespace OHOS::Ace
 #endif

@@ -1,0 +1,69 @@
+{
+    "name": "@koalaui/libarkts",
+    "version": "1.7.3+devel",
+    "bin": "./lib/es2panda",
+    "types": "./build/index.d.ts",
+    "exports": {
+        ".": "./lib/libarkts.js",
+        "./plugins/*": "./lib/plugins/*.js"
+    },
+    "files": [
+        "./lib/**/*",
+        "./build/**/*",
+        "./plugins/build/src/**/*"
+    ],
+    "config": {
+        "gen_version": "2.1.7",
+        "panda_sdk_path": "../../incremental/tools/panda/node_modules/@panda/sdk",
+        "ohos_panda_sdk_path": "../build/sdk",
+        "panda_sdk_version": "next"
+    },
+    "dependencies": {
+        "@koalaui/ets-tsc": "4.9.5-r5",
+        "@koalaui/build-common": "1.7.3+devel",
+        "@koalaui/compat": "1.7.3+devel",
+        "@koalaui/common": "1.7.3+devel",
+        "@koalaui/interop": "1.7.3+devel",
+        "node-addon-api": "8.0.0",
+        "node-api-headers": "0.0.5",
+        "commander": "10.0.1"
+    },
+    "devDependencies": {
+        "rollup": "^4.13.0",
+        "@rollup/plugin-commonjs": "^26.0.1",
+        "@rollup/plugin-node-resolve": "^15.3.0",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@rollup/plugin-typescript": "^11.1.6"
+    },
+    "scripts": {
+        "clean": "rimraf build native/build* ./.rollup.cache tsconfig.tsbuildinfo lib",
+        "clean:plugins": "rimraf plugins/build",
+        "compile:koala:interop": "npm run --prefix ../../interop compile",
+        "compile:meson": "cd native && meson setup build && meson compile -C build",
+        "copy:.node": "mkdir -p ./build/native/build && cp ./native/build/es2panda.node ./build/native/build",
+        "compile:native": "npm run compile:koala:interop && npm run compile:meson && npm run copy:.node",
+        "compile:src": "npx ets-tsc -p ./tsconfig.json",
+        "compile": "npm run compile:native && npm run compile:js",
+        "compile:js": "npm run compile:src && rollup -c rollup.lib.mjs && rollup -c rollup.es2panda.mjs",
+        "compile:gn": "npm run compile:koala:interop && npm run compile:js",
+        "compile:plugins": "npx rollup -c ./rollup.printer-plugin.mjs && npx rollup -c ./rollup.no-visitor-plugin.mjs ",
+        "restart": "node ../fast-arktsc --config arktsconfig.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/abc/main.abc --restart-stages && ninja -f build/abc/build.ninja",
+        "direct": "node ../fast-arktsc --config arktsconfig.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/abc/main.abc && ninja -f build/abc/build.ninja",
+        "run": "npm run compile && npm run compile:plugins && npm run direct",
+        "run:memo": "npm run compile && npm run compile:plugins && npm run compile --prefix ../memo-plugin && npm run memo",
+        "run:abc": "../../incremental/tools/panda/node_modules/@panda/sdk/linux_host_tools/bin/ark --load-runtimes=ets --boot-panda-files=../../incremental/tools/panda/node_modules/@panda/sdk/ets/etsstdlib.abc ./main.abc main.ETSGLOBAL::main",
+        "mocha": "PANDA_SDK_PATH=../../incremental/tools/panda/node_modules/@panda/sdk TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register --reporter-option maxDiffSize=0",
+        "mocha:ohos": "PANDA_SDK_PATH=../build/sdk TS_NODE_PROJECT=./test/tsconfig.json mocha -r tsconfig-paths/register --reporter-option maxDiffSize=0",
+        "test": "npm run compile:native && npm run mocha",
+        "test:golden": "npm run compile:native && TEST_GOLDEN=1 npm run mocha",
+        "compile:playground": "cd playground && meson setup build && meson compile -C build",
+        "run:playground": "npm run compile:playground && ./playground/build/playground.out",
+        "panda:sdk:clean": "cd ../../incremental/tools/panda && rimraf node_modules",
+        "panda:sdk:install": "cd ../../incremental/tools/panda && PANDA_SDK_VERSION=$npm_package_config_panda_sdk_version npm run panda:sdk:install",
+        "panda:sdk:reinstall": "npm run panda:sdk:clean && npm run panda:sdk:install",
+        "regenerate:current": "npm run compile -C ../../../arktscgen && node ../../../arktscgen --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize --debug",
+        "regenerate": "npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
+        "regenerate:ohos": "npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path $npm_package_config_ohos_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
+        "reinstall:regenerate": "npm run panda:sdk:reinstall && npm run regenerate"
+    }
+}

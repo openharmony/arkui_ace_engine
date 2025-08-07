@@ -73,9 +73,70 @@ public:
         PaintProperty::FromJson(json);
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColor, Color, PROPERTY_UPDATE_RENDER);
+    const std::optional<Color>& GetDividerColor() const
+    {
+        return propDividerColor_;
+    }
+
+    bool HasDividerColor() const
+    {
+        return propDividerColor_.has_value();
+    }
+
+    const Color& GetDividerColorValue() const
+    {
+        return propDividerColor_.value();
+    }
+
+    const Color& GetDividerColorValue(const Color& defaultValue) const
+    {
+        if (!HasDividerColor()) {
+            return defaultValue;
+        }
+        return propDividerColor_.value();
+    }
+
+    std::optional<Color> CloneDividerColor() const
+    {
+        return propDividerColor_;
+    }
+
+    void ResetDividerColor()
+    {
+        return propDividerColor_.reset();
+    }
+
+    void UpdateDividerColor(const Color& value)
+    {
+        if (SystemProperties::ConfigChangePerform()) {
+            UpdateDividerColorSetByUser(true);
+        }
+        if (propDividerColor_.has_value()) {
+            if (NearEqual(propDividerColor_.value(), value)) {
+                return;
+            }
+        }
+        propDividerColor_ = value;
+        UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
+
+    void UpdateDividerColorByTheme(const Color& value)
+    {
+        if (propDividerColor_.has_value()) {
+            if (NearEqual(propDividerColor_.value(), value)) {
+                return;
+            }
+        }
+        propDividerColor_ = value;
+        UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LineCap, LineCap, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(DividerRenderProperty);
+
+protected:
+    std::optional<Color> propDividerColor_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_RENDER_PROPERTY_H

@@ -45,6 +45,11 @@ struct JsComponent {
     const std::string methods;
 };
 
+// used for hybrid application
+enum class JsEngineHybridType {
+    NONE, DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
+};
+
 class JsEngineInstance {
 public:
     JsEngineInstance() = default;
@@ -344,6 +349,8 @@ public:
     virtual std::shared_ptr<void> SerializeValue(
         const std::shared_ptr<Framework::JsValue>& jsValue) { return nullptr; }
 
+    virtual void TriggerModuleSerializer() {}
+
     virtual void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) {}
 
     virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
@@ -536,9 +543,19 @@ public:
         return value;
     }
 
+    virtual bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+    {
+        return false;
+    }
+
     virtual napi_value GetFrameNodeValueByNodeId(int32_t nodeId)
     {
         return nullptr;
+    }
+
+    void UpdateHybridType(JsEngineHybridType type)
+    {
+        hybridType = type;
     }
 
 protected:
@@ -549,6 +566,7 @@ protected:
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawChildrenEvents_;
     bool needUpdate_ = false;
     PageUrlCheckFunc pageUrlCheckFunc_;
+    JsEngineHybridType hybridType = JsEngineHybridType::NONE;
 
 private:
     // weather the app has debugger.so.

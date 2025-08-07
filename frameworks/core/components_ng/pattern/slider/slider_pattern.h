@@ -139,10 +139,16 @@ public:
         return valueRatio_;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
+    void UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -227,6 +233,13 @@ public:
     {
         bubbleFlag_ = flag;
     }
+
+    void UpdateSliderParams(float trackThickness, SizeF blockSize, SizeF blockHotSize)
+    {
+        trackThickness_ = trackThickness;
+        blockSize_ = blockSize;
+        blockHotSize_ = blockHotSize;
+    }
     
     RefPtr<SliderContentModifier> GetSliderContentModifier() const
     {
@@ -258,10 +271,22 @@ public:
     void CalculateOffset();
     void MountToNavigation(RefPtr<FrameNode>& tipNode);
 
+    void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
+    void UpdateSliderComponentMedia();
+    void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
+    Axis GetDirection() const;
+
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -283,7 +308,6 @@ private:
     bool AtPanArea(const Offset& offset, const SourceType& sourceType);
 
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
-    Axis GetDirection() const;
 
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -333,29 +357,34 @@ private:
             event.action, event.degree);
         double mainDelta = GetCrownRotatePx(event);
         switch (event.action) {
-            case CrownAction::BEGIN:
-                crownMovingLength_ = valueRatio_ * sliderLength_;
-                crownEventNum_ = 0;
-                reachBoundary_ = false;
-                HandleCrownAction(mainDelta);
-                timeStampPre_ = GetCurrentTimestamp();
-                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
-                FireChangeEvent(SliderChangeMode::Begin);
-                OpenTranslateAnimation(SliderStatus::MOVE);
-                break;
             case CrownAction::UPDATE:
-                HandleCrownAction(mainDelta);
-                StartVibrateFeedback();
-                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
-                FireChangeEvent(SliderChangeMode::Moving);
-                OpenTranslateAnimation(SliderStatus::MOVE);
+                if (!isHandleCrownActionBegin_) {
+                    isHandleCrownActionBegin_ = true;
+                    crownMovingLength_ = valueRatio_ * sliderLength_;
+                    crownEventNum_ = 0;
+                    reachBoundary_ = false;
+                    HandleCrownAction(mainDelta);
+                    timeStampPre_ = GetCurrentTimestamp();
+                    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    FireChangeEvent(SliderChangeMode::Begin);
+                    OpenTranslateAnimation(SliderStatus::MOVE);
+                } else {
+                    HandleCrownAction(mainDelta);
+                    StartVibrateFeedback();
+                    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    FireChangeEvent(SliderChangeMode::Moving);
+                    OpenTranslateAnimation(SliderStatus::MOVE);
+                }
                 break;
             case CrownAction::END:
-            default:
+                isHandleCrownActionBegin_ = false;
                 bubbleFlag_ = false;
                 UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 FireChangeEvent(SliderChangeMode::End);
                 CloseTranslateAnimation();
+                break;
+            case CrownAction::BEGIN:
+            default:
                 break;
         }
     }
@@ -428,6 +457,10 @@ private:
         return skipGestureEvents_;
     }
     void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
+    void UpdateStepPointsAccessibilityText(
+        RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options);
+
+    void RemoveCallbackOnDetach(FrameNode* frameNode);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -472,6 +505,7 @@ private:
     bool reachBoundary_ = false;
     int64_t timeStampCur_ = 0;
     int64_t timeStampPre_ = 0;
+    bool isHandleCrownActionBegin_ = false;
 #endif
 
     RefPtr<TouchEventImpl> touchEvent_;

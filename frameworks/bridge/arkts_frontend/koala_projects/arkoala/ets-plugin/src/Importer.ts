@@ -118,7 +118,10 @@ function implementedPackages(kind: ArkUIImplementation): string[] {
         'ohos.router',
         'ohos.arkui.UIContext',
         'ohos.arkui.modifier',
-        'ohos.animator'
+        'ohos.animator',
+        'ohos.arkui.componentUtils',
+        'ohos.arkui.inspector',
+        'ohos.observer'
     ]
 
     assertUnreachable(kind)

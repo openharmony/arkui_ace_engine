@@ -17,55 +17,232 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Number_Number_Void } from "./grid"
 import { Callback_Number_Void } from "./alphabetIndexer"
-import { ArkStepperComponent } from "./../generated/ArkStepper"
-import { ArkStepperPeer } from "./../generated/peers/ArkStepperPeer"
-export interface Literal_Number_index {
-    index?: number;
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { StepperOpsHandWritten } from "./../handwritten"
+
+export class ArkStepperPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkStepperPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Stepper_construct(peerId, flags)
+        const _peer  = new ArkStepperPeer(_peerPtr, peerId, "Stepper", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setStepperOptionsAttribute(value?: StepperOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            const value_value_index  = value_value.index
+            let value_value_index_type : int32 = RuntimeType.UNDEFINED
+            value_value_index_type = runtimeType(value_value_index)
+            thisSerializer.writeInt8(value_value_index_type as int32)
+            if ((RuntimeType.OBJECT) == (value_value_index_type)) {
+                StepperOpsHandWritten.hookStepperAttributeStepperIndexImpl(this.peer.ptr,
+                    (value_value_index as Bindable<number>));
+                thisSerializer.release()
+                return
+            } else if ((RuntimeType.NUMBER) == (value_value_index_type)) {
+                const value_value_index_value  = value_value_index! as number
+                thisSerializer.writeNumber(value_value_index_value)
+            }
+        }
+        ArkUIGeneratedNativeModule._StepperInterface_setStepperOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFinishAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._StepperAttribute_onFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSkipAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._StepperAttribute_onSkip(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChangeAttribute(value: ((first: number,last: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._StepperAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onNextAttribute(value: ((first: number,last: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._StepperAttribute_onNext(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPreviousAttribute(value: ((first: number,last: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._StepperAttribute_onPrevious(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    _onChangeEvent_indexAttribute(callback: ((index: number) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._StepperAttribute__onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
-/** @memo:stable */
+export interface StepperOptions {
+    index?: number | Bindable<number>;
+}
+export type StepperInterface = (value?: StepperOptions) => StepperAttribute;
 export interface StepperAttribute extends CommonMethod {
-    /** @memo */
-    setStepperOptions(value?: Literal_Number_index): this
-    /** @memo */
-    onFinish(value: (() => void)): this
-    /** @memo */
-    onSkip(value: (() => void)): this
-    /** @memo */
-    onChange(value: ((first: number,last: number) => void)): this
-    /** @memo */
-    onNext(value: ((first: number,last: number) => void)): this
-    /** @memo */
-    onPrevious(value: ((first: number,last: number) => void)): this
-    /** @memo */
-    _onChangeEvent_index(callback: ((index: number) => void)): void
+    onFinish(value: (() => void) | undefined): this
+    onSkip(value: (() => void) | undefined): this
+    onChange(value: ((first: number,last: number) => void) | undefined): this
+    onNext(value: ((first: number,last: number) => void) | undefined): this
+    onPrevious(value: ((first: number,last: number) => void) | undefined): this
+    _onChangeEvent_index(callback: ((index: number | Bindable<number>) => void)): void
+}
+export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
+    onFinish_value?: (() => void) | undefined
+    onSkip_value?: (() => void) | undefined
+    onChange_value?: ((first: number,last: number) => void) | undefined
+    onNext_value?: ((first: number,last: number) => void) | undefined
+    onPrevious_value?: ((first: number,last: number) => void) | undefined
+    public onFinish(value: (() => void) | undefined): this {
+        return this
+    }
+    public onSkip(value: (() => void) | undefined): this {
+        return this
+    }
+    public onChange(value: ((first: number,last: number) => void) | undefined): this {
+        return this
+    }
+    public onNext(value: ((first: number,last: number) => void) | undefined): this {
+        return this
+    }
+    public onPrevious(value: ((first: number,last: number) => void) | undefined): this {
+        return this
+    }
+    public _onChangeEvent_index(callback: ((index: number | Bindable<number>) => void)): void {
+        throw new Error("Unimplmented")
+        }
+}
+export class ArkStepperComponent extends ArkCommonMethodComponent implements StepperAttribute {
+    getPeer(): ArkStepperPeer {
+        return (this.peer as ArkStepperPeer)
+    }
+    public setStepperOptions(value?: StepperOptions): this {
+        if (this.checkPriority("setStepperOptions")) {
+            const value_casted = value as (StepperOptions | undefined)
+            this.getPeer()?.setStepperOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFinish(value: (() => void) | undefined): this {
+        if (this.checkPriority("onFinish")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onFinishAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onSkip(value: (() => void) | undefined): this {
+        if (this.checkPriority("onSkip")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onSkipAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onChange(value: ((first: number,last: number) => void) | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            this.getPeer()?.onChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNext(value: ((first: number,last: number) => void) | undefined): this {
+        if (this.checkPriority("onNext")) {
+            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            this.getPeer()?.onNextAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPrevious(value: ((first: number,last: number) => void) | undefined): this {
+        if (this.checkPriority("onPrevious")) {
+            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            this.getPeer()?.onPreviousAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public _onChangeEvent_index(callback: ((index: number) => void)): void {
+        if (this.checkPriority("_onChangeEvent_index")) {
+            const callback_casted = callback as (((index: number) => void))
+            this.getPeer()?._onChangeEvent_indexAttribute(callback_casted)
+            return
+        }
+        return
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Stepper(
-  /** @memo */
-  style: ((attributes: StepperAttribute) => void) | undefined,
-  value?: Literal_Number_index | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: StepperAttribute) => void) | undefined,
+    value?: StepperOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkStepperComponent()
     })

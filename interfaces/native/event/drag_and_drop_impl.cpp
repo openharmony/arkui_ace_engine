@@ -22,6 +22,7 @@
 #include "pixelmap_native_impl.h"
 #include "securec.h"
 #include "udmf_async_client.h"
+#include "udmf_client.h"
 #include "unified_types.h"
 
 #ifdef __cplusplus
@@ -60,6 +61,7 @@ int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data)
     if (!event || !data || !dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    dragEvent->useDataLoadParams = false;
     dragEvent->unifiedData = data;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -69,7 +71,7 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* b
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !bundleName || !dragEvent || !dragEvent->bundleName ||
+    if (!event || !bundleName || !dragEvent ||
         static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -256,6 +258,7 @@ int32_t OH_ArkUI_DragAction_SetData(ArkUI_DragAction* dragAction, OH_UdmfData* d
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    dragActions->useDataLoadParams = false;
     dragActions->unifiedData = data;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -271,6 +274,22 @@ int32_t OH_ArkUI_DragAction_SetDragPreviewOption(ArkUI_DragAction* dragAction, A
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     dragActions->dragPreviewOption = *options;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragAction_SetDataLoadParams(
+    ArkUI_DragAction* dragAction, OH_UdmfDataLoadParams* dataLoadParams)
+{
+    if (!dragAction || !dataLoadParams) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->useDataLoadParams = true;
+    dragActions->dataLoadParams = dataLoadParams;
+
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -691,6 +710,26 @@ float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event)
     return result;
 }
 
+float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayX);
+    return result;
+}
+
+float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayY);
+    return result;
+}
+
 float OH_ArkUI_DragEvent_GetVelocityX(ArkUI_DragEvent* event)
 {
     if (!event) {
@@ -750,6 +789,21 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
     if (status != 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_UdmfDataLoadParams* dataLoadParams)
+{
+    if (!event || !dataLoadParams) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!dragEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragEvent->useDataLoadParams = true;
+    dragEvent->dataLoadParams = dataLoadParams;
+
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

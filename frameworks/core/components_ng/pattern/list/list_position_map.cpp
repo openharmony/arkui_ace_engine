@@ -54,7 +54,7 @@ ListPosMapUpdate ListPositionMap::CheckPosMapUpdateRule()
     return flag;
 }
 
-void ListPositionMap::UpdatePosMapStart(float delta, float& listCurrentPos, float space,
+void ListPositionMap::UpdatePosMapStart(float delta, double& listCurrentPos, float space,
     int32_t startIndex, float startPos, bool groupAtStart)
 {
     auto it = posMap_.find(startIndex);

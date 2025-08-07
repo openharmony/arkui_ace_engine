@@ -77,6 +77,11 @@ HitTestResult DynamicNode::TouchTest(const PointF& globalPoint, const PointF& pa
         return HitTestResult::OUT_OF_REGION;
     }
 
+    if (touchRestrict.hitTestType == SourceType::MOUSE ||
+        touchRestrict.touchEvent.sourceType == SourceType::MOUSE) {
+        return testResult;
+    }
+
     auto pattern = GetPattern<DynamicPattern>();
     CHECK_NULL_RETURN(pattern, testResult);
     auto context = GetContext();
@@ -84,7 +89,7 @@ HitTestResult DynamicNode::TouchTest(const PointF& globalPoint, const PointF& pa
     auto eventManager = context->GetEventManager();
     CHECK_NULL_RETURN(eventManager, testResult);
     auto delegate = AceType::MakeRefPtr<DynamicTouchDelegate>(pattern);
-    eventManager->RegisterTouchDelegate(touchRestrict.touchEvent.id, delegate);
+    eventManager->UpdateTouchDelegate(touchRestrict.touchEvent.id, delegate);
     return testResult;
 }
 } // namespace OHOS::Ace::NG

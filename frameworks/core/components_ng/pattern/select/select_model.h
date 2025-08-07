@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -30,6 +31,21 @@ namespace OHOS::Ace {
 namespace NG {
 struct MenuParam;
 }
+enum class SelectColorType {
+    FONT_COLOR,
+    BACKGROUND_COLOR,
+    SELECTED_OPTION_BG_COLOR,
+    SELECTED_OPTION_FONT_COLOR,
+    OPTION_BG_COLOR,
+    OPTION_FONT_COLOR,
+    MENU_BACKGROUND_COLOR
+};
+
+enum class SelectOptionType {
+    TEXT,
+    ICON
+};
+
 enum class ArrowPosition {
     END = 0,
     START,
@@ -56,6 +72,11 @@ struct SelectParam {
     std::string icon;
     std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon = nullptr;
     RefPtr<SymbolModifier> symbolModifier = nullptr;
+};
+
+struct SelectResObjParam {
+    RefPtr<ResourceObject> valueResObj = nullptr;
+    RefPtr<ResourceObject> iconResObj = nullptr;
 };
 
 class ACE_FORCE_EXPORT SelectModel {
@@ -123,6 +144,17 @@ public:
     virtual void ResetShowInSubWindow() = 0;
     virtual void SetShowDefaultSelectedIcon(bool show) = 0;
     virtual void ResetShowDefaultSelectedIcon() = 0;
+    virtual void CreateWithColorResourceObj(
+        const RefPtr<ResourceObject>& resObj, const SelectColorType& selectColorType) {};
+    virtual void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) {};
+    virtual void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetOptionFontColorByUser(bool isValidValue = true) {};
+    virtual void SetMenuBackgroundColorByUser(bool isValidValue = true) {};
+    virtual void SetFontColorByUser(bool isValidValue = true) {};
+    virtual void SetSelectedOptionFontColorByUser(bool isValidValue = true) {};
+    virtual void SetOptionBgColorByUser(bool isValidValue = true) {};
+    virtual void SetSelectedOptionBgColorByUser(bool isValidValue = true) {};
 
 private:
     static std::unique_ptr<SelectModel> instance_;

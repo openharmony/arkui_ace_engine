@@ -55,8 +55,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // auto frameNode = NavigatorModelNG::CreateFrameNode(id);
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    return {};
 }
 } // NavigatorModifier
 namespace NavigatorInterfaceModifier {
@@ -81,37 +80,43 @@ void SetNavigatorOptions1Impl(Ark_NativePointer node)
 } // NavigatorInterfaceModifier
 namespace NavigatorAttributeModifier {
 void ActiveImpl(Ark_NativePointer node,
-                Ark_Boolean value)
+                const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetActive(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    NavigatorModelNG::SetActive(frameNode, *convValue);
 }
 void TypeImpl(Ark_NativePointer node,
-              Ark_NavigationType value)
+              const Opt_NavigationType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto typeOpt = Converter::OptConvert<NavigatorType>(value);
+    auto typeOpt = Converter::OptConvert<NavigatorType>(*value);
     CHECK_NULL_VOID(typeOpt);
     NavigatorModelNG::SetType(frameNode, *typeOpt);
 }
 void TargetImpl(Ark_NativePointer node,
-                const Ark_String* value)
+                const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    NavigatorModelNG::SetUri(frameNode, Converter::Convert<std::string>(*value));
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    NavigatorModelNG::SetUri(frameNode, *convValue);
 }
 void ParamsImpl(Ark_NativePointer node,
-                const Ark_CustomObject* value)
+                const Opt_Object* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavigatorModelNG::SetParams(frameNode, convValue);
     LOGE("NavigatorAttributeModifier::ParamsImpl - the CustomObjects is not implemented yet!");
 }
 } // NavigatorAttributeModifier

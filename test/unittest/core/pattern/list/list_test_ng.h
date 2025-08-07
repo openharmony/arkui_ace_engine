@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/base/mock_system_properties.h"
 #undef private
 #undef protected
 
@@ -34,6 +36,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t TOTAL_ITEM_NUMBER = CONTENT_MAIN_SIZE / ITEM_MAIN_SIZE;
 constexpr int32_t GROUP_NUMBER = 4;
 constexpr int32_t GROUP_ITEM_NUMBER = 2;
+constexpr int32_t EVEN_NUMBER_MOD = 2;
 constexpr float GROUP_HEADER_LEN = 50.f;
 constexpr Dimension GROUP_MARGIN = 12.0_vp;
 constexpr float DEFAULT_STIFFNESS = 228;
@@ -123,6 +126,7 @@ protected:
 
     virtual void GetList();
     ListModelNG CreateList();
+    RefPtr<FrameNode> CreateList(const std::function<void(ListModelNG)>& callback);
     ListItemModelNG CreateListItem(V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     void CreateListItems(
         int32_t itemNumber = TOTAL_ITEM_NUMBER, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
@@ -161,6 +165,7 @@ protected:
     RefPtr<ListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
+    std::vector<RefPtr<ListItemGroupPattern>> itemGroupPatters_;
 };
 
 class ListItemGroupPatternTestNg : public TestNG {

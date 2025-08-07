@@ -72,8 +72,8 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
         FingerInfo fingerInfo = { point.second.GetOriginalReCovertId(), point.second.operatingHand,
-            point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()),
-            point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool };
+            point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),
+            point.second.GetGlobalDisplayOffset(), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
             && point.second.pointers.size() >= touchPoints_.size()) {
@@ -139,6 +139,8 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     touchPoints_[event.id].y = event.y;
     touchPoints_[event.id].screenX = event.screenX;
     touchPoints_[event.id].screenY = event.screenY;
+    touchPoints_[event.id].globalDisplayX = event.globalDisplayX;
+    touchPoints_[event.id].globalDisplayY = event.globalDisplayY;
     touchPoints_[event.id].sourceType = event.sourceType;
     touchPoints_[event.id].sourceTool = event.sourceTool;
     touchPoints_[event.id].originalId = event.originalId;
@@ -148,10 +150,13 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     point.y = event.y;
     point.screenX = event.screenX;
     point.screenY = event.screenY;
+    point.globalDisplayX = event.globalDisplayX;
+    point.globalDisplayY = event.globalDisplayY;
     point.sourceTool = event.sourceTool;
     point.originalId = event.originalId;
     touchPoints_[event.id].pointers = { point };
     touchPoints_[event.id].pointerEvent = event.pointerEvent;
+    touchPoints_[event.id].targetDisplayId = event.targetDisplayId;
 }
 
 std::string MultiFingersRecognizer::DumpGestureInfo() const

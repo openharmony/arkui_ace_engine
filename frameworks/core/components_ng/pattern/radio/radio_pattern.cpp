@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -28,7 +29,6 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 200;
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE = 150;
-constexpr float DEFAULT_CUSTOM_SCALE = 0.7F;
 constexpr float INDICATOR_MIN_SCALE = 0.8F;
 constexpr float INDICATOR_MAX_SCALE = 1.0F;
 constexpr float INDICATOR_MIN_OPACITY = 0.0F;
@@ -39,7 +39,7 @@ constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 728.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 46.0f;
-
+constexpr Color DEFAULT_INDICATOR_DARK_LIGHT_COLOR = Color(0xffffffff);
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -49,7 +49,7 @@ void RadioPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
-void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void RadioPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
@@ -57,6 +57,18 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
+}
+
+void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
+}
+
+void RadioPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void RadioPattern::SetBuilderState()
@@ -105,21 +117,43 @@ void RadioPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
     if (!makeFunc_.has_value() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateIndicatorType();
     }
     UpdateState();
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
+    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
+    InitDefaultMargin();
+    HandleEnabled();
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    InitFocusEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void RadioPattern::InitDefaultMargin()
+{
+    if (makeFunc_.has_value()) {
+        ResetDefaultMargin();
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.right = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.top = CalcLength(hotZoneVerticalPadding_.Value());
+    margin.bottom = CalcLength(hotZoneVerticalPadding_.Value());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -136,17 +170,19 @@ void RadioPattern::OnModifyDone()
         }
     }
     layoutProperty->UpdateMargin(margin);
-    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
-    HandleEnabled();
-    InitClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
-    InitFocusEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
+}
+
+void RadioPattern::ResetDefaultMargin()
+{
+    if (isUserSetMargin_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
 }
 
 void RadioPattern::InitFocusEvent()
@@ -242,13 +278,13 @@ void RadioPattern::ImageNodeCreate()
     CHECK_NULL_VOID(radioPaintProperty);
     auto imageProperty = builderChildNode_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageProperty);
-    imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
-    auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0));
-    UpdateInternalResource(imageSourceInfo);
-    auto* pipeline = host->GetContextWithCheck();
+    auto* pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
+    imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize(radioTheme));
+    auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0), radioTheme);
+    UpdateInternalResource(imageSourceInfo);
     auto indicatorColor = radioPaintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
     auto imageRenderProperty = builderChildNode_->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
@@ -659,14 +695,9 @@ void RadioPattern::startExitAnimation()
     }
 }
 
-ImageSourceInfo RadioPattern::GetImageSourceInfoFromTheme(int32_t RadioIndicator)
+ImageSourceInfo RadioPattern::GetImageSourceInfoFromTheme(int32_t RadioIndicator, const RefPtr<RadioTheme>& radioTheme)
 {
     ImageSourceInfo imageSourceInfo;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, imageSourceInfo);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_RETURN(pipeline, imageSourceInfo);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_RETURN(radioTheme, imageSourceInfo);
     switch (RadioIndicator) {
         case static_cast<int32_t>(RadioIndicatorType::TICK):
@@ -687,12 +718,10 @@ void RadioPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(sourceInfo.IsInternalResource());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto* pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (iconPath.empty()) {
         return;
@@ -726,50 +755,37 @@ void RadioPattern::LoadBuilder()
     }
 }
 
-void RadioPattern::InitializeParam(
-    Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding)
+CalcSize RadioPattern::GetChildContentSize(const RefPtr<RadioTheme>& radioTheme)
 {
+    CHECK_NULL_RETURN(radioTheme, CalcSize());
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    defaultWidth = radioTheme->GetWidth();
-    defaultHeight = radioTheme->GetHeight();
-    horizontalPadding = radioTheme->GetDefaultPaddingSize();
-    verticalPadding = radioTheme->GetDefaultPaddingSize();
-}
-
-CalcSize RadioPattern::GetChildContentSize()
-{
-    auto host = GetHost();
+    CHECK_NULL_RETURN(host, CalcSize());
     auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, CalcSize());
     auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         auto selfIdealSize = layoutConstraint->selfIdealSize;
         if (selfIdealSize->IsValid()) {
-            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_CUSTOM_SCALE;
-            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_CUSTOM_SCALE;
+            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
+            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
             auto length = std::min(width, height);
             return CalcSize(NG::CalcLength(length), NG::CalcLength(length));
         }
         if (selfIdealSize->Width().has_value()) {
-            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_CUSTOM_SCALE;
+            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
             return CalcSize(NG::CalcLength(width), NG::CalcLength(width));
         }
         if (selfIdealSize->Height().has_value()) {
-            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_CUSTOM_SCALE;
+            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
             return CalcSize(NG::CalcLength(height), NG::CalcLength(height));
         }
     }
-    Dimension defaultWidth;
-    Dimension defaultHeight;
-    Dimension horizontalPadding;
-    Dimension verticalPadding;
-    InitializeParam(defaultWidth, defaultHeight, horizontalPadding, verticalPadding);
-    auto width = (defaultWidth - horizontalPadding * RADIO_PADDING_COUNT) * DEFAULT_CUSTOM_SCALE;
-    auto height = (defaultHeight - verticalPadding * RADIO_PADDING_COUNT) * DEFAULT_CUSTOM_SCALE;
+    Dimension defaultWidth = radioTheme->GetWidth();
+    Dimension defaultHeight = radioTheme->GetHeight();
+    Dimension horizontalPadding = radioTheme->GetDefaultPaddingSize();
+    Dimension verticalPadding = radioTheme->GetDefaultPaddingSize();
+    auto width = (defaultWidth - horizontalPadding * RADIO_PADDING_COUNT) * DEFAULT_RADIO_IMAGE_SCALE;
+    auto height = (defaultHeight - verticalPadding * RADIO_PADDING_COUNT) * DEFAULT_RADIO_IMAGE_SCALE;
     return CalcSize(NG::CalcLength(width), NG::CalcLength(height));
 }
 
@@ -845,7 +861,7 @@ void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto* pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -1010,16 +1026,49 @@ void RadioPattern::DumpInfo ()
     }
 }
 
+void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    switch (radioColorType) {
+        case RadioColorType::CHECKED_BACKGROUND_COLOR:
+            paintProperty->UpdateRadioCheckedBackgroundColor(color);
+            break;
+        case RadioColorType::UNCHECKED_BORDER_COLOR:
+            paintProperty->UpdateRadioUncheckedBorderColor(color);
+            break;
+        case RadioColorType::INDICATOR_COLOR:
+            paintProperty->UpdateRadioIndicatorColor(color);
+            ImageNodeCreate();
+            break;
+        default:
+            break;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void RadioPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAndReturnIndex(customNode_);
-    if (makeFunc_.has_value()) {
-        customNode_ = BuildContentModifierNode();
-        CHECK_NULL_VOID(customNode_);
-        host->AddChild(customNode_, 0);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(customNode_);
+        customNode_ = nullptr;
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
     }
+    auto node = BuildContentModifierNode();
+    if (customNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(customNode_);
+    customNode_ = node;
+    CHECK_NULL_VOID(customNode_);
+    host->AddChild(customNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1065,5 +1114,48 @@ void RadioPattern::SetPrePageIdToLastPageId()
         CHECK_NULL_VOID(pageNode);
         SetPrePageId(pageNode->GetId());
     }
+}
+
+void RadioPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    auto pattern = host->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (!paintProperty->GetRadioCheckedBackgroundColorSetByUser().value_or(false)) {
+        auto activeColor = radioTheme->GetActiveColor();
+        paintProperty->UpdateRadioCheckedBackgroundColor(activeColor);
+    }
+    if (!paintProperty->GetRadioUncheckedBorderColorSetByUser().value_or(false)) {
+        Color inActiveColor;
+        if (pattern->GetUncheckedBorderColorByJSRadioTheme()) {
+            inActiveColor = radioTheme->GetInactiveColor();
+        } else {
+            inActiveColor = radioTheme->GetUnCheckBorderColor();
+        }
+        paintProperty->UpdateRadioUncheckedBorderColor(inActiveColor);
+    }
+    if (!paintProperty->GetRadioIndicatorColorSetByUser().value_or(false)) {
+        Color pointColor;
+        if (pattern->GetIndicatorColorByJSRadioTheme()) {
+            pointColor = radioTheme->GetPointColor();
+            paintProperty->UpdateRadioIndicatorColor(pointColor);
+        } else {
+            paintProperty->UpdateRadioIndicatorColor(DEFAULT_INDICATOR_DARK_LIGHT_COLOR);
+        }
+        ImageNodeCreate();
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

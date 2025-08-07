@@ -15,14 +15,32 @@
 
 #include "interfaces/inner_api/ui_session/ui_content_stub.h"
 
+#include "ipc_skeleton.h"
+#include "accesstoken_kit.h"
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "ui_content_errors.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
+bool UiContentStub::IsSACalling() const
+{
+    const auto tokenId = IPCSkeleton::GetCallingTokenID();
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        LOGD("SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+        return true;
+    }
+    LOGW("Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+    return false;
+}
+
 int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    if (!IsSACalling()) {
+        return -1;
+    }
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         LOGW("ui_session InterfaceToken check failed");
         return -1;
@@ -126,6 +144,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case SEND_COMMAND: {
             SendCommandKeyCodeInner(data, reply, option);
+            break;
+        }
+        case EXE_APP_AI_FUNCTION: {
+            ExeAppAIFunctionInner(data, reply, option);
             break;
         }
         default: {
@@ -325,6 +347,14 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     GetVisibleInspectorTree(nullptr);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::ExeAppAIFunctionInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string funcName = data.ReadString();
+    std::string params = data.ReadString();
+    reply.WriteInt32(ExeAppAIFunction(funcName, params, nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

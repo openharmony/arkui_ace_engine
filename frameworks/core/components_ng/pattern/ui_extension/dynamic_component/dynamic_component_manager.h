@@ -24,7 +24,8 @@ class ACE_EXPORT DynamicComponentManager {
 public:
     DynamicComponentManager() {}
     ~DynamicComponentManager() {};
-    static void TriggerOnAreaChangeCallback(FrameNode* frameNode, uint64_t nanoTimestamp);
+    static void TriggerOnAreaChangeCallback(
+        FrameNode* frameNode, uint64_t nanoTimestamp, int32_t areaChangeMinDepth = -1);
     static void HandleDynamicRenderOnAreaChange(FrameNode* frameNode, const RectF& currFrameRect,
         const OffsetF& currParentOffset, const OffsetF& currHostParentOffset);
 };

@@ -14,6 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_test_ng") {
+  module_name = "Component-Text"
+  module_output = ""
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
@@ -23,6 +25,7 @@ ace_unittest("text_test_ng") {
     "span_string_test_two_ng.cpp",
     "span_sub_test_ng.cpp",
     "span_test_ng.cpp",
+    "text_arkoala_test.cpp",
     "text_base.cpp",
     "text_pattern_test_ng.cpp",
     "text_test_ng.cpp",
@@ -35,9 +38,11 @@ ace_unittest("text_test_ng") {
     "text_testsix_ng.cpp",
     "text_testten_ng.cpp",
     "text_testthree_ng.cpp",
+    "text_testtwelve_ng.cpp",
     "text_testtwo_ng.cpp",
     "typed_text_test_ng.cpp",
   ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
   cflags = [ "-fno-access-control" ]
 }
 

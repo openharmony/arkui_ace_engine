@@ -16,6 +16,7 @@
 #include "bridge/card_frontend/card_frontend_declarative.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #ifdef NG_BUILD
@@ -165,6 +166,7 @@
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
+#include "bridge/declarative_frontend/style_string/js_text_layout.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
@@ -455,6 +457,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageAttachment", JSImageAttachment::JSBind },
     { "ParagraphStyleSpan", JSParagraphStyleSpan::JSBind},
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
+    { "TextLayout", JSTextLayout::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
@@ -553,6 +556,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageAttachment", JSImageAttachment::JSBind },
     { "ParagraphStyleSpan", JSParagraphStyleSpan::JSBind},
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
+    { "TextLayout", JSTextLayout::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
@@ -821,7 +825,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TouchRecognizer", JSTouchRecognizer::JSBind }
 };
 
-void RegisterBindFuncs(BindingTarget globalObj)
+void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)
 {
     auto container = Container::Current();
     if (container && container->IsDynamicRender() && !container->GetRegisterComponents().empty()) {
@@ -839,11 +843,15 @@ void RegisterBindFuncs(BindingTarget globalObj)
     }
 
     for (auto& iter : bindFuncs) {
+        if (isCustomEnvSupported &&
+            supportedTargetsInCustomEnv.find(iter.first) == supportedTargetsInCustomEnv.end()) {
+            continue;
+        }
         iter.second(globalObj);
     }
 }
 
-void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
+void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
@@ -891,7 +899,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSEllipseShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
 
-    RegisterBindFuncs(globalObj);
+    RegisterBindFuncs(globalObj, isCustomEnvSupported);
     RegisterExtraViews(globalObj);
 }
 
@@ -1025,19 +1033,6 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsUpdateDirty2ForAnimateTo(BindingTarget globalObj)
-{
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> updateDirty2ForAnimateToFunc = globalObject->GetProperty("updateDirty2ForAnimateTo");
-    if (updateDirty2ForAnimateToFunc->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(updateDirty2ForAnimateToFunc);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUpdateDirty2ForAnimateTo(callback);
-    }
-}
-
 void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativeEngine)
 {
     std::stringstream input(modules);
@@ -1046,7 +1041,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativ
         RegisterModuleByName(globalObj, moduleName);
     }
     JsUINodeRegisterCleanUp(globalObj);
-    JsUpdateDirty2ForAnimateTo(globalObj);
 
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -1105,7 +1099,7 @@ void JsBindFormViews(
     }
 }
 
-void JsBindViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSViewAbstract::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
@@ -1140,7 +1134,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
         JsRegisterModules(globalObj, jsModules, nativeEngine);
     } else {
-        RegisterAllModule(globalObj, nativeEngine);
+        RegisterAllModule(globalObj, nativeEngine, isCustomEnvSupported);
     }
 }
 

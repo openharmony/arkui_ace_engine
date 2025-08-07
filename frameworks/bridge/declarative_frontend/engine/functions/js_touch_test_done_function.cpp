@@ -46,7 +46,9 @@ bool JsTouchTestDoneFunction::Execute(
 
 JSRef<JSObject> JsTouchTestDoneFunction::CreateGestureEventObject(const std::shared_ptr<BaseGestureEvent>& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objTemp = JSRef<JSObjTemplate>::New();
+    objTemp->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objTemp->NewInstance();
     CommonUtils::SetBaseGestureEventInfo(obj, info);
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
@@ -71,6 +73,7 @@ JSRef<JSObject> JsTouchTestDoneFunction::CreateGestureEventObject(const std::sha
     obj->SetPropertyObject("fingerList", fingerArr);
     auto target = CommonUtils::CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->Wrap<BaseGestureEvent>(info.get());
     return obj;
 }
 } // namespace OHOS::Ace::Framework

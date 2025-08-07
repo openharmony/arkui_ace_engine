@@ -1017,6 +1017,7 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
 {
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     RefreshModelNG refreshModel;
     refreshModel.Create();
     auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());

@@ -885,8 +885,10 @@ void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrap
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
     std::optional<SizeF> currentTextSize;
-    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
-        frameNode, currentTextSize));
+    if (frameNode->GetTag() != V2::SAVE_BUTTON_ETS_TAG) {
+        securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(
+            securityComponentLayoutProperty, frameNode, currentTextSize));
+    }
     securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
     securityComponentLayoutProperty->UpdateIsIconExceeded(GetIconExceededFlag(securityComponentLayoutProperty,
         frameNode));

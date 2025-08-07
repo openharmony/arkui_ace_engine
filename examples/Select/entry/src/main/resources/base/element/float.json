@@ -3,6 +3,38 @@
     {
       "name": "float_1",
       "value": "20.6"
+    },
+    {
+      "name": "float_2",
+      "value": "2"
+    },
+    {
+      "name": "float_80",
+      "value": "30"
+    },
+    {
+      "name": "float_n30",
+      "value": "-30"
+    },
+    {
+      "name": "float_30",
+      "value": "30.6"
+    },
+    {
+      "name": "float_100",
+      "value": "100"
+    },
+    {
+      "name": "float_50",
+      "value": "50"
+    },
+    {
+      "name": "integer_145",
+      "value": "1.45"
+    },
+    {
+      "name": "float_8",
+      "value": "8"
     }
   ]
 }

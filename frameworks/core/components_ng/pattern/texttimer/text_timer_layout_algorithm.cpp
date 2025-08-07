@@ -24,24 +24,50 @@ void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto childConstraint = layoutProperty->CreateChildConstraint();
-
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto& minSize = constraint->minSize;
+    auto& maxSize = constraint->maxSize;
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthFix()) {
+            maxSize.SetWidth(std::numeric_limits<float>::max());
+            childConstraint.maxSize.SetWidth(std::numeric_limits<float>::max());
+        }
+        if (layoutPolicy->IsHeightFix()) {
+            maxSize.SetHeight(std::numeric_limits<float>::max());
+            childConstraint.maxSize.SetHeight(std::numeric_limits<float>::max());
+        }
+        if (layoutPolicy->IsWidthMatch()) {
+            maxSize.SetWidth(constraint->parentIdealSize.Width().value());
+            childConstraint.maxSize.SetWidth(constraint->parentIdealSize.Width().value());
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            maxSize.SetHeight(constraint->parentIdealSize.Height().value());
+            childConstraint.maxSize.SetHeight(constraint->parentIdealSize.Height().value());
+        }
+    }
     textWrapper->Measure(childConstraint);
 
     auto textSize = textWrapper->GetGeometryNode()->GetFrameSize();
     OptionalSizeF textTimerFrameSize = { textSize.Width(), textSize.Height() };
     auto padding = layoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, textTimerFrameSize);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    const auto& minSize = constraint->minSize;
-    const auto& maxSize = constraint->maxSize;
     textTimerFrameSize.Constrain(minSize, maxSize);
     if (constraint->selfIdealSize.Width()) {
         textTimerFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
     }
     if (constraint->selfIdealSize.Height()) {
         textTimerFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            textTimerFrameSize.SetWidth(constraint->parentIdealSize.Width().value());
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            textTimerFrameSize.SetHeight(constraint->parentIdealSize.Height().value());
+        }
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(textTimerFrameSize.ConvertToSizeT());
 }

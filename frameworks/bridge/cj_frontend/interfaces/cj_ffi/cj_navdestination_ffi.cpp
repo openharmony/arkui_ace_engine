@@ -320,7 +320,7 @@ void FfiOHOSAceFrameworkNavdestinationIgnoreLayoutSafeArea(VectorInt32Ptr types,
 {
     const auto& typesArray = *reinterpret_cast<std::vector<int32_t>*>(types);
     const auto& edgeArray = *reinterpret_cast<std::vector<int32_t>*>(edges);
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     if (typesArray.size() > 0) {
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
         for (size_t i = 0; i < typesArray.size(); ++i) {

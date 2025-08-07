@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -54,8 +53,8 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern, public LinearLazyContainer {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern, LinearLazyContainer);
+class ListPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
@@ -156,6 +155,8 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     bool GetIsInViewInGroup(int32_t groupIndex, int32_t index);
+    static bool IsForwardStep(FocusStep step, bool isVertical, bool isDefault);
+    static bool IsBackwardStep(FocusStep step, bool isVertical, bool isDefault);
     virtual void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
@@ -179,7 +180,7 @@ public:
         return itemPosition_;
     }
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return currentOffset_;
     }
@@ -415,6 +416,17 @@ public:
         focusGroupIndex_ = index;
     }
 
+    std::optional<int32_t> GetFocusIndex() const
+    {
+        return focusIndex_;
+    }
+
+    void UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, int32_t indexInGroup, int32_t count);
+    bool CheckFocusOnHeaderOrFooter(const RefPtr<FocusHub>& childFocusHub);
+    void AdjustFocusGroupIndex(int32_t index, int32_t& indexInGroup);
+
+    void FireFocusInListItemGroup(int32_t groupIndexInList);
+
     void ResetGroupIndexChanged()
     {
         groupIndexChanged_ = false;
@@ -427,11 +439,6 @@ public:
     void ResetGroupIndexInView()
     {
         groupIndexInView_ = true;
-    }
-    
-    void SetFocusIndexChangedByListItemGroup(bool focusIndexChangedByListItemGroup)
-    {
-        focusIndexChangedByListItemGroup_ = focusIndexChangedByListItemGroup;
     }
 
     void SetGroupIndexInView(bool groupIndexInView)
@@ -487,6 +494,7 @@ protected:
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     void SetLayoutAlgorithmParams(
         const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -526,8 +534,7 @@ protected:
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
-    void UpdateOffsetHelper(float lastDelta);
-
+    void ResetScrollToIndexParams();
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -536,6 +543,8 @@ private:
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
+    bool JudgeCanOverScrollStart();
+    bool JudgeCanOverScrollEnd();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -571,7 +580,6 @@ private:
         ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
         ScrollAlign align, float& targetPos);
-    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     // multiSelectable
     void ClearMultiSelect() override;
@@ -615,20 +623,22 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
-    bool ScrollToLastFocusIndex(KeyCode keyCode);
+    bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
+    void HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub);
     void FireFocus();
-    void FireFocusInListItemGroup();
-    void ProcessFocusEvent(const KeyEvent& event, bool indexChanged);
-    void RequestFocusForItem();
-    bool needTriggerFocus_ = false;
-    bool triggerFocus_ = false;
+    bool CheckValidInList(int32_t index);
+    void ProcessFocusEvent(bool indexChanged);
+    void RequestFocusForItem(int32_t index, int32_t indexInGroup);
+    RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
+    void ResetForExtScroll() override;
+
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
     float prevEndOffset_ = 0.f;
-    float currentOffset_ = 0.0f;
+    double currentOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
     std::optional<int32_t> lastSnapTargetIndex_;
 
@@ -637,7 +647,6 @@ private:
     bool snapTrigByScrollBar_ = false;
     bool groupIndexChanged_ = false;
     bool groupIndexInView_ = true;
-    bool focusIndexChangedByListItemGroup_ = false;
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
@@ -683,6 +692,7 @@ private:
 
     bool prevMeasureBreak_ = false;
     int32_t draggingIndex_ = -1;
+    bool heightEstimated_ = false;
 };
 } // namespace OHOS::Ace::NG
 

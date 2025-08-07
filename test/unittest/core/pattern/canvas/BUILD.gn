@@ -20,4 +20,5 @@ ace_unittest("canvas_test_ng") {
     "canvas_custom_paint_method_testtwo_ng.cpp",
     "canvas_test_ng.cpp",
   ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
 }

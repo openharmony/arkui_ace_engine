@@ -161,3 +161,23 @@ ace_unittest("form_pattern_test") {
     ]
   }
 }
+
+ohos_unittest("form_special_style_test") {
+  module_out_path = pattern_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+    "form_special_style_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+  ]
+  external_deps = [ 
+    "bundle_framework:appexecfwk_base",
+    "form_fwk:fmskit_native",
+  ]
+}

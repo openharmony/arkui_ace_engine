@@ -24,7 +24,7 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 inline std::string ToString(const CheckBoxGroupPaintProperty::SelectStatus& status)
 {
-    static const LinearEnumMapNode<CheckBoxGroupPaintProperty::SelectStatus, std::string> table[] = {
+    const LinearEnumMapNode<CheckBoxGroupPaintProperty::SelectStatus, std::string> table[] = {
         { CheckBoxGroupPaintProperty::SelectStatus::ALL, "ALL" },
         { CheckBoxGroupPaintProperty::SelectStatus::PART, "PART" },
         { CheckBoxGroupPaintProperty::SelectStatus::NONE, "NONE" },
@@ -662,15 +662,15 @@ bool CheckBoxGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(checkBoxTheme, result);
     auto checkBoxGroupPaintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_RETURN(checkBoxGroupPaintProperty, result);
-    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupSelectedColorFlagByUser()) {
+    if (!checkBoxGroupPaintProperty->GetCheckBoxGroupSelectedColorFlagByUserValue(false)) {
         checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(checkBoxTheme->GetActiveColor());
         result = true;
     }
-    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupUnSelectedColorFlagByUser()) {
+    if (!checkBoxGroupPaintProperty->GetCheckBoxGroupUnSelectedColorFlagByUserValue(false)) {
         checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(checkBoxTheme->GetInactiveColor());
         result = true;
     }
-    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupCheckMarkColorFlagByUser()) {
+    if (!checkBoxGroupPaintProperty->GetCheckBoxGroupCheckMarkColorFlagByUserValue(false)) {
         checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(checkBoxTheme->GetPointColor());
         result = true;
     }

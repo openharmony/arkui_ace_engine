@@ -60,14 +60,6 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
     auto iconNode = iconWrap_->GetHostNode();
     CHECK_NULL_VOID(iconNode);
 
-    if (property->GetImageSourceInfo().has_value()) {
-        auto imagePattern = iconNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(imagePattern);
-        auto size = imagePattern->GetRawImageSize();
-        alpha_ =
-            (LessOrEqual(size.Width(), 0.0) || LessOrEqual(size.Height(), 0.0)) ? 1.0 : size.Height() / size.Width();
-    }
-
     width_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
         theme->GetIconSize().ConvertToPx();
     height_ = width_ * alpha_;

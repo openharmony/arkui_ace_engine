@@ -24,6 +24,7 @@ ace_unittest("gestures_test_ng") {
     "gesture_recognizer_test_ng.cpp",
     "gesture_referee_test_ng.cpp",
     "gestures_common_test_ng.cpp",
+    "gesture_model_test_ng.cpp",
     "long_press_recognizer_test_ng.cpp",
     "multi_fingers_recognizer_test_ng.cpp",
     "pan_recognizer_axis_base_test_ng.cpp",

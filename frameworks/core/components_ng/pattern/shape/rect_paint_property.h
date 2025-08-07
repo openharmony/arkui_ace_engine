@@ -211,7 +211,15 @@ public:
         UpdateRadius(propBottomLeftRadius_, value);
     }
 
-    void UpdateRadius(std ::optional<Radius>& radiusOpt, const Radius& value)
+    void UpdateRadius(const Radius& value)
+    {
+        UpdateRadius(propTopLeftRadius_, value);
+        UpdateRadius(propTopRightRadius_, value);
+        UpdateRadius(propBottomLeftRadius_, value);
+        UpdateRadius(propBottomRightRadius_, value);
+    }
+
+    void UpdateRadius(std::optional<Radius>& radiusOpt, const Radius& value)
     {
         // Dimension(0) is a valid value in radius.
         if (!value.GetX().IsNonNegative() && !value.GetY().IsNonNegative()) {

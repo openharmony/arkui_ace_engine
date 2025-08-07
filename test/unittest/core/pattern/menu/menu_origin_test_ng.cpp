@@ -19,7 +19,6 @@
 #define private public
 #define protected public
 
-#include "base/memory/ace_type.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -28,11 +27,12 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "base/memory/ace_type.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -1327,7 +1328,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_THIRD, OFFSET_THIRD);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    auto pipelineContext = DialogManager::GetMainPipelineContext(menuNode);
     ASSERT_NE(pipelineContext, nullptr);
     /**
      * @tc.steps: step2. the window can accommodate preview, placement is LEFT_TOP, layout preview and menu

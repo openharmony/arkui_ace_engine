@@ -11662,6 +11662,20 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _FrameNode_reuse(ptr: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._FrameNode_reuse(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _FrameNode_recycle(ptr: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._FrameNode_recycle(ptr)
+        }
+        throw new Error("Not implemented")
+    }
     static _PixelMap_ctor(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -18337,6 +18351,27 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._XComponentController_stopImageAnalyzer(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _XComponentController_setOnSurfaceCreatedCallback(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._XComponentController_setOnSurfaceCreatedCallback(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _XComponentController_setOnSurfaceChangedCallback(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._XComponentController_setOnSurfaceChangedCallback(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _XComponentController_setOnSurfaceDestroyedCallback(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._XComponentController_setOnSurfaceDestroyedCallback(ptr, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }

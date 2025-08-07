@@ -21,7 +21,6 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkLocationButtonCreate();
-CJ_EXPORT void FfiOHOSAceFrameworkLocationButtonOnClick(void (*callback)(CJClickInfo event, int32_t result));
 CJ_EXPORT void FfiOHOSAceFrameworkLocationButtonCreateWithButtonOptions(int32_t icon, int32_t text, int32_t buttonType);
 }
 #endif // OHOS_ACE_FRAMEWORK_CJ_LOCATION_BUTTON_FFI_H

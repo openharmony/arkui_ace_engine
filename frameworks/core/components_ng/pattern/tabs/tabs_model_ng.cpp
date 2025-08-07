@@ -1456,10 +1456,14 @@ void TabsModelNG::HandleBarGridGutter(FrameNode* frameNode, const RefPtr<Resourc
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         CHECK_NULL_VOID(tabBarNode);
         CalcDimension result;
+        BarGridColumnOptions tempUsed;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            tempUsed.gutter = result;
+        }
         BarGridColumnOptions columnOption;
         ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
-        ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        columnOption.gutter = result;
+        columnOption.gutter = tempUsed.gutter;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
@@ -1480,10 +1484,14 @@ void TabsModelNG::HandleBarGridMargin(FrameNode* frameNode, const RefPtr<Resourc
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         CHECK_NULL_VOID(tabBarNode);
         CalcDimension result;
+        BarGridColumnOptions tempUsed;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            tempUsed.margin = result;
+        }
         BarGridColumnOptions columnOption;
         ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
-        ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        columnOption.margin = result;
+        columnOption.margin = tempUsed.margin;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
@@ -1541,12 +1549,14 @@ void TabsModelNG::HandleDividerColor(FrameNode* frameNode, const RefPtr<Resource
         ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, node);
         if (ResourceParseUtils::ParseResColor(resObj, result)) {
             divider.color = result;
+            TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), true);
         } else {
             auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipelineContext);
             auto tabTheme = pipelineContext->GetTheme<TabTheme>();
             CHECK_NULL_VOID(tabTheme);
             divider.color = tabTheme->GetDividerColor();
+            TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), false);
         }
         TabsModelNG::SetDivider(AceType::RawPtr(node), divider);
         tabsPattern->UpdateDividerColor();
@@ -1623,8 +1633,12 @@ void TabsModelNG::HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<R
         CalcDimension result;
         ScrollableBarModeOptions option;
         ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, ScrollableBarModeOptions, option, tabBarNode);
-        ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        option.margin = result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || Negative(result.Value()) ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            option.margin = 0.0_vp;
+        } else {
+            option.margin = result;
+        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, ScrollableBarModeOptions, option, tabBarNode);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
@@ -1648,13 +1662,12 @@ void TabsModelNG::HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr
         CHECK_NULL_VOID(tabBarNode);
         auto target = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(target);
-        if (target->GetBackgroundEffect().has_value()) {
-            EffectOption option = target->GetBackgroundEffect().value();
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            option.color = result;
-            TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
-        }
+        EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
+        option.isWindowFocused = true; // set to default value
+        Color result = Color::TRANSPARENT;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        option.color = result;
+        TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1667,25 +1680,26 @@ void TabsModelNG::HandleBackgroundEffectInactiveColor(FrameNode* frameNode, cons
     CHECK_NULL_VOID(pattern);
     const std::string key = "tabsBackGroundEffectInactiveColor";
     pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode),
-                                        weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                                        const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), resObj](const RefPtr<ResourceObject>& dummyResObj) {
         auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
         CHECK_NULL_VOID(tabsNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         CHECK_NULL_VOID(tabBarNode);
         auto target = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(target);
-        if (target->GetBackgroundEffect().has_value()) {
-            EffectOption option = target->GetBackgroundEffect().value();
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            option.inactiveColor = result;
+        EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
+        option.isWindowFocused = true; // set to default value
+        if (!resObj) {
             TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
+            return;
         }
+        Color result = Color::TRANSPARENT;
+        option.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
+        option.inactiveColor = result;
+        TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
     };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 
 void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
@@ -1696,24 +1710,25 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     CHECK_NULL_VOID(pattern);
     const std::string key = "tabsBackGroundBlurStyle";
     pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode),
-                                        weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                                        const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), resObj](const RefPtr<ResourceObject>& dummyResObj) {
         auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
         CHECK_NULL_VOID(tabsNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         CHECK_NULL_VOID(tabBarNode);
         auto target = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(target);
-        if (target->GetBackBlurStyle().has_value()) {
-            BlurStyleOption styleOption = target->GetBackBlurStyle().value();
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            styleOption.inactiveColor = result;
+        BlurStyleOption styleOption = target->GetBackBlurStyle().value_or(BlurStyleOption{});
+        styleOption.isWindowFocused = true; // set to default value
+        if (!resObj) {
             TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
+            return;
         }
+        Color result = Color::TRANSPARENT;
+        styleOption.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
+        styleOption.inactiveColor = result;
+        TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
     };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

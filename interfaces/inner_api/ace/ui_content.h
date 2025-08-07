@@ -505,7 +505,10 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) {};
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
+        bool isRouter = true, bool ignoreOrientation = false) {}
+
+    virtual void SetForceSplitConfig(const std::string& configJsonStr) {}
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
 

@@ -37,6 +37,9 @@
 #include "core/event/pointer_event.h"
 #include "core/common/container_consts.h"
 
+struct _ArkUINodeAdapter;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -397,12 +400,20 @@ public:
         return frameNode->GetContext();
     }
 
+    RenderContext* GetRenderContext() const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetRenderContext().GetRawPtr();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
@@ -433,6 +444,13 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         return DynamicCast<T>(host->GetOrCreateEventHub<T>());
+    }
+
+    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(flag);
     }
 
     // Called after frameNode RebuildRenderContextTree.
@@ -518,6 +536,11 @@ public:
     virtual int32_t GetDragRecordSize()
     {
         return -1;
+    }
+
+    virtual bool OnBackPressedCallback()
+    {
+        return false;
     }
 
     virtual void HandleOnDragStatusCallback(
@@ -612,19 +635,6 @@ public:
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
-    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
-    {
-        return nullptr;
-    }
-
-    /**
-     * @brief To override FrameNode::GetTotalChildCount in Arkoala
-     */
-    virtual int32_t GetTotalChildCount() const
-    {
-        return -1;
-    }
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -648,10 +658,12 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        layoutProperty->CheckLocalizedAlignment(layoutDirection);
         // Reset for safeAreaExpand's Cache in GeometryNode
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
         layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+        layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
@@ -686,15 +698,6 @@ public:
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
-    virtual ScrollWindowAdapter* GetScrollWindowAdapter()
-    {
-        return nullptr;
-    }
-    virtual ScrollWindowAdapter* GetOrCreateScrollWindowAdapter()
-    {
-        return nullptr;
-    }
-
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
     virtual bool OnThemeScopeUpdate(int32_t themeScopeId)
@@ -706,7 +709,7 @@ public:
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
-    
+
     void RemoveResObj(const std::string& key);
 
     void AddResCache(const std::string& key, const std::string& value);
@@ -747,7 +750,7 @@ public:
         return false;
     }
 
-    void UnRegisterResource(const std::string& key);
+    virtual void UnRegisterResource(const std::string& key);
 
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
@@ -770,6 +773,57 @@ public:
     {
         return false;
     }
+
+    virtual void UpdateBorderResource() {};
+    virtual void UpdateMarginResource() {};
+    virtual bool DetachHostNodeAdapter(const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool GetNodeAdapterComponent(ArkUINodeAdapterHandle handle, const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperEnabled()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperCustomized()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelper(
+        LayoutWrapper* layoutWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+    {
+        return false;
+    }
+    virtual bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM)
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreEnabled()
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreCustomized()
+    {
+        return false;
+    }
+    virtual void PostponedTaskForIgnore() {}
+    virtual bool NeedCustomizeSafeAreaPadding()
+    {
+        return false;
+    }
+    virtual PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
+    {
+        return safeAreaPadding;
+    }
+    virtual bool ChildTentativelyLayouted()
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

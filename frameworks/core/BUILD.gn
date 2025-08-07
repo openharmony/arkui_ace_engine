@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -132,6 +131,7 @@ template("ace_core_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
@@ -165,6 +165,7 @@ template("ace_core_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
+      "common/color_inverter.cpp",
 
       # declaration
       "components/declaration/badge/badge_declaration.cpp",
@@ -503,6 +504,10 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
 
+    deps += [
+      "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform",
+    ]
+
     if (qrcodegen_support) {
       deps += [
         "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
@@ -525,7 +530,7 @@ template("ace_core_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
 
@@ -675,6 +680,7 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
+      defines += [ "WINDOW_SCENE_SUPPORTED" ]
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
@@ -760,6 +766,7 @@ template("ace_core_ng_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
@@ -793,6 +800,7 @@ template("ace_core_ng_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
+      "common/color_inverter.cpp",
 
       # event
       "event/axis_event.cpp",
@@ -839,6 +847,7 @@ template("ace_core_ng_source_set") {
       # pipeline
       "pipeline/base/constants.cpp",
       "pipeline/base/element_register.cpp",
+      "pipeline/base/element_register_multi_thread.cpp",
       "pipeline/base/related_node.cpp",
       "pipeline/container_window_manager.cpp",
       "pipeline/pipeline_base.cpp",
@@ -1041,6 +1050,10 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
+    deps += [
+      "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform",
+    ]
+
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
     } else {
@@ -1081,6 +1094,7 @@ template("ace_core_ng_source_set") {
           "napi:ace_napi",
           "webview:libnweb",
           "webview:cj_webview_ffi",
+          "webview:ohos_base_glue_source",
           "window_manager:libwm",
         ]
       } else {
@@ -1119,6 +1133,7 @@ template("ace_core_ng_source_set") {
       }
     }
     if (defined(config.window_scene_support) && config.window_scene_support) {
+      defines += [ "WINDOW_SCENE_SUPPORTED" ]
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
@@ -1163,7 +1178,7 @@ template("ace_core_ng_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
 

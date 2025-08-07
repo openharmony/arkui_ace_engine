@@ -32,7 +32,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -75,8 +74,8 @@ constexpr float SWIPER_CURVE_MASS = 1.0f;
 constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
 constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 
-class SwiperPattern : public NestableScrollContainer, public LinearLazyContainer {
-    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer, LinearLazyContainer);
+class SwiperPattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 
 public:
@@ -329,6 +328,13 @@ public:
         }
     }
 
+    void UpdateOnScrollStateChangedEvent(ChangeEvent&& event)
+    {
+        auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->AddOnScrollStateChangedEvent(std::make_shared<ChangeEvent>(event));
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -360,6 +366,10 @@ public:
     void SwipeTo(int32_t index);
     void ChangeIndex(int32_t index, bool useAnimation);
     void ChangeIndex(int32_t index, SwiperAnimationMode mode);
+
+    void ChangeIndexMultiThread(int32_t index, bool useAnimation);
+    void ChangeIndexMultiThread(int32_t index, SwiperAnimationMode mode);
+    void SetCachedCountMultiThread(int32_t cachedCount);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -483,13 +493,7 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
-    void SetCachedCount(int32_t cachedCount)
-    {
-        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
-            SetLazyLoadFeature(true);
-        }
-        cachedCount_ = cachedCount;
-    }
+    void SetCachedCount(int32_t cachedCount);
 
     void SetFinishCallbackType(FinishCallbackType finishCallbackType)
     {
@@ -512,6 +516,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    std::shared_ptr<SwiperArrowParameters> GetSwiperArrowParameters() const;
     virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -527,7 +532,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void SwipeToWithoutAnimation(int32_t index);
+    void SwipeToWithoutAnimation(int32_t index, bool byUser = false);
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
@@ -840,6 +845,12 @@ public:
         return targetIndex_;
     }
 
+    void OnFontScaleConfigurationUpdate() override;
+    void SetMainSizeIsMeasured(bool mainSizeIsMeasured)
+    {
+        mainSizeIsMeasured_ = mainSizeIsMeasured;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -892,6 +903,30 @@ protected:
     void HandleTouchDown(const TouchLocationInfo& locationInfo);
     void HandleTouchUp();
 
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
+
+    bool ChildTentativelyLayouted() override
+    {
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
+
     /**
      * @brief Notifies the parent component that the scroll has started at the specified position.
      *
@@ -913,6 +948,12 @@ private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);
@@ -991,6 +1032,7 @@ private:
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
+    void FireScrollStateEvent(ScrollState scrollState);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
     void HandleSwiperCustomAnimation(float offset);
@@ -1040,6 +1082,7 @@ private:
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
     void UpdateAnimationProperty(float velocity);
+    void NestedScrollToParent(float velocity);
     void TriggerAnimationEndOnForceStop(bool isInterrupt = false);
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
@@ -1282,7 +1325,7 @@ private:
     int32_t GetNodeId() const;
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     void ReportComponentChangeEvent(
-        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0f) const;
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
@@ -1342,6 +1385,7 @@ private:
     int32_t currentFocusIndex_ = 0;
     int32_t selectedIndex_ = -1;
     int32_t unselectedIndex_ = -1;
+    ScrollState scrollState_ = ScrollState::IDLE;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -1367,6 +1411,7 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     ChangeEventPtr selectedEvent_;
     ChangeEventPtr unselectedEvent_;
+    ChangeEventPtr scrollStateChangedEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
@@ -1396,6 +1441,7 @@ private:
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> jumpIndexByUser_;
     std::optional<int32_t> runningTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;

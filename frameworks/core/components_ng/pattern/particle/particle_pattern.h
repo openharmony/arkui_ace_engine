@@ -31,6 +31,7 @@ public:
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToMainTree() override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    std::unique_ptr<JsonValue> ToEmitterPropertyJsonValue(const EmitterProperty& emitterProperty) const;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
     void updateEmitterPosition(std::vector<EmitterProperty>& property);
 
@@ -84,8 +85,7 @@ private:
     void GetSpinJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
 
     std::unique_ptr<JsonValue> ParseEmitterParticleJson(const ParticleOption& particleOption) const;
-    std::unique_ptr<JsonValue> ParseAnnulusRegionJson(const ParticleOption& particleOption,
-        const ParticleAnnulusRegion& annulusRegion) const;
+    std::unique_ptr<JsonValue> ParseAnnulusRegionJson(const ParticleAnnulusRegion& annulusRegion) const;
     std::unique_ptr<JsonValue> ParseColorUpdater(ParticleColorPropertyUpdater& updater) const;
     std::unique_ptr<JsonValue> ParseFloatObjectJson(const ParticleFloatPropertyOption& updaterObject) const;
     void ParseParticleObject(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

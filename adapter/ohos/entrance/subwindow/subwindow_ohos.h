@@ -180,9 +180,11 @@ public:
     bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
-    void SetFollowParentWindowLayoutEnabled(bool enable) override
+    bool SetFollowParentWindowLayoutEnabled(bool enable) override
     {
-        window_->SetFollowParentWindowLayoutEnabled(enable);
+        CHECK_NULL_RETURN(window_, false);
+        OHOS::Rosen::WMError ret = window_->SetFollowParentWindowLayoutEnabled(enable);
+        return ret == OHOS::Rosen::WMError::WM_OK;
     }
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
@@ -232,7 +234,18 @@ public:
     {
         return nodeId_;
     }
+    void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) override;
+    Rosen::WindowAnchorInfo WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type);
 
+#if defined(ACE_STATIC)
+    void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
+    void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) override;
+    void ShowDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback) override;
+    void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback) override;
+    void OpenCustomDialogStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback) override;
+#endif
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -312,6 +325,18 @@ private:
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
     std::list<int32_t> followParentWindowLayoutNodeIds_;
+#if defined(ACE_STATIC)
+    void ShowDialogForAbilityStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback);
+    void ShowDialogForServiceStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuForAbilityStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuForServiceStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void OpenCustomDialogForAbilityStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback);
+    void OpenCustomDialogForServiceStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback);
+#endif
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {

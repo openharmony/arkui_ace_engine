@@ -33,6 +33,7 @@ public:
 
     virtual void Create() = 0;
     virtual void SetColor(const Color& value) = 0;
+    virtual void SetColorByUser(bool isSetByUser) = 0;
     virtual void SetEnableLoading(bool enable) = 0;
     virtual void ResetColor() = 0;
     virtual void SetForegroundColorParseFailed(bool isParseFailed) {};

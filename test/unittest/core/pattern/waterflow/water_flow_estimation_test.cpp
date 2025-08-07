@@ -207,4 +207,29 @@ HWTEST_F(WaterFlowTestNg, LargeOffset003, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 9);
 }
+
+/**
+ * @tc.name: Offset003
+ * @tc.desc: waterFlow offset estimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Offset003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems(60);
+    CreateDone();
+    auto info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-5000.0f);
+    EXPECT_EQ(info->startIndex_, 33);
+    EXPECT_EQ(info->endIndex_, 37);
+    EXPECT_EQ(info->EstimateTotalHeight(), 9920);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
+    FlushUITasks();
+    EXPECT_EQ(info->startIndex_, 33);
+    EXPECT_EQ(info->endIndex_, 43);
+    EXPECT_NEAR(info->EstimateTotalHeight(), 4995.4f, 0.1);
+}
 } // namespace OHOS::Ace::NG

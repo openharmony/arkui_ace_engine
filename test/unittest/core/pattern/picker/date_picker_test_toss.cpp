@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
@@ -385,4 +386,125 @@ HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
     EXPECT_TRUE(CompareOptionProperties(initOptionProperties, optionProperties));
 }
 
+/**
+ * @tc.name: DatePickerPatternDirty000
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, DatePickerPatternDirty000, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    DirtySwapConfig dirtySwapConfig;
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    /**
+     * @tc.step: step2. call pattern's OnDirtyLayoutWrapperSwap method.
+     * @tc.expected: the result of OnDirtyLayoutWrapperSwap is true.
+     */
+    dirtySwapConfig.skipLayout = false;
+    dirtySwapConfig.skipMeasure = false;
+    EXPECT_TRUE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    /**
+     * @tc.step: step3. call pattern's OnDirtyLayoutWrapperSwap method.
+     * @tc.expected: the result of OnDirtyLayoutWrapperSwap is false.
+     */
+    dirtySwapConfig.skipLayout = true;
+    dirtySwapConfig.skipMeasure = true;
+    EXPECT_FALSE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+}
+
+/**
+ * @tc.name: GetDisappearTextStyle001
+ * @tc.desc: Test DatePickerModelNG GetDisappearTextStyle by frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, GetDisappearTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. call SetDisappearTextStyle & getDisappearTextStyle.
+     * @tc.expected: the result of fontStyle & textColor is equal to preset value.
+     */
+    NG::PickerTextStyle textStyle;
+    textStyle.fontStyle = Ace::FontStyle::ITALIC;
+    textStyle.textColor = Color::WHITE;
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+    auto curTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
+    EXPECT_EQ(curTextStyle.fontStyle.value(), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(curTextStyle.textColor.value(), Color::WHITE);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<PickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->OnAttachToMainTreeMultiThread();
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+    EXPECT_TRUE(columnPattern->tossAnimationController_);
+    EXPECT_NE(columnPattern->jumpInterval_, 0.f);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern->OnDetachFromMainTreeMultiThread();
+
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
 } // namespace OHOS::Ace::NG

@@ -277,6 +277,40 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest001, TestSize.Le
 }
 
 /**
+ * @tc.name: LazyForEachOnDatasetChangeTest002
+ * @tc.desc: Test OnDatasetChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create delete operation and Invoke OnDatasetChange function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "delete", .index = INDEX_0, .count = 1 };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuild();
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
  * @tc.name: LazyForEachGetFrameChildByIndexTest001
  * @tc.desc: Create LazyForEach, update its Items and invoke :GetFrameChildByIndex function.
  * @tc.type: FUNC
@@ -715,6 +749,37 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecycleItemsOutOfBoundaryTest001, T
     EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), LAZY_FOR_EACH_ITEMS.size());
     lazyForEachBuilder->RecycleItemsOutOfBoundary();
     EXPECT_EQ(lazyForEachBuilder->outOfBoundaryNodes_.size(), 0);
+}
+
+/**
+ * @tc.name: LazyForEachOnDataDeletedTest001
+ * @tc.desc: Test OnDataDeleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataDeletedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    /**
+     * @tc.steps: step2. Invoke OnDataDeleted function.
+     * @tc.expected: Create delete operation and Invoke OnDataDeleted function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    lazyForEachNode->OnDataDeleted(INDEX_0);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuild();
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
 }
 
 /**
@@ -2506,7 +2571,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
      * @tc.steps: step3. Invoke the PaintDebugBoundaryTreeAll function.
      * @tc.expected:  Set condition to true.
      */
+    node->shouldRerender_ = false;
     lazyForEachBuilder->NotifyColorModeChange(1, true);
-    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+    EXPECT_TRUE(node->measureAnyWay_);
+    EXPECT_TRUE(node->shouldRerender_);
 }
 } // namespace OHOS::Ace::NG

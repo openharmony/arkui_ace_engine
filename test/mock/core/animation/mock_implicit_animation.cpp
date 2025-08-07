@@ -27,14 +27,14 @@ void MockImplicitAnimation::UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) 
         NG::MockAnimationProxy<float>::GetInstance().Next(prop, remainingTicks_);
         auto cb = prop->GetUpdateCallback();
         if (cb) {
-            cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
+            cb(NG::MockAnimationProxy<float>::GetInstance().GetValue(prop));
         }
     }
     if (auto prop = AceType::DynamicCast<NG::AnimatablePropertyOffsetF>(propWk.Upgrade()); prop) {
         NG::MockAnimationProxy<NG::OffsetF>::GetInstance().Next(prop, remainingTicks_);
         auto cb = prop->GetUpdateCallback();
         if (cb) {
-            cb(NG::MockAnimationProxy<NG::OffsetF>::GetInstance().GetStagingValue(prop));
+            cb(NG::MockAnimationProxy<NG::OffsetF>::GetInstance().GetValue(prop));
         }
     }
     /* add update code for other types */
@@ -57,16 +57,19 @@ void MockImplicitAnimation::Next()
     }
 }
 
-void MockImplicitAnimation::ForceUpdate(float delta)
+template<typename T>
+void MockImplicitAnimation::ForceUpdate(const T& delta)
 {
-    auto prop = AceType::DynamicCast<NG::AnimatablePropertyFloat>(prop_.Upgrade());
+    auto prop = AceType::DynamicCast<NG::AnimatableProperty<T>>(prop_.Upgrade());
     CHECK_NULL_VOID(prop);
-    NG::MockAnimationProxy<float>::GetInstance().ForceUpdate(prop, delta);
+    NG::MockAnimationProxy<T>::GetInstance().ForceUpdate(prop, delta);
     auto cb = prop->GetUpdateCallback();
     if (cb) {
-        cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
+        cb(NG::MockAnimationProxy<T>::GetInstance().GetValue(prop));
     }
 }
+template void MockImplicitAnimation::ForceUpdate(const float& delta);
+template void MockImplicitAnimation::ForceUpdate(const NG::OffsetF& delta);
 
 void MockImplicitAnimation::End()
 {

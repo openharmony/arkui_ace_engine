@@ -140,12 +140,6 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
 }
 
-void JSRepeatVirtualScroll2::IsInAnimation(const JSCallbackInfo& info)
-{
-    auto result = RepeatVirtualScroll2Model::GetInstance()->IsInAnimation();
-    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
-}
-
 void JSRepeatVirtualScroll2::RemoveNode(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:RemoveNode");
@@ -369,7 +363,6 @@ void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
 
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("onMove", &JSRepeatVirtualScroll2::OnMove);
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("setCreateByTemplate", &JSRepeatVirtualScroll2::SetCreateByTemplate);
-    JSClass<JSRepeatVirtualScroll2>::StaticMethod("isInAnimation", &JSRepeatVirtualScroll2::IsInAnimation);
     JSClass<JSRepeatVirtualScroll2>::Bind<>(globalObj);
 }
 

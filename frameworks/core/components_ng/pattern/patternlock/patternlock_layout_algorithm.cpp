@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_layout_algorithm.h"
 #include "core/components_ng/pattern/patternlock/patternlock_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,8 +36,50 @@ std::optional<SizeF> PatternLockLayoutAlgorithm::MeasureContent(
     float maxHeight = std::max(contentConstraint.maxSize.Height(), contentConstraint.minSize.Height());
     float selfIdealWidth = contentConstraint.selfIdealSize.Width().value_or(maxWidth);
     float selfIdealHeight = contentConstraint.selfIdealSize.Height().value_or(maxHeight);
+    auto layoutPolicy = patternLockLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthFix()) {
+            selfIdealWidth = length;
+        }
+        if (layoutPolicy->IsHeightFix()) {
+            selfIdealHeight = length;
+        }
+    }
     float maxLength = std::min(selfIdealWidth, selfIdealHeight);
     length = std::min(maxLength, length);
     return SizeF(length, length);
+}
+
+void PatternLockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+        auto contentConstraint = layoutProperty->GetLayoutConstraint();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_VOID(patternLockTheme);
+        Dimension defaultSize = patternLockTheme->GetSideLength();
+        auto defaultHeight = defaultSize.ConvertToPx();
+        OptionalSizeF patternLockFrameSize = { defaultHeight, defaultHeight };
+        if (contentConstraint->selfIdealSize.Width().has_value()) {
+            patternLockFrameSize.SetWidth(contentConstraint->selfIdealSize.Width().value());
+        }
+        if (contentConstraint->selfIdealSize.Height().has_value()) {
+            patternLockFrameSize.SetHeight(contentConstraint->selfIdealSize.Height().value());
+        }
+        if (layoutPolicy->IsWidthFix()) {
+            patternLockFrameSize.SetWidth(defaultHeight);
+        }
+        if (layoutPolicy->IsHeightFix()) {
+            patternLockFrameSize.SetHeight(defaultHeight);
+        }
+        layoutWrapper->GetGeometryNode()->SetFrameSize(patternLockFrameSize.ConvertToSizeT());
+    } else {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+    }
 }
 } // namespace OHOS::Ace::NG

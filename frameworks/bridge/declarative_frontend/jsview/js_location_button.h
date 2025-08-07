@@ -33,7 +33,7 @@ public:
         JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsLocationButtonClickFunction() override {};
-    void Execute() override
+    void Execute()
     {
         JsFunction::ExecuteJS();
     };

@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuParamAccessor {
 void DestroyPeerImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_WebContextMenuParam CtorImpl()
@@ -50,31 +48,22 @@ Ark_Number YImpl(Ark_WebContextMenuParam peer)
 Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
     std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetLinkUrl();
-    if (result.empty()) {
-        return {};
-    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
     std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetUnfilteredLinkUrl();
-    if (result.empty()) {
-        return {};
-    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetSourceUrlImpl(Ark_WebContextMenuParam peer)
 {
     std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetSourceUrl();
-    if (result.empty()) {
-        return {};
-    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Boolean ExistsImageContentsImpl(Ark_WebContextMenuParam peer)
@@ -90,11 +79,8 @@ Ark_ContextMenuMediaType GetMediaTypeImpl(Ark_WebContextMenuParam peer)
 Ark_String GetSelectionTextImpl(Ark_WebContextMenuParam peer)
 {
     std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetSelectionText();
-    if (result.empty()) {
-        return {};
-    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_ContextMenuSourceType GetSourceTypeImpl(Ark_WebContextMenuParam peer)
@@ -155,7 +141,4 @@ const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor
     return &WebContextMenuParamAccessorImpl;
 }
 
-struct WebContextMenuParamPeer {
-    virtual ~WebContextMenuParamPeer() = default;
-};
 }

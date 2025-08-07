@@ -33,8 +33,10 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/custom_menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -388,5 +390,193 @@ HWTEST_F(CustomMenuItemPatternTestNg, RegisterAccessibilityChildActionNotify001,
     ASSERT_NE(callback, nullptr);
     auto reuslt = callback(menuItemNode, NotifyChildActionType::ACTION_CLICK);
     EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_RISE);
+}
+
+/**
+ * @tc.name: CustomMenuItemLayoutAlgorithmMeasure001
+ * @tc.desc: Test CustomMenuItemLayoutAlgorithm Measure with different child layout policies
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithmMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem and set the LayoutPolicyProperty to FIX_AT_IDEAL_SIZE.
+     */
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, -1, menuItemPattern);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProp->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    layoutProp->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    LayoutConstraintF layoutConstraintF;
+    layoutProp->UpdateLayoutConstraint(layoutConstraintF);
+    layoutProp->UpdateContentConstraint();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItemNode, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Create a subcomponent of the Text type and Set FrameSize to (200, 100).
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(childGeometryNode, nullptr);
+    childGeometryNode->SetFrameSize(SizeF(200.0f, 100.0f));
+    auto childLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    ASSERT_NE(childLayoutProperty, nullptr);
+
+    LayoutConstraintF childLayoutConstraintF = {
+        .selfIdealSize = { 200.f, 100.f },
+    };
+
+    /**
+     * @tc.steps: step3. Add the Text component as a child of the menuitem component.
+     */
+    childLayoutProperty->UpdateLayoutConstraint(childLayoutConstraintF);
+    childLayoutProperty->UpdateContentConstraint();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, childGeometryNode, childLayoutProperty);
+    menuItemNode->AddChild(frameNode);
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step4. Calling the algorithm calculates the size of the menuIten component.
+     * @tc.expected: result as expected
+     */
+    auto algorithm = AceType::MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    EXPECT_FLOAT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 200.f);
+    EXPECT_FLOAT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), 100.f);
+}
+
+/**
+ * @tc.name: CustomMenuItemLayoutAlgorithmMeasure002
+ * @tc.desc: Test CustomMenuItemLayoutAlgorithm Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithmMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem and Set FrameSize to (200, 100).
+     */
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, -1, menuItemPattern);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(200.0f, 100.0f));
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { 0.f, 0.f },
+        .maxSize = { 200.f, 100.f },
+        .percentReference = { 200.f, 100.f },
+        .parentIdealSize = { 200.f, 100.f },
+        .selfIdealSize = { 200.f, 100.f }
+    };
+    layoutProp->UpdateLayoutConstraint(layoutConstraintF);
+    layoutProp->UpdateContentConstraint();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItemNode, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Create a subcomponent of the Button type and set the LayoutPolicyProperty to MATCH_PARENT.
+     */
+    auto pattern = AceType::MakeRefPtr<ButtonPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(childGeometryNode, nullptr);
+    LayoutConstraintF layoutConstraintF1 = {
+        .minSize = { 0.f, 0.f },
+        .maxSize = { 200.f, 100.f },
+        .percentReference = { 200.f, 100.f },
+        .parentIdealSize = { 200.f, 100.f },
+    };
+    auto childLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutConstraint(layoutConstraintF1);
+    childLayoutProperty->UpdateContentConstraint();
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+
+    /**
+     * @tc.steps: step3. Add the Button component as a child of the menuitem component.
+     */
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, childGeometryNode, childLayoutProperty);
+    menuItemNode->AddChild(frameNode);
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step4. Calling the algorithm calculates the size of the Button component.
+     * @tc.expected: result as expected
+     */
+    auto algorithm = AceType::MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    BoxLayoutAlgorithm boxLayoutAlgorithm;
+    boxLayoutAlgorithm.Measure(Referenced::RawPtr(childLayoutWrapper));
+    EXPECT_FLOAT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 200.f);
+    EXPECT_FLOAT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height(), 100.f);
+}
+
+/**
+ * @tc.name: CustomMenuItemLayoutAlgorithmMeasure003
+ * @tc.desc: Test CustomMenuItemLayoutAlgorithm Measure with different child layout policies
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithmMeasure003, TestSize.Level1)
+{
+    // create host FrameNode and Pattern; 100 means hostNode's id is 100
+    auto hostNode = FrameNode::CreateFrameNode("custom_menu_item", 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    // create LayoutProperty and LayoutWrapper
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutConstraintF layoutConstraintF;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraintF);
+    layoutProperty->UpdateContentConstraint();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(hostNode, geometryNode, layoutProperty);
+
+    // Mock Pattern : IsEnableChildrenMatchParent
+    class MockPattern : public Pattern {
+    public:
+        bool enableMatchParent = false;
+        bool IsEnableChildrenMatchParent() override { return enableMatchParent; }
+    };
+    auto mockPattern = AceType::MakeRefPtr<MockPattern>();
+    hostNode->pattern_ = mockPattern;
+
+    // create childNode1: layoutPolicy = NO_MATCH; 101 means childNode1's id is 101
+    auto childNode1 = FrameNode::CreateFrameNode("child1", 101, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty1 = AceType::MakeRefPtr<LayoutProperty>();
+    childNode1->layoutProperty_ = childLayoutProperty1;
+    auto childWrapper1 = AceType::MakeRefPtr<LayoutWrapperNode>(childNode1,
+        AceType::MakeRefPtr<GeometryNode>(), childLayoutProperty1);
+    layoutWrapper.AppendChild(childWrapper1);
+
+    // create childNode2: layoutPolicy = MATCH_PARENT; 102 means childNode2's id is 102
+    auto childNode2 = FrameNode::CreateFrameNode("child2", 102, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty2 = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutPolicyProperty policy2;
+    policy2.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    policy2.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    childLayoutProperty2->layoutPolicy_ = policy2;
+    childNode2->layoutProperty_ = childLayoutProperty2;
+    auto childWrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(childNode2,
+        AceType::MakeRefPtr<GeometryNode>(), childLayoutProperty2);
+    layoutWrapper.AppendChild(childWrapper2);
+
+    // create CustomMenuItemLayoutAlgorithm
+    auto layoutAlgorithm = AceType::MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
+    // 1. test enableMatchParent = false
+    mockPattern->enableMatchParent = false;
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_FALSE(std::isinf(layoutConstraintF.maxSize.Width()));
+    EXPECT_FALSE(std::isinf(layoutConstraintF.maxSize.Height()));
+    EXPECT_EQ(layoutAlgorithm->layoutPolicyChildren_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

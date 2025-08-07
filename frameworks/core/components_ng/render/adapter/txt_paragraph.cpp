@@ -18,6 +18,7 @@
 #include "base/log/ace_performance_monitor.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -41,6 +42,19 @@ RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPt
 RefPtr<Paragraph> Paragraph::Create(void* rsParagraph)
 {
     return AceType::MakeRefPtr<TxtParagraph>(rsParagraph);
+}
+
+void TxtParagraph::SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    auto rsNode = context->GetRSNode();
+    rsSymbolAnimation_ = RSSymbolAnimation();
+    rsSymbolAnimation_.SetNode(rsNode);
+
+    std::function<bool(const std::shared_ptr<RSSymbolAnimationConfig>& symbolAnimationConfig)> scaleCallback =
+        std::bind(&RSSymbolAnimation::SetSymbolAnimation, rsSymbolAnimation_, std::placeholders::_1);
+
+    SetAnimation(scaleCallback);
 }
 
 bool TxtParagraph::IsValid()
@@ -1001,6 +1015,11 @@ RSParagraph* TxtParagraph::GetParagraph()
         return paragraph_.get();
     }
     return externalParagraph_;
+}
+
+std::unique_ptr<RSParagraph> TxtParagraph::GetParagraphUniquePtr()
+{
+    return std::move(paragraph_);
 }
 
 void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)

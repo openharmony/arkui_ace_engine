@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/animation/animation_util.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/animation/animation_util.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
@@ -28,21 +29,6 @@ constexpr int32_t API_VERSION_9 = 9;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
 constexpr Dimension LIMIT_SPACING = 8.0_vp;
 
-// get main window's pipeline
-RefPtr<PipelineContext> GetMainPipelineContext()
-{
-    auto containerId = Container::CurrentId();
-    RefPtr<PipelineContext> context;
-    if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
-        CHECK_NULL_RETURN(parentContainer, nullptr);
-        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
-    } else {
-        context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    }
-    return context;
-}
 } // namespace
 
 void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps)
@@ -50,11 +36,12 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     InitUIExtensionHostWindowRect();
 
     // init toast wrapper rect with different settings.
-    auto pipelineContext =
-        IsDefaultToast() ? PipelineContext::GetCurrentContextSafelyWithCheck() : GetMainPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
     CHECK_NULL_VOID(layoutWrapper);
-    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(host);
     float safeAreaTop = safeAreaInsets.top_.Length();
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(toastProp);
@@ -172,7 +159,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(context, false);
     auto toastNode = dirty->GetHostNode();
     CHECK_NULL_RETURN(toastNode, false);
@@ -221,7 +208,7 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, Dimension(0.0));
-    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
@@ -290,7 +277,7 @@ void ToastPattern::AdjustOffsetForKeyboard(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_VOID(context);
     auto safeAreaManager = context->GetSafeAreaManager();
     auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
@@ -335,7 +322,7 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
     // Obtain the height relative to the main window
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
-    auto pipeline = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto pipeline = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto rootHeight = Dimension(wrapperRect_.Height());
     auto toastTheme = pipeline->GetTheme<ToastTheme>();
@@ -356,7 +343,8 @@ void ToastPattern::BeforeCreateLayoutWrapper()
 {
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
-    auto pipelineContext = IsDefaultToast() ? toastNode->GetContextRefPtr() : GetMainPipelineContext();
+    auto pipelineContext =
+        IsDefaultToast() ? toastNode->GetContextRefPtr() : DialogManager::GetMainPipelineContext(toastNode);
     if (!pipelineContext) {
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
         return;
@@ -384,7 +372,7 @@ void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
 void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
 {
     CHECK_NULL_VOID(text);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = text->GetContext();
     CHECK_NULL_VOID(context);
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
     auto parent = gridColumnInfo->GetParent();
@@ -430,7 +418,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto textContext = host->GetRenderContext();
     CHECK_NULL_VOID(textContext);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
@@ -452,6 +440,7 @@ void ToastPattern::OnAttachToFrameNode()
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto pipeline = parentContainerId < 0 ? host->GetContextRefPtr() : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     auto callbackId =
         pipeline->RegisterFoldDisplayModeChangedCallback([parentContainerId](FoldDisplayMode foldDisplayMode) {
             if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
@@ -469,6 +458,12 @@ void ToastPattern::OnAttachToFrameNode()
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
+    rowKeyboardCallbackId_ =
+        pipeline->RegisterRawKeyboardChangedCallback([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FoldStatusChangedAnimation();
+        });
     InitUIExtensionHostWindowRect();
 }
 
@@ -485,13 +480,16 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     if (HasHalfFoldHoverChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value_or(-1));
     }
+    pipeline->UnRegisterRawKeyboardChangedCallback(rowKeyboardCallbackId_);
+    CHECK_NULL_VOID(node);
+    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
 }
 
 double ToastPattern::GetTextMaxHeight()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
-    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceHeight = 0.0;
     if (IsSystemTopMost()) {
@@ -525,7 +523,7 @@ double ToastPattern::GetTextMaxWidth()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
-    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceWidth = 0.0;
     if (IsSystemTopMost()) {
@@ -695,7 +693,25 @@ RefPtr<PipelineContext> ToastPattern::GetToastContext()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     return context;
+}
+
+void ToastPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "WindowSize is changed, type: %{public}d", type);
+    auto isRotation = type == WindowSizeChangeReason::ROTATION;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (isRotation && container->IsSubContainer()) {
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->PopToast(host->GetId());
+    }
 }
 } // namespace OHOS::Ace::NG

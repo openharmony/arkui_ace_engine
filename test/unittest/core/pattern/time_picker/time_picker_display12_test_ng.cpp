@@ -1963,4 +1963,51 @@ HWTEST_F(TimePickerDisplay12TestNg, TimePickerTextDisplayHour12TestNg031, TestSi
         PM + std::to_string(CURRENT_INDEX_VALUE3 + 1) + COLON + std::to_string(CURRENT_INDEX_VALUE1));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
+
+/**
+ * @tc.name: TimePickerTextDisplayHour12TestNg032
+ * @tc.desc: Test OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDisplay12TestNg, TimePickerTextDisplayHour12TestNg032, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateLoop(false);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    timePickerRowPattern->InitOnKeyEvent(focusHub);
+
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::UNKNOWN;
+    keyEvent.code = KeyCode::KEY_DPAD_UP;
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+
+    keyEvent.action = KeyAction::DOWN;
+    auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(timePickerRowPattern->focusKeyID_));
+    ASSERT_NE(stackChild, nullptr);
+    auto blendChild = AceType::DynamicCast<FrameNode>(stackChild->GetLastChild());
+    ASSERT_NE(blendChild, nullptr);
+    auto pickerChild = AceType::DynamicCast<FrameNode>(blendChild->GetLastChild());
+    ASSERT_NE(pickerChild, nullptr);
+    auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(pattern, nullptr);
+    timePickerRowPattern->options_[pickerChild].clear();
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+
+    timePickerRowPattern->options_[pickerChild][0] = "AM";
+    timePickerRowPattern->options_[pickerChild][1] = "PM";
+    EXPECT_EQ(pattern->GetCurrentIndex(), 0);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(pattern->GetCurrentIndex(), 0);
+}
 } // namespace OHOS::Ace::NG

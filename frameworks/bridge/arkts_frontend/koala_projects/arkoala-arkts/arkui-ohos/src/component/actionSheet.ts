@@ -18,18 +18,17 @@
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource";
+import { Resource } from "global/resource"
 import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
-import { Callback_Void } from "./abilityComponent"
-import { DismissReason, Rectangle, BlurStyle, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
+import { DismissReason, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
 import { DialogButtonStyle, BorderStyle } from "./enums"
-import { DialogAlignment } from "./alertDialog"
+import { DialogAlignment, LevelOrder } from "./alertDialog"
 export class ActionSheet {
     public static show(value: ActionSheetOptions): undefined {
         const value_casted = value as (ActionSheetOptions)
@@ -63,6 +62,12 @@ export interface ActionSheetOffset {
     dx: number | string | Resource;
     dy: number | string | Resource;
 }
+export interface LevelMode {
+    _LevelModeStub: string;
+}
+export interface ImmersiveMode {
+    _ImmersiveModeStub: string;
+}
 export type Callback_DismissDialogAction_Void = (parameter: DismissDialogAction) => void;
 export interface ActionSheetOptions {
     title: string | Resource;
@@ -79,6 +84,8 @@ export interface ActionSheetOptions {
     isModal?: boolean;
     backgroundColor?: ResourceColor;
     backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     onWillDismiss?: ((parameter: DismissDialogAction) => void);
     transition?: TransitionEffect;
     cornerRadius?: Dimension | BorderRadiuses | LocalizedBorderRadiuses;
@@ -90,4 +97,12 @@ export interface ActionSheetOptions {
     shadow?: ShadowOptions | ShadowStyle;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
+    onDidAppear?: (() => void);
+    onDidDisappear?: (() => void);
+    onWillAppear?: (() => void);
+    onWillDisappear?: (() => void);
+    levelMode?: LevelMode;
+    levelUniqueId?: number;
+    immersiveMode?: ImmersiveMode;
+    levelOrder?: LevelOrder;
 }

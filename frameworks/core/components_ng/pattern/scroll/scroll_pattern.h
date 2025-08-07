@@ -18,6 +18,10 @@
 
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/components_ng/pattern/scroll/free_scroll_controller.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -26,6 +30,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scroll/zoom_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -61,8 +66,10 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
-        return layoutAlgorithm;
+        if (freeScroll_) {
+            return MakeRefPtr<ScrollLayoutAlgorithm>(freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
+        }
+        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
@@ -98,7 +105,7 @@ public:
         return currentOffset_;
     }
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return -currentOffset_;
     }
@@ -108,9 +115,9 @@ public:
     Offset GetCurrentOffset() const
     {
         if (GetAxis() == Axis::HORIZONTAL) {
-            return Offset{currentOffset_, 0};
+            return Offset { currentOffset_, 0 };
         }
-        return Offset{0, currentOffset_};
+        return Offset { 0, currentOffset_ };
     }
 
     float GetScrollableDistance() const
@@ -125,7 +132,7 @@ public:
 
     bool IsColReverse() const
     {
-        return  direction_ == FlexDirection::COLUMN_REVERSE;
+        return direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
     RefPtr<ScrollableController> GetScrollPositionController() const
@@ -310,7 +317,7 @@ public:
 
     void SetEnablePaging(ScrollPagingStatus status)
     {
-        enablePagingStatus_ =  status;
+        enablePagingStatus_ = status;
     }
 
     ScrollPagingStatus GetEnablePaging()
@@ -362,12 +369,12 @@ public:
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
-    SizeF GetViewSize() const
+    const SizeF& GetViewSize() const
     {
         return viewSize_;
     }
 
-    SizeF GetViewPortExtent() const
+    const SizeF& GetViewPortExtent() const
     {
         return viewPortExtent_;
     }
@@ -408,6 +415,8 @@ private:
     float ValidateOffset(int32_t source, float willScrollOffset);
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
+    TwoDimensionScrollResult FireObserverTwoDimensionOnWillScroll(Dimension xOffset, Dimension yOffset,
+        ScrollState state, ScrollSource source);
     void FireOnDidScroll(float scroll);
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -419,6 +428,7 @@ private:
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     std::string GetScrollSnapPagination() const;
+    void OnColorModeChange(uint32_t colorMode) override;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
@@ -430,6 +440,53 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
+
+    /* ============================= zoom Enhancements ============================= */
+public:
+    void SetMaxZoomScale(float scale);
+    float GetMaxZoomScale() const;
+    void SetMinZoomScale(float scale);
+    float GetMinZoomScale() const;
+    void SetZoomScale(std::optional<float> scale);
+    float GetZoomScale() const;
+    void UpdateZoomScale(float scale);
+    void SetEnableBouncesZoom(bool enable);
+    bool GetEnableBouncesZoom() const;
+    void ProcessZoomScale();
+    void SetChildScale(std::optional<float> scale);
+private:
+    void UpdatePinchGesture();
+    friend class ZoomController;
+    RefPtr<ZoomController> zoomCtrl_;
+    float maxZoomScale_ = 1.0f;
+    float minZoomScale_ = 1.0f;
+    std::optional<float> zoomScale_;
+    std::optional<float> childScale_;
+    bool enableBouncesZoom_ = true;
+    /* ============================================================================== */
+
+    /* ============================= Free Scroll Enhancements ============================= */
+public:
+    /**
+     * @return Pan gesture recognizer configured for Axis::FREE mode
+     */
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer();
+    RefPtr<ScrollBar2D> Get2DScrollBar() const
+    {
+        return scrollBar2d_;
+    }
+
+    Offset GetFreeScrollOffset() const final;
+    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollPage(bool reverse, bool smooth) final;
+    bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity) final;
+    void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
+
+private:
+    RefPtr<ParallelRecognizer> gestureGroup_;
+    RefPtr<FreeScrollController> freeScroll_;
+    RefPtr<ScrollBar2D> scrollBar2d_;
+    /* ============================================================================== */
 
     // scrollSnap
     std::vector<float> snapOffsets_;
@@ -445,15 +502,15 @@ private:
     // enablePaging
     ScrollPagingStatus enablePagingStatus_ = ScrollPagingStatus::NONE;
     float lastPageLength_ = 0.0f;
-    float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
+    float GetPagingOffset(float delta, float dragDistance, float velocity) const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
 
     RefPtr<ScrollContentModifier> scrollContentModifier_;
 
-    //initialOffset
+    // initialOffset
     std::optional<OffsetT<CalcDimension>> initialOffset_;
 
-    //scrollToEdge
+    // scrollToEdge
     ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
 
     // dump info

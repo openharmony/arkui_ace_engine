@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +66,14 @@ void SheetObject::DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWrapper>& layou
     pattern->CheckBuilderChange();
 }
 
+void SheetObject::SetSheetAnimationOption(AnimationOption& option) const
+{
+    option.SetFillMode(FillMode::FORWARDS);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        option.SetDuration(SHEET_ANIMATION_DURATION);
+    }
+}
+
 RefPtr<InterpolatingSpring> SheetObject::GetSheetTransitionCurve(float dragVelocity) const
 {
     return AceType::MakeRefPtr<InterpolatingSpring>(
@@ -84,6 +93,7 @@ std::function<void()> SheetObject::GetSheetTransitionFinishEvent(bool isTransiti
                 pattern->SetAnimationBreak(false);
             }
             pattern->AvoidAiBar();
+            pattern->HandleMultiDetentKeyboardAvoid();
             pattern->FireOnDetentsDidChange(pattern->GetHeight());
             pattern->SetSpringBack(false);
         } else {
@@ -138,7 +148,7 @@ void SheetObject::ClipSheetNode()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -148,7 +158,7 @@ void SheetObject::ClipSheetNode()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     pattern->ResetClipShape();
-    auto sheetType = pattern->GetSheetType();
+    auto sheetType = pattern->GetSheetTypeNoProcess();
     BorderRadiusProperty borderRadius(sheetTheme->GetSheetRadius());
     pattern->CalculateSheetRadius(borderRadius);
     if (pattern->IsSheetBottom()) {
@@ -188,7 +198,6 @@ void SheetObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstTrans
         sheetPattern->FireOnTypeDidChange();
         sheetPattern->FireOnWidthDidChange();
         ACE_SCOPED_TRACE("Sheet start admission");
-        sheetPattern->SetBottomStyleHotAreaInSubwindow();
     }
 }
 
@@ -213,7 +222,9 @@ void SheetObject::SetFinishEventForAnimationOption(
             const auto& overlay = pattern->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
             pattern->FireOnDetentsDidChange(overlay->GetSheetHeight());
-            pattern->FireOnHeightDidChange();
+            auto sheetObject = pattern->GetSheetObject();
+            CHECK_NULL_VOID(sheetObject);
+            sheetObject->FireHeightDidChange();
         });
     } else {
         option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode))] {
@@ -240,7 +251,7 @@ AnimationOption SheetObject::GetAnimationOptionForOverlay(bool isTransitionIn, b
     const RefPtr<InterpolatingSpring> curve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
-    sheetPattern->SetSheetAnimationOption(option);
+    SetSheetAnimationOption(option);
     if (isTransitionIn && sheetPattern->IsFoldStatusChanged()) {
         option.SetDuration(0);
         option.SetCurve(Curves::LINEAR);
@@ -273,7 +284,7 @@ void SheetObject::HandleDragStart()
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->InitScrollProps();
+    InitScrollProps();
     sheetPattern->SetIsDragging(true);
     if (sheetPattern->GetAnimation() && sheetPattern->GetAnimationProcess()) {
         AnimationUtils::StopAnimation(sheetPattern->GetAnimation());
@@ -287,7 +298,7 @@ void SheetObject::HandleDragUpdate(const GestureEvent& info)
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetType = sheetPattern->GetSheetType();
+    auto sheetType = sheetType_;
     if (sheetType == SheetType::SHEET_POPUP) {
         return;
     }
@@ -339,7 +350,7 @@ void SheetObject::HandleDragEnd(float dragVelocity)
     sheetPattern->SetIsDragging(false);
     auto sheetDetentsSize = sheetPattern->GetSheetDetentHeight().size();
     if ((sheetDetentsSize == 0) ||
-        (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) ||
+        (sheetType_ == SheetType::SHEET_POPUP) ||
         sheetPattern->IsShowInSubWindowTwoInOne()) {
         return;
     }
@@ -405,7 +416,7 @@ void SheetObject::OnScrollStartRecursive(float position, float velocity)
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->InitScrollProps();
+    InitScrollProps();
     if (sheetPattern->GetAnimation() && sheetPattern->GetAnimationProcess()) {
         AnimationUtils::StopAnimation(sheetPattern->GetAnimation());
         sheetPattern->SetAnimationBreak(true);
@@ -449,7 +460,7 @@ ScrollResult SheetObject::HandleScrollWithSheet(float scrollOffset)
     ScrollResult result = {scrollOffset, true};
     auto sheetPattern = GetPattern();
     CHECK_NULL_RETURN(sheetPattern, result);
-    auto sheetType = sheetPattern->GetSheetType();
+    auto sheetType = sheetType_;
     auto sheetDetentsSize = sheetPattern->GetSheetDetentHeight().size();
     if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0) || sheetPattern->IsShowInSubWindowTwoInOne()) {
         isSheetNeedScroll_ = false;
@@ -523,6 +534,27 @@ bool SheetObject::HandleScrollVelocity(float velocity)
     return true;
 }
 
+void SheetObject::InitScrollProps()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto scrollNode = pattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+
+    // When sheet content height is larger than sheet height,
+    // the sheet height should set scroll always enabled.
+    auto edgeEffectAlwaysEnabled =
+        pattern->GetScrollSizeMode() == ScrollSizeMode::CONTINUOUS && pattern->IsScrollable();
+    if (pattern->GetSheetEffectEdge() == SheetEffectEdge::NONE) {
+        scrollPattern->SetEdgeEffect(EdgeEffect::NONE, edgeEffectAlwaysEnabled);
+    } else {
+        scrollPattern->SetEdgeEffect(EdgeEffect::SPRING,
+            edgeEffectAlwaysEnabled, static_cast<EffectEdge>(pattern->GetSheetEffectEdge()));
+    }
+}
+
 void SheetObject::ModifyFireSheetTransition(float dragVelocity)
 {
     TAG_LOGD(AceLogTag::ACE_SHEET, "ModifyFireSheetTransition function enter");
@@ -553,6 +585,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
         } else {
             ref->SetAnimationBreak(false);
         }
+        ref->SetStartProp(0.0);
         ref->AvoidAiBar();
         ref->SetIsNeedProcessHeight(false);
         ref->FireOnDetentsDidChange(ref->GetHeight());
@@ -562,6 +595,9 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
 
     sheetPattern->SetAnimationProcess(true);
     sheetPattern->HandleDragEndAccessibilityEvent();
+    if (NearZero(sheetPattern->GetStartProp())) {
+        return;
+    }
     property->Set(sheetPattern->GetStartProp());
     sheetPattern->SetBottomStyleHotAreaInSubwindow();
     std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
@@ -624,4 +660,58 @@ void SheetObject::CreatePropertyCallback()
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
 }
+
+void SheetObject::BeforeCreateLayoutWrapper()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = pattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(scrollLayoutProperty);
+    scrollLayoutProperty->ResetSafeAreaPadding();
+}
+
+SheetKeyboardAvoidMode SheetObject::GetAvoidKeyboardModeByDefault() const
+{
+    if (sheetType_ == SheetType::SHEET_POPUP) {
+        return SheetKeyboardAvoidMode::NONE;
+    }
+    return SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+}
+
+void SheetObject::AvoidKeyboardInDirtyLayoutProcess()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    if (sheetType_ == SheetType::SHEET_POPUP) {
+        return;
+    }
+    if (sheetPattern->IsWindowRotate()) {
+        // When rotating the screen,
+        // first switch the sheet to the position corresponding to the proportion before rotation
+        sheetPattern->TranslateTo(sheetPattern->GetPageHeightWithoutOffset() - sheetPattern->GetHeight());
+        sheetPattern->SetWindowRotate(false);
+    } else {
+        // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
+        AvoidKeyboard(false);
+    }
+}
+
+void SheetObject::AvoidKeyboard(bool forceAvoid)
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->AvoidKeyboard(forceAvoid);
+}
+
+void SheetObject::FireHeightDidChange()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->FireOnHeightDidChange();
+}
+
 } // namespace OHOS::Ace::NG

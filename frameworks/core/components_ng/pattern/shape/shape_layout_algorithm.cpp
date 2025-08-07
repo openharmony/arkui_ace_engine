@@ -16,49 +16,35 @@
 #include "frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/drawing_layout_utils.h"
 
 namespace OHOS::Ace::NG {
-
 std::optional<SizeF> ShapeLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
-    if (!host->IsAtomicNode()) {
-        return std::nullopt;
-    }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
     OptionalSizeF contentSize;
-    do {
-        // Use idea size first if it is valid.
-        contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
-        if (contentSize.IsValid()) {
-            break;
-        }
+    // Use idealSize first if it is valid.
+    contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
+    if (contentSize.IsValid()) {
+        return contentSize.ConvertToSizeT();
+    }
 
-        if (measureType == MeasureType::MATCH_PARENT) {
-            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
-            // use max is parent ideal size is invalid.
-            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.percentReference);
-            break;
-        }
+    if (measureType == MeasureType::MATCH_PARENT) {
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
+        // use max is parent ideal size is invalid.
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.percentReference);
+        return contentSize.ConvertToSizeT();
+    }
 
-        // wrap content case use min size default.
-        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
-
-        // if width or height is matchParent
-        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value()) {
-            if (layoutPolicy->IsWidthMatch()) {
-                contentSize.SetWidth(contentConstraint.parentIdealSize.Width());
-            }
-            if (layoutPolicy->IsHeightMatch()) {
-                contentSize.SetHeight(contentConstraint.parentIdealSize.Height());
-            }
-        }
-    } while (false);
-    return contentSize.ConvertToSizeT();
+    // wrap content case use min size default.
+    contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
+    SizeF size = contentSize.ConvertToSizeT();
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, size);
+    return size;
 }
 } // namespace OHOS::Ace::NG

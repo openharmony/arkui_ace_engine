@@ -57,9 +57,9 @@ void ShowPreviousImpl(Ark_SwiperController peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerShowPrevious();
 }
-void ChangeIndexImpl(Ark_SwiperController peer,
-                     const Ark_Number* index,
-                     const Opt_Boolean* useAnimation)
+void ChangeIndex0Impl(Ark_SwiperController peer,
+                      const Ark_Number* index,
+                      const Opt_Boolean* useAnimation)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -67,6 +67,11 @@ void ChangeIndexImpl(Ark_SwiperController peer,
     auto aceIdx = Converter::Convert<Ark_Int32>(*index);
     auto aceUseAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation) : std::nullopt;
     peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
+}
+void ChangeIndex1Impl(Ark_SwiperController peer,
+                      const Ark_Number* index,
+                      const Opt_Union_SwiperAnimationMode_Boolean* animationMode)
+{
 }
 void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
@@ -82,6 +87,13 @@ void FinishAnimationImpl(Ark_SwiperController peer,
     }
     peerImpl->TriggerFinishAnimation();
 }
+void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_SwiperController peer,
+                      const Opt_Array_Number* indices,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+}
 } // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
 {
@@ -91,13 +103,12 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
         SwiperControllerAccessor::GetFinalizerImpl,
         SwiperControllerAccessor::ShowNextImpl,
         SwiperControllerAccessor::ShowPreviousImpl,
-        SwiperControllerAccessor::ChangeIndexImpl,
+        SwiperControllerAccessor::ChangeIndex0Impl,
+        SwiperControllerAccessor::ChangeIndex1Impl,
         SwiperControllerAccessor::FinishAnimationImpl,
+        SwiperControllerAccessor::PreloadItemsImpl,
     };
     return &SwiperControllerAccessorImpl;
 }
 
-struct SwiperControllerPeer {
-    virtual ~SwiperControllerPeer() = default;
-};
 }

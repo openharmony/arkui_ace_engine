@@ -77,6 +77,20 @@
         continue;                \
     }
 
+#define CHECK_NE_VOID(var, value) \
+    do {                             \
+        if ((var) != (value)) {      \
+            return;                  \
+        }                            \
+    } while (0)
+
+#define CHECK_NE_RETURN(var, value, ret) \
+    do {                                    \
+        if ((var) != (value)) {             \
+            return ret;                     \
+        }                                   \
+    } while (0)
+
 #define CHECK_INITIALIZED_FIELDS_BEGIN() \
     constexpr auto _lineBegin = __LINE__;
 

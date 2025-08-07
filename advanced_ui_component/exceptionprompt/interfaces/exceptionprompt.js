@@ -17,21 +17,19 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
-if (PUV2ViewBase.contextStack === undefined) {
-    Reflect.set(PUV2ViewBase, 'contextStack', []);
-}
 const curves = requireNativeModule('ohos.curves');
 const hilog = requireNapi('hilog');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const i18n = requireNapi('i18n');
 
-const START_TIME = 250;
-const END_TIME = 200;
-const BORDER_RADIUS = 12;
-const ZINDEX_NUM = 9;
-const SYMBOL_SIZE = 24;
-const MAX_SYMBOL_FONT_SCALE = 2;
-const MIN_SYMBOL_FONT_SCALE = 1;
-const DEFAULT_SYMBOL_FONT_SCALE = 1;
+const i14 = 250;
+const j14 = 200;
+const k14 = 12;
+const l14 = 9;
+const n14 = 24;
+const o14 = 2;
+const p14 = 1;
+const q14 = 1;
 
 export var MarginType;
 (function (MarginType) {
@@ -61,9 +59,10 @@ export class ExceptionPrompt extends ViewPU {
         this.callbackId = undefined;
         this.callbacks = {
             onConfigurationUpdated: (config) => {
-                this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
-                this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
-            }, onMemoryLevel() {
+                this.fontSizeScale = Math.min(this.updateFontScale(), o14);
+                this.fontSizeScale = Math.max(this.fontSizeScale, p14);
+            },
+            onMemoryLevel() {
             }
         };
         this.setInitiallyProvidedValue(params);
@@ -131,10 +130,7 @@ export class ExceptionPrompt extends ViewPU {
 
     TextBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Flex.create({
-                justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
-                    .Center
-            });
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
             Flex.padding({
                 left: {
                     'id': -1,
@@ -199,14 +195,14 @@ export class ExceptionPrompt extends ViewPU {
                         SymbolGlyph.attributeModifier.bind(this)(this.options?.symbolStyle);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-                        SymbolGlyph.fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`);
+                        SymbolGlyph.fontSize(`${(this.fontSizeScale ?? q14) * n14}vp`);
                     }, SymbolGlyph);
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (Util.isSymbolResource(this.options?.icon)) {
+                        if (Util.v14(this.options?.icon)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(this.options?.icon ?? {
@@ -223,8 +219,7 @@ export class ExceptionPrompt extends ViewPU {
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__'
                                     }]);
-                                    SymbolGlyph.fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) *
-                                        SYMBOL_SIZE}vp`);
+                                    SymbolGlyph.fontSize(`${(this.fontSizeScale ?? q14) * n14}vp`);
                                 }, SymbolGlyph);
                             });
                         } else {
@@ -269,25 +264,15 @@ export class ExceptionPrompt extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
-            Text.margin(i18n.isRTL(i18n.System.getSystemLanguage()) ?
-                {
-                    right: {
-                        'id': -1,
-                        'type': 10002,
-                        params: ['sys.float.ohos_id_dialog_margin_end'],
-                        'bundleName': '__harDefaultBundleName__',
-                        'moduleName': '__harDefaultModuleName__'
-                    }
-                } :
-                {
-                    left: {
-                        'id': -1,
-                        'type': 10002,
-                        params: ['sys.float.ohos_id_dialog_margin_end'],
-                        'bundleName': '__harDefaultBundleName__',
-                        'moduleName': '__harDefaultModuleName__'
-                    }
-                });
+            Text.margin({
+                start: LengthMetrics.resource({
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_dialog_margin_end'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
+                })
+            });
             Text.flexShrink(1);
             Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
         }, Text);
@@ -319,7 +304,7 @@ export class ExceptionPrompt extends ViewPU {
                         });
                         Button.accessibilityDescription(this.onActionTextClick ? '' : ' ');
                         Button.accessibilityRole(this.onActionTextClick ? AccessibilityRoleType.BUTTON :
-                          AccessibilityRoleType.ROLE_NONE);
+                        AccessibilityRoleType.ROLE_NONE);
                         Button.onClick(() => {
                             this.onActionTextClick && this.onActionTextClick();
                         });
@@ -349,25 +334,15 @@ export class ExceptionPrompt extends ViewPU {
                         });
                         Text.maxLines(2);
                         Text.padding(0);
-                        Text.margin(i18n.isRTL(i18n.System.getSystemLanguage()) ?
-                            {
-                                left: {
-                                    'id': -1,
-                                    'type': 10002,
-                                    params: ['sys.float.ohos_id_text_paragraph_margin_s'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                }
-                            } :
-                            {
-                                right: {
-                                    'id': -1,
-                                    'type': 10002,
-                                    params: ['sys.float.ohos_id_text_paragraph_margin_s'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                }
-                            });
+                        Text.margin({
+                            end: LengthMetrics.resource({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_text_paragraph_margin_s'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            })
+                        });
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.flexShrink(1);
                         Text.textAlign(TextAlign.End);
@@ -382,7 +357,7 @@ export class ExceptionPrompt extends ViewPU {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        SymbolGlyph.fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`);
+                        SymbolGlyph.fontSize(`${(this.fontSizeScale ?? q14) * n14}vp`);
                         SymbolGlyph.fontColor([{
                             'id': -1,
                             'type': 10001,
@@ -408,7 +383,7 @@ export class ExceptionPrompt extends ViewPU {
             Row.create();
             Row.width('100%');
             Row.position({ y: this.options.marginTop });
-            Row.zIndex(ZINDEX_NUM);
+            Row.zIndex(l14);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -445,14 +420,14 @@ export class ExceptionPrompt extends ViewPU {
             });
             Column.transition(TransitionEffect.OPACITY.animation({
                 curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1),
-                duration: this.options.isShown ? START_TIME : END_TIME
+                duration: this.options.isShown ? i14 : j14
             }));
             Column.visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
-            Column.borderRadius(BORDER_RADIUS);
+            Column.borderRadius(k14);
             Column.backgroundColor({
                 'id': -1,
                 'type': 10001,
@@ -460,7 +435,7 @@ export class ExceptionPrompt extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             });
-            Column.zIndex(ZINDEX_NUM);
+            Column.zIndex(l14);
         }, Column);
         this.TextBuilder.bind(this)();
         Column.pop();
@@ -470,12 +445,12 @@ export class ExceptionPrompt extends ViewPU {
 
     aboutToAppear() {
         try {
-            let uiContent = this.getUIContext();
-            this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-            this.maxAppFontScale = uiContent.getMaxFontScale();
-            this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
-            this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
-            this.callbackId = uiContent.getHostContext()?.getApplicationContext()?.on('environment', this.callbacks);
+            let u14 = this.getUIContext();
+            this.isFollowingSystemFontScale = u14.isFollowingSystemFontScale();
+            this.maxAppFontScale = u14.getMaxFontScale();
+            this.fontSizeScale = Math.min(this.updateFontScale(), o14);
+            this.fontSizeScale = Math.max(this.fontSizeScale, p14);
+            this.callbackId = u14.getHostContext()?.getApplicationContext()?.on('environment', this.callbacks);
         } catch (err) {
             let code = err.code;
             let message = err.message;
@@ -491,12 +466,12 @@ export class ExceptionPrompt extends ViewPU {
     }
 
     updateFontScale() {
-        let uiContent = this.getUIContext();
-        let systemFontScale = uiContent.getHostContext()?.config?.fontSizeScale ?? 1;
+        let s14 = this.getUIContext();
+        let t14 = s14.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        return Math.min(systemFontScale, this.maxAppFontScale);
+        return Math.min(t14, this.maxAppFontScale);
     }
 
     rerender() {
@@ -505,18 +480,18 @@ export class ExceptionPrompt extends ViewPU {
 }
 
 class Util {
-    static isSymbolResource(resourceStr) {
-        if (resourceStr === undefined) {
+    static v14(r14) {
+        if (r14 === undefined) {
             return true;
         }
-        if (!Util.isResourceType(resourceStr)) {
+        if (!Util.w14(r14)) {
             return false;
         }
-        let resource = resourceStr;
-        return resource.type === Util.RESOURCE_TYPE_SYMBOL;
+        let resource = r14;
+        return resource.type === Util.x14;
     }
 
-    static isResourceType(resource) {
+    static w14(resource) {
         if (!resource) {
             return false;
         }
@@ -524,7 +499,7 @@ class Util {
     }
 }
 
-Util.RESOURCE_TYPE_SYMBOL = 40000;
+Util.x14 = 40000;
 
 export default {
     MarginType,

@@ -236,6 +236,13 @@ void WebModelImpl::SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const
     webComponent->SetOnInterceptRequest(std::move(jsCallback));
 }
 
+void WebModelImpl::SetOnOverrideErrorPage(std::function<std::string(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnOverrideErrorPage(std::move(jsCallback));
+}
+
 void WebModelImpl::SetOnUrlLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -610,6 +617,13 @@ void WebModelImpl::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
+void WebModelImpl::SetCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetCssDisplayChangeEnabled(isCssDisplayChangeEnabled);
 }
 
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

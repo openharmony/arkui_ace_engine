@@ -15,6 +15,7 @@
 
 #include "ui/base/agingadapation/aging_adapation_dialog_util.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/utils/utils.h"
@@ -25,6 +26,15 @@ namespace OHOS::Ace::Kit {
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     const std::string& message, const int32_t iconNodeId, const IconNodeType type)
 {
+    int32_t themeScopedId = 0;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopedId);
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    float scale = context->GetFontScale();
+    if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        return nullptr;
+    }
     if (type == IconNodeType::TEXT) {
         auto dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(UtfUtils::Str8ToStr16(message));
         CHECK_NULL_RETURN(dialogNode, nullptr);

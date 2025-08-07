@@ -22,7 +22,6 @@ export class ArkRowNode extends ArkBaseNode implements RowAttribute {
         if (value) {
             this.getPeer().alignItemsAttribute(value);
         } else {
-            // this.getPeer().resetAlignItemsAttribute(value);
         }
         return this;
     }

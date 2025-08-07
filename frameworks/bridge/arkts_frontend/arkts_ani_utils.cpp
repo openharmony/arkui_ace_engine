@@ -16,6 +16,8 @@
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 
 #include <ani.h>
+#include <sstream>
+#include <iostream>
 
 #include "base/log/log.h"
 
@@ -67,5 +69,34 @@ int32_t ArktsAniUtils::GetNearestNonBootRuntimeLinker(ani_env* env, ani_ref& res
         return static_cast<int32_t>(state);
     }
     return static_cast<int32_t>(state);
+}
+
+void ArktsAniUtils::ClearAniPendingError(ani_env* env)
+{
+    ani_boolean result = ANI_FALSE;
+    env->ExistUnhandledError(&result);
+    if (result != ANI_FALSE) {
+        std::ostringstream oss;
+        auto rdbufBak = std::cerr.rdbuf(oss.rdbuf());
+        env->DescribeError();
+        std::cerr.rdbuf(rdbufBak);
+        LOGE("ani pending error: %{public}s", oss.str().c_str());
+        env->ResetError();
+    }
+}
+
+ani_env* ArktsAniUtils::GetAniEnv(ani_vm* vm)
+{
+    if (!vm) {
+        LOGW("GetAniEnv from null vm");
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    ani_status status;
+    if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
+        LOGW("GetAniEnv from vm failed, status: %{public}d", status);
+        return nullptr;
+    }
+    return env;
 }
 } // namespace OHOS::Ace

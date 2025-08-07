@@ -239,8 +239,8 @@ struct JscScopedState {
             JSObjectRef ys = JSObjectMakeTypedArray(context, kJSTypedArrayTypeInt32Array, count, &exc);
             int32_t* xsRaw = reinterpret_cast<int32_t*>(JSObjectGetTypedArrayBytesPtr(context, xs, &exc));
             int32_t* ysRaw = reinterpret_cast<int32_t*>(JSObjectGetTypedArrayBytesPtr(context, ys, &exc));
-            memcpy(xsRaw, xValues, 4 * count);
-            memcpy(ysRaw, yValues, 4 * count);
+            memcpy_s(xsRaw, 4 * count, xValues, 4 * count);
+            memcpy_s(ysRaw, 4 * count, yValues, 4 * count);
             args[0] = xs;
             args[1] = ys;
             auto result = JSObjectCallAsFunction(context, onMultiTouchMove, redrawer, 2, &args[0], &exc);
@@ -264,8 +264,8 @@ struct JscScopedState {
             JSObjectRef ys = JSObjectMakeTypedArray(context, kJSTypedArrayTypeInt32Array, count, &exc);
             int32_t* xsRaw = reinterpret_cast<int32_t*>(JSObjectGetTypedArrayBytesPtr(context, xs, &exc));
             int32_t* ysRaw = reinterpret_cast<int32_t*>(JSObjectGetTypedArrayBytesPtr(context, ys, &exc));
-            memcpy(xsRaw, xValues, 4 * count);
-            memcpy(ysRaw, yValues, 4 * count);
+            memcpy_s(xsRaw, 4 * count, xValues, 4 * count);
+            memcpy_s(ysRaw, 4 * count, yValues, 4 * count);
             args[0] = xs;
             args[1] = ys;
             args[2] = JSValueMakeNumber(context, tap);
@@ -430,7 +430,6 @@ struct JscCallback {
     JSValueRef callCallback() {
         JSObjectRef callback = this->callback;
         JSObjectRef receiver = this->receiver;
-        //JSObjectRef object = this->object;
         JSValueRef result = JSObjectCallAsFunction(context, callback, receiver, 0, nullptr, nullptr);
 
         return result;

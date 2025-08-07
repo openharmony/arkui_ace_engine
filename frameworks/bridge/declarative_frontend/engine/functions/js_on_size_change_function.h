@@ -32,7 +32,7 @@ class JsOnSizeChangeFunction : public JsFunction {
 public:
     explicit JsOnSizeChangeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(jsFunction) {}
     ~JsOnSizeChangeFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

@@ -25,6 +25,7 @@
 #include "native_node.h"
 #include "native_type.h"
 
+#include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
@@ -35,7 +36,7 @@ struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
     bool cNode = false;
-    bool freeNode = false;
+    bool threadSafeNode = false;
     bool buildNode = false;
     void* extraData = nullptr;
     void* extraCustomData = nullptr;
@@ -125,8 +126,8 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
-ArkUI_NodeHandle CreateNodeInner(ArkUI_NodeType type, bool isFreeNode);
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
+void DisposeNativeSource(ArkUI_NodeHandle nativePtr);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
 bool IsValidArkUINode(ArkUI_NodeHandle nodePtr);
 
@@ -146,6 +147,7 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId);
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
+bool GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion platfromVersion);
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event));
 void UnregisterOnEvent();
@@ -173,6 +175,7 @@ bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
 int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
+std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType);
 void RegisterBindNativeNode(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

@@ -1005,4 +1005,37 @@ void PatternLockPattern::UpdateActiveCircleColor(const Color& color, bool isFris
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
+void PatternLockPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    if (!pops->HasPathColorSetByUser() || (pops->HasPathColorSetByUser() && !pops->GetPathColorSetByUserValue())) {
+        pops->UpdatePathColor(theme->GetPathColor());
+    }
+    if (!pops->HasRegularColorSetByUser() ||
+        (pops->HasRegularColorSetByUser() && !pops->GetRegularColorSetByUserValue())) {
+        pops->UpdateRegularColor(theme->GetRegularColor());
+    }
+    if (!pops->HasActiveColorSetByUser() ||
+        (pops->HasActiveColorSetByUser() && !pops->GetActiveColorSetByUserValue())) {
+        pops->UpdateActiveColor(theme->GetActiveColor());
+    }
+    if (!pops->HasSelectedColorSetByUser() ||
+        (pops->HasSelectedColorSetByUser() && !pops->GetSelectedColorSetByUserValue())) {
+        UpdateSelectedColor(theme->GetSelectedColor());
+    }
+    if (!pops->HasActiveCircleColorSetByUser() ||
+        (pops->HasActiveCircleColorSetByUser() && !pops->GetActiveCircleColorSetByUserValue())) {
+        UpdateActiveCircleColor(Color::TRANSPARENT);
+    }
+}
 } // namespace OHOS::Ace::NG

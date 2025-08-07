@@ -22,6 +22,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
  
 using namespace testing;
 using namespace testing::ext;
@@ -33,6 +34,7 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+constexpr int32_t PERFORM_ACTION = 1;
 } // namespace
 
 class RichEditorKeyboardTestNg : public RichEditorCommonTestNg {
@@ -173,6 +175,8 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestRequestKeyboard001, Test
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto func = [] {};
 
     auto customKeyboardBuilder = richEditorPattern->customKeyboardBuilder_;
@@ -193,6 +197,8 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CloseCustomKeyboard();
 
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto func = []() {};
     auto oldFunc = richEditorPattern->customKeyboardBuilder_;
 
@@ -206,6 +212,33 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
     ASSERT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
 
     richEditorPattern->customKeyboardBuilder_ = oldFunc;
+}
+
+/**
+ * @tc.name: RequestCustomKeyboard
+ * @tc.desc: test RequestCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    int32_t apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
+    richEditorPattern->SetCustomKeyboardOption(true);
+    auto func = []() {};
+    richEditorPattern->customKeyboardBuilder_ = func;
+
+    EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, false);
+    EXPECT_EQ(richEditorPattern->RequestCustomKeyboard(), true);
+    EXPECT_EQ(textFieldManager->UsingCustomKeyboardAvoid(), true);
+    EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, true);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
 }
 
 /**
@@ -373,6 +406,194 @@ HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed004, TestSize.Level1)
     richEditorPattern->action_ = TextInputAction::SEARCH;
     richEditorPattern->ResetKeyboardIfNeed();
     EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: PerformAction001
+ * @tc.desc: test PerformAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, PerformAction001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options2);
+    int count = 0;
+    TextFieldCommonEvent event2;
+    auto callback = [&count, &event2](int32_t key, NG::TextFieldCommonEvent& event) {
+        event2 = event;
+        if (count > 0) {
+            event.SetKeepEditable(true);
+        }
+        count = count + 1;
+    };
+    eventHub->SetOnSubmit(std::move(callback));
+    TextInputAction action2 = TextInputAction::SEARCH;
+    bool forceCloseKeyboard = false;
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, PERFORM_ACTION);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight001
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight002
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->rootHeight_ = 80.0;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = 70;
+    insetBottom.end = 80;
+    pipeline->GetSafeAreaManager()->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight003
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->rootHeight_ = 80.0;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = 1;
+    insetBottom.end = 86;
+    pipeline->GetSafeAreaManager()->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight004
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight005
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: HandlePointWithTransform001
+ * @tc.desc: test HandlePointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorNode_->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    OffsetF point(0, 0);
+    richEditorPattern->HandlePointWithTransform(point);
+    EXPECT_EQ(point.GetX(), 0);
+    EXPECT_EQ(point.GetY(), 0);
+}
+
+/**
+ * @tc.name: HandlePointWithTransform002
+ * @tc.desc: test HandlePointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorNode_->tag_ = V2::SCREEN_ETS_TAG;
+    OffsetF point(0, 0);
+    richEditorPattern->HandlePointWithTransform(point);
+    EXPECT_EQ(point.GetX(), 0);
+    EXPECT_EQ(point.GetY(), 0);
 }
 
 }

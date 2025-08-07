@@ -62,10 +62,6 @@ let allTests: TestDescriptor[] = [
             sendClick(control, elementById("TheButton"), 100, 50)
         }
     },
-    // {
-    //     page: "pages/Progress.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/Slider.test",
         skipFrames: 1
@@ -94,10 +90,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/MenuItemGroup.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/Marquee.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/ImageAnimator.test",
         skipFrames: 1
@@ -182,10 +174,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/Stack.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/ScrollBar.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/Divider.test",
         skipFrames: 1
@@ -194,10 +182,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/TextTimer.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/DatePicker.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/Radio.test",
         skipFrames: 1
@@ -218,10 +202,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/NavDestination.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/XComponent.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/SideBarContainer.test",
         skipFrames: 1
@@ -230,22 +210,10 @@ let allTests: TestDescriptor[] = [
         page: "pages/Toggle.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/Web.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/AlphabetIndexer.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/Video.test",
-    //     skipFrames: 1
-    // },
-    // {
-    //     page: "pages/DataPanel.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/Shape.test",
         skipFrames: 1
@@ -254,10 +222,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/FormLink.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/Gauge.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/Button.test",
         skipFrames: 1
@@ -270,10 +234,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/Line.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/PatternLock.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/ColumnSplit.test",
         skipFrames: 1
@@ -282,14 +242,6 @@ let allTests: TestDescriptor[] = [
         page: "pages/RowSplit.test",
         skipFrames: 1
     },
-    // {
-    //     page: "pages/Panel.test",
-    //     skipFrames: 1
-    // },
-    // {
-    //     page: "pages/TimePicker.test",
-    //     skipFrames: 1
-    // },
     {
         page: "pages/Path.test",
         skipFrames: 1

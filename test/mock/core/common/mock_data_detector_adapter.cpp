@@ -36,13 +36,12 @@ bool DataDetectorAdapter::ShowAIEntityMenu(
 }
 
 bool DataDetectorAdapter::GetAiEntityMenuOptions(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode,
-    AIMenuInfo info, std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
-    const std::function<void()>& onMenuDisappear)
+    AIMenuInfo info, std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
 {
     return false;
 }
-RefPtr<NG::FrameNode> DataDetectorAdapter::CreateAIEntityMenu(const AISpan& aiSpan,
-    const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info, const std::function<void()>& onMenuDisappear)
+RefPtr<NG::FrameNode> DataDetectorAdapter::CreateAIEntityMenu(
+    const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info)
 {
     return nullptr;
 }
@@ -50,8 +49,7 @@ RefPtr<NG::FrameNode> DataDetectorAdapter::CreateAIEntityMenu(const AISpan& aiSp
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan) {}
 
 void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
-    const std::pair<std::string, FuncVariant>& menuOption, const RefPtr<NG::FrameNode>& targetNode,
-    const std::function<void()>& onMenuDisappear, bool isFirst)
+    const std::pair<std::string, FuncVariant>& menuOption, const RefPtr<NG::FrameNode>& targetNode)
 {}
 
 void DataDetectorAdapter::GetAIEntityMenu() {}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,9 +86,7 @@ void JSRadio::Create(const JSCallbackInfo& info)
         ParseIndicator(info, indicator, customBuilderFunc, builderObject);
     }
     RadioModel::GetInstance()->Create(value, group, indicator);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        RadioModel::GetInstance()->SetBuilder(std::move(customBuilderFunc));
-    }
+    RadioModel::GetInstance()->SetBuilder(std::move(customBuilderFunc));
     JSRadioTheme::ApplyTheme();
 }
 
@@ -97,16 +95,15 @@ void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>&
 {
     if (indicator.value() == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
         if (builderObject->IsFunction()) {
-            auto vm = info.GetVm();
-            auto jsFunc = JSRef<JSFunc>::Cast(builderObject);
-            auto func = jsFunc->GetLocalHandle();
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
+            CHECK_NULL_VOID(builderFunc);
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            customBuilderFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
+            customBuilderFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                    node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("Radio.builder");
                 PipelineContext::SetCallBackNode(node);
-                func->Call(vm, func.ToLocal(), nullptr, 0);
+                func->Execute();
             };
         } else {
             indicator = static_cast<int32_t>(RadioIndicatorType::TICK);
@@ -122,9 +119,11 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("checked", &JSRadio::Checked);
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
+    JSClass<JSRadio>::StaticMethod("margin", &JSRadio::JsMargin);
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
     JSClass<JSRadio>::StaticMethod("responseRegion", &JSRadio::JsResponseRegion);
     JSClass<JSRadio>::StaticMethod("hoverEffect", &JSRadio::JsHoverEffect);
+    JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
     JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -140,17 +139,14 @@ void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEv
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto vm = args.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChecked = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool check) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Radio.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, check) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
+        func->ExecuteJS(1, &newJSVal);
     };
     RadioModel::GetInstance()->SetOnChangeEvent(std::move(onChecked));
 }
@@ -202,6 +198,12 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
     NG::PaddingPropertyF oldPadding = GetOldPadding(info);
     NG::PaddingProperty newPadding = GetNewPadding(info);
     RadioModel::GetInstance()->SetPadding(oldPadding, newPadding);
+}
+
+void JSRadio::JsMargin(const JSCallbackInfo& info)
+{
+    RadioModel::GetInstance()->SetIsUserSetMargin(true);
+    JSViewAbstract::JsMargin(info);
 }
 
 NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
@@ -304,20 +306,47 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         RadioModel::GetInstance()->SetIndicatorColor(theme->GetPointColor());
         return;
     }
+    SetCheckedBackgroundColor(info, theme);
+    SetUncheckedBorderColor(info, theme);
+    SetIndicatorColor(info, theme);
+}
+
+void JSRadio::SetCheckedBackgroundColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
-    JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
-    JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
     Color checkedBackgroundColorVal;
-    if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
+    RefPtr<ResourceObject> backgroundResObj;
+    bool isUserSetBgColor = true;
+    if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal, backgroundResObj)) {
+        isUserSetBgColor = false;
         if (!JSRadioTheme::ObtainCheckedBackgroundColor(checkedBackgroundColorVal)) {
             checkedBackgroundColorVal = theme->GetActiveColor();
         }
     }
+    CreateWithResourceObj(backgroundResObj, static_cast<int32_t>(RadioColorType::CHECKED_BACKGROUND_COLOR));
     RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
+    RadioModel::GetInstance()->SetCheckedBackgroundColorSetByUser(isUserSetBgColor);
+}
+
+void JSRadio::SetUncheckedBorderColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
     Color uncheckedBorderColorVal;
-    if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
+    RefPtr<ResourceObject> borderResObj;
+    bool isUserSetUnBorderColor = true;
+    bool isByTheme = false;
+    if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal, borderResObj)) {
+        isUserSetUnBorderColor = false;
         if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
+            isByTheme = true;
             uncheckedBorderColorVal = theme->GetInactiveColor();
         }
     } else {
@@ -327,14 +356,41 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pattern);
         pattern->SetIsUserSetUncheckBorderColor(true);
     }
+    CreateWithResourceObj(borderResObj, static_cast<int32_t>(RadioColorType::UNCHECKED_BORDER_COLOR));
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
+    RadioModel::GetInstance()->SetUncheckedBorderColorSetByUser(isUserSetUnBorderColor);
+    RadioModel::GetInstance()->SetUncheckedBorderColorByJSRadioTheme(isByTheme);
+}
+
+void JSRadio::SetIndicatorColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
     Color indicatorColorVal;
-    if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
+    RefPtr<ResourceObject> indicatorResObj;
+    bool isUserSetIndicatorColor = true;
+    bool isByTheme = false;
+    if (!ParseJsColor(indicatorColor, indicatorColorVal, indicatorResObj)) {
+        isUserSetIndicatorColor = false;
         if (!JSRadioTheme::ObtainIndicatorColor(indicatorColorVal)) {
+            isByTheme = true;
             indicatorColorVal = theme->GetPointColor();
         }
     }
+    CreateWithResourceObj(indicatorResObj, static_cast<int32_t>(RadioColorType::INDICATOR_COLOR));
     RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
+    RadioModel::GetInstance()->SetIndicatorColorSetByUser(isUserSetIndicatorColor);
+    RadioModel::GetInstance()->SetIndicatorColorByJSRadioTheme(isByTheme);
+}
+
+void JSRadio::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj, const int32_t colorType)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RadioModel::GetInstance()->CreateWithColorResourceObj(resObj, static_cast<RadioColorType>(colorType));
+    }
 }
 
 void JSRadio::JsResponseRegion(const JSCallbackInfo& info)
@@ -349,6 +405,25 @@ void JSRadio::JsResponseRegion(const JSCallbackInfo& info)
     }
 
     RadioModel::GetInstance()->SetResponseRegion(result);
+}
+
+void JSRadio::OnChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Radio.onChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
+        func->ExecuteJS(1, &newJSVal);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
+    };
+    RadioModel::GetInstance()->SetOnChange(std::move(onChange));
+    args.ReturnSelf();
 }
 
 void JSRadio::JsOnClick(const JSCallbackInfo& args)

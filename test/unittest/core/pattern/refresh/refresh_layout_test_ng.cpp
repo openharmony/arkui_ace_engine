@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "refresh_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -265,6 +266,8 @@ HWTEST_F(RefreshLayoutTestNg, GetTargetOffset001, TestSize.Level1)
     pattern_->HandleDragEnd(0.f);
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
     EXPECT_FALSE(pattern_->isHigherVersion_);
+    auto algorithm = AceType::DynamicCast<RefreshLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->isHighVersion_);
 }
 
 /**
@@ -442,7 +445,6 @@ HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
-    EXPECT_NE(pattern_->refreshTheme_, nullptr);
     EXPECT_TRUE(pattern_->isHigherVersion_);
     EXPECT_TRUE(pattern_->hasLoadingText_);
     
@@ -452,5 +454,158 @@ HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     auto textLayoutProperty = pattern_->loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(0.0_vp), 14.0_fp);
     EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::WHITE), Color::BLACK);
+}
+
+/**
+ * @tc.name: CustomBuilderNodeVisibility001
+ * @tc.desc: Test CustomBuilderNode's visibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetCustomBuilder
+     * @tc.expected: custom node exists, and default visibility is visible.
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto builder = CreateCustomNode();
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+    CreateDone();
+    EXPECT_EQ(pattern_->progressChild_, nullptr);
+    EXPECT_EQ(pattern_->customBuilder_, builder);
+    auto customBuilderLayoutProperty = pattern_->customBuilder_->GetLayoutProperty();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step2.  start Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step3.  end Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step4.  user has setted visibility and  start Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5.  user has setted visibility and  end Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: BeginAndEndTrailingTrace001
+ * @tc.desc: Test BeginTrailingTrace and EndTrailingTrace function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, BeginAndEndTrailingTrace001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+
+    pattern_->BeginTrailingTrace();
+    EXPECT_TRUE(pattern_->hasBeginTrailingTrace_);
+    pattern_->EndTrailingTrace();
+    EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+}
+
+/**
+ * @tc.name: ResetAnimation001
+ * @tc.desc: Test ResetAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, ResetAnimation001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    pattern_->scrollOffset_ = 100.0f;
+    pattern_->ResetAnimation();
+    EXPECT_EQ(pattern_->animation_, nullptr);
+    EXPECT_EQ(pattern_->offsetProperty_->Get(), 100.0f);
+    pattern_->QuickStartFresh();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_NE(pattern_->animation_, nullptr);
+    pattern_->ResetAnimation();
+    EXPECT_EQ(pattern_->offsetProperty_->Get(), pattern_->refreshOffset_.ConvertToPx());
+}
+
+/**
+ * @tc.name: TestInitChildNode001
+ * @tc.desc: Test InitChildNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create with loadingText
+     * @tc.expected: loadingText node exists.
+     */
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("loadingText");
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+    EXPECT_NE(pattern_->progressChild_, nullptr);
+    EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. refresh don't set accessibilityLevel
+     * @tc.expected: progress node and loadingText node don't have accessibilityLevel.
+     */
+    auto refreshAccessibilityProperty = frameNode_->GetAccessibilityProperty<NG::RefreshAccessibilityProperty>();
+    EXPECT_NE(refreshAccessibilityProperty, nullptr);
+    EXPECT_FALSE(refreshAccessibilityProperty->HasAccessibilityLevel());
+    auto progressAccessibilityProperty = pattern_->progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(progressAccessibilityProperty, nullptr);
+    EXPECT_FALSE(progressAccessibilityProperty->accessibilityLevel_.has_value());
+    auto textAccessibilityProperty = pattern_->loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(textAccessibilityProperty, nullptr);
+    EXPECT_FALSE(textAccessibilityProperty->accessibilityLevel_.has_value());
+
+    /**
+     * @tc.steps: step3. refresh sets accessibilityLevel
+     * @tc.expected: progress node and loadingText node have accessibilityLevel.
+     */
+    refreshAccessibilityProperty->SetAccessibilityLevel("no");
+    EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
+    EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");
+    pattern_->InitChildNode();
+    EXPECT_TRUE(progressAccessibilityProperty->accessibilityLevel_.has_value());
+    EXPECT_EQ(progressAccessibilityProperty->accessibilityLevel_.value(), "no");
+    EXPECT_TRUE(textAccessibilityProperty->accessibilityLevel_.has_value());
+    EXPECT_EQ(textAccessibilityProperty->accessibilityLevel_.value(), "no");
 }
 } // namespace OHOS::Ace::NG

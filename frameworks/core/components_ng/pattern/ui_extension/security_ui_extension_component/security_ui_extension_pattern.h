@@ -59,7 +59,7 @@ public:
         return uiExtensionType_;
     }
 
-    void Initialize(const NG::UIExtensionConfig& config);
+    virtual void Initialize(const NG::UIExtensionConfig& config);
     void UnregisterResources();
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
@@ -82,13 +82,15 @@ public:
     void OnUeaAccessibilityEventAsync();
     void OnExtensionDetachToDisplay();
 
+    void OnAttachContext(PipelineContext *context) override;
+    void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
-    void OnVisibleChange(bool visible) override;
+    void OnVisibleChangeInner(bool visible);
     void OnMountToParentDone() override;
     void OnLanguageConfigurationUpdate() override;
     void OnColorConfigurationUpdate() override;
@@ -141,6 +143,7 @@ public:
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
 
 protected:
+    void UpdateSessionInstanceId(int32_t instanceId);
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
@@ -176,6 +179,12 @@ protected:
     bool isVisible_ = true;
     bool isShowPlaceholder_ = false;
     bool densityDpi_ = false;
+
+    // StartUIExtension should after mountToParent
+    bool hasMountToParent_ = false;
+    bool hasAttachContext_ = false;
+    bool needReNotifyForeground_ = false;
+
     int32_t callbackId_ = 0;
     RectF displayArea_;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;

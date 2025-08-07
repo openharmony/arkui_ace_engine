@@ -385,8 +385,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternValidSessionTest, TestSiz
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
 
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleChange(false);
+    pattern->OnRealVisibleChangeInner(true);
+    pattern->OnRealVisibleChangeInner(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -425,8 +425,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternInValidSessionTest, TestS
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
     InValidSessionWrapper(pattern);
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleChange(false);
+    pattern->OnRealVisibleChangeInner(true);
+    pattern->OnRealVisibleChangeInner(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -993,11 +993,13 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleMouseEventInValidSession, 
     auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
     EXPECT_NE(sessionWrapper, nullptr);
     pattern->isVisible_ = true;
-    pattern->OnWindowHide();
+    pattern->curVisible_ = true;
     pattern->OnWindowShow();
-    pattern->isVisible_ = false;
     pattern->OnWindowHide();
+    EXPECT_EQ(pattern->isVisible_, false);
+    EXPECT_EQ(pattern->curVisible_, false);
     pattern->OnWindowShow();
+    pattern->OnWindowHide();
 #endif
 }
 
@@ -1883,12 +1885,114 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
      */
     int32_t instanceId = 1;
     pattern->RegisterPipelineEvent(instanceId);
+    EXPECT_NE(pattern->surfacePositionCallBackId_, 0);
 
     /**
      * @tc.steps: step3. test UnRegisterPipelineEvent.
      */
     pattern->UnRegisterPipelineEvent(instanceId);
 #endif
+}
+
+/**
+ * @tc.name: FireOnTerminatedCallbackTest
+ * @tc.desc: Test FireOnTerminated Callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, FireOnTerminatedCallbackTestNg, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+    ValidSessionWrapper(pattern);
+    ValidSession(pattern);
+    /**
+     * @tc.steps: step2. set onTerminatedFuntionQE.
+     */
+    auto onTerminatedFuntionEQ =
+        [](int32_t code, const RefPtr<WantWrap>& wantWrap) { EXPECT_EQ(code, CODE); };
+    pattern->SetOnTerminatedCallback(onTerminatedFuntionEQ);
+
+    pattern->sessionType_ = SessionType::INVALID_TYPE;
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    pattern->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    pattern->usage_ = UIExtensionUsage::MODAL;
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    pattern->usage_ = UIExtensionUsage::EMBEDDED;
+    /**
+     * @tc.steps: step3. fire onTerminatedFuntion.
+     */
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    auto onTerminatedFuntion =
+        [](int32_t code, const RefPtr<WantWrap>& wantWrap) {};
+    /**
+     * @tc.steps: step4. set onTerminatedFuntion.
+     */
+    pattern->SetOnTerminatedCallback(onTerminatedFuntion);
+    InValidSession(pattern);
+    /**
+     * @tc.steps: step5. fire onTerminatedFuntion when InValidSession.
+     */
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    InValidSessionWrapper(pattern);
+    /**
+     * @tc.steps: step6. fire onTerminatedFuntion when InValidSessionWrapper.
+     */
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION);
+}
+
+/**
+ * @tc.name: FireOnResultCallbackTestNg
+ * @tc.desc: Test FireOnResult Callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, FireOnResultCallbackTestNg, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+    ValidSessionWrapper(pattern);
+    ValidSession(pattern);
+    OHOS::AAFwk::Want myWant;
+    /**
+     * @tc.steps: step2. set onResultFuntionQE.
+     */
+    auto onResultFuntionEQ =
+        [](int32_t code, const AAFwk::Want& want) { EXPECT_EQ(code, CODE); };
+    pattern->SetOnResultCallback(onResultFuntionEQ);
+    /**
+     * @tc.steps: step3. fire onResultFuntion.
+     */
+    pattern->FireOnResultCallback(CODE, myWant);
+    auto onResultFuntion =
+        [](int32_t code, const AAFwk::Want& want) {};
+    /**
+     * @tc.steps: step4. set onResultFuntion.
+     */
+    pattern->SetOnResultCallback(onResultFuntion);
+    InValidSession(pattern);
+    /**
+     * @tc.steps: step5. fire onResultFuntion when InValidSession.
+     */
+    pattern->FireOnResultCallback(CODE, myWant);
+    InValidSessionWrapper(pattern);
+    /**
+     * @tc.steps: step6. fire onResultFuntion when InValidSessionWrapper.
+     */
+    pattern->FireOnResultCallback(CODE, myWant);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION);
 }
 
 /**
@@ -1932,5 +2036,68 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentOnDrawReadyTestNg, Test
     EXPECT_FALSE(pattern->IsShowPlaceholder());
     EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::NONE);
 #endif
+}
+
+/**
+ * @tc.name: ModalUIExtensionTestNg
+ * @tc.desc: Test Modal UIExtension
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, ModalUIExtensionTestNgTestNg, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    UIExtensionModelNG uecNG;
+    /**
+     * @tc.steps: step2. test Create with return FrameNode
+     */
+    OHOS::AAFwk::Want want;
+    want.SetElementName("com.example", "testuea");
+    want.SetParam("ability.want.params.uiExtensionType", std::string("sys/CommonUI"));
+    ModalUIExtensionCallbacks callbacks;
+    InnerModalUIExtensionConfig innerConfig;
+    auto node1 = uecNG.Create(want, callbacks, innerConfig);
+    ASSERT_NE(node1, nullptr);
+    auto pattern1 = node1->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern1, nullptr);
+    pattern1->OnAttachToMainTree();
+    ValidSessionWrapper(pattern1);
+    ValidSession(pattern1);
+    ASSERT_NE(pattern1->sessionWrapper_, nullptr);
+    pattern1->usage_ = UIExtensionUsage::MODAL;
+    auto focusHub1 = node1->GetFocusHub();
+    ASSERT_NE(focusHub1, nullptr);
+    pattern1->OnConnect();
+    innerConfig.isModalRequestFocus = false;
+    auto node2 = uecNG.Create(want, callbacks, innerConfig);
+    ASSERT_NE(node2, nullptr);
+    auto pattern2 = node2->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    pattern2->OnAttachToMainTree();
+    ValidSessionWrapper(pattern2);
+    ValidSession(pattern2);
+    ASSERT_NE(pattern2->sessionWrapper_, nullptr);
+    pattern1->usage_ = UIExtensionUsage::MODAL;
+    pattern2->OnConnect();
+    EXPECT_EQ(pattern2->isModalRequestFocus_, false);
+}
+
+/**
+ * @tc.name: Visible Test
+ * @tc.desc: Test UIExtension Visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternVisibleTest, TestSize.Level1)
+{
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->visiblityProperty_, true);
+    pattern->OnVisibleChange(false);
+    EXPECT_EQ(pattern->visiblityProperty_, false);
+    pattern->OnVisibleChange(true);
+    EXPECT_EQ(pattern->visiblityProperty_, true);
 }
 } // namespace OHOS::Ace::NG

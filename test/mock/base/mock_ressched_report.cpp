@@ -46,9 +46,16 @@ void ResSchedReport::ResSchedDataReport(
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config) {}
 
+void ResSchedReport::OnKeyEvent(const KeyEvent& event) {}
+
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,
     const std::string& toPage, const std::string& mode)
 {}
+
+void ResSchedReport::TriggerModuleSerializer()
+{
+    loadPageOn_ = true;
+}
 
 ResSchedReportScope::ResSchedReportScope(
     const std::string& name, const std::unordered_map<std::string, std::string>& param)

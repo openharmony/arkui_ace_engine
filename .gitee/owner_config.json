@@ -1,13 +1,13 @@
 {
     "groups": {
-        "https://gitee.com/arkui-auto-tdd": [
-            "https://gitee.com/ileft2019",
-            "https://gitee.com/zhongjianfei",
-            "https://gitee.com/uniquexch",
-            "https://gitee.com/gongpingde"
+        "https://gitee.com/arkui-default": [
+            "https://gitee.com/cc520bf",
+            "https://gitee.com/raulnaruto_admin",
+            "https://gitee.com/bad-eleven",
+            "https://gitee.com/gongpingde",
+            "https://gitee.com/liyujie43"
         ],
         "https://gitee.com/arkui_superman": [
-            "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
             "https://gitee.com/tsj_2020",
             "https://gitee.com/cheng-feiwang",
@@ -22,7 +22,7 @@
             "https://gitee.com/zhanghangkai1024"
         ],
         "https://gitee.com/arkuiframework": [
-            "https://gitee.com/harmony_zhangjian",
+            "https://gitee.com/bitlepetit",
             "https://gitee.com/yesiyuanjim",
             "https://gitee.com/lushi1202",
             "https://gitee.com/xiang-shouxing"
@@ -51,13 +51,14 @@
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
+            "https://gitee.com/shiyu_huang",
             "https://gitee.com/lixingchi1",
             "https://gitee.com/s10021109",
             "https://gitee.com/lihong67",
+            "https://gitee.com/jiyujia926",
             "https://gitee.com/guido_grassel"
         ],
         "https://gitee.com/arkuiscroll": [
-            "https://gitee.com/cc520bf",
             "https://gitee.com/yangcan18",
             "https://gitee.com/yeyinglong_admin",
             "https://gitee.com/zcdqs",
@@ -73,7 +74,6 @@
             "https://gitee.com/Armstrong15",
             "https://gitee.com/fredtt",
             "https://gitee.com/futurescape",
-            "https://gitee.com/luoying_ace_admin",
             "https://gitee.com/houguobiao"
         ],
         "https://gitee.com/huawei_g_five": [
@@ -99,8 +99,14 @@
             "https://gitee.com/zhufenghao",
             "https://gitee.com/cr_wanghui",
             "https://gitee.com/chenjiadong0322",
-            "https://gitee.com/smileJuliet",
-            "https://gitee.com/bc_yx"
+            "https://gitee.com/qianlf",
+            "https://gitee.com/bc_yx",
+            "https://gitee.com/zhouge94",
+            "https://gitee.com/cloud_nine",
+            "https://gitee.com/hjoksky",
+            "https://gitee.com/zhang-yinglie",
+            "https://gitee.com/whuqincheng",
+            "https://gitee.com/ring_king"
         ],
         "https://gitee.com/arkui_cj": [
             "https://gitee.com/persisting",
@@ -113,28 +119,37 @@
         ],
         "https://gitee.com/form_framework": [
             "https://gitee.com/cx983299475"
+        ],
+        "https://gitee.com/arkui_rich_editor": [
+            "https://gitee.com/zhuweifeng94",
+            "https://gitee.com/zzc19990127"
+        ],
+        "https://gitee.com/arkuiadvanceduicomponent": [
+            "https://gitee.com/fengluochenai",
+            "https://gitee.com/wangrunsen",
+            "https://gitee.com/wxwg_admin",
+            "https://gitee.com/guozonghao11"
+        ],
+        "https://gitee.com/arkui-idlize": [
+            "https://gitee.com/guozejun"
         ]
     },
     "userInfos": {
-        "https://gitee.com/ileft2019": {
-            "info": "[自测试管理 zuopengpeng]",
-            "group": "https://gitee.com/arkui-auto-tdd"
+        "https://gitee.com/cc520bf": {
+            "info": "[公共 caocan]",
+            "group": "https://gitee.com/arkui-default"
         },
-        "https://gitee.com/zhongjianfei": {
-            "info": "[自测试管理 zhongjianfei]",
-            "group": "https://gitee.com/arkui-auto-tdd"
-        },
-        "https://gitee.com/uniquexch": {
-            "info": "[自测试管理 xuchenghua]",
-            "group": "https://gitee.com/arkui-auto-tdd"
+        "https://gitee.com/bad-eleven": {
+            "info": "[公共 yeliangfeng]",
+            "group": "https://gitee.com/arkui-default"
         },
         "https://gitee.com/gongpingde": {
-            "info": "[自测试管理 chengongping]",
-            "group": "https://gitee.com/arkui-auto-tdd"
+            "info": "[公共 chengongping]",
+            "group": "https://gitee.com/arkui-default"
         },
         "https://gitee.com/raulnaruto_admin": {
-            "info": "[导航/模态公共 laoyitong]",
-            "group": "https://gitee.com/arkui_superman"
+            "info": "[公共 laoyitong]",
+            "group": "https://gitee.com/arkui-default"
         },
         "https://gitee.com/jiangdayuan": {
             "info": "[导航/模态 jiangdayuan]",
@@ -176,8 +191,8 @@
             "info": "[无障碍相关 zhanghangkai]",
             "group": "https://gitee.com/arkuiabilitygroup"
         },
-        "https://gitee.com/harmony_zhangjian": {
-            "info": "[基础框架公共 zhangjian]",
+        "https://gitee.com/bitlepetit": {
+            "info": "[基础框架 fangzhiyuan]",
             "group": "https://gitee.com/arkuiframework"
         },
         "https://gitee.com/yesiyuanjim": {
@@ -246,7 +261,10 @@
         },
         "https://gitee.com/liyujie43": {
             "info": "[Image能力 liyujie]",
-            "group": "https://gitee.com/arkui_image"
+            "group": [
+                "https://gitee.com/arkui_image",
+                "https://gitee.com/arkui-default"
+            ]
         },
         "https://gitee.com/luoying_ace_admin": {
             "info": "[picker类组件 luoying]",
@@ -268,6 +286,14 @@
             "info": "[公共能力/预览 wuhaibin]",
             "group": "https://gitee.com/arkuistatemgmt"
         },
+        "https://gitee.com/shiyu_huang": {
+            "info": "[前端公共 huangshiyu]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/jiyujia926": {
+            "info": "[状态管理 jiyujia]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
         "https://gitee.com/lihong67": {
             "info": "[工具链 lihong]",
             "group": "https://gitee.com/arkuistatemgmt"
@@ -275,10 +301,6 @@
         "https://gitee.com/guido_grassel": {
             "info": "[状态管理 guido]",
             "group": "https://gitee.com/arkuistatemgmt"
-        },
-        "https://gitee.com/cc520bf": {
-            "info": "[滚动组件公共 caocan]",
-            "group": "https://gitee.com/arkuiscroll"
         },
         "https://gitee.com/yangcan18": {
             "info": "[Tabs组件 yangcan]",
@@ -385,7 +407,7 @@
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/libing23": {
-            "info": "[web-基础框架 libing]",
+            "info": "[web-交互安全 libing]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
         "https://gitee.com/LongLie": {
@@ -408,12 +430,36 @@
             "info": "[web-网络加载 chenjiadong]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
-        "https://gitee.com/smileJuliet": {
-            "info": "[web-性能优化 yangshimiao]",
+        "https://gitee.com/qianlf": {
+            "info": "[web-性能优化 qianliangfang]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
         "https://gitee.com/bc_yx": {
             "info": "[web-性能优化 liurongliang]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/zhouge94": {
+            "info": "[web-性能优化 zhouge]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/cloud_nine": {
+            "info": "[web-基础框架 chenyunjiu]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/hjoksky": {
+            "info": "[web-稳定性&DFX chenshijun]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/zhang-yinglie": {
+            "info": "[web-南向 zhangyinglie]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/whuqincheng": {
+            "info": "[web-多媒体 liweiyang]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/ring_king": {
+            "info": "[web-编译构建 renkang]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
         "https://gitee.com/persisting": {
@@ -447,6 +493,34 @@
         "https://gitee.com/cx983299475": {
             "info": "[卡片框架 chenxuan]",
             "group": "https://gitee.com/form_framework"
+        },
+        "https://gitee.com/zhuweifeng94": {
+            "info": "[富文本 zhuweifeng]",
+            "group": "https://gitee.com/arkui_rich_editor"
+        },
+        "https://gitee.com/zzc19990127": {
+            "info": "[富文本 zhangzecong]",
+            "group": "https://gitee.com/arkui_rich_editor"
+        },
+        "https://gitee.com/fengluochenai": {
+            "info": "[高级UI组件 luocheng]",
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
+        },
+        "https://gitee.com/wangrunsen": {
+            "info": "[高级UI组件 wangrunsen]",
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
+        },
+        "https://gitee.com/wxwg_admin": {
+            "info": "[高级UI组件 xuyinjie]",
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
+        },
+        "https://gitee.com/guozonghao11": {
+            "info": "[高级UI组件 guozonghao]",
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
+        },
+        "https://gitee.com/guozejun": {
+            "info": "[idlize guozejun]",
+            "group": "https://gitee.com/arkui-idlize"
         }
     }
 }

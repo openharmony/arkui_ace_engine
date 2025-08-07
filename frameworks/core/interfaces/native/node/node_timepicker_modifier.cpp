@@ -29,7 +29,7 @@ constexpr int32_t POS_2 = 2;
 constexpr int NUM_3 = 3;
 const char DEFAULT_DELIMITER = '|';
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 ArkUI_Bool GetPickerThemeByFrameNode(FrameNode* frameNode, RefPtr<PickerTheme>& theme)
 {
@@ -168,6 +168,7 @@ void SetTimepickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPi
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTimePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetTimePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -213,6 +214,7 @@ void SetTimepickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTimePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetTimePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -257,6 +259,7 @@ void SetTimepickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTimePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetTimePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -491,7 +494,7 @@ ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
+    return TimePickerModelNG::GetTimepickerEnableCascade(frameNode);
 }
 
 void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)

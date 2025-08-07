@@ -49,7 +49,18 @@ export struct MenuIndex {
     { name: 'bindContextMenuBottom', path: 'bindContextMenuBottom' },
     { name: 'bindContextMenuTop', path: 'bindContextMenuTop' },
     { name: 'bindContextMenuRight', path: 'bindContextMenuRight' },
-    { name: 'bindContextMenuLeft', path: 'bindContextMenuLeft' }
+    { name: 'bindContextMenuLeft', path: 'bindContextMenuLeft' },
+    { name: 'bindContextMenuPreview', path: 'bindContextMenuPreview' },
+    { name: 'menu组合场景1', path: 'MenuLevel0' },
+    { name: 'menu组合场景2', path: 'MenuLevel1' },
+    { name: 'menu组合场景3', path: 'MenuLevel2' },
+    { name: 'stackMenuAvoid', path: 'stackMenuAvoid'},
+    { name: 'MultiLevelSubMenu', path: 'MultiLevelSubMenu'},
+    { name: 'MenuTestLevel0_0', path: 'MenuTestLevel0_0'},
+    { name: 'MenuTestLevel01', path: 'MenuTestLevel01'},
+    { name: 'MenuTestLevel010', path: 'MenuTestLevel010'},
+    { name: 'MenuTestLevel011', path: 'MenuTestLevel011'},
+    { name: 'MenuTestLevel012', path: 'MenuTestLevel012'}
   ]
 
   build() {

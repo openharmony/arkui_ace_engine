@@ -51,6 +51,8 @@ public:
 
     ~DatePickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     void OnColorModeChange(uint32_t colorMode) override
     {
         LinearLayoutPattern::OnColorModeChange(colorMode);
@@ -224,7 +226,6 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = value != lunar_;
         lunar_ = value;
     }
 
@@ -465,6 +466,7 @@ public:
 
     void SetMode(const DatePickerMode& value)
     {
+        isForceUpdate_ = value != datePickerMode_;
         datePickerMode_ = value;
     }
 
@@ -857,7 +859,7 @@ private:
     void FlushChildNodes();
     void UpdateLunarSwitch();
     void UpdateDateOrder();
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
     void UpdateTextStyleCommon(

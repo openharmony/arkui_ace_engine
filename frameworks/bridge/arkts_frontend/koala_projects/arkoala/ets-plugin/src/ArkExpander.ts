@@ -213,10 +213,6 @@ export default function arkExpander(program: ts.Program, userPluginOptions: ArkT
                 updateRouterDestinationsFile(pluginOptions.destination, entryTracker)
             }
 
-            // if (structTranslator.entryFile) {
-            //     emitStartupFile(structTranslator.entryFile, pluginOptions.source!, pluginOptions.destination!)
-            // }
-
             return final
         }
     }

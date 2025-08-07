@@ -1,0 +1,32 @@
+<svg width="200" height="200" viewBox="0 0 200 200">
+	<!-- 心形路径 -->
+	<path id="heart" fill="red" d="M100,36.4C70-15.2,0,10.4,0,60.4c0,40,100,80,100,80s100-40,100-80c0-50-70-75.6-100-24z">
+		<!-- 缩放动画 -->
+		<animateTransform 
+			attributeName="transform"
+			type="scale"
+			values="1; 1.2; 1; 0.9; 1"
+			dur="1s"
+			repeatCount="1"
+		/>
+		<!-- 颜色变化动画 -->
+		<animate 
+			attributeName="fill"
+			values="red; #ff6666; red; #ff9999; red"
+			dur="2s"
+			repeatCount="1"
+		/>
+	</path>
+	
+	<!-- 旋转的小星星 -->
+	<polygon id="star" points="100,10 106,26 124,26 110,36 116,52 100,42 84,52 90,36 76,26 94,26" fill="gold">
+		<animateTransform
+			attributeName="transform"
+			type="rotate"
+			from="0 100 100"
+			to="360 100 100"
+			dur="4s"
+			repeatCount="1"
+		/>
+	</polygon>
+</svg>

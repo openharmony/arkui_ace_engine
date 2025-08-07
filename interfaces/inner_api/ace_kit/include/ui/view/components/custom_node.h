@@ -33,6 +33,8 @@ public:
 
     static void SetOnWindowFocusedCallback(const NodeHandle node, void (*onWindowFocused)(NodeHandle node));
     static void SetOnWindowUnfocusedCallback(const NodeHandle node, void (*onWindowUnfocused)(NodeHandle node));
+    static void SetOnWindowActivatedCallback(const NodeHandle node, void (*onWindowActivated)(NodeHandle node));
+    static void SetOnWindowDeactivatedCallback(const NodeHandle node, void (*onWindowDeactivated)(NodeHandle node));
     static void SetOnAttachToMainTreeCallback(const NodeHandle node, void (*onAttachToMainTree)(NodeHandle node));
     static void SetOnDetachFromMainTreeCallback(const NodeHandle node, void (*onDetachFromMainTree)(NodeHandle node));
     static void SetOnAvoidInfoChangeCallback(const NodeHandle node, void (*onAvoidInfoChange)(NodeHandle node));

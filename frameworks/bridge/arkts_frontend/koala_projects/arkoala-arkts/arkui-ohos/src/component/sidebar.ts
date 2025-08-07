@@ -17,27 +17,225 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { Callback_Boolean_Void } from "./navigation"
+import { Length, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
+import { Callback_Opt_Boolean_Void } from "./checkbox"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { Resource } from "global/resource";
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { Callback_Boolean_Void } from "./checkbox"
-import { DividerStyle } from "./tabs"
-import { ArkSideBarContainerComponent } from "./../generated/ArkSidebar"
-import { ArkSideBarContainerPeer } from "./../generated/peers/ArkSidebarPeer"
+import { PixelMap } from "./arkui-pixelmap"
+
+export interface DividerStyle {
+    strokeWidth: Length;
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
+}
+export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkSideBarContainerPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._SideBarContainer_construct(peerId, flags)
+        const _peer  = new ArkSideBarContainerPeer(_peerPtr, peerId, "SideBarContainer", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setSideBarContainerOptionsAttribute(type?: SideBarContainerType): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let type_type : int32 = RuntimeType.UNDEFINED
+        type_type = runtimeType(type)
+        thisSerializer.writeInt8(type_type as int32)
+        if ((RuntimeType.UNDEFINED) != (type_type)) {
+            const type_value  = (type as SideBarContainerType)
+            thisSerializer.writeInt32(TypeChecker.SideBarContainerType_ToNumeric(type_value))
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerInterface_setSideBarContainerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    showSideBarAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_showSideBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    controlButtonAttribute(value: ButtonStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeButtonStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_controlButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    showControlButtonAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_showControlButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sideBarWidth0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_sideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sideBarWidth1Attribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_sideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    minSideBarWidth0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_minSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    minSideBarWidth1Attribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_minSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    maxSideBarWidth0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_maxSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    maxSideBarWidth1Attribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_maxSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    autoHideAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_autoHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sideBarPositionAttribute(value: SideBarPosition | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as SideBarPosition)
+            thisSerializer.writeInt32(TypeChecker.SideBarPosition_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_sideBarPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dividerAttribute(value: DividerStyle | null | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeDividerStyleSidebar(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_divider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    minContentWidthAttribute(value: Dimension | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_minContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    _onChangeEvent_showSideBarAttribute(callback: ((select: boolean | undefined) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute__onChangeEvent_showSideBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum SideBarContainerType {
     EMBED = 0,
     Embed = 0,
@@ -63,43 +261,219 @@ export interface ButtonStyle {
     height?: number;
     icons?: ButtonIconOptions;
 }
-/** @memo:stable */
+export type SideBarContainerInterface = (type?: SideBarContainerType) => SideBarContainerAttribute;
 export interface SideBarContainerAttribute extends CommonMethod {
-    /** @memo */
-    setSideBarContainerOptions(type?: SideBarContainerType): this
-    /** @memo */
-    showSideBar(value: boolean): this
-    /** @memo */
-    controlButton(value: ButtonStyle): this
-    /** @memo */
-    showControlButton(value: boolean): this
-    /** @memo */
-    onChange(value: ((parameter: boolean) => void)): this
-    /** @memo */
-    sideBarWidth(value: number | Length): this
-    /** @memo */
-    minSideBarWidth(value: number | Length): this
-    /** @memo */
-    maxSideBarWidth(value: number | Length): this
-    /** @memo */
-    autoHide(value: boolean): this
-    /** @memo */
-    sideBarPosition(value: SideBarPosition): this
-    /** @memo */
-    divider(value?: DividerStyle): this
-    /** @memo */
-    minContentWidth(value: Dimension): this
-    /** @memo */
-    _onChangeEvent_showSideBar(callback: ((parameter: boolean) => void)): void
+    showSideBar(value: boolean | undefined): this
+    controlButton(value: ButtonStyle | undefined): this
+    showControlButton(value: boolean | undefined): this
+    onChange(value: ((isVisible: boolean) => void) | undefined): this
+    sideBarWidth(value: number | undefined): this
+    minSideBarWidth(value: number | undefined): this
+    maxSideBarWidth(value: number | undefined): this
+    autoHide(value: boolean | undefined): this
+    sideBarPosition(value: SideBarPosition | undefined): this
+    divider(value: DividerStyle | null | undefined): this
+    minContentWidth(value: Dimension | undefined): this
+    _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
+}
+export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
+    showSideBar_value?: boolean | undefined
+    controlButton_value?: ButtonStyle | undefined
+    showControlButton_value?: boolean | undefined
+    onChange_value?: ((isVisible: boolean) => void) | undefined
+    sideBarWidth_value?: number | undefined
+    minSideBarWidth_value?: number | undefined
+    maxSideBarWidth_value?: number | undefined
+    autoHide_value?: boolean | undefined
+    sideBarPosition_value?: SideBarPosition | undefined
+    divider_value?: DividerStyle | null | undefined
+    minContentWidth_value?: Dimension | undefined
+    public showSideBar(value: boolean | undefined): this {
+        return this
+    }
+    public controlButton(value: ButtonStyle | undefined): this {
+        return this
+    }
+    public showControlButton(value: boolean | undefined): this {
+        return this
+    }
+    public onChange(value: ((isVisible: boolean) => void) | undefined): this {
+        return this
+    }
+    public sideBarWidth(value: number | undefined): this {
+        return this
+    }
+    public minSideBarWidth(value: number | undefined): this {
+        return this
+    }
+    public maxSideBarWidth(value: number | undefined): this {
+        return this
+    }
+    public autoHide(value: boolean | undefined): this {
+        return this
+    }
+    public sideBarPosition(value: SideBarPosition | undefined): this {
+        return this
+    }
+    public divider(value: DividerStyle | null | undefined): this {
+        return this
+    }
+    public minContentWidth(value: Dimension | undefined): this {
+        return this
+    }
+    public _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void {
+        throw new Error("Unimplmented")
+        }
+}
+export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements SideBarContainerAttribute {
+    getPeer(): ArkSideBarContainerPeer {
+        return (this.peer as ArkSideBarContainerPeer)
+    }
+    public setSideBarContainerOptions(type?: SideBarContainerType): this {
+        if (this.checkPriority("setSideBarContainerOptions")) {
+            const type_casted = type as (SideBarContainerType | undefined)
+            this.getPeer()?.setSideBarContainerOptionsAttribute(type_casted)
+            return this
+        }
+        return this
+    }
+    public showSideBar(value: boolean | undefined): this {
+        if (this.checkPriority("showSideBar")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.showSideBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public controlButton(value: ButtonStyle | undefined): this {
+        if (this.checkPriority("controlButton")) {
+            const value_casted = value as (ButtonStyle | undefined)
+            this.getPeer()?.controlButtonAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public showControlButton(value: boolean | undefined): this {
+        if (this.checkPriority("showControlButton")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.showControlButtonAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_casted = value as (((isVisible: boolean) => void) | undefined)
+            this.getPeer()?.onChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public sideBarWidth(value: number | undefined): this {
+        if (this.checkPriority("sideBarWidth")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.sideBarWidth0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (Length | undefined)
+                this.getPeer()?.sideBarWidth1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public minSideBarWidth(value: number | undefined): this {
+        if (this.checkPriority("minSideBarWidth")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.minSideBarWidth0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (Length | undefined)
+                this.getPeer()?.minSideBarWidth1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public maxSideBarWidth(value: number | undefined): this {
+        if (this.checkPriority("maxSideBarWidth")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.maxSideBarWidth0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (Length | undefined)
+                this.getPeer()?.maxSideBarWidth1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public autoHide(value: boolean | undefined): this {
+        if (this.checkPriority("autoHide")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.autoHideAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public sideBarPosition(value: SideBarPosition | undefined): this {
+        if (this.checkPriority("sideBarPosition")) {
+            const value_casted = value as (SideBarPosition | undefined)
+            this.getPeer()?.sideBarPositionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public divider(value: DividerStyle | null | undefined): this {
+        if (this.checkPriority("divider")) {
+            const value_casted = value as (DividerStyle | null | undefined)
+            this.getPeer()?.dividerAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minContentWidth(value: Dimension | undefined): this {
+        if (this.checkPriority("minContentWidth")) {
+            const value_casted = value as (Dimension | undefined)
+            this.getPeer()?.minContentWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_showSideBar")) {
+            const callback_casted = callback as (((select: boolean | undefined) => void))
+            this.getPeer()?._onChangeEvent_showSideBarAttribute(callback_casted)
+            return
+        }
+        return
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function SideBarContainer(
-  /** @memo */
-  style: ((attributes: SideBarContainerAttribute) => void) | undefined,
-  type?: SideBarContainerType | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: SideBarContainerAttribute) => void) | undefined,
+    type?: SideBarContainerType,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkSideBarContainerComponent()
     })

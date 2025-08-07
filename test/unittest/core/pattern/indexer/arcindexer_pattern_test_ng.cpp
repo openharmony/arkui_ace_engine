@@ -620,9 +620,12 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0017, TestSize.Level1)
      * @tc.steps: step1. call OnSelect.
      * @tc.expected: step1. expect resuit is true
     */
-    auto value = pattern_->lastSelected_ = 1;
+    auto value1 = pattern_->lastSelected_ = 1;
     pattern_->OnSelect();
-    EXPECT_TRUE(value != pattern_->animateSelected_);
+    EXPECT_TRUE(value1 != pattern_->animateSelected_);
+    auto value2 = pattern_->selected_ = 3;
+    pattern_->ItemSelectedChangedAnimation();
+    EXPECT_EQ(pattern_->lastSelected_, value2);
 }
 
 /**

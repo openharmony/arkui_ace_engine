@@ -333,7 +333,8 @@ void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, 
     }
     while (leftContinue || rightContinue) {
         if (leftContinue) {
-            if (pos - offset < 0 || data[pos - offset] == WIDE_NEWLINE[0]) {
+            if (pos - offset < 0 || pos - offset >= dataLen ||
+                data[pos - offset] == WIDE_NEWLINE[0]) {
                 start = pos - offset + 1;
                 leftContinue = false;
             }
@@ -415,8 +416,6 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
 
 void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
-    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "before move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
-        handleRect.GetX(), handleRect.GetY());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);

@@ -1823,6 +1823,114 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpringAnimationTest011
+ * @tc.desc: Test GridItem change height during spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest011, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(2);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0, 3 };
+    model.SetLayoutOptions(option);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedHeightItems(1, 100);
+    CreateFixedHeightItems(1, 50);
+    CreateFixedHeightItems(1, 80);
+    CreateFixedHeightItems(1, 800);
+    CreateFixedHeightItems(1, 30);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+    GestureEvent info;
+    info.SetMainVelocity(-200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -646.41699);
+
+    /**
+     * @tc.steps: step2. play spring animation frame by frame, and decrease gridItem height during animation
+     * @tc.expected: currentOffset will not change with the gridItem height
+     */
+    MockAnimationManager::GetInstance().Tick();
+    GetChildLayoutProperty<LayoutProperty>(frameNode_, 3)
+            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(500)));
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -238.2085);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -130);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: TestOffsetAfterSpring001
+ * @tc.desc: Test Grid prevOffset_ equals currentOffset_ after spring
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, TestGridOffsetAfterSpring001, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetColumnsGap(Dimension(10));
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(40);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    /**
+     * @tc.steps: step1. Simulate a scrolling gesture.
+     * @tc.expected: Grid trigger spring animation.
+     */
+    GestureEvent info;
+    info.SetMainVelocity(-200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(pattern_->info_.prevOffset_, pattern_->info_.currentOffset_);
+}
+
+/**
  * @tc.name: SpringAnimationTest009
  * @tc.desc: Test Grid change height during spring animation. Grid becomes unscrollable.
  * @tc.type: FUNC
@@ -2428,6 +2536,54 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset001, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.currentOffset_, 10.f);
 }
 
+/**
+ * @tc.name: UpdateCurrentOffset002
+ * @tc.desc: Test grid pattern UpdateCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test SCROLL_FROM_UPDATE
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(10);
+    CreateDone();
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(0.0f));
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdatePadding(padding);
+    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    pattern_->info_.offsetEnd_ = true;
+    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10.f);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test grid pattern UpdateCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test SCROLL_FROM_UPDATE
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(10);
+    CreateDone();
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(0.0f));
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdatePadding(padding);
+    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    pattern_->UpdateCurrentOffset(10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 10.f);
+}
 /**
  * @tc.name: Test GetTotalOffset
  * @tc.desc: Test GetTotalOffset when updating an item's height in the viewport

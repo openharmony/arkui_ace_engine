@@ -164,7 +164,7 @@ export class FrameNode implements MaterializedBase {
     }
     private getPositionToWindowWithTransform_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Position = retvalDeserializer.readPosition()
         return returnResult
     }

@@ -1477,7 +1477,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;
@@ -1557,6 +1557,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     aiSpan2.end = AI_SPAN_END_II;
     aiSpan2.content = SPAN_URL;
     aiSpan2.type = TextDataDetectType::URL;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START] = aiSpan1;
     pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START_II] = aiSpan2;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();

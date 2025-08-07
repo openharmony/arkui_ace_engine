@@ -57,6 +57,7 @@ constexpr double NEG_VALUE = -1.0;
 constexpr double VALUE_OF_PROGRESS = 100.0;
 constexpr double NEG_VALUE_OF_PROGRESS = -100.0;
 constexpr double MAX_VALUE_OF_PROGRESS = 100000.0;
+constexpr double MAX_VALUE_OF_PROGRESS2 = 10000.0;
 constexpr double MAX_NEG_VALUE_OF_PROGRESS = -100000.0;
 constexpr ProgressType PROGRESS_TYPE_LINEAR = ProgressType::LINEAR;
 constexpr ProgressType PROGRESS_TYPE_SCALE = ProgressType::SCALE;
@@ -1152,5 +1153,63 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest002, TestSize.Level1)
     EXPECT_FALSE(pattern->isFocusScaleSet_);
     EXPECT_FALSE(pattern->isFocusTextColorSet_);
     EXPECT_FALSE(pattern->isFocusShadowSet_);
+}
+
+/**
+* @tc.name: ProgressHandleBlurEventTest003
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS2, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS2);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set true and call HandleBlurEvent.
+    * @tc.expected: step2. isFocusScaleSet_, isFocusShadowSet_, isFocusShadowSet_ is false.
+    */
+    pattern->isFocusScaleSet_ = true;
+    pattern->isFocusTextColorSet_ = true;
+    pattern->isFocusShadowSet_ = true;
+    pattern->HandleBlurEvent();
+    EXPECT_FALSE(pattern->isFocusScaleSet_);
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+    EXPECT_FALSE(pattern->isFocusShadowSet_);
+}
+
+/**
+ * @tc.name: ProgressSafeAreaTest001
+ * @tc.desc: Test LayoutPolicy of ProgressSafeAreaTest001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressBuilderTestNg, ProgressSafeAreaTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create progress and get frameNode.
+     * @tc.expected: step1. check frameNode exists and tag is correct.
+     */
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS2, PROGRESS_TYPE_LINEAR);
+    CreateDone();
+    /**
+     * @tc.steps: step2. get childNode of frameNode.
+     * @tc.expected: step2. check whether childNode is empty.
+     */
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+    EXPECT_TRUE(pattern->IsEnableFix());
 }
 } // namespace OHOS::Ace::NG

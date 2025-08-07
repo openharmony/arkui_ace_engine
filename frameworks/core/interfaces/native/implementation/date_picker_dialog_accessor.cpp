@@ -61,7 +61,7 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     CHECK_NULL_RETURN(pipeline, dialogProps);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, dialogProps);
-    
+
     dialogProps.alignment = dialogTheme->GetAlignment();
     if (dialogProps.alignment == DialogAlignment::BOTTOM) {
         dialogProps.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
@@ -73,7 +73,7 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
     dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(options.enableHoverMode);
+        Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode.value_or(false));
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
@@ -177,11 +177,11 @@ std::map<std::string, DialogEvent> CreateDialogEvent(const Ark_DatePickerDialogO
 }
 void ShowImpl(const Opt_DatePickerDialogOptions* options)
 {
+#ifndef ARKUI_WEARABLE
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_DatePickerDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_DatePickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
-    
+
     Ark_DatePickerDialogOptions arkOptions = *arkOptionsOpt;
     DialogProperties dialogProps = BuildDialogProperties(arkOptions);
     DatePickerSettingData settingData = BuildSettingData(arkOptions);
@@ -196,6 +196,7 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
         dialogCancelEvent["cancelId"] = onCancelFunc;
     }
     DatePickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+#endif
 }
 } // DatePickerDialogAccessor
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()

@@ -107,6 +107,27 @@ void JSLinearIndicator::Loop(const JSCallbackInfo& info)
     LinearIndicatorModel::GetInstance()->Loop(value);
 }
 
+void JSLinearIndicator::OnChange(const JSCallbackInfo& info)
+{
+    if ((info.Length() == 0)) {
+        return;
+    }
+    auto arg0 = info[0];
+    if (!arg0->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(arg0));
+    auto onChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                int32_t index, float progress) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("LinearIndicator::onChange");
+        JSRef<JSVal> params[2] = { JSRef<JSVal>::Make(ToJSValue(index)), JSRef<JSVal>::Make(ToJSValue(progress)) };
+        func->ExecuteJS(2, params);
+    };
+    LinearIndicatorModel::GetInstance()->OnChange(std::move(onChangeCallback));
+}
+
 void JSLinearIndicator::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLinearIndicator>::Declare("LinearIndicator");
@@ -114,6 +135,7 @@ void JSLinearIndicator::JSBind(BindingTarget globalObj)
     JSClass<JSLinearIndicator>::StaticMethod("create", &JSLinearIndicator::Create, opt);
     JSClass<JSLinearIndicator>::StaticMethod("indicatorStyle", &JSLinearIndicator::SetStyle, opt);
     JSClass<JSLinearIndicator>::StaticMethod("indicatorLoop", &JSLinearIndicator::Loop, opt);
+    JSClass<JSLinearIndicator>::StaticMethod("onChange", &JSLinearIndicator::OnChange, opt);
     JSClass<JSLinearIndicator>::StaticMethod("height", &JSLinearIndicator::JsHeight, opt);
     JSClass<JSLinearIndicator>::StaticMethod("padding", &JSLinearIndicator::JsPadding, opt);
     JSClass<JSLinearIndicator>::StaticMethod("paddingLeft", &JSLinearIndicator::SetPaddingLeft, opt);

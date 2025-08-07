@@ -166,11 +166,9 @@ void SheetWrapperLayoutAlgorithm::MeasureSheetMask(LayoutWrapper* layoutWrapper)
     auto index = host->GetChildIndexById(maskNode->GetId());
     auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(maskWrapper);
-    auto rect = sheetWrapperPattern->GetMainWindowRect();
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     auto constraint = layoutProp->CreateChildConstraint();
-    constraint.selfIdealSize = OptionalSizeF(rect.Width(), rect.Height());
     maskWrapper->Measure(constraint);
 }
 
@@ -195,11 +193,13 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     placement_ = sheetStyle.placement.value_or(Placement::BOTTOM);
+    sheetPopupInfo_.Reset();    // everytime sheetWrapper changed, we need to reset sheetPopupInfo to default value
     sheetPopupInfo_.finalPlacement = placement_;
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+#ifndef PREVIEW
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         // global rect need to reduce the top and bottom safe area
         windowGlobalRect_ = pipeline->GetCurrentWindowRect();
         auto safeArea = pipeline->GetSafeArea();
@@ -209,9 +209,23 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
         pipeline->GetContainerModalButtonsRect(floatContainerModal, titleRect);
         auto offsetY = safeArea.top_.Length() + titleRect.Height();
         auto height = windowGlobalRect_.Height() - offsetY - safeArea.bottom_.Length();
+        auto manager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(manager);
+        auto keyboardInset = manager->GetKeyboardInset();
+        auto focusHub = sheetPage->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        auto isFocused = focusHub->IsCurrentFocus();
+        auto needAvoidKeyboard = sheetStyle.sheetKeyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET;
+        if (keyboardInset.Length() != 0 && isFocused && needAvoidKeyboard) {
+            sheetPopupInfo_.keyboardShow = true;
+            height -= keyboardInset.Length() - safeArea.bottom_.Length();
+            sheetPopupInfo_.showArrow =
+                !IsTargetNodeHideByKeyboard(keyboardInset, sheetWrapperPattern->GetTargetNode());
+        }
         // windowRect neet to set as origin point, because sheet offset is relative to window rect
         windowGlobalRect_ = Rect(0.f, offsetY, windowGlobalRect_.Width(), height);
     }
+#endif
 }
 
 void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
@@ -236,7 +250,7 @@ void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
 
 void SheetWrapperLayoutAlgorithm::DecreaseArrowHeightWhenArrowIsShown(const RefPtr<FrameNode>& sheetNode)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (sheetNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -292,7 +306,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto targetSize = geometryNode->GetFrameSize();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         targetSize = targetNode->GetPaintRectWithTransform().GetSize();
     }
     auto targetOffset = targetNode->GetPaintRectOffset();
@@ -318,7 +332,9 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetInAvoidanceRule(
     LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacement(layoutWrapper, targetSize, targetOffset);
     } else {
         // before api 16, only placement bottom is used
@@ -392,10 +408,17 @@ Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacement(
     TAG_LOGD(AceLogTag::ACE_SHEET, "After directionCheck, placement: %{public}s",
         PlacementUtils::ConvertPlacementToString(finalPlacement).c_str());
     // step2: check whether placement direction is NONE;
+    // if finalPlacement == None, it means nowhere can place the sheetPage after direction check.
     if (finalPlacement == Placement::NONE) {
         sheetPopupInfo_.placementRechecked = true;
         if (sheetPopupInfo_.placementOnTarget) {
             finalPlacement = placement_;
+            // when placementOnTarget and avoid keyboard is set true, the best place is user set placement.
+            if (sheetPopupInfo_.keyboardShow) {
+                // aovid keyboard need decrease sheetHeight.
+                sheetHeight_ = std::min(static_cast<double>(sheetHeight_),
+                    (windowGlobalRect_.Height() - DOUBLE_SIZE * WINDOW_EDGE_SPACE.ConvertToPx()));
+            }
         } else {
             SizeF bestSize = SizeF(0.f, 0.f);
             finalPlacement = RecheckBestPlacementWithInsufficientSpace(targetSize, targetOffset, bestSize);
@@ -893,12 +916,14 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceBottom(float& offsetX, fl
         windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
 
     offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
-        windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
+        std::max(windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx(),
+            windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx()));
 
     if (sheetPopupInfo_.placementRechecked && sheetPopupInfo_.placementOnTarget) {
         sheetPopupInfo_.showArrow = false;
-        offsetY =
-            windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx();
+        offsetY = std::max(
+            windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx(),
+            windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx());
     }
 }
 
@@ -908,7 +933,8 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceTop(float& offsetX, float
         windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
 
     offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
-        windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
+        std::max(windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx(),
+            windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx()));
 
     if (sheetPopupInfo_.placementRechecked && sheetPopupInfo_.placementOnTarget) {
         sheetPopupInfo_.showArrow = false;
@@ -1021,7 +1047,7 @@ void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(sheetPageNode);
     auto sheetPagePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPagePattern);
-    auto sheetType = sheetPagePattern->GetSheetType();
+    auto sheetType = sheetPagePattern->GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "before popup sheet page, origin size [%{public}f, %{public}f]",
             sheetWidth_, sheetHeight_);
@@ -1058,24 +1084,21 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
     auto index = host->GetChildIndexById(maskNode->GetId());
     auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(maskWrapper);
-    auto rect = sheetWrapperPattern->GetMainWindowRect();
     auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
     CHECK_NULL_VOID(subContainer);
     auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
     CHECK_NULL_VOID(subWindowContext);
-    auto subWindowGlobalRect = subWindowContext->GetDisplayWindowRectInfo();
-    auto contentOffset = OffsetF(rect.GetX() - subWindowGlobalRect.Left(),
-        rect.GetY() - subWindowGlobalRect.Top());
     auto geometryNode = maskWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(contentOffset);
 
     auto currentId = Container::CurrentId();
     SubwindowManager::GetInstance()->DeleteHotAreas(currentId, maskNode->GetId(), SubwindowType::TYPE_SHEET);
+    // true means that the mask layer takes effect in response to the click event
     if (maskPattern->GetIsMaskInteractive()) {
+        auto maskFrameRect = geometryNode->GetFrameRect();
         std::vector<Rect> rects;
-        auto maskHotRect = Rect(rect.GetX(), rect.GetY(),
-            maskNode->GetGeometryNode()->GetFrameSize().Width(), maskNode->GetGeometryNode()->GetFrameSize().Height());
+        auto maskHotRect =
+            Rect(maskFrameRect.GetX(), maskFrameRect.GetY(), maskFrameRect.Width(), maskFrameRect.Height());
         rects.emplace_back(maskHotRect);
         auto subWindowMgr = SubwindowManager::GetInstance();
         subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_SHEET, maskNode->GetId(), currentId);
@@ -1086,6 +1109,16 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
 void SheetWrapperLayoutAlgorithm::RemeasureForPopup(LayoutWrapper* layoutWrapper)
 {
     UpdateSheetNodePopupInfo(layoutWrapper);
+}
+
+bool SheetWrapperLayoutAlgorithm::IsTargetNodeHideByKeyboard(
+    const SafeAreaInsets::Inset& keyboardInset, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto windowHeight = windowGlobalRect_.Height();
+    auto keyboardHeight = keyboardInset.Length();
+    auto targetRect = targetNode->GetPaintRectToWindowWithTransform();
+    return GreatOrEqual(targetRect.Top(), windowHeight - keyboardHeight);
 }
 
 void SheetWrapperLayoutAlgorithm::UpdateSheetNodePopupInfo(LayoutWrapper* layoutWrapper)

@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/frame_node.h"
@@ -63,7 +64,9 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     info_->axis_ = axis_ = props_->GetAxis();
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-
+    const float prevOffset = pattern->GetPrevOffset();
+    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+                info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
 
     Init(idealSize);
@@ -88,6 +91,9 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     const int32_t cacheCnt = props_->GetCachedCountValue(info_->defCachedCount_);
     wrapper_->SetCacheCount(cacheCnt);
+    if (info_->measureInNextFrame_) {
+        return;
+    }
     if (props_->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(wrapper_, info_, cacheCnt);
     } else {
@@ -108,7 +114,7 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     size_t segmentCnt = itemsCrossSize_.size();
     std::vector<std::vector<float>> crossPos(segmentCnt);
-    auto crossSize = wrapper_->GetGeometryNode()->GetFrameSize().CrossSize(axis_);
+    auto crossSize = wrapper_->GetGeometryNode()->GetPaddingSize().CrossSize(axis_);
     auto layoutDirection = props_->GetNonAutoLayoutDirection();
     auto isRtl = layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL;
     // prepare crossPos
@@ -503,6 +509,10 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             // refill from [i] if height doesn't match record
             info_->ClearCacheAfterIndex(i - 1);
             Fill(i);
+            break;
+        }
+        if (!syncLoad_ && wrapper_->ReachResponseDeadline()) {
+            info_->measureInNextFrame_ = true;
             break;
         }
     }

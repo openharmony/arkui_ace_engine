@@ -22,20 +22,17 @@
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 
-class ACE_EXPORT GridPattern : public ScrollablePattern, public LazyContainer {
-    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern, LazyContainer);
+class ACE_EXPORT GridPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
 public:
     GridPattern() = default;
-
-    void OnAttachToFrameNode() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -177,7 +174,7 @@ public:
 
     bool UpdateStartIndex(int32_t index, ScrollAlign align);
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return EstimateHeight();
     }
@@ -271,8 +268,7 @@ public:
 
     void HandleOnItemFocus(int32_t index);
 
-    RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
-
+    void OnColorModeChange(uint32_t colorMode) override;
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -290,8 +286,6 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-
-    void UpdateOffsetHelper(float offset);
 
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;
@@ -334,6 +328,10 @@ private:
     float mainSizeChanged_ = 0.0f;
     KeyEvent keyEvent_;
     GridFocus focusHandler_ { *this, info_ };
+
+    // index of first and last GridItem in viewport
+    int32_t startIndex_ = 0;
+    int32_t endIndex_ = -1;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

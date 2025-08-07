@@ -34,6 +34,8 @@ public:
 
 private:
     void LayoutHoverScaleImage(const RefPtr<MenuWrapperPattern>& wrapperPattern);
+    void CheckLayoutConstraint(
+        LayoutWrapper* layoutWrapper, const MenuParam& menuParam, const RefPtr<MenuPattern>& menuPattern);
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

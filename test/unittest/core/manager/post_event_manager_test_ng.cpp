@@ -792,6 +792,39 @@ HWTEST_F(PostEventManagerTestNg, PostTouchEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostTouchEventTest002
+ * @tc.desc: test PostTouchEvent func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. Simulate when the user touchDown and then handles the out-of-hand
+     *                   action event through the PostDownEvent function.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+    TouchEvent touchEvent;
+    touchEvent.type = Ace::TouchType::DOWN;
+    postEventManager_->passThroughResult_ = true;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    pipelineContext->eventManager_->isDragCancelPending_ = false;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchEvent));
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+    pipelineContext->eventManager_->isDragCancelPending_ = true;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchEvent));
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
+
+/**
  * @tc.name: PostMouseEventTest001
  * @tc.desc: test PostMouseEvent func.
  * @tc.type: FUNC
@@ -1046,5 +1079,37 @@ HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest006, TestSize.Level1)
     postEventManager_->postInputEventAction_.push_back(eventAction);
     auto result = postEventManager_->CheckTouchEvent(UInode, touchUpEvent);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsTest001
+ * @tc.desc: test ClearPostInputActions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTest001, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent touchUpEvent;
+    touchUpEvent.type = TouchType::MOVE;
+    touchUpEvent.x = 15;
+    touchUpEvent.y = 15;
+    touchUpEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    touchUpEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchUpEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    postEventManager_->ClearPostInputActions(UInode, touchUpEvent.id);
+    EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
 }
 } // namespace OHOS::Ace::NG

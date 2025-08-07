@@ -310,6 +310,99 @@ struct ParticleAnnulusRegion {
         return str;
     }
 
+    std::pair<CalcDimension, CalcDimension> GetCenter() const
+    {
+        return center_;
+    }
+
+    void SetCenter(const std::pair<CalcDimension, CalcDimension>& center)
+    {
+        center_ = center;
+    }
+
+    void SetCenterX(CalcDimension& centerX)
+    {
+        center_.first = centerX;
+    }
+
+    void SetCenterY(CalcDimension& centerY)
+    {
+        center_.second = centerY;
+    }
+
+    CalcDimension GetInnerRadius() const
+    {
+        return innerRadius_;
+    }
+
+    void SetInnerRadius(const CalcDimension& innerRadius)
+    {
+        innerRadius_ = innerRadius;
+    }
+
+    CalcDimension GetOuterRadius() const
+    {
+        return outerRadius_;
+    }
+
+    void SetOuterRadius(const CalcDimension& outerRadius)
+    {
+        outerRadius_ = outerRadius;
+    }
+
+    float GetStartAngle() const
+    {
+        return startAngle_;
+    }
+
+    void SetStartAngle(float startAngle)
+    {
+        startAngle_ = startAngle;
+    }
+
+    float GetEndAngle() const
+    {
+        return endAngle_;
+    }
+
+    void SetEndAngle(float endAngle)
+    {
+        endAngle_ = endAngle;
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ParticleAnnulusRegion&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        AnnulusResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : AnnulusResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = AnnulusResMap_.find(key);
+        if (iter != AnnulusResMap_.end()) {
+            AnnulusResMap_.erase(iter);
+        }
+    }
+
+private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ParticleAnnulusRegion&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> AnnulusResMap_;
+
     std::pair<CalcDimension, CalcDimension> center_;
     CalcDimension innerRadius_;
     CalcDimension outerRadius_;

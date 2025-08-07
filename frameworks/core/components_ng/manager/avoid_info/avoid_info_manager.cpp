@@ -194,29 +194,35 @@ void AvoidInfoManager::GetContainerModalAvoidInfoForUEC(const RefPtr<FrameNode>&
     auto context = uecNode->GetContext();
     CHECK_NULL_VOID(context);
     if (context->GetContainerCustomTitleVisible() || !context->GetContainerControlButtonVisible()) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "uec don't need avoid control button");
         return;
     }
-    auto offsetRelativeToWindow = uecNode->GetOffsetRelativeToWindow();
+    auto globalOffset = uecNode->GetPaintRectOffsetNG();
     auto uecGeometryNode = uecNode->GetGeometryNode();
     CHECK_NULL_VOID(uecGeometryNode);
     auto uecRect = uecGeometryNode->GetFrameRect();
-    uecRect.SetOffset(offsetRelativeToWindow);
+    uecRect.SetOffset(globalOffset);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "uec rect: %{public}s", uecRect.ToString().c_str());
     RectF buttonsRect;
     RectF containerModal;
     if (!context->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "failed to get buttonRect");
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "control button rect: %{public}s", buttonsRect.ToString().c_str());
     auto height = context->GetContainerModalTitleHeight();
     if (height <= 0) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "failed to get titleHeight");
         return;
     }
     if (!uecRect.IsIntersectWith(buttonsRect)) {
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "UEC isn't intersect with control button");
         return;
     }
     info.needAvoid = true;
     info.titleHeight = height;
     info.controlBottonsRect = uecRect.IntersectRectT(buttonsRect);
-    info.controlBottonsRect -= offsetRelativeToWindow;
+    info.controlBottonsRect -= globalOffset;
 }
 
 bool AvoidInfoManager::CheckIfNeedNotifyAvoidInfoChange(

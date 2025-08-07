@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/preview_ui_extension_adapter.h"
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
@@ -309,26 +309,7 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionInvalidSessionTest
     pattern->OnSyncGeometryNode(config);
 
     /**
-     * @tc.steps: step3. test NotifyBackground and NotifyForeground, state not change
-     */
-    pattern->state_ = PreviewUIExtensionPattern::AbilityState::NONE;
-    pattern->NotifyForeground();
-    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::NONE);
-    pattern->NotifyBackground();
-    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::NONE);
-
-    /**
-     * @tc.steps: step4. UpdateWant has not effect, state not change
-     */
-    OHOS::AAFwk::Want want;
-    want.SetElementName("123", "456", "");
-    pattern->instanceId_= 1;
-    EXPECT_EQ(pattern->CheckConstraint(), false);
-    pattern->UpdateWant(want);
-    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::NONE);
-
-    /**
-     * @tc.steps: step5. test NotifyDestroy, state not change
+     * @tc.steps: step3. test NotifyDestroy, state not change
      */
     pattern->NotifyDestroy();
     EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::NONE);
@@ -457,11 +438,11 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionHandleKeyEventVali
 }
 
 /**
- * @tc.name: SeucurityUIExtensionHandleKeyEventInvalidSession
+ * @tc.name: PreviewUIExtensionHandleKeyEventInvalidSession
  * @tc.desc: Invalid session, test pattern KeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PreviewUIExtensionComponentTestNg, SeucurityUIExtensionHandleKeyEventInvalidSession, TestSize.Level1)
+HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionHandleKeyEventInvalidSession, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -485,11 +466,11 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, SeucurityUIExtensionHandleKeyEventIn
 }
 
 /**
- * @tc.name: SeucurityUIExtensionHandleMouseEventValidSession
+ * @tc.name: PreviewUIExtensionHandleMouseEventValidSession
  * @tc.desc: Valid session, test pattern MouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PreviewUIExtensionComponentTestNg, SeucurityUIExtensionHandleMouseEventValidSession, TestSize.Level1)
+HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionHandleMouseEventValidSession, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -547,11 +528,11 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, SeucurityUIExtensionHandleMouseEvent
 }
 
 /**
- * @tc.name: SeucurityUIExtensionHandleMouseEventInvalidSession
+ * @tc.name: PreviewUIExtensionHandleMouseEventInvalidSession
  * @tc.desc: Invalid session, test pattern MouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(PreviewUIExtensionComponentTestNg, SeucurityUIExtensionHandleMouseEventInvalidSession, TestSize.Level1)
+HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionHandleMouseEventInvalidSession, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -642,31 +623,6 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionPlaceholderTest, T
 }
 
 /**
- * @tc.name: PreviewUIExtensionUpdateWantTest
- * @tc.desc: Test pattern UpdateWant function
- * @tc.type: FUNC
- */
-HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionUpdateWantTest, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    /**
-     * @tc.steps: step1. construct a PreviewUIExtensionComponent node and get pattern
-     */
-    auto pattern = CreatePreviewUEC();
-    ASSERT_NE(pattern, nullptr);
-    /**
-     * @tc.steps: step2. test UpdateWant
-     */
-    pattern->UpdateWant(nullptr);
-    RefPtr<WantWrap> wantOhos = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
-    pattern->UpdateWant(wantOhos);
-    auto wantOhos2 = AceType::DynamicCast<WantWrap>(wantOhos);
-    pattern->UpdateWant(wantOhos2);
-    EXPECT_NE(pattern, nullptr);
-#endif
-}
-
-/**
  * @tc.name: PreviewUIExtensionDpiTest
  * @tc.desc: Test pattern SetDensityDpi/GetDensityDpi function
  * @tc.type: FUNC
@@ -723,7 +679,7 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, InitializeTest001, TestSize.Level1)
     pattern->Initialize(config);
 
     /**
-     * @tc.steps: step3. test CreateLayoutAlgorithm
+     * @tc.steps: step4. test CreateLayoutAlgorithm
      */
     ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
 #endif
@@ -1423,34 +1379,155 @@ HWTEST_F(PreviewUIExtensionComponentTestNg, PreviewUIExtensionComponentLifeCycle
     ASSERT_NE(pattern->sessionWrapper_, nullptr);
     EXPECT_TRUE(pattern->sessionWrapper_->IsSessionValid());
     /**
-     * @tc.steps: step4. test Life Cycle NotifyForeground
-     */
-    pattern->NotifyForeground();
-    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::FOREGROUND);
-    /**
-     * @tc.steps: step5. test Life Cycle OnTerminated
+     * @tc.steps: step3. test Life Cycle OnTerminated
      */
     pattern->FireOnErrorCallback(0, "123", "123");
     EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::NONE);
     EXPECT_EQ(host->TotalChildCount(), 0);
     /**
-     * @tc.steps: step6. test Life Cycle UpdateWant
-     */
-    OHOS::AAFwk::Want want2;
-    want2.SetElementName(BOUNDLE_NAME_NEW, ABILITY_NAME_NEW);
-    pattern->instanceId_ = 2;
-    EXPECT_EQ(pattern->CheckConstraint(), true);
-    pattern->UpdateWant(want2);
-    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::FOREGROUND);
-    pattern->OnConnect();
-    EXPECT_NE(pattern->contentNode_, nullptr);
-    ASSERT_NE(pattern->sessionWrapper_, nullptr);
-    EXPECT_TRUE(pattern->sessionWrapper_->IsSessionValid());
-    /**
-     * @tc.steps: step7. test Life Cycle OnDisconnect
+     * @tc.steps: step4. test Life Cycle OnDisconnect
      */
     pattern->OnDisconnect(true);
     EXPECT_EQ(host->TotalChildCount(), 0);
 #endif
+}
+
+/**
+ * @tc.name: AfterMountToParent001
+ * @tc.desc: Test PreviewUIExtension pattern AfterMountToParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewUIExtensionComponentTestNg, AfterMountToParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a PreviewUIExtensionComponent Node
+     */
+    auto pattern = CreatePreviewUEC();
+    ASSERT_NE(pattern, nullptr);
+    ValidSessionWrapper(pattern);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test AfterMountToParent
+     */
+    pattern->hasAttachContext_ = false;
+    pattern->AfterMountToParent();
+    EXPECT_TRUE(pattern->hasMountToParent_);
+
+    pattern->needReNotifyForeground_ = true;
+    pattern->hasAttachContext_ = false;
+    pattern->AfterMountToParent();
+    EXPECT_TRUE(pattern->hasMountToParent_);
+
+    pattern->hasAttachContext_ = true;
+    pattern->AfterMountToParent();
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
+}
+
+/**
+ * @tc.name: OnAttachContext001
+ * @tc.desc: Test PreviewUIExtension pattern OnAttachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewUIExtensionComponentTestNg, OnAttachContext001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a PreviewUIExtensionComponent Node
+     */
+    auto pattern = CreatePreviewUEC();
+    ASSERT_NE(pattern, nullptr);
+    ValidSessionWrapper(pattern);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnAttachContext
+     */
+    pattern->hasAttachContext_ = false;
+    pattern->OnAttachContext(nullptr);
+    EXPECT_FALSE(pattern->hasAttachContext_);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pattern->instanceId_ = 1;
+    pipeline->instanceId_ = 2;
+    pattern->OnAttachContext(AceType::RawPtr(pipeline));
+    EXPECT_EQ(pattern->instanceId_, pipeline->instanceId_);
+
+    pattern->instanceId_ = 1;
+    pipeline->instanceId_ = 1;
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasMountToParent_ = true;
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachContext(AceType::RawPtr(pipeline));
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = true;
+    pattern->hasMountToParent_ = false;
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachContext(AceType::RawPtr(pipeline));
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+    pattern->needReNotifyForeground_ = true;
+    pattern->hasMountToParent_ = true;
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachContext(AceType::RawPtr(pipeline));
+    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::FOREGROUND);
+}
+
+/**
+ * @tc.name: UpdateSessionInstanceId
+ * @tc.desc: Test PreviewUIExtension pattern UpdateSessionInstanceId001
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewUIExtensionComponentTestNg, UpdateSessionInstanceId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a PreviewUIExtensionComponent Node
+     */
+    auto pattern = CreatePreviewUEC();
+    ASSERT_NE(pattern, nullptr);
+    pattern->instanceId_ = 1;
+    ValidSessionWrapper(pattern);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateSessionInstanceId
+     */
+    pattern->hasAttachContext_ = false;
+    pattern->UpdateSessionInstanceId(1);
+    EXPECT_NE(pattern->sessionWrapper_, nullptr);
+
+    InvalidSessionWrapper(pattern);
+    pattern->UpdateSessionInstanceId(1);
+    EXPECT_EQ(pattern->sessionWrapper_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyDestroy001
+ * @tc.desc: Test the method NotifyDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewUIExtensionComponentTestNg, NotifyDestroy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a PreviewSessionWrapperImpl
+     */
+    auto pattern = CreatePreviewUEC();
+    ASSERT_NE(pattern, nullptr);
+    pattern->instanceId_ = 1;
+    ValidSessionWrapper(pattern);
+    auto sessionWrapper = pattern->sessionWrapper_;
+    ASSERT_NE(sessionWrapper, nullptr);
+    ValidSession(pattern);
+
+    /**
+     * @tc.steps: step2. test NotifyDestroy
+     */
+    bool isHandleError = true;
+    sessionWrapper->NotifyDestroy(isHandleError);
+    EXPECT_EQ(isHandleError, true);
+
+    isHandleError = false;
+    sessionWrapper->NotifyDestroy(isHandleError);
+    EXPECT_EQ(isHandleError, false);
 }
 } //namespace OHOS::Ace::NG

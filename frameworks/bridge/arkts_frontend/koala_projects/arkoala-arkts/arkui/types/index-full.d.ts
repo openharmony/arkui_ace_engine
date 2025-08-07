@@ -450,6 +450,8 @@ declare class FrameNode {
     dispose(): void;
     getOpacity(): number;
     getPositionToWindowWithTransform(): Position;
+    reuse(): void;
+    recycle(): void;
 }
 declare interface PixelMap {
     readonly isEditable: boolean;
@@ -1307,8 +1309,8 @@ declare interface ScaleOptions {
     centerX?: (number|string);
     centerY?: (number|string);
 }
-declare type Literal_String_anchor_HorizontalAlign_align = { anchor: string, align: HorizontalAlign }
-declare type Literal_String_anchor_VerticalAlign_align = { anchor: string, align: VerticalAlign }
+declare type HorizontalAlignOptions = { anchor: string, align: HorizontalAlign }
+declare type VerticalAlignOptions = { anchor: string, align: VerticalAlign }
 declare interface AlignRuleOption {
     left?: { anchor: string, align: HorizontalAlign };
     right?: { anchor: string, align: HorizontalAlign };
@@ -2685,9 +2687,6 @@ declare interface ContainerSpanInterface {
 declare class ContainerSpanAttribute {
     textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
     attributeModifier(value: AttributeModifier<ContainerSpanAttribute>): ContainerSpanAttribute;
-}
-declare interface Content {
-    _ContentStub: string;
 }
 declare class ContentSlotAttribute {
 }
@@ -8895,6 +8894,13 @@ declare class ComponentObserver {
 }
 declare class UIInspector {
     createComponentObserver(id: string): ComponentObserver;
+}
+declare class UIObserver {
+    on(type: string, callback: () => void): void;
+    off(type: string, callback?: () => void): void;
+}
+declare class Observer {
+    createUIObserver(id: number): UIObserver;
 }
 declare const AbilityComponent: AbilityComponentInterface
 declare const AbilityComponentInstance: AbilityComponentAttribute

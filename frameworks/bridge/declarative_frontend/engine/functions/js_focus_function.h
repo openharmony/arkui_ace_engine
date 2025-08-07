@@ -28,7 +28,7 @@ public:
     ~JsFocusFunction() override = default;
 
     void Execute(int direction);
-    void Execute() override;
+    void Execute();
 };
 
 } // namespace OHOS::Ace::Framework

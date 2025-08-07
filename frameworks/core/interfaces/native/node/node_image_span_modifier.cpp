@@ -87,11 +87,17 @@ void ResetImageSpanObjectFit(ArkUINodeHandle node)
 }
 
 void SetImageSpanTextBackgroundStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
+    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length,
+    void* style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && style) {
+        auto textBackgroundStyle = reinterpret_cast<TextBackgroundStyle*>(style);
+        ImageSpanView::SetPlaceHolderStyle(frameNode, *textBackgroundStyle);
         return;
     }
     TextBackgroundStyle font;

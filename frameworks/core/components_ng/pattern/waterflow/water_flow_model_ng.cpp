@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,9 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include <string>
-
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
+#include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -25,8 +26,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
+
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -296,7 +299,11 @@ void WaterFlowModelNG::SetFriction(double friction)
 
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+    int32_t count = value;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show);
 }
 
@@ -304,7 +311,11 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value.value(), frameNode);
+        int32_t count = value.value();
+        if (SystemProperties::IsWhiteBlockEnabled()) {
+            count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);
     }
@@ -387,6 +398,24 @@ float WaterFlowModelNG::GetScrollBarWidth(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
     return value.ConvertToVp();
+}
+
+void WaterFlowModelNG::SetSyncLoad(bool syncLoad)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad);
+}
+
+void WaterFlowModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
+
+bool WaterFlowModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    bool result = true;
+    CHECK_NULL_RETURN(frameNode, result);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, SyncLoad, result, frameNode, true);
+    return result;
 }
 
 RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
@@ -688,6 +717,8 @@ bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
 {
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -761,12 +792,12 @@ void WaterFlowModelNG::ParseResObjFriction(FrameNode* frameNode, const RefPtr<Re
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("waterflow.Friction");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
-        double result;
-        if (!ResourceParseUtils::ParseResourceToDouble(resObj, result)) {
-            return;
-        }
-        pattern->SetFriction(result);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
 }
@@ -784,5 +815,18 @@ void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& f
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerNode);
+}
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjScrollBarColor(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

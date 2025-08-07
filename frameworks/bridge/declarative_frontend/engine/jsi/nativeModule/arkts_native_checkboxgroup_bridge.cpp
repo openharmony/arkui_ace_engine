@@ -33,11 +33,14 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectedColor(ArkUIR
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupSelectedColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectedColor(
-            nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectedColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -60,11 +63,14 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupUnSelectedColor(ArkU
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupUnSelectedColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupUnSelectedColor(
-            nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupUnSelectedColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

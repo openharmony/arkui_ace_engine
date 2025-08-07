@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -189,7 +190,7 @@ void SearchPattern::UpdateDisable(const std::u16string& textValue)
     }
 }
 
-void SearchPattern::UpdateEnable(bool needToenable)
+void SearchPattern::UpdateEnable(bool needToEnable)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -197,14 +198,13 @@ void SearchPattern::UpdateEnable(bool needToenable)
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    if (needToenable) {
+    if (needToEnable) {
         buttonEventHub->SetEnabled(true);
     } else {
         buttonEventHub->SetEnabled(false);
     }
     isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
     searchButtonFrameNode->MarkModifyDone();
-    searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 bool SearchPattern::IsEventEnabled(const std::u16string& textValue, int16_t style)
@@ -297,13 +297,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
-        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
-        layoutProperty->UpdateMargin(margin);
-    }
-
+    InitMargin(layoutProperty);
     InitSearchTheme();
     HandleBackgroundColor();
 
@@ -600,18 +594,6 @@ void SearchPattern::InitTextFieldDragEvent()
     }
 
     searchEventHub->ClearCustomerOnDragFunc();
-    RemoveDragFrameNodeFromManager();
-}
-
-void SearchPattern::RemoveDragFrameNodeFromManager()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto dragDropManager = context->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
 }
 
 void SearchPattern::OnAfterModifyDone()
@@ -909,8 +891,7 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d, KeyCode:%{public}d", static_cast<int>(event.action),
-        static_cast<int>(event.code));
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d", static_cast<int>(event.action));
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -1765,6 +1746,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
+    json->PutExtAttr("autoCapitalizationMode", textFieldPattern->AutoCapTypeToString().c_str(), filter);
     textFieldPattern->ToJsonValueForStroke(json, filter);
     json->PutExtAttr("enableAutoSpacing", std::to_string(
         textFieldLayoutProperty->GetEnableAutoSpacing().value_or(false)).c_str(), filter);
@@ -2783,5 +2765,655 @@ void SearchPattern::SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& 
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->SetKeyboardAppearanceConfig(config);
+}
+
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                            \
+    {                                                                                       \
+        #KEY_TYPE, [](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {        \
+            if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {           \
+                prop->UPDATE_METHOD(*realValue);                                            \
+            }                                                                               \
+        }                                                                                   \
+    }
+
+void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(value);
+
+    using Handler = std::function<void(SearchLayoutProperty*, RefPtr<PropertyValueBase>)>;
+    const std::unordered_map<std::string, Handler> handlers = {
+
+        {"placeholder", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdatePlaceholderResource(*realValue);
+                }
+            }
+        },
+
+        {"text", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateTextResource(*realValue);
+                }
+            }
+        },
+
+        {"searchButtonValue", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateSearchButtonValueResource(*realValue);
+                }
+            }
+        },
+
+        {"searchButtonFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateSearchButtonFontSizeResource(*realValue);
+                    prop->UpdateSearchButtonFontSize(*realValue);
+                }
+            }
+        },
+
+        {"searchButtonFontColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateSearchButtonFontColorResource(*realValue);
+                }
+            }
+        },
+
+        {"searchIconSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    pattern->SetSearchIconSize(*realValue);
+                    prop->UpdateSearchIconUDSize(*realValue);
+                }
+            }
+        },
+
+        {"searchIconColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->GetSearchNode()->SetSearchImageIconColor(*realValue);
+                    pattern->SetSearchIconColor(*realValue);
+                }
+            }
+        },
+
+        {"searchIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->SetSearchSrcPath(*realValue, "", "");
+                }
+            }
+        },
+        
+        {"cancelButtonIconSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    pattern->SetCancelIconSize(*realValue);
+                    prop->UpdateCancelButtonUDSize(*realValue);
+                }
+            }
+        },
+
+        {"cancelButtonIconColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->SetCancelIconColor(*realValue);
+                }
+            }
+        },
+
+        {"scancelButtonIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    pattern->SetRightIconSrcPath(*realValue);
+                }
+            }
+        },
+
+        {"fontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateFontSizeResource(*realValue);
+                }
+            }
+        },
+
+        {"fontColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateFontColorResource(*realValue);
+                }
+            }
+        },
+
+        {"caretColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateCaretColorResource(*realValue);
+                }
+            }
+        },
+
+        {"caretWidth", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateCaretWidthResource(*realValue);
+                }
+            }
+        },
+
+        {"placeholderColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdatePlaceholderColorResource(*realValue);
+                }
+            }
+        },
+
+        {"placeholderFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdatePlaceholderFontSizeResource(*realValue);
+                }
+            }
+        },
+
+        {"decorationColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateDecorationColorResource(*realValue);
+                }
+            }
+        },
+
+        {"minFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateMinFontSizeResource(*realValue);
+                }
+            }
+        },
+
+        {"maxFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateMaxFontSizeResource(*realValue);
+                }
+            }
+        },
+
+        {"letterSpacing", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateLetterSpacingResource(*realValue);
+                }
+            }
+        },
+
+        {"lineHeight", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateLineHeightResource(*realValue);
+                }
+            }
+        },
+
+        {"minFontScale", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<float>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateMinFontScaleResource(*realValue);
+                }
+            }
+        },
+
+        {"maxFontScale", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<float>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateMaxFontScaleResource(*realValue);
+                }
+            }
+        },
+
+        {"selectedBackgroundColor", [wp = WeakClaim(this)]
+            (SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    if (realValue->GetAlpha() == 255) {
+                        *realValue = realValue->ChangeOpacity(0.2);
+                    }
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateSelectedBackgroundColorResource(*realValue);
+                }
+            }
+        },
+
+        {"inputFilter", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateInputFilterResource(*realValue);
+                }
+            }
+        },
+
+        {"textIndent", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateTextIndentResource(*realValue);
+                }
+            }
+        },
+    };
+
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(layoutProperty, value);
+    }
+    if (frameNode->GetRerenderable()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SearchPattern::UpdatePlaceholderResource(const std::u16string& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdatePlaceholder(value);
+    textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateTextResource(const std::u16string& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    auto textValue = pattern->GetTextUtf16Value();
+    if (value != textValue) {
+        auto changed = pattern->InitValueText(value);
+        pattern->SetTextChangedAtCreation(changed);
+    }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateSearchButtonValueResource(const std::string text)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+
+    auto searchButtonRenderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(searchButtonRenderContext);
+
+    auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(searchButtonEvent);
+
+    if (!text.empty()) {
+        searchButtonEvent->SetEnabled(true);
+        searchButtonRenderContext->UpdateOpacity(1.0);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton, text, frameNode);
+    } else {
+        searchButtonEvent->SetEnabled(false);
+        searchButtonRenderContext->UpdateOpacity(0.0);
+    }
+
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateLabel(text);
+
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateSearchButtonFontSizeResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+
+    buttonLayoutProperty->UpdateFontSize(value);
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateSearchButtonFontColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+
+    buttonLayoutProperty->UpdateFontColor(value);
+    buttonFrameNode->MarkModifyDone();
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdateFontColorResource(const Color& color)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldLayoutProperty->UpdateTextColor(color);
+    textFieldPaintProperty->UpdateTextColorFlagByUser(color);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdateCaretColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFrameNode);
+    auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textPaintProperty);
+    textPaintProperty->UpdateCursorColor(value);
+    textPaintProperty->UpdateCaretColorFlagByUser(true);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdateCaretWidthResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFrameNode);
+    auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textPaintProperty);
+    textPaintProperty->UpdateCursorWidth(value);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdatePlaceholderColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldLayoutProperty->UpdatePlaceholderTextColor(value);
+    textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdatePlaceholderFontSizeResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdatePlaceholderFontSize(value);
+    textFieldLayoutProperty->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateDecorationColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextDecorationColor(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateMinFontSizeResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateAdaptMinFontSize(value);
+    textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateMaxFontSizeResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateAdaptMaxFontSize(value);
+    textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateLetterSpacingResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLetterSpacing(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateLineHeightResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateLineHeight(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateMinFontScaleResource(const float value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto tmpValue = LessOrEqual(value, 0.0f) ? 0.0f : value;
+    tmpValue = GreatOrEqual(tmpValue, 1.0f) ? 1.0f : tmpValue;
+    textFieldLayoutProperty->UpdateMinFontScale(tmpValue);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateMaxFontScaleResource(const float value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto tmpValue = LessOrEqual(value, 1.0f) ? 1.0f : value;
+    textFieldLayoutProperty->UpdateMaxFontScale(std::min(tmpValue, MAX_FONT_SCALE));
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateSelectedBackgroundColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateSelectedBackgroundColor(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdateTextIndentResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    Dimension tmpValue = value;
+    tmpValue.SetUnit(DimensionUnit::VP);
+    textFieldLayoutProperty->UpdateTextIndent(tmpValue);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateInputFilterResource(const std::string& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateInputFilter(value);
+    textFieldPattern->FilterInitializeText();
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateFontSizeResource(const Dimension& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateFontSize(value);
+    textFieldLayoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(true);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateBorderResource()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+
+    bool isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto borderRadiusProperty = renderContext->GetBorderRadius();
+    CHECK_NULL_VOID(borderRadiusProperty);
+    auto radius = borderRadiusProperty.value();
+
+    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+    auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateBorderRadiusFlagByUser(radius);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+}
+
+void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
+{
+    if (!property->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        property->UpdateMargin(margin);
+    }
+    if (property->HasUserMargin()) {
+        return;
+    }
+    auto layoutPolicyProperty = property->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicyProperty);
+    MarginProperty margin;
+    auto hasWidthPolicy = layoutPolicyProperty->widthLayoutPolicy_.has_value() &&
+                          layoutPolicyProperty->widthLayoutPolicy_.value() != LayoutCalPolicy::NO_MATCH;
+    auto hasHeightPolicy = layoutPolicyProperty->heightLayoutPolicy_.has_value() &&
+                           layoutPolicyProperty->heightLayoutPolicy_.value() != LayoutCalPolicy::NO_MATCH;
+    if (!hasWidthPolicy && !hasHeightPolicy) {
+        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+    }
+    property->UpdateMargin(margin);
+}
+
+void SearchPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 } // namespace OHOS::Ace::NG

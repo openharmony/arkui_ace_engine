@@ -142,7 +142,9 @@ VectorToCFFIArray HandleFFIArray(const std::vector<size_t>& vec)
     for (size_t i = 0; i < vec.size(); ++i) {
         ffiArray.buffer[i] = static_cast<int64_t>(vec[i]);
     }
-    ffiArray.free = reinterpret_cast<void (*)(int64_t*)>(free);
+    ffiArray.free = [](int64_t* ptr) {
+        delete[] ptr;
+    };
     return ffiArray;
 }
 

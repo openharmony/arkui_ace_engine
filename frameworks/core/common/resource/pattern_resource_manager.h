@@ -24,25 +24,49 @@
 #include "base/memory/ace_type.h"
 
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
+enum class ValueType {
+    UNKNOWN = 0,
+    CALDIMENSION,
+    COLOR,
+    DOUBLE,
+    DIMENSION,
+    FLOAT,
+    FONT_WEIGHT,
+    MEDIA,
+    STRING,
+    U16STRING,
+    VECTOR_STRING
+};
+
+using VariantValue = std::variant<std::string, std::u16string, float, double, Color, CalcDimension,
+    std::vector<std::string>, FontWeight>;
+
 class PropertyValueBase : public virtual AceType {
     DECLARE_ACE_TYPE(PropertyValueBase, AceType);
 public:
     virtual ~PropertyValueBase() = default;
-};
- 
-template<typename T>
-class PropertyValue : public PropertyValueBase {
-    DECLARE_ACE_TYPE(PropertyValue<T>, PropertyValueBase);
-public:
-    T value;
-    PropertyValue() : value() {}
-    explicit PropertyValue(const T& val) : value(val) {}
-    void SetValue(const T& value_)
+    VariantValue& GetValue()
     {
-        value = value_;
+        return value_;
     }
+    ValueType GetValueType()
+    {
+        return valueType_;
+    }
+    void SetValue(const VariantValue& value)
+    {
+        value_ = value;
+    }
+    void SetValueType(const ValueType& valueType)
+    {
+        valueType_ = valueType;
+    }
+private:
+    ValueType valueType_;
+    VariantValue value_;
 };
 
 class PatternResourceManager final : public AceType {
@@ -71,7 +95,22 @@ public:
     void UpdateProperty(std::function<void(const std::string&, const RefPtr<PropertyValueBase>&)>&& propUpdateFunc,
         const std::string& key, const RefPtr<ResourceObject>& resObj)
     {
-        auto value = AceType::MakeRefPtr<PropertyValue<T>>();
+        auto value = AceType::MakeRefPtr<PropertyValueBase>();
+        if constexpr (std::is_same_v<T, std::string>) {
+            value->SetValueType(ValueType::STRING);
+        } else if (std::is_same_v<T, std::u16string>) {
+            value->SetValueType(ValueType::U16STRING);
+        } else if constexpr(std::is_same_v<T, Color>) {
+            value->SetValueType(ValueType::COLOR);
+        } else if constexpr(std::is_same_v<T, double>) {
+            value->SetValueType(ValueType::DOUBLE);
+        } else if constexpr(std::is_same_v<T, CalcDimension>) {
+            value->SetValueType(ValueType::CALDIMENSION);
+        } else if constexpr(std::is_same_v<T, float>) {
+            value->SetValueType(ValueType::FLOAT);
+        } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
+            value->SetValueType(ValueType::VECTOR_STRING);
+        }
         ParsePropertyValue(resObj, value);
         if (propUpdateFunc) {
             propUpdateFunc(key, value);
@@ -90,9 +129,6 @@ public:
             }
         };
         AddResource(key, resObj, std::move(updateFunc));
-        if (propUpdateFunc) {
-            propUpdateFunc(key, AceType::MakeRefPtr<PropertyValue<T>>(value));
-        }
     }
 
     void ParsePropertyValue(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);

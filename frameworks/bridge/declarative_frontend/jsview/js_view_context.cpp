@@ -27,7 +27,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_animation_on_finish_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
@@ -181,7 +181,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         }
         auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
-        ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
@@ -244,7 +243,6 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         }
         auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
-        ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
@@ -351,14 +349,14 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     AnimationOption option;
     if (onFinish->IsFunction()) {
-        count = GetAnimationFinshCount();
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        count = GetAnimationFinishCount();
+        auto jsFunc = AceType::MakeRefPtr<JsAnimationOnFinishFunction>(JSRef<JSFunc>::Cast(onFinish));
         std::function<void()> onFinishEvent = [execCtx = executionContext, func = std::move(jsFunc),
                             id = Container::CurrentIdSafely()]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
+            func->Execute(false);
             func = nullptr;
         };
         option.SetOnFinishEvent(onFinishEvent);
@@ -467,7 +465,6 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     std::vector<KeyframeParam>& keyframes, const std::optional<int32_t>& count)
 {
     // flush build and flush ui tasks before open animation closure.
-    ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
     pipelineContext->FlushBuild();
     if (!pipelineContext->IsLayouting()) {
         pipelineContext->FlushUITasks(true);
@@ -487,7 +484,6 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
         AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
         AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
             keyframe.animationClosure();
-            ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
                 pipelineContext->FlushUITasks(true);
@@ -750,9 +746,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     RefPtr<Curve> debugCurve = Curves::FAST_OUT_LINEAR_IN;
     auto isDebugAnim = option.GetDuration() == DEBUG_DURATION && debugCurve->IsEqual(option.GetCurve());
     if (onFinish->IsFunction()) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        auto jsFunc = AceType::MakeRefPtr<JsAnimationOnFinishFunction>(JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count,
                             iterations, isDebugAnim]() mutable {
@@ -765,7 +761,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish, cnt:%{public}d", count.value());
-            func->ExecuteJS(0, nullptr, isDebugAnim);
+            func->Execute(isDebugAnim);
             if (isDebugAnim) {
                 TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish after ExecuteJS, cnt:%{public}d", count.value());
             }

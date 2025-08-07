@@ -1686,8 +1686,9 @@ ArkUINativeModuleValue RichEditorBridge::SetEditMenuOptions(ArkUIRuntimeCallInfo
         nodeModifiers->getRichEditorModifier()->resetRichEditorEditMenuOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    nodeModifiers->getRichEditorModifier()->setRichEditorEditMenuOptions(
-        nativeNode, reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback));
+    nodeModifiers->getRichEditorModifier()->setRichEditorEditMenuOptions(nativeNode,
+        reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback),
+        reinterpret_cast<void*>(&onPrepareMenuCallback));
     return panda::JSValueRef::Undefined(vm);
 }
 

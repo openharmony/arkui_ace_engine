@@ -14,7 +14,7 @@
  */
 
 import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
-import { int32, int64, float32 } from "@koalaui/common"
+import { int32, float32 } from "@koalaui/common"
 import { Length } from "./ArkUnitsInterfaces"
 
 export class ArkUIGeneratedNativeModuleEmpty {
@@ -8707,6 +8707,15 @@ export class ArkUIGeneratedNativeModuleEmpty {
     }
     _XComponentController_stopImageAnalyzer(ptr: KPointer): void {
         console.log("_XComponentController_stopImageAnalyzer")
+    }
+    _XComponentController_setOnSurfaceCreatedCallback(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_XComponentController_setOnSurfaceCreatedCallback")
+    }
+    _XComponentController_setOnSurfaceChangedCallback(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_XComponentController_setOnSurfaceChangedCallback")
+    }
+    _XComponentController_setOnSurfaceDestroyedCallback(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_XComponentController_setOnSurfaceDestroyedCallback")
     }
     _WaterFlowSections_ctor(): KPointer {
         console.log("_WaterFlowSections_ctor")

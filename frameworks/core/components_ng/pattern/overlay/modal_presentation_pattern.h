@@ -194,6 +194,9 @@ public:
         return !isUIExtension_;
     }
 
+    void RegisterModalBgColorResFunc(const RefPtr<NG::FrameNode>& modalNode,
+        NG::ModalStyle& modalStyle);
+
     bool TriggerAutoSaveWhenInvisible() override
     {
         return true;
@@ -208,6 +211,12 @@ public:
     {
         return enableSafeArea_;
     }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;

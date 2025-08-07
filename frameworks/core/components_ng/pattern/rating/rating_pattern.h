@@ -85,7 +85,6 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }
@@ -111,18 +110,24 @@ public:
 
     void DumpInfo() override;
 
-private:
-    void OnAttachToFrameNode() override;
-    void UpdateRatingScore(double ratingScore);
-    void MarkDirtyNode(const PropertyChangeFlag& flag);
-    void OnModifyDone() override;
-    void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     void LoadForeground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
+
+private:
+    void OnAttachToFrameNode() override;
+    void UpdateRatingScore(double ratingScore);
+    void MarkDirtyNode(const PropertyChangeFlag& flag);
+    void OnModifyDone() override;
+    void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
     void LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void UpdatePaintConfig();
@@ -133,6 +138,7 @@ private:
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
     float GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace);
+    void OnColorModeChange(uint32_t colorMode) override;
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ class GridContainerUtils : public AceType {
 public:
     ~GridContainerUtils() override = default;
 
+    static int CalcBreakPoint(const RefPtr<GridSizeInfo>& threshold, double windowWidth);
+    static WidthBreakpoint GetWidthBreakpoint(
+        const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase> &pipeline, bool userDefine);
     static GridSizeType ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
         const WindowMode& mode, const RefPtr<PipelineBase>& pipeline = nullptr);
     static GridSizeType ProcessGridSizeType(
@@ -42,6 +45,8 @@ public:
     static int32_t ProcessColumn(GridSizeType sizeType, const GridContainerSize& columnNum);
     static int32_t ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum);
     static double ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double size);
+    static void InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+        int32_t *containerSizeArray, int32_t size);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_COL_UTILS_H

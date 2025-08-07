@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
+#include "core/components_ng/pattern/navigation/nav_content_layout_property_base.h"
 
 namespace OHOS::Ace::NG {
 class NavDestinationContentPattern : public LinearLayoutPattern, public CustomSafeAreaExpander {
@@ -34,6 +35,26 @@ private:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         return RunCustomizeExpandIfNeeded(host);
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+    
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<NavContentLayoutPropertyBase>(GetIsVertical());
     }
 };
 } // namespace OHOS::Ace::NG

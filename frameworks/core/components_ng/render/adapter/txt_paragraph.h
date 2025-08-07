@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 
 #include "base/utils/noncopyable.h"
@@ -40,21 +39,7 @@ public:
         externalParagraph_ = reinterpret_cast<RSParagraph*>(paragraph);
     }
 
-    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
-    {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
-        auto rsNode = context->GetRSNode();
-        rsSymbolAnimation_ = RSSymbolAnimation();
-        rsSymbolAnimation_.SetNode(rsNode);
-
-        std::function<bool(
-            const std::shared_ptr< RSSymbolAnimationConfig>& symbolAnimationConfig)>
-            scaleCallback = std::bind(&RSSymbolAnimation::SetSymbolAnimation,
-            rsSymbolAnimation_,
-            std::placeholders::_1);
-
-        SetAnimation(scaleCallback);
-    }
+    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override;
 
     void SetAnimation(
         std::function<bool(
@@ -100,6 +85,8 @@ public:
     float GetAlphabeticBaseline() override;
     float GetCharacterWidth(int32_t index) override;
 
+    std::unique_ptr<RSParagraph> GetParagraphUniquePtr();
+
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
 
@@ -141,6 +128,12 @@ public:
     void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
+
+    std::shared_ptr<RSParagraph> GetSharedParagraph()
+    {
+        std::shared_ptr<RSParagraph> paragraphSharedPtr(paragraph_.get(), [](RSParagraph*) {});
+        return paragraphSharedPtr;
+    }
 
 protected:
     virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);

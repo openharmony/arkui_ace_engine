@@ -34,6 +34,8 @@ public:
 
     static ModuleManager* GetInstance();
     bool InitModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj, const std::string& moduleName);
+    bool InitModuleForCustomRuntime(
+        const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& thisObj, const std::string& moduleName);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ModuleManager);

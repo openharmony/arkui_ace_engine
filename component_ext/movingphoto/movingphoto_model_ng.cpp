@@ -97,6 +97,14 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     SetXmagePosition();
 }
 
+void MovingPhotoModelNG::SetHdrBrightness(float hdrBrightness)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    movingPhotoPattern->SetHdrBrightness(hdrBrightness);
+}
+
 void MovingPhotoModelNG::SetMuted(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -162,6 +170,15 @@ void MovingPhotoModelNG::SetOnError(MovingPhotoEventFunc&& onError)
     auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
+}
+
+void MovingPhotoModelNG::SetOnPrepared(MovingPhotoEventFunc&& onPrepared)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPrepared(std::move(onPrepared));
 }
 
 void MovingPhotoModelNG::AutoPlayPeriod(int64_t startTime, int64_t endTime)
@@ -234,15 +251,6 @@ void MovingPhotoModelNG::SetDynamicRangeMode(DynamicRangeMode rangeMode)
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetDynamicRangeMode(rangeMode);
-}
-
-void MovingPhotoModelNG::GetXmageHeight()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(movingPhotoPattern);
-    movingPhotoPattern->GetXmageHeight();
 }
 
 void MovingPhotoModelNG::SetXmagePosition()

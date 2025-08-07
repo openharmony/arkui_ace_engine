@@ -517,6 +517,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
 {
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     RefreshModelNG refreshModel;
     refreshModel.Create();
     auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
@@ -1109,7 +1110,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge003, TestSize.Level1)
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -153.52615);
 
     const auto& info = pattern_->layoutInfo_;
-    MockAnimationManager::GetInstance().TickByVelocity(-8000);
+    MockAnimationManager::GetInstance().TickByVelocity(-8000.0f);
     FlushUITasks();
     EXPECT_EQ(info->endIndex_, 19);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 19), 600);
@@ -1145,7 +1146,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge004, TestSize.Level1)
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -17.300961);
 
-    MockAnimationManager::GetInstance().TickByVelocity(1000);
+    MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 }

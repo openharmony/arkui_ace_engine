@@ -36,6 +36,9 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 #include "core/components_ng/syntax/syntax_item.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/base/mock_system_properties.h"
 #undef private
 #undef protected
 #include "test/mock/core/animation/mock_animation_manager.h"
@@ -45,6 +48,8 @@ namespace OHOS::Ace::NG {
 void WaterFlowTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -56,6 +61,10 @@ void WaterFlowTestNg::SetUpTestSuite()
     auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
     auto refreshTheme = RefreshThemeNG::Builder().Build(refreshThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId())).WillRepeatedly(Return(refreshTheme));
+    auto scrollbarThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(scrollbarThemeConstants);
+    scrollBarTheme->foregroundColor_ = Color::RED;
+    EXPECT_CALL(*themeManager, GetTheme(ScrollBarTheme::TypeId())).WillRepeatedly(Return(scrollBarTheme));
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
     ASSERT_TRUE(container);
@@ -70,15 +79,21 @@ void WaterFlowTestNg::SetUpTestSuite()
 void WaterFlowTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void WaterFlowTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void WaterFlowTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
@@ -89,6 +104,7 @@ void WaterFlowTestNg::TearDown()
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::GetCurrent()->SetResponseTime(INT32_MAX);
 }
 
 void WaterFlowTestNg::GetWaterFlow()
@@ -115,6 +131,7 @@ WaterFlowModelNG WaterFlowTestNg::CreateWaterFlow()
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.SetScroller(positionController, scrollBarProxy);
+    model.SetSyncLoad(true);
 #ifdef TEST_WATER_FLOW_SW
     model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
 #endif
@@ -177,6 +194,11 @@ std::pair<std::string, RefPtr<NG::UINode>> WaterFlowMockLazy::OnGetChildByIndex(
     ViewAbstract::SetWidth(CalcLength(CalcLength(FILL_LENGTH)));
     ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
     auto node = ViewStackProcessor::GetInstance()->Finish();
+    node->nodeId_ = index;
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
+        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
+    };
     return { std::to_string(index), node };
 }
 
@@ -203,6 +225,11 @@ WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
         axis = Axis::HORIZONTAL;
     }
     SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(mainSize));
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
+        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
+    };
     return waterFlowItemModel;
 }
 
@@ -2205,5 +2232,413 @@ HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
     // should layout at the end.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 30);
     EXPECT_EQ(GetChildRect(frameNode_, 30).Bottom(), WATER_FLOW_HEIGHT);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.ParseResObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.ParseResObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+/**
+ * @tc.name: ScrollBarMarginColumnReverseTest001
+ * @tc.desc: Test scrollBar margin behavior comparison between normal and reverse modes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarMarginColumnReverseTest001, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetScrollBarMode(DisplayMode::ON);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    // Set margin
+    ScrollBarMargin testMargin;
+    testMargin.start_ = Dimension(20.0);
+    testMargin.end_ = Dimension(20.0);
+    scrollBar->SetScrollBarMargin(testMargin);
+
+    auto viewSize = pattern_->GetHost()->GetGeometryNode()->GetFrameSize();
+    auto estimatedHeight = pattern_->layoutInfo_->EstimateTotalHeight();
+
+    // Test reverse mode
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    FlushUITasks();
+
+    scrollBar->SetRectTrickRegion(
+        Offset(0.0f, 0.0f),
+        Size(viewSize.Width(), viewSize.Height()),
+        Offset(0.0f, 100.0f),
+        estimatedHeight,
+        SCROLL_FROM_UPDATE
+    );
+
+    auto reverseModeRect = scrollBar->GetActiveRect();
+
+    // Get the actual scrollable region considering margins
+    double scrollableRegionStart = 20.0f;
+    double scrollableRegionEnd = viewSize.Height() - 20.0f;
+
+    // Verify scrollBar stays within the scrollable region
+    EXPECT_GE(reverseModeRect.Top(), scrollableRegionStart);
+    EXPECT_LE(reverseModeRect.Bottom(), scrollableRegionEnd);
+
+    // Verify scrollBar is visible
+    EXPECT_GT(reverseModeRect.Height(), 0.0f);
+}
+
+/**
+ * @tc.name: ScrollBarMarginColumnReverseTest002
+ * @tc.desc: Test scrollBar margin boundary cases in COLUMN_REVERSE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarMarginColumnReverseTest002, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetScrollBarMode(DisplayMode::ON);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    FlushUITasks();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    auto viewSize = pattern_->GetHost()->GetGeometryNode()->GetFrameSize();
+
+    // Test large margin scenario
+    ScrollBarMargin largeMargin;
+    largeMargin.start_ = Dimension(viewSize.Height() * 0.4);
+    largeMargin.end_ = Dimension(viewSize.Height() * 0.4);
+    scrollBar->SetScrollBarMargin(largeMargin);
+
+    scrollBar->SetRectTrickRegion(
+        Offset(0.0f, 0.0f),
+        Size(viewSize.Width(), viewSize.Height()),
+        Offset(0.0f, 0.0f),
+        pattern_->layoutInfo_->EstimateTotalHeight(),
+        SCROLL_FROM_UPDATE
+    );
+
+    auto rect = scrollBar->GetActiveRect();
+    auto barRect = scrollBar->GetBarRect();
+
+    // Verify scrollBar remains within valid region even with large margins
+    EXPECT_GE(rect.Top(), viewSize.Height() * 0.4);
+    EXPECT_LE(rect.Bottom(), barRect.Height() - viewSize.Height() * 0.4);
+}
+
+/**
+ * @tc.name: ScrollBarMarginColumnReverseTest003
+ * @tc.desc: Test scrollBar margin interaction with reservedHeight and precision
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarMarginColumnReverseTest003, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetScrollBarMode(DisplayMode::ON);
+    CreateWaterFlowItems(25);
+    CreateDone();
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    FlushUITasks();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    // Set margin
+    ScrollBarMargin margin;
+    margin.start_ = Dimension(10.0);
+    margin.end_ = Dimension(10.0);
+    scrollBar->SetScrollBarMargin(margin);
+
+    // Set reservedHeight (triggered by border radius)
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = std::make_optional<Dimension>(8.0);
+    borderRadius.radiusBottomLeft = std::make_optional<Dimension>(8.0);
+    scrollBar->SetHostBorderRadius(borderRadius);
+    scrollBar->CalcReservedHeight();
+
+    auto viewSize = pattern_->GetHost()->GetGeometryNode()->GetFrameSize();
+
+    scrollBar->SetRectTrickRegion(
+        Offset(0.0f, 0.0f),
+        Size(viewSize.Width(), viewSize.Height()),
+        Offset(0.0f, 80.0f),
+        pattern_->layoutInfo_->EstimateTotalHeight(),
+        SCROLL_FROM_UPDATE
+    );
+
+    auto rect = scrollBar->GetActiveRect();
+    auto barRect = scrollBar->GetBarRect();
+
+    // Verify boundaries with combined margin and reservedHeight effects
+    EXPECT_GE(rect.Top(), 10.0f);
+    EXPECT_LE(rect.Bottom(), barRect.Height() - 10.0f);
+    EXPECT_GT(rect.Height(), 0.0f);
+}
+
+/**
+ * @tc.name: ScrollBarMarginRowReverseTest001
+ * @tc.desc: Test scrollBar margin behavior comparison between normal and reverse modes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarMarginRowReverseTest001, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetScrollBarMode(DisplayMode::ON);
+    model.SetLayoutDirection(FlexDirection::ROW);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    // Set scrollBar to horizontal
+    scrollBar->SetAxis(Axis::HORIZONTAL);
+
+    // Set margin
+    ScrollBarMargin testMargin;
+    testMargin.start_ = Dimension(10.0);
+    testMargin.end_ = Dimension(10.0);
+    scrollBar->SetScrollBarMargin(testMargin);
+
+    auto viewSize = pattern_->GetHost()->GetGeometryNode()->GetFrameSize();
+
+    // Test reverse mode
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW_REVERSE);
+    FlushUITasks();
+
+    // Use estimated height for horizontal scrolling
+    auto estimatedWidth = pattern_->layoutInfo_->EstimateTotalHeight();
+
+    scrollBar->SetRectTrickRegion(
+        Offset(0.0f, 0.0f),
+        Size(viewSize.Width(), viewSize.Height()),
+        Offset(50.0f, 0.0f),
+        estimatedWidth,
+        SCROLL_FROM_UPDATE
+    );
+
+    auto reverseModeRect = scrollBar->GetActiveRect();
+
+    // Get the actual scrollable region considering margins
+    double scrollableRegionStart = 10.0f;
+    double scrollableRegionEnd = viewSize.Width() - 10.0f;
+
+    // Verify scrollBar stays within the scrollable region
+    EXPECT_GE(reverseModeRect.Left(), scrollableRegionStart);
+    EXPECT_LE(reverseModeRect.Right(), scrollableRegionEnd);
+
+    // Verify scrollBar is visible
+    EXPECT_GT(reverseModeRect.Width(), 0.0f);
+}
+
+/**
+ * @tc.name: ScrollBarMarginRowReverseTest002
+ * @tc.desc: Test scrollBar margin boundary cases in ROW_REVERSE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarMarginRowReverseTest002, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetScrollBarMode(DisplayMode::ON);
+    model.SetLayoutDirection(FlexDirection::ROW);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW_REVERSE);
+    FlushUITasks();
+
+    EXPECT_EQ(layoutProperty_->GetAxis(), Axis::HORIZONTAL);
+    EXPECT_TRUE(layoutProperty_->IsReverse());
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    // Set scrollBar to horizontal
+    scrollBar->SetAxis(Axis::HORIZONTAL);
+
+    auto viewSize = pattern_->GetHost()->GetGeometryNode()->GetFrameSize();
+
+    // Test large horizontal margin scenario
+    ScrollBarMargin largeMargin;
+    largeMargin.start_ = Dimension(viewSize.Width() * 0.3);
+    largeMargin.end_ = Dimension(viewSize.Width() * 0.3);
+    scrollBar->SetScrollBarMargin(largeMargin);
+
+    scrollBar->SetRectTrickRegion(
+        Offset(0.0f, 0.0f),
+        Size(viewSize.Width(), viewSize.Height()),
+        Offset(0.0f, 0.0f),
+        pattern_->layoutInfo_->EstimateTotalHeight(),
+        SCROLL_FROM_UPDATE
+    );
+
+    auto rect = scrollBar->GetActiveRect();
+
+    // Verify scrollBar remains within valid horizontal region
+    EXPECT_GE(rect.Left(), viewSize.Width() * 0.3);
+    EXPECT_LE(rect.Right(), viewSize.Width() - viewSize.Width() * 0.3);
+    EXPECT_EQ(scrollBar->GetPositionMode(), PositionMode::BOTTOM);
+}
+
+/**
+ * @tc.name: ScrollBarMarginRowReverseTest003
+ * @tc.desc: Test scrollBar margin with ROW_REVERSE and RTL interaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarMarginRowReverseTest003, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetScrollBarMode(DisplayMode::ON);
+    model.SetLayoutDirection(FlexDirection::ROW);
+    CreateWaterFlowItems(25);
+    CreateDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+
+    // Set scrollBar to horizontal
+    scrollBar->SetAxis(Axis::HORIZONTAL);
+
+    // Set margin
+    ScrollBarMargin margin;
+    margin.start_ = Dimension(15.0);
+    margin.end_ = Dimension(15.0);
+    scrollBar->SetScrollBarMargin(margin);
+
+    // Test ROW_REVERSE with LTR (should be reverse)
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW_REVERSE);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushUITasks();
+    EXPECT_TRUE(layoutProperty_->IsReverse());
+
+    // Test ROW_REVERSE with RTL (should not be reverse)
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks();
+    EXPECT_FALSE(layoutProperty_->IsReverse());
+
+    auto viewSize = pattern_->GetHost()->GetGeometryNode()->GetFrameSize();
+
+    scrollBar->SetRectTrickRegion(
+        Offset(0.0f, 0.0f),
+        Size(viewSize.Width(), viewSize.Height()),
+        Offset(50.0f, 0.0f),
+        pattern_->layoutInfo_->EstimateTotalHeight(),
+        SCROLL_FROM_UPDATE
+    );
+
+    auto rect = scrollBar->GetActiveRect();
+
+    // Verify scrollBar remains within margin boundaries
+    EXPECT_GE(rect.Left(), 15.0f);
+    EXPECT_LE(rect.Right(), viewSize.Width() - 15.0f);
+    EXPECT_GT(rect.Width(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

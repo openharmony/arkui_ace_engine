@@ -26,6 +26,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/property/measure_utils.h"
 
 #undef private
 #undef protected
@@ -1219,6 +1220,42 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBackgroundLayoutSafeAreaEdges001
+ * @tc.desc: Test CheckBackgroundLayoutSafeAreaEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+}
+
+/**
  * @tc.name: CheckIgnoreLayoutSafeArea
  * @tc.desc: Test CheckIgnoreLayoutSafeArea
  * @tc.type: FUNC
@@ -1285,5 +1322,198 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level1)
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
     layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+}
+
+/**
+ * @tc.name: TestMirrorOffset
+ * @tc.desc: Test PaddingPropertyT MirrorOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestMirrorOffset, TestSize.Level1)
+{
+    PaddingPropertyF edges = {
+        .left = 10.0f,
+        .right = 20.0f,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    OffsetF expectedRes(-20.0f, 30.0f);
+    EXPECT_EQ(edges.MirrorOffset(), expectedRes);
+}
+
+/**
+ * @tc.name: TestConvertSafeAreaPadding
+ * @tc.desc: Test ConvertWithResidueToPaddingPropertyF
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestConvertSafeAreaPadding, TestSize.Level1)
+{
+    std::unique_ptr<PaddingProperty> safeAreaPadding = std::make_unique<PaddingProperty>();
+    *safeAreaPadding = {
+        .left = CalcLength(50, DimensionUnit::VP),
+        .right = CalcLength(50, DimensionUnit::VP),
+        .top = CalcLength(50, DimensionUnit::VP),
+        .bottom = CalcLength(50, DimensionUnit::VP)
+    };
+    ScaleProperty scaleProperty = {
+        .vpScale = 3.25,
+        .fpScale = 1.0,
+        .lpxScale = 1.0
+    };
+    PaddingPropertyF fract = {
+        .left = 0.4f + 0.4f,
+        .right = 0.4f + 0.4f,
+        .top = 0.4f + 0.4f,
+        .bottom = 0.4f + 0.4f
+    };
+    PaddingPropertyF expectedRes = {
+        .left = 163.0f,
+        .right = 163.0f,
+        .top = 163.0f,
+        .bottom = 163.0f
+    };
+    auto res = ConvertWithResidueToPaddingPropertyF(safeAreaPadding, scaleProperty, fract);
+    EXPECT_EQ(res, expectedRes);
+}
+
+/**
+ * @tc.name: UpdateLocalizedAlignment001
+ * @tc.desc: Test cast to UpdateLocalizedAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_FALSE(layoutProperty->positionProperty_);
+    layoutProperty->UpdateLocalizedAlignment("top_start");
+    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->UpdateLocalizedAlignment("bottom_end");
+    auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align1, "bottom_end");
+}
+
+/**
+ * @tc.name: UpdateIsMirrorable001
+ * @tc.desc: Test cast to UpdateIsMirrorable
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateIsMirrorable(true);
+    auto isMirrorable = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable, true);
+
+    layoutProperty->UpdateIsMirrorable(false);
+    auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable1, false);
+}
+
+/**
+ * @tc.name: CheckCalcLayoutConstraintTest01
+ * @tc.desc: Test CheckCalcLayoutConstraint()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")),
+        .maxSize = CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    LayoutConstraintF parentConstraint = {
+        .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
+        .percentReference = { 100, 100 }
+    };
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
+     *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(90, 90))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(10, 10))
+        << layoutProperty->layoutConstraint_->minSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMaxSize.has_value());
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMinSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMinSize,
+        CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")))
+        << layoutProperty->calcLayoutConstraint_->preMinSize.value().ToString();
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMaxSize,
+        CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")))
+        << layoutProperty->calcLayoutConstraint_->preMaxSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preSelfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
+        CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")))
+        << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
+}
+
+/**
+ * @tc.name: CheckCalcLayoutConstraintTest02
+ * @tc.desc: Test CheckCalcLayoutConstraint()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")),
+        .maxSize = CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    LayoutConstraintF parentConstraint = {
+        .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
+        .percentReference = { 100, 100 }
+    };
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.steps: step2. layoutProperty update new calcConstraint
+     */
+    userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(20%)"), CalcLength("calc(20%)")),
+        .maxSize = CalcSize(CalcLength("calc(80%)"), CalcLength("calc(80%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
+     *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(80, 80))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(20, 20))
+        << layoutProperty->layoutConstraint_->minSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMinSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMinSize,
+        CalcSize(CalcLength("calc(20%)"), CalcLength("calc(20%)")))
+        << layoutProperty->calcLayoutConstraint_->preMinSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMaxSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMaxSize,
+        CalcSize(CalcLength("calc(80%)"), CalcLength("calc(80%)")))
+        << layoutProperty->calcLayoutConstraint_->preMaxSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preSelfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
+        CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")))
+        << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
 }
 }

@@ -31,12 +31,16 @@ public:
     void SetOnTimer(std::function<void(int64_t, int64_t)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextColorByUser(bool isSetByUser) override {};
     void SetTextShadow(const std::vector<Shadow>& value) override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void CreateWithResourceObj(
         JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
+    void SetFontSizeByUser(bool value) override {};
+    void SetFontWeightByUser(bool value) override {};
+    void SetFontFamilyByUser(bool value) override {};
 
 private:
     static RefPtr<TextTimerComponent> GetComponent();

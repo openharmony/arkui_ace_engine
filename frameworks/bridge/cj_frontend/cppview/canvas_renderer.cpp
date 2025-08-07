@@ -308,6 +308,9 @@ Metrics NativeCanvasRenderer::MeasureText(const std::string& text)
 
     double density = Positive(GetDensity()) ? GetDensity() : 1;
     TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+    if (NearZero(density)) {
+        density = 1.0;
+    }
     double width = textMetrics.width / density;
     double height = textMetrics.height / density;
     double actualBoundingBoxLeft = textMetrics.actualBoundingBoxLeft / density;
@@ -578,7 +581,7 @@ int64_t NativeCanvasRenderer::CreateConicGradient(const double startAngle, const
     double density = GetDensity();
     Gradient gradient = Gradient();
     gradient.SetType(GradientType::CONIC);
-    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * M_PI))));
+    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * ACE_PI))));
     gradient.GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient.GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
 

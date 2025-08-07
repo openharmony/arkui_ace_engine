@@ -280,6 +280,14 @@ RefPtr<FrameNode> SideBarContainerPattern::GetFirstFrameNode(const RefPtr<UINode
     return nullptr;
 }
 
+void SideBarContainerPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    OnModifyDone();
+}
+
 RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNodeOrFirstChild() const
 {
     auto host = GetHost();

@@ -30,14 +30,14 @@ constexpr WebCacheMode DEFAULT_CACHE_MODE = WebCacheMode::DEFAULT;
 constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_ALLOW_WINDOWOPEN_METHOD = false;
-constexpr WebKeyboardAvoidMode DEFAULT_KEYBOAED_AVIOD_MODE = WebKeyboardAvoidMode::RESIZE_CONTENT;
-constexpr bool DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED = true;
-constexpr bool DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED = true;
+constexpr WebKeyboardAvoidMode DEFAULT_KEYBOARD_AVOID_MODE = WebKeyboardAvoidMode::RESIZE_VISUAL;
+constexpr bool DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
-constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_DATABASE_ACCESS_ENABLED = false;
-constexpr bool DEFAULT_OVERVIEWMODE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_OVERVIEW_MODE_ACCESS = false;
 constexpr bool DEFAULT_FORCEDARK_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
 constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
@@ -55,14 +55,15 @@ constexpr char DEFAULT_WEBFANTASY_FONT[] = "fantasy";
 constexpr char DEFAULT_WEBCURSIVE_FONT[] = "cursive";
 constexpr WebLayoutMode DEFAULT_LAYOUT_MODE = WebLayoutMode::NONE;
 constexpr bool DEFAULT_NATIVE_EMBED_OPTIONS = false;
-constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = true;
-constexpr bool DEFAULT_ONLINEIMAGE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED = false;
 constexpr bool MEDIA_PLAY_GESTURE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_MEDIA_OPTIONS_ENABLED = true;
 constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
 constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
 constexpr OverScrollMode DEFAULT_OVERSCROLL_MODE = OverScrollMode::NEVER;
+constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAULT;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -214,7 +215,7 @@ void ResetKeyboardAvoidMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOAED_AVIOD_MODE);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOARD_AVOID_MODE);
 }
 
 void SetOnControllerAttached(ArkUINodeHandle node, void* extraParam)
@@ -247,7 +248,7 @@ void ResetVerticalScrollBarAccessEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED);
+    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED);
 }
 
 void SetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node, ArkUI_Bool value)
@@ -261,7 +262,7 @@ void ResetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED);
+    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED);
 }
 
 void SetTextZoomRatio(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -479,7 +480,7 @@ void ResetOverviewModeAccess(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEWMODE_ACCESS_ENABLED);
+    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEW_MODE_ACCESS);
 }
 
 void SetForceDarkAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -885,7 +886,7 @@ void ResetOnlineImageAccess(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINEIMAGE_ACCESS_ENABLED);
+    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED);
 }
 
 void SetMediaPlayGestureAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1061,7 +1062,10 @@ void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* v
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScriptItems SecriptInfos;
+    if (size <= 0) {
+        return;
+    }
+    ScriptItems scriptInfos;
     for (int32_t i = 0; i < size; ++i) {
         std::string script;
         ScriptItemsByOrder scriptRules;
@@ -1075,9 +1079,9 @@ void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* v
             tmp.push_back(sc);
         }
         scriptRules = tmp;
-        SecriptInfos.insert(std::make_pair(script, scriptRules));
+        scriptInfos.insert(std::make_pair(script, scriptRules));
     }
-    WebModelNG::JavaScriptOnDocumentStart(frameNode, SecriptInfos);
+    WebModelNG::JavaScriptOnDocumentStart(frameNode, scriptInfos);
 }
 
 void ResetJavaScriptOnDocumentStart(ArkUINodeHandle node)
@@ -1091,7 +1095,10 @@ void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* val
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScriptItems SecriptInfos;
+    if (size <= 0) {
+        return;
+    }
+    ScriptItems scriptInfos;
     for (int32_t i = 0; i < size; ++i) {
         std::string script;
         ScriptItemsByOrder scriptRules;
@@ -1105,9 +1112,9 @@ void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* val
             tmp.push_back(sc);
         }
         scriptRules = tmp;
-        SecriptInfos.insert(std::make_pair(script, scriptRules));
+        scriptInfos.insert(std::make_pair(script, scriptRules));
     }
-    WebModelNG::JavaScriptOnDocumentEnd(frameNode, SecriptInfos);
+    WebModelNG::JavaScriptOnDocumentEnd(frameNode, scriptInfos);
 }
 
 void ResetJavaScriptOnDocumentEnd(ArkUINodeHandle node)
@@ -1751,6 +1758,402 @@ void ResetOnInterceptKeyEventCallBack(ArkUINodeHandle node)
     WebModelNG::SetOnInterceptKeyEvent(frameNode, nullptr);
 }
 
+void SetOnErrorReceive(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(ReceivedErrorEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const ReceivedErrorEvent*>(event)) {
+                auto& nonConstEvent = const_cast<ReceivedErrorEvent&>(*scrollEvent);
+                originalCallback(nonConstEvent);
+                return true;
+            }
+            return false;
+        };
+        WebModelNG::SetOnErrorReceive(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnErrorReceive(frameNode, nullptr);
+    }
+}
+
+void ResetOnErrorReceive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnErrorReceive(frameNode, nullptr);
+}
+
+void SetOnLoadIntercept(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<bool(LoadInterceptEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const LoadInterceptEvent*>(event)) {
+                auto& nonConstEvent = const_cast<LoadInterceptEvent&>(*scrollEvent);
+                return originalCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnLoadIntercept(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnLoadIntercept(frameNode, nullptr);
+    }
+}
+
+void ResetOnLoadIntercept(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnLoadIntercept(frameNode, nullptr);
+}
+
+void SetOnHttpErrorReceive(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(ReceivedHttpErrorEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const ReceivedHttpErrorEvent*>(event)) {
+                auto& nonConstEvent = const_cast<ReceivedHttpErrorEvent&>(*scrollEvent);
+                originalCallback(nonConstEvent);
+                return true;
+            }
+            return false;
+        };
+        WebModelNG::SetOnHttpErrorReceive(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnHttpErrorReceive(frameNode, nullptr);
+    }
+}
+
+void ResetOnHttpErrorReceive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnHttpErrorReceive(frameNode, nullptr);
+}
+
+void SetOnOverrideUrlLoading(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<bool(LoadOverrideEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const LoadOverrideEvent*>(event)) {
+                auto& nonConstEvent = const_cast<LoadOverrideEvent&>(*scrollEvent);
+                return originalCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnOverrideUrlLoading(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnOverrideUrlLoading(frameNode, nullptr);
+    }
+}
+
+void ResetOnOverrideUrlLoading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnOverrideUrlLoading(frameNode, nullptr);
+}
+
+void SetOnHttpAuthRequest(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<bool(WebHttpAuthEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (auto scrollEvent = static_cast<const WebHttpAuthEvent*>(event)) {
+                auto& nonConstEvent = const_cast<WebHttpAuthEvent&>(*scrollEvent);
+                return originalCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnHttpAuthRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnHttpAuthRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnHttpAuthRequest(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnHttpAuthRequest(frameNode, nullptr);
+}
+
+void SetOnConsole(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* loadWebConsoleLogEventPtr = reinterpret_cast<std::function<bool(LoadWebConsoleLogEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(loadWebConsoleLogEventPtr);
+        auto callback = [loadWebConsoleLogEventCallback = *loadWebConsoleLogEventPtr](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto loadWebConsoleLogEvent = static_cast<const LoadWebConsoleLogEvent*>(event);
+            if (loadWebConsoleLogEvent) {
+                auto& nonConstEvent = const_cast<LoadWebConsoleLogEvent&>(*loadWebConsoleLogEvent);
+                return loadWebConsoleLogEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnConsole(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnConsole(frameNode, nullptr);
+    }
+}
+
+void ResetOnConsole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnConsole(frameNode, nullptr);
+}
+
+void SetOnSslErrorEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallback = static_cast<std::function<void(WebAllSslErrorEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallback);
+
+        auto callback = [originalFunc = *originalCallback](const BaseEventInfo* event) -> bool {
+            CHECK_NULL_RETURN(event, false);
+            auto* sslEvent = static_cast<const WebAllSslErrorEvent*>(event);
+            originalFunc(const_cast<WebAllSslErrorEvent&>(*sslEvent));
+            return true;
+        };
+        WebModelNG::SetOnSslErrorEvent(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnSslErrorEvent(frameNode, nullptr);
+    }
+}
+
+void ResetOnSslErrorEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnSslErrorEvent(frameNode, nullptr);
+}
+
+void SetOnDataResubmitted(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(DataResubmittedEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* concreteEvent = static_cast<DataResubmittedEvent*>(event.get());
+            CHECK_NULL_VOID(originalCallback);
+            originalCallback(*concreteEvent);
+        };
+        WebModelNG::SetOnDataResubmitted(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnDataResubmitted(frameNode, nullptr);
+    }
+}
+
+void ResetOnDataResubmitted(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnDataResubmitted(frameNode, nullptr);
+}
+
+void SetGestureFocusMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetGestureFocusMode(frameNode, GestureFocusMode(value));
+}
+
+void ResetGestureFocusMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetGestureFocusMode(frameNode, DEFAULT_GESTURE_FOCUS_MODE);
+}
+
+void SetOnSslErrorEventReceive(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* webSslErrorEventPtr = reinterpret_cast<std::function<bool(WebSslErrorEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(webSslErrorEventPtr);
+        auto webSslErrorEventCallback = *webSslErrorEventPtr;
+        auto callback = [webSslErrorEventCallback](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto webSslErrorEvent = static_cast<const WebSslErrorEvent*>(event);
+            if (webSslErrorEvent) {
+                auto& nonConstEvent = const_cast<WebSslErrorEvent&>(*webSslErrorEvent);
+                return webSslErrorEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnSslErrorRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnSslErrorRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnSslErrorEventReceive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnSslErrorRequest(frameNode, nullptr);
+}
+
+void SetOnClientAuthenticationRequest(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* webSslSelectCertEventPtr = reinterpret_cast<std::function<bool(WebSslSelectCertEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(webSslSelectCertEventPtr);
+        auto callback = [webSslSelectCertEventCallback = *webSslSelectCertEventPtr](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto webSslSelectCertEvent = static_cast<const WebSslSelectCertEvent*>(event);
+            if (webSslSelectCertEvent) {
+                auto& nonConstEvent = const_cast<WebSslSelectCertEvent&>(*webSslSelectCertEvent);
+                return webSslSelectCertEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnClientAuthenticationRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnClientAuthenticationRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnClientAuthenticationRequest(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnClientAuthenticationRequest(frameNode, nullptr);
+}
+
+void SetOnInterceptRequest(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr =
+            reinterpret_cast<std::function<RefPtr<WebResponse>(OnInterceptRequestEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (event == nullptr) {
+                return RefPtr<WebResponse>(nullptr);
+            }
+            if (auto scrollEvent = static_cast<const OnInterceptRequestEvent*>(event)) {
+                auto& nonConstEvent = const_cast<OnInterceptRequestEvent&>(*scrollEvent);
+                return originalCallback(nonConstEvent);
+            }
+            return RefPtr<WebResponse>(nullptr);
+        };
+        WebModelNG::SetOnInterceptRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnInterceptRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnInterceptRequest(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnInterceptRequest(frameNode, nullptr);
+}
+
+void SetOnFaviconReceived(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(FaviconReceivedEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* onFaviconReceived = static_cast<FaviconReceivedEvent*>(event.get());
+            if (onFaviconReceived != nullptr) {
+                originalCallback(*onFaviconReceived);
+            }
+        };
+        WebModelNG::SetFaviconReceivedId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetFaviconReceivedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnFaviconReceived(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetFaviconReceivedId(frameNode, nullptr);
+}
+
+void SetOnBeforeUnload(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* webDialogEventPtr = reinterpret_cast<std::function<bool(WebDialogEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(webDialogEventPtr);
+        auto callback = [webDialogEventCallback = *webDialogEventPtr](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto webDialogEvent = static_cast<const WebDialogEvent*>(event);
+            if (webDialogEvent) {
+                auto& nonConstEvent = const_cast<WebDialogEvent&>(*webDialogEvent);
+                return webDialogEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnBeforeUnload(frameNode, std::move(callback), DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    } else {
+        WebModelNG::SetOnBeforeUnload(frameNode, nullptr, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    }
+}
+
+void ResetOnBeforeUnload(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnBeforeUnload(frameNode, nullptr, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+}
+
+void SetJavaScriptProxy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* jsProxyCallback = reinterpret_cast<std::function<void()>*>(extraParam);
+        WebModelNG::SetJavaScriptProxy(frameNode, std::move(*jsProxyCallback));
+    } else {
+        WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+    }
+}
+
+void ResetJavaScriptProxy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -1926,6 +2329,36 @@ const ArkUIWebModifier* GetWebModifier()
         .resetWebNestedScrollExt = ResetWebNestedScrollExt,
         .setOnInterceptKeyEventCallBack = SetOnInterceptKeyEventCallBack,
         .resetOnInterceptKeyEventCallBack = ResetOnInterceptKeyEventCallBack,
+        .setOnErrorReceive = SetOnErrorReceive,
+        .resetOnErrorReceive = ResetOnErrorReceive,
+        .setOnLoadIntercept = SetOnLoadIntercept,
+        .resetOnLoadIntercept = ResetOnLoadIntercept,
+        .setOnHttpErrorReceive = SetOnHttpErrorReceive,
+        .resetOnHttpErrorReceive = ResetOnHttpErrorReceive,
+        .setOnOverrideUrlLoading = SetOnOverrideUrlLoading,
+        .resetOnOverrideUrlLoading = ResetOnOverrideUrlLoading,
+        .setOnHttpAuthRequest = SetOnHttpAuthRequest,
+        .resetOnHttpAuthRequest = ResetOnHttpAuthRequest,
+        .setOnConsole = SetOnConsole,
+        .resetOnConsole = ResetOnConsole,
+        .setOnSslErrorEvent = SetOnSslErrorEvent,
+        .resetOnSslErrorEvent = ResetOnSslErrorEvent,
+        .setOnDataResubmitted = SetOnDataResubmitted,
+        .resetOnDataResubmitted = ResetOnDataResubmitted,
+        .setGestureFocusMode = SetGestureFocusMode,
+        .resetGestureFocusMode = ResetGestureFocusMode,
+        .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
+        .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
+        .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
+        .resetOnClientAuthenticationRequest = ResetOnClientAuthenticationRequest,
+        .setOnInterceptRequest = SetOnInterceptRequest,
+        .resetOnInterceptRequest = ResetOnInterceptRequest,
+        .setOnFaviconReceived = SetOnFaviconReceived,
+        .resetOnFaviconReceived = ResetOnFaviconReceived,
+        .setOnBeforeUnload = SetOnBeforeUnload,
+        .resetOnBeforeUnload = ResetOnBeforeUnload,
+        .setJavaScriptProxy = SetJavaScriptProxy,
+        .resetJavaScriptProxy = ResetJavaScriptProxy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2105,6 +2538,36 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetWebNestedScrollExt = ResetWebNestedScrollExt,
         .setOnInterceptKeyEventCallBack = SetOnInterceptKeyEventCallBack,
         .resetOnInterceptKeyEventCallBack = ResetOnInterceptKeyEventCallBack,
+        .setOnErrorReceive = SetOnErrorReceive,
+        .resetOnErrorReceive = ResetOnErrorReceive,
+        .setOnLoadIntercept = SetOnLoadIntercept,
+        .resetOnLoadIntercept = ResetOnLoadIntercept,
+        .setOnHttpErrorReceive = SetOnHttpErrorReceive,
+        .resetOnHttpErrorReceive = ResetOnHttpErrorReceive,
+        .setOnOverrideUrlLoading = SetOnOverrideUrlLoading,
+        .resetOnOverrideUrlLoading = ResetOnOverrideUrlLoading,
+        .setOnHttpAuthRequest = SetOnHttpAuthRequest,
+        .resetOnHttpAuthRequest = ResetOnHttpAuthRequest,
+        .setOnConsole = SetOnConsole,
+        .resetOnConsole = ResetOnConsole,
+        .setOnSslErrorEvent = SetOnSslErrorEvent,
+        .resetOnSslErrorEvent = ResetOnSslErrorEvent,
+        .setOnDataResubmitted = SetOnDataResubmitted,
+        .resetOnDataResubmitted = ResetOnDataResubmitted,
+        .setGestureFocusMode = SetGestureFocusMode,
+        .resetGestureFocusMode = ResetGestureFocusMode,
+        .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
+        .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
+        .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
+        .resetOnClientAuthenticationRequest = ResetOnClientAuthenticationRequest,
+        .setOnInterceptRequest = SetOnInterceptRequest,
+        .resetOnInterceptRequest = ResetOnInterceptRequest,
+        .setOnFaviconReceived = SetOnFaviconReceived,
+        .resetOnFaviconReceived = ResetOnFaviconReceived,
+        .setOnBeforeUnload = SetOnBeforeUnload,
+        .resetOnBeforeUnload = ResetOnBeforeUnload,
+        .setJavaScriptProxy = SetJavaScriptProxy,
+        .resetJavaScriptProxy = ResetJavaScriptProxy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

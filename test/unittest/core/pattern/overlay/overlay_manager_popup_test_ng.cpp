@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -1897,5 +1898,43 @@ HWTEST_F(OverlayManagerPopupTestNg, HideAllPopupsWithoutAnimation001, TestSize.L
     overlayManager->HideAllPopupsWithoutAnimation();
     EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: ShowTipsInSubwindow001
+ * @tc.desc: Test ShowTipsInSubwindow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, ShowTipsInSubwindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    PopupInfo popupInfo;
+    popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    MockPipelineContext::SetUp();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    MockPipelineContext::GetCurrent()->overlayManager_ = overlayManager;
+    overlayManager->tipsEnterAndLeaveInfoMap_[targetNode->GetId()] = { { 0, true } };
+    overlayManager->ShowTipsInSubwindow(targetNode->GetId(), popupInfo, 0);
+    EXPECT_FALSE(overlayManager->tipsInfoList_.empty());
+
+    overlayManager->tipsEnterAndLeaveInfoMap_[targetNode->GetId()] = { { 0, true } };
+    popupInfo.isTips = false;
+    popupInfo.popupNode = stageNode;
+    overlayManager->UpdatePopupMap(targetNode->GetId(), popupInfo);
+    overlayManager->ShowTipsInSubwindow(targetNode->GetId(), popupInfo, 0);
+    EXPECT_FALSE(overlayManager->tipsInfoList_.empty());
+    
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

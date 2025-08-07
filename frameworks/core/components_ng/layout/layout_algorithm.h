@@ -71,6 +71,11 @@ public:
         return MAIN_TASK;
     }
 
+    virtual bool MeasureInNextFrame() const
+    {
+        return false;
+    }
+
     void SetHasMeasured(bool measured)
     {
         hasMeasured_ = measured;
@@ -150,6 +155,11 @@ public:
     bool SkipLayout() override
     {
         return skipLayout_;
+    }
+
+    bool MeasureInNextFrame() const override
+    {
+        return layoutAlgorithm_ && layoutAlgorithm_->MeasureInNextFrame();
     }
 
     const RefPtr<LayoutAlgorithm>& GetLayoutAlgorithm() const

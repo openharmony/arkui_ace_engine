@@ -148,6 +148,10 @@ void NavDestinationEventHub::FireOnAppear()
         onAppearAction();
         return;
     }
+    if (navDestination && navDestination->IsHomeDestination()) {
+        onAppearAction();
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();

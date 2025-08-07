@@ -1456,11 +1456,12 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    
+
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
 
     if (SystemProperties::ConfigChangePerform()) {
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        MarkMonthNodeDirty();
         OnModifyDone();
     }
 }
@@ -1488,4 +1489,19 @@ void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         json->PutExtAttr("end", currentSettingData_.endDate.ToString(false).c_str(), filter);
     }
 }
+
+void CalendarDialogPattern::MarkMonthNodeDirty()
+{
+    auto swiperNode = GetSwiperFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    auto monthFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(currentIndex));
+    if (monthFrameNode) {
+        monthFrameNode->MarkModifyDone();
+        monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 } // namespace OHOS::Ace::NG

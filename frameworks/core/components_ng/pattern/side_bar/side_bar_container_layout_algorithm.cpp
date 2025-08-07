@@ -132,6 +132,58 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         realSideBarWidthDimension_ = Dimension(realSideBarWidth_, DimensionUnit::PX);
     }
+    
+    AddChildToIgnoreLayoutSafeBundle(layoutWrapper);
+}
+
+void SideBarContainerLayoutAlgorithm::AddChildToIgnoreLayoutSafeBundle(LayoutWrapper* layoutWrapper)
+{
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(layoutWrapper->IsActive());
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    IgnoreLayoutSafeAreaBundle bundle;
+    int32_t index = 0;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        index++;
+        if (index != INDEX_SIDE_BAR) {
+            continue;
+        }
+        auto sideBarLayoutWrapper = (*it);
+        CHECK_NULL_VOID(sideBarLayoutWrapper);
+        auto sideBarNode = sideBarLayoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(sideBarNode);
+        auto sideBarLayoutProperty = sideBarNode->GetLayoutProperty();
+        if (sideBarLayoutProperty && sideBarLayoutProperty->IsExpandConstraintNeeded()) {
+            bundle.first.emplace_back(sideBarNode);
+            auto sideBarGeo = sideBarLayoutWrapper->GetGeometryNode();
+            CHECK_NULL_VOID(sideBarGeo);
+            layoutConstraint.parentIdealSize.SetSize(sideBarGeo->GetFrameSize());
+            sideBarGeo->SetParentLayoutConstraint(layoutConstraint);
+            SetNeedPostponeForIgnore();
+        }
+    }
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
+        auto contentLayoutWrapper = children.front();
+        CHECK_NULL_VOID(contentLayoutWrapper);
+        auto contentNode = contentLayoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(contentNode);
+        auto contentLayoutProperty = contentNode->GetLayoutProperty();
+        if (contentLayoutProperty && contentLayoutProperty->IsExpandConstraintNeeded()) {
+            bundle.first.emplace_back(contentNode);
+            auto contentGeo = contentLayoutWrapper->GetGeometryNode();
+            CHECK_NULL_VOID(contentGeo);
+            layoutConstraint.parentIdealSize.SetSize(contentGeo->GetFrameSize());
+            contentGeo->SetParentLayoutConstraint(layoutConstraint);
+            SetNeedPostponeForIgnore();
+        }
+    }
+    if (GetNeedPostponeForIgnore()) {
+        bundle.second = host;
+        context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    }
 }
 
 void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion(LayoutWrapper* layoutWrapper)
@@ -566,6 +618,11 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         return;
     }
+    
+    auto host = layoutWrapper->GetHostNode();
+    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
+        return;
+    }
 
     int index = 0;
     for (auto it = children.rbegin(); it != children.rend(); ++it) {
@@ -698,6 +755,9 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
         }
     }
     sideBarOffset_ = OffsetF(sideBarOffsetX, sideBarOffsetY + decorBarHeight);
+    
+    AdjustChildOffset(sideBarLayoutWrapper, sideBarOffset_);
+    
     sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
     sideBarLayoutWrapper->Layout();
 }
@@ -722,6 +782,9 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     }
 
     auto contentOffset = OffsetF(contentOffsetX, contentOffsetY);
+    
+    AdjustChildOffset(contentLayoutWrapper, contentOffset);
+    
     contentLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(contentOffset);
     contentLayoutWrapper->Layout();
 }
@@ -789,5 +852,22 @@ SideBarPosition SideBarContainerLayoutAlgorithm::GetSideBarPositionWithRtl(
         sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;
+}
+
+void SideBarContainerLayoutAlgorithm::AdjustChildOffset(const RefPtr<LayoutWrapper>& layoutWrapper, OffsetF& offset)
+{
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    if (layoutProperty && layoutProperty->IsIgnoreOptsValid()) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->SetMarginFrameOffset(offset);
+        IgnoreLayoutSafeAreaOpts& opts = *(layoutProperty->GetIgnoreLayoutSafeAreaOpts());
+        auto safeExpand = node->GetAccumulatedSafeAreaExpand(false, opts);
+        auto offsetX = safeExpand.left.value_or(0.0f);
+        auto offsetY = safeExpand.top.value_or(0.0f);
+        offset -= OffsetF(offsetX, offsetY);
+    }
 }
 } // namespace OHOS::Ace::NG

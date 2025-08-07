@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiListBridge : public virtual AceType {
-    DECLARE_ACE_TYPE(JsiListBridge, AceType)
+    DECLARE_ACE_TYPE(JsiListBridge, AceType);
 public:
     static shared_ptr<JsValue> JsGetCurrentOffset(const shared_ptr<JsRuntime>& runtime, NodeId nodeId);
 };

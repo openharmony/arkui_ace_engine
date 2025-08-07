@@ -179,7 +179,6 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         .height = paintRect.Height(),
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
-        .uniq = "default" + std::to_string(screenId),
         .direction = ConvertDegreeToMMIRotation(rotation)
     };
     InputManagerUpdateDisplayInfo(paintRect, displayInfo, windowInfo);
@@ -193,8 +192,6 @@ void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
     g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);
 
     MMI::DisplayGroupInfo displayGroupInfo = {
-        .width = paintRect.Width(),
-        .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
         .displaysInfo = g_displayInfoVector
@@ -233,7 +230,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         rootScene->SetDisplayDensity(density);
         int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
         rootScene->SetDisplayOrientation(orientation);
-        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE);
     } else if (rsWindow->GetClassType() == "ScreenScene") {
         auto screenScene = static_cast<Rosen::ScreenScene*>(rsWindow.GetRefPtr());
         CHECK_NULL_RETURN(screenScene, false);

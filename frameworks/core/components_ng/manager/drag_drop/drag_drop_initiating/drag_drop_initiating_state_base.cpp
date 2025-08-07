@@ -277,9 +277,11 @@ std::function<void()> GetTextAnimationFinishCallback(
         pattern->ShowAIEntityMenuForCancel();
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->RemovePixelMap();
+        if (!pattern->IsPreviewMenuShow()) {
+            auto manager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(manager);
+            manager->RemovePixelMap();
+        }
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -426,6 +428,24 @@ void DragDropInitiatingStateBase::UpdatePointInfoForFinger(const TouchEvent& tou
 void DragDropInitiatingStateBase::OnActionEnd(const GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropManager->IsAboutToPreview()) {
+        dragDropManager->ResetDragging();
+    }
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragDropManager->SetIsDisableDefaultDropAnimation(true);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+}
+
+void DragDropInitiatingStateBase::OnActionCancel(const GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action cancel.");
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);

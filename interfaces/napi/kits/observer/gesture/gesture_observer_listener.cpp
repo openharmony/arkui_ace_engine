@@ -24,7 +24,6 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
@@ -33,6 +32,7 @@
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "ace_engine/interfaces/napi/kits/observer/gesture/gesture_observer_listener.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -177,7 +177,7 @@ EventTargetInfoWrapper* GetEventTargetInfoWrapper(
     return wrapper;
 }
 
-void PaesePanDirection(napi_env env, napi_value value, PanDirection& panDirection)
+void ParsePanDirection(napi_env env, napi_value value, PanDirection& panDirection)
 {
     uint32_t typeValue;
     napi_get_value_uint32(env, value, &typeValue);
@@ -227,8 +227,12 @@ static napi_value GetTag(napi_env env, napi_callback_info info)
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
-    std::string tag = gestureInfo->GetTag().value_or("");
-    napi_create_string_utf8(env, tag.c_str(), NAPI_AUTO_LENGTH, &result);
+    if (gestureInfo->GetTag().has_value()) {
+        std::string tag = gestureInfo->GetTag().value();
+        napi_create_string_utf8(env, tag.c_str(), NAPI_AUTO_LENGTH, &result);
+    } else {
+        napi_get_undefined(env, &result);
+    }
     napi_value newResult = nullptr;
     napi_escape_handle(env, scope, result, &newResult);
     napi_close_escapable_handle_scope(env, scope);
@@ -323,6 +327,27 @@ static napi_value IsEnabled(napi_env env, napi_callback_info info)
     return newResult;
 }
 
+static GestureRecognizerState ConvertRefereeState(NG::RefereeState state)
+{
+    switch (state) {
+        case NG::RefereeState::READY:
+            return GestureRecognizerState::READY;
+        case NG::RefereeState::DETECTING:
+            return GestureRecognizerState::DETECTING;
+        case NG::RefereeState::PENDING:
+            return GestureRecognizerState::PENDING;
+        case NG::RefereeState::PENDING_BLOCKED:
+        case NG::RefereeState::SUCCEED_BLOCKED:
+            return GestureRecognizerState::BLOCKED;
+        case NG::RefereeState::SUCCEED:
+            return GestureRecognizerState::SUCCEED;
+        case NG::RefereeState::FAIL:
+            return GestureRecognizerState::FAIL;
+        default:
+            return GestureRecognizerState::UNKNOWN;
+    }
+}
+
 static napi_value GetState(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -333,7 +358,7 @@ static napi_value GetState(napi_env env, napi_callback_info info)
         return nullptr;
     }
     napi_value result = nullptr;
-    napi_create_int32(env, static_cast<int32_t>(current->recognizer->GetRefereeState()), &result);
+    napi_create_int32(env, static_cast<int32_t>(ConvertRefereeState(current->recognizer->GetRefereeState())), &result);
     napi_value newResult = nullptr;
     napi_escape_handle(env, scope, result, &newResult);
     napi_close_escapable_handle_scope(env, scope);
@@ -633,7 +658,7 @@ static napi_value GetDistanceMap(napi_env env, napi_callback_info info)
     napi_get_named_property(env, nativeMap, "set", &setFunc);
     napi_value result;
     for (const auto& item : panDistanceMap) {
-        double distance = context->ConvertPxToVp(Dimension(item.second, DimensionUnit::PX));
+        double distance = context->ConvertPxToVp(item.second);
         double roundedDistance = RoundToMaxPrecision(distance);
         napi_value key;
         napi_value value;
@@ -668,7 +693,7 @@ static napi_value SetDirection(napi_env env, napi_callback_info info)
     if (argc != PARAM_SIZE_ONE || !GestureObserverListener::MatchValueType(env, argv[PARAM_SIZE_ZERO], napi_number)) {
         panDirection.type = PanDirection::ALL;
     } else {
-        PaesePanDirection(env, argv[PARAM_SIZE_ZERO], panDirection);
+        ParsePanDirection(env, argv[PARAM_SIZE_ZERO], panDirection);
     }
 
     wrapper->panGestureOption->SetDirection(panDirection);
@@ -972,20 +997,20 @@ bool WrapRecognizer(napi_env env, napi_value objValue, MultiFingersRecognizerWra
     return true;
 }
 
-void BindRecognizerSpecificFunctions(napi_env env, napi_value objValue, GestureTypeName typeName)
+void BindRecognizerSpecificFunctions(napi_env env, napi_value objValue, NG::GestureListenerType gestureListenerType)
 {
-    static const std::unordered_map<GestureTypeName, std::vector<std::pair<const char*, napi_callback>>>
-        typeFunctions = { { GestureTypeName::PAN_GESTURE,
+    static const std::unordered_map<NG::GestureListenerType, std::vector<std::pair<const char*, napi_callback>>>
+        typeFunctions = { { NG::GestureListenerType::PAN,
                               { { GET_PANGESTURE_OPTIONS, GetPanGestureOptions }, { GET_DIRECTION, GetDirection },
                                   { GET_DISTANCE, GetDistance }, { GET_DISTANCE_MAP, GetDistanceMap } } },
-            { GestureTypeName::PINCH_GESTURE, { { GET_DISTANCE, GetDistance } } },
-            { GestureTypeName::TAP_GESTURE, { { GET_TAP_COUNT, GetTapCount } } },
-            { GestureTypeName::LONG_PRESS_GESTURE, { { IS_REPEAT, IsRepeat }, { GET_DURATION, GetDuration } } },
-            { GestureTypeName::ROTATION_GESTURE, { { GET_ANGLE, GetAngle } } },
-            { GestureTypeName::SWIPE_GESTURE,
+            { NG::GestureListenerType::PINCH, { { GET_DISTANCE, GetDistance } } },
+            { NG::GestureListenerType::TAP, { { GET_TAP_COUNT, GetTapCount } } },
+            { NG::GestureListenerType::LONG_PRESS, { { IS_REPEAT, IsRepeat }, { GET_DURATION, GetDuration } } },
+            { NG::GestureListenerType::ROTATION, { { GET_ANGLE, GetAngle } } },
+            { NG::GestureListenerType::SWIPE,
                 { { GET_VELOCITY_THRESHOLD, GetVelocityThreshold }, { GET_DIRECTION, GetSwipeDirection } } } };
 
-    auto it = typeFunctions.find(typeName);
+    auto it = typeFunctions.find(gestureListenerType);
     if (it == typeFunctions.end()) {
         return;
     }
@@ -1010,8 +1035,8 @@ MultiFingersRecognizerWrapper* CreateMultiFingersWrapper(const RefPtr<NG::MultiF
 }
 } // namespace
 
-void GestureObserverListener::AddGestureRecognizerInfo(
-    napi_env env, napi_value objValueGestureRecognizer, const RefPtr<NG::NGGestureRecognizer>& current)
+void GestureObserverListener::AddGestureRecognizerInfo(napi_env env, napi_value objValueGestureRecognizer,
+    const RefPtr<NG::NGGestureRecognizer>& current, NG::GestureListenerType gestureListenerType)
 {
     napi_handle_scope scope = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_open_handle_scope(env, &scope));
@@ -1033,12 +1058,12 @@ void GestureObserverListener::AddGestureRecognizerInfo(
     }
 
     BindCommonFunctions(env, objValueGestureRecognizer);
-    CreateRecognizerObject(env, objValueGestureRecognizer, current);
+    CreateRecognizerObject(env, objValueGestureRecognizer, current, gestureListenerType);
     napi_close_handle_scope(env, scope);
 }
 
-void GestureObserverListener::CreateRecognizerObject(
-    napi_env env, napi_value objValue, const RefPtr<NG::NGGestureRecognizer>& current)
+void GestureObserverListener::CreateRecognizerObject(napi_env env, napi_value objValue,
+    const RefPtr<NG::NGGestureRecognizer>& current, NG::GestureListenerType gestureListenerType)
 {
     napi_handle_scope scope = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_open_handle_scope(env, &scope));
@@ -1049,7 +1074,7 @@ void GestureObserverListener::CreateRecognizerObject(
         return;
     }
 
-    BindRecognizerSpecificFunctions(env, objValue, gestureInfo->GetRecognizerType());
+    BindRecognizerSpecificFunctions(env, objValue, gestureListenerType);
     napi_close_handle_scope(env, scope);
 }
 

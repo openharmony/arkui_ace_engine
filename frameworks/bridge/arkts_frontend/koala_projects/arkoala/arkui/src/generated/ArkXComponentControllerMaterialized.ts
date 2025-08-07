@@ -46,6 +46,11 @@ export class XComponentController implements MaterializedBase {
         const ctorPtr: KPointer = XComponentController.ctor_xcomponentcontroller()
         this.peer = new Finalizable(ctorPtr, XComponentController.getFinalizer())
     }
+    public holdXComponentCallback() {
+        this.setOnSurfaceCreatedCallback(this.onSurfaceCreated);
+        this.setOnSurfaceChangedCallback(this.onSurfaceChanged);
+        this.setOnSurfaceDestroyedCallback(this.onSurfaceDestroyed);
+    }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._XComponentController_getFinalizer()
     }
@@ -98,6 +103,21 @@ export class XComponentController implements MaterializedBase {
     }
     public stopImageAnalyzer(): void {
         this?.stopImageAnalyzer_serialize()
+        return
+    }
+    private setOnSurfaceCreatedCallback(onSurfaceCreatedCallback: ((breakpoints: string) => void)): void {
+        const onSurfaceCreatedCallback_casted = onSurfaceCreatedCallback as (((breakpoints: string) => void))
+        this.setOnSurfaceCreatedCallback_serialize(onSurfaceCreatedCallback_casted)
+        return
+    }
+    private setOnSurfaceChangedCallback(onSurfaceChangedCallback: ((surfaceId: string,rect: SurfaceRect) => void)): void {
+        const onSurfaceChangedCallback_casted = onSurfaceChangedCallback as (((surfaceId: string,rect: SurfaceRect) => void))
+        this.setOnSurfaceChangedCallback_serialize(onSurfaceChangedCallback_casted)
+        return
+    }
+    private setOnSurfaceDestroyedCallback(onSurfaceDestroyedCallback: ((breakpoints: string) => void)): void {
+        const onSurfaceDestroyedCallback_casted = onSurfaceDestroyedCallback as (((breakpoints: string) => void))
+        this.setOnSurfaceDestroyedCallback_serialize(onSurfaceDestroyedCallback_casted)
         return
     }
     private getXComponentSurfaceId_serialize(): string {
@@ -163,5 +183,23 @@ export class XComponentController implements MaterializedBase {
     }
     private stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._XComponentController_stopImageAnalyzer(this.peer!.ptr)
+    }
+    private setOnSurfaceCreatedCallback_serialize(onSurfaceCreatedCallback: ((breakpoints: string) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onSurfaceCreatedCallback)
+        ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceCreatedCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setOnSurfaceChangedCallback_serialize(onSurfaceChangedCallback: ((surfaceId: string,rect: SurfaceRect) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onSurfaceChangedCallback)
+        ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceChangedCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setOnSurfaceDestroyedCallback_serialize(onSurfaceDestroyedCallback: ((breakpoints: string) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onSurfaceDestroyedCallback)
+        ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceDestroyedCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }

@@ -81,6 +81,10 @@ public:
         dialogNode_ = dialogNode;
     }
 
+    NavigationToolbarOptions GetToolBarOptions() const
+    {
+        return options_;
+    }
 private:
     bool CustomizeExpandSafeArea() override;
     void OnModifyDone() override;

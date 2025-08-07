@@ -66,6 +66,14 @@ public:
         mouseEventActuator_->RemoveInputEvent(onMouseEvent);
     }
 
+    void RemoveAllTipsMouseEvents()
+    {
+        if (!mouseEventActuator_) {
+            return;
+        }
+        mouseEventActuator_->RemoveAllTipsEvents();
+    }
+
     void SetHoverEffect(HoverEffectType type);
 
     HoverEffectType GetHoverEffect()
@@ -151,7 +159,15 @@ public:
         }
         hoverEventActuator_->RemoveInputEvent(onHoverEvent);
     }
-    
+
+    void RemoveAllTipsHoverEvents()
+    {
+        if (!hoverEventActuator_) {
+            return;
+        }
+        hoverEventActuator_->RemoveAllTipsEvents();
+    }
+
     void AddOnHoverMoveEvent(const RefPtr<InputEvent>& onHoverMoveEvent)
     {
         if (!hoverMoveEventActuator_) {

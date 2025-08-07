@@ -89,6 +89,7 @@ private:
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize);
     void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
     bool HandleBlankFirstTimeMeasure(const MagicLayoutNode& child, FlexItemProperties& flexItemProperties);
+    bool CheckBlankIllegality(const RefPtr<LayoutProperty>& blankLayoutProperty);
     void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
@@ -118,6 +119,9 @@ private:
     void SecondMeasureInGrowOrShrink();
     void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
         FlexItemProperties& flexItemProperties);
+    void CalcMainExpand(
+        const ExpandEdges& mainExpand, ExpandEdges& sae, bool isHorizontal, bool isExpandConstraintNeeded);
+    bool CheckReCalcMainExpand(const FlexAlign& crossAlign);
 
     template<typename T>
     void PatternOperator(T pattern, FlexOperatorType operation, FlexMeasureResult& measureResult,

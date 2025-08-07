@@ -660,4 +660,107 @@ HWTEST_F(InputEventHubTestNg, InputEventHubGetHoverEffectStr001, TestSize.Level1
     inputEventHub->hoverEffectType_ = HoverEffectType::OPACITY;
     EXPECT_EQ(inputEventHub->GetHoverEffectStr(), "HoverEffect.Auto");
 }
+
+/**
+ * @tc.name: RemoveAllTipsMouseEvents001
+ * @tc.desc: test RemoveAllTipsMouseEvents
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, RemoveAllTipsMouseEvents001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    inputEventHub->RemoveAllTipsMouseEvents();
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    auto mouseTask1 = [](MouseInfo& info) {};
+    auto mouseTask2 = [](MouseInfo& info) {};
+    auto mouseEvent1 = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask1));
+    auto mouseEvent2 = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask2));
+    mouseEvent1->SetIstips(true);
+    mouseEvent1->SetTipsFollowCursor(true);
+    mouseEvent2->SetIstips(true);
+    mouseEvent2->SetTipsFollowCursor(true);
+    inputEventHub->AddOnMouseEvent(mouseEvent1);
+    inputEventHub->AddOnMouseEvent(mouseEvent2);
+    ASSERT_NE(inputEventHub->mouseEventActuator_, nullptr);
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
+    inputEventHub->RemoveAllTipsMouseEvents();
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveAllTipsHoverEvents001
+ * @tc.desc: test RemoveAllTipsHoverEvents
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, RemoveAllTipsHoverEvents001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    inputEventHub->RemoveAllTipsHoverEvents();
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    auto hoverTask1 = [](bool isHover) {};
+    auto hoverTask2 = [](bool isHover) {};
+    auto hoverEvent1 = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask1));
+    auto hoverEvent2 = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask2));
+    hoverEvent1->SetIstips(true);
+    hoverEvent2->SetIstips(true);
+    inputEventHub->AddOnHoverEvent(hoverEvent1);
+    inputEventHub->AddOnHoverEvent(hoverEvent2);
+    ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
+    inputEventHub->RemoveAllTipsHoverEvents();
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), 0);
+}
+
+/**
+ * @tc.name: HandleHoverEventTest001
+ * @tc.desc: Create InputEventHub and HoverEventTarget HandleHoverEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, HandleHoverEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and eventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    Offset actualGlobalLocation;
+    Offset actualDisplayLocation;
+    Offset actualGlobalDisplayLocation;
+    const OnHoverFunc onHoverCallback =
+        [&actualGlobalLocation, &actualDisplayLocation, &actualGlobalDisplayLocation](bool isHover, HoverInfo& info) {
+            actualGlobalLocation = info.GetGlobalLocation();
+            actualDisplayLocation = info.GetScreenLocation();
+            actualGlobalDisplayLocation = info.GetGlobalDisplayLocation();
+        };
+    hoverEventTarget->SetCallback(onHoverCallback);
+
+    MouseEvent mouseEvent;
+    const Offset expectedOffset(1, 1);
+    mouseEvent.x = expectedOffset.GetX();
+    mouseEvent.y = expectedOffset.GetY();
+    mouseEvent.screenX = expectedOffset.GetX();
+    mouseEvent.screenY = expectedOffset.GetY();
+    mouseEvent.globalDisplayX = expectedOffset.GetX();
+    mouseEvent.globalDisplayY = expectedOffset.GetY();
+
+    hoverEventTarget->HandleHoverEvent(false, mouseEvent);
+    EXPECT_EQ(actualGlobalLocation, expectedOffset);
+    EXPECT_EQ(actualDisplayLocation, expectedOffset);
+    EXPECT_EQ(actualGlobalDisplayLocation, expectedOffset);
+}
 } // namespace OHOS::Ace::NG

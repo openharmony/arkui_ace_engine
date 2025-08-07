@@ -29,7 +29,9 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_cited_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -94,6 +96,8 @@ constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
+constexpr double DEFAULT_OPACITY = 0.2;
+const int32_t DEFAULT_ALPHA = 255;
 const char* TOP_START_PROPERTY = "topStart";
 const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
@@ -138,40 +142,62 @@ void ParseTextProperty(const JSRef<JSVal>& textValue, std::optional<std::u16stri
     }
 }
 
+bool JSTextField::ParseText(const JSRef<JSObject>& paramObject, std::optional<std::u16string>& value,
+    JSRef<JSVal>& changeEventVal, std::u16string& text, RefPtr<ResourceObject>& textObject)
+{
+    bool textResult = false;
+    JSRef<JSVal> textValue = paramObject->GetProperty("text");
+    if (textValue->IsObject()) {
+        JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
+        changeEventVal = valueObj->GetProperty("changeEvent");
+        if (changeEventVal->IsFunction()) {
+            textValue = valueObj->GetProperty("value");
+        }
+        value = u"";
+        textResult = ParseJsString(textValue, text, textObject);
+        if (textResult) {
+            value = text;
+        }
+    } else if (paramObject->GetProperty("$text")->IsFunction()) {
+        changeEventVal = paramObject->GetProperty("$text");
+        value = u"";
+        textResult = ParseJsString(textValue, text, textObject);
+        if (textResult) {
+            value = text;
+        }
+    } else if (paramObject->HasProperty("text")) {
+        textResult = ParseJsString(textValue, text, textObject);
+        if (textResult) {
+            value = text;
+        }
+        if (textValue->IsUndefined()) {
+            value = u"";
+        }
+    }
+    return textResult;
+}
+
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::u16string> placeholderSrc;
     std::optional<std::u16string> value;
+    bool placeholderResult = false;
+    bool textResult = false;
+    std::u16string placeholder;
+    std::u16string text;
+    RefPtr<ResourceObject> placeholderObject;
+    RefPtr<ResourceObject> textObject;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(jsValue);
-        std::u16string placeholder;
-        if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
+        placeholderResult = ParseJsString(paramObject->GetProperty("placeholder"), placeholder, placeholderObject);
+        if (placeholderResult) {
             placeholderSrc = placeholder;
         }
-        std::u16string text;
         JSRef<JSVal> textValue = paramObject->GetProperty("text");
-        if (textValue->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
-            changeEventVal = valueObj->GetProperty("changeEvent");
-            if (changeEventVal->IsFunction()) {
-                textValue = valueObj->GetProperty("value");
-            }
-            value = u"";
-            if (ParseJsString(textValue, text)) {
-                value = text;
-            }
-        } else if (paramObject->GetProperty("$text")->IsFunction()) {
-            changeEventVal = paramObject->GetProperty("$text");
-            value = u"";
-            if (ParseJsString(textValue, text)) {
-                value = text;
-            }
-        } else if (paramObject->HasProperty("text")) {
-            ParseTextProperty(textValue, value, text);
-        }
+        textResult = ParseText(paramObject, value, changeEventVal, text, textObject);
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
@@ -186,40 +212,42 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetFocusableAndFocusNode();
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("placeholder");
+        if (placeholderResult && placeholderObject) {
+            RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("text");
+        if (textResult && textObject) {
+            RegisterResource<std::u16string>("text", textObject, text);
+        }
+    }
 }
 
 void JSTextField::CreateTextArea(const JSCallbackInfo& info)
 {
     std::optional<std::u16string> placeholderSrc;
     std::optional<std::u16string> value;
+    bool placeholderResult = false;
+    bool textResult = false;
+    std::u16string placeholder;
+    std::u16string text;
+    RefPtr<ResourceObject> placeholderObject;
+    RefPtr<ResourceObject> textObject;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(jsValue);
-        std::u16string placeholder;
-        if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
+        placeholderResult = ParseJsString(paramObject->GetProperty("placeholder"), placeholder, placeholderObject);
+        if (placeholderResult) {
             placeholderSrc = placeholder;
         }
-        std::u16string text;
+
         JSRef<JSVal> textValue = paramObject->GetProperty("text");
-        if (textValue->IsObject()) {
-            JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
-            changeEventVal = valueObj->GetProperty("changeEvent");
-            if (changeEventVal->IsFunction()) {
-                textValue = valueObj->GetProperty("value");
-            }
-            if (ParseJsString(textValue, text)) {
-                value = text;
-            }
-        } else if (paramObject->GetProperty("$text")->IsFunction()) {
-            changeEventVal = paramObject->GetProperty("$text");
-            if (ParseJsString(textValue, text)) {
-                value = text;
-            }
-        } else if (paramObject->HasProperty("text")) {
-            ParseTextProperty(textValue, value, text);
-        }
+        textResult = ParseText(paramObject, value, changeEventVal, text, textObject);
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
@@ -234,6 +262,18 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetFocusableAndFocusNode();
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("placeholder");
+        if (placeholderResult && placeholderObject) {
+            RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("text");
+        if (textResult && textObject) {
+            RegisterResource<std::u16string>("text", textObject, text);
+        }
+    }
 }
 
 void JSTextField::SetType(const JSCallbackInfo& info)
@@ -279,9 +319,14 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     Color color = theme->GetPlaceholderColor();
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("placeholderColor");
+    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor", resourceObject)) {
         TextFieldModel::GetInstance()->ResetPlaceholderColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("placeholderColor", resourceObject, color);
     }
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
@@ -291,15 +336,17 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
     Font font;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = paramObject->GetProperty("size");
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("placeholderFontSize");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
     } else {
         CalcDimension size;
-        auto theme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
         if (fontSize->IsString()) {
             auto result = StringUtils::StringToDimensionWithThemeValue(
                 fontSize->ToString(), true, Dimension(theme->GetFontSize()));
@@ -307,10 +354,13 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
                 result = theme->GetFontSize();
             }
             font.fontSize = result;
-        } else if (ParseJsDimensionFp(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+        } else if (ParseJsDimensionFp(fontSize, size, resourceObject) && size.Unit() != DimensionUnit::PERCENT) {
             font.fontSize = size;
         } else {
             font.fontSize = Dimension(theme->GetFontSize());
+        }
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<CalcDimension>("placeholderFontSize", resourceObject, size);
         }
     }
 
@@ -326,10 +376,15 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     auto fontFamily = paramObject->GetProperty("family");
+    UnregisterResource("placeholderFontFamily");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
-        if (ParseJsFontFamilies(fontFamily, fontFamilies)) {
+        RefPtr<ResourceObject> resourceObject;
+        if (ParseJsFontFamilies(fontFamily, fontFamilies, resourceObject)) {
             font.fontFamilies = fontFamilies;
+            if (SystemProperties::ConfigChangePerform() && resourceObject) {
+                RegisterResource<std::vector<std::string>>("placeholderFontFamily", resourceObject, fontFamilies);
+            }
         }
     }
 
@@ -420,9 +475,14 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
     }
 
     Color color;
-    if (!ParseJsColor(info[0], color)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("caretColor");
+    if (!ParseJsColor(info[0], color, resourceObject)) {
         TextFieldModel::GetInstance()->ResetCaretColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("caretColor", resourceObject, color);
     }
     TextFieldModel::GetInstance()->SetCaretColor(color);
 }
@@ -432,6 +492,8 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnregisterResource("caretWidth");
+    UnregisterResource("caretColor");
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
         CaretStyle caretStyle;
@@ -446,8 +508,12 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
             caretStyle.caretWidth = theme->GetCursorWidth();
         } else {
             CalcDimension width;
-            if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
+            RefPtr<ResourceObject> widthObject;
+            if (!ParseJsDimensionVpNG(caretWidth, width, widthObject, false)) {
                 width = theme->GetCursorWidth();
+            }
+            if (SystemProperties::ConfigChangePerform() && widthObject) {
+                RegisterResource<CalcDimension>("caretWidth", widthObject, width);
             }
             if (LessNotEqual(width.Value(), 0.0)) {
                 width = theme->GetCursorWidth();
@@ -462,9 +528,13 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
             return;
         } else {
             auto caretColorProp = paramObject->GetProperty("color");
+            RefPtr<ResourceObject> colorObject;
             if (caretColorProp->IsUndefined() || caretColorProp->IsNull()
-                || !ParseJsColor(caretColorProp, caretColor)) {
+                || !ParseJsColor(caretColorProp, caretColor, colorObject)) {
                 caretColor = theme->GetCursorColor();
+            }
+            if (SystemProperties::ConfigChangePerform() && colorObject) {
+                RegisterResource<Color>("caretColor", colorObject, caretColor);
             }
             TextFieldModel::GetInstance()->SetCaretColor(caretColor);
         }
@@ -500,17 +570,20 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
 
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("selectedBackgroundColor");
+    if (!ParseJsColor(info[0], selectedColor, resourceObject)) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
     }
-    // Alpha = 255 means opaque
-    if (selectedColor.GetAlpha() == 255) {
-        // Default setting of 20% opacity
-        selectedColor = selectedColor.ChangeOpacity(0.2);
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("selectedBackgroundColor", resourceObject, selectedColor);
+    }
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
     }
     TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
@@ -546,10 +619,15 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension fontSize;
-    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("fontSize");
+    if (!ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP, resourceObject, false)) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetFontSize();
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("fontSize", resourceObject, fontSize);
     }
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
@@ -559,12 +637,17 @@ void JSTextField::SetFontWeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnregisterResource("fontWeight");
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
     if (args->IsNumber()) {
         fontWeight = args->ToString();
     } else {
-        ParseJsString(args, fontWeight);
+        RefPtr<ResourceObject> resourceObject;
+        ParseJsString(args, fontWeight, resourceObject);
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::string>("fontWeight", resourceObject, fontWeight);
+        }
     }
     FontWeight formatFontWeight = ConvertStrToFontWeight(fontWeight);
     TextFieldModel::GetInstance()->SetFontWeight(formatFontWeight);
@@ -573,8 +656,17 @@ void JSTextField::SetFontWeight(const JSCallbackInfo& info)
 void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale = 0.0;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+    if (info.Length() < 1) {
         return;
+    }
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDouble(info[0], minFontScale, resourceObject)) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<float>("minFontScale", resourceObject, minFontScale);
+    } else {
+        UnregisterResource("minFontScale");
     }
     if (LessOrEqual(minFontScale, 0.0f)) {
         TextFieldModel::GetInstance()->SetMinFontScale(0.0f);
@@ -590,8 +682,18 @@ void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
 void JSTextField::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale = 0.0;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+    if (info.Length() < 1) {
         return;
+    }
+
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDouble(info[0], maxFontScale, resourceObject)) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<float>("maxFontScale", resourceObject, maxFontScale);
+    } else {
+        UnregisterResource("maxFontScale");
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         TextFieldModel::GetInstance()->SetMaxFontScale(1.0f);
@@ -606,9 +708,14 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsColor(info[0], textColor, resourceObject)) {
+        UnregisterResource("fontColor");
         TextFieldModel::GetInstance()->ResetTextColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("fontColor", resourceObject, textColor);
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
@@ -641,9 +748,20 @@ void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
     if (ParseJsColorStrategy(jsValue, strategy)) {
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
+        if (SystemProperties::ConfigChangePerform()) {
+            UnregisterResource("foregroundColor");
+        }
         return;
     }
     Color foregroundColor;
+    RefPtr<ResourceObject> resourceObject;
+    auto ret = ParseJsColor(jsValue, foregroundColor, resourceObject);
+    CHECK_NULL_VOID(ret);
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("foregroundColor", resourceObject, foregroundColor);
+    } else {
+        UnregisterResource("foregroundColor");
+    }
     if (!ParseJsColor(jsValue, foregroundColor)) {
         return;
     }
@@ -664,8 +782,14 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
     std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsFontFamilies(info[0], fontFamilies, resourceObject)) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<std::vector<std::string>>("fontFamily", resourceObject, fontFamilies);
+    } else {
+        UnregisterResource("fontFamily");
     }
     TextFieldModel::GetInstance()->SetFontFamily(fontFamilies);
 }
@@ -678,12 +802,21 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
     auto jsValue = info[0];
     std::string inputFilter;
     if (jsValue->IsUndefined()) {
+        UnregisterResource("inputFilter");
         TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
         return;
     }
-    if (!ParseJsString(jsValue, inputFilter)) {
+
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsString(jsValue, inputFilter, resourceObject)) {
         return;
     }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<std::string>("inputFilter", resourceObject, inputFilter);
+    } else {
+        UnregisterResource("inputFilter");
+    }
+
     if (!CheckRegexValid(inputFilter)) {
         inputFilter = "";
     }
@@ -732,9 +865,14 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsColor(info[0], backgroundColor, resourceObject)) {
+        UnregisterResource("backgroundColor");
         TextFieldModel::GetInstance()->ResetBackgroundColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("backgroundColor", resourceObject, backgroundColor);
     }
     TextFieldModel::GetInstance()->SetBackgroundColor(backgroundColor, false);
 }
@@ -763,6 +901,7 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnregisterResource("width");
     auto jsValue = info[0];
     if (jsValue->IsString() && jsValue->ToString().empty()) {
         return;
@@ -776,9 +915,13 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
 
     TextFieldModel::GetInstance()->SetWidthAuto(false);
     CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDimensionVp(jsValue, value, resourceObject)) {
         SetLayoutPolicy(jsValue, true);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("width", resourceObject, value);
     }
     if (LessNotEqual(value.Value(), 0.0)) {
         return;
@@ -812,14 +955,14 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
     CalcDimension length;
     ParseJsDimensionVp(jsValue, length);
     if (length.IsNegative()) {
-        TextFieldModel::GetInstance()->SetPadding(NG::PaddingProperty(), Edge(), true);
+        TextFieldModel::GetInstance()->SetPadding(NG::PaddingProperty(), Edge(), true, false);
         return;
     }
     bool tmp = !jsValue->IsString() && !jsValue->IsNumber() && !jsValue->IsObject();
-
-    NG::PaddingProperty newPadding = GetNewPadding(info);
+    bool hasRegist = false;
+    NG::PaddingProperty newPadding = GetNewPadding(info, hasRegist);
     Edge oldPadding = Edge(GetOldPadding(info));
-    TextFieldModel::GetInstance()->SetPadding(newPadding, oldPadding, tmp);
+    TextFieldModel::GetInstance()->SetPadding(newPadding, oldPadding, tmp, hasRegist);
 }
 
 Edge JSTextField::GetOldPadding(const JSCallbackInfo& info)
@@ -847,7 +990,7 @@ Edge JSTextField::GetOldPadding(const JSCallbackInfo& info)
     return padding;
 }
 
-NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
+NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info, bool& hasRegist)
 {
     NG::PaddingProperty padding;
     auto jsValue = info[0];
@@ -857,16 +1000,21 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
         ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-            padding = SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
-                commonCalcDimension.right);
+            padding = GetEdgePaddingsOrSafeAreaPaddings(commonCalcDimension);
             return padding;
         }
     }
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(jsValue, length)) {
+    RefPtr<ResourceObject> lengthResObj;
+    if (!ParseJsDimensionVp(jsValue, length, lengthResObj)) {
         // use default value.
         length.Reset();
+    }
+    if (SystemProperties::ConfigChangePerform() && lengthResObj) {
+        NG::ViewAbstract::SetPadding(lengthResObj);
+        hasRegist = true;
+        return padding;
     }
     padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
     return padding;
@@ -937,7 +1085,7 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
 
     auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
     if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius);
+        JSViewAbstract::ParseBorderRadius(valueRadius);
     }
     // use default value when undefined.
     JSViewAbstract::ParseBorderStyle(object->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE)));
@@ -1286,6 +1434,52 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowUnderline(jsValue->ToBoolean());
 }
 
+void JSTextField::SetUnderlineColorObject(const JSRef<JSObject>& param)
+{
+    UnregisterResource("underlineColorTyping");
+    UnregisterResource("underlineColorNormal");
+    UnregisterResource("underlineColorError");
+    UnregisterResource("underlineColorDisable");
+    UserUnderlineColor userColor = UserUnderlineColor();
+    auto typingColorProp = param->GetProperty("typing");
+    Color typing;
+    RefPtr<ResourceObject> typingObject;
+    if (ParseJsColor(typingColorProp, typing, typingObject)) {
+        userColor.typing = typing;
+        if (SystemProperties::ConfigChangePerform() && typingObject) {
+            RegisterResource<Color>("underlineColorTyping", typingObject, typing);
+        }
+    }
+    auto normalColorProp = param->GetProperty("normal");
+    Color normal;
+    RefPtr<ResourceObject> normalObject;
+    if (ParseJsColor(normalColorProp, normal, normalObject)) {
+        userColor.normal = normal;
+        if (SystemProperties::ConfigChangePerform() && normalObject) {
+            RegisterResource<Color>("underlineColorNormal", normalObject, normal);
+        }
+    }
+    auto errorColorProp = param->GetProperty("error");
+    Color error;
+    RefPtr<ResourceObject> errorObject;
+    if (ParseJsColor(errorColorProp, error, errorObject)) {
+        userColor.error = error;
+        if (SystemProperties::ConfigChangePerform() && errorObject) {
+            RegisterResource<Color>("underlineColorError", errorObject, error);
+        }
+    }
+    auto disableColorProp = param->GetProperty("disable");
+    Color disable;
+    RefPtr<ResourceObject> disableObject;
+    if (ParseJsColor(disableColorProp, disable, disableObject)) {
+        userColor.disable = disable;
+        if (SystemProperties::ConfigChangePerform() && disableObject) {
+            RegisterResource<Color>("underlineColorDisable", disableObject, disable);
+        }
+    }
+    TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+}
+
 void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1293,34 +1487,76 @@ void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
     }
     auto jsValue = info[0];
     Color underlineColor;
-    if (ParseJsColor(jsValue, underlineColor)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (ParseJsColor(jsValue, underlineColor, resourceObject)) {
         TextFieldModel::GetInstance()->SetNormalUnderlineColor(underlineColor);
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("underlineColorNormal", resourceObject, underlineColor);
+        } else {
+            UnregisterResource("underlineColorNormal");
+        }
     } else if (jsValue->IsObject()) {
-        auto param = JSRef<JSObject>::Cast(jsValue);
-        UserUnderlineColor userColor = UserUnderlineColor();
-        auto typingColorProp = param->GetProperty("typing");
-        Color typing;
-        if (ParseJsColor(typingColorProp, typing)) {
-            userColor.typing = typing;
-        }
-        auto normalColorProp = param->GetProperty("normal");
-        Color normal;
-        if (ParseJsColor(normalColorProp, normal)) {
-            userColor.normal = normal;
-        }
-        auto errorColorProp = param->GetProperty("error");
-        Color error;
-        if (ParseJsColor(errorColorProp, error)) {
-            userColor.error = error;
-        }
-        auto disableColorProp = param->GetProperty("disable");
-        Color disable;
-        if (ParseJsColor(disableColorProp, disable)) {
-            userColor.disable = disable;
-        }
-        TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+        SetUnderlineColorObject(JSRef<JSObject>::Cast(jsValue));
     } else {
         TextFieldModel::GetInstance()->SetUserUnderlineColor(UserUnderlineColor());
+        if (SystemProperties::ConfigChangePerform()) {
+            UnregisterResource("underlineColorTyping");
+            UnregisterResource("underlineColorNormal");
+            UnregisterResource("underlineColorError");
+            UnregisterResource("underlineColorDisable");
+        }
+    }
+}
+
+void JSTextField::ParseOnIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon)
+{
+    UnregisterResource("onIconSrc");
+    if (showVal->IsString()) {
+        passwordIcon.showResult = showVal->ToString();
+    }
+    if (showVal->IsObject()) {
+        JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(showVal)->GetProperty("bundleName");
+        JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(showVal)->GetProperty("moduleName");
+        if (bundleName->IsString()) {
+            passwordIcon.showBundleName = bundleName->ToString();
+        }
+        if (moduleName->IsString()) {
+            passwordIcon.showModuleName = moduleName->ToString();
+        }
+        RefPtr<ResourceObject> resourceObject;
+        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordIcon.showResult, resourceObject);
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::string>("onIconSrc", resourceObject, passwordIcon.showResult);
+        }
+    }
+    if (!showVal->IsString() && !showVal->IsObject()) {
+        passwordIcon.showResult = "";
+    }
+}
+
+void JSTextField::ParseOffIconSrc(const JSRef<JSVal>& hideVal, PasswordIcon& passwordIcon)
+{
+    UnregisterResource("offIconSrc");
+    if (hideVal->IsString()) {
+        passwordIcon.hideResult = hideVal->ToString();
+    }
+    if (hideVal->IsObject()) {
+        JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("bundleName");
+        JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("moduleName");
+        if (bundleName->IsString()) {
+            passwordIcon.hideBundleName = bundleName->ToString();
+        }
+        if (moduleName->IsString()) {
+            passwordIcon.hideModuleName = moduleName->ToString();
+        }
+        RefPtr<ResourceObject> resourceObject;
+        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordIcon.hideResult);
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::string>("offIconSrc", resourceObject, passwordIcon.hideResult);
+        }
+    }
+    if (!hideVal->IsString() && !hideVal->IsObject()) {
+        passwordIcon.hideResult = "";
     }
 }
 
@@ -1337,40 +1573,8 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     JSRef<JSVal> showVal = jsObj->GetProperty("onIconSrc");
     JSRef<JSVal> hideVal = jsObj->GetProperty("offIconSrc");
     PasswordIcon passwordIcon;
-    if (showVal->IsString()) {
-        passwordIcon.showResult = showVal->ToString();
-    }
-    if (hideVal->IsString()) {
-        passwordIcon.hideResult = hideVal->ToString();
-    }
-    if (showVal->IsObject()) {
-        JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(showVal)->GetProperty("bundleName");
-        JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(showVal)->GetProperty("moduleName");
-        if (bundleName->IsString()) {
-            passwordIcon.showBundleName = bundleName->ToString();
-        }
-        if (moduleName->IsString()) {
-            passwordIcon.showModuleName = moduleName->ToString();
-        }
-        ParseJsMedia(JSRef<JSObject>::Cast(showVal), passwordIcon.showResult);
-    }
-    if (hideVal->IsObject()) {
-        JSRef<JSVal> bundleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("bundleName");
-        JSRef<JSVal> moduleName = JSRef<JSObject>::Cast(hideVal)->GetProperty("moduleName");
-        if (bundleName->IsString()) {
-            passwordIcon.hideBundleName = bundleName->ToString();
-        }
-        if (moduleName->IsString()) {
-            passwordIcon.hideModuleName = moduleName->ToString();
-        }
-        ParseJsMedia(JSRef<JSObject>::Cast(hideVal), passwordIcon.hideResult);
-    }
-    if (!showVal->IsString() && !showVal->IsObject()) {
-        passwordIcon.showResult = "";
-    }
-    if (!hideVal->IsString() && !hideVal->IsObject()) {
-        passwordIcon.hideResult = "";
-    }
+    ParseOnIconSrc(showVal, passwordIcon);
+    ParseOffIconSrc(hideVal, passwordIcon);
     TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
 }
 
@@ -1430,6 +1634,16 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         bool isVisible = false;
         std::u16string errorText;
+        RefPtr<ResourceObject> resourceObject;
+        auto ret = ParseJsString(jsValue, errorText, resourceObject);
+        if (ret) {
+            isVisible = true;
+            if (SystemProperties::ConfigChangePerform() && resourceObject) {
+                RegisterResource<std::u16string>("errorString", resourceObject, errorText);
+            } else {
+                UnregisterResource("errorString");
+            }
+        }
         if (ParseJsString(jsValue, errorText)) {
             isVisible = true;
         }
@@ -1622,6 +1836,7 @@ static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
 
 void JSTextField::SetCancelButton(const JSCallbackInfo& info)
 {
+    UnregisterResource("cancelButtonIconColorDefault");
     if (info.Length() < 1 || !info[0]->IsObject()) {
         ResetCancelIcon();
         return;
@@ -1659,12 +1874,18 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
-    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("cancelButtonIconSize");
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() &&
+        ParseJsDimensionVpNG(iconSizeProp, iconSize, resourceObject)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetCancelIconSize();
         }
     } else {
         iconSize = theme->GetCancelIconSize();
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("cancelButtonIconSize", resourceObject, iconSize);
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     SetCancelIconColorAndIconSrc(iconParam);
@@ -1714,16 +1935,29 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     std::string bundleName;
     std::string moduleName;
     auto iconSrcProp = iconParam->GetProperty("src");
-    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() ||
+        !ParseJsMedia(iconSrcProp, iconSrc, resourceObject)) {
+        UnregisterResource("cancelButtonIconSrc");
         iconSrc = "";
     }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<std::string>("cancelButtonIconSrc", resourceObject, iconSrc);
+    }
+
     GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
     TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, bundleName, moduleName);
     TextFieldModel::GetInstance()->SetCancelButtonSymbol(false);
     // set icon color
     Color iconColor;
+    RefPtr<ResourceObject> colorObject;
+    UnregisterResource("cancelButtonIconColor");
     auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
+        ParseJsColor(iconColorProp, iconColor, colorObject)) {
+        if (SystemProperties::ConfigChangePerform() && colorObject) {
+            RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
+        }
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
         return;
     }
@@ -1731,6 +1965,10 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     if (info.IsSvg() && iconSrc != "") {
         // svg need not default color, otherwise multi color svg will render fault
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        RegisterResource<Color>("cancelButtonIconColorDefault", resObj, iconColor);
     }
     if (Container::CurrentColorMode() == ColorMode::DARK) {
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
@@ -1771,41 +2009,44 @@ void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
 
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
-    do {
-        auto tmpInfo = info[0];
-        if (!tmpInfo->IsObject()) {
-            TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
-            TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
-            TextFieldModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
-            break;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
-        JSRef<JSVal> typeValue = obj->GetProperty("type");
-        JSRef<JSVal> colorValue = obj->GetProperty("color");
-        JSRef<JSVal> styleValue = obj->GetProperty("style");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsObject()) {
+        TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+        TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+        TextFieldModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+    JSRef<JSVal> typeValue = obj->GetProperty("type");
+    JSRef<JSVal> colorValue = obj->GetProperty("color");
+    JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextDecoration();
-        if (typeValue->IsNumber()) {
-            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
-        }
-        Color result = theme->GetTextStyle().GetTextDecorationColor();
-        ParseJsColor(colorValue, result, Color::BLACK);
-        std::optional<TextDecorationStyle> textDecorationStyle;
-        if (styleValue->IsNumber()) {
-            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-        } else {
-            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
-        }
-        TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
-        TextFieldModel::GetInstance()->SetTextDecorationColor(result);
-        if (textDecorationStyle) {
-            TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-        }
-    } while (false);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    TextDecoration textDecoration = theme->GetTextDecoration();
+    if (typeValue->IsNumber()) {
+        textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    }
+    Color result = theme->GetTextStyle().GetTextDecorationColor();
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("decorationColor");
+    ParseJsColor(colorValue, result, Color::BLACK, resourceObject);
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>("decorationColor", resourceObject, result);
+    }
+    std::optional<TextDecorationStyle> textDecorationStyle;
+    if (styleValue->IsNumber()) {
+        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
+    }
+    TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
+    TextFieldModel::GetInstance()->SetTextDecorationColor(result);
+    if (textDecorationStyle) {
+        TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
 }
 
 void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
@@ -1814,9 +2055,14 @@ void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
         return;
     }
     CalcDimension minFontSize;
-    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("minFontSize");
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, resourceObject, false)) {
         TextFieldModel::GetInstance()->SetAdaptMinFontSize(CalcDimension());
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("minFontSize", resourceObject, minFontSize);
     }
     if (minFontSize.IsNegative()) {
         minFontSize = CalcDimension();
@@ -1834,10 +2080,15 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
     auto theme = pipelineContext->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
-    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("maxFontSize");
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, resourceObject, false)) {
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
         TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("maxFontSize", resourceObject, maxFontSize);
     }
     if (maxFontSize.IsNegative()) {
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
@@ -1856,10 +2107,15 @@ void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDimensionFpNG(info[0], value, resourceObject, false)) {
         value.Reset();
         TextFieldModel::GetInstance()->SetLetterSpacing(value);
+        UnregisterResource("letterSpacing");
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("letterSpacing", resourceObject, value);
     }
     TextFieldModel::GetInstance()->SetLetterSpacing(value);
 }
@@ -1867,10 +2123,15 @@ void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFpNG(info[0], value)) {
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("lineHeight");
+    if (!ParseJsDimensionFpNG(info[0], value, resourceObject)) {
         value.Reset();
         TextFieldModel::GetInstance()->SetLineHeight(value);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("lineHeight", resourceObject, value);
     }
     if (value.IsNegative()) {
         value.Reset();
@@ -1955,8 +2216,13 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 void JSTextField::SetTextIndent(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionVpNG(info[0], value, true)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDimensionVpNG(info[0], value, resourceObject, true)) {
         value.Reset();
+        UnregisterResource("textIndent");
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("textIndent", resourceObject, value);
     }
     TextFieldModel::GetInstance()->SetTextIndent(value);
 }
@@ -2245,5 +2511,14 @@ void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     }
     NG::KeyboardAppearanceConfig config = ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
     NG::TextFieldModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+}
+
+void JSTextField::UnregisterResource(const std::string& key)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 } // namespace OHOS::Ace::Framework

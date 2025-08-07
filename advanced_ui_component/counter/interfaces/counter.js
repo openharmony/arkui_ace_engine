@@ -359,8 +359,8 @@ export class CounterComponent extends ViewPU {
     this.controller2 = new TextInputController();
     this.controller3 = new TextInputController();
     this.initFlag = true;
-    this.increaseStr = getContext().resourceManager.getStringSync(125834852);
-    this.reduceStr = getContext().resourceManager.getStringSync(125834853);
+    this.increaseStrCache = undefined;
+    this.reduceStrCache = undefined;
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.finalizeConstruction();
@@ -546,11 +546,11 @@ export class CounterComponent extends ViewPU {
     if (params.initFlag !== undefined) {
       this.initFlag = params.initFlag;
     }
-    if (params.increaseStr !== undefined) {
-      this.increaseStr = params.increaseStr;
+    if (params.increaseStrCache !== undefined) {
+      this.increaseStrCache = params.increaseStrCache;
     }
-    if (params.reduceStr !== undefined) {
-      this.reduceStr = params.reduceStr;
+    if (params.reduceStrCache !== undefined) {
+      this.reduceStrCache = params.reduceStrCache;
     }
   }
   updateStateVars(params) {
@@ -1842,6 +1842,18 @@ export class CounterComponent extends ViewPU {
       return this.counterDirection;
     }
   }
+  getIncreaseStr() {
+    if (this.increaseStrCache === undefined) {
+      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    }
+    return this.increaseStrCache;
+  }
+  getReduceStr() {
+    if (this.reduceStrCache === undefined) {
+      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    }
+    return this.reduceStrCache;
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -1914,7 +1926,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityDescription(this.value === this.min ? '' : this.getReduceStr());
             Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2099,7 +2111,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr());
             Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2253,7 +2265,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityDescription(this.value === this.min ? '' : this.getReduceStr());
             Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2436,7 +2448,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr());
             Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2950,7 +2962,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr());
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Button.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
@@ -3068,7 +3080,7 @@ export class CounterComponent extends ViewPU {
               bundleName: '__harDefaultBundleName__',
               moduleName: '__harDefaultModuleName__',
             });
-            Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityDescription(this.value === this.min ? '' : this.getReduceStr());
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Button.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);

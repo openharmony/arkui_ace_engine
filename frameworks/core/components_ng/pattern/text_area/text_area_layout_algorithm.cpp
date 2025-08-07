@@ -43,6 +43,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    isInlineFocus_ = isInlineStyle && pattern->HasFocus();
     if (!isInlineStyle && textFieldLayoutProperty->HasNormalMaxViewLines()) {
         UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
     }
@@ -70,7 +71,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
-    UpdateAutoWidth(textFieldLayoutProperty, layoutWrapper);
+    autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
 
     if (textContent_.empty()) {
         // Used for empty text.
@@ -86,11 +87,64 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         contentSize = InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
         contentSize = PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
+        if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
+            paragraph_->GetLineCount() > 1 && isPlaceHolderOverSize_ &&
+            pattern->IsTextArea() && !pattern->IsNormalInlineState()) {
+                contentSize = ReMeasureContentForPlaceholder(textFieldContentConstraint, layoutWrapper,
+                    textStyle, textFieldContentConstraint);
+            }
     } else {
         contentSize = TextAreaMeasureContent(textFieldContentConstraint, layoutWrapper);
     }
     CalcMeasureContentWithMinLines(contentSize, layoutWrapper, contentConstraint);
     return contentSize;
+}
+
+std::optional<SizeF> TextAreaLayoutAlgorithm::ReMeasureContentForPlaceholder(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+    TextStyle& textStyle, LayoutConstraintF& textFieldContentConstraint)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto lineCount = paragraph_->GetLineCount() != 0 ? paragraph_->GetLineCount() : 1;
+
+    float height = 0.0f;
+    if (isFontSizeNonPositive_) {
+        height = paragraph_->GetHeight();
+    } else {
+        height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0) ? paragraph_->GetHeight()
+                                                                  : std::max(preferredHeight_, paragraph_->GetHeight());
+    }
+    auto paragraphHeight = height / lineCount;
+    auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
+    auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
+
+    auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
+    // new height consider counter
+    contentHeight = std::max(std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height), 0.0f);
+
+    auto targetLines = 1.0f;
+    if (!NearEqual(paragraphHeight, 0.0f)) {
+        targetLines = std::max(targetLines, contentHeight / paragraphHeight);
+    }
+
+    textStyle.SetMaxLines(static_cast<uint32_t>(targetLines)); // replace with new maxlines for ellipsis
+
+    if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint)) {
+        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
+            layoutWrapper)) {
+            return std::nullopt;
+        }
+        pattern->SetAdaptFontSize(textStyle.GetFontSize());
+    } else {
+        CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
+    }
+
+    return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
 }
 
 void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -125,7 +179,6 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.SetWidth(finalWidth);
         ConstraintHeight(layoutWrapper, frameSize, contentHeight);
     }
-    UpdateFrameSizeWithLayoutPolicy(layoutWrapper, frameSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 

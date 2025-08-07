@@ -21,9 +21,6 @@
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
-const std::string NAME = "name";
-const std::string MESSAGE = "message";
-const std::string STACK = "stack";
 static void KillApplicationByUid()
 {
     auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();

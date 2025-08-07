@@ -37,6 +37,7 @@ public:
     virtual void StrokeWidth(const Dimension& value) = 0;
     virtual void LineCap(const LineCap& value) = 0;
     virtual void ResetDividerColor() {};
+    virtual void ResetResObj(const std::string& key) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODEL_H

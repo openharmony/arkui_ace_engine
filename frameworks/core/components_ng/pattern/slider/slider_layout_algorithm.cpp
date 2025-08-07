@@ -42,6 +42,7 @@ RefPtr<SliderTheme> GetTheme()
 SizeF SliderLayoutAlgorithm::CalculateHotSize(
     LayoutWrapper* layoutWrapper, const SizeF& blockSize, float themeBlockHotSize)
 {
+    CHECK_NULL_RETURN(layoutWrapper, SizeF());
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, SizeF());
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -84,6 +85,15 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
 
     float width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     float height = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            width = contentConstraint.parentIdealSize.Width().value();
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            height = contentConstraint.parentIdealSize.Height().value();
+        }
+    }
     Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     if (direction == Axis::HORIZONTAL && GreaterOrEqualToInfinity(width)) {
         width = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
@@ -113,6 +123,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     }
     blockSize_ = sliderLayoutProperty->GetBlockSizeValue(SizeF(blockDiameter, blockDiameter));
     blockHotSize_ = CalculateHotSize(layoutWrapper, blockSize_, static_cast<float>(themeBlockHotSize.ConvertToPx()));
+    pattern->UpdateSliderParams(trackThickness_, blockSize_, blockHotSize_);
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     auto sliderWidth = CalculateSliderWidth(width, height, direction, hotBlockShadowWidth, mode);
     float sliderLength =
@@ -154,6 +165,7 @@ float SliderLayoutAlgorithm::CalculateSliderWidth(
 void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness,
     Dimension& themeBlockSize, Dimension& hotBlockShadowWidth, Dimension& themeBlockHotSize)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -183,8 +195,11 @@ void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dim
 
 void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutProperty);
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -209,7 +224,6 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(prefixChild);
             SetChildConstraint(prefixChild, maxWidth, maxHeight);
         }
-
         if (pattern->HasSuffix()) {
             auto suffixChild = layoutWrapper->GetOrCreateChildByIndex(0);
             if (pattern->HasPrefix()) {
@@ -371,4 +385,13 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     child->Layout();
 }
 
+std::optional<NG::LayoutPolicyProperty> SliderLayoutAlgorithm::GetLayoutPolicy(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, NG::LayoutPolicyProperty());
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, NG::LayoutPolicyProperty());
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicy, NG::LayoutPolicyProperty());
+    return layoutPolicy;
+}
 } // namespace OHOS::Ace::NG

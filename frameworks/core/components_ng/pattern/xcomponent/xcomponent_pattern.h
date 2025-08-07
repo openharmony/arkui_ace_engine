@@ -66,6 +66,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
@@ -117,7 +122,6 @@ public:
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
-        hasGotNativeXComponent_ = true;
         return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
     }
 
@@ -144,8 +148,7 @@ public:
         if (id_.has_value()) {
             return id_.value();
         }
-        auto host = GetHost();
-        return "nodeId:" + (host ? std::to_string(host->GetId()) : "-1");
+        return "nodeId_" + nodeId_;
     }
 
     void SetId(const std::string& id)
@@ -306,6 +309,11 @@ public:
         return isNativeXComponentDisabled_;
     }
 
+    void SetHasGotNativeXComponent(bool hasGotNativeXComponent)
+    {
+        hasGotNativeXComponent_ = hasGotNativeXComponent;
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
@@ -376,8 +384,10 @@ protected:
     void AdjustNativeWindowSize(float width, float height);
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void RegisterTransformHintCallback(PipelineContext* context);
 
     std::optional<std::string> id_;
+    std::string nodeId_ = "-1";
     XComponentType type_;
     bool hasGotSurfaceHolder_ = false;
     bool hasGotNativeXComponent_ = false;
@@ -409,7 +419,7 @@ protected:
 
 private:
     void OnAreaChangedInner() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -465,9 +475,18 @@ private:
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
-    void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
     void UnregisterSurfaceRenderContext();
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
+    void RegisterNode();
+    void UnregisterNode();
+
+    void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
+    void InitControllerMultiThread();
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

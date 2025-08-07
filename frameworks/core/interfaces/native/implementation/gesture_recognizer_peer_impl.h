@@ -16,20 +16,53 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_GESTURE_RECOGNIZER_PEER_IMPL_H
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
+
+const int32_t DEFAULT_FINGERS = 1;
+const bool DEFAULT_LIMIT = false;
 
 struct GestureRecognizerPeer {
-    using GestureRecognizerPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>;
-
-    GestureRecognizerPtr GetRecognizer() const
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer> GetRecognizer()
     {
         return recognizer_;
     }
-
-    void SetRecognizer(const GestureRecognizerPtr& recognizer)
+    void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>& recognizer)
     {
         recognizer_ = recognizer;
     }
+    int32_t GetFingers()
+    {
+        return fingers_;
+    }
+    bool IsFingerCountLimit()
+    {
+        return isLimitFingerCount;
+    }
+
+protected:
+    GestureRecognizerPeer() = default;
+    virtual ~GestureRecognizerPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
+
+    bool isLimitFingerCount = DEFAULT_LIMIT;
+    int32_t fingers_ = DEFAULT_FINGERS;
+
 private:
-    GestureRecognizerPtr recognizer_;
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer> recognizer_;
 };
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_GESTURE_RECOGNIZER_PEER_IMPL_H
+
+struct MultiFingerRecognizerPeer : public GestureRecognizerPeer {
+    void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::MultiFingersRecognizer>& recognizer)
+    {
+        GestureRecognizerPeer::Update(recognizer);
+        isLimitFingerCount = recognizer->GetLimitFingerCount();
+        fingers_ = recognizer->GetFingers();
+    }
+
+protected:
+    MultiFingerRecognizerPeer() = default;
+    ~MultiFingerRecognizerPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
+};
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_GESTURE_RECOGNIZER_PEER_IMPL_H

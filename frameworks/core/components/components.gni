@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("build_component") {
@@ -134,7 +133,7 @@ template("build_component") {
           }
         }
       }
-      if (use_new_skia) {
+      if (ace_engine_feature_enable_upgrade_skia) {
         defines += [ "USE_NEW_SKIA" ]
       }
       part_name = ace_engine_part

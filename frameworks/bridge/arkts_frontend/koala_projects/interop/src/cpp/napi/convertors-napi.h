@@ -66,7 +66,6 @@ napi_value makeUInt64(napi_env env, uint64_t value);
 napi_value makeFloat32(napi_env env, float value);
 napi_value makePointer(napi_env env, void* value);
 napi_value makeVoid(napi_env env);
-// napi_value makeObject(napi_env env, napi_value object);
 
 void* getPointer(napi_env env, napi_value value);
 void* getSerializerBufferPointer(napi_env env, napi_value value);
@@ -269,7 +268,6 @@ public:
   }
 private:
   napi_env _env;
-  // napi_callback_info _info;
   std::vector<napi_value> args;
 };
 
@@ -440,12 +438,6 @@ inline KBoolean getBoolean(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, false);
   return getBoolean(info.Env(), info[index]);
 }
-// TODO should we keep supporting conversion to and from raw JS object values?
-// napi_value getObject(napi_env env, napi_value value);
-// inline napi_value getObject(const CallbackInfo& info, int index) {
-//   NAPI_ASSERT_INDEX(info, index, info.Env().Global());
-//   return getObject(info.Env(), info[index]);
-// }
 
 template <typename Type>
 inline Type getArgument(const CallbackInfo& info, int index) = delete;
@@ -555,11 +547,6 @@ template <>
 inline KNativePointerArray getArgument<KNativePointerArray>(const CallbackInfo& info, int index) {
   return getPointerElements(info, index);
 }
-
-// template <>
-// inline napi_value getArgument<napi_value>(const CallbackInfo& info, int index) {
-//   return getObject(info, index);
-// }
 
 template <>
 inline uint8_t* getArgument<uint8_t*>(const CallbackInfo& info, int index) {

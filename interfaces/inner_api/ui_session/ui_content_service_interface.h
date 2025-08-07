@@ -16,9 +16,15 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #include <iremote_broker.h>
-#include <pixel_map.h>
-#include "base/utils/macros.h"
 
+#include "ui/base/macros.h"
+
+namespace OHOS {
+namespace Media {
+class PixelMap;
+class ImageSource;
+} // namespace Media
+} // namespace OHOS
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
@@ -53,6 +59,7 @@ public:
         SENDCOMMAND_EVENT,
         GET_VISIBLE_TREE,
         SEND_COMMAND,
+        EXE_APP_AI_FUNCTION,
     };
 
     /**
@@ -221,6 +228,13 @@ public:
      * AI to judge if connect
      */
     virtual bool IsConnect() = 0;
+
+    /**
+     * @description: execute application AI function
+     * @return: result number
+     */
+    virtual int32_t ExeAppAIFunction(const std::string& funcName, const std::string& params,
+        const std::function<void(uint32_t)>& finishCallback) = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -240,6 +254,7 @@ public:
         SEND_TEXT,
         SEND_IMAGES,
         SEND_CURRENT_PAGE_NAME,
+        SEND_EXE_APP_AI_FUNCTION_RESULT,
     };
 
     /**
@@ -296,6 +311,11 @@ public:
      * @description: define ui send page name for sa service
      */
     virtual void SendCurrentPageName(const std::string& data) = 0;
+
+    /**
+     * @description: define ui send execute application AI function result for sa service
+     */
+    virtual void SendExeAppAIFunctionResult(uint32_t result) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

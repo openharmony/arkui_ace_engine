@@ -16,8 +16,10 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
 {
     JSRef<JSVal> isHoverParam = JSRef<JSVal>::Make(ToJSValue(isHover));
@@ -45,6 +47,11 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = hoverInfo.GetGlobalDisplayLocation();
+    hoverObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    hoverObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     hoverObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     hoverObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
     hoverObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
@@ -77,9 +84,16 @@ void JsHoverFunction::HoverMoveExecute(HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
     hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
     hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
+    hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
+    hoverObj->SetProperty<int32_t>("pressure", 0.0f);
     const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = hoverInfo.GetGlobalDisplayLocation();
+    hoverObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    hoverObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     hoverObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     hoverObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
     hoverObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
@@ -116,6 +130,11 @@ void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHover
     const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = hoverInfo.GetGlobalDisplayLocation();
+    hoverObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    hoverObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     hoverObj->SetProperty<int32_t>("type", static_cast<int32_t>(hoverInfo.GetActionType()));
     hoverObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     hoverObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));

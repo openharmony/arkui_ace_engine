@@ -25,6 +25,10 @@ export struct BindPopupBootcamp {
   @State handlePopup: boolean = false;
   @State enableCompPopupType: boolean = true;
   @State compPopupType: number = 0;
+  @State compPopupAvoidTargetMessage: string = (() => {
+    const baseText = 'This is a popup with AvoidanceMode.AVOID_AROUND_TARGET. ';
+    return Array(40).fill(baseText).join('');
+  })();
   @State enableCompBindPopupArrowOffset: boolean = false;
   @State compBindPopupArrowOffset: number = 0;
   @State enableCompBindPopupShowInSubWindow: boolean = false;
@@ -47,6 +51,8 @@ export struct BindPopupBootcamp {
   @State compBindPopupTargetSpace: number = 0;
   @State enableCompBindPopupPlacement: boolean = false;
   @State compBindPopupPlacement: Placement = Placement.Bottom;
+  @State enableCompBindPopupAvoidTarget: boolean = false;
+  @State compBindPopupAvoidTarget: AvoidanceMode = AvoidanceMode.COVER_TARGET;
   @State enableCompBindPopupOffsetX: boolean = false;
   @State compBindPopupOffsetX: number = 0;
   @State enableCompBindPopupOffsetY: boolean = false;
@@ -185,7 +191,8 @@ export struct BindPopupBootcamp {
           console.info('Button click');
         })
         .bindPopup(this.handlePopup, {
-          message: this.compPopupType == 0 ? 'This is a popup with button ' : 'This is a popup only Text ',
+          message: this.compPopupType == 0 ? 'This is a popup with button ' : useEnabled(
+            this.enableCompBindPopupAvoidTarget, this.compPopupAvoidTargetMessage, 'This is a popup only Text '),
           arrowOffset: useEnabled(this.enableCompBindPopupArrowOffset, this.compBindPopupArrowOffset) ?
           useEnabled(this.enableCompBindPopupArrowOffset, this.compBindPopupArrowOffset) : null,
           showInSubWindow: useEnabled(this.enableCompBindPopupShowInSubWindow, this.compBindPopupShowInSubWindow),
@@ -205,9 +212,8 @@ export struct BindPopupBootcamp {
             }
           },
           targetSpace: useEnabled(this.enableCompBindPopupTargetSpace, this.compBindPopupTargetSpace),
-          placement:
-          useEnabled(this.enableCompBindPopupPlacement, this.compBindPopupPlacement) ?
-          useEnabled(this.enableCompBindPopupPlacement, this.compBindPopupPlacement) : Placement.Top,
+          placement: useEnabled(this.enableCompBindPopupPlacement, this.compBindPopupPlacement, Placement.Top),
+          avoidTarget: useEnabled(this.enableCompBindPopupAvoidTarget, this.compBindPopupAvoidTarget),
           offset: {
             x: useEnabled(this.enableCompBindPopupOffsetX, this.compBindPopupOffsetX),
             y: useEnabled(this.enableCompBindPopupOffsetY, this.compBindPopupOffsetY),
@@ -455,6 +461,18 @@ export struct BindPopupBootcamp {
             { label: 'BottomRight', value: Placement.BottomRight },
             { label: 'RightTop', value: Placement.RightTop },
             { label: 'RightBottom', value: Placement.RightBottom },
+            { label: 'LeftTop', value: Placement.LeftTop },
+            { label: 'LeftBottom', value: Placement.LeftBottom },
+          ]
+        })
+
+        RadioBlock({
+          title: 'popupOptions.avoidTarget',
+          isEnabled: $enableCompBindPopupAvoidTarget,
+          value: $compBindPopupAvoidTarget,
+          dataSource: [
+            { label: 'COVER_TARGET', value: AvoidanceMode.COVER_TARGET },
+            { label: 'AVOID_AROUND_TARGET', value: AvoidanceMode.AVOID_AROUND_TARGET },
           ]
         })
 

@@ -31,6 +31,7 @@ void LongPressRecognizer::OnAccepted()
         LongPressInfo info(trackPoint.id);
         info.SetTimeStamp(time_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
+        info.SetGlobalDisplayLocation(trackPoint.GetGlobalDisplayOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onLongPress_(info);
@@ -244,6 +245,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         info.SetDeviceId(deviceId_);
         info.SetGlobalPoint(globalPoint_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
+        info.SetGlobalDisplayLocation(trackPoint.GetGlobalDisplayOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(trackPoint.force);

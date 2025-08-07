@@ -22,7 +22,7 @@ namespace OHOS::Ace::Framework {
 class JSEffectComponent : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void Create();
+    static void Create(const JSCallbackInfo& info);
     static void AlwaysSnapshot(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework

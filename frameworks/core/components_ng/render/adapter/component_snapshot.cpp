@@ -64,6 +64,9 @@ public:
         }
     }
 
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
+
 private:
     ComponentSnapshot::JsCallback callback_;
     WeakPtr<FrameNode> node_;
@@ -78,6 +81,9 @@ public:
         CHECK_NULL_VOID(callback_);
         callback_(pixelMap);
     }
+
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 
 private:
     ComponentSnapshot::NormalCallback callback_;
@@ -102,6 +108,9 @@ public:
         std::unique_lock<std::mutex> lock(mutex_);
         cv_.notify_all();
     }
+
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetPixelMap(std::chrono::duration<int, std::milli> timeout)
     {
@@ -171,7 +180,8 @@ bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& opti
     if (layoutDirection == TextDirection::AUTO || layoutDirection == TextDirection::INHERIT) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
-    bool isRegionMirror = NG::SnapshotRegionMode::LOCALIZED && layoutDirection == TextDirection::RTL;
+    bool isRegionMirror = options.regionMode == NG::SnapshotRegionMode::LOCALIZED &&
+        layoutDirection == TextDirection::RTL;
 
     specifiedAreaRect = Rosen::Drawing::Rect(
         isRegionMirror ? nodeWidth - snapshotRegion.end : snapshotRegion.start,
@@ -186,7 +196,7 @@ void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
-            imageIds += (std::to_string(imageNode->GetId()) + ", ");
+            imageIds += (std::to_string(imageNode->GetId()) + ", " + imageNode->GetInspectorId().value_or("") + ";");
             auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
             imagePattern->SetIsComponentSnapshotNode(true);
             imagePattern->OnVisibleAreaChange(true);
@@ -428,6 +438,7 @@ void ComponentSnapshot::Create(
     if (flag) {
         executor->PostTask(
             [node]() {
+                TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Flush UI tasks with flag");
                 auto pipeline = node->GetContext();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->FlushUITasks();
@@ -463,7 +474,8 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param)
 {
     int32_t imageCount = 0;
-    if (param.checkImageStatus && !CheckImageSuccessfullyLoad(node, imageCount)) {
+    auto checkResult = CheckImageSuccessfullyLoad(node, imageCount);
+    if (param.checkImageStatus && !checkResult) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=%{public}d rootNode=%{public}s",
             node->GetId(), node->GetTag().c_str());
@@ -472,6 +484,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         return;
     }
     if (param.options.waitUntilRenderFinished) {
+        TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Flush UI tasks with waitUntilRenderFinished");
         pipeline->FlushUITasks();
         pipeline->FlushModifier();
         pipeline->FlushMessages();
@@ -480,9 +493,9 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to take surfaceCapture for ui, rootId=" SEC_PLD(%{public}d) " depth=%{public}d param=%{public}s "
-        "imageCount=%{public}d size=%{public}s",
+        "imageCount=%{public}d size=%{public}s, regionMode=%{public}d",
         SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), imageCount,
-        node->GetGeometryNode()->GetFrameSize().ToString().c_str());
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str(), param.options.regionMode);
     if (param.options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         rsInterface.TakeSurfaceCaptureForUI(
             rsNode,
@@ -642,6 +655,38 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
     return captureResult;
 }
 
+void ComponentSnapshot::SetRSUIContext(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetAttachedContext()) {
+        return;
+    }
+    auto children = frameNode->GetChildren();
+    for (const auto& child : children) {
+        CHECK_NULL_VOID(child);
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto context = AceType::DynamicCast<RosenRenderContext>(childFrameNode->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto rsNode = context->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetRSUIContext(rsUIContext);
+        SetRSUIContext(childFrameNode, rsUIContext);
+    }
+}
+
+std::shared_ptr<Rosen::RSUIContext> ComponentSnapshot::GetRSUIContext(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
+}
+
 // Note: do not use this method, it's only called in drag procedure process.
 std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     const RefPtr<AceType>& customNode, const SnapshotParam& param)
@@ -664,6 +709,8 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
+    auto rsUIContext = GetRSUIContext(pipeline);
+    SetRSUIContext(node, rsUIContext);
     ACE_SCOPED_TRACE("ComponentSnapshot::CreateSync_Tag=%s_Id=%d_Key=%s", node->GetTag().c_str(), node->GetId(),
         node->GetInspectorId().value_or("").c_str());
     std::string imageIds = "";
@@ -700,7 +747,22 @@ RefPtr<FrameNode> ComponentSnapshot::GetRangeIDNode(const NodeIdentity& ID)
     if (!ID.first.empty()) {
         return Inspector::GetFrameNodeByKey(ID.first);
     }
-    return AceType::DynamicCast<FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(ID.second));
+
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(ID.second);
+    if (!node) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Node with id %{public}d not found", ID.second);
+        return nullptr;
+    }
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (!frameNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Node with id %{public}d is not a FrameNode (actual type: %{public}s)",
+            ID.second, AceType::TypeName(node));
+        return nullptr;
+    }
+
+    return frameNode;
 }
 
 std::string ComponentSnapshot::GetRangeIDStr(const NodeIdentity& ID)
@@ -714,11 +776,17 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
     CHECK_RUN_ON(UI);
     auto startNode = GetRangeIDNode(startID);
     auto endNode = GetRangeIDNode(endID);
-    if (!startNode || !endNode) {
+    if (!startNode) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't find a component that startId or endId are " SEC_PLD(%{public}s) " and " SEC_PLD(%{public}s)
-            ", please check your parameters are correct",
-            SEC_PARAM(GetRangeIDStr(startID).c_str()), SEC_PARAM(GetRangeIDStr(endID).c_str()));
+            "Node not found that startld is " SEC_PLD(%{public}s),
+            SEC_PARAM(GetRangeIDStr(startID).c_str()));
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+    if (!endNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Node not found that endld is " SEC_PLD(%{public}s),
+            SEC_PARAM(GetRangeIDStr(endID).c_str()));
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
@@ -739,7 +807,7 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
         options.scale, options.scale, options.waitUntilRenderFinished);
     if (!isSystem) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "No system permissions to take screenshot, please grant the permission to take screenshot");
+            "No system permissions to take screenshot");
         callback(nullptr, ERROR_CODE_PERMISSION_DENIED, nullptr);
     }
 }

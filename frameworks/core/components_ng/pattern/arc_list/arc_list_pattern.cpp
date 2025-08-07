@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -44,7 +45,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float ARC_LIST_FRICTION = 0.8f;
-constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
 constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
 constexpr float ARC_LIST_DRAG_OVER_KVALUE = 0.84f;
@@ -98,6 +98,11 @@ void ArcListPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    auto fadingEdge = GetFadingEdge(paintProperty);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && fadingEdge) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ArcListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -300,6 +305,9 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
     int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_RETURN(listLayoutProperty, false);
+    if (!listLayoutProperty->GetContentLayoutConstraint().has_value()) {
+        return false;
+    }
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     float stopOnScreen = GetMainAxisSize(contentConstraint.maxSize, Axis::VERTICAL) / FLOAT_TWO;
     float predictStop = stopOnScreen + deltaPos;

@@ -1215,7 +1215,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager001, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
 
     navigationPattern->RemoveFromDumpManager();
     EXPECT_EQ(mgr->dumpMap_.size(), 0);
@@ -1241,7 +1241,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager002, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
     navigationPattern->frameNode_ = nullptr;
 
     navigationPattern->RemoveFromDumpManager();
@@ -1268,7 +1268,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager003, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
     MockPipelineContext::pipeline_ = nullptr;
 
     navigationPattern->RemoveFromDumpManager();
@@ -1296,7 +1296,7 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager004, TestSize.Level1
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
     auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(navigationNode, callback);
     context->navigationMgr_ = nullptr;
 
     navigationPattern->RemoveFromDumpManager();

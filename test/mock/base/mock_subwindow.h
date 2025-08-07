@@ -28,7 +28,7 @@ public:
     MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
     MOCK_METHOD0(ResizeWindowForMenu, void());
-    MOCK_METHOD1(SetFollowParentWindowLayoutEnabled, void(bool enable));
+    MOCK_METHOD1(SetFollowParentWindowLayoutEnabled, bool(bool enable));
     MOCK_METHOD0(GetRect, NG::RectF());
     MOCK_METHOD0(UpdatePreviewPosition, void());
     MOCK_METHOD1(GetMenuPreviewCenter, bool(NG::OffsetF& offset));
@@ -133,6 +133,16 @@ public:
     MOCK_METHOD1(RemoveFollowParentWindowLayoutNode, void(int32_t nodeId));
     MOCK_METHOD1(SetNodeId, void(int32_t nodeId));
     MOCK_CONST_METHOD0(GetNodeId, int32_t());
+    MOCK_METHOD3(SetWindowAnchorInfo, void(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId));
+#if defined(ACE_STATIC)
+    MOCK_METHOD2(ShowToastStatic, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(CloseToastStatic, void(int32_t toastId, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(ShowDialogStatic, void(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback));
+    MOCK_METHOD2(ShowActionMenuStatic, void(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback));
+    MOCK_METHOD2(OpenCustomDialogStatic, void(DialogProperties &dialogProps, std::function<void(int32_t)> &&callback));
+#endif
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

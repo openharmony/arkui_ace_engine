@@ -37,6 +37,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     std::replace(textContent_.begin(), textContent_.end(), u'\n', u' ');
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    isInlineFocus_ = isInlineStyle && pattern->HasFocus();
 
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
@@ -56,7 +57,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
-    UpdateAutoWidth(textFieldLayoutProperty, layoutWrapper);
+    autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
     isFontSizeNonPositive_ = IsFontSizeNonPositive(textStyle);
 
     if (textContent_.empty()) {
@@ -137,9 +138,9 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.SetHeight(finalSize.Height());
         frameSize.Constrain(frameSizeConstraint.minSize, frameSizeConstraint.maxSize);
     }
-    UpdateFrameSizeWithLayoutPolicy(layoutWrapper, frameSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     MeasureAutoFillIcon(layoutWrapper);
+    MeasureCounterWithPolicy(layoutWrapper, responseAreaWidth + pattern->GetHorizontalPaddingAndBorderSum());
 }
 
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -291,7 +292,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto fontSize =
         textStyle.GetFontSize().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
-    auto autofillController = pattern->GetAutoFillController();
+    auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_RETURN(autofillController, false);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
     if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
@@ -348,7 +349,7 @@ void TextInputLayoutAlgorithm::MeasureAutoFillIcon(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldlayoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(textFieldlayoutProperty);
-    auto autofillController = textFieldPattern->GetAutoFillController();
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto weakAutoFillIcon = autofillController->GetAutoFillIconNode();
     auto autoFillIcon =  weakAutoFillIcon.Upgrade();
@@ -390,7 +391,7 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
     auto textFieldSize = textFieldGeometryNode->GetFrameSize();
     auto textFieldFrameWidth = textFieldSize.Width();
     auto textFieldFrameHeight = textFieldSize.Height();
-    auto autofillController = textFieldPattern->GetAutoFillController();
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto weakAutoFillIcon = autofillController->GetAutoFillIconNode();
     auto autoFillIcon =  weakAutoFillIcon.Upgrade();
@@ -422,5 +423,16 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
     OffsetF iconOffset(iconHorizontalOffset, iconVerticalOffset);
     iconGeometryNode->SetMarginFrameOffset(iconOffset);
     childWrapper->Layout();
+}
+
+void TextInputLayoutAlgorithm::MeasureCounterWithPolicy(LayoutWrapper* layoutWrapper, float nonContentWidth)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthLayoutPolicy != LayoutCalPolicy::NO_MATCH) {
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        auto counterWidth = frameSize.Width() - nonContentWidth;
+        CounterNodeMeasure(counterWidth, layoutWrapper);
+    }
 }
 } // namespace OHOS::Ace::NG

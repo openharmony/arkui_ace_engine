@@ -208,12 +208,20 @@ class ACE_FORCE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:
+#if defined(ACE_STATIC)
+    /**
+     * @description: only for 1.2
+     * @param opts initialize options
+     * @return refptr pixelmap
+     */
+    static RefPtr<PixelMap> Create(const std::shared_ptr<Media::PixelMap>& pixmap);
+#endif
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> Create(const InitializationOptions& opts);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
     static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
     static RefPtr<PixelMap> DecodeTlv(std::vector<uint8_t>& buff);
-    
+
     /**
      * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
      */
@@ -250,7 +258,7 @@ public:
     virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
     virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
     virtual uint32_t WritePixels(const WritePixelsOptions& opts) = 0;
-    virtual bool GetIsWideColorGamut() const = 0;
+    virtual uint32_t GetInnerColorGamut() const = 0;
     virtual void SetMemoryName(std::string pixelMapName) const = 0;
 };
 

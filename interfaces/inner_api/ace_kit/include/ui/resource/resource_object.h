@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "ui/base/ace_type.h"
+#include "ui/properties/color.h"
 
 namespace OHOS::Ace {
 enum class ResourceObjectParamType { NONE, INT, STRING, FLOAT };
@@ -60,6 +61,11 @@ public:
         return instanceId_;
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
     std::vector<ResourceObjectParams> GetParams() const
     {
         return params_;
@@ -75,13 +81,68 @@ public:
         return moduleName_;
     }
 
+    const Color& GetColor() const
+    {
+        return color_;
+    }
+
+    void SetColor(const Color& color)
+    {
+        color_ = color;
+    }
+
+    void SetNodeTag(const std::string& nodeTag)
+    {
+        nodeTag_ = nodeTag;
+    }
+
+    const std::string& GetNodeTag() const
+    {
+        return nodeTag_;
+    }
+
+    bool IsResource() const
+    {
+        return isResource_;
+    }
+
+    void SetIsResource(bool isResource)
+    {
+        isResource_ = isResource;
+    }
+
+    void SetColorMode(ColorMode colorMode)
+    {
+        colorMode_ = colorMode;
+    }
+
+    const ColorMode& GetColorMode() const
+    {
+        return colorMode_;
+    }
+
+    void SetHasDarkRes(bool hasDarkRes)
+    {
+        hasDarkRes_ = hasDarkRes;
+    }
+
+    bool HasDarkResource() const
+    {
+        return hasDarkRes_;
+    }
+
 private:
     int32_t id_;
     int32_t type_;
     int32_t instanceId_;
+    Color color_;
     std::vector<ResourceObjectParams> params_;
     std::string bundleName_;
     std::string moduleName_;
+    std::string nodeTag_;
+    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    bool isResource_ = true;
+    bool hasDarkRes_ = false;
 };
 } // namespace OHOS::Ace
 

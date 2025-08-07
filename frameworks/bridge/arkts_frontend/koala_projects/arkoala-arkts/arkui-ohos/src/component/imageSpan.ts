@@ -17,26 +17,181 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
+import { ImageSpanAlignment, ImageFit } from "./enums"
+import { ColorFilter, ResourceStr } from "./units"
+import { DrawingColorFilter } from "./arkui-drawing"
+import { ImageErrorCallback, ImageError } from "./image"
+import { PixelMap } from "./arkui-pixelmap"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ResourceStr, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, ColorFilter } from "./units"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { BaseSpan, TextBackgroundStyle } from "./span"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageSpanAlignment, ImageFit } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions, DrawingColorFilter, ImageErrorCallback } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { ArkImageSpanComponent } from "./../generated/ArkImageSpan"
-import { ArkImageSpanPeer } from "./../generated/peers/ArkImageSpanPeer"
+
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+export class ArkImageSpanPeer extends ArkBaseSpanPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkImageSpanPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._ImageSpan_construct(peerId, flags)
+        const _peer  = new ArkImageSpanPeer(_peerPtr, peerId, "ImageSpan", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setImageSpanOptionsAttribute(value: ResourceStr | PixelMap): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type)) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_0  = value as ResourceStr
+            let value_0_type : int32 = RuntimeType.UNDEFINED
+            value_0_type = runtimeType(value_0)
+            if (RuntimeType.STRING == value_0_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_0_0  = value_0 as string
+                thisSerializer.writeString(value_0_0)
+            }
+            else if (RuntimeType.OBJECT == value_0_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_0_1  = value_0 as Resource
+                thisSerializer.writeResource(value_0_1)
+            }
+        }
+        else if (TypeChecker.isPixelMap(value, false, false)) {
+            thisSerializer.writeInt8(1 as int32)
+            const value_1  = value as PixelMap
+            thisSerializer.writePixelMap(value_1)
+        }
+        ArkUIGeneratedNativeModule._ImageSpanInterface_setImageSpanOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    verticalAlignAttribute(value: ImageSpanAlignment | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as ImageSpanAlignment)
+            thisSerializer.writeInt32(TypeChecker.ImageSpanAlignment_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_verticalAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    colorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColorFilter(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ColorFilter
+                thisSerializer.writeColorFilter(value_value_0)
+            }
+            else if (TypeChecker.isDrawingColorFilter(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as DrawingColorFilter
+                thisSerializer.writeDrawingColorFilter(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_colorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    objectFitAttribute(value: ImageFit | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as ImageFit)
+            thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_objectFit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onCompleteAttribute(value: ImageCompleteCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_onComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onErrorAttribute(value: ImageErrorCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    altAttribute(value: PixelMap | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writePixelMap(value_value)
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_alt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export type ImageSpanInterface = (value: ResourceStr | PixelMap) => ImageSpanAttribute;
+export interface ImageSpanAttribute extends BaseSpan {
+    verticalAlign(value: ImageSpanAlignment | undefined): this
+    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this
+    objectFit(value: ImageFit | undefined): this
+    onComplete(value: ImageCompleteCallback | undefined): this
+    onError(value: ImageErrorCallback | undefined): this
+    alt(value: PixelMap | undefined): this
+}
+export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
+    verticalAlign_value?: ImageSpanAlignment | undefined
+    colorFilter_value?: ColorFilter | DrawingColorFilter | undefined
+    objectFit_value?: ImageFit | undefined
+    onComplete_value?: ImageCompleteCallback | undefined
+    onError_value?: ImageErrorCallback | undefined
+    alt_value?: PixelMap | undefined
+    public verticalAlign(value: ImageSpanAlignment | undefined): this {
+        return this
+    }
+    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+        return this
+    }
+    public objectFit(value: ImageFit | undefined): this {
+        return this
+    }
+    public onComplete(value: ImageCompleteCallback | undefined): this {
+        return this
+    }
+    public onError(value: ImageErrorCallback | undefined): this {
+        return this
+    }
+    public alt(value: PixelMap | undefined): this {
+        return this
+        }
+}
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
 export interface ImageLoadResult {
     width: number;
@@ -49,31 +204,80 @@ export interface ImageLoadResult {
     contentOffsetX: number;
     contentOffsetY: number;
 }
-/** @memo:stable */
-export interface ImageSpanAttribute extends BaseSpan {
-    /** @memo */
-    setImageSpanOptions(value: ResourceStr | PixelMap): this
-    /** @memo */
-    verticalAlign(value: ImageSpanAlignment): this
-    /** @memo */
-    colorFilter(value: ColorFilter | DrawingColorFilter): this
-    /** @memo */
-    objectFit(value: ImageFit): this
-    /** @memo */
-    onComplete(value: ImageCompleteCallback): this
-    /** @memo */
-    onError(value: ImageErrorCallback): this
-    /** @memo */
-    alt(value: PixelMap): this
+export class ArkImageSpanComponent extends ArkBaseSpanComponent implements ImageSpanAttribute {
+    getPeer(): ArkImageSpanPeer {
+        return (this.peer as ArkImageSpanPeer)
+    }
+    public setImageSpanOptions(value: ResourceStr | PixelMap): this {
+        if (this.checkPriority("setImageSpanOptions")) {
+            const value_casted = value as (ResourceStr | PixelMap)
+            this.getPeer()?.setImageSpanOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public verticalAlign(value: ImageSpanAlignment | undefined): this {
+        if (this.checkPriority("verticalAlign")) {
+            const value_casted = value as (ImageSpanAlignment | undefined)
+            this.getPeer()?.verticalAlignAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+        if (this.checkPriority("colorFilter")) {
+            const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
+            this.getPeer()?.colorFilterAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public objectFit(value: ImageFit | undefined): this {
+        if (this.checkPriority("objectFit")) {
+            const value_casted = value as (ImageFit | undefined)
+            this.getPeer()?.objectFitAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onComplete(value: ImageCompleteCallback | undefined): this {
+        if (this.checkPriority("onComplete")) {
+            const value_casted = value as (ImageCompleteCallback | undefined)
+            this.getPeer()?.onCompleteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onError(value: ImageErrorCallback | undefined): this {
+        if (this.checkPriority("onError")) {
+            const value_casted = value as (ImageErrorCallback | undefined)
+            this.getPeer()?.onErrorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public alt(value: PixelMap | undefined): this {
+        if (this.checkPriority("alt")) {
+            const value_casted = value as (PixelMap | undefined)
+            this.getPeer()?.altAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function ImageSpan(
-  /** @memo */
-  style: ((attributes: ImageSpanAttribute) => void) | undefined,
-  value: ResourceStr | PixelMap, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: ImageSpanAttribute) => void) | undefined,
+    value: ResourceStr | PixelMap,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkImageSpanComponent()
     })

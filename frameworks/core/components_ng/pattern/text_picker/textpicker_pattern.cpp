@@ -50,8 +50,10 @@ const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
-const int32_t UNOPTION_COUNT = 2;
+const int32_t INVISIBLE_OPTIONS_COUNT = 2;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr uint32_t PRECISION_TWO = 2;
+constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -82,6 +84,10 @@ void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return false;
+    }
+
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     if (GetIsShowInDialog()) {
@@ -124,7 +130,7 @@ void TextPickerPattern::UpdateButtonMargin(
     buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
-void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext)
 {
     CHECK_NULL_VOID(buttonNode);
     auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
@@ -132,7 +138,7 @@ void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonN
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    auto pipeline = updateNode->GetContextRefPtr();
+    auto pipeline = updateNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -879,7 +885,7 @@ RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
     return DynamicCast<FrameNode>(columnNode);
 }
 
-std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes()
+std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes() const
 {
     std::map<uint32_t, RefPtr<FrameNode>> allChildNode;
     auto host = GetHost();
@@ -913,6 +919,7 @@ void TextPickerPattern::OnColumnsBuildingCascade()
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->HandleAccessibilityTextChange();
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -941,6 +948,7 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->HandleAccessibilityTextChange();
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -961,6 +969,7 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->HandleAccessibilityTextChange();
             textPickerColumnPattern->SetOptions(options_);
             textPickerColumnPattern->SetColumnKind(columnsKind_);
             it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1379,10 +1388,12 @@ void TextPickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
                 SupplementOption(reOptions, rangeContents, patterIndex);
                 textPickerColumnPattern->SetCurrentIndex(currentSelectedIndex);
                 textPickerColumnPattern->SetOptions(rangeContents);
+                textPickerColumnPattern->HandleAccessibilityTextChange();
                 textPickerColumnPattern->FlushCurrentOptions();
             } else {
                 textPickerColumnPattern->ClearOptions();
                 textPickerColumnPattern->SetCurrentIndex(0);
+                textPickerColumnPattern->HandleAccessibilityTextChange();
                 textPickerColumnPattern->FlushCurrentOptions(false, false, true);
             }
         }
@@ -1426,7 +1437,7 @@ bool TextPickerPattern::ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textP
             break;
 
         case KeyCode::KEY_MOVE_END:
-            textPickerColumnPattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+            textPickerColumnPattern->SetCurrentIndex(totalOptionCount - INVISIBLE_OPTIONS_COUNT);
             if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
                 textPickerColumnPattern->HandleScrollStopEventCallback(true);
             }
@@ -1561,9 +1572,7 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         }
     }
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
-    if (!columnWidths_.empty()) {
-        json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
-    }
+    json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
 }
 
 std::string TextPickerPattern::GetRangeStr() const
@@ -1642,12 +1651,18 @@ std::string TextPickerPattern::GetOptionsMultiStr() const
 
 std::string TextPickerPattern::GetColumnWidthsStr() const
 {
-    std::string result = "";
-    for (const auto& item : columnWidths_) {
-        result += item.ToString();
-        result += ",";
+    std::ostringstream oss;
+    auto allChildNode = GetColumnNodes();
+    for (const auto& child : allChildNode) {
+        const auto& columnNode = child.second;
+        CHECK_NULL_RETURN(columnNode, "");
+        auto columnWidth = columnNode->GetGeometryNode()->GetFrameSize().Width();
+        oss << std::fixed << std::setprecision(PRECISION_TWO) << columnWidth << "px,";
     }
-    result.pop_back();
+    std::string result = oss.str();
+    if (!result.empty()) {
+        result.pop_back();
+    }
     return result;
 }
 
@@ -1664,18 +1679,27 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(
-        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    pickerProperty->UpdateSelectedColor(
-        GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
-    if (pickerProperty && pickerProperty->GetDisableTextStyleAnimation().value_or(false)) {
+    if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetSelectedTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    }
+
+    if (pickerProperty->GetDisableTextStyleAnimation().value_or(false) &&
+        !pickerProperty->GetDefaultTextColorSetByUser().value_or(false)) {
         auto textTheme = context->GetTheme<TextTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(textTheme);
-        auto defaultTextStyle = textTheme->GetTextStyle();
         pickerProperty->UpdateDefaultColor(
-            GetTextProperties().defaultTextStyle_.textColor.value_or(defaultTextStyle.GetTextColor()));
+            GetTextProperties().defaultTextStyle_.textColor.value_or(textTheme->GetTextStyle().GetTextColor()));
     }
     if (isPicker_) {
         return;
@@ -1791,28 +1815,33 @@ int32_t TextPickerPattern::CalculateIndex(RefPtr<FrameNode>& frameNode)
 float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize)
 {
     float widthSum = 0.0f;
-    for (size_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
-        columnWidths_[i] = columnWidths_[i].Unit() != DimensionUnit::PERCENT ?
-            Dimension(columnWidths_[i].ConvertToPx(), DimensionUnit::PX) :
-            Dimension(pickerContentSize.Width() * columnWidths_[i].Value() / MAX_PERCENT, DimensionUnit::PX);
+    if (columnWidths_.empty()) {
+        return pickerContentSize.Width() / std::max(childCount, 1.0f);
+    }
+    auto columnWidth = columnWidths_;
+    for (size_t i = 0; i < std::min(columnWidth.size(), static_cast<size_t>(childCount)); i++) {
+        columnWidth[i] = columnWidth[i].Unit() != DimensionUnit::PERCENT ?
+            Dimension(columnWidth[i].ConvertToPx(), DimensionUnit::PX) :
+            Dimension(pickerContentSize.Width() * columnWidth[i].Value() / MAX_PERCENT, DimensionUnit::PX);
 
-        if (LessNotEqual(columnWidths_[i].Value(), 0.0f) && !NearZero(childCount)) {
-            columnWidths_[i].SetValue(pickerContentSize.Width() / childCount);
+        if (LessNotEqual(columnWidth[i].Value(), 0.0f) && !NearZero(childCount)) {
+            columnWidth[i].SetValue(pickerContentSize.Width() / childCount);
         }
 
-        widthSum += columnWidths_[i].Value();
+        widthSum += columnWidth[i].Value();
     }
 
     if (GreatNotEqual(widthSum, pickerContentSize.Width())) {
         return pickerContentSize.Width() / std::max(childCount, 1.0f);
     }
 
-    if (static_cast<size_t>(index) >= columnWidths_.size()) {
-        columnWidths_.emplace_back(Dimension((pickerContentSize.Width() - widthSum) /
-            (childCount - columnWidths_.size()), DimensionUnit::PX));
+    if (static_cast<size_t>(index) < columnWidth.size()) {
+        return columnWidth[index].Value();
+    } else if (!NearZero(childCount - columnWidth.size())) {
+        return (pickerContentSize.Width() - widthSum) / (childCount - columnWidth.size());
+    } else {
+        return 0.0f;
     }
-    return columnWidths_.size() == 0 ?
-        pickerContentSize.Width() / std::max(childCount, 1.0f) : columnWidths_[index].Value();
 }
 
 void TextPickerPattern::SetCanLoop(bool isLoop)
@@ -1940,7 +1969,9 @@ void TextPickerPattern::UpdateTextStyleCommon(
     const TextStyle& defaultTextStyle,
     std::function<void(const Color&)> updateTextColorFunc,
     std::function<void(const Dimension&)> updateFontSizeFunc,
-    std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc
+    std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc,
+    std::function<void(const Dimension&)> updateMinFontSizeFunc,
+    std::function<void(const Dimension&)> updateMaxFontSizeFunc
 )
 {
     auto host = GetHost();
@@ -1961,6 +1992,18 @@ void TextPickerPattern::UpdateTextStyleCommon(
         updateFontSizeFunc(ConvertFontScaleValue(fontSize));
 
         updateFontFamilyFunc(textStyle.fontFamily.value_or(defaultTextStyle.GetFontFamilies()));
+
+        Dimension minFontSize = Dimension();
+        if (textStyle.minFontSize.has_value() && textStyle.minFontSize->IsValid()) {
+            minFontSize = ConvertFontScaleValue(textStyle.minFontSize.value());
+        }
+        updateMinFontSizeFunc(minFontSize);
+
+        Dimension maxFontSize = Dimension();
+        if (textStyle.maxFontSize.has_value() && textStyle.maxFontSize->IsValid()) {
+            maxFontSize = ConvertFontScaleValue(textStyle.maxFontSize.value());
+        }
+        updateMaxFontSizeFunc(maxFontSize);
     }
 
     if (host->GetRerenderable()) {
@@ -1979,12 +2022,19 @@ void TextPickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDisappearColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
         [&](const Color& color) { pickerProperty->UpdateDisappearColor(color); },
         [&](const Dimension& fontSize) { pickerProperty->UpdateDisappearFontSize(fontSize); },
-        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDisappearFontFamily(fontFamily); }
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDisappearFontFamily(fontFamily); },
+        [&](const Dimension& minFontSize) { pickerProperty->UpdateDisappearMinFontSize(minFontSize); },
+        [&](const Dimension& maxFontSize) { pickerProperty->UpdateDisappearMaxFontSize(maxFontSize); }
     );
 }
 
@@ -1999,12 +2049,19 @@ void TextPickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
         [&](const Color& color) { pickerProperty->UpdateColor(color); },
         [&](const Dimension& fontSize) { pickerProperty->UpdateFontSize(fontSize); },
-        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateFontFamily(fontFamily); }
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateFontFamily(fontFamily); },
+        [&](const Dimension& minFontSize) { pickerProperty->UpdateMinFontSize(minFontSize); },
+        [&](const Dimension& maxFontSize) { pickerProperty->UpdateMaxFontSize(maxFontSize); }
     );
 }
 
@@ -2019,12 +2076,19 @@ void TextPickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetSelectedColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
         [&](const Color& color) { pickerProperty->UpdateSelectedColor(color); },
         [&](const Dimension& fontSize) { pickerProperty->UpdateSelectedFontSize(fontSize); },
-        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); },
+        [&](const Dimension& minFontSize) { pickerProperty->UpdateSelectedMinFontSize(minFontSize); },
+        [&](const Dimension& maxFontSize) { pickerProperty->UpdateSelectedMaxFontSize(maxFontSize); }
     );
 }
 
@@ -2040,33 +2104,19 @@ void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
+    if (pickerProperty->GetDefaultColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDefaultColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
         [&](const Color& color) { pickerProperty->UpdateDefaultColor(color); },
         [&](const Dimension& fontSize) { pickerProperty->UpdateDefaultFontSize(fontSize); },
-        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDefaultFontFamily(fontFamily); }
+        [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateDefaultFontFamily(fontFamily); },
+        [&](const Dimension& minFontSize) { pickerProperty->UpdateDefaultMinFontSize(minFontSize); },
+        [&](const Dimension& maxFontSize) { pickerProperty->UpdateDefaultMaxFontSize(maxFontSize); }
     );
-
-    if (pipelineContext->IsSystmColorChange()) {
-        if (textStyle.minFontSize.has_value() && textStyle.minFontSize->IsValid()) {
-            Dimension minFontSize = textStyle.minFontSize.value();
-            pickerProperty->UpdateDefaultMinFontSize(ConvertFontScaleValue(minFontSize));
-        } else {
-            pickerProperty->UpdateDefaultMinFontSize(Dimension());
-        }
-
-        if (textStyle.maxFontSize.has_value() && textStyle.maxFontSize->IsValid()) {
-            Dimension maxFontSize = textStyle.maxFontSize.value();
-            pickerProperty->UpdateDefaultMaxFontSize(ConvertFontScaleValue(maxFontSize));
-        } else {
-            pickerProperty->UpdateDefaultMaxFontSize(Dimension());
-        }
-    }
-
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
 }
 
 void TextPickerPattern::ParseRangeResult(NG::TextCascadePickerOptions& option)
@@ -2134,6 +2184,19 @@ void TextPickerPattern::GetAndUpdateRealSelectedArr(const std::vector<NG::TextCa
     SetSelecteds(selectedArr);
     pickerProperty->UpdateSelecteds(selectedArr);
     pickerProperty->UpdateSelectedIndex(selectedArr);
+}
+
+void TextPickerPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
 }
 
 } // namespace OHOS::Ace::NG

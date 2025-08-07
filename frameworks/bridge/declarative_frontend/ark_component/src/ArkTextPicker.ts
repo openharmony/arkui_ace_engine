@@ -256,18 +256,24 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
-        this.value?.font?.style ?? undefined);
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
     if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
       return true;
     } else {
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
     }
   }
 }
@@ -285,18 +291,24 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
-        this.value?.font?.style ?? undefined);
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
     if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
       return true;
     } else {
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
     }
   }
 }
@@ -314,18 +326,24 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
-        this.value?.font?.style ?? undefined);
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
     if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
       return true;
     } else {
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
     }
   }
 }
@@ -373,7 +391,10 @@ class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey<PickerBa
       const { color, borderRadius } = this.value;
       if (borderRadius != null) {
         const borderRadiusKeys = Object.keys(borderRadius);
-        let topLeft, topRight, bottomLeft, bottomRight;
+        let topLeft;
+        let topRight;
+        let bottomLeft;
+        let bottomRight;
         if (borderRadiusKeys.indexOf('value') >= 0) {
           topLeft = topRight = bottomLeft = bottomRight = borderRadius;
         } else if (borderRadiusKeys.indexOf('topLeft') >= 0) {
@@ -389,36 +410,41 @@ class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey<PickerBa
         }
         getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, topLeft, topRight, bottomLeft,
           bottomRight);
+      } else {
+        getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, undefined, undefined,
+          undefined, undefined);
       }
     }
   }
   checkObjectDiff(): boolean {
     if (!(this.stageValue.color === this.value.color)) {
       return true;
-    } else if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
-      return !(
-        (this.stageValue.borderRadius as LengthMetrics).value === (this.value.borderRadius as LengthMetrics).value &&
-        (this.stageValue.borderRadius as LengthMetrics).unit === (this.value.borderRadius as LengthMetrics).unit);
-    } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
-      return !(
-        (this.stageValue.borderRadius as BorderRadiuses).topLeft ===
-        (this.value.borderRadius as BorderRadiuses).topLeft &&
-        (this.stageValue.borderRadius as BorderRadiuses).topRight ===
-        (this.value.borderRadius as BorderRadiuses).topRight &&
-        (this.stageValue.borderRadius as BorderRadiuses).bottomLeft ===
-        (this.value.borderRadius as BorderRadiuses).bottomLeft &&
-        (this.stageValue.borderRadius as BorderRadiuses).bottomRight ===
-        (this.value.borderRadius as BorderRadiuses).bottomRight);
-    } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
-      return !(
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).topStart ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).topStart &&
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).topEnd ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).topEnd &&
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomStart ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).bottomStart &&
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomEnd ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).bottomEnd);
+    } else if (this.stageValue.borderRadius != null && this.value.borderRadius != null) {
+      if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
+        return !(
+          (this.stageValue.borderRadius as LengthMetrics).value === (this.value.borderRadius as LengthMetrics).value &&
+          (this.stageValue.borderRadius as LengthMetrics).unit === (this.value.borderRadius as LengthMetrics).unit);
+      } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
+        return !(
+          (this.stageValue.borderRadius as BorderRadiuses).topLeft ===
+          (this.value.borderRadius as BorderRadiuses).topLeft &&
+          (this.stageValue.borderRadius as BorderRadiuses).topRight ===
+          (this.value.borderRadius as BorderRadiuses).topRight &&
+          (this.stageValue.borderRadius as BorderRadiuses).bottomLeft ===
+          (this.value.borderRadius as BorderRadiuses).bottomLeft &&
+          (this.stageValue.borderRadius as BorderRadiuses).bottomRight ===
+          (this.value.borderRadius as BorderRadiuses).bottomRight);
+      } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
+        return !(
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).topStart ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).topStart &&
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).topEnd ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).topEnd &&
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomStart ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).bottomStart &&
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomEnd ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).bottomEnd);
+      }
     }
     return true;
   }

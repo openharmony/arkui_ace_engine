@@ -282,7 +282,7 @@ private:
     std::vector<RichEditorAbstractSpanResult> replacedSymbolSpans_;
     TextRange rangeBefore_;
     TextRange rangeAfter_;
-    TextChangeReason changeReason_;
+    TextChangeReason changeReason_ = TextChangeReason::UNKNOWN;
 };
 
 class StyledStringChangeValue : public BaseEventInfo {

@@ -433,6 +433,7 @@ void ArcListLayoutAlgorithm::MeasureHeader(LayoutWrapper* layoutWrapper)
     }
 
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto headerLayoutConstraint = layoutProperty->CreateChildConstraint();
     headerLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
 

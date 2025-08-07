@@ -123,6 +123,7 @@ public:
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func);
+    virtual void SetUserMargin() {};
 
 private:
     static std::unique_ptr<SearchModel> instance_;

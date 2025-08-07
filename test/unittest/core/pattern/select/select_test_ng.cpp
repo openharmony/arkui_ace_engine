@@ -22,11 +22,15 @@
 #define protected public
 #define private public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/resource/resource_info.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -39,8 +43,10 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -89,6 +95,8 @@ RefPtr<Theme> GetTheme(ThemeType type)
         return AceType::MakeRefPtr<IconTheme>();
     } else if (type == SelectTheme::TypeId()) {
         return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == ScrollBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<ScrollBarTheme>();
     } else {
         return nullptr;
     }
@@ -519,6 +527,313 @@ HWTEST_F(SelectTestNg, ShowSelectMenuTest001, TestSize.Level1)
     auto offset = pattern->GetHost()->GetPaintRectOffset();
     EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
 }
+
+/**
+ * @tc.name: ShowSelectMenuTest004
+ * @tc.desc: Test SelectPattern ShowSelectMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    MockContainer::SetUp();
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    AceEngine::Get().AddContainer(Container::CurrentId(), container);
+
+    /**
+     * @tc.steps: step2. Configure the Select component to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+
+    /**
+     * @tc.steps: step3. Configure the Select component not to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, false);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), false);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    AceEngine::Get().RemoveContainer(Container::CurrentId());
+}
+
+/**
+ * @tc.name: ShowSelectMenuTest005
+ * @tc.desc: Test SelectPattern ShowSelectMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    MockContainer::SetUp();
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    AceEngine::Get().AddContainer(Container::CurrentId(), container);
+
+    /**
+     * @tc.steps: step2. Configure the Select component not to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = false;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), false);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+
+
+    /**
+     * @tc.steps: step3. Configure the Select component not to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, false);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), false);
+    selectTheme->expandDisplay_ = false;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), false);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    AceEngine::Get().RemoveContainer(Container::CurrentId());
+}
+
+/**
+ * @tc.name: ShowSelectMenuInSubWindow001
+ * @tc.desc: Test SelectPattern ShowSelectMenu when configured for sub-window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuInSubWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Configure the Select component to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+
+    /**
+     * @tc.steps: step4. Call ShowSelectMenu function.
+     * @tc.expected: The function executes, and the menu is configured for sub-window display.
+     */
+    pattern->ShowSelectMenu();
+
+    /**
+     * @tc.steps: step5. Verify menu properties related to sub-window display.
+     */
+
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+}
+
+/**
+ * @tc.name: RegisterOnClickTest001
+ * @tc.desc: Verify bindMenu gesture event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, RegisterOnClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Get pattern and set value.
+     * @tc.expected: Function RegisterOnClick is called.
+     */
+    pattern->selected_ = 2;
+    pattern->isSelected_ = false;
+    pattern->RegisterOnClick();
+
+    /**
+     * @tc.steps: step4. bindMenuGesture with optionParams.
+     * @tc.expected: check the menu event is not nullptr.
+     */
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_NE(gestureHub->showMenu_, nullptr);
+    EXPECT_NE(gestureHub->bindMenuTouch_, nullptr);
+}
+
+/**
+ * @tc.name: ResumeMenuShowTest001
+ * @tc.desc: Test SelectPattern ResumeMenuShow for regular sub-window display.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResumeMenuShowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    pattern->selected_ = 2;
+    pattern->isSelected_ = false;
+    pattern->RegisterOnClick();
+
+    /**
+     * @tc.steps: step3. Configure the Select component to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+    auto targetId = select->GetId();
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->menuStatus_ = MenuStatus::SHOW;
+
+    /**
+     * @tc.steps: step4. Simulate a TouchType::DOWN event to trigger the target logic.
+     */
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.originalId = targetId;
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->TriggerTouchEvent(event), true);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    EXPECT_EQ(overlayManager->CheckSkipMenuShow(targetId), true);
+
+    /**
+     * @tc.steps: step4. Simulate a TouchType::UP event to trigger the target logic.
+     */
+    event.type = TouchType::UP;
+    event.originalId = targetId;
+    EXPECT_EQ(gestureHub->TriggerTouchEvent(event), true);
+    EXPECT_EQ(overlayManager->CheckSkipMenuShow(targetId), false);
+}
+
 /**
  * @tc.name: SelectLayoutPropertyTest005
  * @tc.desc: Test Select Layout Algorithm Measure.
@@ -1087,11 +1402,23 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
      * @tc.expected: Objects are created successfully.
      */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+
+    // Create a single theme object that you will control for this test.
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    const Color themeBgColor = Color::BLUE;
+    selectTheme->backgroundColor_ = themeBgColor;
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
      * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
@@ -1111,11 +1438,11 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.steps: step4. Set and update background color of option.
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
-    pattern->SetSelectedOptionBgColor(Color::BLACK);
     ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectedOptionBgColor(Color::BLACK);
     pattern->OnColorConfigurationUpdate();
     auto selectColor = optionPattern->GetBgColor();
-    EXPECT_EQ(selectColor, Color::BLACK);
+    EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
 }
 
 /**
@@ -1830,6 +2157,37 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     EXPECT_FALSE(pattern->options_.empty());
 }
 
+/**
+ * @tc.name: ToJsonValue003
+ * @tc.desc: Test SelectPattern ToJsonDividerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ToJsonValue003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "");
+    menuLayoutProps->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "FLOATING_ABOVE_MENU");
+    json->Delete("dividerMode");
+    menuLayoutProps->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "EMBEDDED_IN_MENU");
+}
+
 HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
 {
     /**
@@ -1923,7 +2281,6 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
-
     auto options = pattern->GetOptions();
     EXPECT_EQ(options.size(), params.size());
     RefPtr<FrameNode> row =
@@ -1966,5 +2323,293 @@ HWTEST_F(SelectTestNg, SelectMenuOutline001, TestSize.Level1)
     auto renderContext = menu->GetRenderContext();
     EXPECT_EQ(renderContext->GetOuterBorderColor(), menuParam.outlineColor);
     EXPECT_EQ(renderContext->GetOuterBorderWidth(), menuParam.outlineWidth);
+}
+
+/**
+ * @tc.name: GetSelectTheme001
+ * @tc.desc: Test GetSelectTheme with valid frameNode and valid context, expect correct SelectTheme returned.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, GetSelectTheme001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode with SelectPattern and MockPipelineContext.
+     * @tc.expected: step1. FrameNode and context are created successfully.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    pipelineContext->SetThemeManager(themeManager);
+    
+    /**
+     * @tc.steps: step2. Prepare SelectTheme and mock themeManager to return it.
+     * @tc.expected: step2. Mocked themeManager returns the prepared SelectTheme.
+     */
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    frameNode->DetachContext(pipelineContext);
+    
+    /**
+     * @tc.steps: step3. Call GetSelectTheme and verify the result.
+     * @tc.expected: step3. The returned SelectTheme matches the prepared one.
+     */
+    auto result = SelectModelNG::GetSelectTheme(frameNode.GetRawPtr());
+    EXPECT_EQ(result, selectTheme);
+}
+
+/**
+ * @tc.name: ResetComponentColor001
+ * @tc.desc: Test ResetSelectComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResetComponentColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Setup MockThemeManager and SelectTheme.
+     * @tc.expected: step2. ThemeManager and theme are initialized.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetThemeManager(themeManager);
+    
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    
+    /**
+     * @tc.steps: step3. Set theme colors and pattern font color, then reset colors for different types.
+     * @tc.expected: step3. All component colors are reset to theme's RED value.
+     */
+    selectTheme->fontColor_ = Color::RED;
+    selectTheme->backgroundColor_ = Color::RED;
+    selectTheme->selectedColor_ = Color::RED;
+    selectTheme->selectedColorText_ = Color::RED;
+    selectTheme->menuFontColor_ = Color::RED;
+    pattern->SetOptionFontColor(Color::RED);
+    
+    std::vector<SelectColorType> colorTypes = { SelectColorType::FONT_COLOR, SelectColorType::BACKGROUND_COLOR,
+        SelectColorType::SELECTED_OPTION_BG_COLOR, SelectColorType::SELECTED_OPTION_FONT_COLOR,
+        SelectColorType::OPTION_BG_COLOR, SelectColorType::OPTION_FONT_COLOR, static_cast<SelectColorType>(999) };
+    for (const auto& type : colorTypes) {
+        SelectModelNG::ResetComponentColor(frameNode, type);
+    }
+    
+    /**
+     * @tc.steps: step4. Verify reset colors match the theme's RED value.
+     * @tc.expected: step4. All verified colors are RED.
+     */
+    EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
+    EXPECT_EQ(pattern->selectedFont_.FontColor, Color::RED);
+    EXPECT_EQ(pattern->optionFont_.FontColor, Color::RED);
+}
+
+/**
+ * @tc.name: CreateWithValueIconResourceObj
+ * @tc.desc: Test CreateWithValueIconResourceObj with null and valid ResourceObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithValueIconResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test with null ResourceObject params.
+     * @tc.expected: step2. No exception thrown when null params are passed.
+     */
+    SelectResObjParam nullObjParam;
+    nullObjParam.valueResObj = nullptr;
+    nullObjParam.iconResObj = nullptr;
+    selectModelNG.CreateWithValueIconResourceObj({ nullObjParam });
+    
+    /**
+     * @tc.steps: step3. Create valid value and icon ResourceObjects.
+     * @tc.expected: step3. ResourceObjects are created with valid parameters.
+     */
+    ResourceObjectParams valueParam;
+    valueParam.type = ResourceObjectParamType::STRING;
+    valueParam.value = "TEXT";
+    auto valueResObj = AceType::MakeRefPtr<ResourceObject>(1001, static_cast<int32_t>(Kit::ResourceType::STRING),
+        std::vector<ResourceObjectParams> { valueParam }, "bundle", "module", 0);
+
+    ResourceObjectParams iconParam;
+    iconParam.type = ResourceObjectParamType::STRING;
+    iconParam.value = "ICON.svg";
+    auto iconResObj = AceType::MakeRefPtr<ResourceObject>(1002, static_cast<int32_t>(Kit::ResourceType::MEDIA),
+        std::vector<ResourceObjectParams> { iconParam }, "bundle", "module", 0);
+    
+    /**
+     * @tc.steps: step4. Test with valid params and verify menu pattern state.
+     * @tc.expected: step4. MenuPattern's isSelectMenu_ is set to true after valid resource creation.
+     */
+    SelectResObjParam validObjParam;
+    validObjParam.valueResObj = valueResObj;
+    validObjParam.iconResObj = iconResObj;
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    selectModelNG.CreateWithValueIconResourceObj({ validObjParam });
+    EXPECT_TRUE(menuPattern->isSelectMenu_);
+}
+
+/**
+ * @tc.name: CreateWithIntegerResourceObj
+ * @tc.desc: Test CreateWithIntegerResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithIntegerResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test with null ResourceObject and verify selected value is not zero.
+     * @tc.expected: step2. GetSelected() does not return zero when null resource is passed.
+     */
+    selectModelNG.CreateWithIntegerResourceObj(nullptr);
+    EXPECT_NE(pattern->GetSelected(), 0);
+    
+    /**
+     * @tc.steps: step3. Create valid integer ResourceObject and test selected value.
+     * @tc.expected: step3. GetSelected() returns -1 when valid resource with "-1" is passed.
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::INT;
+    param.value = "-1";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::INTEGER);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    selectModelNG.CreateWithIntegerResourceObj(resObj);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+    
+    /**
+     * @tc.steps: step4. Add resource to cache and reload, verifying resource manager interaction.
+     * @tc.expected: step4. Resource is added to cache and resource manager is accessed.
+     */
+    std::string key = "selectSelected";
+    pattern->AddResCache(key, param.value.value());
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+}
+
+/**
+ * @tc.name: CreateWithStringResourceObj
+ * @tc.desc: Test CreateWithStringResourceObj function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithStringResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test with null ResourceObject (no assertion, just function call).
+     * @tc.expected: step2. No exception thrown when null resource is passed.
+     */
+    selectModelNG.CreateWithStringResourceObj(nullptr);
+    
+    /**
+     * @tc.steps: step3. Create valid string ResourceObject and test resource assignment.
+     * @tc.expected: step3. Resource is accepted without error.
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "string";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::STRING);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+
+    selectModelNG.CreateWithStringResourceObj(resObj);
+    
+    /**
+     * @tc.steps: step4. Add resource to cache and reload, verifying resource manager interaction.
+     * @tc.expected: step4. Resource is added to cache and resource manager is accessed.
+     */
+    std::string key = "selectValue";
+    pattern->AddResCache(key, param.value.value());
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+}
+
+/**
+ * @tc.name: ModifierColorTypeToString
+ * @tc.desc: Test ModifierColorTypeToString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ModifierColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases with color type and expected string.
+     * @tc.expected: step1. Test cases cover all relevant color types and an unknown type.
+     */
+    std::vector<std::pair<SelectColorType, std::string>> types = { { SelectColorType::FONT_COLOR, "FontColor" },
+        { SelectColorType::BACKGROUND_COLOR, "BackgroundColor" },
+        { SelectColorType::SELECTED_OPTION_BG_COLOR, "SelectedOptionBgColor" },
+        { SelectColorType::SELECTED_OPTION_FONT_COLOR, "SelectedOptionFontColor" },
+        { SelectColorType::OPTION_BG_COLOR, "OptionBgColor" },
+        { SelectColorType::OPTION_FONT_COLOR, "OptionFontColor" },
+        { SelectColorType::MENU_BACKGROUND_COLOR, "MenuBackgroundColor" },
+        { static_cast<SelectColorType>(999), "Unknown" } };
+    
+    /**
+     * @tc.steps: step2. Loop through test cases and verify string conversion.
+     * @tc.expected: step2. Each color type converts to the expected string, including unknown type.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = SelectModelNG::ModifierColorTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
 }
 } // namespace OHOS::Ace::NG

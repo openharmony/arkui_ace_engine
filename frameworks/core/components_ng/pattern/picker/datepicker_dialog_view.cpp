@@ -1687,6 +1687,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     timePickerRowPattern->SetShowLunarSwitch(settingData.lunarswitch);
     auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(timePickerLayout, nullptr);
+    timePickerLayout->UpdateLoop(settingData.canLoop);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
         ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
@@ -2009,7 +2010,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo>& buttonInfos, const RefPtr<FrameNode>& contentRow)
 {
     CHECK_NULL_RETURN(dateNode, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = dateNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();

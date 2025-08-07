@@ -451,4 +451,15 @@ int32_t ImageLoadingContext::GetFrameCount() const
     return imageObj_ ? imageObj_->GetFrameCount() : 0;
 }
 
+std::string ImageLoadingContext::GetImageSizeInfo() const
+{
+    if (!imageObj_) {
+        return "[imageObj=null]";
+    }
+
+    std::ostringstream oss;
+    oss << "[fileSize=" << imageObj_->GetImageFileSize()
+        << ", dataSize=" << imageObj_->GetImageDataSize() << "]";
+    return oss.str();
+}
 } // namespace OHOS::Ace::NG

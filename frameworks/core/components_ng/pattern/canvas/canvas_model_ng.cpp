@@ -105,8 +105,7 @@ RefPtr<AceType> CanvasModelNG::GetCanvasPattern(FrameNode* node)
 
 RefPtr<FrameNode> CanvasModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    return FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    return frameNode;
 }
 } // namespace OHOS::Ace::NG

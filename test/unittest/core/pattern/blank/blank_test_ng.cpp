@@ -709,4 +709,25 @@ HWTEST_F(BlankTestNg, ToJsonValue001, TestSize.Level1)
     frameNode->GetPattern<BlankPattern>()->ToJsonValue(jsonValue, filter);
     EXPECT_EQ(jsonValue->GetValue("color")->GetString().c_str(), COLOR_WHITE);
 }
+
+/**
+ * @tc.name: SetColor
+ * @tc.desc: Test SetColor of Blank
+ * @tc.type: FUNC
+ */
+HWTEST_F(BlankTestNg, SetColorTest1, TestSize.Level1)
+{
+    BlankModelNG blankModelNG;
+    blankModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BlankPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    blankModelNG.SetColor(resObj);
+    std::string blank = pattern->GetResCacheMapByKey("blank.Color");
+    EXPECT_EQ(blank, "");
+}
 } // namespace OHOS::Ace::NG

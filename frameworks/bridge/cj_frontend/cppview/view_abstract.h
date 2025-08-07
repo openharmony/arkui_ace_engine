@@ -72,23 +72,6 @@ struct FfiTextMenuItem {
 typedef VectorTextMenuItemHandle (*CjOnCreateMenu)(VectorTextMenuItemHandle);
 typedef bool (*CjOnMenuItemClick)(FfiTextMenuItem, int32_t, int32_t);
 
-namespace OHOS::Ace {
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000,
-    SYMBOL = 40000
-};
-}
-
 namespace OHOS::Ace::Framework {
 RefPtr<ResourceObject> GetResourceObject(const NativeResourceObject& obj);
 RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const NativeResourceObject& obj);

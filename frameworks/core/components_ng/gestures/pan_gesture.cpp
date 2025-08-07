@@ -18,7 +18,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-PanGesture::PanGesture(int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap,
+PanGesture::PanGesture(int32_t fingers, const PanDirection& direction, const PanDistanceMapDimension& distanceMap,
     bool isLimitFingerCount)
 {
     fingers_ = fingers;
@@ -86,7 +86,7 @@ void PanGesture::SerializeTo(char* buff)
     for (auto iter : distanceMap_) {
         *reinterpret_cast<SourceTool*>(buff) = iter.first;
         buff += sizeof(SourceTool);
-        *reinterpret_cast<double*>(buff) = iter.second;
+        *reinterpret_cast<double*>(buff) = iter.second.ConvertToPx();
         buff += sizeof(double);
     }
     double* matrix = reinterpret_cast<double*>(buff);
@@ -136,7 +136,7 @@ int32_t PanGesture::Deserialize(const char* buff)
         buff += sizeof(SourceTool);
         double distance = *reinterpret_cast<double*>(const_cast<char*>(buff));
         buff += sizeof(double);
-        distanceMap_[sourceTool] = distance;
+        distanceMap_[sourceTool] = Dimension(distance, DimensionUnit::PX);
     }
     double* matrix = reinterpret_cast<double*>(const_cast<char*>(buff));
     for (int i = 0; i < Matrix4::DIMENSION; i++) {
@@ -147,7 +147,7 @@ int32_t PanGesture::Deserialize(const char* buff)
     return SizeofMe();
 }
 
-void PanGesture::SetDistanceMap(const PanDistanceMap& distanceMap)
+void PanGesture::SetDistanceMap(const PanDistanceMapDimension& distanceMap)
 {
     distanceMap_ = distanceMap;
 }

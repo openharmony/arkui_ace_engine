@@ -86,7 +86,7 @@ public:
     MOCK_METHOD(AllocatorType, GetAllocatorType, (), (const override));
     MOCK_METHOD(bool, IsHdr, (), (const override));
     MOCK_METHOD(uint32_t, WritePixels, (const WritePixelsOptions& opts), (override));
-    MOCK_METHOD(bool, GetIsWideColorGamut, (), (const override));
+    MOCK_METHOD(uint32_t, GetInnerColorGamut, (), (const override));
     MOCK_METHOD(void, SetMemoryName, (std::string pixelMapName), (const override));
 };
 
@@ -1199,6 +1199,34 @@ HWTEST_F(WebPatternTestHandle, KeyboardReDispatch005, TestSize.Level1)
     }
     webPattern->KeyboardReDispatch(event, isUsed);
     EXPECT_EQ(webPattern->webKeyEvent_.front().deviceId, 0);
+#endif
+}
+
+/**
+ * @tc.name: OnTakeFocus001
+ * @tc.desc: OnTakeFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestHandle, OnTakeFocus001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+
+    auto event = std::make_shared<OHOS::NWeb::MockNWebKeyEvent>();
+    EXPECT_NE(event, nullptr);
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    webPattern->OnTakeFocus(event);
 #endif
 }
 

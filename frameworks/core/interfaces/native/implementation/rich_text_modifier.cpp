@@ -14,7 +14,7 @@
  */
 
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/richtext_model_ng.h"
+#include "core/components_ng/pattern/web/ani/richtext_model_static.h"
 #endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -28,12 +28,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WEB_SUPPORTED
-    // need check
-    // auto frameNode = RichTextModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = RichTextModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 #else
     return {};
 #endif // WEB_SUPPORTED
@@ -48,38 +46,43 @@ void SetRichTextOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(content);
 #ifdef WEB_SUPPORTED
     auto convValue = Converter::Convert<std::string>(*content);
-    // need check
-    // RichTextModelNG::SetRichTextOptions(frameNode, convValue);
+    RichTextModelStatic::SetRichTextOptions(frameNode, convValue);
 #endif
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
 void OnStartImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 #ifdef WEB_SUPPORTED
-    auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
         arkCallback.Invoke();
     };
-    // need check
-    // RichTextModelNG::SetOnPageStart(frameNode, std::move(onCallback));
+    RichTextModelStatic::SetOnPageStart(frameNode, std::move(onCallback));
 #endif
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Callback_Void* value)
+                    const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 #ifdef WEB_SUPPORTED
-    auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onCallback = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
         arkCallback.Invoke();
     };
-    // need check
-    // RichTextModelNG::SetOnPageFinish(frameNode, std::move(onCallback));
+    RichTextModelStatic::SetOnPageFinish(frameNode, std::move(onCallback));
 #endif
 }
 } // RichTextAttributeModifier

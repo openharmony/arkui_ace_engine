@@ -162,6 +162,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return this.dependentElmtIdsByProperty_.hasDependencies();
   }
 
+  public getDependencies(): Set<number> {
+    return this.dependentElmtIdsByProperty_.getAllPropertyDependencies();
+  }
+
   /* for @Prop value from source we need to generate a @State
      that observes when this value changes. This ObservedPropertyPU
      sits inside SynchedPropertyOneWayPU.
@@ -275,14 +279,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // notify owning ViewPU and peers of a variable assignment
   // also property/item changes to  ObservedObjects of class object type, which use compat mode
   // Date and Array are notified as if there had been an assignment.
-  protected notifyPropertyHasChangedPU() : void {
+  protected notifyPropertyHasChangedPU(isSync: boolean = false) : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {
       if (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
-        // send viewPropertyHasChanged right away
-        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
-
+        if (!isSync) {
+          // send viewPropertyHasChanged right away
+          this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
+        } else {
+          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies(), true);
+        }
         // send changed observed property to profiler
         // only will be true when enable profiler
         if (stateMgmtDFX.enableProfiler) {
@@ -296,7 +303,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     }
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber && typeof subscriber === 'object' && 'syncPeerHasChanged' in subscriber) {
-        (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
+        (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this, isSync);
       } else {
         stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
       }
@@ -306,13 +313,19 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
 
   // notify owning ViewPU and peers of a ObservedObject @Track property's assignment
-  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string) : void {
+  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string, isSync: boolean = false) : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyTrackedObjectPropertyHasChanged');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged.`);
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
-        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        if (!isSync) {
+          this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        } else {
+          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_,
+            this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'), false);
+        }
+        
         // send changed observed property to profiler
         // only will be true when enable profiler
         if (stateMgmtDFX.enableProfiler) {
@@ -327,7 +340,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
         if ('syncPeerTrackedPropertyHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerTrackedPropertyHasChanged(this, changedPropertyName);
+          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerTrackedPropertyHasChanged(this, changedPropertyName, isSync);
         } else  {
           stateMgmtConsole.warn(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged: unknown subscriber ID 'subscribedId' error!`);
         }

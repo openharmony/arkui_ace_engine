@@ -372,15 +372,18 @@ void ResetRichEditorEnablePreviewText(ArkUINodeHandle node)
 }
 
 
-void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback,
+    void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback);
+    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
     NG::OnCreateMenuCallback* onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
     NG::OnMenuItemClickCallback* onMenuItemClick
         = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    NG::OnPrepareMenuCallback* onPrepareMenu = reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback);
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu),
+        std::move(*onMenuItemClick), std::move(*onPrepareMenu));
 }
 
 void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
@@ -389,7 +392,9 @@ void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        std::move(onPrepareMenuCallback));
 }
 
 void SetRichEditorOnWillChange(ArkUINodeHandle node, void* callback)

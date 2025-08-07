@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,9 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
 
 void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
 {
+    if (startingLine < 0) {
+        startingLine = 0;
+    }
     if (targetIdx >= info_->GetChildrenCount()) {
         targetIdx = info_->GetChildrenCount() - 1;
     }
@@ -141,6 +144,8 @@ void GridIrregularFiller::FillOne(const int32_t idx)
 bool GridIrregularFiller::FindNextItem(int32_t target)
 {
     const auto& mat = info_->gridMatrix_;
+    // start from first cross everytime, for the current target might be before the previous target
+    posX_ = -1;
     while (AdvancePos()) {
         if (mat.at(posY_).at(posX_) == target) {
             return true;
@@ -198,34 +203,14 @@ bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row
 std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache)
 {
+    auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    auto constraint = props->CreateChildConstraint();
     auto child = wrapper_->GetOrCreateChildByIndex(itemIdx, !isCache, isCache);
     CHECK_NULL_RETURN(child, {});
-    return MeasureItemInner(params, AceType::RawPtr(child), itemIdx, col, row);
-}
 
-void GridIrregularFiller::MeasureItem(
-    const FillParameters& params, LayoutWrapper* child, int32_t itemIdx, int32_t col, int32_t row)
-{
-    if (!child || col < 0 || row < 0 || itemIdx < 0) {
-        LOGW("input error");
-        return;
-    }
-    CHECK_NULL_VOID(child && info_ && wrapper_);
-    MeasureItemInner(params, child, itemIdx, col, row);
-}
-
-std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItemInner(
-    const FillParameters& params, LayoutWrapper* node, int32_t itemIdx, int32_t col, int32_t row)
-{
-    auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    CHECK_NULL_RETURN(props, {});
-    auto constraint = props->CreateChildConstraint();
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
-        if (i + col >= params.crossLens.size()) {
-            break;
-        }
         crossLen += params.crossLens[i + col];
     }
     crossLen += params.crossGap * (itemSize.columns - 1);
@@ -237,14 +222,14 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItemInner(
         constraint.maxSize = SizeF { Infinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
-
-    if (constraint != node->GetGeometryNode()->GetParentLayoutConstraint() ||
-        CheckNeedMeasure(node->GetLayoutProperty()->GetPropertyChangeFlag())) {
-        node->Measure(constraint);
+    
+    if (isCache) {
+        child->SetActive();
     }
-    SetItemInfo(node, itemIdx, row, col, itemSize);
+    child->Measure(constraint);
+    SetItemInfo(child, itemIdx, row, col, itemSize);
 
-    float childHeight = node->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     // spread height to each row.
     float heightPerRow = (childHeight - (params.mainGap * (itemSize.rows - 1))) / itemSize.rows;
     for (int32_t i = 0; i < itemSize.rows; ++i) {
@@ -380,7 +365,7 @@ int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const
 }
 
 void GridIrregularFiller::SetItemInfo(
-    const LayoutWrapper* item, int32_t idx, int32_t row, int32_t col, GridItemSize size)
+    const RefPtr<LayoutWrapper>& item, int32_t idx, int32_t row, int32_t col, GridItemSize size)
 {
     CHECK_NULL_VOID(item);
     if (info_->axis_ == Axis::HORIZONTAL) {

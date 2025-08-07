@@ -23,7 +23,8 @@ namespace OHOS::Ace {
 class ImagePerfOhos : public ImagePerf {
 public:
     void StartRecordImageLoadStat(int64_t id) override;
-    void EndRecordImageLoadStat(int64_t id, const std::string& imageType, std::pair<int, int> size, int state) override;
+    void EndRecordImageLoadStat(
+        int64_t id, const std::string& imageType, std::pair<int32_t, int32_t> size, int32_t state) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_IMAGE_PERF_OHOS_H

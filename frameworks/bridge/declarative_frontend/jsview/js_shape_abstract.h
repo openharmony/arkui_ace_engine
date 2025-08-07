@@ -61,6 +61,8 @@ public:
     void ObjectSize(const JSCallbackInfo& info);
     void ObjectOffset(const JSCallbackInfo& info);
     void ObjectFill(const JSCallbackInfo& info);
+    void ObjectPositionUpdate(DimensionOffset& position, RefPtr<ResourceObject>& xResObj,
+        RefPtr<ResourceObject>& yResObj);
     void ObjectPosition(const JSCallbackInfo& info);
 protected:
     static void SetSize(const JSCallbackInfo& info);

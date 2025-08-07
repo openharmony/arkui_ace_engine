@@ -195,6 +195,12 @@ public:
     {
         return false;
     }
+    virtual WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId)
+    {
+        return nullptr;
+    }
+    virtual void SetWebPatternBySurfaceId(const std::string& surfaceId, WeakPtr<NG::WebPattern> pattern) {}
+    virtual void RemoveWebPatternBySurfaceId(const std::string& surfaceId) {}
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -371,7 +377,7 @@ public:
     virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
 
     virtual void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) {};
-    virtual bool IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node) { return false; };
+    virtual bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) {return true;};
 
 protected:
     int32_t treeId_ = 0;

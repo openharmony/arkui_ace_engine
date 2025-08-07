@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_BOX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_BOX_H
 
+#include <functional>
 #include <optional>
 
 #include "base/geometry/calc_dimension.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 namespace OHOS::Ace::NG {
 
@@ -28,6 +30,37 @@ struct FocusBoxStyle {
     std::optional<Color> strokeColor;
     std::optional<CalcDimension> strokeWidth;
     std::optional<CalcDimension> margin;
+
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, FocusBoxStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, FocusBoxStyle&)>&& updateFunc)
+    {
+        if (resObj && updateFunc) {
+            resMap_[key] = { resObj, std::move(updateFunc) };
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
+        }
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
 };
 
 class ACE_EXPORT FocusBox : public virtual AceType {

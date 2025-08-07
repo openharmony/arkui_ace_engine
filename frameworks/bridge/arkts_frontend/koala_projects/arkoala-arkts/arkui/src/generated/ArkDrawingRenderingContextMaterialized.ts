@@ -79,7 +79,7 @@ export class DrawingRenderingContext implements MaterializedBase {
     }
     private getSize_serialize(): Size {
         const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Size = retvalDeserializer.readSize()
         return returnResult
     }

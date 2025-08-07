@@ -76,6 +76,7 @@ public:
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         float newPointOffset = 0.0f;
         if (!isDragEvent_) {
+            FixPointOffset();
             if (isRtl) {
                 newPointOffset = offsetIsRtl;
             } else {
@@ -215,6 +216,9 @@ public:
 
     void SetSize(SizeF& size)
     {
+        if (actualSize_ != size) {
+            isSizeChange_ = true;
+        }
         actualSize_ = size;
         if (size_) {
             size_->Set(size);
@@ -294,6 +298,7 @@ public:
     }
 
 private:
+    void FixPointOffset();
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
     float pointRadius_ = 0.0f;
@@ -320,6 +325,8 @@ private:
     bool isFirstCreated_ = true;
     bool showHoverEffect_ = true;
     bool isFocusOrBlur_ = false;
+    bool isSizeChange_ = false;
+    bool isSelectChange_ = false;
     float actualTrackRadius_ = 0.0f;
 
     OffsetF hotZoneOffset_;

@@ -29,8 +29,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // auto frameNode = NavRouterModelNG::CreateFrameNode(id);
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    return {};
 }
 } // NavRouterModifier
 namespace NavRouterInterfaceModifier {
@@ -44,30 +43,32 @@ void SetNavRouterOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavRouterModelNG::SetSetNavRouterOptions1(frameNode, convValue);
     LOGE("ARKOALA SetNavRouterOptions1 -> Method is not implemented.");
 }
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       const Callback_Boolean_Void* value)
+                       const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onStateChangeCallback = [arkCallback = CallbackHelper(*value)](const bool isActivated) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onStateChangeCallback = [arkCallback = CallbackHelper(*optValue)](const bool isActivated) {
         auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
         arkCallback.Invoke(arkIsActivated);
     };
-    // NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
+    NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_NavRouteMode value)
+              const Opt_NavRouteMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto enumMode = Converter::OptConvert<NavRouteMode>(value);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto enumMode = Converter::OptConvert<NavRouteMode>(*value);
     // NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier

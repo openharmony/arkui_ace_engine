@@ -25,6 +25,11 @@
 
 namespace OHOS::Ace::Framework {
 
+struct HomePathInfo {
+    std::string name;
+    JSRef<JSVal> param;
+};
+
 struct NavPathInfoUINode {
     NavPathInfoUINode(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& uiNode, int32_t index)
     {
@@ -135,6 +140,12 @@ public:
 
     void RemoveByIndexes(const std::vector<int32_t>& indexes) override;
 
+    void SetHomePathInfo(HomePathInfo&& pathInfo)
+    {
+        homePathInfo_ = std::move(pathInfo);
+    }
+    bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;
@@ -175,9 +186,15 @@ private:
 
     bool RemoveDestinationIfNeeded(const JSRef<JSObject>& param, int32_t errorCode, int32_t index);
 
+    bool ExecutePopCallbackInStack(const JSRef<JSVal>& param);
     bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, const JSRef<JSVal>& param);
+    void ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param);
+
 private:
     JSRef<JSObject> thisObj_;
+
+    std::optional<HomePathInfo> homePathInfo_;
+    WeakPtr<NG::NavDestinationGroupNode> homeDestinationNode_;
 };
 } // namespace OHOS::Ace::Framework
 

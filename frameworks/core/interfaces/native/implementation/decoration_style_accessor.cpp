@@ -27,15 +27,16 @@ void DestroyPeerImpl(Ark_DecorationStyle peer)
 Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
 {
     RefPtr<DecorationSpan> span;
-    // if (value) {
-    //     auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
-    //     auto aceColorOpt = Converter::OptConvert<Color>(value->color);
-    //     auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
-    //     span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
-    //         aceColorOpt, aceStyleOpt);
-    // } else {
-    //     span = AceType::MakeRefPtr<DecorationSpan>();
-    // }
+    if (value) {
+        auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
+        auto aceColorOpt = Converter::OptConvert<Color>(value->color);
+        auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
+        span = AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({ aceTypeOpt.value_or(TextDecoration::NONE) }),
+            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>());
+    } else {
+        span = AceType::MakeRefPtr<DecorationSpan>();
+    }
     return new DecorationStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -47,27 +48,23 @@ Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
     auto invalidValue = static_cast<Ark_TextDecorationType>(-1);
     CHECK_NULL_RETURN(peer, invalidValue);
     CHECK_NULL_RETURN(peer->span, invalidValue);
-    // auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationType());
-    // return value;
-    return invalidValue;
+    auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationFirst());
+    return value;
 }
-Ark_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
+Opt_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
 {
-    Ark_ResourceColor invalidValue = {};
+    auto invalidValue = Converter::ArkValue<Opt_ResourceColor>();
     CHECK_NULL_RETURN(peer && peer->span, invalidValue);
     auto color = peer->span->GetColor();
-    auto value = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
-    return Converter::GetOpt(value).value_or(invalidValue);
+    return Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
 }
-Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
+Opt_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
-    auto invalidValue = static_cast<Ark_TextDecorationStyle>(-1);
+    auto invalidValue = Converter::ArkValue<Opt_TextDecorationStyle>();
     CHECK_NULL_RETURN(peer, invalidValue);
     CHECK_NULL_RETURN(peer->span, invalidValue);
     auto optValue = peer->span->GetTextDecorationStyle();
-    CHECK_NULL_RETURN(optValue.has_value(), invalidValue);
-    auto value = Converter::ArkValue<Ark_TextDecorationStyle>(optValue.value());
-    return value;
+    return Converter::ArkValue<Opt_TextDecorationStyle>(optValue);
 }
 } // DecorationStyleAccessor
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()

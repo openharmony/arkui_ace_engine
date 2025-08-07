@@ -118,6 +118,10 @@ public:
     {
         return needAvoidContainerModal_;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    void OnAttachToMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
 
 private:
     RefPtr<UINode> backButton_;
@@ -128,6 +132,7 @@ private:
     std::string innerChildId_;
     bool needAvoidContainerModal_ = false;
     bool useContainerModalTitleHeight_ = false;
+    int32_t menuBarChangeListenerId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

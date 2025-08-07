@@ -68,6 +68,7 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
+    static void SetContentTransition(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnClickWithoutNGBUILD(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);

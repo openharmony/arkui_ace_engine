@@ -206,6 +206,10 @@ OffsetF NavDestinationNodeBase::CalcTranslateForTransitionPushEnd(const SizeF& f
     if (angle == ROTATION_90 || angle == ROTATION_270) {
         width = frameSize.Height();
     }
+    if (SystemProperties::IsSoftPageTransition()) {
+        auto translate = OffsetF{ -width * HALF * HALF * isRTL, 0.0f };
+        return translate;
+    }
     auto translate = OffsetF{ -width * CONTENT_OFFSET_PERCENT * isRTL, 0.0f };
     return translate;
 }
@@ -220,6 +224,10 @@ OffsetF NavDestinationNodeBase::CalcTranslateForTransitionPopStart(const SizeF& 
     float width = frameSize.Width();
     if (angle == ROTATION_90 || angle == ROTATION_270) {
         width = frameSize.Height();
+    }
+    if (SystemProperties::IsSoftPageTransition()) {
+        auto translate = OffsetF{ -width * HALF * HALF * isRTL, 0.0f };
+        return translate;
     }
     auto translate = OffsetF{ -width * CONTENT_OFFSET_PERCENT * isRTL, 0.0f };
     return translate;

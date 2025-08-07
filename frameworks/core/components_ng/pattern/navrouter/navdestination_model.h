@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace {
+enum class NavDestinationPatternType {
+    TITLE_BAR = 0,
+    NAV_DESTINATION,
+};
 class ACE_FORCE_EXPORT NavDestinationModel {
 public:
     static NavDestinationModel* GetInstance();
@@ -64,7 +68,7 @@ public:
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
-    virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) = 0;
+    virtual void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) {}
     virtual void UpdateTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
@@ -90,7 +94,8 @@ public:
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetMenuOptions(NG::NavigationMenuOptions&& opt) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
-    virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
+    virtual void SetBackgroundColor(
+        const Color& color, bool isVaild = true, const RefPtr<ResourceObject>& backgroundColorResObj = nullptr) = 0;
     virtual void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
     virtual RefPtr<AceType> CreateEmpty()
     {
@@ -102,7 +107,7 @@ public:
         return false;
     }
 
-    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetSystemTransitionType(NG::NavigationSystemTransitionType type) {};
     virtual void SetScrollableProcessor(
@@ -114,8 +119,9 @@ public:
     virtual void SetPreferredOrientation(const std::optional<Orientation>& ori) {}
     virtual void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) {}
     virtual void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) {}
+    virtual void ResetResObj(NavDestinationPatternType type, const std::string& key) {}
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) {return false;};
+        const RefPtr<ResourceObject>& mainResObj) {return false;};
     virtual void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
     virtual void UpdateSubTitle(

@@ -14,16 +14,25 @@
  */
 #include "core/interfaces/native/node/path_modifier.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
-
 
 namespace OHOS::Ace::NG {
 
-void SetPathCommands(ArkUINodeHandle node, ArkUI_CharPtr commands)
+void SetPathCommands(ArkUINodeHandle node, ArkUI_CharPtr commands, void* resObjPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    PathModelNG::SetCommands(frameNode, std::string(commands));
+    auto commandsVal = std::string(commands);
+    PathModelNG::SetCommands(frameNode, commandsVal);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("PathCommands");
+    if (SystemProperties::ConfigChangePerform() && resObjPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
+        pattern->RegisterResource<std::string>("PathCommands", resObj, commandsVal);
+    }
 }
 
 void ResetPathCommands(ArkUINodeHandle node)
@@ -32,6 +41,9 @@ void ResetPathCommands(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PathModelNG::SetCommands(frameNode, outCommands);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("PathCommands");
 }
 
 namespace NodeModifier {
