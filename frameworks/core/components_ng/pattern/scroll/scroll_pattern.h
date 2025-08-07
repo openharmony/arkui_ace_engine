@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,8 +196,8 @@ public:
         SnapDirection snapDirection = SnapDirection::NONE) override;
     std::optional<float> CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection);
     bool NeedScrollSnapToSide(float delta) override;
-    void CaleSnapOffsets();
-    void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
+    void CaleSnapOffsets(const RefPtr<FrameNode>& host);
+    void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, const RefPtr<FrameNode>& host);
     void CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign);
 
     float GetSelectScrollWidth();
@@ -281,6 +281,8 @@ public:
         CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
+
+    ScrollSnapAlign GetScrollSnapAlign(const RefPtr<FrameNode>& host) const;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -426,7 +428,7 @@ private:
     bool ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
-    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
+    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host);
     std::string GetScrollSnapPagination() const;
     void OnColorModeChange(uint32_t colorMode) override;
 
