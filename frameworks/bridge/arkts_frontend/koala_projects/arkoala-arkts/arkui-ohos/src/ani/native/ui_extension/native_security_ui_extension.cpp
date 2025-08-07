@@ -141,13 +141,13 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
         }
         auto* frameNodePeerRaw = reinterpret_cast<FrameNodePeer*>(placeholder);
         if (frameNodePeerRaw == nullptr) {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION, "Get frameNodePeer failed.");
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION, "Get FrameNodePeer failed.");
             continue;
         }
         auto nodeWeak = frameNodePeerRaw->weakNode;
         auto upgradePtr = nodeWeak.Upgrade();
         if (!upgradePtr) {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION, "Get frameNode RefPtr failed.");
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION, "Get FrameNode RefPtr failed.");
             continue;
         }
         placeholderMap.insert({type, upgradePtr});
@@ -167,7 +167,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
 }
 
 
-ani_status NativeSecurityUiExtension::SetSecurityUiExtensionWant(
+ani_status NativeSecurityUiExtension::SetSecurityUiextensionWant(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj)
 {
@@ -176,7 +176,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiExtensionWant(
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
-            "frameNode is null when SetSecurityUiExtensionWant");
+            "frameNode is null when SetSecurityUiextensionWant");
         return ANI_ERROR;
     }
 
@@ -198,8 +198,8 @@ ani_status NativeSecurityUiExtension::SetSecurityUiExtensionWant(
 #ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::UpdateSecurityWant(frameNode, want);
 #endif //WINDOW_SCENE_SUPPORTED
-TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
-    "NativeUiExtension SetSecurityUiextensionWant end");
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
+        "NativeUiExtension SetSecurityUiextensionWant end");
     return ANI_OK;
 }
 
@@ -217,7 +217,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
     }
 
     ani_ref onErrorRef = reinterpret_cast<ani_ref>(callbackObj);
-    ani_ref onErrorGlobalref;
+    ani_ref onErrorGlobalRef;
     env->GlobalReference_Create(onErrorRef, &onErrorGlobalref);
     ani_vm* vm = nullptr;
     env->GetVM(&vm);

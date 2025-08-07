@@ -98,7 +98,7 @@ ani_object NativeUiExtensionCommon::SendDataSync(
 {
     ani_object result_obj = {};
     auto uIExtensionProxyPeer =
-            reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
+        reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
     if (uIExtensionProxyPeer == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "uIExtensionProxyPeer is null when SendDataSync");
