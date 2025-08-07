@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ColumnSplitComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ColumnSplitComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ColumnSplitComposedElement, InspectorComposedElement);
 
 public:
     explicit ColumnSplitComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

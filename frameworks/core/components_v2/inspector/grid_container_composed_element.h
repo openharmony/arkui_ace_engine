@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT GridContainerComposedElement : public ColumnComposedElement {
-    DECLARE_ACE_TYPE(GridContainerComposedElement, ColumnComposedElement)
+    DECLARE_ACE_TYPE(GridContainerComposedElement, ColumnComposedElement);
 
 public:
     explicit GridContainerComposedElement(const ComposeId& id) : ColumnComposedElement(id) {}

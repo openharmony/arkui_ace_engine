@@ -364,49 +364,6 @@ void LayoutWrapper::ExpandSafeArea()
     }
 }
 
-void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
-{
-    CHECK_NULL_VOID(opts);
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
-    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
-        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
-        frame.SetLeft(safeArea.left_.start);
-    }
-    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
-        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
-        frame.SetTop(safeArea.top_.start);
-    }
-
-    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
-        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
-    }
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
-        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
-    }
-}
-
-void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
-{
-    // reset if User has fixed size
-    auto layoutProperty = GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    if (layoutProperty->HasFixedWidth()) {
-        frame.SetWidth(geometryNode->GetFrameRect().Width());
-    }
-    if (layoutProperty->HasFixedHeight()) {
-        frame.SetHeight(geometryNode->GetFrameRect().Height());
-    }
-    if (layoutProperty->HasAspectRatio()) {
-        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
-    }
-}
-
 void LayoutWrapper::ResetSafeAreaPadding()
 {
     // meant to reset everything each frame
@@ -632,6 +589,49 @@ bool LayoutWrapper::PredictMeasureResult(
         return true;
     }
     return false;
+}
+
+void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
+{
+    CHECK_NULL_VOID(opts);
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
+    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
+        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
+        frame.SetLeft(safeArea.left_.start);
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
+        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
+        frame.SetTop(safeArea.top_.start);
+    }
+
+    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
+        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
+        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
+    }
+}
+
+void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
+{
+    // reset if User has fixed size
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (layoutProperty->HasFixedWidth()) {
+        frame.SetWidth(geometryNode->GetFrameRect().Width());
+    }
+    if (layoutProperty->HasFixedHeight()) {
+        frame.SetHeight(geometryNode->GetFrameRect().Height());
+    }
+    if (layoutProperty->HasAspectRatio()) {
+        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
+    }
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
