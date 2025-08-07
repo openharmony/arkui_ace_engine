@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from 'components'
-import { Finalizable, runtimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KLong, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
+import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { Finalizable, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KLong, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -115,7 +115,7 @@ export class SecurityUIExtensionProxyInternal implements MaterializedBase,Securi
         ArkUIGeneratedNativeModule._SecurityUIExtensionProxy_onSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private offAsyncReceiverRegister_serialize(callback_: ((parameter: SecurityUIExtensionProxy) => void)): void {
+    private offAsyncReceiverRegister_serialize(callback_?: ((parameter: SecurityUIExtensionProxy) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -127,7 +127,7 @@ export class SecurityUIExtensionProxyInternal implements MaterializedBase,Securi
         ArkUIGeneratedNativeModule._SecurityUIExtensionProxy_offAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private offSyncReceiverRegister_serialize(callback_: ((parameter: SecurityUIExtensionProxy) => void)): void {
+    private offSyncReceiverRegister_serialize(callback_?: ((parameter: SecurityUIExtensionProxy) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -145,7 +145,7 @@ export class SecurityUIExtensionProxyInternal implements MaterializedBase,Securi
         return obj
     }
 }
-class ArkSecurityUIExtensxionCallbackHelp {
+class ArkSecurityUIExtensionCallbackHelp {
     onRemoteReady?: ((parameter: SecurityUIExtensionProxy) => void)
     onReceive?: ((param: Record<string, Object>) => void)
     onError?: ((e: BusinessError) => void)
@@ -158,36 +158,36 @@ class ArkSecurityUIExtensxionCallbackHelp {
     }
 }
 
-export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodsPeer {
+export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodPeer {
     _callbackHelp?: ArkSecurityUIExtensionCallbackHelp;
-    protected constructor(peerPtr: KPointer, ind: int32, name: string = "", flags: int32 = 0) {
-        super(peerPtr, IdleDeadline, name, flags)
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
         this.InitArkSecurityUIExtensionCallbackHelp();
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkSecurityUIExtensionComponentPeer {
         InteropNativeModule._NativeLog("[AceSecurityUiExtensionComponent] create ArkUIExtensionComponentPeer start");
         const peerId = PeerNode.nextId()
         const _peerPtr = ArkUIGeneratedNativeModule._SecurityUIExtensionComponent_construct(peerId, flags)
-        cosnt _peer = new ArkSecurityUIExtensionComponentPeer(_peerPtr, peerId, "UIExtensionComponent", flags)
+        const _peer = new ArkSecurityUIExtensionComponentPeer(_peerPtr, peerId, "UIExtensionComponent", flags)
         component?.setPeer(_peer)
         return _peer
     }
     InitArkSecurityUIExtensionCallbackHelp(): void {
         InteropNativeModule._NativeLog("[AceSecurityUiExtensionComponent] InitArkUIExtensionCallback Help entry");
-        this._callbackHelp = new ArkSecurityUIExtensxionCallbackHelp();
+        this._callbackHelp = new ArkSecurityUIExtensionCallbackHelp();
     }
     setSecurityUIExtensionComponentOptionsAttribute(want: AbilityWant, options?: SecurityUIExtensionOptions): void {
         InteropNativeModule._NativeLog("[AceSecurityUiExtensionComponent] setUIExtensionComponentOptionsAttribute entry");
         if (options != undefined) {
             let innerOption : ArkUIAniUIExtensionOptions = new ArkUIAniUIExtensionOptions();
             if (options.isTransferringCaller != undefined) {
-                innterOptions.isTransferringCaller = (options.isTransferringCaller) as boolean;
+                innerOption.isTransferringCaller = (options.isTransferringCaller) as boolean;
             }
 
             if (options.dpiFollowStrategy != undefined) {
                 innerOption.dpiFollowStrategy = (options.dpiFollowStrategy as SecurityDpiFollowStrategy).valueOf();
             }
-            ArkUIAniSecurityUiextensionModal._SecurityUIextension_Set_Option(this.setSecurityUIExtensionComponentOptionsAttribute.prototype, innerOption);
+            ArkUIAniSecurityUiextensionModal._SecurityUIextension_Set_Option(this.peer.ptr, innerOption);
         }
 
         ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_Want(this.peer.ptr, want);
@@ -201,14 +201,14 @@ export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodsPeer {
             const value_value = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
-        ArkUIGeneratedNativeModule._SecurityUIExtensionComponentAttribute_onRemoteRead(this.setSecurityUIExtensionComponentOptionsAttribute.prototype, thisSerializer.asBuffer(), thisSerializer.writeLength())
+        ArkUIGeneratedNativeModule._SecurityUIExtensionComponentAttribute_onRemoteReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onReceiveAttribute(value: ((parameter: Record<string, Object>) => void) | undefined): void {
         const help = this._callbackHelp;
         if (help != undefined && help != null) {
             help.onReceive = value;
-            ArkUIAniSecurityUiextensionModal._SecurityUIextension_Set_OnReciveCallback(this.setSecurityUIExtensionComponentOptionsAttribute.prototype, (param: Record<string, Object>) => {
+            ArkUIAniSecurityUiextensionModal._SecurityUIextension_Set_OnReciveCallback(this.peer.ptr, (param: Record<string, Object>) => {
                 const onReceive = this._callbackHelp?.onReceive;
                 if (onReceive !== undefined && onReceive !== null) {
                     const innerParam = param;
@@ -223,14 +223,14 @@ export class ArkSecurityUIExtensionComponentPeer extends ArkCommonMethodsPeer {
         if (help != undefined && help != null) {
             help.onError = value;
             ArkUIAniSecurityUiextensionModal._SecurityUiextension_Set_OnErrorCallback(
-                this.setSecurityUIExtensionComponentOptionsAttribute.prototype, (code1: number, name1: string, message1: string) => {
+                this.peer.ptr, (code1: number, name1: string, message1: string) => {
                     const onError = this._callback_Help?.onError;
                     if (onError !== undefined && onError !== null) {
                         const param = {
-                            code: 1,
+                            code: code1,
                             name: name1,
                             message: message1
-                        } as BusinessError
+                        } as TerminationInfo
                         onError(param);
                     }
                 });
@@ -266,7 +266,7 @@ export enum SecurityWindowModeFollowStrategy {
 export interface SecurityUIExtensionOptions {
     isTransferringCaller?: boolean;
     dpiFollowStrategy?: SecurityDpiFollowStrategy;
-    windowModelFollowStrategy?: SecurityWindowModeFollowStrategy;
+    windowModeFollowStrategy?: SecurityWindowModeFollowStrategy;
 }
 export type Callback_SecurityUIExtensionProxy_Void = (parameter: SecurityUIExtensionProxy) => void;
 export type SecurityUIExtensionComponentInterface = (want: AbilityWant, options?: SecurityUIExtensionOptions) => SecurityUIExtensionComponentAttribute;
@@ -330,9 +330,9 @@ export class ArkSecurityUIExtensionComponentComponent extends ArkCommonMethodCom
         }
         return this
     }
-    public onError(value: ErrorCallback | undefined): this {
+    public onError(value: ((e: BusinessError) => void) | undefined): this {
         if (this.checkPriority("onError")) {
-            const value_casted = value as (ErrorCallback | undefined)
+            const value_casted = value as (((e: BusinessError) => void) | undefined)
             this.getPeer()?.onErrorAttribute(value_casted)
             return this
         }
@@ -364,7 +364,7 @@ export function SecurityUIExtensionComponent(
         return new ArkSecurityUIExtensionComponentComponent()
     })
     NodeAttach<ArkSecurityUIExtensionComponentPeer>((): ArkSecurityUIExtensionComponentPeer => ArkSecurityUIExtensionComponentPeer.create(receiver), (_: ArkSecurityUIExtensionComponentPeer) => {
-        receiver.setUIExtensionComponentOptions(want,options)
+        receiver.setSecurityUIExtensionComponentOptions(want,options)
         style?.(receiver)
         content_?.()
         receiver.applyAttributesFinish()

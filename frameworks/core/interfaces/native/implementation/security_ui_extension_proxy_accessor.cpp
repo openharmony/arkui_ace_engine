@@ -20,7 +20,7 @@
 
 #include "frameworks/core/interfaces/native/implementation/security_ui_extension_proxy_peer.h"
 
-namespace SecurityUIExtensionProxyAccessor {
+namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUISecurityUIExtensionProxyAccessor* GetSecurityUIExtensionProxyAccessor();
 namespace SecurityUIExtensionProxyAccessor {
 void DestroyPeerImpl(Ark_SecurityUIExtensionProxy peer)
@@ -41,7 +41,7 @@ void SendImpl(Ark_SecurityUIExtensionProxy peer, const Map_String_Object* data)
 {
     LOGE("SecurityUIExtensionProxyAccessor::SendImpl - implement by ANI");
 }
-Map_String_Object SendSyncImpl(Ark_VMContxt vmContext,
+Map_String_Object SendSyncImpl(Ark_VMContext vmContext,
     Ark_SecurityUIExtensionProxy peer, const Map_String_Object* data)
 {
     LOGE("SecurityUIExtensionProxyAccessor::SendSyncImpl - implement by ANI");
@@ -98,54 +98,54 @@ void OnSyncReceiverRegisterImpl(Ark_SecurityUIExtensionProxy peer,
 void OffAsyncReceiverRegisterImpl(Ark_SecurityUIExtensionProxy peer,
     const Opt_Callback_SecurityUIExtensionProxy_Void* callback_)
 {
-    #ifdef WINDOW_SCENE_SUPPORTED
-        CHECK_NULL_VOID(peer);
-        CHECK_NULL_VOID(callback_);
-        auto cb = Converter::OptConvert<Callback_SecurityUIExtensionProxy_Void>(*callback_);
-        std::lock_guard<std::mutex> lock(peer->callbackListLock_);
-        if (cb) {
-            peer->DeleteAsyncCallbackFromList(cb.value().resource.resourceId);
-        } else {
-            peer->ClearAsyncCallbackList();
-        }
-        auto pattern = peer->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        auto funcList = peer->GetOnAsyncCallbackList();
-        pattern->SetAsyncCallbacks(std::move(funcList));
-    #endif //WINDOW_SCENE_SUPPORTED
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto cb = Converter::OptConvert<Callback_SecurityUIExtensionProxy_Void>(*callback_);
+    std::lock_guard<std::mutex> lock(peer->callbackListLock_);
+    if (cb) {
+        peer->DeleteAsyncCallbackFromList(cb.value().resource.resourceId);
+    } else {
+        peer->ClearAsyncCallbackList();
+    }
+    auto pattern = peer->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto funcList = peer->GetOnAsyncCallbackList();
+    pattern->SetAsyncCallbacks(std::move(funcList));
+#endif //WINDOW_SCENE_SUPPORTED
 }
 void OffSyncReceiverRegisterImpl(Ark_SecurityUIExtensionProxy peer,
     const Opt_Callback_SecurityUIExtensionProxy_Void* callback_)
 {
-    #ifdef WINDOW_SCENE_SUPPORTED
-        CHECK_NULL_VOID(peer);
-        CHECK_NULL_VOID(callback_);
-        auto cb = Converter::OptConvert<Callback_SecurityUIExtensionProxy_Void>(*callback_);
-        std::lock_guard<std::mutex> lock(peer->callbackListLock_);
-        if (cb) {
-            peer->DeleteSyncCallbackFromList(cb.value().resource.resourceId);
-        } else {
-            peer->ClearSyncCallbackList();
-        }
-        auto pattern = peer->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        auto funcList = peer->GetOnSyncCallbackList();
-        pattern->SetSyncCallbacks(std::move(funcList));
-    #endif //WINDOW_SCENE_SUPPORTED
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto cb = Converter::OptConvert<Callback_SecurityUIExtensionProxy_Void>(*callback_);
+    std::lock_guard<std::mutex> lock(peer->callbackListLock_);
+    if (cb) {
+        peer->DeleteSyncCallbackFromList(cb.value().resource.resourceId);
+    } else {
+        peer->ClearSyncCallbackList();
+    }
+    auto pattern = peer->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto funcList = peer->GetOnSyncCallbackList();
+    pattern->SetSyncCallbacks(std::move(funcList));
+#endif //WINDOW_SCENE_SUPPORTED
 }
 } // SecurityUIExtensionProxyAccessor
 const GENERATED_ArkUISecurityUIExtensionProxyAccessor* GetSecurityUIExtensionProxyAccessor()
 {
     static const GENERATED_ArkUISecurityUIExtensionProxyAccessor SecurityUIExtensionProxyAccessorImpl {
-        GetSecurityUIExtensionProxyAccessor::DestroyPeerImpl,
-        GetSecurityUIExtensionProxyAccessor::CtorImpl,
-        GetSecurityUIExtensionProxyAccessor::GetFinalizerImpl,
-        GetSecurityUIExtensionProxyAccessor::SendImpl,
-        GetSecurityUIExtensionProxyAccessor::SendSyncImpl,
-        GetSecurityUIExtensionProxyAccessor::OnAsyncReceiverRegisterImpl,
-        GetSecurityUIExtensionProxyAccessor::OnSyncReceiverRegisterImpl,
-        GetSecurityUIExtensionProxyAccessor::OffAsyncReceiverRegisterImpl,
-        GetSecurityUIExtensionProxyAccessor::OffSyncReceiverRegisterImpl,
+        SecurityUIExtensionProxyAccessor::DestroyPeerImpl,
+        SecurityUIExtensionProxyAccessor::CtorImpl,
+        SecurityUIExtensionProxyAccessor::GetFinalizerImpl,
+        SecurityUIExtensionProxyAccessor::SendImpl,
+        SecurityUIExtensionProxyAccessor::SendSyncImpl,
+        SecurityUIExtensionProxyAccessor::OnAsyncReceiverRegisterImpl,
+        SecurityUIExtensionProxyAccessor::OnSyncReceiverRegisterImpl,
+        SecurityUIExtensionProxyAccessor::OffAsyncReceiverRegisterImpl,
+        SecurityUIExtensionProxyAccessor::OffSyncReceiverRegisterImpl,
     };
     return &SecurityUIExtensionProxyAccessorImpl;
 }

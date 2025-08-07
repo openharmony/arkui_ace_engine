@@ -79,12 +79,12 @@ void SecurityUIExtensionStatic::SetSecurityOnRelease(
 }
 
 void SecurityUIExtensionStatic::SetSecurityOnRemoteReady(FrameNode* frameNode,
-    std::function<void(const RefPtr<SecurityUIExtensionProxy>&)>&& OnRemoteReady)
+    std::function<void(const RefPtr<SecurityUIExtensionProxy>&)>&& onRemoteReady)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnRemoteReadyCallback(std::move(OnRemoteReady));
+    eventHub->SetOnRemoteReadyCallback(std::move(onRemoteReady));
 }
 
 void SecurityUIExtensionStatic::SetSecurityOnResult(
