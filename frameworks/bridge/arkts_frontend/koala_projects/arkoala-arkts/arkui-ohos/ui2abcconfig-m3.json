@@ -93,9 +93,6 @@
             ],
             "#stateMgmtTool": [
                 "arkui/stateManagement/tools/arkts"
-            ],
-            "@ohos/arkui/theme": [
-                "./@ohos.arkui.theme"
             ]
         },
         "plugins": [
