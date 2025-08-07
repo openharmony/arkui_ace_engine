@@ -127,7 +127,6 @@ class PersistentStorage {
         Type.from<boolean>(),
     ]);
     private readonly storage_: IAniStorage = new AniStorage();
-    private isSimpleType: boolean = false;
 
     private static getOrCreate(): PersistentStorage {
         if (PersistentStorage.instance_) {
@@ -170,11 +169,9 @@ class PersistentStorage {
         fromJson?: FromJSONType<T>
     ): boolean {
         const ttype = Type.of(defaultValue);
-        if (!toJson && !fromJson && this.simpleTypeSet.has(ttype)) {
-            this.isSimpleType = true;
-        }
+
         try {
-            if (!this.isSimpleType && (!toJson || !fromJson)) {
+            if (!this.simpleTypeSet.has(ttype) && (!toJson || !fromJson)) {
                 StateMgmtConsole.log(
                     `Object Types for key ${key} requires toJson and fromJson functions to be defined`
                 );
@@ -195,13 +192,14 @@ class PersistentStorage {
                 }
                 return success;
             }
+
             // case 2: Read from disk, set in AppStorage and start persistence
             if (
                 PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(
                     key,
                     ttype,
-                    this.isSimpleType ? undefined : fromJson,
-                    this.isSimpleType ? undefined : toJson
+                    this.simpleTypeSet.has(key) ? undefined : fromJson,
+                    this.simpleTypeSet.has(key) ? undefined : toJson
                 )
             ) {
                 return true;
@@ -212,7 +210,7 @@ class PersistentStorage {
                 key,
                 ttype,
                 defaultValue,
-                this.isSimpleType ? undefined : toJson,
+                this.simpleTypeSet.has(key)? undefined : toJson,
             );
             if (!success) {
                 StateMgmtConsole.log(`Failed to create and persist key ${key} with default value`);
@@ -295,7 +293,7 @@ class PersistentStorage {
         }
 
         try {
-            if (this.isSimpleType) {
+            if (this.simpleTypeSet.has(key)) {
                 // Step 2: simple type just parse from disk
                 const value = JSON.parse<T>(jsonString, ttype);
 
@@ -345,7 +343,7 @@ class PersistentStorage {
                 return;
             }
             try {
-                if (this.isSimpleType) {
+                if (this.simpleTypeSet.has(key)) {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {

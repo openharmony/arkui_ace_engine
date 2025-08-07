@@ -205,6 +205,9 @@ export class StorageBase {
     }
 
     public __getStoragePropUnsafe<T>(key: string): StorageProperty<T> | undefined {
+        if (!this.repoAllTypes.has(key)) {
+            return undefined;
+        }
         return this.repoAllTypes.get(key) as StorageProperty<T>;
     }
 }

@@ -159,7 +159,7 @@ export class InteropStorageBase extends StorageBase {
 
     // return ArkTS1.1 ObservedPropertyPU object.
     public getStoragePropertyForDynamic(value: string): Any {
-        const storage = super.get(value);
+        const storage = super.__getStoragePropUnsafe<NullishType>(value);
         if (storage === undefined) {
             return undefined;
         }
