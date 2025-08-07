@@ -2142,4 +2142,27 @@ HWTEST_F(SwiperEventTestNg, FireSelectedEvent002, TestSize.Level1)
     pattern_->FireSelectedEvent(3, 3);
     EXPECT_EQ(pattern_->selectedIndex_, 3);
 }
+
+/**
+ * @tc.name: OnIndexChange002
+ * @tc.desc: Test OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->oldIndex_ = 3;
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(3);
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(true);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(true);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
+}
 } // namespace OHOS::Ace::NG
