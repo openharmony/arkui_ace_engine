@@ -6505,6 +6505,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     std::string stringValue;
     std::string extraInfoValue;
     RefPtr<PixelMap> pixmap = nullptr;
+    std::shared_ptr<Media::PixelMap> pixelMapSharedPtr = nullptr;
     if (valueObj->IsObject(vm)) {
         auto obj = valueObj->ToObject(vm);
         auto inspectorId = obj->Get(vm, "inspetorId");
@@ -6527,7 +6528,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
             pixmap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, pixelMap);
 #endif
             if (pixmap) {
-                auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
+                pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
                 dragPreview.pixelMap = static_cast<void*>(&pixelMapSharedPtr);
             }
         }
