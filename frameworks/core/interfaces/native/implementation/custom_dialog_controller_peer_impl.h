@@ -35,6 +35,7 @@ public:
     void SetDialogAlignment(Opt_DialogAlignment alignment);
     void SetOffset(Opt_Offset offset);
     void SetCustomStyle(Opt_Boolean customStyle);
+    Opt_Boolean GetCustomStyle();
     void SetGridCount(Opt_Number gridCount);
     void SetMaskColor(Opt_ResourceColor maskColor);
     void SetMaskRect(Opt_Rectangle maskRect);

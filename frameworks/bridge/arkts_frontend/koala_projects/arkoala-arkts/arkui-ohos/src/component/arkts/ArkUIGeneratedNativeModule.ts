@@ -5774,6 +5774,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_open(ptr: KPointer): undefined
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
+    @ani.unsafe.Quick
+    native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
     @ani.unsafe.Direct

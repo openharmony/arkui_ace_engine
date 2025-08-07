@@ -69,6 +69,9 @@ export class CustomDialogController implements MaterializedBase {
     public close(): void {
         this.close_serialize()
     }
+    public getExternalOptions(): CustomDialogControllerExternalOptions {
+        return this.getExternalOptions_serialize()
+    }
     private open_serialize(): void {
         if (this.customComponent) {
             const peerNode = this.customComponent!.getPeerNode()
@@ -80,6 +83,19 @@ export class CustomDialogController implements MaterializedBase {
     }
     private close_serialize(): void {
         ArkUIGeneratedNativeModule._CustomDialogController_close(this.peer!.ptr)
+    }
+    private getExternalOptions_serialize(): CustomDialogControllerExternalOptions {
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._CustomDialogController_getExternalOptions(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const returnResult : CustomDialogControllerExternalOptions = retvalDeserializer.readCustomDialogControllerExternalOptions()
+        return returnResult
     }
 }
 export interface CustomDialogControllerOptions {
@@ -122,4 +138,8 @@ export interface CustomDialogControllerOptions {
     levelOrder?: LevelOrder;
     focusable?: boolean;
     baseComponent?: ExtendableComponent;
+}
+
+export interface CustomDialogControllerExternalOptions {
+    customStyle?: boolean;
 }

@@ -35432,6 +35432,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialogController peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getExternalOptions(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
     {
         if (!needGroupedLog(1))
@@ -46195,6 +46205,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::GetExternalOptionsImpl,
             CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
