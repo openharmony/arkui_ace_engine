@@ -17,7 +17,6 @@ export * from "./handwritten"
 export * from "./annotations"
 
 export * from "./ArkState"
-export * from "./ArkStateProperties"
 export * from "./NativeLog"
 export * from "./UserView"
 export * from "./ForEach"

@@ -14,6 +14,8 @@
  */
 
 
+package global.resource;
+
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
