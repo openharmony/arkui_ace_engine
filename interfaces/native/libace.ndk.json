@@ -2743,7 +2743,7 @@
         "first_introduced": "15",
         "name": "OH_ArkUI_FocusSetAutoTransfer"
     },
-    { 
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_HostWindowInfo_GetName"
     },
@@ -3534,5 +3534,13 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_NativeModule_GetNavDestinationAniParam"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NativeModule_GetDrawableDescriptorFromAniValue"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NativeModule_GetDrawableDescriptorFromResourceAniValue"
     }
 ]

@@ -25,7 +25,7 @@ ArkUI_DrawableDescriptor* OH_ArkUI_CreateFromNapiDrawable(OHOS::Ace::Napi::Drawa
 {
     auto pixelMap = napiDrawable->GetPixelMap();
     auto drawable = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(pixelMap);
-    return new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, drawable };
+    return new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, drawable };
 }
 
 } // namespace OHOS::Ace::Drawable
