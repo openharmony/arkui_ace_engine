@@ -8295,6 +8295,11 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
         return;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    NewLinearGradient(jsObj, newGradient);
+}
+
+void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient)
+{
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
     std::optional<float> degree;
@@ -8375,6 +8380,11 @@ void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradien
         return;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(arg);
+    NewRadialGradient(jsObj, newGradient);
+}
+
+void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient)
+{
     newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
     // center
     JSRef<JSVal> center = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER));
