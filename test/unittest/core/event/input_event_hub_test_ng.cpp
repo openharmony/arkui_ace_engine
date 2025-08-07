@@ -758,6 +758,10 @@ HWTEST_F(InputEventHubTestNg, HandleHoverEventTest001, TestSize.Level1)
     mouseEvent.globalDisplayX = expectedOffset.GetX();
     mouseEvent.globalDisplayY = expectedOffset.GetY();
 
+    /**
+     * @tc.steps: step1. Test HandleHoverEvent Func.
+     * @tc.expected: Get location same as expectedOffset.
+     */
     hoverEventTarget->HandleHoverEvent(false, mouseEvent);
     EXPECT_EQ(actualGlobalLocation, expectedOffset);
     EXPECT_EQ(actualDisplayLocation, expectedOffset);
