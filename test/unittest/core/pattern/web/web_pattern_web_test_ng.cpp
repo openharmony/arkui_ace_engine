@@ -584,6 +584,8 @@ HWTEST_F(WebPatternWebTest, OnAttachContext, TestSize.Level1)
     auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     auto pipelineContext = MockPipelineContext::GetCurrent();
     webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
+    webPattern->renderContextForSurface_ = nullptr;
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }
