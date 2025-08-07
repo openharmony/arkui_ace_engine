@@ -66,7 +66,9 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize,
     const PaddingPropertyF& padding)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto property = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    const auto& layoutConstraint = property->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
     OptionalSizeF frameSize;
