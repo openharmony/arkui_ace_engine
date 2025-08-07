@@ -118,8 +118,12 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>(themeScopeId);
     auto defaultColor = theme ? theme->GetTextStyle().GetTextColor() : Color::BLACK;
-    json->PutExtAttr("fontColor",
-        GetTextColor().value_or(defaultColor).ColorToString().c_str(), filter);
+
+    if (host->GetTags() == V2::SYMBOL_ETS_TAG) {
+        json->PutExtAttr("fontColor", GetSymbolColorListInJson(GetSymbolColorList()), filter);
+    } else {
+        json->PutExtAttr("fontColor", GetTextColor().value_or(defaultColor).ColorToString().c_str(), filter);
+    }
     json->PutExtAttr("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str(), filter);
     json->PutExtAttr("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);

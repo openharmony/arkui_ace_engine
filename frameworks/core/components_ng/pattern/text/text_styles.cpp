@@ -328,6 +328,20 @@ std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<
     return array;
 }
 
+std::unique_ptr<JsonValue> GetSymbolColorListInJson(const std::optional<std::vector<Color>>& value)
+{
+    auto array = JsonUtil::CreateArray(true);
+    if (!value.has_value() || value->empty()) {
+        return array;
+    }
+    for (const auto& color_i: *value) {
+        auto obj = JsonUtil::Create(true);
+        obj->Put("color", color_i.ColorToString().c_str());
+        array->Put(obj);
+    }
+    return array;
+}
+
 void FontStyle::UpdateColorByResourceId()
 {
     if (propTextColor) {
