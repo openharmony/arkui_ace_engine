@@ -22,7 +22,7 @@ import { int32 } from "@koalaui/compat"
 export function hashCodeFromString(value: string): int32 {
     let hash = 5381
     for(let i = 0; i < value.length; i++) {
-        hash = (hash * 33) ^ value.charCodeAt(i).toInt()
+        hash = (hash * 33) ^ value.charCodeAt(i)
         hash |= 0
     }
     return hash
