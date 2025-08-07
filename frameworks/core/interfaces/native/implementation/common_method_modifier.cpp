@@ -4342,13 +4342,13 @@ void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   const Opt_AccessibilitySamePageMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
-    if (!convValue) {
-        ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
-        return;
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
+    // if (!convValue) {
+    //     return;
+    // }
+    // auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
