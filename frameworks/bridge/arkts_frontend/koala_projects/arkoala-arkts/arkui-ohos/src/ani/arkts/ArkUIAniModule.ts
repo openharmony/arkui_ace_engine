@@ -67,6 +67,7 @@ export class ArkUIAniModule {
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _SyntaxNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
