@@ -67,8 +67,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             int64_t deadline = std::min(ts, static_cast<int64_t>(timeStampNanos)) + refreshPeriod;
             bool dvsyncOn = window->GetUiDvsyncSwitch();
             if (dvsyncOn) {
-                int64_t frameBufferCount = (refreshPeriod != 0 && timeStampNanos - ts > 0) ?
-                    (timeStampNanos - ts) / refreshPeriod : 0;
+                int64_t timeCompare = static_cast<int64_t>(timeStampNanos) - ts;
+                int64_t frameBufferCount = (refreshPeriod != 0 && timeCompare > 0) ? timeCompare / refreshPeriod : 0;
                 deadline = window->GetDeadlineByFrameCount(deadline, ts, frameBufferCount);
                 ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", refreshPeriod is: %" PRId64 ",\
                     frameBufferCount is %" PRId64 ", deadline is %" PRId64 "",\
