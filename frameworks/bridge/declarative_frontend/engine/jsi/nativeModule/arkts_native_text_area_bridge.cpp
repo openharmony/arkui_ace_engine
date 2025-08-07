@@ -1303,19 +1303,13 @@ ArkUINativeModuleValue TextAreaBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runti
         caretWidth = textFieldTheme->GetCursorWidth();
     }
     Color color;
-    uint32_t caretColor;
+    uint32_t caretColor = textFieldTheme->GetCursorColor().GetValue();
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!caretColorArg->IsUndefined()) {
         if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
             caretColor = color.GetValue();
-        } else {
-            caretColor = textFieldTheme->GetCursorColor().GetValue();
         }
-    } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaret(
-            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), AceType::RawPtr(widthObject));
-        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaretStyle(
         nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()),
