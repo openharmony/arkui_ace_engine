@@ -750,6 +750,7 @@ void WindowPattern::AddBackgroundColorDelayed()
         auto context = self->GetContext();
         CHECK_NULL_VOID(context);
         auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        CHECK_NULL_VOID(self->snapshotWindow_);
         auto snapshotContext = self->snapshotWindow_->GetRenderContext();
         CHECK_NULL_VOID(snapshotContext);
         snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
