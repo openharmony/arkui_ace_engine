@@ -110,6 +110,9 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_002, TestSize.Level1)
      */
     auto event = guestureEventHub->eventHub_.Upgrade();
     event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
