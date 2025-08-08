@@ -14,7 +14,7 @@
  */
 
 import { pointer } from "@koalaui/interop";
-import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "./generated";
+import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "#generated";
 import { int32 } from "@koalaui/common"
 import { MutableState } from "@koalaui/runtime";
 

@@ -15,7 +15,7 @@
 
 const tsNode = require("ts-node")
 const path = require("path")
-const { goldenSetup } = require("@koalaui/common/golden")
+const { goldenSetup } = require("@koalaui/harness/golden")
 
 goldenSetup('.', '.')
 

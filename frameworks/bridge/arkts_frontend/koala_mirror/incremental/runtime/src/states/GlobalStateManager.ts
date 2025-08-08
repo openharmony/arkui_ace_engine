@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 
-import { CoroutineLocalValue, KoalaCallsiteKey } from "@koalaui/common"
-import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
+import { ArrayState, Equivalent, MutableState, StateManager, StateManagerLocal, ValueTracker, createStateManager } from "./State"
 
 /**
  * This class provides an access to the global state manager of the application.
  * @internal
  */
 export class GlobalStateManager {
-    private static localManager = new CoroutineLocalValue<StateManager>()
     private static sharedManager: StateManager | undefined = undefined
 
     private static get current(): StateManager | undefined {
-        return GlobalStateManager.GetLocalManager() ?? GlobalStateManager.sharedManager
+        return StateManagerLocal.get() ?? GlobalStateManager.sharedManager
     }
 
     /**
@@ -51,26 +49,22 @@ export class GlobalStateManager {
 
     /**
      * Get state manager by coroutine id.
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
      * @internal
      */
     static GetLocalManager(): StateManager | undefined {
-        return GlobalStateManager.localManager.get()
+        return StateManagerLocal.get()
     }
 
     /**
      * Store state manager by coroutine id.
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
      * @internal
      */
     static SetLocalManager(manager: StateManager | undefined): void {
-        GlobalStateManager.localManager.set(manager)
-    }
-
-    /**
-     * @return callsite key for a current context or `undefined` for global context
-     * @internal
-     */
-    public static getCurrentScopeId(): KoalaCallsiteKey | undefined {
-        return GlobalStateManager.instance.currentScopeId
+        StateManagerLocal.set(manager)
     }
 }
 
@@ -130,4 +124,16 @@ export function mutableState<T>(value: T, equivalent?: Equivalent<T>, tracker?: 
  */
 export function arrayState<T>(array?: ReadonlyArray<T>, equivalent?: Equivalent<T>): ArrayState<T> {
     return GlobalStateManager.instance.arrayState<T>(array, undefined, equivalent)
+}
+
+/**
+ * Creates new mutable state in the global state manager.
+ * This state is valid until it is manually detached from the manager.
+ * Note that this state will not be automatically disconnected,
+ * even if this function is called in memo-context.
+ * Always call {@link Disposable.dispose} when the state is not needed to prevent memory leaks.
+ * @see #mutableState
+ */
+export function globalMutableState<Value>(value: Value): MutableState<Value>  {
+    return GlobalStateManager.instance.mutableState(value, true)
 }

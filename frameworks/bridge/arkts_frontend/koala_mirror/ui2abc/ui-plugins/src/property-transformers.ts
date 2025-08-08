@@ -16,8 +16,8 @@
 import * as arkts from "@koalaui/libarkts"
 import { Es2pandaTokenType } from "@koalaui/libarkts"
 
-import { DecoratorNames, DecoratorParameters, hasDecorator } from "./utils"
-import { CustomComponentNames, getComponentPackage, getDecoratorPackage, getRuntimePackage, Importer, ImportingTransformer, InternalAnnotations } from "./utils"
+import { DecoratorNames, DecoratorParameters, findDecorator, hasDecorator } from "./utils"
+import { CustomComponentNames, getDecoratorPackage, getRuntimePackage, Importer, ImportingTransformer, InternalAnnotations } from "./utils"
 import { annotation, classMethods, isAnnotation } from "./common/arkts-utils"
 
 export interface PropertyTransformer extends ImportingTransformer {
@@ -55,7 +55,7 @@ export function createWrapperType(name: string, type: arkts.TypeNode, useUnion: 
     return useUnion ? arkts.factory.createETSUnionType([type.clone(), box]) : box
 }
 
-function backingFieldNameOf(property: arkts.ClassProperty): string {
+export function backingFieldNameOf(property: arkts.ClassProperty): string {
     return "__backing_" + property.id!.name
 }
 
@@ -530,10 +530,10 @@ function initializerOf(property: arkts.ClassProperty): arkts.Expression {
     return fieldOf(arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME), property.id!.name, true)
 }
 
-function parseAllowOverride(propertyOriginal: arkts.ClassProperty): boolean {
-    const allowOverrideProperty = propertyOriginal.annotations.find(it => {
-            return arkts.isIdentifier(it.expr) && it.expr.name === DecoratorNames.PROVIDE
-        })?.properties.find(it => {
+function parseAllowOverride(propertyOriginal: arkts.ClassProperty, decoratorName: DecoratorNames): boolean {
+    const allowOverrideProperty =
+        findDecorator(propertyOriginal.annotations, decoratorName)
+        ?.properties.find(it => {
             return arkts.isClassProperty(it) && it.id?.name === DecoratorParameters.ALLOW_OVERRIDE
         })
     return allowOverrideProperty !== undefined
@@ -578,7 +578,7 @@ export class ProvideTransformer extends PropertyTransformerBase {
         addPropertyRecordTo(result, property)
     }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
-        const allowOverride = parseAllowOverride(property)
+        const allowOverride = parseAllowOverride(property, this.decoratorName)
         const params = withStorageKey([], property, this.decoratorName)
         if (!allowOverride) {
             result.push(callStatementsOnce([
@@ -591,7 +591,30 @@ export class ProvideTransformer extends PropertyTransformerBase {
         super.collectImports(imports)
         imports.add("once", getRuntimePackage())
     }
+}
 
+export class ProviderTransformer extends PropertyTransformerBase {
+    constructor() {
+        super(DecoratorNames.PROVIDER, "ProvideDecoratorProperty")
+    }
+
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        if (property.value == undefined) {
+            throw new Error(`@Provider decorator requires an initial value for '${property.id?.name}'`)
+        }
+        result.push(
+            thisPropertyMethodCall(property, "init", [arkts.factory.createUndefinedLiteral(),
+                arkts.factory.createTSAsExpression(property.value, property.typeAnnotation, false)
+            ])
+        )
+    }
+
+    applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        if (parseAllowOverride(property, this.decoratorName)) {
+            throw new Error(`@Provider does not support the allowOverride parameter. Name overloading is already used by default.`)
+        }
+        result.push(thisPropertyMethodCall(property, "provide", withStorageKey([], property, this.decoratorName)))
+    }
 }
 
 export class ConsumeTransformer extends PropertyTransformerBase {
@@ -601,6 +624,22 @@ export class ConsumeTransformer extends PropertyTransformerBase {
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         if (property.value) throw new Error("@Consume decorator does not expect property initializer")
         result.push(thisPropertyMethodCall(property, "init", withStorageKey([], property, this.decoratorName)))
+    }
+}
+
+export class ConsumerTransformer extends PropertyTransformerBase {
+    constructor() {
+        super(DecoratorNames.CONSUMER, "ConsumerDecoratorProperty")
+    }
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        if (property.value == undefined) {
+            throw new Error(`@Consumer decorator requires an initial value for '${property.id?.name}'`)
+        }
+        result.push(
+            thisPropertyMethodCall(property,
+                "init",
+                withStorageKey([arkts.factory.createTSAsExpression(property.value, property.typeAnnotation, false)], property, this.decoratorName))
+        )
     }
 }
 
@@ -637,6 +676,18 @@ export class BuilderParamTransformer implements PropertyTransformer {
         // addPropertyRecordTo(result, property)
     }
     applyBuild(property: arkts.ClassProperty, result: arkts.Statement[]): void {
+    }
+}
+
+export class LocalPropertyTransformer extends PropertyTransformerBase {
+    constructor() {
+        super(DecoratorNames.LOCAL, "StateDecoratorProperty")
+    }
+    applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
+        result.push(thisPropertyMethodCall(property, "init", [arkts.factory.createUndefinedLiteral(), property.value!]))
+    }
+    applyReuseRecord(property: arkts.ClassProperty, result: arkts.Expression[]): void {
+        addPropertyRecordTo(result, property)
     }
 }
 

@@ -82,8 +82,16 @@ export class ClassProperty extends ClassElement {
         return global.generatedEs2panda._ClassPropertyNeedInitInStaticBlockConst(global.context, this.peer)
     }
     /** @deprecated */
-    setInitInStaticBlock(needInitInStaticBlock: boolean): this {
-        global.generatedEs2panda._ClassPropertySetInitInStaticBlock(global.context, this.peer, needInitInStaticBlock)
+    setNeedInitInStaticBlock(): this {
+        global.generatedEs2panda._ClassPropertySetNeedInitInStaticBlock(global.context, this.peer)
+        return this
+    }
+    get isImmediateInit(): boolean {
+        return global.generatedEs2panda._ClassPropertyIsImmediateInitConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setIsImmediateInit(): this {
+        global.generatedEs2panda._ClassPropertySetIsImmediateInit(global.context, this.peer)
         return this
     }
     /** @deprecated */

@@ -120,7 +120,7 @@
 
         "clean": "rimraf build",
         "clean:native": "npm run clean --prefix ./framework",
-        "clean:all": "npm run clean && npm run clean --prefix arkui && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:all --prefix shopping",
+        "clean:all": "npm run clean && npm run clean --prefix arkui && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:all --prefix shopping && npm run clean --prefix modules",
         "perf:trivial": "npm run perf --prefix trivial",
 
         "previewer:run": "node scripts/previewer-cli.mjs run",
@@ -130,8 +130,8 @@
         "previewer:list-remote": "node scripts/previewer-cli.mjs list-remote",
         "previewer:set-active": "node scripts/previewer-cli.mjs set-active",
 
-        "link": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build/arkui.abc",
-        "build": "npm run build --prefix ../incremental && npm run build --prefix ../interop && npm run build --prefix arkui && npm run link"
+        "link": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build/arkui.abc modules/build/bootPandaFiles/modules.abc",
+        "build": "npm run build --prefix ../incremental && npm run build --prefix ../interop && npm run build --prefix arkui && npm run build:modules --prefix modules && npm run link"
     }
 }
 

@@ -44,10 +44,10 @@ class Use {
     }
     const test = new Test();
     test.obj_arg(__memo_context, ((__memo_id) + (__hash("id_obj_arg_@test/input/HQ/object-param.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_obj_arg_@test/input/HQ/object-param.ets"))), ((): A => {
-      return ({
+      return {
         x: 1,
         y: 2,
-      } as A);
+      };
     })));
     {
       __memo_scope.recache();

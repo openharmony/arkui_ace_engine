@@ -39,7 +39,7 @@
 #endif
 
 #ifdef KOALA_KOTLIN
-#include "kotlin_koala_api.h"
+#include "kotlin_vmloader_wrapper.h"
 #endif
 
 #if defined(KOALA_LINUX) || defined(KOALA_MACOS) || defined(KOALA_OHOS)
@@ -162,6 +162,8 @@ struct VMEntry {
     int vmKind;
     void* env;
     void* app;
+    void* create;
+    void* start;
     void* enter;
     void* emitEvent;
     void* restartWith;
@@ -506,10 +508,14 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
 #ifdef KOALA_KOTLIN
     if (vmKind == KOTLIN_KIND) {
         g_vmEntry.vmKind = vmKind;
+        (void)vm;
 
-        typedef kotlin_koala_ExportedSymbols* (*get_symbols_t)(void);
-        get_symbols_t get_symbols = (get_symbols_t)findSymbol(handle, "kotlin_koala_symbols");
-        env = static_cast<void*>(get_symbols());
+        application_create_t application_create = (application_create_t)findSymbol(handle, "application_create");
+        application_start_t application_start = (application_start_t)findSymbol(handle, "application_start");
+        application_enter_t application_enter = (application_enter_t)findSymbol(handle, "application_enter");
+        g_vmEntry.create = (void*)application_create;
+        g_vmEntry.start = (void*)application_start;
+        g_vmEntry.enter = (void*)application_enter;
 
         result = 0;
     }
@@ -871,14 +877,14 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
 
 #if defined(KOALA_KOTLIN)
     if (g_vmEntry.vmKind == KOTLIN_KIND) {
-        auto env = reinterpret_cast<kotlin_koala_ExportedSymbols*>(g_vmEntry.env);
-        auto ApplicationType = env->kotlin.root.koala.Application;
+        application_create_t application_create = (application_create_t)g_vmEntry.create;
+        application_start_t application_start = (application_start_t)g_vmEntry.start;
 
-        auto app = ApplicationType.Application(appUrl, appParams);
-        g_vmEntry.app = (void*)app.pinned;
+        kotlin_kref_VMLoaderApplication app = application_create(appUrl, appParams);
+        g_vmEntry.app = app.pinned;
 
-        auto ptr = ApplicationType.start(app);
-        return reinterpret_cast<KNativePointer>(ptr.pinned);
+        kotlin_kref_PeerNodeStub root = application_start(app);
+        return root.pinned;
     }
 #endif
 
@@ -947,11 +953,9 @@ extern "C" DLL_EXPORT KBoolean RunApplication(const KInt arg0, const KInt arg1) 
 
 #ifdef KOALA_KOTLIN
     if (g_vmEntry.vmKind == KOTLIN_KIND) {
-        auto env = reinterpret_cast<kotlin_koala_ExportedSymbols*>(g_vmEntry.env);
-        auto ApplicationType = env->kotlin.root.koala.Application;
-
-        kotlin_koala_kref_koala_Application app = { .pinned = g_vmEntry.app };
-        return ApplicationType.enter(app, arg0, arg1) ? 1 : 0;
+        kotlin_kref_VMLoaderApplication app = { .pinned = g_vmEntry.app };
+        application_enter_t application_enter = (application_enter_t)g_vmEntry.enter;
+        return application_enter(app) ? 1 : 0;
     }
 #endif
 

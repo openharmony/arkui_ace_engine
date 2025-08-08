@@ -25,7 +25,7 @@
 // to see the output.
 #define KOALA_TRACE_PUBLIC "%{public}s"
 #else
-#include <stdio.h>
+#include <cstdio>
 #define KOALA_TRACE(msg, str) fprintf(stderr, "Koala: " msg "\n", str)
 #define KOALA_TRACE_PUBLIC "%s"
 #endif

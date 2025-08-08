@@ -22,6 +22,7 @@ export const BANNER = "[fast-arktsc]"
 export const PLUGIN_DEPENDENCIES = "dependencies"
 export const PLUGIN_NAME = "name"
 export const LAST_STATE = "_proceed_to_binary"
+export const indexVariants = [".ts", ".ets", ".d.ts", ".d.ets"]
 
 export function relativeOrDot(from: string, to: string) {
     const result = path.relative(from, to)
@@ -108,7 +109,7 @@ function resolvePaths(name: string, paths: Map<string, string>, dependencies: Ma
 
 /**
  * Checks that compilation with the given ui2abcconfig is possible and creates temporary arktsconfigs
- * 
+ *
  * @param configPath path to ui2abc configuration file
  * @returns path to first es2panda configuration file and intermediate build directories
  */
@@ -156,7 +157,7 @@ export function resolveConfig(configPath: string, restartStates: boolean): [stri
 
         for (const [k, v] of resolvedPaths) {
             let ext = path.extname(v)
-            let isResolvedToFile = ext === ".ts" || ext === ".ets"
+            let isResolvedToFile = indexVariants.includes(ext)
             if (isResolvedToFile) {
                 try {
                     isResolvedToFile = fs.statSync(v).isFile()
@@ -164,8 +165,13 @@ export function resolveConfig(configPath: string, restartStates: boolean): [stri
                     isResolvedToFile = false
                 }
             }
-            if (!isResolvedToFile && (k.startsWith('@') || k.startsWith('#')) && !v.endsWith('*') && !fs.existsSync(path.join(v, "index.ts")) && !fs.existsSync(path.join(v, "index.ets"))) {
-                error(`File ${v}/index.[ts|ets] does not exists`)
+            if (!isResolvedToFile &&
+                (k.startsWith('@') || k.startsWith('#')) &&
+                !v.endsWith('*') &&
+                !indexVariants.some(value => fs.existsSync(path.join(v, `index${value}`))) &&
+                !indexVariants.some(value => fs.existsSync(`${v}${value}`))
+            ) {
+                console.warn(`Warning: File ${v}.[ts|ets|d.ts|d.ets] or ${v}/index.[ts|ets|d.ts|d.ets] does not exists`)
             }
         }
 

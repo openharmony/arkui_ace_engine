@@ -18,7 +18,7 @@ import { __context, __id, contextNode, DataNode, memoEntry2, remember, rememberM
 import { hashCodeFromString, int32, KoalaCallsiteKey } from "@koalaui/common"
 import { nullptr, pointer } from "@koalaui/interop";
 import { LazyForEachType, PeerNode, PeerNodeType } from "./PeerNode";
-import { LazyForEachOps } from "./generated"
+import { LazyForEachOps } from "#generated"
 import { DataChangeListener, InternalListener } from "./DataChangeListener";
 
 export { DataChangeListener } from "./DataChangeListener";

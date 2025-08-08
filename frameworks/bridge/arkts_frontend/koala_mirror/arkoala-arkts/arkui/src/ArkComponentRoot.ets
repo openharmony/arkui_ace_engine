@@ -16,10 +16,10 @@ import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koala
 
 import { mutableState, MutableState, NodeAttach, rememberDisposable, remember, RunEffect, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode } from "./PeerNode";
-import { ArkComponentRootPeer } from "./generated";
+import { ArkComponentRootPeer } from "#generated";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
-import { CurrentRouterTransitionState, RouterTransitionVisibility } from "./handwritten/Router";
+import { CurrentRouterTransitionState, RouterTransitionVisibility } from "./Router";
 
 let _isNeedCreate: boolean = false
 

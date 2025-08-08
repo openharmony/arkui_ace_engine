@@ -20,9 +20,9 @@ import { int32 } from "@koalaui/common"
 import { KPointer } from "@koalaui/interop"
 import { ComponentBase } from "../ComponentBase"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, ToolbarItem, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition, PixelMap, Resource, SymbolGlyphModifier, CustomBuilder, ResourceStr, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./../generated"
+import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, ToolbarItem, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition, PixelMap, Resource, SymbolGlyphModifier, CustomBuilder, ResourceStr, LayoutSafeAreaType, LayoutSafeAreaEdge } from "#generated"
 import { PeerNode } from "../PeerNode"
-import { ArkCommonMethodPeer, Dimension, Length, NavExtender, NavPathStack } from "../generated"
+import { ArkCommonMethodPeer, Dimension, Length, NavExtender, NavPathStack } from "#generated"
 
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
 

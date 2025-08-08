@@ -199,7 +199,7 @@ typedef struct InteropObject {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 134
+#define GENERATED_ARKUI_FULL_API_VERSION 135
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -1003,16 +1003,6 @@ typedef struct Array_drawing_TextBlobRunBuffer Array_drawing_TextBlobRunBuffer;
 typedef struct Opt_Array_drawing_TextBlobRunBuffer Opt_Array_drawing_TextBlobRunBuffer;
 typedef struct Array_FingerInfo Array_FingerInfo;
 typedef struct Opt_Array_FingerInfo Opt_Array_FingerInfo;
-typedef struct Array_font_UIFontAdjustInfo Array_font_UIFontAdjustInfo;
-typedef struct Opt_Array_font_UIFontAdjustInfo Opt_Array_font_UIFontAdjustInfo;
-typedef struct Array_font_UIFontAliasInfo Array_font_UIFontAliasInfo;
-typedef struct Opt_Array_font_UIFontAliasInfo Opt_Array_font_UIFontAliasInfo;
-typedef struct Array_font_UIFontFallbackGroupInfo Array_font_UIFontFallbackGroupInfo;
-typedef struct Opt_Array_font_UIFontFallbackGroupInfo Opt_Array_font_UIFontFallbackGroupInfo;
-typedef struct Array_font_UIFontFallbackInfo Array_font_UIFontFallbackInfo;
-typedef struct Opt_Array_font_UIFontFallbackInfo Opt_Array_font_UIFontFallbackInfo;
-typedef struct Array_font_UIFontGenericInfo Array_font_UIFontGenericInfo;
-typedef struct Opt_Array_font_UIFontGenericInfo Opt_Array_font_UIFontGenericInfo;
 typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
 typedef struct Array_GestureRecognizer Array_GestureRecognizer;
@@ -1961,18 +1951,6 @@ typedef struct Ark_FocusMovement Ark_FocusMovement;
 typedef struct Opt_FocusMovement Opt_FocusMovement;
 typedef struct Ark_FolderStackOptions Ark_FolderStackOptions;
 typedef struct Opt_FolderStackOptions Opt_FolderStackOptions;
-typedef struct Ark_font_UIFontAdjustInfo Ark_font_UIFontAdjustInfo;
-typedef struct Opt_font_UIFontAdjustInfo Opt_font_UIFontAdjustInfo;
-typedef struct Ark_font_UIFontAliasInfo Ark_font_UIFontAliasInfo;
-typedef struct Opt_font_UIFontAliasInfo Opt_font_UIFontAliasInfo;
-typedef struct Ark_font_UIFontConfig Ark_font_UIFontConfig;
-typedef struct Opt_font_UIFontConfig Opt_font_UIFontConfig;
-typedef struct Ark_font_UIFontFallbackGroupInfo Ark_font_UIFontFallbackGroupInfo;
-typedef struct Opt_font_UIFontFallbackGroupInfo Opt_font_UIFontFallbackGroupInfo;
-typedef struct Ark_font_UIFontFallbackInfo Ark_font_UIFontFallbackInfo;
-typedef struct Opt_font_UIFontFallbackInfo Opt_font_UIFontFallbackInfo;
-typedef struct Ark_font_UIFontGenericInfo Ark_font_UIFontGenericInfo;
-typedef struct Opt_font_UIFontGenericInfo Opt_font_UIFontGenericInfo;
 typedef struct Ark_FontInfo Ark_FontInfo;
 typedef struct Opt_FontInfo Opt_FontInfo;
 typedef struct Ark_FontSettingOptions Ark_FontSettingOptions;
@@ -8939,51 +8917,6 @@ typedef struct Opt_Array_FingerInfo {
     Ark_Tag tag;
     Array_FingerInfo value;
 } Opt_Array_FingerInfo;
-typedef struct Array_font_UIFontAdjustInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontAdjustInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontAdjustInfo;
-typedef struct Opt_Array_font_UIFontAdjustInfo {
-    Ark_Tag tag;
-    Array_font_UIFontAdjustInfo value;
-} Opt_Array_font_UIFontAdjustInfo;
-typedef struct Array_font_UIFontAliasInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontAliasInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontAliasInfo;
-typedef struct Opt_Array_font_UIFontAliasInfo {
-    Ark_Tag tag;
-    Array_font_UIFontAliasInfo value;
-} Opt_Array_font_UIFontAliasInfo;
-typedef struct Array_font_UIFontFallbackGroupInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontFallbackGroupInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontFallbackGroupInfo;
-typedef struct Opt_Array_font_UIFontFallbackGroupInfo {
-    Ark_Tag tag;
-    Array_font_UIFontFallbackGroupInfo value;
-} Opt_Array_font_UIFontFallbackGroupInfo;
-typedef struct Array_font_UIFontFallbackInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontFallbackInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontFallbackInfo;
-typedef struct Opt_Array_font_UIFontFallbackInfo {
-    Ark_Tag tag;
-    Array_font_UIFontFallbackInfo value;
-} Opt_Array_font_UIFontFallbackInfo;
-typedef struct Array_font_UIFontGenericInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontGenericInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontGenericInfo;
-typedef struct Opt_Array_font_UIFontGenericInfo {
-    Ark_Tag tag;
-    Array_font_UIFontGenericInfo value;
-} Opt_Array_font_UIFontGenericInfo;
 typedef struct Array_FractionStop {
     /* kind: ContainerType */
     Ark_FractionStop* array;
@@ -13518,62 +13451,6 @@ typedef struct Opt_FolderStackOptions {
     Ark_Tag tag;
     Ark_FolderStackOptions value;
 } Opt_FolderStackOptions;
-typedef struct Ark_font_UIFontAdjustInfo {
-    /* kind: Interface */
-    Ark_Number weight;
-    Ark_Number to;
-} Ark_font_UIFontAdjustInfo;
-typedef struct Opt_font_UIFontAdjustInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontAdjustInfo value;
-} Opt_font_UIFontAdjustInfo;
-typedef struct Ark_font_UIFontAliasInfo {
-    /* kind: Interface */
-    Ark_String name;
-    Ark_Number weight;
-} Ark_font_UIFontAliasInfo;
-typedef struct Opt_font_UIFontAliasInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontAliasInfo value;
-} Opt_font_UIFontAliasInfo;
-typedef struct Ark_font_UIFontConfig {
-    /* kind: Interface */
-    Array_String fontDir;
-    Array_font_UIFontGenericInfo generic;
-    Array_font_UIFontFallbackGroupInfo fallbackGroups;
-} Ark_font_UIFontConfig;
-typedef struct Opt_font_UIFontConfig {
-    Ark_Tag tag;
-    Ark_font_UIFontConfig value;
-} Opt_font_UIFontConfig;
-typedef struct Ark_font_UIFontFallbackGroupInfo {
-    /* kind: Interface */
-    Ark_String fontSetName;
-    Array_font_UIFontFallbackInfo fallback;
-} Ark_font_UIFontFallbackGroupInfo;
-typedef struct Opt_font_UIFontFallbackGroupInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontFallbackGroupInfo value;
-} Opt_font_UIFontFallbackGroupInfo;
-typedef struct Ark_font_UIFontFallbackInfo {
-    /* kind: Interface */
-    Ark_String language;
-    Ark_String family;
-} Ark_font_UIFontFallbackInfo;
-typedef struct Opt_font_UIFontFallbackInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontFallbackInfo value;
-} Opt_font_UIFontFallbackInfo;
-typedef struct Ark_font_UIFontGenericInfo {
-    /* kind: Interface */
-    Ark_String family;
-    Array_font_UIFontAliasInfo alias;
-    Array_font_UIFontAdjustInfo adjust;
-} Ark_font_UIFontGenericInfo;
-typedef struct Opt_font_UIFontGenericInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontGenericInfo value;
-} Opt_font_UIFontGenericInfo;
 typedef struct Ark_FontInfo {
     /* kind: Interface */
     Ark_String path;
@@ -21144,8 +21021,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                      const Opt_ReuseOptions* value);
     void (*setRenderFit)(Ark_NativePointer node,
                          const Opt_RenderFit* value);
-    void (*setGestureModifier)(Ark_NativePointer node,
-                               const Opt_GestureModifier* value);
     void (*setBackgroundBrightness)(Ark_NativePointer node,
                                     const Opt_BackgroundBrightnessOptions* value);
     void (*setOnGestureJudgeBegin)(Ark_NativePointer node,
@@ -25854,14 +25729,6 @@ typedef struct GENERATED_ArkUIGestureGroupInterfaceAccessor {
                                           const Callback_Void* event);
 } GENERATED_ArkUIGestureGroupInterfaceAccessor;
 
-typedef struct GENERATED_ArkUIGestureModifierAccessor {
-    void (*destroyPeer)(Ark_GestureModifier peer);
-    Ark_GestureModifier (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*applyGesture)(Ark_GestureModifier peer,
-                         const Ark_UIGestureEvent* event);
-} GENERATED_ArkUIGestureModifierAccessor;
-
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     void (*destroyPeer)(Ark_GestureRecognizer peer);
     Ark_GestureRecognizer (*construct)();
@@ -25958,18 +25825,6 @@ typedef struct GENERATED_ArkUIHttpAuthHandlerAccessor {
     void (*cancel)(Ark_HttpAuthHandler peer);
     Ark_Boolean (*isHttpAuthInfoSaved)(Ark_HttpAuthHandler peer);
 } GENERATED_ArkUIHttpAuthHandlerAccessor;
-
-typedef struct GENERATED_ArkUIImage_PixelMapAccessor {
-    void (*destroyPeer)(Ark_image_PixelMap peer);
-    Ark_image_PixelMap (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*readPixelsToBufferSync)(Ark_image_PixelMap peer,
-                                   const Ark_Buffer* dst);
-    void (*writeBufferToPixels)(Ark_image_PixelMap peer,
-                                const Ark_Buffer* src);
-    Ark_Boolean (*getIsEditable)(Ark_image_PixelMap peer);
-    Ark_Boolean (*getIsStrideAlignment)(Ark_image_PixelMap peer);
-} GENERATED_ArkUIImage_PixelMapAccessor;
 
 typedef struct GENERATED_ArkUIImageAnalyzerControllerAccessor {
     void (*destroyPeer)(Ark_ImageAnalyzerController peer);
@@ -28430,7 +28285,6 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_Edges (*edgeColors)(const Ark_Number* all);
     Ark_Edges (*edgeWidths)(const Ark_Number* all);
     Ark_Boolean (*focusControl_requestFocus)(const Ark_String* value);
-    Ark_font_UIFontConfig (*font_getUIFontConfig)();
     Ark_ComponentInfo (*getRectangleById)(const Ark_String* id);
     void (*postCardAction)(const Ark_Object* component,
                            const Ark_Object* action);
@@ -28652,7 +28506,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGestureAccessor* (*getGestureAccessor)();
     const GENERATED_ArkUIGestureEventAccessor* (*getGestureEventAccessor)();
     const GENERATED_ArkUIGestureGroupInterfaceAccessor* (*getGestureGroupInterfaceAccessor)();
-    const GENERATED_ArkUIGestureModifierAccessor* (*getGestureModifierAccessor)();
     const GENERATED_ArkUIGestureRecognizerAccessor* (*getGestureRecognizerAccessor)();
     const GENERATED_ArkUIGestureStyleAccessor* (*getGestureStyleAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* (*getGlobalScope_ohos_arkui_componentSnapshotAccessor)();
@@ -28662,7 +28515,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* (*getHierarchicalSymbolEffectAccessor)();
     const GENERATED_ArkUIHoverEventAccessor* (*getHoverEventAccessor)();
     const GENERATED_ArkUIHttpAuthHandlerAccessor* (*getHttpAuthHandlerAccessor)();
-    const GENERATED_ArkUIImage_PixelMapAccessor* (*getImage_PixelMapAccessor)();
     const GENERATED_ArkUIImageAnalyzerControllerAccessor* (*getImageAnalyzerControllerAccessor)();
     const GENERATED_ArkUIImageAttachmentAccessor* (*getImageAttachmentAccessor)();
     const GENERATED_ArkUIImageBitmapAccessor* (*getImageBitmapAccessor)();

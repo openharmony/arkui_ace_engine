@@ -307,10 +307,11 @@ export class SerializerBase {
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }
-    writeBuffer(buffer: NativeBuffer) {
+    writeBuffer(buffer: ArrayBuffer) {
         this.holdAndWriteObject(buffer)
-        this.writePointer(buffer.data)
-        this.writeInt64(buffer.length)
+        const ptr = InteropNativeModule._GetNativeBufferPointer(buffer)
+        this.writePointer(ptr)
+        this.writeInt64(buffer.byteLength)
     }
 }
 

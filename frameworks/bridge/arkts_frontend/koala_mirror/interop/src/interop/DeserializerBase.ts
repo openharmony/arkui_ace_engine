@@ -209,12 +209,11 @@ export class DeserializerBase {
         }
         return suffix
     }
-    readBuffer(): NativeBuffer {
+    readBuffer(): ArrayBuffer {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
-        InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
-        return new NativeBuffer(data, length, resource.release)
+        return InteropNativeModule._MaterializeBuffer(data, BigInt(length), resource.resourceId, resource.hold, resource.release)
     }
 }
 

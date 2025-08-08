@@ -10,8 +10,7 @@
         "src/**/*"
     ],
     "exports": {
-        ".": "./build/lib/src/index.js",
-        "./golden": "./test/golden.js"
+        ".": "./build/lib/src/index.js"
     },
     "typesVersions": {
         "*": {

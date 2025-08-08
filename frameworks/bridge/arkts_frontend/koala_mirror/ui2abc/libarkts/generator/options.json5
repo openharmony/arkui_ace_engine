@@ -23,13 +23,19 @@
     ],
     "ignore": {
         "full": [
-            "es2panda_Impl",
             "es2panda_Config",
             "es2panda_ExternalSource",
             "es2panda_OverloadInfo",
             "es2panda_GlobalContext"
         ],
         "partial": [
+            {
+                interface: "es2panda_Impl",
+                methods: [
+                    "LogSyntaxError", "LogWarning", "LogTypeError", // wrong idl
+                    "DestroyContext", // cleanup arena (Improve: move this cleanup to another method) 
+                ],
+            },
             {
                 interface: "MethodDefinition",
                 methods: [
@@ -253,7 +259,16 @@
                     types: ["returnType"]
                 }
             ]
-        }
+        },
+        {
+            name: "ClassDeclaration",
+            methods: [
+                {
+                    name: "Definition",
+                    types: ["returnType"]
+                }
+            ]
+        },
     ],
     fragments: [
         {
@@ -298,6 +313,54 @@
                     definition: "extension_ScriptFunctionSetPreferredReturnTypePointer",
                 },
             ]
+        },
+        {
+            interface: "Expression",
+            methods: [
+                {
+                    name: "getPreferredTypePointer",
+                    definition: "extension_ExpressionGetPreferredTypePointer",
+                },
+                {
+                    name: "setPreferredTypePointer",
+                    definition: "extension_ExpressionSetPreferredTypePointer",
+                },
+            ]
+        },
+        {
+            interface: "Program",
+            methods: [
+                {
+                    name: "getExternalSources",
+                    definition: "extension_ProgramGetExternalSources",
+                },
+            ],
+        },
+        {
+            interface: "SourcePosition",
+            methods: [
+                {
+                    name: "getLine",
+                    definition: "extension_SourcePositionGetLine",
+                },
+                {
+                    name: "getCol",
+                    definition: "extension_SourcePositionGetCol",
+                },
+                {
+                    name: "toString",
+                    definition: "extension_SourcePositionToString",
+                },
+            ],
+        },
+        {
+            interface: "NumberLiteral",
+            methods: [
+                {
+                    name: "value",
+                    definition: "extension_NumberLiteralValue",
+                },
+            ],
         },
     ],
     parameters: [

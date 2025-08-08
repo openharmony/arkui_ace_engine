@@ -20,10 +20,37 @@ import {
     Importer,
     InternalAnnotations,
     getComponentPackage,
+    getCustomComponentPackage,
+    getCommonMethodPackage,
     getRuntimeAnnotationsPackage,
-    getDecoratorPackage
+    getDecoratorPackage,
+    hasDecorator,
+    isDecoratorAnnotation,
+    getDecoratorProperties,
+    findDecorator,
+    createThrowError,
+    getAnnotationName,
+    getRouterPackage
 } from "./utils";
-import { BuilderParamTransformer, ConsumeTransformer, LinkTransformer, LocalStorageLinkTransformer, LocalStoragePropTransformer, ObjectLinkTransformer, PropertyTransformer, PropTransformer, ProvideTransformer, StateTransformer, StorageLinkTransformer, StoragePropTransformer, PlainPropertyTransformer, fieldOf } from "./property-transformers";
+import {
+    BuilderParamTransformer,
+    ConsumeTransformer,
+    LinkTransformer,
+    LocalStorageLinkTransformer,
+    LocalStoragePropTransformer,
+    ObjectLinkTransformer,
+    PropertyTransformer,
+    PropTransformer,
+    ProvideTransformer,
+    StateTransformer,
+    StorageLinkTransformer,
+    StoragePropTransformer,
+    PlainPropertyTransformer,
+    fieldOf,
+    LocalPropertyTransformer,
+    ProviderTransformer,
+    ConsumerTransformer
+} from "./property-transformers";
 import { annotation, isAnnotation, classMethods } from "./common/arkts-utils";
 import { DecoratorNames, DecoratorParameters, hasBuilderDecorator, hasEntryAnnotation } from "./utils";
 import {
@@ -48,7 +75,6 @@ function computeOptionsName(clazz: arkts.ClassDeclaration): string {
 
 export class ComponentTransformer extends arkts.AbstractVisitor {
     private arkuiImport?: string
-    private entryCounter: number = 0
 
     constructor(private imports: Importer, options?: ComponentTransformerOptions) {
         super()
@@ -60,13 +86,13 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         this.parseEntryParameter(statements)
         this.imports.add(
             CustomComponentNames.COMPONENT_CLASS_NAME,
-            getComponentPackage())
+            getCustomComponentPackage())
         this.imports.add(
             InternalAnnotations.BUILDER_LAMBDA,
             getDecoratorPackage())
         this.imports.add(
             "CommonMethod",
-            getComponentPackage())
+            getCommonMethodPackage())
         this.imports.add(InternalAnnotations.MEMO, getRuntimeAnnotationsPackage())
         this.imports.add(InternalAnnotations.MEMO_STABLE, getRuntimeAnnotationsPackage())
         this.propertyTransformers.forEach(it => it.collectImports(this.imports))
@@ -157,6 +183,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         let result: arkts.ClassElement[] = []
         body.forEach(node => {
             if (arkts.isClassProperty(node)) {
+                this.verifyStructProperty(clazz, node)
                 this.getPropertyTransformer(node).applyStruct(clazz, node, result)
             } else if (arkts.isMethodDefinition(node)) {
                 let method = node as arkts.MethodDefinition
@@ -177,6 +204,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         this.addCustomLayoutParameter(clazz, result)
         this.addReusableMethods(clazz, result)
         this.addInstantiate(clazz, result)
+        this.addFreezableParameter(clazz, result)
         return result
     }
 
@@ -231,6 +259,15 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         }
     }
 
+    private addFreezableParameter(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
+        const [_, isFreezable] = getDecoratorProperties(
+            findDecorator(clazz.definition!.annotations, DecoratorNames.COMPONENT_V2)
+        ).find(([key]) => key.name == ComponentV2Config.freezableDecoratorPropName) ?? []
+        if (isFreezable) {
+            classBody.push(createTrueMethod(CustomComponentNames.COMPONENT_IS_FREEZABLE))
+        }
+    }
+
     private addCustomLayoutParameter(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
         const methods = classMethods(clazz, method =>
             method.function?.id?.name == CustomComponentNames.COMPONENT_ONPLACECHILDREN_ORI ||
@@ -278,9 +315,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                         arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_LET,
                         arkts.factory.createIdentifier(resultName, createRecordTypeReference()),
                         arkts.factory.createObjectExpression(
-                            arkts.Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION,
                             [],
-                            false
                         )
                     )
                 ]
@@ -296,9 +331,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                         arkts.factory.createAssignmentExpression(
                             arkts.factory.createIdentifier(resultName),
                             arkts.factory.createObjectExpression(
-                                arkts.Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION,
                                 props,
-                                false
                             ),
                             arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_SUBSTITUTION
                         )
@@ -369,18 +402,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
             arkts.factory.createFunctionExpression(
                 arkts.factory.createIdentifier(methodName),
                 arkts.factory.createScriptFunction(
-                    arkts.factory.createBlockStatement([
-                        arkts.factory.createThrowStatement(
-                            arkts.factory.createETSNewClassInstanceExpression(
-                                arkts.factory.createETSTypeReference(
-                                    arkts.factory.createETSTypeReferencePart(
-                                        arkts.factory.createIdentifier('Error')
-                                    )
-                                ),
-                                []
-                            )
-                        )
-                    ]),
+                    arkts.factory.createBlockStatement([createThrowError()]),
                     undefined,
                     [
                         this.createFactoryParameter(clazzName, "factory"),
@@ -544,9 +566,25 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         new LocalStoragePropTransformer(),
         new ObjectLinkTransformer(),
         new ProvideTransformer(),
+        new ProviderTransformer(),
         new ConsumeTransformer(),
+        new ConsumerTransformer(),
         new BuilderParamTransformer(),
+        new LocalPropertyTransformer()
     ]
+
+    verifyStructProperty(clazz: arkts.ClassDeclaration, property: arkts.ClassProperty) {
+        if (hasDecorator(clazz, DecoratorNames.COMPONENT_V2)) {
+            const unsuitable = property
+                .annotations
+                .find(anno => {
+                    return !ComponentV2Config.allowedDecorators.some(it => isDecoratorAnnotation(anno, it))
+                })
+            if (unsuitable) {
+                throw Error(`@${getAnnotationName(unsuitable)} decorator cannot be used with @${DecoratorNames.COMPONENT_V2}`)
+            }
+        }
+    }
 
     getPropertyTransformer(property: arkts.ClassProperty): PropertyTransformer {
         const transformer = this.propertyTransformers.find(it => it.check(property))
@@ -554,9 +592,14 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         throw new Error(`Cannot find transformer for property ${property.id?.name}`)
     }
 
+    private getEntryName(className: string): string {
+        return `__EntryWrapper_${className}`
+    }
+
     private createEntryWrapper(className: string): arkts.ClassDeclaration {
         /*
-        class __EntryWrapper extends EntryPoint {
+        class `__EntryWrapper_${className}` extends EntryPoint {
+            constructor() {}
             @memo public entry(): void {
                 `${className}`()
             }
@@ -565,13 +608,40 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         this.imports.add("EntryPoint", getComponentPackage())
         const result = arkts.factory.createClassDeclaration(
             arkts.factory.createClassDefinition(
-                arkts.factory.createIdentifier(`__EntryWrapper${ this.entryCounter ? this.entryCounter : "" }`),
+                arkts.factory.createIdentifier(this.getEntryName(className)),
                 undefined,
                 undefined,
                 [],
                 undefined,
-                arkts.factory.createIdentifier("EntryPoint", undefined),
+                arkts.factory.createETSTypeReference(
+                    arkts.factory.createETSTypeReferencePart(
+                        arkts.factory.createIdentifier("EntryPoint", undefined)
+                    )
+                ),
                 [
+                    arkts.factory.createMethodDefinition(
+                        arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_CONSTRUCTOR,
+                        arkts.factory.createIdentifier("constructor"),
+                        arkts.factory.createFunctionExpression(
+                            arkts.factory.createIdentifier("constructor"),
+                            arkts.factory.createScriptFunction(
+                                arkts.factory.createBlockStatement(
+                                    [],
+                                ),
+                                undefined,
+                                [],
+                                undefined,
+                                false,
+                                arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_CONSTRUCTOR,
+                                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                                arkts.factory.createIdentifier("constructor"),
+                                [],
+                            )
+                        ),
+                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_CONSTRUCTOR,
+                        false,
+                        [],
+                    ),
                     arkts.factory.createMethodDefinition(
                         arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
                         arkts.factory.createIdentifier("entry"),
@@ -613,8 +683,41 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
             ),
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT,
         )
-        this.entryCounter++
         return result
+    }
+
+    private registerRouterPage(className: string): arkts.Statement {
+        this.imports.add("registerPage", getRouterPackage())
+        return arkts.factory.createBlockStatement([
+            arkts.factory.createExpressionStatement(
+                arkts.factory.createCallExpression(
+                    arkts.factory.createIdentifier("registerPage"),
+                    [
+                        arkts.factory.createStringLiteral(className),
+                        arkts.factory.createCallExpression(
+                            fieldOf(
+                                arkts.factory.createCallExpression(
+                                    fieldOf(arkts.factory.createIdentifier("Type"), "from"),
+                                    [],
+                                    arkts.factory.createTSTypeParameterInstantiation([
+                                        arkts.factory.createETSTypeReference(
+                                            arkts.factory.createETSTypeReferencePart(
+                                                arkts.factory.createIdentifier(this.getEntryName(className), undefined), undefined, undefined
+                                            )
+                                        )
+                                    ]),
+                                    false,
+                                    false
+                                ),
+                                "getName"
+                            ),
+                            [], undefined, false, false, undefined
+                        )
+                    ],
+                    undefined, false, false, undefined
+                )
+            )
+        ])
     }
 
     private rewriteStruct(node: arkts.ETSStructDeclaration, result: arkts.Statement[]) {
@@ -623,13 +726,21 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         result.push(this.rewriteStructToOptions(node))
         if (node.definition && hasEntryAnnotation(node.definition)) {
             result.push(this.createEntryWrapper(node.definition.ident!.name))
+            result.push(this.registerRouterPage(node.definition.ident!.name))
         }
     }
 
     private verifyStructAnnotations(node: arkts.ETSStructDeclaration) {
+        if (hasDecorator(node, DecoratorNames.COMPONENT) && hasDecorator(node, DecoratorNames.COMPONENT_V2)) {
+            throw new Error(`@ComponentV2 and @Component decorators cannot be used to decorate the same structure`)
+        }
+        if (hasDecorator(node, DecoratorNames.REUSABLE) && hasDecorator(node, DecoratorNames.COMPONENT_V2)) {
+            throw new Error(`@ComponentV2 decorator does not support component reuse`)
+        }
         const unsuitable = node.definition?.annotations
             .filter(it => !isAnnotation(it, DecoratorNames.ENTRY))
             .filter(it => !isAnnotation(it, DecoratorNames.COMPONENT))
+            .filter(it => !isAnnotation(it, DecoratorNames.COMPONENT_V2))
             .filter(it => !isAnnotation(it, DecoratorNames.REUSABLE))
         if (unsuitable?.length) {
             console.warn(`${unsuitable[0].baseName?.name} decorator is not applicable to struct declaration`)
@@ -710,4 +821,16 @@ function createRecordTypeReference(): arkts.TypeNode {
             undefined
         )
     )
+}
+
+class ComponentV2Config {
+    static readonly allowedDecorators = [DecoratorNames.LOCAL,
+        DecoratorNames.PARAM,
+        DecoratorNames.ONCE,
+        DecoratorNames.EVENT,
+        DecoratorNames.PROVIDER,
+        DecoratorNames.CONSUMER,
+    ]
+
+    static readonly freezableDecoratorPropName = "freezeWhenInactive"
 }

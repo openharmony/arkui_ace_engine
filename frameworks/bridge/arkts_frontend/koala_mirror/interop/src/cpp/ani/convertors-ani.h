@@ -27,13 +27,13 @@
 #include "interop-logging.h"
 #include "interop-utils.h"
 
-#define CHECK_ANI_FATAL(result)                                                            \
-do {                                                                                       \
-  ani_status res = (result);                                                               \
-  if (res != ANI_OK) {                                                                     \
-    INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", res,  __LINE__); \
-  }                                                                                        \
-}                                                                                          \
+#define CHECK_ANI_FATAL(result)                                                                  \
+do {                                                                                             \
+  ani_status ___res___ = (result);                                                               \
+  if (___res___ != ANI_OK) {                                                                     \
+    INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", ___res___,  __LINE__); \
+  }                                                                                              \
+}                                                                                                \
 while (0)
 
 template<class T>
@@ -132,27 +132,26 @@ struct InteropTypeConverter<KVMObjectHandle> {
 
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
-    using InteropType = ani_fixedarray_byte;
+    using InteropType = ani_arraybuffer;
     static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
-      if (value == nullptr) return KInteropBuffer();
-      ani_size length = 0;
-      CHECK_ANI_FATAL(env->FixedArray_GetLength(value, &length));
-      KByte* data = new KByte[length];
-      CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
-      KInteropBuffer result = { 0 };
-      result.data = data;
-      result.length = length;
-      return result;
+      void* data {};
+      size_t len {};
+      CHECK_ANI_FATAL(env->ArrayBuffer_GetInfo(value, &data, &len));
+      return {static_cast<KLong>(len), data, 0, nullptr};
     }
+
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
-      ani_fixedarray_byte result;
-      CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
-      CHECK_ANI_FATAL(env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
+      void* data {};
+      ani_arraybuffer result;
+      CHECK_ANI_FATAL(env->CreateArrayBuffer(value.length, &data, &result));
+      interop_memcpy(data, value.length, value.data, value.length);
       value.dispose(value.resourceId);
       return result;
     }
     static inline void release(ani_env* env, InteropType value, KInteropBuffer converted) {
-      delete [] (KByte*)converted.data;
+      if (converted.dispose) {
+        converted.dispose(converted.resourceId);
+      }
     }
 };
 

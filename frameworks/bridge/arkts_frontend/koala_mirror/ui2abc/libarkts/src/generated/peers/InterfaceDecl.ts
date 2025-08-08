@@ -38,6 +38,9 @@ export class InterfaceDecl extends TSInterfaceDeclaration {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    static create1InterfaceDecl(name: string, declNode?: AstNode): InterfaceDecl {
+        return new InterfaceDecl(global.generatedEs2panda._CreateInterfaceDecl1(global.context, name, passNode(declNode)))
+    }
     protected readonly brandInterfaceDecl: undefined
 }
 export function isInterfaceDecl(node: object | undefined): node is InterfaceDecl {

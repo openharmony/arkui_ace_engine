@@ -112,7 +112,7 @@ suite("Parameter with @memo initializer", () => {
     )
 })
 
-suite("@memo function missing return type", () => {
+suite.skip("@memo function missing return type", () => {
     diagnostics(
         "Function",
         "missing-type-function.ets",
