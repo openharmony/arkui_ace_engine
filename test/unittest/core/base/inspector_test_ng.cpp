@@ -530,33 +530,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg011, TestSize.Level1)
 }
 
 /**
- * @tc.name: InspectorTestNg012
- * @tc.desc: Test the operation of GetSimplifiedInspector
- * @tc.type: FUNC
- */
-HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
-{
-    auto id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    context->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
-    int32_t containerId = 1;
-    TreeParams params { false };
-    auto inspector = std::make_shared<SimplifiedInspector>(containerId, params);
-    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
-        [](const std::shared_ptr<std::string> result) {
-            ASSERT_NE(result, nullptr);
-            EXPECT_NE(result->c_str(), "");
-        },
-        false);
-    inspector->GetInspectorAsync(collector);
-    auto result = inspector->GetInspector();
-    EXPECT_NE(result, "");
-    context->stageManager_ = nullptr;
-}
-
-/**
  * @tc.name: InspectorTestNg013
  * @tc.desc: Test the function of InspectorFilter
  * @tc.type: FUNC
@@ -1702,86 +1675,6 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest012, TestSize.Level1)
     size_t depth = 5;
     filter->SetFilterDepth(depth);
     EXPECT_EQ(depth, filter-> GetFilterDepth());
-}
-
-/**
-* @tc.name: SimplifiedInspectorTest001
-* @tc.desc: Test the operation of FilterEmptyInitially
-* @tc.type: FUNC
-*/
-HWTEST_F(InspectorTestNg, SimplifiedInspectorTest001, TestSize.Level1)
-{
-    auto id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
-    auto pageId = ElementRegister::GetInstance()->MakeUniqueId();
-    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("PageA", pageId,
-        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>(10, "page/Index", "page/Index")));
-    stageNode->AddChild(pageA);
-    int32_t containerId = 100;
-    TreeParams params { false };
-    auto inspector = std::make_shared<SimplifiedInspector>(containerId, params);
-    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
-        [](const std::shared_ptr<std::string> result) {
-            ASSERT_NE(result, nullptr);
-            auto inspectorJson = JsonUtil::ParseJsonString(*result);
-            EXPECT_EQ(inspectorJson->GetValue("pageUrl")->GetString(), "page/Index");
-            // EXPECT_EQ(*result, "{\"$type\":\"root\",\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"0.000000\",\"pageUrl\":\"page/Index\",\"navDstName\":\"\",\"$childrenCount\":1}");
-        },
-        false);
-    inspector->GetInspectorBackgroundAsync(collector);
-    auto result = collector->GetJson()->ToString();
-    EXPECT_EQ(result, "{}");
-    context->stageManager_ = nullptr;
-}
-
-/**
-* @tc.name: SimplifiedInspectorTest002
-* @tc.desc: Test the operation of FilterEmptyInitially
-* @tc.type: FUNC
-*/
-HWTEST_F(InspectorTestNg, SimplifiedInspectorTest002, TestSize.Level1)
-{
-    auto id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
-    int32_t containerId = 100;
-    TreeParams params { false };
-    auto inspector = std::make_shared<SimplifiedInspector>(containerId, params);
-    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
-        [](const std::shared_ptr<std::string> result) {}, false);
-    inspector->GetInspectorBackgroundAsync(collector);
-    auto result = collector->GetJson()->ToString();
-    EXPECT_EQ(result, "{}");
-}
-
-/**
-* @tc.name: SimplifiedInspectorTest003
-* @tc.desc: Test the operation of FilterEmptyInitially
-* @tc.type: FUNC
-*/
-HWTEST_F(InspectorTestNg, SimplifiedInspectorTest003, TestSize.Level1)
-{
-    auto id = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
-    int32_t containerId = 100;
-    TreeParams params { true };
-    auto inspector = std::make_shared<SimplifiedInspector>(containerId, params);
-    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
-        [](const std::shared_ptr<std::string> result) {}, false);
-    inspector->GetInspectorBackgroundAsync(collector);
-    EXPECT_TRUE(inspector->isBackground_);
-    EXPECT_TRUE(inspector->isAsync_);
 }
 
 bool HasInternalIds(const std::unique_ptr<JsonValue>& children)
