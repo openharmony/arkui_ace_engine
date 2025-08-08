@@ -527,26 +527,7 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
-    auto frontend = weakFrontend_.Upgrade();
-    CHECK_NULL_VOID(frontend);
-    auto lock = frontend->GetLock();
-    auto& windowConfig = frontend->GetWindowConfig();
-    if (windowConfig.designWidth <= 0) {
-        return;
-    }
-    if (GetIsDeclarative()) {
-        viewScale_ = DEFAULT_VIEW_SCALE;
-        double pageWidth = width;
-        if (IsContainerModalVisible()) {
-            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-        }
-        pageWidth = CalcPageWidth(pageWidth);
-        designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
-        windowConfig.designWidthScale = designWidthScale_;
-    } else {
-        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
-    }
+    ForceUpdateDesignWidthScale(width);
     if (NearZero(viewScale_)) {
         return;
     }
@@ -1180,5 +1161,29 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
     commandTimeUpdate_ = true;
     dvsyncTimeUpdate_ = true;
     dvsyncTimeUseCount_ = 0;
+}
+
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
+{
+    auto frontend = weakFrontend_.Upgrade();
+    CHECK_NULL_VOID(frontend);
+    auto lock = frontend->GetLock();
+    auto& windowConfig = frontend->GetWindowConfig();
+    if (windowConfig.designWidth <= 0) {
+        return;
+    }
+    if (GetIsDeclarative()) {
+        viewScale_ = DEFAULT_VIEW_SCALE;
+        double pageWidth = width;
+        if (IsContainerModalVisible()) {
+            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+        }
+        pageWidth = CalcPageWidth(pageWidth);
+        designWidthScale_ =
+            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
+        windowConfig.designWidthScale = designWidthScale_;
+    } else {
+        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+    }
 }
 } // namespace OHOS::Ace
