@@ -1246,6 +1246,10 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg036, TestSize.L
     sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
     sessionWrapper->NotifyDisplayArea(displayArea);
     EXPECT_EQ(transaction, transactionController->GetRSTransaction());
+    
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::SNAPSHOT_ROTATION);
+    sessionWrapper->NotifyDisplayArea(displayArea);
+    EXPECT_EQ(transaction, transactionController->GetRSTransaction());
 
     std::shared_ptr<Rosen::RSTransaction> sharedTransaction = std::make_shared<Rosen::RSTransaction>();
     sessionWrapper->transaction_ = sharedTransaction;
