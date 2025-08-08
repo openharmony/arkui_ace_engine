@@ -15,6 +15,7 @@
 
 import { int32 } from "@koalaui/common"
 import { ArkResource } from "../../component/resources"
+import { Resource } from "global.resource"
 
 export class ResourceTransfer {
     static transferStatic(input: Any): Object {
@@ -24,28 +25,19 @@ export class ResourceTransfer {
         const bundleName = ESValue.wrap(input).getProperty("bundleName").toString();
         const moduleName = ESValue.wrap(input).getProperty("moduleName").toString();
         const params = ESValue.wrap(input).getProperty("params");
-        const paramsArray: Array<Object|undefined> = new Array<Object|undefined>();
+        const paramsArray: Array<string | int | long | double | Resource> = new Array<string | int | long | double | Resource>();
         const parray = params.unwrap() as Any[];
         let arrayLength = parray.length;
         for (let i = 0; i < arrayLength; i++) {
             let item = params.getProperty(i);
-            if (item.isBoolean()) {
-                paramsArray.push(item.toBoolean());
-            }
             if (item.isString()) {
                 paramsArray.push(item.toString());
             }
             if (item.isNumber()) {
-                paramsArray.push(item.toNumber());
-            }
-            if (item.isBigInt()) {
-                paramsArray.push(item.toBigInt());
-            }
-            if (item.isUndefined()) {
-                paramsArray.push(item.toUndefined());
+                paramsArray.push(item.toNumber() as double);
             }
             if (item.isStaticObject()) {
-                paramsArray.push(item.toStaticObject());
+                paramsArray.push(item.toStaticObject() as Resource);
             }
         }
         let type: int32 | undefined = undefined;
@@ -79,7 +71,7 @@ export class ResourceTransfer {
         const moduleName = ESValue.wrap(staticValue.moduleName);
         const type = ESValue.wrap(staticValue.type);
         const id = ESValue.wrap(staticValue._id);
-        let paramArr = staticValue.params as Array<Object | undefined>;
+        let paramArr = staticValue.params as Array<string | int | long | double | Resource>;
         let paramsArray = ESValue.instantiateEmptyArray();
         for (let i = 0;i < paramArr.length; i++) {
             paramsArray.setProperty(i, ESValue.wrap(paramArr[i]));
