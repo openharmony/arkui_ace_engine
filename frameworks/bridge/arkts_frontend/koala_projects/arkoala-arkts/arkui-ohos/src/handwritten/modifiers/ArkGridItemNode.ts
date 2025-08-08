@@ -37,6 +37,9 @@ export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
         this.getPeer()?.setGridItemOptionsAttribute(options_casted)
         return this;
     }
+    allowChildCount(): number {
+        return 1;
+    }
     rowStart(value: number | undefined): this {
         const value_casted = value as (number | undefined)
         this.getPeer()?.rowStartAttribute(value_casted)

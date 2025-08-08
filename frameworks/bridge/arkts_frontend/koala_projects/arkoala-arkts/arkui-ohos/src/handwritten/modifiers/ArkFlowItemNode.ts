@@ -27,4 +27,7 @@ export class ArkFlowItemNode extends ArkBaseNode implements FlowItemAttribute {
         this.getPeer()?.setFlowItemOptionsAttribute()
         return this;
     }
+    allowChildCount(): number {
+        return 1;
+    }
 }
