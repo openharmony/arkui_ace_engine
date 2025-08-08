@@ -2453,4 +2453,153 @@ HWTEST_F(NavigationPatternTestSevenNg, TitleBarNode_MarkIsInitialTitle001, TestS
     titleBarNode->MarkIsInitialTitle(false);
     EXPECT_FALSE(pattern->isInitialTitle_);
 }
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest001
+ * @tc.desc: if navBar -> navDestination and mode has changed from stack to split.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_TRUE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest002
+ * @tc.desc: if navBar -> navDestination and mode has changed from split to stack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_FALSE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest003
+ * @tc.desc: if navBar -> navDestination and mode NOT changed(SPLIT).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_TRUE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest004
+ * @tc.desc: if navBar -> navDestination and mode NOT changed(STACK).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_FALSE(homeNode->IsVisible());
+}
 } // namespace OHOS::Ace::NG
