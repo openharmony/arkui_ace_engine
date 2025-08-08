@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -1750,5 +1751,83 @@ HWTEST_F(MenuPattern2TestNg, ShowStackMainMenuDisappearAnimation001, TestSize.Le
     auto innerMenuContext = innerMenuNode->GetRenderContext();
     ASSERT_NE(innerMenuContext, nullptr);
     EXPECT_EQ(innerMenuContext->GetOpacity(), 1.0f);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: Verify OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, OnColorConfigurationUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init pipeline and create menu.
+     * @tc.expected: step1. All pointers non-null.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    std::vector<SelectParam> selectParam = { { "content1", "icon1" }, { "content2", "" }, { "", "icon3" }, { "", "" } };
+    auto wrapperNode = MenuView::Create(selectParam, TARGET_ID, "");
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+    auto pipeline = menuNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    theme->menuFontColor_ = Color::RED;
+    theme->menuBlendBgColor_ = true;
+    theme->backgroundColor_ = Color::RED;
+
+    /**
+     * @tc.steps: step2. Color config change, user sets font & disables bg.
+     * @tc.expected: step2. Font color keeps user's value.
+     */
+    g_isConfigChangePerform = true;
+    menuPattern->isDisableMenuBgColorByUser_ = true;
+    layout->UpdateFontColorSetByUser(true);
+    menuPattern->OnColorConfigurationUpdate();
+    EXPECT_NE(layout->GetFontColor().value_or(Color::TRANSPARENT), theme->GetMenuFontColor());
+
+    /**
+     * @tc.steps: step3. Color config change, use theme font & bg.
+     * @tc.expected: step3. Font color uses theme.
+     */
+    menuPattern->isDisableMenuBgColorByUser_ = false;
+    layout->UpdateFontColorSetByUser(false);
+    menuPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(layout->GetFontColor().value_or(Color::TRANSPARENT), theme->GetMenuFontColor());
+
+    /**
+     * @tc.steps: step4. No config change, user disables bg.
+     * @tc.expected: step4. Bg color unchanged.
+     */
+    g_isConfigChangePerform = false;
+    menuPattern->isDisableMenuBgColorByUser_ = true;
+    layout->UpdateFontColorSetByUser(true);
+    menuPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), theme->GetBackgroundColor());
+
+    /**
+     * @tc.steps: step5. No config change, use theme bg.
+     * @tc.expected: step5. Bg color uses theme.
+     */
+    menuPattern->isDisableMenuBgColorByUser_ = false;
+    layout->UpdateFontColorSetByUser(false);
+    menuPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), theme->GetBackgroundColor());
+
+    /**
+     * @tc.steps: step6. Blend bg enabled, recheck bg color.
+     * @tc.expected: step6. Still matches theme.
+     */
+    theme->menuBlendBgColor_ = true;
+    menuPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), theme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG

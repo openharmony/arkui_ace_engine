@@ -2404,11 +2404,14 @@ HWTEST_F(SelectTestNg, ResetComponentColor001, TestSize.Level1)
     selectTheme->selectedColor_ = Color::RED;
     selectTheme->selectedColorText_ = Color::RED;
     selectTheme->menuFontColor_ = Color::RED;
+    selectTheme->menuBlendBgColor_ = true;
+    pattern->SetMenuBackgroundColor(Color::RED);
     pattern->SetOptionFontColor(Color::RED);
-    
+
     std::vector<SelectColorType> colorTypes = { SelectColorType::FONT_COLOR, SelectColorType::BACKGROUND_COLOR,
         SelectColorType::SELECTED_OPTION_BG_COLOR, SelectColorType::SELECTED_OPTION_FONT_COLOR,
-        SelectColorType::OPTION_BG_COLOR, SelectColorType::OPTION_FONT_COLOR, static_cast<SelectColorType>(999) };
+        SelectColorType::OPTION_BG_COLOR, SelectColorType::OPTION_FONT_COLOR, SelectColorType::MENU_BACKGROUND_COLOR,
+        static_cast<SelectColorType>(999) };
     for (const auto& type : colorTypes) {
         SelectModelNG::ResetComponentColor(frameNode, type);
     }
@@ -2420,6 +2423,59 @@ HWTEST_F(SelectTestNg, ResetComponentColor001, TestSize.Level1)
     EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
     EXPECT_EQ(pattern->selectedFont_.FontColor, Color::RED);
     EXPECT_EQ(pattern->optionFont_.FontColor, Color::RED);
+    EXPECT_EQ(pattern->menuBackgroundColor_, Color::RED);
+}
+
+/**
+ * @tc.name: ResetComponentColor002
+ * @tc.desc: Test ResetSelectComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResetComponentColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select and get pattern.
+     * @tc.expected: SelectPattern created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup mock theme and pipeline context.
+     * @tc.expected: Mock theme injected.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetThemeManager(themeManager);
+
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+
+    /**
+     * @tc.steps: step3. Set theme colors and override pattern colors.
+     * @tc.expected: pattern colors set to RED, theme colors are GREEN.
+     */
+    auto selectLayoutProps = frameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+    selectTheme->selectedColor_ = Color::GREEN;
+    pattern->SetSelectedOptionBgColor(Color::RED);
+    SelectModelNG::SetShowDefaultSelectedIcon(frameNode, true);
+    SelectModelNG::ResetComponentColor(frameNode, SelectColorType::SELECTED_OPTION_BG_COLOR);
+
+    /**
+     * @tc.steps: step4. Validate that colors were not changed (reset skipped).
+     */
+    EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), true);
+    EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
 }
 
 /**
@@ -2611,5 +2667,35 @@ HWTEST_F(SelectTestNg, ModifierColorTypeToString, TestSize.Level1)
         auto result = SelectModelNG::ModifierColorTypeToString(type);
         EXPECT_EQ(result, expected);
     }
+}
+
+/**
+ * @tc.name: SetColorStatus001
+ * @tc.desc: Test SetColorStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetColorStatus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    selectModelNG.SetColorStatus(frameNode, SelectColorType::FONT_COLOR);
+    EXPECT_FALSE(menuPattern->isDisableMenuBgColorByUser_);
+
+    selectModelNG.SetColorStatus(frameNode, SelectColorType::MENU_BACKGROUND_COLOR);
+    EXPECT_TRUE(menuPattern->isDisableMenuBgColorByUser_);
 }
 } // namespace OHOS::Ace::NG

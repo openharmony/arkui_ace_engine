@@ -3210,4 +3210,51 @@ HWTEST_F(SelectPatternTestNg, UpdateComponentColor001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: UpdateMenuOption
+ * @tc.desc: Test UpdateMenuOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, UpdateMenuOption, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    // Ensure there is at least one option
+    ASSERT_FALSE(menuPattern->GetOptions().empty());
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(menuPattern->GetOptions().at(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    // Test text update
+    const std::string newText = "UpdatedText";
+    selectPattern->UpdateMenuOption(0, newText, SelectOptionType::TEXT);
+    EXPECT_EQ(menuItemPattern->GetText(), newText);
+
+    // Test invalid update
+    selectPattern->UpdateMenuOption(0, "UnusedValue", static_cast<SelectOptionType>(999));
+
+    // Test icon update
+    const std::string newIcon = "/path/to/icon.png";
+    selectPattern->UpdateMenuOption(0, newIcon, SelectOptionType::ICON);
+    auto iconNode = menuItemPattern->icon_;
+    ASSERT_NE(iconNode, nullptr);
+    ASSERT_EQ(iconNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    auto imageSrcInfo = props->GetImageSourceInfo();
+    EXPECT_EQ(imageSrcInfo->GetSrc(), newIcon);
+}
 } // namespace OHOS::Ace::NG
