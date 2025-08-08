@@ -934,6 +934,43 @@ HWTEST_F(SymbolTestNg, SetShaderStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShaderStyle002
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    symbolModelNG.SetShaderStyle(gradients);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+
+    auto symbolOptions = textStyle.GetShaderStyle();
+    EXPECT_EQ(symbolOptions.size(), gradients.size());
+}
+
+/**
  * @tc.name: SymbolShadow001
  * @tc.desc: test SetSymbolShadow and GetSymbolShadow
  * @tc.type: FUNC
