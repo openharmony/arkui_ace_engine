@@ -337,7 +337,7 @@ export interface XComponentParameters {
 export type OnNativeLoadCallback = (event?: Object) => void;
 export type Callback_String_SurfaceRect_Void = (surfaceId: string, rect: SurfaceRect) => void;
 export interface XComponentAttribute extends CommonMethod {
-    setXComponentOptions(value: XComponentParameter | XComponentOptions | NativeXComponentParameters): this {
+    setXComponentOptions(value: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
         return this
     }
     onLoad(value: VoidCallback | undefined): this
@@ -355,7 +355,7 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
     enableSecure_value?: boolean | undefined
     hdrBrightness_value?: number | undefined
     enableTransparentLayer_value?: boolean | undefined
-    public setXComponentOptions(value: XComponentParameter | XComponentOptions | NativeXComponentParameters): this {
+    public setXComponentOptions(value: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
         return this
     }
     public onLoad(value: VoidCallback | undefined): this {
