@@ -16,11 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode, FrameNodeInternal } from "./generated/arkui.FrameNode"
-import { GlobalScope_ohos_font } from "./generated"
-import { GlobalScope_ohos_measure_utils } from "./generated"
-import { FontOptions, FontInfo, MeasureOptions } from "./generated"
-import { SizeOptions } from "./generated"
+import { FrameNode, FrameNodeInternal } from "#generated/../FrameNode"
+import { GlobalScope_ohos_font } from "#generated"
+import { GlobalScope_ohos_measure_utils } from "#generated"
+import { MeasureOptions } from "#generated/ohos.measure"
+import { FontOptions, FontInfo } from "@ohos.font"
+import { SizeOptions } from "#generated"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"

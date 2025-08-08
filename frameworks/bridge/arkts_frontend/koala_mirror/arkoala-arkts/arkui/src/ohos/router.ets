@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Router } from "../handwritten"
+import { Router } from "#handwritten"
 
 interface RouterOptions {
     url: string

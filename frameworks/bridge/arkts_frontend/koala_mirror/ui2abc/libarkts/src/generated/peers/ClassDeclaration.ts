@@ -61,8 +61,8 @@ export class ClassDeclaration extends Statement {
         result.setChildrenParentPtr()
         return result
     }
-    get definition(): ClassDefinition | undefined {
-        return unpackNode(global.generatedEs2panda._ClassDeclarationDefinition(global.context, this.peer))
+    get definition(): ClassDefinition {
+        return unpackNonNullableNode(global.generatedEs2panda._ClassDeclarationDefinition(global.context, this.peer))
     }
     /** @deprecated */
     emplaceDecorators(decorators?: Decorator): this {

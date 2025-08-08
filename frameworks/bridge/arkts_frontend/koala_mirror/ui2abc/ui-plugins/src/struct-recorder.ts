@@ -17,7 +17,7 @@ import * as arkts from "@koalaui/libarkts"
 import * as fs from "fs"
 import * as path from "path"
 import { CustomComponentNames } from "./utils"
-import { programGetExternalSources, metaDatabase } from "@koalaui/libarkts"
+import { metaDatabase } from "@koalaui/libarkts"
 
 export class PropertyDescriptor {
     constructor(public name: string, public decorators: string[]) { }
@@ -61,7 +61,7 @@ export class StructsResolver {
     }
 
     init() {
-        for (let source of programGetExternalSources(arkts.global.compilerContext.program)) {
+        for (let source of arkts.global.compilerContext.program.getExternalSources()) {
             const name = source.getName()
             if (name.startsWith("std.")) continue
             if (name.startsWith("escompat")) continue

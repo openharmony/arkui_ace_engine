@@ -38,6 +38,7 @@ import { Es2pandaModuleKind } from "./../Es2pandaEnums"
 import { Es2pandaProgramFlags } from "./../Es2pandaEnums"
 import { Es2pandaScriptKind } from "./../Es2pandaEnums"
 import { SourcePosition } from "./SourcePosition"
+import { extension_ProgramGetExternalSources } from "./../../reexport-for-generated"
 
 export class Program extends ArktsObject {
     constructor(pointer: KNativePointer) {
@@ -190,6 +191,7 @@ export class Program extends ArktsObject {
         global.generatedEs2panda._ProgramAddFileDependencies(global.context, this.peer, file, depFile)
         return this
     }
+    getExternalSources = extension_ProgramGetExternalSources
     protected readonly brandProgram: undefined
 }
 export function isProgram(node: object | undefined): node is Program {

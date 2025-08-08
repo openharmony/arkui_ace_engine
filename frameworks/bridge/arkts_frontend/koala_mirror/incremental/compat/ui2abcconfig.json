@@ -9,6 +9,5 @@
             "@koalaui/compat": ["../"]
         }
     },
-    "include": ["src/index.ts", "src/arkts/**/*.ts"],
-    "exclude": ["./src/arkts/index.ts"]
+    "include": ["src/arkts/**/*.ts"]
 }

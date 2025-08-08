@@ -621,20 +621,6 @@ struct __ani_interaction_api {
                                           ani_size nr_methods);
 
     /**
-     * @brief Binds static native methods to a class.
-     *
-     * This function binds an array of static native methods to the specified class.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to which the native methods will be bound.
-     * @param[in] methods A pointer to an array of static native methods to bind.
-     * @param[in] nr_methods The number of static native methods in the array.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_BindStaticNativeMethods)(ani_env *env, ani_class cls, const ani_native_function *methods,
-                                                ani_size nr_methods);
-
-    /**
      * @brief Deletes a local reference.
      *
      * This function deletes a specified local reference to free up resources.
@@ -6245,6 +6231,20 @@ struct __ani_interaction_api {
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Any_New)(ani_env *env, ani_ref ctor, ani_size argc, ani_ref *argv, ani_ref *result);
+
+    /**
+     * @brief Binds static native methods to a class.
+     *
+     * This function binds an array of static native methods to the specified class.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] cls The class to which the native methods will be bound.
+     * @param[in] methods A pointer to an array of static native methods to bind.
+     * @param[in] nr_methods The number of static native methods in the array.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Class_BindStaticNativeMethods)(ani_env *env, ani_class cls, const ani_native_function *methods,
+                                                ani_size nr_methods);
 };
 
 // C++ API
@@ -6384,10 +6384,6 @@ struct __ani_env {
     ani_status Class_BindNativeMethods(ani_class cls, const ani_native_function *methods, ani_size nr_methods)
     {
         return c_api->Class_BindNativeMethods(this, cls, methods, nr_methods);
-    }
-    ani_status Class_BindStaticNativeMethods(ani_class cls, const ani_native_function *methods, ani_size nr_methods)
-    {
-        return c_api->Class_BindStaticNativeMethods(this, cls, methods, nr_methods);
     }
     ani_status Reference_Delete(ani_ref ref)
     {
@@ -8294,6 +8290,10 @@ struct __ani_env {
     ani_status Any_New(ani_ref ctor, ani_size argc, ani_ref *argv, ani_ref *result)
     {
         return c_api->Any_New(this, ctor, argc, argv, result);
+    }
+    ani_status Class_BindStaticNativeMethods(ani_class cls, const ani_native_function *methods, ani_size nr_methods)
+    {
+        return c_api->Class_BindStaticNativeMethods(this, cls, methods, nr_methods);
     }
 #endif  // __cplusplus
 };

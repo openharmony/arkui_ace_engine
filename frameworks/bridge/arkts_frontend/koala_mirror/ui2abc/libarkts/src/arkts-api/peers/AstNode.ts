@@ -19,7 +19,7 @@ import { allFlags, unpackNode, unpackNodeArray, unpackNonNullableNode, unpackStr
 import { throwError } from "../../utils"
 import { Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import { ArktsObject } from "./ArktsObject"
-import { SourcePosition } from "./SourcePosition"
+import { SourcePosition } from "../../generated/peers/SourcePosition"
 import { NodeCache } from "../node-cache"
 
 export abstract class AstNode extends ArktsObject {

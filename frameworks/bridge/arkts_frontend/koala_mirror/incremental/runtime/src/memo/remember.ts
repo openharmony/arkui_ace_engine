@@ -167,8 +167,7 @@ function applyPromiseToState<Value>(promise: Promise<Value>, state: MutableState
 /** @memo */
 export function rememberMutableAsyncState<Value>(compute: () => Promise<Value | undefined>, initial?: Value, onError?: (error: Error) => void): MutableState<Value | undefined> {
     const result = rememberMutableState<Value | undefined>(initial)
-    const callback = () => { applyPromiseToState<Value | undefined>(compute(), result, onError) }
-    once(callback)
+    once(() => { applyPromiseToState<Value | undefined>(compute(), result, onError) })
     return result
 }
 

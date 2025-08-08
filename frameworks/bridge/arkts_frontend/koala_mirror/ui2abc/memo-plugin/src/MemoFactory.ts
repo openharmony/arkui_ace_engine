@@ -333,12 +333,17 @@ export class factory {
     static deduceAsWrapperType(node: arkts.TSAsExpression): arkts.TypeNode|undefined {
         return node.typeAnnotation?.clone()
     }
-    static deduceObjectWrapperType(node: arkts.Expression): arkts.TypeNode|undefined {
-        return undefined
+    static deduceObjectWrapperType(node: arkts.ObjectExpression): arkts.TypeNode|undefined {
+        const preferredTypePointer = node.getPreferredTypePointer()
+        if (!preferredTypePointer) {
+            return undefined
+        }
+        console.log(`Using inferred object type ${arkts.unpackString(arkts.global.es2panda._Checker_TypeToString(arkts.global.context, preferredTypePointer))} for object ${arkts.originalSourcePositionString(node)}`)
+        return arkts.factory.createOpaqueTypeNode(arkts.global.es2panda._Checker_TypeClone(arkts.global.context, preferredTypePointer))
     }
     static deduceArrowWrapperType(arrow: arkts.ArrowFunctionExpression): arkts.TypeNode|undefined {
         const origType: arkts.TypeNode | undefined = arrow.function?.returnTypeAnnotation
-        const origPreferredType: arkts.TypeNode | undefined = arkts.tryConvertCheckerTypeToTypeNode(
+        const origPreferredType: arkts.TypeNode | undefined = arkts.convertCheckerTypeToTypeNode(
             arrow.function?.getPreferredReturnTypePointer()
         )
         if (origType == undefined && origPreferredType == undefined) return undefined
@@ -382,8 +387,8 @@ export class factory {
     static createComputeExpression(hash: arkts.Expression, node: arkts.Expression): arkts.CallExpression {
         return arkts.factory.createCallExpression(
             arkts.factory.createMemberExpression(
-                arkts.factory.createIdentifier(RuntimeNames.CONTEXT, undefined),
-                arkts.factory.createIdentifier(RuntimeNames.COMPUTE, undefined),
+                arkts.factory.createIdentifier(RuntimeNames.CONTEXT),
+                arkts.factory.createIdentifier(RuntimeNames.COMPUTE),
                 arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
                 false,
                 false

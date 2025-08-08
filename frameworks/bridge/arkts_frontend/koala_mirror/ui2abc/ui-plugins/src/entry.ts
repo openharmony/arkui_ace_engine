@@ -25,32 +25,38 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
     return {
         name: "ui",
         parsed(hooks: arkts.RunTransformerHooks = parsedHooks) {
-            console.log("[ui-plugin] Run parsed state plugin")
+            arkts.Tracer.pushContext('ui-plugin')
+            arkts.trace(() => "Run parsed state plugin", true)
             const transform = parsedTransformer(parsedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
+                arkts.Tracer.popContext()
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
         checked(hooks: arkts.RunTransformerHooks = checkedHooks) {
-            console.log("[ui-plugin] Run checked state plugin")
+            arkts.Tracer.pushContext('ui-plugin')
+            arkts.trace(() => "Run checked state plugin", true)
             const transform = checkedTransformer(checkedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
                 arkts.recheckSubtree(prog.ast)
+                arkts.Tracer.popContext()
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
         clean() {
-            console.log("[ui-plugin] Clean")
+            arkts.Tracer.pushContext('ui-plugin')
+            arkts.trace(() => "Clean", true)
+            arkts.Tracer.popContext()
             pluginContext = new arkts.PluginContextImpl()
         }
     }

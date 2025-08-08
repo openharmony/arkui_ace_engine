@@ -17,7 +17,7 @@ import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koala
 import { KPointer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { CustomBuilder } from "./component/builder"
-import { CustomNodeBuilder, ArkComponentRootPeer } from "./generated"
+import { CustomNodeBuilder, ArkComponentRootPeer } from "#generated"
 
 // Improve: need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
