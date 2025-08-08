@@ -346,6 +346,7 @@ struct DialogProperties {
     RefPtr<ResourceObject> resourceWidthObj;
     RefPtr<ResourceObject> resourceHeightObj;
     RefPtr<ResourceObject> resourceBdColorObj;
+    std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
 };
 
 struct PromptDialogAttr {
