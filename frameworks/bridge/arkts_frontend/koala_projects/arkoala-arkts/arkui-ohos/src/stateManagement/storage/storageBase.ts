@@ -52,6 +52,7 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         owner: ExtendableComponent,
         propertyNameInAppStorage: string,
         varName: string,
+        decoratorName: string,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> {
         StateMgmtConsole.log(`makeStorageLink('${propertyNameInAppStorage} ${varName}')`);
@@ -61,7 +62,7 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         const set = (newValue: T): void => {
             this.set(newValue);
         };
-        return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, this, get, set, watchFunc);
+        return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, decoratorName, this, get, set, watchFunc);
     }
 
     public registerWatchToStorageSource(link: DecoratedV1VariableBase<T>): WatchIdType {
@@ -140,6 +141,7 @@ export class StorageBase {
         owner: ExtendableComponent,
         key: string,
         varName: string,
+        decoratorName: string,
         defaultValue: T,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
@@ -156,7 +158,7 @@ export class StorageBase {
             `makeStorageLink: key '${key}' found value of matching type. Create StorageLinkDecoratedVariable Ok`
         );
         const storageProperty = sp as StorageProperty<T>;
-        const sLink = storageProperty.makeStorageLink(owner, key, varName, watchFunc);
+        const sLink = storageProperty.makeStorageLink(owner, key, varName, decoratorName, watchFunc);
         storageProperty.registerWatchToStorageSource(sLink);
         return sLink;
     }

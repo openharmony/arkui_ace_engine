@@ -37,12 +37,14 @@ export class StorageLinkDecoratedVariable<T>
         owningComponent: ExtendableComponent | null,
         propertyNameInAppStorage: string,
         varName: string,
+        decoratroName: string,
         source: IDecoratedV1Variable<T>,
         sourceGet: () => T,
         sourceSet: (newValue: T) => void,
         watchFunc?: WatchFuncType
     ) {
         super(owningComponent, varName, source, sourceGet, sourceSet, watchFunc);
+        this.decorator = decoratroName;
         this.propertyNameInAppStorage_ = propertyNameInAppStorage;
     }
 }
