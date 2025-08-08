@@ -924,7 +924,7 @@ HWTEST_F(WebModifierTest, onRenderExitedTest, TestSize.Level1)
         Converter::ArkValue<Callback_OnRenderExitedEvent_Void>(checkCallback, contextId);
 
     auto optCallback = Converter::ArkValue<Opt_Callback_OnRenderExitedEvent_Void>(arkCallback);
-    modifier_->setOnRenderExited0(node_, &optCallback);
+    modifier_->setOnRenderExited(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRenderExitedEvent(std::make_shared<RenderExitedEvent>(

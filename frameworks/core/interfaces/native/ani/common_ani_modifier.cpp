@@ -121,7 +121,7 @@ ArkUI_Int32 GetCurrentInstanceId()
 
 ArkUI_Int32 GetFocusedInstanceId()
 {
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     CHECK_NULL_RETURN(container, -1);
     auto currentInstance = container->GetInstanceId();
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {

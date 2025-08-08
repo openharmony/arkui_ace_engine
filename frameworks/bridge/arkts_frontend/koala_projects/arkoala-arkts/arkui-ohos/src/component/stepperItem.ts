@@ -22,12 +22,15 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { StepperItemModifier } from "../StepperItemModifier"
+import { hookStepperItemAttributeModifier } from "../handwritten"
 
 export class ArkStepperItemPeer extends ArkCommonMethodPeer {
+    _attributeSet?: StepperItemModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -93,6 +96,7 @@ export interface StepperItemAttribute extends CommonMethod {
     prevLabel(value: string | undefined): this
     nextLabel(value: string | undefined): this
     status(value: ItemState | undefined): this
+    attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod>| undefined): this
 }
 export class ArkStepperItemStyle extends ArkCommonMethodStyle implements StepperItemAttribute {
     prevLabel_value?: string | undefined
@@ -106,7 +110,10 @@ export class ArkStepperItemStyle extends ArkCommonMethodStyle implements Stepper
     }
     public status(value: ItemState | undefined): this {
         return this
-        }
+    }
+    public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod>| undefined): this {
+        return this
+    }
 }
 export class ArkStepperItemComponent extends ArkCommonMethodComponent implements StepperItemAttribute {
     getPeer(): ArkStepperItemPeer {
@@ -147,6 +154,10 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public attributeModifier(modifier: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookStepperItemAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

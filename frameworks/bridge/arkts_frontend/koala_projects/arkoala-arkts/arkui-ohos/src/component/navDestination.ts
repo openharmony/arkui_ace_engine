@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback, AttributeModifier } from "./common"
 import { ResourceStr, Length } from "./units"
 import { PixelMap } from "#external"
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
@@ -35,7 +35,8 @@ import { Scroller } from "./scroll"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TitleHeight, Curve } from "./enums"
-import { hookNavDestinationBackButtonIconImpl, hookNavDestinationOnNewParamImpl, hookNavDestinationOnReadyImpl, hookNavDestinationOnWillAppearImpl, hookNavDestinationOnWillDisappearImpl, hookNavDestinationOnWillHideImpl, hookNavDestinationOnWillShowImpl, hookNavDestinationTitleImpl } from "./../handwritten"
+import { hookNavDestinationBackButtonIconImpl, hookNavDestinationOnNewParamImpl, hookNavDestinationOnReadyImpl, hookNavDestinationOnWillAppearImpl, hookNavDestinationOnWillDisappearImpl, hookNavDestinationOnWillHideImpl, hookNavDestinationOnWillShowImpl, hookNavDestinationTitleImpl, hookNavDestinationAttributeModifier } from "./../handwritten"
+import { NavDestinationModifier } from "../NavDestinationModifier"
 
 export interface NavDestinationContext {
     pathInfo: NavPathInfo
@@ -139,6 +140,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     }
 }
 export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
+    _attributeSet?: NavDestinationModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -841,6 +843,7 @@ export interface NavDestinationAttribute extends CommonMethod {
     hideToolBar(hide: boolean | undefined, animated?: boolean): this
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
     enableStatusBar(enabled: boolean | undefined, animated?: boolean): this
+    attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod>| undefined): this
 }
 export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
     hideTitleBar_value?: boolean | undefined
@@ -957,7 +960,10 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     }
     public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
         return this
-        }
+    }
+    public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod>| undefined): this {
+        return this
+    }
 }
 export type NavDestinationTransitionDelegate = (operation: NavigationOperation, isEnter: boolean) => Array<NavDestinationTransition> | undefined;
 export type Callback_NavDestinationContext_Void = (parameter: NavDestinationContext) => void;
@@ -1251,6 +1257,10 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public attributeModifier(modifier: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookNavDestinationAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

@@ -185,16 +185,16 @@ std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
     return {};
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
-    RefPtr<Container> foucsContainer;
-    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && pipeline->IsWindowFocused()) {
-            foucsContainer = container;
+            focusContainer = container;
         }
     });
-    return foucsContainer;
+    return focusContainer;
 }
 
 bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)

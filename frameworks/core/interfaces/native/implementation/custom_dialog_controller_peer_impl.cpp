@@ -119,6 +119,11 @@ void CustomDialogControllerPeerImpl::SetCustomStyle(Opt_Boolean customStyle)
     }
 }
 
+Opt_Boolean CustomDialogControllerPeerImpl::GetCustomStyle()
+{
+    return Converter::ArkValue<Opt_Boolean>(dialogProperties_.customStyle);
+}
+
 void CustomDialogControllerPeerImpl::SetGridCount(Opt_Number gridCount)
 {
     auto result = Converter::OptConvert<int32_t>(gridCount);

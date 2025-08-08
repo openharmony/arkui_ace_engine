@@ -3862,7 +3862,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     }
     AccessibilityEventInfo eventInfoNew = eventInfo;
     if (isDynamicRender) {
-        auto focusedContainer = Container::GetFoucsed();
+        auto focusedContainer = Container::GetFocused();
         if (focusedContainer) {
             eventInfoNew.SetWindowId(focusedContainer->GetWindowId());
         }
@@ -7048,7 +7048,7 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_VOID(ngPipeline);
 
-    if (!ngPipeline->GetOnFoucs() && (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE)) {
+    if (!ngPipeline->GetOnFocus() && (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE)) {
         TAG_LOGD(AceLogTag::ACE_WEB,
             "SearchWebElementInfo GetOnFocus, elementId: %{public}" PRId64
             ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",

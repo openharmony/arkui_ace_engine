@@ -15,8 +15,12 @@
 
 import { KPointer } from "@koalaui/interop"
 import { Length } from "../component"
-import { DividerStyle } from "../component/sidebar"
 import { SideBarContainerHandWrittenImpl } from "./SideBarContainerHandWrittenImpl"
+import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from 'arkui/component/common';
+import { applyAttributeModifierBase, applyCommonModifier } from "./modifiers/ArkCommonModifier";
+import { CommonModifier } from '../CommonModifier';
+import { SideBarContainerModifier } from "../SideBarContainerModifier"
+import { ArkSideBarContainerComponent, DividerStyle, SideBarContainerAttribute } from 'arkui/component/sidebar'
 
 export function hookSideBarContainerSideBarWidthImpl(node: KPointer, value: number | Length | undefined) {
     SideBarContainerHandWrittenImpl.SideBarWidthImpl(node, value)
@@ -32,4 +36,36 @@ export function hookSideBarContainerMaxSideBarWidthImpl(node: KPointer, value: n
 
 export function hookSideBarContainerDividerImpl(node: KPointer, value: DividerStyle | null | undefined) {
     SideBarContainerHandWrittenImpl.DividerImpl(node, value)
+}
+
+export function hookSideBarContainerAttributeModifier(component: ArkSideBarContainerComponent, modifier: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): SideBarContainerModifier => {
+        let isSideBarContainerModifier: boolean = modifier instanceof SideBarContainerModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new SideBarContainerModifier();
+        if (isSideBarContainerModifier) {
+            let sideBarContainerModifier = modifier as object as SideBarContainerModifier;
+            initModifier.mergeModifier(sideBarContainerModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkSideBarContainerComponent => {
+        let componentNew: ArkSideBarContainerComponent = new ArkSideBarContainerComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SideBarContainerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }

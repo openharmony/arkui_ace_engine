@@ -89,6 +89,15 @@ void CloseImpl(Ark_CustomDialogController peer)
     peer->CloseDialog();
 }
 #ifdef WRONG_SDK
+Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialogController peer)
+{
+    Ark_CustomDialogControllerExternalOptions result = {
+        .customStyle = Converter::ArkValue<Opt_Boolean>(false),
+    };
+    CHECK_NULL_RETURN(peer, result);
+    result.customStyle = peer->GetCustomStyle();
+    return result;
+}
 void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
 {
     CHECK_NULL_VOID(peer);

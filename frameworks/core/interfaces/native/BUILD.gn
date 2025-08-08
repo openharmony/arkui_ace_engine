@@ -215,7 +215,6 @@ template("ace_core_interfaces_native_node") {
       ]
     }
     include_dirs = [
-      "${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/",
       "${ace_root}/frameworks/core/interfaces/native/generated/interface",
       "${ace_root}/interfaces/inner_api/ace",
       "${ace_root}/interfaces/native",

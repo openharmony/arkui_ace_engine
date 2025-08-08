@@ -3414,9 +3414,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_onSslErrorReceive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _WebAttribute_onRenderExited(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_onShowFileSelector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -5774,6 +5772,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_open(ptr: KPointer): undefined
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
+    @ani.unsafe.Quick
+    native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
     @ani.unsafe.Direct
