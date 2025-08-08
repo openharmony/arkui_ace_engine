@@ -246,7 +246,6 @@ public:
     std::function<void()> transitionOutCallback_;
     Color actualForegroundColor_;
 
-private:
     size_t animationsCount_ = 0;
     BlurOption backdropBlurOption;
     BlurOption foregroundBlurOption;
