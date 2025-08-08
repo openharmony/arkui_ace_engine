@@ -24,7 +24,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { DismissDialogAction, DismissDialogAction_serializer } from "./actionSheet"
 import { CustomBuilder } from "./builder"
-import { ExtendableComponent, ExtendableComponent_serializer } from "./extendableComponent"
+import { ExtendableComponent/*, ExtendableComponent_serializer*/ } from "./extendableComponent"
 import { DialogAlignment } from "./alertDialog"
 import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Color, BorderStyle } from "./enums"
@@ -137,7 +137,7 @@ export class CustomDialogControllerOptions_serializer {
         } else if (valueHolderForBuilder instanceof ExtendableComponent) {
             valueSerializer.writeInt8((1).toChar())
             const valueHolderForBuilderForIdx1  = valueHolderForBuilder as ExtendableComponent
-            ExtendableComponent_serializer.write(valueSerializer, valueHolderForBuilderForIdx1)
+            //ExtendableComponent_serializer.write(valueSerializer, valueHolderForBuilderForIdx1)
         }
         const valueHolderForCancel  = value.cancel
         if (valueHolderForCancel !== undefined) {
@@ -590,7 +590,7 @@ export class CustomDialogControllerOptions_serializer {
                 return;
             }
         } else if (builderTmpBufUnionSelector == (1).toChar()) {
-            builderTmpBuf = (ExtendableComponent_serializer.read(valueDeserializer) as ExtendableComponent)
+            //builderTmpBuf = (ExtendableComponent_serializer.read(valueDeserializer) as ExtendableComponent)
         } else {
             throw new Error("One of the branches for builderTmpBuf has to be chosen through deserialisation.")
         }
