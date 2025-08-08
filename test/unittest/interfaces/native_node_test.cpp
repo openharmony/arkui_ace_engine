@@ -7498,6 +7498,42 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest_OutlineColor001
+ * @tc.desc: Test customNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_OutlineColor001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    uint32_t color0 = 0xFFFF0000;
+    uint32_t color1 = 0xFFFF00FF;
+    uint32_t color2 = 0xFFFFFF00;
+    uint32_t color3 = 0xFF00FFFF;
+
+    ArkUI_NumberValue value[] = {{.u32 = color0}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    ArkUI_NumberValue value4[] = {{.u32 = color0}, {.u32 = color1}, {.u32 = color2}, {.u32 = color3}};
+    ArkUI_AttributeItem item4 = {value4, sizeof(value4) / sizeof(ArkUI_NumberValue)};
+
+    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_COLOR, &item);
+    auto outlineColorVal = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_COLOR);
+    EXPECT_EQ(outlineColorVal->value[0].u32, color0);
+
+    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_COLOR, &item4);
+    auto outlineColorVal4 = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_COLOR);
+    EXPECT_EQ(outlineColorVal4->value[0].u32, color0);
+    EXPECT_EQ(outlineColorVal4->value[1].u32, color1);
+    EXPECT_EQ(outlineColorVal4->value[2].u32, color2);
+    EXPECT_EQ(outlineColorVal4->value[3].u32, color3);
+}
+
+/**
  * @tc.name: NativeNodeScrollZoomTest001
  * @tc.desc: Test Scroll zoom attribute.
  * @tc.type: FUNC
