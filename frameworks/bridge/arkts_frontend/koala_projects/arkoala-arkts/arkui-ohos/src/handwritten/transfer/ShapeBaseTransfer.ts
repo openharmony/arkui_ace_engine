@@ -18,8 +18,8 @@ import { Rect, RoundRect, CornerRadius, Vector2, Circle, CommandPath } from "../
 export class ShapeBaseTransfer {
     static transferRectStatic(rectValue: ESValue): Rect {
         const left = rectValue.getProperty("left").toNumber();
-        const right = rectValue.getProperty("right").toNumber();
         const top = rectValue.getProperty("top").toNumber();
+        const right = rectValue.getProperty("right").toNumber();
         const bottom = rectValue.getProperty("bottom").toNumber();
         let rect: Rect = { left: left, top: top, right: right, bottom: bottom };
         return rect
