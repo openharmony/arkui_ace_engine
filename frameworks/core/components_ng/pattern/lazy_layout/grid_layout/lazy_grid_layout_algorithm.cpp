@@ -79,9 +79,7 @@ void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, Optiona
         return;
     }
 
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto layoutPolicy = property->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
         auto isVertical = axis_ == Axis::VERTICAL;
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
