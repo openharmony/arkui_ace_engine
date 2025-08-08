@@ -1420,10 +1420,10 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
 
 /**
  * @tc.name: GetKeyboardWebInset
- * @tc.desc: Use GetKeyboardWebInset and test.
+ * @tc.desc: test functionality of GetKeyboardWebInset interface
  * @tc.type: FUNC
  */
- HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
+ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
  {
      SafeAreaInsets::Inset inset;
      safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
