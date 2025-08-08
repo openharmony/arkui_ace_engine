@@ -36,6 +36,7 @@ ace_unittest("util_test") {
   type = "new"
   sources = [
     "base_utils_test.cpp",
+    "dump_recorder_test.cpp",
     "json_util_test.cpp",
     "node_object_test.cpp",
     "unique_valued_map_test.cpp",
