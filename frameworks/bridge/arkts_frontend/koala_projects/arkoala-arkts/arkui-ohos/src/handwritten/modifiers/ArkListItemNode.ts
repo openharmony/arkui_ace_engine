@@ -37,6 +37,9 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
         this.getPeer()?.setListItemOptions0Attribute(options_casted)
         return this
     }
+    allowChildCount(): number {
+        return 1;
+    }
     sticky(value: Sticky | undefined): this {
         const value_casted = value as (Sticky | undefined)
         this.getPeer()?.stickyAttribute(value_casted)
