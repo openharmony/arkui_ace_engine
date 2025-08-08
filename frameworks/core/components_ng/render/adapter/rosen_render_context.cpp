@@ -488,6 +488,12 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
         rsContext = GetRSUIContext(pipeline);
+        if (!rsContext) {
+            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsContext = rsUIDirector_->GetRSUIContext();
+        }
     }
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
