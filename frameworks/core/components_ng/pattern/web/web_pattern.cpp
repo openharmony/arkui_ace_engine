@@ -3587,6 +3587,10 @@ void WebPattern::OnAttachContext(PipelineContext *context)
         updateInstanceIdCallback_(newId);
     }
 
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRSUIContext(context);
+    }
+
     if (renderSurface_) {
         renderSurface_->SetInstanceId(newId);
     }
