@@ -988,6 +988,18 @@ void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam)
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 
+void SetOnWaterFlowScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollIndex = reinterpret_cast<ScrollIndexFunc*>(extraParam);
+        WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
+    } else {
+        WaterFlowModelNG::SetOnScrollIndex(frameNode, nullptr);
+    }
+}
+
 void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1000,18 +1012,6 @@ void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
-}
-
-void SetOnWaterFlowScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onScrollIndex = reinterpret_cast<ScrollIndexFunc*>(extraParam);
-        WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
-    } else {
-        WaterFlowModelNG::SetOnScrollIndex(frameNode, nullptr);
-    }
 }
 
 void ResetOnWillScroll(ArkUINodeHandle node)

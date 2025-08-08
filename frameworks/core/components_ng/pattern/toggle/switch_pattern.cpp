@@ -756,6 +756,10 @@ void SwitchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(switchTheme);
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
