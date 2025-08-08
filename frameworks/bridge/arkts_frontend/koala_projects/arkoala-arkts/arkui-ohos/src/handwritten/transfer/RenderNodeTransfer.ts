@@ -89,10 +89,10 @@ export class RenderNodeTransfer {
     // 2. get nodeId
     // 3. check map
     // 4. transfer property
-    public transfer2S(input: Object): RenderNode | null {
+    public transfer2S(input: Object): RenderNode | undefined {
         let inVal = ESValue.wrap(input);
         if (inVal.isNull() || inVal.isUndefined()) {
-            return null;
+            return undefined;
         }
 
         // try get nodePtr(1.1)
@@ -100,13 +100,13 @@ export class RenderNodeTransfer {
         // get nodePtr value
         let nodePtrVal = TransferUtil.getNodePtrValue(nativeRef);
         if (nodePtrVal === 0) {
-            return null;
+            return undefined;
         }
 
         // get node id
         let nodeId = ArkUIAniModule._GetNodeIdWithNodePtr(nodePtrVal);
         if (nodeId <= 0) {
-            return null;
+            return undefined;
         }
         // check if exist
         if (this.mapNodeStatic.has(nodeId)) {
@@ -124,7 +124,7 @@ export class RenderNodeTransfer {
         let ParentVal = inVal.getProperty("parentRenderNode");
         if (ParentVal.isObject()) {
             let parVal = TransferUtil.nodeDeref(ParentVal.unwrap()! as Object);
-            if (parVal !== null) {
+            if (parVal !== undefined) {
                 this.transfer2S(parVal as Object);
             }
         }
@@ -138,7 +138,7 @@ export class RenderNodeTransfer {
             }
             const childObj = childVal.unwrap() as Object;
             let childNode = this.transfer2S(childObj);
-            if (childNode === null) {
+            if (childNode === undefined) {
                 break;
             }
             tsNode.appendChild(childNode as RenderNode);
@@ -269,7 +269,7 @@ export class RenderNodeTransfer {
         const trans = new RenderNodeTransfer();
         const node = trans.transfer2S(input! as Object);
     
-        return node !== null ? node : new Object();
+        return node !== undefined ? node : new Object();
     }
 
     /*
