@@ -4927,7 +4927,7 @@ void LinearGradientBlur0Impl(Ark_NativePointer node,
     auto radius = Converter::OptConvertPtr<Dimension>(value);
     auto convValue = Converter::OptConvertPtr<NG::LinearGradientBlurPara>(options);
     Validator::ValidateNonNegative(radius);
-    if (radius.has_value()) {
+    if (radius.has_value() && convValue.has_value()) {
         convValue->blurRadius_ = radius.value();
     }
     ViewAbstractModelStatic::SetLinearGradientBlur(frameNode, convValue);
@@ -5163,6 +5163,10 @@ void BindContextMenuBase(Ark_NativePointer node,
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    if (!menuOption) {
+        contentBuilder(menuParam, nullptr);
+        return;
     }
     Converter::VisitUnion(menuOption->preview,
         [&menuParam, menuOption, contentBuilder](const Ark_MenuPreviewMode& value) {
