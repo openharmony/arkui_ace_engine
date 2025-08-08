@@ -7574,7 +7574,8 @@ typedef struct {
     ArkUI_Bool (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
     void (*detachHostNode)(ArkUINodeHandle host);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
-    ArkUI_CharPtr (*getNodeType)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getNodeType)(ArkUINodeAdapterHandle handle);
+    void (*fireArkUIObjectLifecycleCallback)(void* data, ArkUINodeAdapterHandle handle);
 } ArkUINodeAdapterAPI;
 
 typedef struct {
