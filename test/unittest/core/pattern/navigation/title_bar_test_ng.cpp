@@ -2841,4 +2841,31 @@ HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle2, TestSize.Level1)
     auto value = textLayout->GetContent().value_or(u"");
     EXPECT_EQ(value, UtfUtils::Str8DebugToStr16("main"));
 }
+
+/**
+ * @tc.name: test ToJsonValue
+ * @tc.desc: nobranch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, ToJsonValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode.
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+
+    /**
+     * @tc.steps: step2. setcolor and test
+     */
+    auto ctx = titleBarNode->GetRenderContext();
+    ASSERT_NE(ctx, nullptr);
+    ctx->UpdateBackgroundColor(Color::RED);
+    
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    titleBarNode->ToJsonValue(json, filter);
+    ASSERT_NE(json->GetString("backgroundColor"), "0xffff0000");
+}
 } // namespace OHOS::Ace::NG
