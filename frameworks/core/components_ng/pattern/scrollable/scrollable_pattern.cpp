@@ -4615,6 +4615,9 @@ void ScrollablePattern::ReportOnItemStopEvent()
 
 PaddingPropertyF ScrollablePattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
 {
+    if (needFullSafeArea_) {
+        return needRotate ? PaddingPropertyF{} : safeAreaPadding;
+    }
     bool isVertical = GetAxis() == Axis::VERTICAL;
     if (needRotate) {
         isVertical = !isVertical;
@@ -4632,6 +4635,9 @@ PaddingPropertyF ScrollablePattern::CustomizeSafeAreaPadding(PaddingPropertyF sa
 bool ScrollablePattern::AccumulatingTerminateHelper(
     RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf, LayoutSafeAreaType ignoreType)
 {
+    if (needFullSafeArea_) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (host->IsScrollableAxisInsensitive()) {

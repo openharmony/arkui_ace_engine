@@ -910,6 +910,11 @@ public:
     bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
+    void SetNeedFullSafeArea(bool needFullSafeArea)
+    {
+        needFullSafeArea_ = needFullSafeArea;
+    }
+
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
@@ -1264,6 +1269,7 @@ private:
     std::queue<std::pair<uint64_t, float>> offsets_;
     bool isExtScroll_ = false;
     bool isNeedCollectOffset_ = false;
+    bool needFullSafeArea_ = false;
 };
 } // namespace OHOS::Ace::NG
 

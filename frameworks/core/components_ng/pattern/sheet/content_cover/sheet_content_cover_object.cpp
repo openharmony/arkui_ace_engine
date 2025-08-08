@@ -109,6 +109,12 @@ void SheetContentCoverObject::BeforeCreateLayoutWrapper()
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
     dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollablePattern = scrollNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetNeedFullSafeArea(true);
 }
 
 void SheetContentCoverObject::SetFinishEventForAnimationOption(

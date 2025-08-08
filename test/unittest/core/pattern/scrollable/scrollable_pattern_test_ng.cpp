@@ -2080,6 +2080,55 @@ HWTEST_F(ScrollablePatternTestNg, HandleOnWillScrollEventEx, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomizeSafeAreaPadding
+ * @tc.desc: Test CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, CustomizeSafeAreaPadding, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scrollable pattern, init .
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->needFullSafeArea_ = true;
+    /**
+     * @tc.steps: step2. set padding and call CustomizeSafeAreaPadding with true.
+     * @tc.expected: safeAreaPadding is PaddingPropertyF{}.
+     */
+    PaddingPropertyF padding {10, 20, 30, 40};
+    auto safeAreaPadding = scrollablePattern->CustomizeSafeAreaPadding(padding, true);
+    EXPECT_EQ(safeAreaPadding, PaddingPropertyF{});
+    /**
+     * @tc.steps: step3. call CustomizeSafeAreaPadding with false.
+     * @tc.expected: safeAreaPadding is equal to padding.
+     */
+    safeAreaPadding = scrollablePattern->CustomizeSafeAreaPadding(padding, false);
+    EXPECT_EQ(safeAreaPadding, padding);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelper
+ * @tc.desc: Test AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, AccumulatingTerminateHelper, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scrollable pattern, init.
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    /**
+     * @tc.steps: step2. set needFullSafeArea_ to true and call AccumulatingTerminateHelper.
+     * @tc.expected: the return value is false.
+     */
+    scrollablePattern->needFullSafeArea_ = true;
+    ExpandEdges padding {10, 20, 30, 40};
+    RectF rect {};
+    auto result = scrollablePattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: GetDVSyncOffset
  * @tc.desc: Test GetDVSyncOffset
  * @tc.type: FUNC
