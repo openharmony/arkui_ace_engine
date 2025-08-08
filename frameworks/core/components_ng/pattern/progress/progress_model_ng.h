@@ -140,6 +140,8 @@ public:
     static void SetRSScaleWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetTextResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetFontSizeResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetCapsuleStyle(FrameNode* frameNode, bool value);
+    static void SetCapsuleStyleFontColor(FrameNode* frameNode, bool value);
     static void CreateWithResourceObj(FrameNode* frameNode, JsProgressResourceType jsResourceType,
         const RefPtr<ResourceObject>& resObj);
     static void CreateLSOrRingOrCapsuleWithResourceObj(
