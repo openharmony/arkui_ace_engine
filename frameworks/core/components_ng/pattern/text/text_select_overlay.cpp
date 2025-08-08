@@ -158,6 +158,9 @@ void TextSelectOverlay::OnResetTextSelection()
 
 void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
+    if (!SelectOverlayIsOn()) {
+        return;
+    }
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     auto host = textPattern->GetHost();
@@ -435,6 +438,10 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
 
 void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    auto isDragging = GetIsHandleDragging();
+    if (isDragging) {
+        TriggerScrollableParentToScroll(FindScrollableParent(), Offset(), true);
+    }
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);

@@ -1496,4 +1496,11 @@ bool SelectContentOverlayManager::IsPasteOption(const RefPtr<UINode>& node)
     }
     return false;
 }
+
+void SelectContentOverlayManager::UpdateIsSingleHandle(bool isSingleHandle)
+{
+    if (IsOpen() && shareOverlayInfo_) {
+        shareOverlayInfo_->isSingleHandle = isSingleHandle;
+    }
+}
 } // namespace OHOS::Ace::NG

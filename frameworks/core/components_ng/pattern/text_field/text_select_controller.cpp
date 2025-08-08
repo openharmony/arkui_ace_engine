@@ -92,6 +92,9 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
     if (textAlign != TextAlign::END) {
         AdjustHandleAtEdge(rect);
     }
+    if (GreatNotEqual(rect.Height(), contentRect_.Height()) && !textField->IsTextArea()) {
+        rect.SetHeight(contentRect_.Height());
+    }
     return rect;
 }
 

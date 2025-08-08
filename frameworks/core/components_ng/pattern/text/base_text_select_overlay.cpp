@@ -1645,4 +1645,12 @@ bool BaseTextSelectOverlay::GetDragViewHandleRects(RectF& firstRect, RectF& seco
     secondRect = overlayInfo->secondHandle.localPaintRect + dragParentOffset;
     return true;
 }
+
+void BaseTextSelectOverlay::UpdateIsSingleHandle(bool isSingleHandle)
+{
+    SetIsSingleHandle(isSingleHandle);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->UpdateIsSingleHandle(isSingleHandle);
+}
 } // namespace OHOS::Ace::NG
