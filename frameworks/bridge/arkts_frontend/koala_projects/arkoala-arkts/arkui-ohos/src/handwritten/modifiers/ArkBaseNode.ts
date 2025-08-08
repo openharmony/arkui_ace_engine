@@ -51,7 +51,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     constructParam(...param: Object[]): this {
         return this;
     }
-    private markDirty(): void {
+    markDirty(): void {
         ArkUIAniModule._FrameNode_MarkDirtyNode(this.getPeer().getPeerPtr());
         return;
     }
