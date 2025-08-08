@@ -1745,7 +1745,7 @@ HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
                   by the user using the changindex interface.
      * @tc.expected: jumpIndexByUser_ is not changed.
      */
-    pattern_->SwipeToWithoutAnimation(1, false);
+    pattern_->SwipeToWithoutAnimation(1);
     EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
 
     /**
@@ -1753,7 +1753,7 @@ HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
                   by the user using the changindex interface.
      * @tc.expected: jumpIndexByUser_ is changed.
      */
-    pattern_->SwipeToWithoutAnimation(1, true);
+    pattern_->SwipeToWithoutAnimation(1, 1);
     EXPECT_EQ(pattern_->jumpIndexByUser_, 1);
 
     /**
