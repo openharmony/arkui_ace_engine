@@ -146,8 +146,8 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    textFieldNode->SetParent(frameNode_);
     ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->CanUndo(), false);

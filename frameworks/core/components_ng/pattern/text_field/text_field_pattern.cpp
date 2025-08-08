@@ -4802,9 +4802,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .abilityToken = container ? container->GetToken() : nullptr
     };
 
-    if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
-        textConfig.inputAttribute.inputPattern = (int32_t)TextInputType::NUMBER;
-    }
     return textConfig;
 }
 
