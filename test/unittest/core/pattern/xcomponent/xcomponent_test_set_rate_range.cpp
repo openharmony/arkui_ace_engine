@@ -16,24 +16,62 @@
 
 #include "gtest/gtest.h"
 
+#include <optional>
+#include <iostream>
 #define private public
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/render/mock_render_surface.h"
 
-#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+struct TestProperty {
+    std::optional<std::string> xcId = std::nullopt;
+    std::optional<XComponentType> xcType = std::nullopt;
+    std::optional<std::string> libraryName = std::nullopt;
+    std::optional<std::string> soPath = std::nullopt;
+};
+
+namespace {
+const std::string XCOMPONENT_ID = "xcomponent";
+const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
+const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
+constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
+ArkUI_XComponent_Params params;
+const int32_t MIN_RATE = 30;
+const int32_t MAX_RATE = 120;
+const int32_t EXPECTED_RATE = 120;
+const int32_t CODE_NO_ERROR = 0;
+} // namespace
 
 class XComponentTestSetRateRange : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void TearDown() override {}
+protected:
+    static RefPtr<FrameNode> CreateXComponentNode();
 };
+
+RefPtr<FrameNode> XComponentTestSetRateRange::CreateXComponentNode()
+{
+    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    return frameNode;
+}
 
 void XComponentTestSetRateRange::SetUpTestSuite()
 {
@@ -52,37 +90,92 @@ void XComponentTestSetRateRange::TearDownTestSuite()
  */
 HWTEST_F(XComponentTestSetRateRange, HandleSetExpectedRateRangeEventTest, TestSize.Level0)
 {
-    auto pattern = XComponentPattern();
-    pattern.nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    EXPECT_NE(pattern.nativeXComponentImpl_, nullptr);
-    pattern.nativeXcomponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(pattern.nativeXComponentImpl_));
+#ifdef ENABLE_ROSEN_BACKEND
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
 
-    EXPECT_NE(pattern.nativeXComponent_, nullptr);
-
-    EXPECT_NE(pattern.displaySync_, nullptr);
+    pattern->nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    EXPECT_NE(pattern->nativeXComponentImpl_, nullptr);
+    pattern->nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(pattern->nativeXComponentImpl_));
+    EXPECT_NE(pattern->nativeXComponent_, nullptr);
+    EXPECT_NE(pattern->displaySync_, nullptr);
     OH_NativeXComponent_ExpectedRateRange* rateRange =
         (OH_NativeXComponent_ExpectedRateRange*)malloc(sizeof(OH_NativeXComponent_ExpectedRateRange));
     rateRange->min = 10;
     rateRange->max = 60;
     rateRange->expected = 30;
-    pattern.nativeXComponentImpl_->SetRateRange(rateRange);
-    EXPECT_NE(pattern.nativeXComponentImpl_->GetRateRange(), nullptr);
-
-#ifdef ENABLE_ROSEN_BACKEND
+    pattern->nativeXComponentImpl_->SetRateRange(rateRange);
+    EXPECT_NE(pattern->nativeXComponentImpl_->GetRateRange(), nullptr);
     FrameRateRange frameRateRange;
     frameRateRange.Set(rateRange->min, rateRange->max, rateRange->expected);
-    pattern.lastFrameRateRange_.Set(rateRange->min, rateRange->max, rateRange->expected);
-    EXPECT_FALSE(frameRateRange.preferred_ != pattern.lastFrameRateRange_.preferred_);
-    pattern.HandleSetExpectedRateRangeEvent();
-    EXPECT_FALSE(pattern.lastFrameRateRange_.IsZero());
+    EXPECT_FALSE(pattern->displaySync_->lastFrameRateRange_.has_value());
+    pattern->displaySync_->lastFrameRateRange_.emplace(rateRange->min, rateRange->max, rateRange->expected);
+    pattern->OnDetachFromMainTree();
+    EXPECT_FALSE(frameRateRange.preferred_ != pattern->displaySync_->lastFrameRateRange_->preferred_);
+    pattern->HandleSetExpectedRateRangeEvent();
+    EXPECT_TRUE(pattern->displaySync_->lastFrameRateRange_.has_value());
+    pattern->displaySync_->lastFrameRateRange_.reset();
+    pattern->OnAttachToMainTree();
+    EXPECT_FALSE(pattern->displaySync_->lastFrameRateRange_.has_value());
+    EXPECT_TRUE(pattern->isOnTree_);
+    pattern->HandleSetExpectedRateRangeEvent();
+    EXPECT_TRUE(pattern->displaySync_->lastFrameRateRange_.has_value());
+    pattern->OnAttachToMainTree();
 
-    pattern.lastFrameRateRange_Reset();
-    EXPECT_TRUE(pattern.lastFrameRateRange_.IsZero());
-    EXPECT_TRUE(frameRateRange.preferred_ != pattern.lastFrameRateRange_.perferred_);
-    pattern.HandleSetExpectedRateRangeEvent();
-    EXPECT_FALSE(pattern.lastFrameRateRange_.IsZero());
-#endif
-
+    auto extFrameNode = CreateXComponentNode();
+    ASSERT_TRUE(extFrameNode);
+    auto extPattern = extFrameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(extPattern);
+    extPattern->displaySync_->lastFrameRateRange_.reset();
+    extPattern->OnDetachFromMainTree();
     free(rateRange);
+#endif
+}
+
+/**
+ * @tc.name: SetExpectedRateRangeTest
+ * @tc.desc: Test SetExpectedRateRangeTest successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestSetRateRange, SetExpectedRateRangeTest, TestSize.Level1)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    int32_t invalidRate = -1;
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    auto code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+
+    OH_NativeXComponent_ExpectedRateRange* rateRange =
+        (OH_NativeXComponent_ExpectedRateRange*)malloc(sizeof(OH_NativeXComponent_ExpectedRateRange));
+    rateRange->min = 10;
+    rateRange->max = 60;
+    rateRange->expected = 30;
+    FrameRateRange frameRateRange;
+    frameRateRange.Set(rateRange->min, rateRange->max, rateRange->expected);
+    EXPECT_TRUE(pattern->displaySync_->lastFrameRateRange_.has_value());
+    pattern->displaySync_->lastFrameRateRange_.emplace(rateRange->min, rateRange->max, rateRange->expected);
+    pattern->usesSuperMethod_ = true;
+    pattern->OnDetachFromMainTree();
+    EXPECT_FALSE(frameRateRange.preferred_ != pattern->displaySync_->lastFrameRateRange_->preferred_);
+    code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+    EXPECT_FALSE(pattern->displaySync_->lastFrameRateRange_->IsZero());
+
+    pattern->displaySync_->lastFrameRateRange_->Reset();
+    pattern->OnAttachToMainTree();
+    EXPECT_TRUE(pattern->displaySync_->lastFrameRateRange_->IsZero());
+    code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+    EXPECT_FALSE(pattern->displaySync_->lastFrameRateRange_->IsZero());
+    pattern->OnAttachToMainTree();
+    code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, invalidRate);
+#endif
 }
 } // namespace OHOS::Ace::NG

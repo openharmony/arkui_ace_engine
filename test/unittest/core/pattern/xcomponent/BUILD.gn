@@ -13,43 +13,6 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-config("rosen_render_context_config") {
-  visibility = [ "./*" ]
-  include_dirs = [
-    "$ace_root",
-    "$ace_root/frameworks",
-    "$root_out_dir/arkui/framework",
-    "$ace_root/interfaces/inner_api/ace_kit/include",
-  ]
-
-  cflags_cc = [
-    "-Wno-unused-private-field",
-    "-Wno-thread-safety-attributes",
-    "-Wno-thread-safety-analysis",
-    "-Wno-non-c-typedef-for-linkage",
-    "-fvisibility-inlines-hidden",
-  ]
-
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-g",
-  ]
-
-  ldflags = [ "-Wl,--gc-sections,--as-needed" ]
-
-  if (ace_engine_feature_enable_coverage) {
-    cflags += [ "--coverage" ]
-    ldflags += [ "--coverage" ]
-  }
-
-  defines = [
-    "OHOS_STANDARD_SYSTEM",
-    "ENABLE_ROSEN_BACKEND",
-  ]
-}
-
 ace_unittest("xcomponent_test_ng") {
   type = "new"
   sources = [
@@ -70,8 +33,12 @@ ace_unittest("xcomponent_test_ng") {
 ace_unittest("xcomponent_test_set_rate_range") {
   type = "new"
   sources = [
+    "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "xcomponent_test_set_rate_range.cpp",
   ]
-  configs = [ ":rosen_render_context_config" ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
+  if (current_os == "ohos") {
+    external_deps += [ "napi:ace_napi" ]
+  }
 }

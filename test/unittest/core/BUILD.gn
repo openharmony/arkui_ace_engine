@@ -169,6 +169,7 @@ group("linux_core_unittest") {
     "pattern/view_context:view_context_test_ng",
     "pattern/withtheme:withtheme_test_ng",
     "pattern/xcomponent:xcomponent_test_ng",
+    "pattern/xcomponent:xcomponent_test_set_rate_range",
     "property:core_property_unittest",
     "render:core_render_unittest",
     "syntax:core_syntax_unittest",
