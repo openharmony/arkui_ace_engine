@@ -245,25 +245,6 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
         return nullptr;
     }
 
-    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
-        ColorMode localMode = pipelineContext->GetLocalColorMode();
-        ColorMode systemMode = pipelineContext->GetColorMode();
-        bool needRestore = false;
-        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
-            // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
-            ResourceManager::GetInstance().UpdateColorMode(systemMode);
-            pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
-            needRestore = true;
-        }
-        auto theme = builderIter->second(themeConstants_);
-        if (needRestore) {
-            pipelineContext->SetLocalColorMode(localMode);
-            ResourceManager::GetInstance().UpdateColorMode(localMode);
-        }
-        themes_.emplace(type, theme);
-        return theme;
-    }
-    
     auto theme = builderIter->second(themeConstants_);
     themes_.emplace(type, theme);
     return theme;
