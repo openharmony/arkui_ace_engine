@@ -89,16 +89,6 @@ export class TransferUtil {
         }
         return refVal.unwrap() as Object;
     }
-    
-    // new
-    
-    
-    
-
-
-
-
-
 
     // nodeId: -> 1.2(int)
     static getPropNumberInt(inVal: ESValue, name: string): int {
