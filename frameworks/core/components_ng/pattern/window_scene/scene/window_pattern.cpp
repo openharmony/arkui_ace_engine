@@ -735,7 +735,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
 
 void WindowPattern::AddBackgroundColorDelayed()
 {
-    if (self->session_->IsExitSplitOnBackground()) {
+    if (session_->IsExitSplitOnBackground()) {
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
