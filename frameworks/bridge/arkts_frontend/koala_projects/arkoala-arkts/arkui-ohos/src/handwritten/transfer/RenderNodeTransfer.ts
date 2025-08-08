@@ -201,19 +201,19 @@ export class RenderNodeTransfer {
      *  4. transfer property
      * @returns Object for arkts1.1
      */
-    public transfer2D(input: Object): Object | null {
+    public transfer2D(input: Object): Object | undefined {
         let inVal = ESValue.wrap(input);
         // get peerPtr
         let peerPtr = TransferUtil.getPropPeerPtr(inVal, "peer");
         if (peerPtr == 0) {
-            return null;
+            return undefined;
         }
         // get nodePtr, it's frameNode pointer
         let nodePtr = ArkUIAniModule._GetNodePtrWithPeerPtr(peerPtr);
         // get nodeId
         let nodeId = ArkUIAniModule._GetNodeIdWithPeerPtr(peerPtr);
         if (nodeId <= 0) {
-            return null;
+            return undefined;
         }
         if (this.mapNodeDynamic.has(nodeId)) {
             let dVal = this.mapNodeDynamic.get(nodeId);
@@ -247,7 +247,7 @@ export class RenderNodeTransfer {
             }
             const childObj = childVal.unwrap();
             let jsChild = this.transfer2D(childObj! as Object);
-            if (jsChild === null) {
+            if (jsChild === undefined) {
                 break;
             }
             jsNodeVal.invokeMethod("appendChild", jsChild as Object);
@@ -283,7 +283,6 @@ export class RenderNodeTransfer {
         }
     
         const trans = new RenderNodeTransfer();
-        const node = trans.transfer2D(input);
-        return node;
+        return trans.transfer2D(input);
     }
 }
