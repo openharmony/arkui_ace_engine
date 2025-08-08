@@ -600,6 +600,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest117, TestSize.Level1)
     ASSERT_NE(borderWidth, nullptr);
     OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(borderWidth, 5.0f, ARKUI_EDGE_DIRECTION_TOP);
     OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(borderWidth, 8.0f, ARKUI_EDGE_DIRECTION_RIGHT);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(borderWidth, -1.0f, ARKUI_EDGE_DIRECTION_RIGHT);
     OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(borderWidth);
 }
 
