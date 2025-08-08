@@ -20,6 +20,7 @@ group("advanced_ui_component_static") {
     deps += [
       "selecttitlebar:selectTitleBar",
       "progressbutton:progressButton",
+      "progressbuttonV2:progressButtonV2",
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
       "composeListItem:composeListItem",
