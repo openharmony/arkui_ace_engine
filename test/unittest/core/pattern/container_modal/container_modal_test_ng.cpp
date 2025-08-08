@@ -1003,4 +1003,61 @@ HWTEST_F(ContainerModelTestNg, SetWindowContainerColor, TestSize.Level1)
     ret = pattern_->IsContainerModalTransparent();
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: InitColumnTouchTestFunc3
+ * @tc.desc: Test InitColumnTouchTestFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc3, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    /**
+     * @tc.steps: step1. Get column node and check it's not null
+     * @tc.expected: Column node is valid
+     */
+    auto column = pattern_->GetColumnNode();
+    ASSERT_NE(column, nullptr);
+
+    /**
+     * @tc.steps: step2. Get gesture event hub and check it's not null
+     * @tc.expected: Gesture event hub is valid
+     */
+    auto eventHub = column->GetOrCreateGestureEventHub();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize touch test function
+     * @tc.expected: Touch test function is set
+     */
+    pattern_->InitColumnTouchTestFunc();
+    auto callback = eventHub->GetOnTouchTestFunc();
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step4. Create frame node and set toolbar builder
+     * @tc.expected: Frame node created and toolbar builder set
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 100, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+    ASSERT_NE(pattern_->titleMgr_, nullptr);
+
+    /**
+     * @tc.steps: step5. Test different combinations of custom title and update target node
+     * @tc.expected: Touch test function set/unset based on conditions
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (auto p : vec) {
+        pattern_->customTitleSettedShow_ = p.first;
+        pattern_->titleMgr_->isUpdateTargetNode_ = p.second;
+        pattern_->InitColumnTouchTestFunc();
+        callback = eventHub->GetOnTouchTestFunc();
+        if (p.first && p.second) {
+            EXPECT_EQ(callback, nullptr);
+        } else {
+            EXPECT_NE(callback, nullptr);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
