@@ -134,7 +134,9 @@ private:
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndAddStartingWindowAboveLocked();
     void HideStartingWindow();
+    void AddBackgroundColorDelayed();
     CancelableCallback<void()> interruptStartingTask_;
+    CancelableCallback<void()> addBackgroundColorTask_;
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     friend class LifecycleListener;

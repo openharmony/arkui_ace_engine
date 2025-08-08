@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t ADD_BACKGROUND_COLOR_MS = 50;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 
@@ -655,12 +656,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
-            auto context = GetContext();
-            CHECK_NULL_VOID(context);
-            auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-            auto snapshotContext = snapshotWindow_->GetRenderContext();
-            CHECK_NULL_VOID(snapshotContext);
-            snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+            AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
@@ -735,6 +731,28 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         });
     }
     UpdateSnapshotWindowProperty();
+}
+
+void WindowPattern::AddBackgroundColorDelayed()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    addBackgroundColorTask_.Cancel();
+    addBackgroundColorTask_.Reset([weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::AddBackgroundColorTask");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto context = self->GetContext();
+        CHECK_NULL_VOID(context);
+        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        auto snapshotContext = self->snapshotWindow_->GetRenderContext();
+        CHECK_NULL_VOID(snapshotContext);
+        snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+    });
+    taskExecutor->PostDelayedTask(
+        addBackgroundColorTask_, TaskExecutor::TaskType::UI, ADD_BACKGROUND_COLOR_MS, __func__);
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)
