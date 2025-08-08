@@ -15,4 +15,5 @@
 package arkui.SymbolGlyphModifier;
 import arkui.component.common.AttributeModifier as AttributeModifier;
 
+[Entity=Class, ComponentModifier]
 interface SymbolGlyphModifier {};

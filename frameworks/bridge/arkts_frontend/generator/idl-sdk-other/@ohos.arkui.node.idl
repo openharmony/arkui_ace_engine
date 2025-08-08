@@ -17,3 +17,7 @@ package ohos.arkui.node;
 interface Content {
 
 };
+
+interface NodeController {
+
+};

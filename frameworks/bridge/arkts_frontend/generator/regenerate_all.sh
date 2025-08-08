@@ -41,11 +41,13 @@ fi
 
 API_VER=${API_VER:=99}
 
+CONFIGS=${CUR_PATH}/arkgen-config.json,${CUR_PATH}/arkgen-idl-config.json,${CUR_PATH}/arkgen-config-arkui.json
+
 echo "Generating C API from ${ETS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 
 ${GENERATOR} \
     --ignore-default-config \
-    --options-file ${CUR_PATH}/arkgen-config.json,${CUR_PATH}/arkgen-idl-config.json \
+    --options-file ${CONFIGS} \
     --reference-names ${CUR_PATH}/ets-sdk.refs.json \
     --use-memo-m3 \
     --language arkts \

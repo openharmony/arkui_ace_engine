@@ -21,10 +21,11 @@ import arkui.FrameNode.FrameNode as FrameNode;
 import arkui.component.common.AnimateParam as AnimateParam;
 import arkui.component.textPicker.TextPickerDialogOptions as TextPickerDialogOptions;
 import ohos.graphics.drawing.drawing.Font as Font;
-import arkui.componen.enums.HeightBreakpoint as HeightBreakpoint;
-import arkui.componen.enums.WidthBreakpoint as WidthBreakpoint;
+import arkui.component.enums.HeightBreakpoint as HeightBreakpoint;
+import arkui.component.enums.WidthBreakpoint as WidthBreakpoint;
 import arkui.component.common.PopupCommonOptions as PopupCommonOptions;
 import arkui.component.common.MenuOptions as MenuOptions;
+import arkui.component.textCommon.TextMenuOptions as TextMenuOptions;
 
 [Synthetic]
 callback Callback_Void = void ();

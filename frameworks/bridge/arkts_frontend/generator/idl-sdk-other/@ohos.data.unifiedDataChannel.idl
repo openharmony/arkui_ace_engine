@@ -32,4 +32,8 @@ namespace unifiedDataChannel {
         boolean hasType(String UnifiedData_type);
         sequence<String> getTypes();
     };
+
+    interface GetDataParams {
+        [Optional] attribute String destUri;
+    };
 };

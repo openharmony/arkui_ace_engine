@@ -13,10 +13,108 @@
  * limitations under the License.
  */
 package ohos.arkui.observer;
-
+import arkui.component.NavPathStack as NavPathStack;
+import arkui.component.NavigationOperation as NavigationOperation;
+import arkui.component.NavBar as NavBar;
+import arkui.component.ResourceStr as ResourceStr;
+import ohos.arkui.UIContext.UIContext as UIContext;
+// import application.UIAbilityContext.default as UIAbilityContext;
+import ohos.base.Callback as Callback;
 [DefaultExport]
-namespace observer {
-    interface RouterPageInfo {};
-    interface NavigationInfo {};
-    interface NavDestinationInfo {};
+namespace uiObserver {
+    dictionary NavDestinationState {
+        number ON_SHOWN = 0;
+        number ON_HIDDEN = 1;
+        number ON_APPEAR = 2;
+        number ON_DISAPPEAR = 3;
+        number ON_WILL_SHOW = 4;
+        number ON_WILL_HIDE = 5;
+        number ON_WILL_APPEAR = 6;
+        number ON_WILL_DISAPPEAR = 7;
+        number ON_BACKPRESS = 100;
+    };
+    dictionary RouterPageState {
+        number ABOUT_TO_APPEAR = 0;
+        number ABOUT_TO_DISAPPEAR = 1;
+        number ON_PAGE_SHOW = 2;
+        number ON_PAGE_HIDE = 3;
+        number ON_BACK_PRESS = 4;
+    };
+    dictionary ScrollEventType {
+        number SCROLL_START = 0;
+        number SCROLL_STOP = 1;
+    };
+    dictionary TabContentState {
+        number ON_SHOW = 0;
+        number ON_HIDE = 1;
+    };
+    interface NavDestinationInfo {
+        attribute ResourceStr navigationId;
+        attribute ResourceStr name;
+        attribute NavDestinationState state;
+        attribute number index;
+        [Optional]
+        attribute Object param;
+        attribute String navDestinationId;
+    };
+    interface NavigationInfo {
+        attribute String navigationId;
+        attribute NavPathStack pathStack;
+    };
+    interface ScrollEventInfo {
+        attribute String id;
+        attribute number uniqueId;
+        attribute ScrollEventType scrollEvent;
+        attribute number offset;
+    };
+    interface TabContentInfo {
+        attribute String tabContentId;
+        attribute number tabContentUniqueId;
+        attribute TabContentState state;
+        attribute number index;
+        attribute String id;
+        attribute number uniqueId;
+    };
+    interface ObserverOptions {
+        attribute String id;
+    };
+    [Entity=Class]
+    interface RouterPageInfo {
+        constructor();
+        // attribute (UIAbilityContext or UIContext) context;
+        attribute number index;
+        attribute String name;
+        attribute String path;
+        attribute RouterPageState state;
+        attribute String pageId;
+    };
+    [Entity=Class]
+    interface DensityInfo {
+        constructor();
+        attribute UIContext context;
+        attribute number density;
+    };
+    interface NavDestinationSwitchInfo {
+        // attribute (UIAbilityContext or UIContext) context;
+        attribute (NavDestinationInfo or NavBar) from;
+        attribute (NavDestinationInfo or NavBar) to;
+        attribute NavigationOperation operation;
+    };
+    interface NavDestinationSwitchObserverOptions {
+        attribute ResourceStr navigationId;
+    };
+    [Synthetic]
+    callback Callback_NavDestinationInfo_Void = void (NavDestinationInfo value0);
+    [Synthetic]
+    callback Callback_ScrollEventInfo_Void = void (ScrollEventInfo value0);
+    [Synthetic]
+    callback Callback_RouterPageInfo_Void = void (RouterPageInfo value0);
+    [Synthetic]
+    callback Callback_DensityInfo_Void = void (DensityInfo value0);
+    [Synthetic]
+    callback Callback_Void = void ();
+    [Synthetic]
+    callback Callback_TabContentInfo_Void = void (TabContentInfo value0);
+    [Synthetic]
+    callback Callback_NavDestinationSwitchInfo_Void = void (NavDestinationSwitchInfo value0);
 };

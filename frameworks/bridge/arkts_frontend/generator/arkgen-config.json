@@ -25,6 +25,11 @@
         "TouchResult",
         "SectionOptions"
     ],
+    "ignoreGenerics": [
+        "arkui.component.common.AttributeModifier",
+        "arkui.component.common.ContentModifier",
+        "arkui.component.ContentModifier"
+    ],
     "forceMaterialized": [
         "TapGestureInterface",
         "LongPressGestureInterface",
@@ -163,7 +168,8 @@
         "TextPickerDialog",
         "TimePickerDialog",
         "AlertDialog",
-        "CanvasPattern"
+        "CanvasPattern",
+        "WithThemeAttribute"
     ],
     "parameterized": [
         "Indicator",
@@ -182,6 +188,7 @@
     ],
     "components": {
         "custom": [
+            "BaseCustomDialog",
             "BaseCustomComponent",
             "CustomComponent",
             "CustomComponentV2"
@@ -190,6 +197,7 @@
             "CustomNode"
         ],
         "handWritten": [
+            "BaseCustomDialog",
             "LocalStorage",
             "SyncedPropertyOneWay",
             "SubscribedAbstractProperty",
@@ -205,7 +213,11 @@
             "PageTransitionExitInterface",
             "CommonTransition",
             "wrapBuilder",
-            "ContentModifier"
+            "ContentModifier",
+            "CustomStyles",
+            "applyStyles",
+            "UIGestureEvent",
+            "GestureModifier"
         ],
         "ignoreEntry": [
             "Optional",
@@ -274,79 +286,105 @@
         ]
     },
     "hooks": {
-        "Button": {
+        "ButtonAttribute": {
             "contentModifier": {
-                "hookName": "hookButtonContentModifier"
+                "hookName": "hookButtonContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Checkbox": {
-            "contentModifier": {
-                "hookName": "hookCheckBoxContentModifier"
+        "CommonMethod": {
+            "id": {
+                "hookName": "hookId",
+                "replaceImplementation": false
+            },
+            "stateStyles": {
+                "hookName": "hookStateStyleImpl",
+                "replaceImplementation": true
+            },
+            "gestureModifier": {
+                "hookName": "hookGestureModifier",
+                "replaceImplementation": true
             }
         },
-        "DataPanel": {
+        "CheckboxAttribute": {
             "contentModifier": {
-                "hookName": "hookDataPanelContentModifier"
+                "hookName": "hookCheckBoxContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Gauge": {
+        "DataPanelAttribute": {
             "contentModifier": {
-                "hookName": "hookGaugeContentModifier"
+                "hookName": "hookDataPanelContentModifier",
+                "replaceImplementation": true
             }
         },
-        "LoadingProgress": {
+        "GaugeAttribute": {
             "contentModifier": {
-                "hookName": "hookLoadingProgressContentModifier"
+                "hookName": "hookGaugeContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Progress": {
+        "LoadingProgressAttribute": {
             "contentModifier": {
-                "hookName": "hookProgressContentModifier"
+                "hookName": "hookLoadingProgressContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Radio": {
+        "ProgressAttribute": {
             "contentModifier": {
-                "hookName": "hookRadioContentModifier"
+                "hookName": "hookProgressContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Rating": {
+        "RadioAttribute": {
             "contentModifier": {
-                "hookName": "hookRatingContentModifier"
+                "hookName": "hookRadioContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Select": {
+        "RatingAttribute": {
+            "contentModifier": {
+                "hookName": "hookRatingContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "SelectAttribute": {
             "menuItemContentModifier": {
-                "hookName": "hookSelectContentModifier"
+                "hookName": "hookSelectContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Slider": {
+        "SliderAttribute": {
             "contentModifier": {
-                "hookName": "hookSliderContentModifier"
+                "hookName": "hookSliderContentModifier",
+                "replaceImplementation": true
             }
         },
-        "TextClock": {
+        "TextClockAttribute": {
             "contentModifier": {
-                "hookName": "hookTextClockContentModifier"
+                "hookName": "hookTextClockContentModifier",
+                "replaceImplementation": true
             }
         },
-        "TextTimer": {
+        "TextTimerAttribute": {
             "contentModifier": {
-                "hookName": "hookTextTimerContentModifier"
+                "hookName": "hookTextTimerContentModifier",
+                "replaceImplementation": true
             }
         },
-        "Toggle": {
+        "ToggleAttribute": {
             "contentModifier": {
-                "hookName": "hookToggleContentModifier"
+                "hookName": "hookToggleContentModifier",
+                "replaceImplementation": true
             }
         },
-        "waterFlow": {
+        "waterFlowAttribute": {
             "setWaterFlowOptionsAttribute": {
-                "hookName": "hookWaterFlowOptionsImpl"
+                "hookName": "hookWaterFlowOptionsImpl",
+                "replaceImplementation": true
             }
         }
     },
-    "externalTypes": {},
-    "externalPackages": [],
     "materialized": {
         "ignoreReturnTypes": [
             "Promise"
@@ -362,7 +400,9 @@
             "String",
             "Function",
             "Optional",
-            "RelativeIndexable"
+            "RelativeIndexable",
+            "StateStyles",
+            "Callback"
         ]
     },
     "dummy": {
@@ -373,11 +413,22 @@
                 "onClick1",
                 "drawModifier"
             ],
+            "EnvironmentBackend": [
+                "isAccessibilityEnabled",
+                "getColorMode",
+                "getFontScale",
+                "getFontWeightScale",
+                "getLayoutDirection",
+                "getLanguageCode"
+            ],
             "EventEmulator": [
                 "emitClickEvent"
             ],
             "RenderServiceNode": [
                 "getNodeId"
+            ],
+            "ScreenshotService": [
+                "requestScreenshot"
             ],
             "DrawModifier": [
                 "invalidate",
@@ -406,9 +457,12 @@
             "packages": [""]
         }
     },
-    "currentModulePackagesPaths": {
-        "arkui.component": "./component"
-    },
+    "libraryNameMapping": { },
+    "currentModulePackagesPaths": [
+        { "package": "arkui.component", "path": "./component" },
+        { "package": "arkui.stateManagement", "path": "./stateManagement" },
+        { "package": "arkui", "path": "./" }
+    ],
     "currentModuleExportedPackages": [
         "arkui.component",
         "internal.component.ets",

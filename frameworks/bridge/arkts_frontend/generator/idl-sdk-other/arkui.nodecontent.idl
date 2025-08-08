@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 package arkui.NodeContent;
+import arkui.Content.Content as Content;
+import arkui.FrameNode.FrameNode as FrameNode;
 
 [Entity=Class]
 interface NodeContent : Content {
     constructor();
-    void addFrameNode( FrameNode node);
-    void removeFrameNode( FrameNode node);
+    void addFrameNode(FrameNode node);
+    void removeFrameNode(FrameNode node);
 };

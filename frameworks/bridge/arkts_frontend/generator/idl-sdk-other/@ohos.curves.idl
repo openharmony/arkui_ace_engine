@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package ohos.curves;
 [DefaultExport]
 namespace curves {
     dictionary Curve {
@@ -45,4 +46,14 @@ namespace curves {
     interface ICurve {
         number interpolate(number fraction);
     };
+    ICurve initCurve(optional Curve curve);
+    ICurve stepsCurve(number count, boolean end);
+    [Synthetic]
+    callback Callback_Number_Number = number (number fraction);
+    ICurve customCurve(Callback_Number_Number interpolate);
+    ICurve cubicBezierCurve(number x1, number y1, number x2, number y2);
+    ICurve springCurve(number velocity, number mass, number stiffness, number damping);
+    ICurve springMotion(optional number response, optional number dampingFraction, optional number overlapDuration);
+    ICurve responsiveSpringMotion(optional number response, optional number dampingFraction, optional number overlapDuration);
+    ICurve interpolatingSpring(number velocity, number mass, number stiffness, number damping);
 };

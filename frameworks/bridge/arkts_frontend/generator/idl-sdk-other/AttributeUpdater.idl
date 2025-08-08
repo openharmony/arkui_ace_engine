@@ -15,3 +15,10 @@
 package arkui.AttributeUpdater;
 
 interface AttributeUpdater {};
+
+dictionary AttributeUpdaterFlag {
+    number INITIAL = 0;
+    number UPDATE = 1;
+    number SKIP = 2;
+    number RESET = 3;
+};

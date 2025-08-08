@@ -14,6 +14,8 @@
  */
 package ohos.font;
 
+import global.resource.Resource as Resource;
+
 namespace font {
     [Entity=Interface]
     interface UIFontFallbackInfo {
@@ -54,4 +56,24 @@ namespace font {
     };
 
     UIFontConfig getUIFontConfig();
+};
+
+[Entity=Interface]
+interface FontOptions {
+    attribute (String or Resource) familyName;
+    attribute (String or Resource) familySrc;
+};
+
+[Entity=Interface]
+interface FontInfo {
+    attribute String path;
+    attribute String postScriptName;
+    attribute String fullName;
+    attribute String family;
+    attribute String subfamily;
+    attribute number weight;
+    attribute number width;
+    attribute boolean italic;
+    attribute boolean monoSpace;
+    attribute boolean symbolic;
 };

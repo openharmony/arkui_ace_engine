@@ -1,8 +1,10 @@
 {
     "DeletedPackages": [
+        "global.rawFileDescriptor",
+        "arkui.component.repeat",
+        "arkui.component.interop"
     ],
     "DeletedDeclarations": [
-        "Callback",
         "double",
         "int",
         "WrappedBuilder",
@@ -64,7 +66,8 @@
         "_r",
         "_rawfile",
         "LazyGridLayoutAttribute",
-        "LazyVGridLayoutAttribute"
+        "LazyVGridLayoutAttribute",
+        "LazyVGridLayoutInterface"
     ],
     "DeletedMembers": {
         "CommonMethod": [
@@ -111,85 +114,6 @@
         "DrawModifier.drawFront": "ExtraMethod",
         "CustomSpan.onMeasure": "",
         "CustomSpan.onDraw": ""
-    },
-    "BoundProperties": {
-        "Checkbox": [
-            "select"
-        ],
-        "CheckboxGroup": [
-            "selectAll"
-        ],
-        "DatePicker": [
-            "selected"
-        ],
-        "TimePicker": [
-            "selected"
-        ],
-        "MenuItem": [
-            "selected"
-        ],
-        "Panel": [
-            "mode"
-        ],
-        "Radio": [
-            "checked"
-        ],
-        "Rating": [
-            "rating"
-        ],
-        "Search": [
-            "value"
-        ],
-        "SideBarContainer": [
-            "showSideBar"
-        ],
-        "Slider": [
-            "value"
-        ],
-        "Stepper": [
-            "index"
-        ],
-        "Swiper": [
-            "index"
-        ],
-        "Tabs": [
-            "index"
-        ],
-        "TextArea": [
-            "text"
-        ],
-        "TextInput": [
-            "text"
-        ],
-        "TextPicker": [
-            "selected",
-            "value"
-        ],
-        "Toggle": [
-            "isOn"
-        ],
-        "AlphabetIndexer": [
-            "selected"
-        ],
-        "Select": [
-            "selected",
-            "value"
-        ],
-        "BindSheet": [
-            "isShow"
-        ],
-        "BindContentCover": [
-            "isShow"
-        ],
-        "Refresh": [
-            "refreshing"
-        ],
-        "GridItem": [
-            "selected"
-        ],
-        "ListItem": [
-            "selected"
-        ]
     },
     "NameReplacements": {
         "common.d.ts": [

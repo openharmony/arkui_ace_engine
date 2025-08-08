@@ -29,6 +29,7 @@ import arkui.Graphics.ShapeMask as ShapeMask;
 import arkui.Graphics.ShapeClip as ShapeClip;
 import arkui.Graphics.Edges as Edges;
 import arkui.Graphics.LengthMetricsUnit as LengthMetricsUnit;
+import arkui.Graphics.Vector2 as Vector2;
 
 import arkui.component.units.EdgeStyles as EdgeStyles;
 
