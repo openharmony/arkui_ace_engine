@@ -225,17 +225,23 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
     if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (left.has_value()) {
-            left = (GreatOrEqual(left.value(), 1.0f) || NearEqual(left.value(), 0.0f)) ? floor(left.value()) : 1.0f;
+            left = (GreatNotEqualCustomPrecision(left.value(), 1.0f) || NearEqual(left.value(), 0.0f))
+                       ? floor(left.value())
+                       : 1.0f;
         }
         if (right.has_value()) {
-            right = (GreatOrEqual(right.value(), 1.0f) || NearEqual(right.value(), 0.0f)) ? floor(right.value()) : 1.0f;
+            right = (GreatNotEqualCustomPrecision(right.value(), 1.0f) || NearEqual(right.value(), 0.0f))
+                        ? floor(right.value())
+                        : 1.0f;
         }
         if (top.has_value()) {
-            top = (GreatOrEqual(top.value(), 1.0f) || NearEqual(top.value(), 0.0f)) ? floor(top.value()) : 1.0f;
+            top = (GreatNotEqualCustomPrecision(top.value(), 1.0f) || NearEqual(top.value(), 0.0f)) ? floor(top.value())
+                                                                                                    : 1.0f;
         }
         if (bottom.has_value()) {
-            bottom =
-                (GreatOrEqual(bottom.value(), 1.0f) || NearEqual(bottom.value(), 0.0f)) ? floor(bottom.value()) : 1.0f;
+            bottom = (GreatNotEqualCustomPrecision(bottom.value(), 1.0f) || NearEqual(bottom.value(), 0.0f))
+                         ? floor(bottom.value())
+                         : 1.0f;
         }
     }
     return BorderWidthPropertyF { left, top, right, bottom };
