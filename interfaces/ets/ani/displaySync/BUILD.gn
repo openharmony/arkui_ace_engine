@@ -38,7 +38,7 @@ generate_static_abc("display_sync_ani_abc") {
   base_url = "./ets"
   files = [
     "./ets/@ohos.graphics.displaySync.ets",
-    "./ets/arkui.component.common.ets"
+    "./ets/arkui.component.common.ets",
   ]
   paths_keys = [ "@ohos.graphics.displaySync" ]
   paths_values = [ "./ets/@ohos.graphics.displaySync.ets" ]
