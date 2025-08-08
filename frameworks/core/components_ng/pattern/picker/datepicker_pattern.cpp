@@ -538,6 +538,18 @@ void DatePickerPattern::UpdateDateOrder()
         dateOrder = orderResult.dateOrder;
     }
     SetDateOrder(dateOrder);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (language == "ar" && layoutProperty->GetLayoutDirection() != TextDirection::RTL) {
+        layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+        isDirectionSetByAr = true;
+    } else if (isDirectionSetByAr) {
+        layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+        isDirectionSetByAr = false;
+    }
 }
 
 void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext)

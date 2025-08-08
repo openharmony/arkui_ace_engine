@@ -75,6 +75,9 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
     } else {
         datePickerPattern->SetDateOrder(dateOrder);
     }
+    if (language == "ar" && dateNode->GetLayoutProperty()) {
+        dateNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
+    }
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();

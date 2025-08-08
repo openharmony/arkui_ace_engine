@@ -105,6 +105,7 @@ public:
 
     RefPtr<FrameNode> columnNode_;
     RefPtr<TimePickerColumnPattern> columnPattern_;
+    std::string oldLanguage_;
 };
 
 class TestNode : public UINode {
@@ -145,11 +146,13 @@ void TimePickerOrderTestNg::SetUp()
     EXPECT_CALL(*themeManager, GetTheme(_, _))
         .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    oldLanguage_ = AceApplicationInfo::GetInstance().GetLanguage();
 }
 
 void TimePickerOrderTestNg::TearDown()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
+    AceApplicationInfo::GetInstance().language_ = oldLanguage_;
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
@@ -1954,4 +1957,105 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder027, TestSize.Level1)
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
+
+/**
+ * @tc.name: TimePickerOrder028
+ * @tc.desc: Test TimePicker OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder028, TestSize.Level1)
+{
+    /**
+    * @tc.steps: steps1. Set the initial language and city.
+    */
+    AceApplicationInfo::GetInstance().SetLocale("ar", "Egypt", "Arabic", "");
+
+    /**
+    * @tc.steps: steps2. Create TimePicker.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetLayoutDirection(), TextDirection::LTR);
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     */
+    AceApplicationInfo::GetInstance().SetLocale("ug", "Kashgar", "Uyghur", "");
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(pickerProperty->GetLayoutDirection(), TextDirection::AUTO);
+}
+
+/**
+ * @tc.name: TimePickerOrder029
+ * @tc.desc: Test TimePickerDialog OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerOrderTestNg, TimePickerOrder029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Set the initial language and city.
+     */
+    AceApplicationInfo::GetInstance().SetLocale("ar", "Egypt", "Arabic", "");
+
+    /**
+     * @tc.steps: steps2. Create TimePickerDialog.
+     */
+    DialogProperties dialogProperties;
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo buttonInfo;
+    buttonInfo.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(buttonInfo);
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    uint32_t hour = 3;
+    uint32_t minute = 4;
+    uint32_t second = 1;
+    timePickerProperty["selected"] = PickerTime(hour, minute, second);
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    ASSERT_NE(customNode, nullptr);
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    ASSERT_NE(timePickerNode, nullptr);
+    auto pickerProperty = timePickerNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetLayoutDirection(), TextDirection::LTR);
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     */
+    AceApplicationInfo::GetInstance().SetLocale("ug", "Kashgar", "Uyghur", "");
+
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(pickerProperty->GetLayoutDirection(), TextDirection::AUTO);
+}
+
 } // namespace OHOS::Ace::NG

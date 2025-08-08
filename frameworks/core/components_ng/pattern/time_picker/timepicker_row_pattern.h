@@ -541,6 +541,18 @@ public:
         auto preAmPmTimeOrder = amPmTimeOrder_;
         amPmTimeOrder_ = DateTimeSequence::GetAmPmTimeOrder(language_).amPmTimeOrder;
         preAmPmTimeOrder == amPmTimeOrder_ ? isAmPmTimeOrderUpdate_ = false : isAmPmTimeOrderUpdate_ = true;
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (language_ == "ar" && layoutProperty->GetLayoutDirection() != TextDirection::RTL) {
+            layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+            isDirectionSetByAr = true;
+        } else if (isDirectionSetByAr) {
+            layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+            isDirectionSetByAr = false;
+        }
     }
 
     void HasUserDefinedDisappearFontFamily(bool isUserDefined)
@@ -826,6 +838,7 @@ private:
     std::string selectedColumnId_;
     bool isUserSetSelectColor_ = false;
     bool isClearFocus_ = true;
+    bool isDirectionSetByAr = false;
 };
 } // namespace OHOS::Ace::NG
 

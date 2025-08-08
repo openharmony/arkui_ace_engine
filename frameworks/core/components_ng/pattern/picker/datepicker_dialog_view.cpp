@@ -100,6 +100,9 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         auto dateOrder = orderResult.dateOrder;
         pickerPattern->SetDateOrder(dateOrder);
     }
+    if (language == "ar" && dateNode->GetLayoutProperty()) {
+        dateNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
+    }
     pickerPattern->SetIsShowInDialog(true);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
@@ -1024,7 +1027,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     SetShowLunar(dateNode, settingData.isLunar);
     SetCanLoop(dateNode, settingData.canLoop);
     SetDateTextProperties(dateNode, settingData.properties);
-    
+
     auto datePickerProperty = settingData.datePickerProperty;
     auto iterStart = datePickerProperty.find("start");
     if (iterStart != datePickerProperty.end()) {
