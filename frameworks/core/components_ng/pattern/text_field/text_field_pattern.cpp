@@ -3391,7 +3391,6 @@ void TextFieldPattern::UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldThem
 void TextFieldPattern::OnModifyDone()
 {
     auto host = GetHost();
-    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
     Pattern::OnModifyDone();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
