@@ -3175,27 +3175,42 @@ void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorV
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineColorValue);
     Color left;
     RefPtr<ResourceObject> leftColorResObj;
+    outlineColor.SetColor(Color::TRANSPARENT);
+    bool isSettingOutlineColor = false;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.leftColor = left;
     }
     Color right;
     RefPtr<ResourceObject> rightColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.rightColor = right;
     }
     Color top;
     RefPtr<ResourceObject> topColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.topColor = top;
     }
     Color bottom;
     RefPtr<ResourceObject> bottomColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.bottomColor = bottom;
+    }
+    if (!isSettingOutlineColor) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(theme);
+        outlineColor.SetColor(theme->GetMenuOutlineColor());
     }
     ParseMenuOutlineColorWithResourceObj(
         leftColorResObj, rightColorResObj, topColorResObj, bottomColorResObj, outlineColor);
