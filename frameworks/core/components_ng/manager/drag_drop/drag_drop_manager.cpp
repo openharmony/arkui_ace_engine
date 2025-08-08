@@ -1148,6 +1148,7 @@ void DragDropManager::DoDragReset()
     isAnyDraggableHit_ = false;
     isPullThrow_ = false;
     fingerPointInfo_.clear();
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
 

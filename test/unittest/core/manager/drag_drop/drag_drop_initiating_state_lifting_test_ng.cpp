@@ -873,4 +873,47 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, CheckStatusForPanActionBeginTestN
     GestureEvent info;
     EXPECT_FALSE(liftingState->CheckStatusForPanActionBegin(frameNode, info));
 }
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG012
+ * @tc.desc: Test Init function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+ 
+    /**
+     * @tc.steps: step2. test lifting state init with IsAllowedDrag is false.
+     */
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
+    frameNode->SetDraggable(true);
+    overlayManager->SetHasPixelMap(false);
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade(), nullptr);
+}
 } // namespace OHOS::Ace::NG

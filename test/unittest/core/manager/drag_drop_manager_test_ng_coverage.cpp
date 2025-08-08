@@ -1982,10 +1982,14 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage070, TestSi
 HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    auto preTargetFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(dragDropManager, nullptr);
+    auto preTargetFrameNode =
+        AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(preTargetFrameNode, nullptr);
-    preTargetFrameNode->tag_ = V2::UI_EXTENSION_COMPONENT_ETS_TAG;
-
+    auto preTargetFrameNodeUec =
+        AceType::MakeRefPtr<FrameNode>(V2::DYNAMIC_COMPONENT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(preTargetFrameNodeUec, nullptr);
+ 
     auto dragFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(dragFrameNode, nullptr);
     DragPointerEvent pointerEvent;
@@ -1998,12 +2002,29 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSi
     Point point = pointerEvent.GetPoint();
     auto ret = dragDropManager->HandleUIExtensionComponentDragCancel(
         preTargetFrameNode, dragFrameNode, true, pointerEvent, point);
-    ASSERT_EQ(ret, false);
-
+    ASSERT_FALSE(ret);
+ 
     dragDropManager->isDragCancel_ = true;
     ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNodeUec, dragFrameNode, true, pointerEvent, point);
+    ASSERT_TRUE(ret);
+ 
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
         preTargetFrameNode, dragFrameNode, true, pointerEvent, point);
-    ASSERT_EQ(ret, false);
+    ASSERT_FALSE(ret);
+ 
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNodeUec, dragFrameNode, false, pointerEvent, point);
+    ASSERT_FALSE(ret);
+ 
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNode, dragFrameNode, false, pointerEvent, point);
+    ASSERT_FALSE(ret);
+ 
+    dragDropManager->isDragCancel_ = true;
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        dragFrameNode, preTargetFrameNodeUec, false, pointerEvent, point);
+    ASSERT_TRUE(ret);
 }
 
 /**

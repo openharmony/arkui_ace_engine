@@ -280,7 +280,7 @@ void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)
     std::string udKey = dragEvent_->GetUdKey();
     if (udKey.empty()) {
         args.SetReturnValue(JSVal::Undefined());
-        NapiThrow(engine, ERROR_CODE_DRAG_DATA_NOT_ONDROP, "Operation no allowed for current pharse.");
+        NapiThrow(engine, ERROR_CODE_DRAG_DATA_NOT_ONDROP, "Operation not allowed for current phase.");
         return;
     }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -308,7 +308,7 @@ void JsDragEvent::EnableInternalDropAnimation(const JSCallbackInfo& args)
     CHECK_NULL_VOID(engine);
 
     if (!NG::DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
-        NapiThrow(engine, ERROR_CODE_DRAG_DATA_NOT_ONDROP, "Operation no allowed for current pharse.");
+        NapiThrow(engine, ERROR_CODE_DRAG_DATA_NOT_ONDROP, "Operation not allowed for current phase.");
         return;
     }
     if (!args[0]->IsString()) {
