@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Length, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -31,7 +31,8 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PixelMap } from "#external"
-import { SideBarContainerOpsHandWritten, hookSideBarContainerSideBarWidthImpl, hookSideBarContainerMinSideBarWidthImpl, hookSideBarContainerMaxSideBarWidthImpl, hookSideBarContainerDividerImpl  } from "./../handwritten"
+import { SideBarContainerOpsHandWritten, hookSideBarContainerSideBarWidthImpl, hookSideBarContainerMinSideBarWidthImpl, hookSideBarContainerMaxSideBarWidthImpl, hookSideBarContainerDividerImpl, hookSideBarContainerAttributeModifier } from "./../handwritten"
+import { SideBarContainerModifier } from '../SideBarContainerModifier'
 
 export interface DividerStyle {
     strokeWidth: Length;
@@ -40,6 +41,7 @@ export interface DividerStyle {
     endMargin?: Length;
 }
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SideBarContainerModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -282,6 +284,7 @@ export interface SideBarContainerAttribute extends CommonMethod {
     divider(value: DividerStyle | null | undefined): this
     minContentWidth(value: Dimension | undefined): this
     _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
+    attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod>| undefined): this
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
     showSideBar_value?: boolean | Bindable<boolean> | undefined
@@ -333,7 +336,10 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     }
     public _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
+    public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod>| undefined): this {
+        return this
+    }
 }
 export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements SideBarContainerAttribute {
     getPeer(): ArkSideBarContainerPeer {
@@ -470,6 +476,10 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public attributeModifier(modifier: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSideBarContainerAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

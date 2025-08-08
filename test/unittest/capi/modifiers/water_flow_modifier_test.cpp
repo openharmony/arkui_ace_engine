@@ -70,7 +70,7 @@ HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onReachStart = eventHub->GetOnReachStart();
@@ -102,7 +102,7 @@ HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onReachEnd = eventHub->GetOnReachEnd();
@@ -116,7 +116,7 @@ HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
 HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
 
     // Define a structure to check events
     struct CheckEvent {
@@ -191,7 +191,7 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
     static const Ark_Int32 expectedResId = 123;

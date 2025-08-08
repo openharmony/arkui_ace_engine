@@ -27,7 +27,6 @@ koalaui_compat_files = [
   "src/arkts/strings.ts",
   "src/arkts/ts-reflection.ts",
   "src/arkts/types.ts",
-  "src/arkts/utils.ts",
   "src/index.ts",
 ]
 

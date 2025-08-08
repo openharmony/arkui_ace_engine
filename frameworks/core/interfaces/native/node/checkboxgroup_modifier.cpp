@@ -285,10 +285,8 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICheckboxGroupModifier modifier = {
         .setCheckboxGroupSelectedColor = SetCheckboxGroupSelectedColor,
-        .setCheckboxGroupSelectedColorPtr = SetCheckboxGroupSelectedColorPtr,
         .resetCheckboxGroupSelectedColor = ResetCheckboxGroupSelectedColor,
         .setCheckboxGroupUnSelectedColor = SetCheckboxGroupUnSelectedColor,
-        .setCheckboxGroupUnSelectedColorPtr = SetCheckboxGroupUnSelectedColorPtr,
         .resetCheckboxGroupUnSelectedColor = ResetCheckboxGroupUnSelectedColor,
         .setCheckboxGroupSelectAll = SetCheckboxGroupSelectAll,
         .resetCheckboxGroupSelectAll = ResetCheckboxGroupSelectAll,
@@ -311,6 +309,8 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         .getCheckboxGroupMarkSize = GetCheckboxGroupMarkSize,
         .getCheckboxGroupMarkWidth = GetCheckboxGroupMarkWidth,
         .getCheckboxGroupStyle = GetCheckboxGroupStyle,
+        .setCheckboxGroupSelectedColorPtr = SetCheckboxGroupSelectedColorPtr,
+        .setCheckboxGroupUnSelectedColorPtr = SetCheckboxGroupUnSelectedColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

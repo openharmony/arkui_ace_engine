@@ -3414,9 +3414,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_onSslErrorReceive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _WebAttribute_onRenderExited(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_onShowFileSelector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3995,9 +3993,9 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getWindowWidthBreakpoint(instanceId: number): number
     @ani.unsafe.Quick
     native static _UIContext_getWindowHeightBreakpoint(instanceId: number): number
-    native static _UIContext_openBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _UIContext_updateBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _UIContext_closeBindSheet(ptr: KPointer, bindSheetContent: KPointer): void
+    native static _UIContext_openBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _UIContext_updateBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _UIContext_closeBindSheet(bindSheetContent: KPointer): void
     @ani.unsafe.Quick
     native static _PromptAction_openPopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
@@ -5774,6 +5772,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_open(ptr: KPointer): undefined
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
+    @ani.unsafe.Quick
+    native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
     @ani.unsafe.Direct

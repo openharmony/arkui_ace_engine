@@ -958,7 +958,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
     const std::vector<std::string> values = {"aa", "bb"};
     const std::vector<double> indexes = {0.0, 1.0};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
     auto developerCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
@@ -1920,7 +1920,7 @@ HWTEST_F(TextPickerModifierTest, setGradientHeight, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1973,7 +1973,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -2030,7 +2030,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -2083,7 +2083,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -2291,7 +2291,7 @@ HWTEST_F(TextPickerModifierTest, setOnScrollStop, TestSize.Level1)
     const std::vector<std::string> values = {"ab", "cd"};
     const std::vector<double> indexes = {0.0, 1.0};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
@@ -2342,7 +2342,7 @@ HWTEST_F(TextPickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
     const std::vector<std::string> values = {"ab", "cd"};
     const std::vector<double> indexes = {2.0, 3.0};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,

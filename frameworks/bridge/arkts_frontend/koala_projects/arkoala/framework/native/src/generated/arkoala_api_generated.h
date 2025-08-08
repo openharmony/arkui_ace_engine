@@ -3190,6 +3190,8 @@ typedef struct ClickEventPeer* Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
 typedef struct Ark_CustomDialogControllerOptions Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomDialogControllerExternalOptions Ark_CustomDialogControllerExternalOptions;
+typedef struct Opt_CustomDialogControllerExternalOptions Opt_CustomDialogControllerExternalOptions;
 typedef struct Ark_CustomPopupOptions Ark_CustomPopupOptions;
 typedef struct Opt_CustomPopupOptions Opt_CustomPopupOptions;
 typedef struct Ark_CustomTheme Ark_CustomTheme;
@@ -19177,6 +19179,13 @@ typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
     Ark_CustomDialogControllerOptions value;
 } Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomDialogControllerExternalOptions {
+    Opt_Boolean customStyle;
+} Ark_CustomDialogControllerExternalOptions;
+typedef struct Opt_CustomDialogControllerExternalOptions {
+    Ark_Tag tag;
+    Ark_CustomDialogControllerExternalOptions value;
+} Opt_CustomDialogControllerExternalOptions;
 typedef struct Ark_CustomPopupOptions {
     CustomNodeBuilder builder;
     Opt_Placement placement;
@@ -23979,10 +23988,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                   const Opt_Type_WebAttribute_onUrlLoadIntercept_callback* value);
     void (*setOnSslErrorReceive)(Ark_NativePointer node,
                                  const Opt_Callback_Literal_Function_handler_Object_error_Void* value);
-    void (*setOnRenderExited0)(Ark_NativePointer node,
-                               const Opt_Callback_OnRenderExitedEvent_Void* value);
-    void (*setOnRenderExited1)(Ark_NativePointer node,
-                               const Opt_Callback_Literal_Object_detail_Boolean* value);
+    void (*setOnRenderExited)(Ark_NativePointer node,
+                              const Opt_Callback_OnRenderExitedEvent_Void* value);
     void (*setOnShowFileSelector)(Ark_NativePointer node,
                                   const Opt_Callback_OnShowFileSelectorEvent_Boolean* value);
     void (*setOnFileSelectorShow)(Ark_NativePointer node,
@@ -24671,18 +24678,15 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                               const Ark_String* id,
                               const Ark_Number* value);
     void (*openBindSheet)(Ark_VMContext vmContext,
-                          Ark_UIContext peer,
-                          Ark_ComponentContent bindSheetContent,
+                          Ark_NativePointer bindSheetContent,
                           const Opt_SheetOptions* sheetOptions,
                           const Opt_Number* targetId);
     void (*updateBindSheet)(Ark_VMContext vmContext,
-                            Ark_UIContext peer,
-                            Ark_ComponentContent bindSheetContent,
-                            const Ark_SheetOptions* sheetOptions,
+                            Ark_NativePointer bindSheetContent,
+                            const Opt_SheetOptions* sheetOptions,
                             const Opt_Boolean* partialUpdate);
     void (*closeBindSheet)(Ark_VMContext vmContext,
-                           Ark_UIContext peer,
-                           Ark_ComponentContent bindSheetContent);
+                           Ark_NativePointer bindSheetContent);
     void (*clearResourceCache)(Ark_VMContext vmContext,
                                Ark_UIContext peer);
     Ark_Boolean (*isFollowingSystemFontScale)(Ark_UIContext peer);
@@ -26698,6 +26702,7 @@ typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*open)(Ark_CustomDialogController peer);
     void (*close)(Ark_CustomDialogController peer);
+    Ark_CustomDialogControllerExternalOptions (*getExternalOptions)(Ark_CustomDialogController peer);
     void (*setOwnerView)(Ark_CustomDialogController peer, Ark_NodeHandle node);
 } GENERATED_ArkUICustomDialogControllerAccessor;
 

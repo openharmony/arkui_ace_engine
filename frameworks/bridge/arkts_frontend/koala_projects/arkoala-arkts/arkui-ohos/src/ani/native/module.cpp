@@ -37,10 +37,12 @@
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "rich_editor/rich_editor_module.h"
+#include "search/search_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
+#include "utils/ani_trace.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -597,6 +599,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::GetPixelMap)
         },
         ani_native_function {
+            "_Search_SetSearchIcon_Symbol",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetSearchIconSymbol)
+        },
+        ani_native_function {
             "_ImageSpan_Set_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanPixelMap)
@@ -950,6 +957,61 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DrawingRenderingContext_GetCanvas",
             "J:L@ohos/graphics/drawing/drawing/Canvas;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetDrawingCanvas)
+        },
+        ani_native_function {
+            "_FrameNode_MarkDirtyNode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
+        },
+        ani_native_function {
+            "_TraceBegin",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceBegin)
+        },
+        ani_native_function {
+            "_TraceEnd",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceEnd)
+        },
+        ani_native_function {
+            "_AsyncTraceBegin",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceBegin)
+        },
+        ani_native_function {
+            "_AsyncTraceEnd",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
+        },
+        ani_native_function {            
+            "_GetStringColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
+        },
+        ani_native_function {            
+            "_GetNumberColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
+        },
+        ani_native_function {
+            "_SendThemeToNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SendThemeToNative)
+        },
+        ani_native_function {
+            "_SetDefaultTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDefaultTheme)
+        },
+        ani_native_function {
+            "_UpdateColorMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UpdateColorMode)
+        },
+        ani_native_function {
+            "_RestoreColorMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreColorMode)
         },
     };
 

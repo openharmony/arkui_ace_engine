@@ -144,7 +144,11 @@ export function rememberArrayState<Value>(initial?: () => ReadonlyArray<Value>):
  * @param state - state to receive computed value on success or `undefined` value on error
  * @param onError - custom callback to handle error cause
  */
-function applyPromiseToState<Value>(promise: Promise<Value>, state: MutableState<Value | undefined>, onError?: (error: Error) => void): void {
+function applyPromiseToState<Value>(
+    promise: Promise<Value>,
+    state: MutableState<Value | undefined>,
+    onError?: (error: Error) => void
+): void {
     promise
         .then<Value>((value: Value): Value => {
             state.value = value
@@ -165,7 +169,11 @@ function applyPromiseToState<Value>(promise: Promise<Value>, state: MutableState
  * @param onError callback called if promise was rejected
  */
 /** @memo */
-export function rememberMutableAsyncState<Value>(compute: () => Promise<Value | undefined>, initial?: Value, onError?: (error: Error) => void): MutableState<Value | undefined> {
+export function rememberMutableAsyncState<Value>(
+    compute: () => Promise<Value | undefined>,
+    initial?: Value,
+    onError?: (error: Error) => void
+): MutableState<Value | undefined> {
     const result = rememberMutableState<Value | undefined>(initial)
     once(() => { applyPromiseToState<Value | undefined>(compute(), result, onError) })
     return result

@@ -452,7 +452,7 @@ HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestValidValues, TestSiz
 HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -503,7 +503,7 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
 HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

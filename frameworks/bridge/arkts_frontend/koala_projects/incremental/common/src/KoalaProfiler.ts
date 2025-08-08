@@ -43,6 +43,21 @@ export class KoalaProfiler {
         if (!set.delete(node)) console.log("node is already disposed")
     }
 
+    static startTrace = (s: string) => {}
+
+    static endTrace = () => {}
+
+    static initTrace(start: (s: string) => void, end: () => void) {
+        KoalaProfiler.startTrace = start
+        KoalaProfiler.endTrace = end
+    }
+
+    static nativeLog = (s: string) => {}
+    
+    static initNativeLog(cb: (s: string) => void) {
+        KoalaProfiler.nativeLog = cb
+    }
+
     public static counters: KoalaProfiler | undefined = undefined
 
     private invalidations = 0
@@ -109,10 +124,18 @@ export class KoalaProfiler {
         const buildTime = Math.round(1000 * (this.buildExitTime - this.buildEnterTime))
         const layoutTime = Math.round(1000 * (this.layoutExitTime - this.layoutEnterTime))
         const drawTime = Math.round(1000 * (this.drawExitTime - this.drawEnterTime))
-        if (this.updateTime < updateTime) this.updateTime = updateTime
-        if (this.buildTime < buildTime) this.buildTime = buildTime
-        if (this.layoutTime < layoutTime) this.layoutTime = layoutTime
-        if (this.drawTime < drawTime) this.drawTime = drawTime
+        if (this.updateTime < updateTime) {
+            this.updateTime = updateTime
+        }
+        if (this.buildTime < buildTime) {
+            this.buildTime = buildTime
+        }
+        if (this.layoutTime < layoutTime) {
+            this.layoutTime = layoutTime
+        }
+        if (this.drawTime < drawTime) {
+            this.drawTime = drawTime
+        }
 
         // TODO: OHOS does not properly handle \n in template literals
         const array = Array.of<string>(
@@ -131,20 +154,37 @@ export class KoalaProfiler {
             `layouts: ${this.layouts}`,
             `FPS: ${this.lastFPS}`,
         )
-        KoalaProfiler.map?.forEach((set:Set<Object>, kind:int32) => {
+        KoalaProfiler.map?.forEach((set: Set<Object>, kind: int32) => {
             if (set.size > 0) array.push(kind + ":" + set.size)
         })
         return array.join("\n")
     }
 
-    invalidation() { this.invalidations++ }
-    compute() { this.computes++ }
-    build() { this.builds++ }
-    node() { this.nodes++ }
-    realDraw() { this.realDraws++ }
-    cachedDraw() { this.cachedDraws++ }
-    layout() {  this.layouts++ }
-    measure() { this.measures++ }
+
+    invalidation() {
+        this.invalidations++
+    }
+    compute() {
+        this.computes++
+    }
+    build() {
+        this.builds++
+    }
+    node() {
+        this.nodes++
+    }
+    realDraw() {
+        this.realDraws++
+    }
+    cachedDraw() {
+        this.cachedDraws++
+    }
+    layout() {
+        this.layouts++
+    }
+    measure() {
+        this.measures++
+    }
     frame(ms: number) {
         if (ms - this.lastTime <= 1000) {
             this.frames++
@@ -181,7 +221,6 @@ export class KoalaProfiler {
     updateSnapshot(modified: int32, all?: int32) {
         if (all === undefined) {
             this.computableValues = modified - this.mutableStates
-
         } else {
             this.mutableStates = modified
             this.updatableStates = all

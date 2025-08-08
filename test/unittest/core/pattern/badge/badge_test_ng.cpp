@@ -163,7 +163,7 @@ void BadgeTestNg::CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -188,7 +188,7 @@ HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -221,7 +221,7 @@ HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest001, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest001, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -379,7 +379,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level0)
 {
     BadgeModelNG BadgeModelNG;
     BadgeParameters badgeParameters;
@@ -417,7 +417,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level0)
 {
     BadgeModelNG BadgeModelNG;
     BadgeParameters badgeParameters;
@@ -455,7 +455,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level1)
  * @tc.desc: test badge pattern OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest005, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest005, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -685,7 +685,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
  * @tc.desc: test UpdateSizeWithCheck
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create badge and get frameNode.
@@ -724,7 +724,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
  * @tc.desc: test SetSizeInit
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create badge and get frameNode.
@@ -745,7 +745,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
@@ -761,7 +761,7 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level1)
+HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level0)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;

@@ -56,7 +56,7 @@ export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ColumnSplitAttribute_resizeable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: ColumnSplitDividerStyle | undefined): void {
+    dividerAttribute(value: ColumnSplitDividerStyle | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -79,18 +79,18 @@ export interface ColumnSplitAttribute extends CommonMethod {
         return this
     }
     resizeable(value: boolean | undefined): this
-    divider(value: ColumnSplitDividerStyle | undefined): this
+    divider(value: ColumnSplitDividerStyle | null | undefined): this
 }
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
-    divider_value?: ColumnSplitDividerStyle | undefined
+    divider_value?: ColumnSplitDividerStyle | null | undefined
     public setColumnSplitOptions(): this {
         return this
     }
     public resizeable(value: boolean | undefined): this {
         return this
     }
-    public divider(value: ColumnSplitDividerStyle | undefined): this {
+    public divider(value: ColumnSplitDividerStyle | null | undefined): this {
         return this
         }
 }
@@ -113,9 +113,9 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public divider(value: ColumnSplitDividerStyle | undefined): this {
+    public divider(value: ColumnSplitDividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (ColumnSplitDividerStyle | undefined)
+            const value_casted = value as (ColumnSplitDividerStyle | null | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }

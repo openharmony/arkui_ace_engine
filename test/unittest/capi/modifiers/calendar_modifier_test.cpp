@@ -943,7 +943,7 @@ HWTEST_F(CalendarModifierTest, workStateStyleTest, TestSize.Level1)
 //         CHECK_NULL_CONTINUE(calendarFrameNode);
 //         auto pattern = calendarFrameNode->GetPattern<CalendarMonthPattern>();
 //         CHECK_NULL_CONTINUE(pattern);
-//         auto calendarEventHub = pattern->GetEventHub<CalendarEventHub>();
+//         auto calendarEventHub = pattern->GetOrCreateEventHub<CalendarEventHub>();
 //         CHECK_NULL_CONTINUE(calendarEventHub);
 //         eventHubList.emplace_back(std::move(calendarEventHub));
 //     }
@@ -986,7 +986,7 @@ HWTEST_F(CalendarModifierTest, setOnRequestDataTest, TestSize.Level1)
     modifier_->setCalendarOptions(node_, &calendarOptions);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto callback = [](const Ark_Int32 resourceId, const Ark_CalendarRequestedData event) {

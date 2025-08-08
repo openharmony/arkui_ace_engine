@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -31,6 +31,7 @@ import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { uiObserver }  from "@ohos/arkui/observer"
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 
 export class ArkUIAniModule {
     static {
@@ -190,6 +191,9 @@ export class ArkUIAniModule {
     native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
 
+    // for search
+    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
+
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -273,4 +277,17 @@ export class ArkUIAniModule {
     native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
+
+    native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
+    native static _TraceBegin(traceName: string): void
+    native static _TraceEnd(): void
+    native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
+    native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _GetColorValue(color: number | string): KUInt
+    native static _GetStringColorValue(color: string): KUInt
+    native static _GetNumberColorValue(color: number): KUInt
+    native static _SendThemeToNative(thisArray: KSerializerBuffer, thisLength: number, elmtId: KInt): void
+    native static _SetDefaultTheme(thisArray: KSerializerBuffer, thisLength: number, isDark: boolean): void
+    native static _UpdateColorMode(colorMode: KInt): void
+    native static _RestoreColorMode(): void
 }

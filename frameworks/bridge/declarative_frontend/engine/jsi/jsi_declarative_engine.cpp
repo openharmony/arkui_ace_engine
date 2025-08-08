@@ -1712,7 +1712,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         abcPath = moduleName.append("/").append(fileName);
 #endif
         {
-            if (arkRuntime->IsStaticOrInvalidFile(abcPath)) {
+            if (arkRuntime->IsStaticOrInvalidFile(content.data(), content.size())) {
                 return false;
             }
         }

@@ -693,7 +693,7 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
     ASSERT_NE(modifier_->setKeyboardShortcut, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto callback = [](Ark_VMContext context, const Ark_Int32 resourceId) {

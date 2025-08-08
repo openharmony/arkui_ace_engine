@@ -93,7 +93,7 @@ import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal,
 import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
+import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../customDialogController"
 import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, Position as GraphicsPosition, ColorMetrics } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
@@ -20139,7 +20139,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
@@ -20724,6 +20724,17 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_focusable_type)) {
             const value_focusable_value  = value_focusable!
             valueSerializer.writeBoolean(value_focusable_value)
+        }
+    }
+    writeCustomDialogControllerExternalOptions(value: CustomDialogControllerExternalOptions): void {
+        let valueSerializer : Serializer = this
+        const value_customStyle  = value.customStyle
+        let value_customStyle_type : int32 = RuntimeType.UNDEFINED
+        value_customStyle_type = runtimeType(value_customStyle)
+        valueSerializer.writeInt8(value_customStyle_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_customStyle_type)) {
+            const value_customStyle_value  = value_customStyle!
+            valueSerializer.writeBoolean(value_customStyle_value)
         }
     }
     writeCustomPopupOptions(value: CustomPopupOptions): void {
@@ -24134,7 +24145,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
@@ -25601,7 +25612,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)
@@ -25878,7 +25889,7 @@ export class Serializer extends SerializerBase {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
+            if (TypeChecker.isShadowOptions(value_shadow_value_type, false, false, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_shadow_value_0  = value_shadow_value as ShadowOptions
                 valueSerializer.writeShadowOptions(value_shadow_value_0)

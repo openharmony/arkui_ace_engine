@@ -213,7 +213,7 @@ HWTEST_F(ImageSpanModifierTest, setOnCompleteTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnComplete, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static double width = 0.0;
@@ -280,7 +280,7 @@ HWTEST_F(ImageSpanModifierTest, setOnErrorTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnComplete, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static double componentWidth = 0.0;

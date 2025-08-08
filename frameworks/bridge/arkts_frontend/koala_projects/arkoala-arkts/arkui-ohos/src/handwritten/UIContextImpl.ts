@@ -29,7 +29,7 @@ import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEn
     IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions } from "arkui/component/common"
+import { KeyEvent, PopupCommonOptions, MenuOptions, SheetOptions } from "arkui/component/common"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
@@ -1183,7 +1183,11 @@ export class DetachedRootEntryManager {
 
     public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
          return this.detachedRoots_;
-     }
+    }
+
+    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>) {
+        this.detachedRoots_.set(nativeNode, new DetachedRootEntryImpl<IncrementalNode>(rootNode));
+    }
 
     public createUiDetachedRoot(
         peerFactory: () => PeerNode,
@@ -1701,6 +1705,78 @@ export class UIContextImpl extends UIContext {
 
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
+    }
+
+    public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const content_component = content as ComponentContent
+        let frameNode = content_component.getFrameNode()
+        let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSheetOptions(options_value)
+        }
+
+        let targetId_type : int32 = RuntimeType.UNDEFINED
+        targetId_type = runtimeType(targetId)
+        thisSerializer.writeInt8(targetId_type as int32)
+        if ((RuntimeType.UNDEFINED) != (targetId_type)) {
+            const targetId_value  = targetId!
+            thisSerializer.writeNumber(targetId_value)
+        }
+        ArkUIGeneratedNativeModule._UIContext_openBindSheet(contentPtr, thisSerializer.asBuffer(), thisSerializer.length());
+        ArkUIAniModule._Common_Restore_InstanceId();
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        thisSerializer.release()
+        return retval;
+    }
+
+    public updateBindSheet(content: ComponentContent, options?: SheetOptions, partialUpdate?: boolean) : Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const content_component = content as ComponentContent
+        let frameNode = content_component.getFrameNode()
+        let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSheetOptions(options_value)
+        }
+
+        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
+        partialUpdate_type = runtimeType(partialUpdate)
+        thisSerializer.writeInt8(partialUpdate_type as int32)
+        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
+            const partialUpdate_value  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdate_value)
+        }
+        ArkUIGeneratedNativeModule._UIContext_updateBindSheet(contentPtr, thisSerializer.asBuffer(), thisSerializer.length());
+        ArkUIAniModule._Common_Restore_InstanceId();
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        thisSerializer.release()
+        return retval;
+    }
+
+    public closeBindSheet(content: ComponentContent) : Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const content_component = content as ComponentContent
+        let frameNode = content_component.getFrameNode()
+        let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+
+        ArkUIGeneratedNativeModule._UIContext_closeBindSheet(contentPtr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        const thisSerializer : Serializer = Serializer.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        thisSerializer.release()
+        return retval;
     }
     
     public getFilteredInspectorTree(filters?: Array<string>): string {

@@ -39,10 +39,10 @@ class ResizeableModifier extends ModifierWithKey<boolean | undefined> {
     }
 }
 
-class DividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | undefined> {
+class DividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | null | undefined> {
     static identity: string = 'divider';
 
-    constructor(value: ColumnSplitDividerStyle | undefined) {
+    constructor(value: ColumnSplitDividerStyle | null | undefined) {
         super(value);
     }
 
@@ -57,7 +57,7 @@ class DividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | undefine
         }
     }
 
-    static factory(value: ColumnSplitDividerStyle | undefined) {
+    static factory(value: ColumnSplitDividerStyle | null | undefined) {
         return new DividerModifier(value);
     }
 }
@@ -68,7 +68,7 @@ export class ArkColumnSplitAttributeSet extends ArkCommonAttributeSet implements
         return this;
     }
 
-    divider(value: ColumnSplitDividerStyle | undefined): this {
+    divider(value: ColumnSplitDividerStyle | null | undefined): this {
         modifierWithKey(this._modifiersWithKeys, DividerModifier.identity, DividerModifier.factory, value);
         return this;
     }
@@ -88,7 +88,7 @@ export class ColumnSplitModifier implements AttributeModifier<ColumnSplitAttribu
         return this;
     }
 
-    divider(value: ColumnSplitDividerStyle | undefined): this {
+    divider(value: ColumnSplitDividerStyle | null | undefined): this {
         this.attributeSet.divider(value);
         return this;
     }

@@ -79,3 +79,18 @@ const GroupLogger defaultInstance = {
 const GroupLogger* GetDefaultLogger() {
     return &defaultInstance;
 }
+
+extern "C" [[noreturn]] void InteropLogFatal(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    char buffer[4096];
+#ifdef __STDC_LIB_EXT1__
+    vsnprintf_s(buffer, sizeof(buffer) - 1, format, args);
+#else
+    vsnprintf(buffer, sizeof(buffer) - 1, format, args);
+#endif
+    LOGE("FATAL: %s", buffer);
+    va_end(args);
+    abort();
+}

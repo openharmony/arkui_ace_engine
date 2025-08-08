@@ -8139,7 +8139,23 @@ export interface CommonMethod {
     lightUpEffect(value: number | undefined): this {return this;}
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {return this;}
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {return this;}
+    accessibilityGroupWithValue(isGroup: boolean | undefined): this {
+        this.accessibilityGroup(isGroup);
+        return this;
+    }
+    accessibilityGroupWithConfig(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
+        this.accessibilityGroup(isGroup, accessibilityOptions);
+        return this;
+    }
     accessibilityText(value: string | undefined | Resource | undefined): this {return this;}
+    accessibilityTextOfStringType(value: string | undefined): this {
+        this.accessibilityText(value);
+        return this;
+    }
+    accessibilityTextOfResourceType(value: Resource | undefined): this {
+        this.accessibilityText(value);
+        return this;
+    }
     accessibilityNextFocusId(value: string | undefined): this {return this;}
     accessibilityDefaultFocus(value: boolean | undefined): this {return this;}
     accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {return this;}
@@ -8148,6 +8164,14 @@ export interface CommonMethod {
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {return this;}
     accessibilityTextHint(value: string | undefined): this {return this;}
     accessibilityDescription(value: string | undefined | Resource | undefined): this {return this;}
+    accessibilityDescriptionOfStringType(value: string | undefined): this {
+        this.accessibilityDescription(value);
+        return this;
+    }
+    accessibilityDescriptionOfResourceType(value: Resource | undefined): this {
+        this.accessibilityDescription(value);
+        return this;
+    }
     accessibilityLevel(value: string | undefined): this {return this;}
     accessibilityVirtualNode(value: CustomBuilder | undefined): this {return this;}
     accessibilityChecked(value: boolean | undefined): this {return this;}
@@ -11040,7 +11064,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (BackgroundOptions)
+            const options_casted = options as (BackgroundOptions | undefined)
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }

@@ -187,7 +187,6 @@ export interface IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): IStorageLinkDecoratedVariable<T>;
     makeLocalStorageLink<T>(
@@ -195,7 +194,6 @@ export interface IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStorageLinkDecoratedVariable<T>;
     makeStoragePropRef<T>(
@@ -203,7 +201,6 @@ export interface IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T>;
     makeLocalStoragePropRef<T>(
@@ -211,7 +208,6 @@ export interface IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T>;
     makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;

@@ -168,9 +168,12 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
 
     /* compiler BUG: change to protcted */
     public execWatchFuncs(_: string = ''): void {
-        this._watchFuncs.forEach((watchFunc, id) => {
-            watchFunc.execute(this.varName);
-        });
+        if (this._watchFuncs.size > 0) {
+            this._watchFuncs.forEach((watchFunc, id) => {
+                watchFunc.execute(this.varName);
+            });
+        }
+
     }
 
     public registerWatchToSource(watchOwner: IDecoratedV1Variable<T>): WatchIdType {

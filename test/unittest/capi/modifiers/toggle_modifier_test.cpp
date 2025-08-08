@@ -255,7 +255,7 @@ HWTEST_F(ToggleModifierTest, setToggleOptionsTestIsOnInvalidValues, TestSize.Lev
 HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -823,7 +823,7 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, T
 HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

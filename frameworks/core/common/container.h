@@ -346,7 +346,7 @@ public:
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
-    static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetFocused();
     static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();

@@ -321,7 +321,7 @@ void LayoutInspector::CreateContainer3DLayoutInfo(RefPtr<Container>& container)
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     return CreateContainerLayoutInfo(container);
 }
 
@@ -640,7 +640,7 @@ void LayoutInspector::HandleStartRecord()
     std::unique_lock<std::mutex> lock(recMutex_);
     SetRsProfilerNodeMountCallback(LayoutInspector::HandleInnerCallback);
     lock.unlock();
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
         container = Container::CurrentSafely();

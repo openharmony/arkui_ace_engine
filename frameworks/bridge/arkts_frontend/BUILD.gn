@@ -129,6 +129,7 @@ config("arkoala_native_config") {
     "koala_projects/interop/src/cpp/ets",
     "koala_projects/interop/src/cpp/types",
     "koala_projects/interop/src/cpp/ohos",
+    "$ace_root/interfaces/inner_api/ace_kit/include"
   ]
 }
 
@@ -141,6 +142,7 @@ ohos_shared_library("ArkoalaNative_ark") {
   ]
 
   sources = [
+    "koala_projects/arkoala/framework/native/src/resource_color_helper.cc",
     "koala_projects/arkoala/framework/native/src/events.cc",
     "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
     "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
@@ -158,12 +160,6 @@ ohos_shared_library("ArkoalaNative_ark") {
     "koala_projects/interop/src/cpp/interop-logging.cc",
     "koala_projects/interop/src/cpp/types/signatures.cc",
   ]
-
-  if (use_linux) {
-    deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani_linux" ]
-  } else {
-    deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani" ]
-  }
 
   configs = [ ":arkoala_native_config" ]
 

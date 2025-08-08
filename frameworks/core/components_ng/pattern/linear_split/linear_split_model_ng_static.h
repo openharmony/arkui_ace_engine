@@ -25,7 +25,7 @@ class  ACE_EXPORT LinearSplitModelNGStatic : public OHOS::Ace::LinearSplitModel 
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, SplitType splitType);
     static void SetDivider(FrameNode* frameNode, NG::SplitType splitType,
-        const std::optional<ItemDivider>& optDivider);
+        const std::optional<ColumnSplitDivider>& optDivider);
 };
 } // namespace OHOS::Ace::NG
 

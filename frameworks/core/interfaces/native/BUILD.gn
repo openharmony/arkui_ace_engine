@@ -145,6 +145,8 @@ template("ace_core_interfaces_native_node") {
     
     sources += [
       "ani/ani_animatable_arithmetic.cpp",
+      "ani/ani_theme.cpp",
+      "ani/ani_theme_module.cpp",
       "ani/ani_utils.cpp",
       "ani/animation_ani_modifier.cpp",
       "ani/canvas_ani_modifier.cpp",
@@ -155,12 +157,12 @@ template("ace_core_interfaces_native_node") {
       "ani/custom_node_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
       "ani/interop_ani_modifier.cpp",
-      "ani/drag_controller_ani_modifier.cpp",
-      "ani/drag_controller_utils.cpp",
       "ani/image_ani_modifier.cpp",
       "ani/image_span_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
+      "ani/search_ani_modifier.cpp",
       "ani/styled_string_ani_modifier.cpp",
+      "ani/trace_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
       "ani/waterflow_ani_modifier.cpp",
       "ani/video_ani_modifier.cpp",
@@ -172,11 +174,12 @@ template("ace_core_interfaces_native_node") {
       "ani/condition_scope_ani_modifier.cpp",
       "${ace_root}/frameworks/bridge/arkts_frontend/ani_graphics_module.cpp",
       "${ace_root}/frameworks/bridge/arkts_frontend/ani_water_flow_module.cpp",
-      "${ace_root}/frameworks/bridge/arkts_frontend/ani_list_module.cpp",
       "${ace_root}/frameworks/bridge/arkts_frontend/arkts_ani_utils.cpp",
     ]
     if (build_ohos_sdk) {
       sources -= [
+        "ani/ani_theme.cpp",
+        "ani/ani_theme_module.cpp",
         "ani/ani_utils.cpp",
         "ani/common_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
@@ -184,12 +187,16 @@ template("ace_core_interfaces_native_node") {
         "ani/waterflow_ani_modifier.cpp",
         "ani/interop_ani_modifier.cpp",
         "ani/list_ani_modifier.cpp",
-        "ani/drag_controller_ani_modifier.cpp",
-        "ani/drag_controller_utils.cpp",
         "${ace_root}/frameworks/bridge/arkts_frontend/ani_graphics_module.cpp",
         "${ace_root}/frameworks/bridge/arkts_frontend/ani_water_flow_module.cpp",
-        "${ace_root}/frameworks/bridge/arkts_frontend/ani_list_module.cpp",
         "${ace_root}/frameworks/bridge/arkts_frontend/arkts_ani_utils.cpp",
+      ]
+    }
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework && !build_ohos_sdk) {
+      sources += [
+        "ani/drag_controller_ani_modifier.cpp",
+        "ani/drag_controller_utils.cpp",
       ]
     }
 

@@ -38,6 +38,9 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.getPeer()?.setScrollOptionsAttribute(scroller_casted)
         return this;
     }
+    allowChildCount(): number {
+        return 1;
+    }
     scrollable(value: ScrollDirection | undefined): this {
         const value_casted = value as (ScrollDirection | undefined)
         this.getPeer()?.scrollableAttribute(value_casted)

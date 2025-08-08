@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <string>
 
 #include "ui/base/macros.h"
 
@@ -55,6 +56,7 @@ typedef struct __ani_env ani_env;
 typedef class __ani_object* ani_object;
 typedef class __ani_ref* ani_ref;
 typedef struct __ani_vm ani_vm;
+typedef class __ani_string* ani_string;
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ArktsAniUtils final {

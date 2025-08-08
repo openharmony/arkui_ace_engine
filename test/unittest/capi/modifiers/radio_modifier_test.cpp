@@ -488,7 +488,7 @@ HWTEST_F(RadioModifierTest, RadioModifierTest008, TestSize.Level1)
 HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     struct CheckEvent {
         int32_t nodeId;
         bool value;
@@ -519,7 +519,7 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
 HWTEST_F(RadioModifierTest, setOnChange1, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     struct CheckEvent {
         int32_t nodeId;
         bool value;
@@ -548,7 +548,7 @@ HWTEST_F(RadioModifierTest, setOnChange1, TestSize.Level1)
 HWTEST_F(RadioModifierTest, setOnChangeEventCheckedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

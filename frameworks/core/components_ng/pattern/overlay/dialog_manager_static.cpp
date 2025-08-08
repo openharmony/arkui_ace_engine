@@ -28,6 +28,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
 constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
+constexpr int32_t TOAST_TIME_MAX = 10000;    // ms
+constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
 } // namespace
 
 DialogManagerStatic::DialogManagerStatic() = default;
@@ -149,12 +151,15 @@ void DialogManagerStatic::ShowToastStatic(const NG::ToastInfo& toastInfo, std::f
     if (containerId < 0) {
         currentId = Container::CurrentId();
     }
-    auto task = [toastInfo, callbackParam = std::move(callback), currentId](
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto task = [updatedToastInfo, callbackParam = std::move(callback), currentId](
         const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(currentId);
         overlayManager->ShowToast(
-            toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
+            updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
     };
     MainWindowOverlayStatic(std::move(task), "ArkUIOverlayShowToast", nullptr, currentId);
 }
