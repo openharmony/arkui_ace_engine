@@ -1391,24 +1391,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetKeyboardWebInset
- * @tc.desc: Use GetKeyboardWebInset and test.
- * @tc.type: FUNC
- */
-HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
-{
-    SafeAreaInsets::Inset inset;
-    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
-    auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
-    EXPECT_EQ(keyboardInset.start, inset.start);
-    EXPECT_EQ(keyboardInset.end, inset.end);
-    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
-    keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
-    EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
-    EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
-}
-
-/**
  * @tc.name: IsModeResizeOrIsModeOffset
  * @tc.desc: Test IsModeResize and IsModeOffset
  * @tc.type: FUNC
@@ -1436,6 +1418,24 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetKeyboardWebInset
+ * @tc.desc: Use GetKeyboardWebInset and test.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
+ {
+     SafeAreaInsets::Inset inset;
+     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
+     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+     EXPECT_EQ(keyboardInset.start, inset.start);
+     EXPECT_EQ(keyboardInset.end, inset.end);
+     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+     keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
+     EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
+     EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
+ }
+ 
 /**
  * @tc.name: SetAndGetKeyboardInsetImplTest
  * @tc.desc: test Set And GetKeyboardInsetImplTest interface
