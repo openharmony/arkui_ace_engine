@@ -21144,8 +21144,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                      const Opt_ReuseOptions* value);
     void (*setRenderFit)(Ark_NativePointer node,
                          const Opt_RenderFit* value);
-    void (*setGestureModifier)(Ark_NativePointer node,
-                               const Opt_GestureModifier* value);
     void (*setBackgroundBrightness)(Ark_NativePointer node,
                                     const Opt_BackgroundBrightnessOptions* value);
     void (*setOnGestureJudgeBegin)(Ark_NativePointer node,
@@ -25854,14 +25852,6 @@ typedef struct GENERATED_ArkUIGestureGroupInterfaceAccessor {
                                           const Callback_Void* event);
 } GENERATED_ArkUIGestureGroupInterfaceAccessor;
 
-typedef struct GENERATED_ArkUIGestureModifierAccessor {
-    void (*destroyPeer)(Ark_GestureModifier peer);
-    Ark_GestureModifier (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*applyGesture)(Ark_GestureModifier peer,
-                         const Ark_UIGestureEvent* event);
-} GENERATED_ArkUIGestureModifierAccessor;
-
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     void (*destroyPeer)(Ark_GestureRecognizer peer);
     Ark_GestureRecognizer (*construct)();
@@ -28640,7 +28630,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGestureAccessor* (*getGestureAccessor)();
     const GENERATED_ArkUIGestureEventAccessor* (*getGestureEventAccessor)();
     const GENERATED_ArkUIGestureGroupInterfaceAccessor* (*getGestureGroupInterfaceAccessor)();
-    const GENERATED_ArkUIGestureModifierAccessor* (*getGestureModifierAccessor)();
     const GENERATED_ArkUIGestureRecognizerAccessor* (*getGestureRecognizerAccessor)();
     const GENERATED_ArkUIGestureStyleAccessor* (*getGestureStyleAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* (*getGlobalScope_ohos_arkui_componentSnapshotAccessor)();

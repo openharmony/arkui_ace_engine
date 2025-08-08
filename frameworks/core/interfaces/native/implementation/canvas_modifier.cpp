@@ -73,8 +73,6 @@ void SetCanvasOptions0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(context);
-
     ContextSetOptionsHelper(frameNode, context);
 
     LOGE("ARKOALA CanvasInterfaceModifier::SetCanvasOptions0Impl - CustomObject is not supported "
@@ -95,8 +93,8 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 }
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
-void OnReadyImpl(Ark_NativePointer node,
-                 const Opt_VoidCallback* value)
+void SetOnReadyImpl(Ark_NativePointer node,
+                    const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -108,8 +106,8 @@ void OnReadyImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
     CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
-void EnableAnalyzerImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+void SetEnableAnalyzerImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -127,8 +125,8 @@ const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
         CanvasModifier::ConstructImpl,
         CanvasInterfaceModifier::SetCanvasOptions0Impl,
         CanvasInterfaceModifier::SetCanvasOptions1Impl,
-        CanvasAttributeModifier::OnReadyImpl,
-        CanvasAttributeModifier::EnableAnalyzerImpl,
+        CanvasAttributeModifier::SetOnReadyImpl,
+        CanvasAttributeModifier::SetEnableAnalyzerImpl,
     };
     return &ArkUICanvasModifierImpl;
 }

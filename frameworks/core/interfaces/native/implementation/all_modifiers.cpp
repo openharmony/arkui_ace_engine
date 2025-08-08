@@ -88,7 +88,6 @@ const GENERATED_ArkUIBlankModifier* GetBlankModifier();
 const GENERATED_ArkUIButtonModifier* GetButtonModifier();
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier();
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier();
-const GENERATED_ArkUIDrawing_CanvasAccessor* GetDrawing_CanvasAccessor();
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier();
 const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier();
 const GENERATED_ArkUICircleModifier* GetCircleModifier();
@@ -136,7 +135,6 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier();
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier();
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier();
 const GENERATED_ArkUIPathModifier* GetPathModifier();
-const GENERATED_ArkUIDrawing_PathAccessor* GetDrawing_PathAccessor();
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier();
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier();
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier();
@@ -234,11 +232,13 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
 const GENERATED_ArkUIDrawContextAccessor* GetDrawContextAccessor();
 const GENERATED_ArkUIDrawing_BrushAccessor* GetDrawing_BrushAccessor();
+const GENERATED_ArkUIDrawing_CanvasAccessor* GetDrawing_CanvasAccessor();
 const GENERATED_ArkUIDrawing_FontAccessor* GetDrawing_FontAccessor();
 const GENERATED_ArkUIDrawing_ImageFilterAccessor* GetDrawing_ImageFilterAccessor();
 const GENERATED_ArkUIDrawing_LatticeAccessor* GetDrawing_LatticeAccessor();
 const GENERATED_ArkUIDrawing_MaskFilterAccessor* GetDrawing_MaskFilterAccessor();
 const GENERATED_ArkUIDrawing_MatrixAccessor* GetDrawing_MatrixAccessor();
+const GENERATED_ArkUIDrawing_PathAccessor* GetDrawing_PathAccessor();
 const GENERATED_ArkUIDrawing_PathEffectAccessor* GetDrawing_PathEffectAccessor();
 const GENERATED_ArkUIDrawing_PenAccessor* GetDrawing_PenAccessor();
 const GENERATED_ArkUIDrawing_RegionAccessor* GetDrawing_RegionAccessor();
@@ -266,7 +266,6 @@ const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAcce
 const GENERATED_ArkUIGestureAccessor* GetGestureAccessor();
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
 const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAccessor();
-const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor();
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
@@ -617,7 +616,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGestureAccessor,
         GetGestureEventAccessor,
         GetGestureGroupInterfaceAccessor,
-        GetGestureModifierAccessor,
         GetGestureRecognizerAccessor,
         GetGestureStyleAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,

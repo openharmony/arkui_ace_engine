@@ -4210,12 +4210,6 @@ void SetRenderFitImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<RenderFit>(value);
     ViewAbstractModelStatic::SetRenderFit(frameNode, convValue);
 }
-void SetGestureModifierImpl(Ark_NativePointer node,
-                            const Opt_GestureModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
 void SetBackgroundBrightnessImpl(Ark_NativePointer node,
                                  const Opt_BackgroundBrightnessOptions* value)
 {
@@ -5564,7 +5558,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetReuseIdImpl,
         CommonMethodModifier::SetReuseImpl,
         CommonMethodModifier::SetRenderFitImpl,
-        CommonMethodModifier::SetGestureModifierImpl,
         CommonMethodModifier::SetBackgroundBrightnessImpl,
         CommonMethodModifier::SetOnGestureJudgeBeginImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
