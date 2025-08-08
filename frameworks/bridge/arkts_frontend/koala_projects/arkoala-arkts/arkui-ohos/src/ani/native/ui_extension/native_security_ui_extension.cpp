@@ -170,8 +170,10 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
 
 
 ani_status NativeSecurityUiExtension::SetSecurityUiextensionWant(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object obj)
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityUiextensionWant start");
