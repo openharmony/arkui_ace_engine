@@ -655,7 +655,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         pattern->SetSyncLoad(true);
     } else {
-        if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent() && needAddBackgroundColor) {
+        if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
             AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
@@ -745,6 +745,7 @@ void WindowPattern::AddBackgroundColorDelayed()
     CHECK_NULL_VOID(taskExecutor);
     addBackgroundColorTask_.Cancel();
     addBackgroundColorTask_.Reset([weakThis = WeakClaim(this)]() {
+        CHECK_EQUAL_VOID(needAddBackgroundColor, false);
         ACE_SCOPED_TRACE("WindowScene::AddBackgroundColorTask");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
