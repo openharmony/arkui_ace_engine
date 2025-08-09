@@ -42,16 +42,22 @@ const struct UpdateParagraphStyle TEST_TYPING_PARAGRAPH_STYLE = {
     .lineBreakStrategy = LineBreakStrategy::HIGH_QUALITY,
     .paragraphSpacing = Dimension(10, DimensionUnit::VP)
 };
+const struct UpdateSpanStyle TEST_TYPING_STYLE = {
+    .updateTextColor = Color::RED,
+    .updateFontSize = CalcDimension(1.0),
+    .updateItalicFontStyle = OHOS::Ace::FontStyle::ITALIC,
+    .updateFontWeight = FontWeight::BOLD,
+};
 }
 
-class RichEditorTypingStyleTestNg : public RichEditorCommonTestNg {
+class RichEditorTypingStyleTest : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
 };
 
-void RichEditorTypingStyleTestNg::SetUp()
+void RichEditorTypingStyleTest::SetUp()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
@@ -69,13 +75,13 @@ void RichEditorTypingStyleTestNg::SetUp()
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
-void RichEditorTypingStyleTestNg::TearDown()
+void RichEditorTypingStyleTest::TearDown()
 {
     richEditorNode_ = nullptr;
     MockParagraph::TearDown();
 }
 
-void RichEditorTypingStyleTestNg::TearDownTestSuite()
+void RichEditorTypingStyleTest::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
 }
@@ -85,12 +91,12 @@ void RichEditorTypingStyleTestNg::TearDownTestSuite()
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::optional<struct UpdateParagraphStyle> typingParagraphStyle = struct UpdateParagraphStyle();
+    std::optional<struct UpdateParagraphStyle> typingParagraphStyle = UpdateParagraphStyle();
     richEditorPattern->SetTypingParagraphStyle(typingParagraphStyle);
     auto& styleManager = richEditorPattern->styleManager_;
     std::list<RefPtr<SpanItem>> spans;
@@ -99,7 +105,8 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle001, TestSize.Level1)
     EXPECT_EQ(styleManager->UseTypingParaStyle(spans, caretPosition), true);
 
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = u"123\n"
+    spanItem->content = u"123\n";
+    spanItem->position = static_cast<int32_t>(spanItem->content.length());
     spans.push_back(spanItem);
     caretPosition = 4;
     EXPECT_EQ(styleManager->UseTypingParaStyle(spans, caretPosition), true);
@@ -112,12 +119,12 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle001, TestSize.Level1)
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle002, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::optional<struct UpdateParagraphStyle> typingParagraphStyle = struct UpdateParagraphStyle();
+    std::optional<struct UpdateParagraphStyle> typingParagraphStyle = UpdateParagraphStyle();
     richEditorPattern->SetTypingParagraphStyle(typingParagraphStyle);
     auto& styleManager = richEditorPattern->styleManager_;
     std::list<RefPtr<SpanItem>> spans;
@@ -129,20 +136,17 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle002, TestSize.Level1)
     // delete to empty
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     spans.push_back(spanItem);
-    spanItem->content = u"123"
+    spanItem->content = u"123";
+    spanItem->position = static_cast<int32_t>(spanItem->content.length());
     changeValue.rangeBefore_.start = 0;
     changeValue.rangeBefore_.end = 3;
     EXPECT_EQ(styleManager->UseTypingParaStyle(spans, changeValue), true);
 
     // insert in last new line
-    spanItem->content = u"123\n"
+    spanItem->content = u"123\n";
+    spanItem->position = static_cast<int32_t>(spanItem->content.length());
     changeValue.rangeBefore_.start = 4;
     changeValue.rangeBefore_.end = 4;
-    EXPECT_EQ(styleManager->UseTypingParaStyle(spans, changeValue), true);
-
-    spanItem->content = u"123\n123"
-    changeValue.rangeBefore_.start = 4;
-    changeValue.rangeBefore_.end = 7;
     EXPECT_EQ(styleManager->UseTypingParaStyle(spans, changeValue), true);
 
     richEditorPattern->SetTypingParagraphStyle(std::nullopt);
@@ -153,36 +157,72 @@ HWTEST_F(RichEditorTypingStyleTestNg, UseTypingParaStyle002, TestSize.Level1)
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTestNg, UseStyleByTypingParagraphStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->SetTypingParagraphStyle(TEST_TYPING_PARAGRAPH_STYLE);
-    auto spanNode = Ace::MakeRefPtr<SpanNode>();
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
 
     auto& styleManager = richEditorPattern->styleManager_;
     EXPECT_EQ(styleManager->HasTypingParagraphStyle(), true);
-    styleManager->UpdateStyleByTypingParagraphStyle(spanNode);
-    auto textAlign = spanNode->GetTextAlign();
-    auto leadingMargin = spanNode->GetLeadingMargin();
-    auto wordBreak = spanNode->GetWordBreak();
-    auto lineBreakStrategy = spanNode->GetLineBreakStrategy();
-    auto paragraphSpacing = spanNode->GetParagraphSpacing();
+    ASSERT_NE(spanItem->textLineStyle, nullptr);
+    styleManager->UpdateStyleByTypingParagraphStyle(spanItem);
+    auto textAlign = spanItem->textLineStyle->GetTextAlign();
+    auto leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
+    auto wordBreak = spanItem->textLineStyle->GetWordBreak();
+    auto lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy();
+    auto paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     ASSERT_EQ(textAlign.has_value(), true);
     ASSERT_EQ(leadingMargin.has_value(), true);
     ASSERT_EQ(wordBreak.has_value(), true);
     ASSERT_EQ(lineBreakStrategy.has_value(), true);
     ASSERT_EQ(paragraphSpacing.has_value(), true);
 
-    EXPECT_EQ(leadingMargin.value(), TEST_TYPING_PARAGRAPH_STYLE.textAlign.value());
-    EXPECT_EQ(textAlign.value(), TEST_TYPING_PARAGRAPH_STYLE.leadingMargin.value());
+    EXPECT_EQ(textAlign.value(), TEST_TYPING_PARAGRAPH_STYLE.textAlign.value());
+    EXPECT_EQ(leadingMargin.value(), TEST_TYPING_PARAGRAPH_STYLE.leadingMargin.value());
     EXPECT_EQ(wordBreak.value(), TEST_TYPING_PARAGRAPH_STYLE.wordBreak.value());
     EXPECT_EQ(lineBreakStrategy.value(), TEST_TYPING_PARAGRAPH_STYLE.lineBreakStrategy.value());
     EXPECT_EQ(paragraphSpacing.value(), TEST_TYPING_PARAGRAPH_STYLE.paragraphSpacing.value());
 
     richEditorPattern->SetTypingParagraphStyle(std::nullopt);
+}
+
+/**
+ * @tc.name: UpdateTextStyleByTypingStyle001
+ * @tc.desc: test UseTypingParaStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+
+    auto& styleManager = richEditorPattern->styleManager_;
+    EXPECT_EQ(styleManager->typingFontStyle_.has_value(), true);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+    styleManager->UpdateTextStyleByTypingStyle(spanItem);
+    auto updateTextColor = spanItem->fontStyle->GetTextColor();
+    auto updateFontSize = spanItem->fontStyle->GetFontSize();
+    auto updateItalicFontStyle = spanItem->fontStyle->GetItalicFontStyle();
+    auto updateFontWeight = spanItem->fontStyle->GetFontWeight();
+    ASSERT_EQ(updateTextColor.has_value(), true);
+    ASSERT_EQ(updateFontSize.has_value(), true);
+    ASSERT_EQ(updateItalicFontStyle.has_value(), true);
+    ASSERT_EQ(updateFontWeight.has_value(), true);
+
+    EXPECT_EQ(updateTextColor.value(), TEST_TYPING_STYLE.updateTextColor.value());
+    EXPECT_EQ(updateFontSize.value(), TEST_TYPING_STYLE.updateFontSize.value());
+    EXPECT_EQ(updateItalicFontStyle.value(), TEST_TYPING_STYLE.updateItalicFontStyle.value());
+    EXPECT_EQ(updateFontWeight.value(), TEST_TYPING_STYLE.updateFontWeight.value());
+
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
 }
 
 }
