@@ -108,7 +108,7 @@ public:
     bool UpdateStyleByTypingParagraphStyle(RefPtr<SpanItem>& spanItem)
     {
         CHECK_NULL_RETURN(spanItem && typingParagraphStyle_.has_value(), false);
-        auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
+        auto spanNode = AceType::MakeRefPtr<SpanNode>(ElementRegister::GetInstance()->MakeUniqueId());
         spanNode->SetSpanItem(spanItem);
         return UpdateStyleByTypingParagraphStyle(spanNode);
     }
@@ -122,7 +122,7 @@ public:
     void UpdateTextStyleByTypingStyle(RefPtr<SpanItem>& spanItem)
     {
         CHECK_NULL_VOID(spanItem && typingFontStyle_.has_value());
-        auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
+        auto spanNode = AceType::MakeRefPtr<SpanNode>(ElementRegister::GetInstance()->MakeUniqueId());
         spanNode->SetSpanItem(spanItem);
         UpdateTextStyleByTypingStyle(spanNode);
     }
