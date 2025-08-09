@@ -295,7 +295,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
      */
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
-
     /**
      * @tc.steps: step2. Create FrameNode and Call TouchTest
      * @tc.expected: touchTestResults_ has the touchPoint.id of instance
