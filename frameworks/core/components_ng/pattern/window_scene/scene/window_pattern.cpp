@@ -727,7 +727,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             auto context = self->snapshotWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateBackgroundColor(Color::TRANSPARENT);
-            needAddBackgroundColor = false;
+            self->needAddBackgroundColor = false;
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
