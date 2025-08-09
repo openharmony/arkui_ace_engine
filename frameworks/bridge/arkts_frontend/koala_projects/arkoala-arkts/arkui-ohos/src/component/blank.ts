@@ -16,23 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
-import { ResourceColor } from "./units"
-import { Color } from "./enums"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ResourceColor } from './units';
+import { Color } from './enums';
+import { Resource } from 'global.resource';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
 import { ArkBlankNode } from '../handwritten/modifiers/ArkBlankNode';
-import { ArkBlankAttributeSet, BlankModifier } from '../BlankModifier';
+import { BlankModifier } from '../BlankModifier';
+import { hookBlankAttributeModifier } from '../handwritten';
 
 export class ArkBlankPeer extends ArkCommonMethodPeer {
+    _attributeSet?:BlankModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -101,7 +103,8 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
     }
 }
 export interface BlankAttribute extends CommonMethod {
-    color(value: ResourceColor | undefined): this
+    color(value: ResourceColor | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribute {
     color_value?: ResourceColor | undefined
@@ -113,6 +116,7 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
     getPeer(): ArkBlankPeer {
         return (this.peer as ArkBlankPeer)
     }
+
     public setBlankOptions(min?: number | string): this {
         if (this.checkPriority("setBlankOptions")) {
             const min_casted = min as (number | string | undefined)
@@ -121,6 +125,7 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         }
         return this
     }
+
     public color(value: ResourceColor | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -129,6 +134,13 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         }
         return this
     }
+
+    public attributeModifier(modifier: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookBlankAttributeModifier(this, modifier);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -15,12 +15,12 @@
 
 import { AttributeModifier } from 'arkui/component/common'
 import { ButtonAttribute } from 'arkui/component/button'
-
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { Length } from './component/units';
 import { PeerNode } from './PeerNode';
 import { ArkButtonPeer } from './component/button';
 import { InteropNativeModule } from "@koalaui/interop"
+
 export class ButtonModifier extends CommonMethodModifier implements ButtonAttribute, AttributeModifier<ButtonAttribute> {
     applyNormalAttribute(instance: ButtonAttribute): void { }
     applyPressedAttribute(instance: ButtonAttribute): void { }

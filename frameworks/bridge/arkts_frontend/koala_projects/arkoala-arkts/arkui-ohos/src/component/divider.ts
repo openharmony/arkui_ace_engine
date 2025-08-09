@@ -16,23 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
-import { ResourceColor } from "./units"
-import { LineCapStyle, Color } from "./enums"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ResourceColor } from './units';
+import { LineCapStyle, Color } from './enums';
+import { Resource } from 'global.resource';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
 import { ArkDividerNode } from '../handwritten/modifiers/ArkDividerNode';
-import { ArkDividerAttributeSet, DividerModifier } from '../DividerModifier';
+import { DividerModifier } from '../DividerModifier';
+import { hookDividerAttributeModifier } from '../handwritten';
 
 export class ArkDividerPeer extends ArkCommonMethodPeer {
+    _attributeSet?:DividerModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -129,10 +131,11 @@ export class ArkDividerPeer extends ArkCommonMethodPeer {
 }
 export type DividerInterface = () => DividerAttribute;
 export interface DividerAttribute extends CommonMethod {
-    vertical(value: boolean | undefined): this
-    color(value: ResourceColor | undefined): this
-    strokeWidth(value: number | string | undefined): this
-    lineCap(value: LineCapStyle | undefined): this
+    vertical(value: boolean | undefined): this {return this;}
+    color(value: ResourceColor | undefined): this {return this;}
+    strokeWidth(value: number | string | undefined): this {return this;}
+    lineCap(value: LineCapStyle | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttribute {
     vertical_value?: boolean | undefined
@@ -195,7 +198,13 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookDividerAttributeModifier(this, modifier);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

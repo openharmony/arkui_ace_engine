@@ -16,20 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from "./enums"
-import { LengthMetrics } from "../Graphics"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from './enums';
+import { LengthMetrics } from '../Graphics';
+import { FlexModifier } from '../FlexModifier';
+import { hookFlexAttributeModifier } from '../handwritten';
 
 export class ArkFlexPeer extends ArkCommonMethodPeer {
+    _attributeSet?:FlexModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -79,7 +82,8 @@ export interface FlexSpaceOptions {
 }
 export type FlexInterface = (value?: FlexOptions) => FlexAttribute;
 export interface FlexAttribute extends CommonMethod {
-    pointLight(value: PointLightStyle | undefined): this
+    pointLight(value: PointLightStyle | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute {
     pointLight_value?: PointLightStyle | undefined
@@ -106,6 +110,12 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
             return this
         }
         return this
+    }
+
+    public attributeModifier(modifier: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookFlexAttributeModifier(this, modifier);
+        return this;
     }
     
     public applyAttributesFinish(): void {
