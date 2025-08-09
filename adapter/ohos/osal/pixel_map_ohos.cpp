@@ -472,7 +472,7 @@ uint32_t PixelMapOhos::GetInnerColorGamut() const
 void PixelMapOhos::SetMemoryName(std::string pixelMapName) const
 {
     CHECK_NULL_VOID(pixmap_);
-    LOGI("PixelMapOhos::SetMemoryName, %{public}s", pixelMapName.c_str());
+    LOGD("PixelMapOhos::SetMemoryName, %{public}s", pixelMapName.c_str());
     pixmap_->SetMemoryName(pixelMapName);
 }
 } // namespace OHOS::Ace
