@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { ResourceColor } from "./units"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Color } from "./enums"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"

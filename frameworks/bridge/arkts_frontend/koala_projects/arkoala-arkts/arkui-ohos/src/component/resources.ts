@@ -1,9 +1,9 @@
-import { Resource } from "global/resource";
+import { Resource } from "global.resource";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { Serializer } from "./peers/Serializer";
 import { asArray } from "@koalaui/common";
-import { RuntimeType, runtimeType } from "@koalaui/interop";
+import { InteropNativeModule } from "@koalaui/interop";
 
 enum ResourceType {
     COLOR = 10001,
@@ -16,26 +16,49 @@ enum ResourceType {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 }
 
 class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
-    params?: Array<Object> | undefined;
+    params?: Array<Object | undefined> | undefined;
     type?: number | undefined;
     _id: number = -1;
-    constructor(resourceName: string, bundleName: string, moduleName: string, ...params: Object[]) {
+
+    castParams(params: Object[]): Array<Object | undefined> {
+        let result: Array<Object | undefined> = new Array<Object | undefined>();
+        for (let param of params) {
+            result.push(param);
+        }
+        return result;
+    }
+
+    constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Object[]) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
-        let param1 = new Array<Object>();
-        if (resourceName != null) {
+        if (resourceName !== null) {
+            let param1 = new Array<Object | undefined>();
             param1.push(resourceName);
-            param1 = param1.concat(asArray(params));
+            this.params = param1.concat(this.castParams(params));
+        } else {
+            this.params = this.castParams(params);
         }
-        this.params = param1;
         this._id = -1;
-        this.type = this.parseResourceType(resourceName);
+        if (this.params!.length > 0) {
+            const name: string = this.params![0] as string;
+            this.type = this.parseResourceType(name);
+        } else {
+            InteropNativeModule._NativeLog("UI-Plugin do not send resourceName when id is -1");
+        }
+    }
+    constructor(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]) {
+        this._id = id;
+        this.type = type;
+        this.params = this.castParams(params);
+        this.bundleName = bundleName;
+        this.moduleName = moduleName;
     }
     set id(value: number) {
         this._id = value;
@@ -91,6 +114,8 @@ class ArkResource implements Resource {
                 return ResourceType.MEDIA;
             case 'RAWFILE':
                 return ResourceType.RAWFILE;
+            case 'symbol':
+                return ResourceType.SYMBOL;
         }
         return ResourceType.STRING;
     }
@@ -99,11 +124,5 @@ export function _r(bundleName: string, moduleName: string, name: string, ...para
     return new ArkResource(name, bundleName, moduleName, ...params)
 }
 export function _rawfile(bundleName: string, moduleName: string, name: string): Resource {
-    return {
-        "id": 0,
-        "type": 30000,
-        "params": new Array<Object>(name),
-        "bundleName": bundleName,
-        "moduleName": moduleName
-    } as Resource
+    return new ArkResource(0, 30000, bundleName, moduleName, name);
 }
