@@ -2591,6 +2591,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void OnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                             const AccessibilityTransparentCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnAccessibilityHoverTransparent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void HoverEffectImpl(Ark_NativePointer node,
                          const Opt_HoverEffect* value)
     {
@@ -20965,6 +20977,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::OnHoverImpl,
             CommonMethodModifier::OnHoverMoveImpl,
             CommonMethodModifier::OnAccessibilityHoverImpl,
+            CommonMethodModifier::OnAccessibilityHoverTransparentImpl,
             CommonMethodModifier::HoverEffectImpl,
             CommonMethodModifier::OnMouseImpl,
             CommonMethodModifier::OnTouchImpl,
