@@ -109,6 +109,33 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
 }
 
 /**
+ * @tc.name: GetListDriection001
+ * @tc.desc: Test GetListDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetListDriection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list, default direction is vertical.
+     */
+    CreateList();
+    CreateDone();
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+
+    /**
+     * @tc.steps: step2. Set direction to horizontal.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::HORIZONTAL));
+
+    /**
+     * @tc.steps: step3. Set direction to vertical.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::VERTICAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+}
+
+/**
  * @tc.name: GetOverScrollOffset001
  * @tc.desc: Test GetOverScrollOffset
  * @tc.type: FUNC

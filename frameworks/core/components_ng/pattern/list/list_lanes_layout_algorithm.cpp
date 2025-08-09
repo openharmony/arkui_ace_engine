@@ -315,7 +315,9 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
 void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
     const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis)
 {
-    auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
+    const auto& contentConstraintOps = layoutProperty->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(contentConstraintOps);
+    auto contentConstraint = contentConstraintOps.value();
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
     int32_t lanes = layoutProperty->GetLanes().value_or(1);
     lanes = lanes > 1 ? lanes : 1;
