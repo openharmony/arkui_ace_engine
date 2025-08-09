@@ -536,6 +536,7 @@ if (globalThis.WithTheme !== undefined) {
         var _a;
         if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
             const prebuildFunc = () => {
+                ArkThemeScopeManager.getInstance().setIsFirstRender(true);
                 globalThis.WithTheme.pop();
             };
             (_a = PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)) === null || _a === void 0 ? void 0 : _a.push(prebuildFunc);
@@ -1092,6 +1093,9 @@ class ArkThemeScopeManager {
             this.lastThemeScopeId = currentThemeScopeId;
             WithTheme.setThemeScopeId(currentThemeScopeId);
         }
+    }
+    setIsFirstRender(isFirstRender) {
+        this.handledIsFirstRender = isFirstRender;
     }
     static getInstance() {
         if (!ArkThemeScopeManager.instance) {

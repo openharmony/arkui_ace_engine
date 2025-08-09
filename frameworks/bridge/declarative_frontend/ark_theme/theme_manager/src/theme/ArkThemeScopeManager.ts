@@ -568,6 +568,10 @@ class ArkThemeScopeManager {
         }
     }
 
+    public setIsFirstRender(isFirstRender: boolean) {
+        this.handledIsFirstRender = isFirstRender;
+    }
+
     private static instance: ArkThemeScopeManager | undefined = undefined
     static getInstance() : ArkThemeScopeManager {
         if (!ArkThemeScopeManager.instance) {
