@@ -31,6 +31,9 @@
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
 typedef struct napi_value__* napi_value;
+typedef struct __ani_env ani_env;
+typedef class __ani_ref* ani_ref;
+typedef class __ani_object* ani_object;
 
 namespace OHOS::Ace {
 
@@ -386,6 +389,40 @@ public:
     }
     virtual void* GetEnv() { return nullptr; }
 
+    void RegisterLocalStorage(int32_t id, void* storage)
+    {
+        storageMap_.emplace(id, storage);
+    }
+
+    void UnRegisterLocalStorage(int32_t id)
+    {
+        storageMap_.erase(id);
+    }
+
+    virtual ani_object GetUIContext(int32_t instanceId)
+    {
+        return nullptr;
+    }
+    
+    virtual ani_ref GetSharedStorage(int32_t id)
+    {
+        return nullptr;
+    }
+
+    virtual void SetHostContext(int32_t instanceId, ani_ref* context) {}
+
+    virtual ani_ref* GetHostContext()
+    {
+        return nullptr;
+    }
+
+    virtual bool HandleMessage(void *frameNode, int32_t type, const std::string& param)
+    {
+        return false;
+    }
+
+    virtual void OpenStateMgmtInterop() {}
+
 protected:
     virtual bool MaybeRelease() override;
     FrontendType type_ = FrontendType::JS;
@@ -395,6 +432,7 @@ protected:
     State state_ = State::UNDEFINE;
     mutable std::recursive_mutex mutex_;
     mutable std::mutex destructMutex_;
+    std::unordered_map<int32_t, void*> storageMap_;
 };
 
 } // namespace OHOS::Ace

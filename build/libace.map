@@ -225,6 +225,7 @@
       OHOS::Ace::Platform::GetTouchEventOriginOffset*;
       OHOS::Ace::Base64Util::Decode*;
       OHOS::Ace::Frontend::*;
+      OHOS::Ace::PluginFrontend*;
       OHOS::Ace::Component::*;
       OHOS::Ace::Framework::ManifestParser::*;
       OHOS::Ace::NG::PipelineContext::*;
@@ -284,6 +285,8 @@
       OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::PipelineBase::CurrentThemeManager*;
       OHOS::Ace::PipelineBase::GetCurrentContext*;
+      OHOS::Ace::ArktsAniUtils::*;
+      OHOS::Ace::PluginManager::*;
 
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
@@ -334,7 +337,8 @@
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::GeometryNode::GetFrameRect(bool) const";
       OHOS::Ace::NG::GeometryNode::*;
-
+      OHOS::Ace::NG::PageRouterManagerFactory::*;
+      OHOS::Ace::NG::PageRouterManager::*;
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
@@ -344,6 +348,7 @@
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
       virtual?thunk?to?OHOS::Ace::Frontend::~Frontend*;
+      virtual?thunk?to?OHOS::Ace::PluginFrontend::~PluginFrontend*;
       virtual?thunk?to?OHOS::Ace::Component::~Component*;
 
       vtable?for?OHOS::Ace::AceApplicationInfo;

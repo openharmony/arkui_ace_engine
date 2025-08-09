@@ -17,7 +17,6 @@
 
 #include <atomic>
 #include <cinttypes>
-#include <ani.h>
 #include <optional>
 
 #include "ability_context.h"
@@ -102,7 +101,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
@@ -1408,13 +1407,9 @@ ani_object UIContentImpl::GetUIAniContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     ContainerScope scope(instanceId_);
-    ani_object result = nullptr;
     auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, result);
-    auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
-    CHECK_NULL_RETURN(arktsFrontend, result);
-    result = arktsFrontend->CallGetUIContextFunc(instanceId_);
-    return result;
+    CHECK_NULL_RETURN(frontend, nullptr);
+    return frontend->GetUIContext(instanceId_);
 }
 
 UIContentErrorCode UIContentImpl::Restore(
@@ -2666,10 +2661,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         if (!storage) {
             container->SetAniLocalStorage(nullptr, context);
         } else {
-            auto* env = reinterpret_cast<ani_env*>(runtime_);
-            ani_ref ref;
-            env->GlobalReference_Create(storage, &ref);
-            container->SetAniLocalStorage(reinterpret_cast<void*>(ref), context);
+            auto ref = ArktsFrontendLoader::GetInstance().CreateAniReference(runtime_, storage);
+            container->SetAniLocalStorage(ref, context);
         }
     }
 
