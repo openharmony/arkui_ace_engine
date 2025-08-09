@@ -308,8 +308,6 @@ private:
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
-    void ReportOnItemGridEvent(const std::string& event);
-    int32_t OnInjectionEvent(const std::string& command) override;
 
     inline bool UseIrregularLayout() const;
 

@@ -45,7 +45,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #ifdef ACE_STATIC
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #endif
@@ -3266,7 +3265,6 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
         host->GetTag().c_str());
-    ReportOnItemStopEvent();
     if (onScrollStop) {
         onScrollStop();
     }
@@ -4600,31 +4598,6 @@ bool ScrollablePattern::IsScrollableSpringEffect() const
 const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
 {
     return scrollEffect_;
-}
-
-std::string ScrollablePattern::ParseCommand(const std::string& command)
-{
-    auto json = JsonUtil::ParseJsonString(command);
-    if (!json || json->IsNull()) {
-        return std::string("");
-    }
-    return json->GetString("cmd");
-}
-
-void ScrollablePattern::ReportOnItemStopEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetTag() == V2::GRID_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
-        TAG_LOGI(
-            AceLogTag::ACE_GRID, "nodeId:[%{public}d] Grid reportComponentChangeEvent onScrollStop", host->GetId());
-    }
-    if (host->GetTag() == V2::LIST_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "List.onScrollStop");
-        TAG_LOGI(
-            AceLogTag::ACE_LIST, "nodeId:[%{public}d] List reportComponentChangeEvent onScrollStop", host->GetId());
-    }
 }
 
 PaddingPropertyF ScrollablePattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)

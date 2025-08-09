@@ -658,11 +658,6 @@ public:
         dragStartAnimationRate_ = rate;
     }
 
-    void SetDragStartPoint(double globalX, double globalY)
-    {
-        dragStartPoint_ = { globalX, globalY };
-    }
-    
     bool CheckIsFolderSubwindowBoundary(float x, float y, int32_t instanceId);
 
     bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
@@ -739,8 +734,6 @@ private:
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
     void StartDragTransitionAnimation(const Offset& newOffset, AnimationOption option,
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
-    void ReportOnItemDropEvent(
-        DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
     void NotifyDragSpringLoadingMove(const RefPtr<FrameNode>& dragFrameNode, const std::string& extraInfo);
     void NotifyDragSpringLoadingIntercept(std::string_view extraParams);
     void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
@@ -820,7 +813,6 @@ private:
     WeakPtr<OverlayManager> subwindowOverlayManager_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
-    Point dragStartPoint_ { 0, 0 };
     RefPtr<DragDropSpringLoadingDetector> dragDropSpringLoadingDetector_;
 
     std::map<int32_t, Point> fingerPointInfo_;
