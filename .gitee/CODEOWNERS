@@ -3192,6 +3192,7 @@ frameworks/core/interfaces/native/implementation/webview_controller_accessor.cpp
 frameworks/core/interfaces/native/implementation/web/webview_controller_peer_impl.h @arkwebinarkuireview
 
 [Test source]
+test/mock/base @arkuiframework
 test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
 test/mock/core/animation/ @arkui_superman
