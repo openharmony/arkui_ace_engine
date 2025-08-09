@@ -991,15 +991,11 @@ class RenderNode extends Disposable {
   }
 }
 
-function nodeDeref(ref): RenderNode | null {
-  if (ref === undefined || ref === null) {
-      return null;
-  }
-  let deref = ref.deref();
-  if (deref === undefined || deref === null) {
-      return null;
-  }
-  return deref;
+function nodeDeref(ref): RenderNode | undefined {
+  return ref?.deref();
+}
+function getNodePtrValue(nativeRef) {
+    return nativeRef?.getNativeHandleVal();
 }
 
 function edgeColors(all: number): EdgeColors {

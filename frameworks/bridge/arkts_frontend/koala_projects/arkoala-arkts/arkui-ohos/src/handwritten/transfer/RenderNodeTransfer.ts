@@ -33,11 +33,7 @@ export class RenderNodeTransfer {
     private transProperty2Static(inVal: ESValue, rn: RenderNode): void {
         rn.lengthMetricsUnit = TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue") as int as LengthMetricsUnit;
         let styleVal = TransferUtil.getPropBorderStyle(inVal, "borderStyleValue");
-        if (styleVal !== null) {
-            rn.borderStyle = styleVal as Edges<BorderStyle>;
-        } else {
-            rn.borderStyle = {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<BorderStyle>;
-        }
+        rn.borderStyle = {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<BorderStyle>;
         let borderWidthVal = TransferUtil.getPropBorderNoExcept(inVal, "borderWidthValue");
         rn.borderWidth = borderWidthVal as Edges<number>;
 
