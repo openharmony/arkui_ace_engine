@@ -350,6 +350,9 @@ void SearchModelStatic::SetCancelImageIcon(FrameNode *frameNode, std::optional<N
         if (!iconOptions.value().GetSize().has_value()) {
             iconOptions.value().UpdateSize(theme->GetIconHeight());
         }
+        if (!iconOptions.value().GetSrc().has_value()) {
+            iconOptions.value().UpdateSrc("", "", "");
+        }
     } else {
         iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
     }
