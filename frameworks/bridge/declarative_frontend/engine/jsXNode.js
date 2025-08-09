@@ -3043,10 +3043,10 @@ class RenderNode extends Disposable {
     }
 }
 function nodeDeref(ref) {
-    return ref?.deref();
+    return ref?.deref?.() ?? undefined;
 }
 function getNodePtrValue(nativeRef) {
-    return nativeRef?.getNativeHandleVal();
+    return nativeRef?.getNativeHandleVal?.() ?? undefined;
 }
 function edgeColors(all) {
     return { left: all, top: all, right: all, bottom: all };
