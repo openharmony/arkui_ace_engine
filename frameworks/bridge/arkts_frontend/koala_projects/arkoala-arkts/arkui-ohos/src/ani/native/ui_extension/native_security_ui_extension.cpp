@@ -105,11 +105,9 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
         "NativeUiExtension SetSecurityUiextensionOption start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
-            "frameNode is null when SetSecurityUiextensionOption");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION, "frameNode is null when SetSecurityUiextensionOption");
         return ANI_ERROR;
     }
-
     std::string optionClassName =
         "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUIExtensionOptions;";
     if (!AniUtils::CheckType(env, obj, optionClassName)) {
@@ -118,7 +116,6 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
             optionClassName.c_str());
         return ANI_ERROR;
     }
-
     bool isTransferringCaller = AniUtils::GetBoolOrUndefined(env, obj, "isTransferringCaller");
     bool isWindowModeFollowHost = AniUtils::GetBoolOrUndefined(env, obj, "isWindowModeFollowHost");
     int32_t dpiFollowStrategy = -1;
@@ -128,7 +125,6 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
         return ANI_ERROR;
     }
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
-
     static const std::map<std::string, NG::PlaceholderType> placeholderTypeTable = {
         { UI_EXTENSION_PLACEHOLDER_TYPE_INITIAL, NG::PlaceholderType::INITIAL },
         { UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED, NG::PlaceholderType::UNDEFINED },
@@ -163,8 +159,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
     NG::SecurityUIExtensionStatic::UpdateSecurityUecConfig(
         frameNode, isTransferringCaller, densityDpi, isWindowModeFollowHost, placeholderMap);
 #endif
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
-        "NativeUiExtension SetSecurityUiextensionOption end");
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,  "NativeUiExtension SetSecurityUiextensionOption end");
     return ANI_OK;
 }
 
@@ -235,7 +230,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
                 "onErrorAniReadyCallbackInfo is nullptr");
             return;
         }
-
         ani_ref onErrorGlobalRef = onErrorAniReadyCallbackInfo->GetOnGlobalRef();
         ani_env* env = onErrorAniReadyCallbackInfo->GetEnvRef();
         if (onErrorGlobalRef == nullptr || env == nullptr) {
@@ -243,7 +237,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
                 "onErrorGlobalRef or env is nullptr");
             return;
         }
-
         auto fnObj = reinterpret_cast<ani_fn_object>(onErrorGlobalRef);
         auto codeArgs = AniUtils::CreateDouble(env, code);
         if (codeArgs == nullptr) {
@@ -251,12 +244,10 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
                 "CreateDouble failed when onErrorCallback");
             return;
         }
-
         ani_string nameArgs;
         env->String_NewUTF8(name.c_str(), name.size(), &nameArgs);
         ani_string messageArgs;
         env->String_NewUTF8(message.c_str(), message.size(), &messageArgs);
-
         ani_ref result;
         std::vector<ani_ref> tmp = {
             reinterpret_cast<ani_ref>(codeArgs),
@@ -265,7 +256,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
         };
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
-
 #ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::SetSecurityOnError(frameNode, std::move(onErrorCallback));
 #endif //WINDOW_SCENE_SUPPORTED
@@ -347,7 +337,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
             "frameNode is null when SetSecurityOnTerminate");
         return ANI_ERROR;
     }
-
     ani_ref onTerminateRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onTerminateGlobalRef;
     env->GlobalReference_Create(onTerminateRef, &onTerminateGlobalRef);
@@ -361,7 +350,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
                     "onTerminateAniReadyCallbackInfo is nullptr");
                 return;
             }
-
             ani_ref onTerminateGlobalRef = onTerminateAniReadyCallbackInfo->GetOnGlobalRef();
             ani_env* env = onTerminateAniReadyCallbackInfo->GetEnvRef();
             if (onTerminateGlobalRef == nullptr || env == nullptr) {
@@ -369,7 +357,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
                     "onTerminateGlobalRef or env is nullptr");
                 return;
             }
-
             AAFwk::Want want;
             if (wantWrap) {
                 want = wantWrap->GetWant();
@@ -387,7 +374,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
                     "WrapWant failed when onTerminateCallback");
                 return;
             }
-
             ani_ref result;
             std::vector<ani_ref> tmp = {
                 reinterpret_cast<ani_ref>(codeArgs), reinterpret_cast<ani_ref>(wantArgs)
