@@ -655,7 +655,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         pattern->SetSyncLoad(true);
     } else {
-        if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
+        if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent() && needAddBackgroundColor) {
             AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
@@ -727,6 +727,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             auto context = self->snapshotWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateBackgroundColor(Color::TRANSPARENT);
+            needAddBackgroundColor = false;
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }

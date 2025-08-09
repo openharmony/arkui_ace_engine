@@ -139,6 +139,7 @@ private:
     CancelableCallback<void()> addBackgroundColorTask_;
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+    bool needAddBackgroundColor = true;
     friend class LifecycleListener;
     friend class WindowEventProcess;
 
