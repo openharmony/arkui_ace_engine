@@ -656,6 +656,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
+            needAddBackgroundColor = true;
             AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
