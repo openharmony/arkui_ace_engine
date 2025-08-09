@@ -20,7 +20,6 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension.h"
-#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
@@ -41,39 +40,8 @@ enum class DialogType {
     PROGRESS_DIALOG,
 };
 
-enum class DialogResourceType {
-    BACKGROUND_COLOR = 1,
-    MASK_COLOR,
-    WIDTH,
-    HEIGHT,
-    TITLE,
-    SUBTITLE,
-    MESSAGE,
-};
 class DialogTypeUtils {
 public:
-    static std::string ConvertDialogTypeToString(const DialogResourceType type)
-    {
-        switch (type) {
-            case DialogResourceType::BACKGROUND_COLOR:
-                return "backgroundColor";
-            case DialogResourceType::MASK_COLOR:
-                return "maskColor";
-            case DialogResourceType::WIDTH:
-                return "width";
-            case DialogResourceType::HEIGHT:
-                return "height";
-            case DialogResourceType::TITLE:
-                return "title";
-            case DialogResourceType::SUBTITLE:
-                return "subtitle";
-            case DialogResourceType::MESSAGE:
-                return "message";
-            default:
-                break;
-        }
-        return "";
-    }
     static std::string ConvertDialogTypeToString(DialogType type)
     {
         switch (type) {
@@ -243,9 +211,6 @@ struct ButtonInfo {
     std::optional<NG::BorderRadiusProperty> borderRadius;
     bool isPrimary = false;
     bool isAcceptButton = false;
-    RefPtr<ResourceObject> resourceTextObj;
-    RefPtr<ResourceObject> resourceFontColorObj;
-    RefPtr<ResourceObject> resourceBgColorObj;
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
     {
@@ -339,14 +304,6 @@ struct DialogProperties {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
-    RefPtr<ResourceObject> resourceBgColorObj;
-    RefPtr<ResourceObject> resourceTitleObj;
-    RefPtr<ResourceObject> resourceSubTitleObj;
-    RefPtr<ResourceObject> resourceContentObj;
-    RefPtr<ResourceObject> resourceMaskColorObj;
-    RefPtr<ResourceObject> resourceWidthObj;
-    RefPtr<ResourceObject> resourceHeightObj;
-    RefPtr<ResourceObject> resourceBdColorObj;
 };
 
 struct PromptDialogAttr {
