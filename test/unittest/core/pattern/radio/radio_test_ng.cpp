@@ -2094,6 +2094,9 @@ HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level1)
 
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto childNode = pattern->builderChildNode_;
     ASSERT_NE(childNode, nullptr);
     auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2153,6 +2156,9 @@ HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level1)
 
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto childNode = pattern->builderChildNode_;
     ASSERT_NE(childNode, nullptr);
     auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2220,6 +2226,9 @@ HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
 
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto childNode = pattern->builderChildNode_;
     ASSERT_NE(childNode, nullptr);
     auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
