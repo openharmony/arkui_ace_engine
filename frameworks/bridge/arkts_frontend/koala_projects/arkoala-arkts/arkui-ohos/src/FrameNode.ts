@@ -57,6 +57,9 @@ import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
 import { ArkSwiperNode } from "./handwritten/modifiers/ArkSwiperNode";
 import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
 import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
+import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
+import { ArkMarqueeNode } from './handwritten/modifiers/ArkMarqueeNode'
+import { ArkSymbolGlyphNode } from './handwritten/modifiers/ArkSymbolGlyphNode'
 import { ArkXComponentNode } from "./handwritten/modifiers/ArkXComponentNode"
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
@@ -90,8 +93,9 @@ import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/searc
 import { SwiperController, SwiperAttribute, ArkSwiperPeer } from './component/swiper'
 import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
 import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
-import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
 import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
+import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
+import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
 import { XComponentType } from './component/enums'
 import { Deserializer } from "./component/peers/Deserializer";
@@ -1221,9 +1225,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSearchNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: SearchOptions): SearchAttribute {
+        initialize(value?: SearchOptions): SearchAttribute {
             let arkSearchNode = this.attribute as ArkSearchNode;
-            return arkSearchNode!.initialize(options);
+            return arkSearchNode!.initialize(value);
         }
     }
 
@@ -1241,9 +1245,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: TextAreaOptions): TextAreaAttribute {
+        initialize(value?: TextAreaOptions): TextAreaAttribute {
             let arkTextAreaNode = this.attribute as ArkTextAreaNode;
-            return arkTextAreaNode!.initialize(options);
+            return arkTextAreaNode!.initialize(value);
         }
     }
 
@@ -1251,9 +1255,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextInputNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: TextInputOptions): TextInputAttribute {
+        initialize(value?: TextInputOptions): TextInputAttribute {
             let arkTextInputNode = this.attribute as ArkTextInputNode;
-            return arkTextInputNode!.initialize(options);
+            return arkTextInputNode!.initialize(value);
         }
     }
 
@@ -1264,6 +1268,26 @@ export namespace typeNode {
         initialize(content?: string | Resource, value?: TextOptions): TextAttribute {
             let arkTextNode = this.attribute as ArkTextNode;
             return arkTextNode!.initialize(content, value);
+        }
+    }
+
+    class MarqueeFrameNode extends TypedFrameNode<ArkMarqueeNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkMarqueeNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value: MarqueeOptions): MarqueeAttribute {
+            let arkMarqueeNode = this.attribute as ArkMarqueeNode;
+            return arkMarqueeNode!.initialize(value);
+        }
+    }
+
+    class SymbolGlyphFrameNode extends TypedFrameNode<ArkSymbolGlyphNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSymbolGlyphNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value?: Resource): SymbolGlyphAttribute {
+            let arkSymbolGlyphNode = this.attribute as ArkSymbolGlyphNode;
+            return arkSymbolGlyphNode!.initialize(value);
         }
     }
 
@@ -1551,7 +1575,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createSearchNode(context: UIContext, type: string): SearchFrameNode {
+    function createSearchNode(context: UIContext, type: 'Search'): SearchFrameNode {
         return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
             let arknode = new ArkSearchNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1573,7 +1597,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextAreaNode(context: UIContext, type: string): TextAreaFrameNode {
+    function createTextAreaNode(context: UIContext, type: 'TextArea'): TextAreaFrameNode {
         return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
             let arknode = new ArkTextAreaNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1584,7 +1608,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextInputNode(context: UIContext, type: string): TextInputFrameNode {
+    function createTextInputNode(context: UIContext, type: 'TextInput'): TextInputFrameNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1600,6 +1624,38 @@ export namespace typeNode {
             let arknode = new ArkTextNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
             const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    class ArkMarqueePeerCustom extends ArkMarqueePeer {
+        constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+            super(peerPtr, id, name, flags)
+        }
+    }
+    // @ts-ignore
+    function createMarqueeNode(context: UIContext, type: 'Marquee'): MarqueeFrameNode {
+        return new MarqueeFrameNode(context, 'Marquee', (node: FrameNode, type: ModifierType): ArkMarqueeNode => {
+            let arknode = new ArkMarqueeNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkMarqueePeerCustom(retval, node._nodeId as int32, "Marquee", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    class ArkSymbolGlyphPeerCustom extends ArkSymbolGlyphPeer {
+        constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+            super(peerPtr, id, name, flags)
+        }
+    }
+    // @ts-ignore
+    function createSymbolGlyphNode(context: UIContext, type: 'SymbolGlyph'): SymbolGlyphFrameNode {
+        return new SymbolGlyphFrameNode(context, 'SymbolGlyph', (node: FrameNode, type: ModifierType): ArkSymbolGlyphNode => {
+            let arknode = new ArkSymbolGlyphNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSymbolGlyphPeerCustom(retval, node._nodeId as int32, "SymbolGlyph", 0);
             arknode.setPeer(peer);
             return arknode;
         });
