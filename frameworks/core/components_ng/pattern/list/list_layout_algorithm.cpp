@@ -92,13 +92,17 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Pre-recycle
     ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
 
-    const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
+    const auto& layoutConstraintOps = listLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraintOps);
+    const auto& layoutConstraint = layoutConstraintOps.value();
 
     // calculate idealSize and set FrameSize
     CalcContentOffset(listLayoutProperty);
 
     // calculate main size.
-    auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
+    const auto& contentConstraintOps = listLayoutProperty->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(contentConstraintOps);
+    auto contentConstraint = contentConstraintOps.value();
 
     float expandHeight = ScrollableUtils::CheckHeightExpansion(listLayoutProperty, axis_);
     contentEndOffset_ += expandHeight;
