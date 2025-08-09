@@ -134,6 +134,29 @@ const std::vector<int32_t> OBJECT_FIT_ARRAY = { OBJECT_FIT_CONTAIN, OBJECT_FIT_C
     OBJECT_FIT_NONE_ALIGN_TOP_START, OBJECT_FIT_NONE_ALIGN_TOP, OBJECT_FIT_NONE_ALIGN_TOP_END,
     OBJECT_FIT_NONE_ALIGN_START, OBJECT_FIT_NONE_ALIGN_CENTER, OBJECT_FIT_NONE_ALIGN_END,
     OBJECT_FIT_NONE_ALIGN_BOTTOM_START, OBJECT_FIT_NONE_ALIGN_BOTTOM, OBJECT_FIT_NONE_ALIGN_BOTTOM_END };
+constexpr int32_t COPY_OPTIONS_NONE = 0;
+constexpr int32_t COPY_OPTIONS_INAPP = 1;
+constexpr int32_t COPY_OPTIONS_LOCAL_DEVICE = 2;
+constexpr int32_t COPY_OPTIONS_CROSS_DEVICE = 3;
+const std::vector<int32_t> COPY_OPTIONS_ARRAY = { COPY_OPTIONS_NONE, COPY_OPTIONS_INAPP,
+    COPY_OPTIONS_LOCAL_DEVICE, COPY_OPTIONS_CROSS_DEVICE };
+constexpr int32_t DYNAMIC_RANGE_MODE_HIGH = 0;
+constexpr int32_t DYNAMIC_RANGE_MODE_CONSTRAINT = 1;
+constexpr int32_t DYNAMIC_RANGE_MODE_STANDARD = 2;
+const std::vector<int32_t> DYNAMIC_RANGE_MODE_ARRAY = { DYNAMIC_RANGE_MODE_HIGH, DYNAMIC_RANGE_MODE_CONSTRAINT,
+    DYNAMIC_RANGE_MODE_STANDARD };
+constexpr int32_t ORIENTATION_AUTO = 0;
+constexpr int32_t ORIENTATION_UP = 1;
+constexpr int32_t ORIENTATION_RIGHT = 2;
+constexpr int32_t ORIENTATION_DOWN = 3;
+constexpr int32_t ORIENTATION_LEFT = 4;
+constexpr int32_t ORIENTATION_UP_MIRRORED = 5;
+constexpr int32_t ORIENTATION_RIGHT_MIRRORED = 6;
+constexpr int32_t ORIENTATION_DOWN_MIRRORED = 7;
+constexpr int32_t ORIENTATION_LEFT_MIRRORED = 8;
+const std::vector<int32_t> ORIENTATION_ARRAY = { ORIENTATION_AUTO, ORIENTATION_UP, ORIENTATION_RIGHT, ORIENTATION_DOWN,
+    ORIENTATION_LEFT, ORIENTATION_UP_MIRRORED, ORIENTATION_RIGHT_MIRRORED,
+    ORIENTATION_DOWN_MIRRORED, ORIENTATION_LEFT_MIRRORED };
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH = 5;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_BASELINE = 4;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_BOTTOM = 3;
@@ -190,6 +213,7 @@ constexpr int32_t REQUIRED_THREE_PARAM = 3;
 constexpr int32_t REQUIRED_FOUR_PARAM = 4;
 constexpr int32_t REQUIRED_FIVE_PARAM = 5;
 constexpr int32_t REQUIRED_SEVEN_PARAM = 7;
+constexpr int32_t REQUIRED_SIXTEEN_PARAM = 16;
 constexpr int32_t REQUIRED_TWENTY_PARAM = 20;
 constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 20;
 thread_local std::string g_stringValue;
@@ -12114,6 +12138,280 @@ int32_t SetSyncLoad(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetSourceSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWO_PARAM);
+    if (actualSize < 0 || item->value[0].i32 <= 0 || item->value[1].i32 <= 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setSourceSizeWithPX(
+        node->uiNodeHandle, item->value[0].i32, item->value[1].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetSourceSize(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto* fullImpl = GetFullImpl();
+    std::array<int32_t, NUM_2> sourceSizeArray = {0};
+    fullImpl->getNodeModifiers()->getImageModifier()->getSourceSize(node->uiNodeHandle, &sourceSizeArray[0], NUM_2);
+    g_numberValues[0].i32 = sourceSizeArray[0];
+    g_numberValues[1].i32 = sourceSizeArray[1];
+    g_attributeItem.size = REQUIRED_TWO_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetSourceSize(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetSourceSize(node->uiNodeHandle);
+}
+
+int32_t SetImageMatrix(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_SIXTEEN_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    std::vector<float> matrixArray;
+    for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_SIXTEEN_PARAM; i++) {
+        matrixArray.emplace_back(item->value[i].f32);
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setImageMatrix(
+        node->uiNodeHandle, &matrixArray[0]);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetImageMatrix(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto fullImpl = GetFullImpl();
+    std::array<float, NUM_16> resizableArray;
+    fullImpl->getNodeModifiers()->getImageModifier()->getImageMatrix(
+        node->uiNodeHandle, &resizableArray[0], NUM_16);
+    for (int i = NUM_0; i < NUM_16; ++i) {
+        g_numberValues[i].f32 = resizableArray[i];
+    }
+    g_attributeItem.size = NUM_16;
+    return &g_attributeItem;
+}
+
+void ResetImageMatrix(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetImageMatrix(node->uiNodeHandle);
+}
+
+int32_t SetMatchTextDirection(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setMatchTextDirection(
+        node->uiNodeHandle, static_cast<bool>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetMatchTextDirection(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getImageModifier()->getMatchTextDirection(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetMatchTextDirection(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetMatchTextDirection(node->uiNodeHandle);
+}
+
+int32_t SetCopyOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    fullImpl->getNodeModifiers()->getImageModifier()->setCopyOption(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCopyOption(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto fullImpl = GetFullImpl();
+    auto resultValue = fullImpl->getNodeModifiers()->getImageModifier()->getCopyOption(node->uiNodeHandle);
+    auto it = std::find(COPY_OPTIONS_ARRAY.begin(), COPY_OPTIONS_ARRAY.end(), resultValue);
+    if (it != COPY_OPTIONS_ARRAY.end()) {
+        g_numberValues[0].i32 = std::distance(COPY_OPTIONS_ARRAY.begin(), it);
+    } else {
+        g_numberValues[0].i32 = static_cast<int32_t>(ARKUI_COPY_OPTIONS_NONE);
+    }
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetCopyOption(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetCopyOption(node->uiNodeHandle);
+}
+
+int32_t SetEnableAnalyzer(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->enableAnalyzer(
+        node->uiNodeHandle, static_cast<bool>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetEnableAnalyzer(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getImageModifier()->getEnableAnalyzer(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetEnableAnalyzer(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetEnableAnalyzer(node->uiNodeHandle);
+}
+
+int32_t SetDynamicRangeMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    fullImpl->getNodeModifiers()->getImageModifier()->setDynamicRangeMode(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetDynamicRangeMode(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto fullImpl = GetFullImpl();
+    auto resultValue = fullImpl->getNodeModifiers()->getImageModifier()->getDynamicRangeMode(node->uiNodeHandle);
+    auto it = std::find(DYNAMIC_RANGE_MODE_ARRAY.begin(), DYNAMIC_RANGE_MODE_ARRAY.end(), resultValue);
+    if (it != DYNAMIC_RANGE_MODE_ARRAY.end()) {
+        g_numberValues[0].i32 = std::distance(DYNAMIC_RANGE_MODE_ARRAY.begin(), it);
+    } else {
+        g_numberValues[0].i32 = static_cast<int32_t>(ARKUI_DYNAMIC_RANGE_MODE_STANDARD);
+    }
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetDynamicRangeMode(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetDynamicRangeMode(node->uiNodeHandle);
+}
+
+int32_t SetHdrBrightness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setHdrBrightness(
+        node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetHdrBrightness(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getImageModifier()->getHdrBrightness(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetHdrBrightness(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetHdrBrightness(node->uiNodeHandle);
+}
+
+int32_t SetImageRotateOrientation(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    fullImpl->getNodeModifiers()->getImageModifier()->setImageRotateOrientation(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetImageRotateOrientation(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto fullImpl = GetFullImpl();
+    auto resultValue = fullImpl->getNodeModifiers()->getImageModifier()->getImageRotateOrientation(node->uiNodeHandle);
+    auto it = std::find(ORIENTATION_ARRAY.begin(), ORIENTATION_ARRAY.end(), resultValue);
+    if (it != ORIENTATION_ARRAY.end()) {
+        g_numberValues[0].i32 = std::distance(ORIENTATION_ARRAY.begin(), it);
+    } else {
+        g_numberValues[0].i32 = static_cast<int32_t>(ARKUI_ORIENTATION_UP);
+    }
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetImageRotateOrientation(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetImageRotateOrientation(node->uiNodeHandle);
+}
+
 int32_t SetAlt(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (!item || (!item->string && !item->object)) {
@@ -16130,7 +16428,8 @@ int32_t SetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_
 {
     static Setter* setters[] = { SetImageSrc, SetObjectFit, SetInterpolation, SetObjectRepeat, SetColorFilter,
         SetAutoResize, SetAlt, SetImageDraggable, SetRenderMode, SetFitOriginalSize, SetFillColor, SetResizable,
-        SetSyncLoad };
+        SetSyncLoad, SetSourceSize, SetImageMatrix, SetMatchTextDirection, SetCopyOption, SetEnableAnalyzer,
+        SetDynamicRangeMode, SetHdrBrightness, SetImageRotateOrientation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -16142,7 +16441,8 @@ const ArkUI_AttributeItem* GetImageAttribute(ArkUI_NodeHandle node, int32_t subT
 {
     static Getter* getters[] = { GetImageSrc, GetObjectFit, GetInterpolation, GetObjectRepeat, GetColorFilter,
         GetAutoResize, GetAlt, GetImageDraggable, GetRenderMode, GetFitOriginalSize, GetFillColor, GetResizable,
-        GetSyncLoad };
+        GetSyncLoad, GetSourceSize, GetImageMatrix, GetMatchTextDirection, GetCopyOption, GetEnableAnalyzer,
+        GetDynamicRangeMode, GetHdrBrightness, GetImageRotateOrientation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -16154,7 +16454,9 @@ void ResetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetImageSrc, ResetObjectFit, ResetInterpolation, ResetObjectRepeat,
         ResetColorFilter, ResetAutoResize, ResetAlt, ResetImageDraggable, ResetRenderMode,
-        ResetFitOriginalSize, ResetFillColor, ResetResizable, ResetSyncLoad };
+        ResetFitOriginalSize, ResetFillColor, ResetResizable, ResetSyncLoad, ResetSourceSize,
+        ResetImageMatrix, ResetMatchTextDirection, ResetCopyOption, ResetEnableAnalyzer,
+        ResetDynamicRangeMode, ResetHdrBrightness, ResetImageRotateOrientation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

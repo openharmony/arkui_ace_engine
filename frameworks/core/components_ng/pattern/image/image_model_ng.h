@@ -123,6 +123,14 @@ public:
         FrameNode* frameNode, std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
+    static ImageRotateOrientation GetOrientation(FrameNode* frameNode);
+    static std::pair<CalcDimension, CalcDimension> GetImageSourceSize(FrameNode* frameNode);
+    static float GetHdrBrightness(FrameNode* frameNode);
+    static DynamicRangeMode GetDynamicRangeMode(FrameNode* frameNode);
+    static bool GetEnableAnalyzer(FrameNode* frameNode);
+    static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static bool GetMatchTextDirection(FrameNode* frameNode);
+    static Matrix4 GetImageMatrix(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);
     static ImageRepeat GetObjectRepeat(FrameNode* frameNode);
     static std::vector<float> GetColorFilter(FrameNode* frameNode);

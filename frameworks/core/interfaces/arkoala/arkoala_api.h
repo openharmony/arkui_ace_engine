@@ -3154,6 +3154,7 @@ struct ArkUIImageModifier {
     void (*setFitOriginalSize)(ArkUINodeHandle node, ArkUI_Bool fitOriginalSizeValue);
     void (*resetFitOriginalSize)(ArkUINodeHandle node);
     void (*setSourceSize)(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height);
+    void (*setSourceSizeWithPX)(ArkUINodeHandle node, ArkUI_Int32 width, ArkUI_Int32 height);
     void (*resetSourceSize)(ArkUINodeHandle node);
     void (*setMatchTextDirection)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMatchTextDirection)(ArkUINodeHandle node);
@@ -3206,6 +3207,14 @@ struct ArkUIImageModifier {
     ArkUI_Int32 (*getObjectRepeat)(ArkUINodeHandle node);
     ArkUI_Int32 (*getObjectFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageInterpolation)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getImageRotateOrientation)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getHdrBrightness)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getDynamicRangeMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEnableAnalyzer)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCopyOption)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getMatchTextDirection)(ArkUINodeHandle node);
+    void (*getImageMatrix)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size);
+    void (*getSourceSize)(ArkUINodeHandle node, ArkUI_Int32* arrayValue, ArkUI_Int32 size);
     void (*getColorFilter)(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter);
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
@@ -3219,6 +3228,7 @@ struct ArkUIImageModifier {
     void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
     void (*enableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setImagePrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
     void (*resetImagePrivacySensitive)(ArkUINodeHandle node);
     void (*analyzerConfig)(ArkUINodeHandle node, void* config);
