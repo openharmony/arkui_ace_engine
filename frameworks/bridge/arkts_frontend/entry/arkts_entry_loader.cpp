@@ -19,6 +19,8 @@
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/container.h"
 
+#include <algorithm>
+
 namespace OHOS::Ace {
 
 static const std::string ENTRY_PREFIX = "/src/main/ets/";
@@ -30,6 +32,7 @@ ani_object EntryLoader::GetPageEntryObj()
     std::string entryPointName;
     entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
     entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+    std::replace(entryPointName.begin(), entryPointName.end(), '/', '.');
     ani_string entryStr;
     env_->String_NewUTF8(entryPointName.c_str(), entryPointName.length(), &entryStr);
     ani_class entryClass = nullptr;
@@ -143,8 +146,10 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
         cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}", &loadClass_), return);
 }
 
-ani_object EntryLoader::GetPageEntryObj(const std::string& entryPath) const
+ani_object EntryLoader::GetPageEntryObj(std::string& entryPath) const
 {
+    std::replace(entryPath.begin(), entryPath.end(), '/', '.');
+
     ani_string entryClassStr;
     ANI_CALL(env_, String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr), return {});
 
