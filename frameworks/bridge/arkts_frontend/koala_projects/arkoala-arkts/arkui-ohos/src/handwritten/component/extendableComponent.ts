@@ -148,13 +148,14 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     public onDumpInspector(): string {
         const dumpInfo: DumpInfo = new DumpInfo();
+        const isV2 = this instanceof CustomComponentV2;
         dumpInfo.viewinfo = {
             componentName: Type.of(this).getName(),
-            isV2: this instanceof CustomComponentV2 ? true : false
+            isV2: isV2
         };
         let ret: string = '';
         try {
-            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
+            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo, isV2);
             ret = JSON.stringify(dumpInfo);
         } catch (error) {
             InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName}\
