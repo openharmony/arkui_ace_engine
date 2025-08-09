@@ -47,12 +47,6 @@ export class ArkContentSlotPeer extends PeerNode {
     }
 }
 
-export class ArkContentSlotStyle extends ArkCommonMethodStyle implements ContentSlotAttribute {
-    public setContentSlotOptions(content?: Content): this {
-        return this
-    }
-}
-
 export class ArkContentSlotComponent extends ComponentBase implements ContentSlotAttribute {
     getPeer(): ArkContentSlotPeer {
         return (this.peer as ArkContentSlotPeer)
