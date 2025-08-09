@@ -375,6 +375,10 @@ struct ArkUIAniCommonModifier {
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
     void (*setCustomCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
     ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
+    ani_long (*getNodePtrWithPeerPtr)(ani_long ptr);
+    ani_int (*getNodeIdWithNodePtr)(ani_long ptr);
+    ani_int (*getNodeIdWithPeerPtr)(ani_long ptr);
+    ani_long (*createRenderNodePeerWithNodePtr)(ani_long ptr);
     ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
