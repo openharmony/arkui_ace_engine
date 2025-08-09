@@ -745,10 +745,10 @@ void WindowPattern::AddBackgroundColorDelayed()
     CHECK_NULL_VOID(taskExecutor);
     addBackgroundColorTask_.Cancel();
     addBackgroundColorTask_.Reset([weakThis = WeakClaim(this)]() {
-        CHECK_EQUAL_VOID(needAddBackgroundColor, false);
         ACE_SCOPED_TRACE("WindowScene::AddBackgroundColorTask");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
+        CHECK_EQUAL_VOID(self->needAddBackgroundColor, false);
         auto context = self->GetContext();
         CHECK_NULL_VOID(context);
         auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
