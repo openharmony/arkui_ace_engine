@@ -646,6 +646,26 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel020
+ * @tc.desc: test SetSupportStyledUndo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(false);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->isStyledUndoSupported_, false);
+    richEditorModel.SetSupportStyledUndo(true);
+    EXPECT_EQ(pattern->isStyledUndoSupported_, true);
+    RichEditorModelNG::SetSupportStyledUndo(richEditorNode, false);
+    EXPECT_EQ(pattern->isStyledUndoSupported_, false);
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
