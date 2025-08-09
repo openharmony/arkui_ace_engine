@@ -26,6 +26,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "length_metrics_peer.h"
+#include "text_picker_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,21 +34,6 @@ namespace {
     const int32_t CROWN_SENSITIVITY_MEDIUM = 1;
     const int32_t CROWN_SENSITIVITY_HIGH = 2;
 }
-
-struct TextPickerOptions {
-    std::vector<NG::RangeContent> range;
-    uint32_t kind = 0;
-    uint32_t selected = 0;
-    std::string value = "";
-    std::vector<NG::TextCascadePickerOptions> options;
-    std::vector<uint32_t> selecteds;
-    std::vector<std::string> values;
-    std::vector<Dimension> columnWidths;
-    bool hasValue = false;
-    bool hasSelected = false;
-    bool isCascade = false;
-    uint32_t maxCount = 0;
-};
 
 size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
 {

@@ -82,22 +82,14 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& op
 TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions& options)
 {
     TimePickerSettingData settingData;
-    auto format = Converter::OptConvert<TimePickerFormat>(options.format);
-    bool showSecond = format.has_value() && format.value() == TimePickerFormat::HOUR_MINUTE_SECOND;
-    settingData.showSecond = showSecond;
     auto useMilitaryTime = Converter::OptConvert<bool>(options.useMilitaryTime);
     if (useMilitaryTime) {
         settingData.isUseMilitaryTime = useMilitaryTime.value();
     }
-    auto enableCascade = Converter::OptConvert<bool>(options.enableCascade);
-    if (enableCascade) {
-        settingData.isEnableCascade = enableCascade.value();
+    auto selectedDate = Converter::OptConvert<PickerDate>(options.selected);
+    if (selectedDate) {
+        settingData.dialogTitleDate = selectedDate.value();
     }
-    auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
-    if (enableHapticFeedback) {
-        settingData.isEnableHapticFeedback = enableHapticFeedback.value();
-    }
-
     auto disappearTextStyle = Converter::OptConvert<PickerTextStyle>(options.disappearTextStyle);
     if (disappearTextStyle) {
         settingData.properties.disappearTextStyle_ = disappearTextStyle.value();
@@ -115,6 +107,17 @@ TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions& 
         settingData.dateTimeOptions.hourType = dateTimeOptions->hourType;
         settingData.dateTimeOptions.minuteType = dateTimeOptions->minuteType;
         settingData.dateTimeOptions.secondType = dateTimeOptions->secondType;
+    }
+    auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
+    if (enableHapticFeedback) {
+        settingData.isEnableHapticFeedback = enableHapticFeedback.value();
+    }
+    auto format = Converter::OptConvert<TimePickerFormat>(options.format);
+    bool showSecond = format.has_value() && format.value() == TimePickerFormat::HOUR_MINUTE_SECOND;
+    settingData.showSecond = showSecond;
+    auto enableCascade = Converter::OptConvert<bool>(options.enableCascade);
+    if (enableCascade) {
+        settingData.isEnableCascade = enableCascade.value();
     }
     return settingData;
 }
