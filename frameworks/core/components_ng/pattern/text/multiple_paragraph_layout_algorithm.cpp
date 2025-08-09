@@ -86,6 +86,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    if (textLayoutProperty->HasFontForegroudGradiantColor()) {
+        textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
+    } else {
+        textStyle.SetFontForegroudGradiantColor(textTheme->GetTextStyle().GetFontForegroudGradiantColor());
+    }
     std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&

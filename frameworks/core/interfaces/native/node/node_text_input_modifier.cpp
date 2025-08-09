@@ -68,19 +68,22 @@ void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colo
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCaretColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("caretColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (colorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+            pattern->RegisterResource<Color>("caretColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("caretColor");
+        }
     }
 }
 
 void ResetTextInputCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetCaretColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
@@ -129,13 +132,15 @@ void SetTextInputPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("placeholderColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (colorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+            pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("placeholderColor");
+        }
     }
 }
 
@@ -464,19 +469,21 @@ void SetTextInputCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int
     caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
     TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && widthRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(widthRawPtr));
-        pattern->RegisterResource<CalcDimension>("caretWidth", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("caretWidth");
-    }
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(caretColor));
-    } else {
-        pattern->UnRegisterResource("caretColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (widthRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(widthRawPtr));
+            pattern->RegisterResource<CalcDimension>("caretWidth", resObj, CalcDimension(value, (DimensionUnit)unit));
+        } else {
+            pattern->UnRegisterResource("caretWidth");
+        }
+        if (colorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+            pattern->RegisterResource<Color>("caretColor", resObj, Color(caretColor));
+        } else {
+            pattern->UnRegisterResource("caretColor");
+        }
     }
 }
 
@@ -564,13 +571,15 @@ void SetTextInputFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr fontWeight, v
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && fontWeightRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontWeightRawPtr));
-        pattern->RegisterResource<std::string>("fontWeight", resObj, fontWeight);
-    } else {
-        pattern->UnRegisterResource("fontWeight");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (fontWeightRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontWeightRawPtr));
+            pattern->RegisterResource<std::string>("fontWeight", resObj, fontWeight);
+        } else {
+            pattern->UnRegisterResource("fontWeight");
+        }
     }
 }
 
@@ -605,13 +614,15 @@ void SetTextInputFontSize(ArkUINodeHandle node, const struct ArkUILengthType *va
     }
     fontSize.SetUnit(static_cast<DimensionUnit>(value->unit));
     TextFieldModelNG::SetFontSize(frameNode, fontSize);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("fontSize", resObj, fontSize);
-    } else {
-        pattern->UnRegisterResource("fontSize");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("fontSize", resObj, fontSize);
+        } else {
+            pattern->UnRegisterResource("fontSize");
+        }
     }
 }
 
@@ -636,13 +647,15 @@ void SetTextInputMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMinFontScale(frameNode, number);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<float>("minFontScale", resObj, number);
-    } else {
-        pattern->UnRegisterResource("minFontScale");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<float>("minFontScale", resObj, number);
+        } else {
+            pattern->UnRegisterResource("minFontScale");
+        }
     }
 }
 
@@ -663,13 +676,15 @@ void SetTextInputMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxFontScale(frameNode, number);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<float>("maxFontScale", resObj, number);
-    } else {
-        pattern->UnRegisterResource("maxFontScale");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<float>("maxFontScale", resObj, number);
+        } else {
+            pattern->UnRegisterResource("maxFontScale");
+        }
     }
 }
 
@@ -704,13 +719,15 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("selectedBackgroundColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("selectedBackgroundColor");
+        }
     }
 }
 
@@ -741,13 +758,15 @@ void SetTextInputShowError(ArkUINodeHandle node, ArkUI_CharPtr error, ArkUI_Uint
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowError(frameNode, UtfUtils::Str8ToStr16(std::string(error)), static_cast<bool>(visible));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<std::u16string>("errorString", resObj, UtfUtils::Str8ToStr16(std::string(error)));
-    } else {
-        pattern->UnRegisterResource("errorString");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<std::u16string>("errorString", resObj, UtfUtils::Str8ToStr16(std::string(error)));
+        } else {
+            pattern->UnRegisterResource("errorString");
+        }
     }
 }
 
@@ -796,19 +815,21 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
         font.fontStyle = static_cast<Ace::FontStyle>(placeholderFont->style);
     }
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && fontSizeRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontSizeRawPtr));
-        pattern->RegisterResource<CalcDimension>("placeholderFontSize", resObj, fontSize);
-    } else {
-        pattern->UnRegisterResource("placeholderFontSize");
-    }
-    if (SystemProperties::ConfigChangePerform() && fontfamilyRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontfamilyRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("placeholderFontFamily", resObj, font.fontFamilies);
-    } else {
-        pattern->UnRegisterResource("placeholderFontFamily");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (fontSizeRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontSizeRawPtr));
+            pattern->RegisterResource<CalcDimension>("placeholderFontSize", resObj, fontSize);
+        } else {
+            pattern->UnRegisterResource("placeholderFontSize");
+        }
+        if (fontfamilyRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontfamilyRawPtr));
+            pattern->RegisterResource<std::vector<std::string>>("placeholderFontFamily", resObj, font.fontFamilies);
+        } else {
+            pattern->UnRegisterResource("placeholderFontFamily");
+        }
     }
 }
 
@@ -838,12 +859,15 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("fontColor");
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("fontColor", resObj, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("fontColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("fontColor");
+        }
     }
 }
 
@@ -889,13 +913,15 @@ void SetTextInputFontFamily(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, A
         }
     }
     TextFieldModelNG::SetFontFamily(frameNode, families);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("fontFamily", resObj, families);
-    } else {
-        pattern->UnRegisterResource("fontFamily");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<std::vector<std::string>>("fontFamily", resObj, families);
+        } else {
+            pattern->UnRegisterResource("fontFamily");
+        }
     }
 }
 
@@ -958,25 +984,27 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
     // set icon color
     Color iconColor(color);
     TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
-        pattern->RegisterResource<CalcDimension>("cancelButtonIconSize", resObj, iconSize);
-    } else {
-        pattern->UnRegisterResource("cancelButtonIconSize");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
-    } else {
-        pattern->UnRegisterResource("cancelButtonIconColor");
-    }
-    if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->srcObj) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->srcObj));
-        pattern->RegisterResource<std::string>("cancelButtonIconSrc", resObj, iconSrc);
-    } else {
-        pattern->UnRegisterResource("cancelButtonIconSrc");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (imageIconRes && imageIconRes->sizeObj) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
+            pattern->RegisterResource<CalcDimension>("cancelButtonIconSize", resObj, iconSize);
+        } else {
+            pattern->UnRegisterResource("cancelButtonIconSize");
+        }
+        if (imageIconRes && imageIconRes->colorObj) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
+            pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
+        } else {
+            pattern->UnRegisterResource("cancelButtonIconColor");
+        }
+        if (imageIconRes && imageIconRes->srcObj) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->srcObj));
+            pattern->RegisterResource<std::string>("cancelButtonIconSrc", resObj, iconSrc);
+        } else {
+            pattern->UnRegisterResource("cancelButtonIconSrc");
+        }
     }
 }
 
@@ -1220,13 +1248,15 @@ void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("backgroundColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
     }
 }
 
@@ -1242,13 +1272,15 @@ void SetTextInputBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint3
         backgroundColor.SetColorSpace(ColorSpace::SRGB);
     }
     TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
-    } else {
-        pattern->UnRegisterResource("backgroundColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
     }
 }
 
@@ -1269,13 +1301,15 @@ void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalC
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(normalColor));
-    } else {
-        pattern->UnRegisterResource("underlineColorNormal");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(normalColor));
+        } else {
+            pattern->UnRegisterResource("underlineColorNormal");
+        }
     }
 }
 
@@ -1292,38 +1326,46 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     }
     if (hasValues[CALL_ARG_0]) {
         userColor.typing = Color(values[CALL_ARG_0]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->typingColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->typingColorObj));
-            pattern->RegisterResource<Color>("underlineColorTyping", resObj, Color(values[CALL_ARG_0]));
-        } else {
-            pattern->UnRegisterResource("underlineColorTyping");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->typingColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->typingColorObj));
+                pattern->RegisterResource<Color>("underlineColorTyping", resObj, Color(values[CALL_ARG_0]));
+            } else {
+                pattern->UnRegisterResource("underlineColorTyping");
+            }
         }
     }
     if (hasValues[CALL_ARG_1]) {
         userColor.normal = Color(values[CALL_ARG_1]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->normalColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->normalColorObj));
-            pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(values[CALL_ARG_1]));
-        } else {
-            pattern->UnRegisterResource("underlineColorNormal");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->normalColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->normalColorObj));
+                pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(values[CALL_ARG_1]));
+            } else {
+                pattern->UnRegisterResource("underlineColorNormal");
+            }
         }
     }
     if (hasValues[CALL_ARG_2]) {
         userColor.error = Color(values[CALL_ARG_2]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->errorColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->errorColorObj));
-            pattern->RegisterResource<Color>("underlineColorError", resObj, Color(values[CALL_ARG_2]));
-        } else {
-            pattern->UnRegisterResource("underlineColorError");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->errorColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->errorColorObj));
+                pattern->RegisterResource<Color>("underlineColorError", resObj, Color(values[CALL_ARG_2]));
+            } else {
+                pattern->UnRegisterResource("underlineColorError");
+            }
         }
     }
     if (hasValues[CALL_ARG_3]) {
         userColor.disable = Color(values[CALL_ARG_3]);
-        if (SystemProperties::ConfigChangePerform() && underlineColorObj && underlineColorObj->disableColorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->disableColorObj));
-            pattern->RegisterResource<Color>("underlineColorDisable", resObj, Color(values[CALL_ARG_3]));
-        } else {
-            pattern->UnRegisterResource("underlineColorDisable");
+        if (SystemProperties::ConfigChangePerform()) {
+            if (underlineColorObj && underlineColorObj->disableColorObj) {
+                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->disableColorObj));
+                pattern->RegisterResource<Color>("underlineColorDisable", resObj, Color(values[CALL_ARG_3]));
+            } else {
+                pattern->UnRegisterResource("underlineColorDisable");
+            }
         }
     }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
@@ -1378,13 +1420,15 @@ void SetTextInputDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_
     TextFieldModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextFieldModelNG::SetTextDecorationColor(frameNode, Color(color));
     TextFieldModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("decorationColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("decorationColor");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("decorationColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("decorationColor");
+        }
     }
 }
 
@@ -1407,13 +1451,16 @@ void SetTextInputLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("letterSpacing", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("letterSpacing");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>(
+                "letterSpacing", resObj, CalcDimension(value, (DimensionUnit)unit));
+        } else {
+            pattern->UnRegisterResource("letterSpacing");
+        }
     }
 }
 
@@ -1443,13 +1490,15 @@ void SetTextInputLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("lineHeight", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("lineHeight");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("lineHeight", resObj, CalcDimension(value, (DimensionUnit)unit));
+        } else {
+            pattern->UnRegisterResource("lineHeight");
+        }
     }
 }
 
@@ -1547,30 +1596,31 @@ void ResetTextInputWordBreak(ArkUINodeHandle node)
 void RegisterPaddingResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->topObj) {
+    if (paddingRes && paddingRes->topObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->topObj));
         pattern->RegisterResource<CalcDimension>("paddingTop", resObj,
         CalcDimension(top->value, static_cast<DimensionUnit>(top->unit)));
     } else {
         pattern->UnRegisterResource("paddingTop");
     }
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->bottomObj) {
+    if (paddingRes && paddingRes->bottomObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->bottomObj));
         pattern->RegisterResource<CalcDimension>("paddingBottom", resObj,
         CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit)));
     } else {
         pattern->UnRegisterResource("paddingBottom");
     }
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->leftObj) {
+    if (paddingRes && paddingRes->leftObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->leftObj));
         pattern->RegisterResource<CalcDimension>("paddingLeft", resObj,
         CalcDimension(left->value, static_cast<DimensionUnit>(left->unit)));
     } else {
         pattern->UnRegisterResource("paddingLeft");
     }
-    if (SystemProperties::ConfigChangePerform() && paddingRes && paddingRes->rightObj) {
+    if (paddingRes && paddingRes->rightObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(paddingRes->rightObj));
         pattern->RegisterResource<CalcDimension>("paddingRight", resObj,
         CalcDimension(right->value, static_cast<DimensionUnit>(right->unit)));
@@ -1636,13 +1686,15 @@ void SetTextInputAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, Ark
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetAdaptMinFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("minFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("minFontSize");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("minFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
+        } else {
+            pattern->UnRegisterResource("minFontSize");
+        }
     }
 }
 
@@ -1668,13 +1720,15 @@ void SetTextInputAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, Ark
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetAdaptMaxFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("maxFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("maxFontSize");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("maxFontSize", resObj, CalcDimension(value, (DimensionUnit)unit));
+        } else {
+            pattern->UnRegisterResource("maxFontSize");
+        }
     }
 }
 
@@ -1779,14 +1833,16 @@ void SetTextInputTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_In
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("textIndent", resObj,
-        Dimension(number, static_cast<DimensionUnit>(unit)));
-    } else {
-        pattern->UnRegisterResource("textIndent");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("textIndent", resObj,
+            Dimension(number, static_cast<DimensionUnit>(unit)));
+        } else {
+            pattern->UnRegisterResource("textIndent");
+        }
     }
 }
 
@@ -2190,30 +2246,31 @@ void ResetTextInputNumberOfLines(ArkUINodeHandle node)
 void RegisterMarginResource(FrameNode* frameNode, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* marginRes)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->topObj) {
+    if (marginRes && marginRes->topObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->topObj));
         pattern->RegisterResource<CalcDimension>("marginTop", resObj,
         CalcDimension(top->value, static_cast<DimensionUnit>(top->unit)));
     } else {
         pattern->UnRegisterResource("marginTop");
     }
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->bottomObj) {
+    if (marginRes && marginRes->bottomObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->bottomObj));
         pattern->RegisterResource<CalcDimension>("marginBottom", resObj,
         CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit)));
     } else {
         pattern->UnRegisterResource("marginBottom");
     }
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->leftObj) {
+    if (marginRes && marginRes->leftObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->leftObj));
         pattern->RegisterResource<CalcDimension>("marginLeft", resObj,
         CalcDimension(left->value, static_cast<DimensionUnit>(left->unit)));
     } else {
         pattern->UnRegisterResource("marginLeft");
     }
-    if (SystemProperties::ConfigChangePerform() && marginRes && marginRes->rightObj) {
+    if (marginRes && marginRes->rightObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(marginRes->rightObj));
         pattern->RegisterResource<CalcDimension>("marginRight", resObj,
         CalcDimension(right->value, static_cast<DimensionUnit>(right->unit)));
@@ -2287,13 +2344,15 @@ void SetTextInputCaret(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 un
     CaretStyle caretStyle;
     caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<CalcDimension>("caretWidth", resObj, CalcDimension(value, (DimensionUnit)unit));
-    } else {
-        pattern->UnRegisterResource("caretWidth");
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("caretWidth", resObj, CalcDimension(value, (DimensionUnit)unit));
+        } else {
+            pattern->UnRegisterResource("caretWidth");
+        }
     }
 }
 
