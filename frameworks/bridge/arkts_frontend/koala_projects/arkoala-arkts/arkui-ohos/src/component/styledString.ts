@@ -1302,8 +1302,8 @@ export type StyledStringMarshallingValue = UserDataSpan;
 export type StyledStringMarshallCallback = (marshallableVal: UserDataSpan) => NativeBuffer;
 export type StyledStringUnmarshallCallback = (buf: NativeBuffer) => UserDataSpan;
 export interface StyleOptions {
-    start?: number;
-    length?: number;
+    start?: int32;
+    length?: int32;
     styledKey: StyledStringKey;
     styledValue: StyledStringValue;
 }

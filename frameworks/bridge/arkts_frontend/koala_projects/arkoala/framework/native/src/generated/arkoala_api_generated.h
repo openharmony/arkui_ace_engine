@@ -19607,8 +19607,8 @@ typedef struct Opt_StyledStringValue {
     Ark_StyledStringValue value;
 } Opt_StyledStringValue;
 typedef struct Ark_StyleOptions {
-    Opt_Number start;
-    Opt_Number length;
+    Opt_Int32 start;
+    Opt_Int32 length;
     Ark_StyledStringKey styledKey;
     Ark_StyledStringValue styledValue;
 } Ark_StyleOptions;
