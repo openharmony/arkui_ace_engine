@@ -409,15 +409,11 @@ void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorTy
     CHECK_NULL_VOID(textRenderContext);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (pipelineContext->IsSystmColorChange()) {
         switch (buttonColorType) {
             case ButtonColorType::FONT_COLOR:
-                layoutProperty->UpdateFontColor(color);
                 textRenderContext->UpdateForegroundColor(color);
-                textNode->MarkModifyDone();
-                textNode->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+                textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 break;
             case ButtonColorType::BACKGROUND_COLOR:
                 renderContext->UpdateBackgroundColor(color);

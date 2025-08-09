@@ -571,6 +571,16 @@ public:
         return isCaretMode_;
     }
 
+    StateChangeFunc GetDoubleBindCallback()
+    {
+        return doubleBindCallback_;
+    }
+
+    void SetDoubleBindCallback(StateChangeFunc&& callback)
+    {
+        doubleBindCallback_ = callback;
+    }
+
     void SetKeyBoardAvoidMode (PopupKeyboardAvoidMode keyboardAvoidMode)
     {
         keyboardAvoidMode_ = keyboardAvoidMode;
@@ -585,20 +595,10 @@ public:
     {
         avoidTarget_ = avoidTarget;
     }
-    
+
     std::optional<AvoidanceMode> GetAvoidTarget() const
     {
         return avoidTarget_;
-    }
-
-    StateChangeFunc GetDoubleBindCallback()
-    {
-        return doubleBindCallback_;
-    }
-
-    void SetDoubleBindCallback(StateChangeFunc&& callback)
-    {
-        doubleBindCallback_ = callback;
     }
 
     void SetFollowTransformOfTarget (bool followTransformOfTarget)
@@ -670,6 +670,16 @@ public:
         return innerBorderWidth_;
     }
 
+    void SetAnchorType(TipsAnchorType anchorType)
+    {
+        anchorType_ = anchorType;
+    }
+
+    TipsAnchorType GetAnchorType() const
+    {
+        return anchorType_;
+    }
+
     void SetTextColorResourceObject(RefPtr<ResourceObject>& obj)
     {
         resourceTextColorObj_ = obj;
@@ -708,16 +718,6 @@ public:
     const RefPtr<ResourceObject>& GetMaskResourceObject()
     {
         return resourceMaskObj_;
-    }
-
-    void SetAnchorType(TipsAnchorType anchorType)
-    {
-        anchorType_ = anchorType;
-    }
-
-    TipsAnchorType GetAnchorType() const
-    {
-        return anchorType_;
     }
 
     void SetWidthResourceObject(RefPtr<ResourceObject>& obj)
