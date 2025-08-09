@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { IndicatorComponentController } from "./indicatorcomponent"
 import { EdgeEffect, Curve, PageFlipMode } from "./enums"
 import { Callback_Number_Void, Callback_Opt_Number_Void } from "./alphabetIndexer"
@@ -35,7 +35,9 @@ import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { LengthMetrics } from "../Graphics"
-import { SwiperOpsHandWritten } from "./../handwritten"
+import { SwiperOpsHandWritten, hookSwiperAttributeModifier } from "./../handwritten"
+import { SwiperModifier } from "../SwiperModifier"
+
 export class SwiperControllerInternal {
     public static fromPtr(ptr: KPointer): SwiperController {
         const obj : SwiperController = new SwiperController()
@@ -281,6 +283,7 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
     }
 }
 export class ArkSwiperPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SwiperModifier
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -911,6 +914,7 @@ export interface SwiperAttribute extends CommonMethod {
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this
     _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void
+    attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod>| undefined): this
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
     index_value?: number | undefined
@@ -1031,7 +1035,10 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     }
     public _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
+    public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod>| undefined): this {
+        return this
+    }
 }
 export type Callback_SwiperContentTransitionProxy_Void = (parameter: SwiperContentTransitionProxy) => void;
 export interface SwiperContentAnimatedTransition {
@@ -1343,6 +1350,10 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public attributeModifier(modifier: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSwiperAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */
