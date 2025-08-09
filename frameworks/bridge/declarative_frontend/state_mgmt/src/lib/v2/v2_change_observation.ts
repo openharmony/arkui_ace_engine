@@ -111,7 +111,6 @@ class ObserveV2 {
   // @Monitor id
   private monitorIdsChanged_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
-
   // used for Monitor API
   // only store the MonitorV2 id, not the path id
   // to make sure the callback function will be executed only once
@@ -754,6 +753,46 @@ class ObserveV2 {
    * three nested loops, means:
    * process @Computed until no more @Computed need update
    * process @Monitor until no more @Computed and @Monitor
+   * process UINode update until no more @Computed and @Monitor and UINode rerender
+   *
+   * @param updateUISynchronously should be set to true if called during VSYNC only
+   *
+   */
+
+  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false): void {
+    aceDebugTrace.begin('updateDirty2');
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
+    // obtain and unregister the removed elmtIds
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+
+    // priority order of processing:
+    // 1- update computed properties until no more need computed props update
+    // 2- update monitors until no more monitors and no more computed props
+    // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
+    // FIXME prevent infinite loops
+    do {
+      this.updateComputedAndMonitors();
+
+      if (this.elmtIdsChanged_.size) {
+        const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
+        this.elmtIdsChanged_ = new Set<number>();
+        updateUISynchronously ? isReuse ? this.updateUINodesForReuse(elmtIds) : this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
+      }
+    } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+
+    aceDebugTrace.end();
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
+  }
+
+  /**
+   * execute /update in this order
+   * - @Computed variables
+   * - @Monitor functions
+   * - UINode re-render
+   * three nested loops, means:
+   * process @Computed until no more @Computed need update
+   * process @Monitor until no more @Computed and @Monitor
   */
   private updateComputedAndMonitors(): void {
     do {
@@ -794,46 +833,6 @@ class ObserveV2 {
       }
     } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size +
     this.computedPropIdsChanged_.size + this.monitorIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0);
-  }
-
-  /**
-   * execute /update in this order
-   * - @Computed variables
-   * - @Monitor functions
-   * - UINode re-render
-   * three nested loops, means:
-   * process @Computed until no more @Computed need update
-   * process @Monitor until no more @Computed and @Monitor
-   * process UINode update until no more @Computed and @Monitor and UINode rerender
-   *
-   * @param updateUISynchronously should be set to true if called during VSYNC only
-   *
-   */
-
-  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false): void {
-    aceDebugTrace.begin('updateDirty2');
-    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
-    // obtain and unregister the removed elmtIds
-    UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-
-    // priority order of processing:
-    // 1- update computed properties until no more need computed props update
-    // 2- update monitors until no more monitors and no more computed props
-    // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
-    // FIXME prevent infinite loops
-    do {
-      this.updateComputedAndMonitors();
-
-      if (this.elmtIdsChanged_.size) {
-        const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
-        this.elmtIdsChanged_ = new Set<number>();
-        updateUISynchronously ? isReuse ? this.updateUINodesForReuse(elmtIds) : this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
-      }
-    } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
-
-    aceDebugTrace.end();
-    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
