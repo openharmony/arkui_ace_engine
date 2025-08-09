@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "gtest/gtest.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -591,6 +592,16 @@ HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
     bool isFirst = true;
     pattern->textForDisplay_ = u"";
     pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
 }
@@ -609,6 +620,17 @@ HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
     RectF handleRect = { 0, 0, 10, 10 };
     bool isFirst = true;
     pattern->textForDisplay_ = u"1";
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
+    pattern->selectOverlay_->OnBind(manager);
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
 }
