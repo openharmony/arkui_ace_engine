@@ -3737,6 +3737,14 @@ void OverlayManager::SendAccessibilityEventToNextOrderNode(const RefPtr<FrameNod
         return;
     }
 
+    if (newTopNode->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        auto pattern = newTopNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto sheetWrapperPattern = DynamicCast<SheetWrapperPattern>(pattern);
+        CHECK_NULL_VOID(sheetWrapperPattern);
+        newTopNode = sheetWrapperPattern->GetSheetPageNode();
+        CHECK_NULL_VOID(newTopNode);
+    }
     newTopNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
