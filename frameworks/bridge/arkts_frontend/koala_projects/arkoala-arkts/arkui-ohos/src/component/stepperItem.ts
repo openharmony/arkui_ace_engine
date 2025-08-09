@@ -93,6 +93,9 @@ export enum ItemState {
 }
 export type StepperItemInterface = () => StepperItemAttribute;
 export interface StepperItemAttribute extends CommonMethod {
+    setStepperItemOptions(): this {
+        return this
+    }
     prevLabel(value: string | undefined): this
     nextLabel(value: string | undefined): this
     status(value: ItemState | undefined): this
@@ -102,6 +105,9 @@ export class ArkStepperItemStyle extends ArkCommonMethodStyle implements Stepper
     prevLabel_value?: string | undefined
     nextLabel_value?: string | undefined
     status_value?: ItemState
+    public setStepperItemOptions(): this {
+        return this
+    }
     public prevLabel(value: string | undefined): this {
         return this
     }
@@ -161,10 +167,9 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function StepperItem(
+export function StepperItemImpl(
     /** @memo */
     style: ((attributes: StepperItemAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -172,9 +177,7 @@ export function StepperItem(
         return new ArkStepperItemComponent()
     })
     NodeAttach<ArkStepperItemPeer>((): ArkStepperItemPeer => ArkStepperItemPeer.create(receiver), (_: ArkStepperItemPeer) => {
-        receiver.setStepperItemOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -60,11 +60,17 @@ export class ArkRowSplitPeer extends ArkCommonMethodPeer {
 }
 export type RowSplitInterface = () => RowSplitAttribute;
 export interface RowSplitAttribute extends CommonMethod {
+    setRowSplitOptions(): this {
+        return this
+    }
     resizeable(value: boolean | undefined): this {return this;}
     attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined
+    public setRowSplitOptions(): this {
+        return this
+    }
     public resizeable(value: boolean | undefined): this {
         return this
     }
@@ -101,10 +107,9 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
     }
 }
 /** @memo */
-export function RowSplit(
+export function RowSplitImpl(
     /** @memo */
     style: ((attributes: RowSplitAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -112,9 +117,7 @@ export function RowSplit(
         return new ArkRowSplitComponent()
     })
     NodeAttach<ArkRowSplitPeer>((): ArkRowSplitPeer => ArkRowSplitPeer.create(receiver), (_: ArkRowSplitPeer) => {
-        receiver.setRowSplitOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

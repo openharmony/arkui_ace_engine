@@ -47,6 +47,12 @@ export class ArkContentSlotPeer extends PeerNode {
     }
 }
 
+export class ArkContentSlotStyle extends ArkCommonMethodStyle implements ContentSlotAttribute {
+    public setContentSlotOptions(content?: Content): this {
+        return this
+    }
+}
+
 export class ArkContentSlotComponent extends ComponentBase implements ContentSlotAttribute {
     getPeer(): ArkContentSlotPeer {
         return (this.peer as ArkContentSlotPeer)
@@ -66,10 +72,9 @@ export class ArkContentSlotComponent extends ComponentBase implements ContentSlo
     }
 }
 /** @memo */
-export function ContentSlot(
+export function ContentSlotImpl(
     /** @memo */
     style: ((attributes: ContentSlotAttribute) => void) | undefined,
-    content?: Content,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -77,9 +82,7 @@ export function ContentSlot(
         return new ArkContentSlotComponent()
     })
     NodeAttach<ArkContentSlotPeer>((): ArkContentSlotPeer => ArkContentSlotPeer.create(receiver), (_: ArkContentSlotPeer) => {
-        receiver.setContentSlotOptions(content)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

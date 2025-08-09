@@ -82,11 +82,17 @@ export interface FlexSpaceOptions {
 }
 export type FlexInterface = (value?: FlexOptions) => FlexAttribute;
 export interface FlexAttribute extends CommonMethod {
+    setFlexOptions(value?: FlexOptions): this {
+        return this
+    }
     pointLight(value: PointLightStyle | undefined): this {return this;}
     attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute {
     pointLight_value?: PointLightStyle | undefined
+    public setFlexOptions(value?: FlexOptions): this {
+        return this
+    }
     public pointLight(value: PointLightStyle | undefined): this {
         return this
     }
@@ -124,10 +130,9 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
     }
 }
 /** @memo */
-export function Flex(
+export function FlexImpl(
     /** @memo */
     style: ((attributes: FlexAttribute) => void) | undefined,
-    value?: FlexOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -135,9 +140,7 @@ export function Flex(
         return new ArkFlexComponent()
     })
     NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (_: ArkFlexPeer) => {
-        receiver.setFlexOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

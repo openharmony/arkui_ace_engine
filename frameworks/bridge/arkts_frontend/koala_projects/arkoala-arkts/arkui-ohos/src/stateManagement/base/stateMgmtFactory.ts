@@ -481,6 +481,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             propertyNameInAppStorage,
             varName,
+            '@StorageLink',
             UIUtils.makeObserved(defaultValue) as T,
             watchFunc
         );
@@ -502,6 +503,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             propertyNameInAppStorage,
             varName,
+            '@LocalStorageLink',
             UIUtils.makeObserved(defaultValue) as T,
             watchFunc
         );
@@ -530,6 +532,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             ref,
             propName,
             varName,
+            '@StoragePropRef',
             watchFunc
         ) as IStoragePropRefDecoratedVariable<T>;
     }
@@ -550,6 +553,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             ref,
             propName,
             varName,
+            '@LocalStoragePropRef',
             watchFunc
         ) as ILocalStoragePropRefDecoratedVariable<T>;
     }

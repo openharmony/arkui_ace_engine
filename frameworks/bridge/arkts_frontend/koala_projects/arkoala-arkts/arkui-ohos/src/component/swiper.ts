@@ -880,6 +880,9 @@ export type OnSwiperAnimationStartCallback = (index: number, targetIndex: number
 export type OnSwiperAnimationEndCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export type OnSwiperGestureSwipeCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
+    setSwiperOptions(controller?: SwiperController): this {
+        return this
+    }
     index(value: number | Bindable<number> | undefined): this
     autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this
     interval(value: number | undefined): this
@@ -939,6 +942,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
+    public setSwiperOptions(controller?: SwiperController): this {
+        return this
+    }
     public index(value: number | Bindable<number> | undefined): this {
         return this
     }
@@ -1346,10 +1352,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     }
 }
 /** @memo */
-export function Swiper(
+export function SwiperImpl(
     /** @memo */
     style: ((attributes: SwiperAttribute) => void) | undefined,
-    controller?: SwiperController,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1357,10 +1362,8 @@ export function Swiper(
         return new ArkSwiperComponent()
     })
     NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (_: ArkSwiperPeer) => {
-        receiver.setSwiperOptions(controller)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class Indicator {

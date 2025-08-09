@@ -58,8 +58,14 @@ export interface MenuItemGroupOptions {
 }
 export type MenuItemGroupInterface = (value?: MenuItemGroupOptions) => MenuItemGroupAttribute;
 export interface MenuItemGroupAttribute extends CommonMethod {
+    setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
+        return this
+    }
 }
 export class ArkMenuItemGroupStyle extends ArkCommonMethodStyle implements MenuItemGroupAttribute {
+    public setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
+        return this
+    }
 }
 export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implements MenuItemGroupAttribute {
     getPeer(): ArkMenuItemGroupPeer {
@@ -80,10 +86,9 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function MenuItemGroup(
+export function MenuItemGroupImpl(
     /** @memo */
     style: ((attributes: MenuItemGroupAttribute) => void) | undefined,
-    value?: MenuItemGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -91,9 +96,7 @@ export function MenuItemGroup(
         return new ArkMenuItemGroupComponent()
     })
     NodeAttach<ArkMenuItemGroupPeer>((): ArkMenuItemGroupPeer => ArkMenuItemGroupPeer.create(receiver), (_: ArkMenuItemGroupPeer) => {
-        receiver.setMenuItemGroupOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

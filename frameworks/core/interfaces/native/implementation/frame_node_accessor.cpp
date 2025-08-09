@@ -631,6 +631,8 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
         { "TextArea", GENERATED_ARKUI_TEXT_AREA },
         { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
         { "Text", GENERATED_ARKUI_TEXT },
+        { "Marquee", GENERATED_ARKUI_MARQUEE },
+        { "SymbolGlyph", GENERATED_ARKUI_SYMBOL_GLYPH },
         { "XComponent", GENERATED_ARKUI_XCOMPONENT },
         { "QRCode", GENERATED_ARKUI_QRCODE },
         { "Badge", GENERATED_ARKUI_BADGE },

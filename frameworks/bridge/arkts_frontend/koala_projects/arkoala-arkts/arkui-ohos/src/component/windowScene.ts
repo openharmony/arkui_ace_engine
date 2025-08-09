@@ -64,9 +64,15 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
 }
 export type WindowSceneInterface = (persistentId: number) => WindowSceneAttribute;
 export interface WindowSceneAttribute extends CommonMethod {
+    setWindowSceneOptions(persistentId: number): this {
+        return this
+    }
     attractionEffect(destination: Position | undefined, fraction: number | undefined): this
 }
 export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowSceneAttribute {
+    public setWindowSceneOptions(persistentId: number): this {
+        return this
+    }
     public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
         return this
         }
@@ -99,10 +105,9 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function WindowScene(
+export function WindowSceneImpl(
     /** @memo */
     style: ((attributes: WindowSceneAttribute) => void) | undefined,
-    persistentId: number,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -110,9 +115,7 @@ export function WindowScene(
         return new ArkWindowSceneComponent()
     })
     NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (_: ArkWindowScenePeer) => {
-        receiver.setWindowSceneOptions(persistentId)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
