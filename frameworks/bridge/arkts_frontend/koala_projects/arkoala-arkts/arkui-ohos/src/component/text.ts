@@ -942,6 +942,9 @@ export interface TextOverflowOptions {
 export type TextInterface = (content?: string | Resource, value?: TextOptions) => TextAttribute;
 export type Callback_MarqueeState_Void = (parameter: MarqueeState) => void;
 export interface TextAttribute extends CommonMethod {
+    setTextOptions(content?: string | Resource, value?: TextOptions): this {
+        return this
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this { return this;}
     fontColor(value: ResourceColor | undefined): this { return this;}
     fontSize(value: number | string | Resource | undefined): this { return this;}
@@ -1029,6 +1032,9 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     editMenuOptions_value?: EditMenuOptions | undefined
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
+    public setTextOptions(content?: string | Resource, value?: TextOptions): this {
+        return this
+    }
     public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
@@ -1573,10 +1579,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
 
 }
 /** @memo */
-export function Text(
+export function TextImpl(
     /** @memo */
     style: ((attributes: TextAttribute) => void) | undefined,
-    content?: string | Resource, value?: TextOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1584,9 +1589,7 @@ export function Text(
         return new ArkTextComponent()
     })
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
-        receiver.setTextOptions(content,value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

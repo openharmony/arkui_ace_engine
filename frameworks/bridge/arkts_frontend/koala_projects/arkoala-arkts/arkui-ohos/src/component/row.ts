@@ -149,6 +149,9 @@ export interface RowOptionsV2 {
 }
 
 export interface RowAttribute extends CommonMethod {
+    setRowOptions(options?: RowOptions | RowOptions | RowOptionsV2): this {
+        return this
+    }
     alignItems(value: VerticalAlign | undefined): this;
     justifyContent(value: FlexAlign | undefined): this;
     pointLight(value: PointLightStyle | undefined): this;
@@ -160,6 +163,9 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     justifyContent_value?: FlexAlign | undefined;
     pointLight_value?: PointLightStyle | undefined;
     reverse_value?: boolean | undefined;
+    public setRowOptions(options?: RowOptions | RowOptions | RowOptionsV2): this {
+        return this
+    }
     public alignItems(value: VerticalAlign | undefined): this {
         return this;
     }
@@ -241,10 +247,9 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
 }
 
 /** @memo */
-export function Row(
+export function RowImpl(
     /** @memo */
     style: ((attributes: RowAttribute) => void) | undefined,
-    options?: RowOptions | RowOptions | RowOptionsV2,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -252,9 +257,7 @@ export function Row(
         return new ArkRowComponent()
     })
     NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (_: ArkRowPeer) => {
-        receiver.setRowOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

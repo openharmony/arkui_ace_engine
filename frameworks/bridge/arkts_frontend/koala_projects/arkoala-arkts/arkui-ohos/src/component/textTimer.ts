@@ -289,6 +289,9 @@ export interface TextTimerOptions {
 }
 export type TextTimerInterface = (options?: TextTimerOptions) => TextTimerAttribute;
 export interface TextTimerAttribute extends CommonMethod {
+    setTextTimerOptions(options?: TextTimerOptions): this {
+        return this
+    }
     format(value: string | undefined): this
     fontColor(value: ResourceColor | undefined): this
     fontSize(value: Length | undefined): this
@@ -309,6 +312,9 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
     onTimer_value?: ((utc: int64,elapsedTime: int64) => void) | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
     contentModifier_value?: ContentModifier | undefined
+    public setTextTimerOptions(options?: TextTimerOptions): this {
+        return this
+    }
     public format(value: string | undefined): this {
         return this
     }
@@ -428,10 +434,9 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
     }
 }
 /** @memo */
-export function TextTimer(
+export function TextTimerImpl(
     /** @memo */
     style: ((attributes: TextTimerAttribute) => void) | undefined,
-    options?: TextTimerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -439,9 +444,7 @@ export function TextTimer(
         return new ArkTextTimerComponent()
     })
     NodeAttach<ArkTextTimerPeer>((): ArkTextTimerPeer => ArkTextTimerPeer.create(receiver), (_: ArkTextTimerPeer) => {
-        receiver.setTextTimerOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
