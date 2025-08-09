@@ -297,7 +297,7 @@ bool TextPattern::CanAIEntityDrag()
 
 bool TextPattern::CheckAIPreviewMenuEnable()
 {
-    return dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_
+    return GetDataDetectorAdapter() && dataDetectorAdapter_->enablePreviewMenu_
         && NeedShowAIDetect()
         && IsShowHandle();
 }
