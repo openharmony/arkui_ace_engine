@@ -134,7 +134,6 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     MinusPaddingToSize(padding, idealSize);
 
     auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutProperty);
-    CHECK_NULL_VOID(linearLayoutProperty);
     auto spaceDimension = linearLayoutProperty ? linearLayoutProperty->GetSpaceValue(Dimension(0)) : Dimension(0);
     linearMeasureProperty.space = ConvertToPx(spaceDimension, layoutConstraint->scaleProperty).value_or(0);
 
@@ -201,7 +200,6 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutProperty);
-    CHECK_NULL_VOID(linearLayoutProperty);
     auto spaceDimension = linearLayoutProperty ? linearLayoutProperty->GetSpaceValue(Dimension(0)) : Dimension(0);
     auto space = ConvertToPx(spaceDimension, layoutConstraint->scaleProperty).value_or(0);
     // update child position.
