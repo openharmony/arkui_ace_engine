@@ -656,7 +656,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
-            needAddBackgroundColor = true;
+            needAddBackgroundColor_ = true;
             AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
@@ -728,7 +728,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             auto context = self->snapshotWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateBackgroundColor(Color::TRANSPARENT);
-            self->needAddBackgroundColor = false;
+            self->needAddBackgroundColor_ = false;
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
@@ -748,7 +748,7 @@ void WindowPattern::AddBackgroundColorDelayed()
     addBackgroundColorTask_.Reset([weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        CHECK_EQUAL_VOID(self->needAddBackgroundColor, false);
+        CHECK_EQUAL_VOID(self->needAddBackgroundColor_, false);
         ACE_SCOPED_TRACE("WindowScene::AddBackgroundColorTask");
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "add background color: %{public}d", self->session_->GetPersistentId());
         auto context = self->GetContext();

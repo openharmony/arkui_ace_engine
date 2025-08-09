@@ -351,11 +351,11 @@ HWTEST_F(WindowSceneTest, AddBackgroundColorDelayed, TestSize.Level1)
      */
     windowScene->session_->SetExitSplitOnBackground(false);
     windowScene->AddBackgroundColorDelayed();
-    EXPECT_EQ(windowScene->needAddBackgroundColor, true);
+    EXPECT_EQ(windowScene->needAddBackgroundColor_, true);
 
     windowScene->session_->SetExitSplitOnBackground(true);
     windowScene->AddBackgroundColorDelayed();
-    EXPECT_EQ(windowScene->needAddBackgroundColor, true);
+    EXPECT_EQ(windowScene->needAddBackgroundColor_, true);
 }
 
 /**
