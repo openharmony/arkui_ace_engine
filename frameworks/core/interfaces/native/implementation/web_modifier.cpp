@@ -850,15 +850,13 @@ void OnSslErrorReceiveImpl(Ark_NativePointer node,
 {
     // deprecated
 }
-void OnRenderExited0Impl(Ark_NativePointer node,
-                         const Opt_Callback_OnRenderExitedEvent_Void* value)
+void OnRenderExitedImpl(Ark_NativePointer node, const Opt_Callback_OnRenderExitedEvent_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
         return;
     }
     auto instanceId = Container::CurrentId();
@@ -869,11 +867,6 @@ void OnRenderExited0Impl(Ark_NativePointer node,
     };
     WebModelStatic::SetRenderExitedId(frameNode, onRenderExited);
 #endif // WEB_SUPPORTED
-}
-void OnRenderExited1Impl(Ark_NativePointer node,
-                         const Opt_Callback_Literal_Object_detail_Boolean* value)
-{
-    // deprecated
 }
 void OnShowFileSelectorImpl(Ark_NativePointer node,
                             const Opt_Callback_OnShowFileSelectorEvent_Boolean* value)
@@ -2427,8 +2420,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::OnRefreshAccessedHistoryImpl,
         WebAttributeModifier::OnUrlLoadInterceptImpl,
         WebAttributeModifier::OnSslErrorReceiveImpl,
-        WebAttributeModifier::OnRenderExited0Impl,
-        WebAttributeModifier::OnRenderExited1Impl,
+        WebAttributeModifier::OnRenderExitedImpl,
         WebAttributeModifier::OnShowFileSelectorImpl,
         WebAttributeModifier::OnFileSelectorShowImpl,
         WebAttributeModifier::OnResourceLoadImpl,

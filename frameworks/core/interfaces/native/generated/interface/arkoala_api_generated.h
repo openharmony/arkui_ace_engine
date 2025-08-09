@@ -23974,10 +23974,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                   const Opt_Type_WebAttribute_onUrlLoadIntercept_callback* value);
     void (*setOnSslErrorReceive)(Ark_NativePointer node,
                                  const Opt_Callback_Literal_Function_handler_Object_error_Void* value);
-    void (*setOnRenderExited0)(Ark_NativePointer node,
-                               const Opt_Callback_OnRenderExitedEvent_Void* value);
-    void (*setOnRenderExited1)(Ark_NativePointer node,
-                               const Opt_Callback_Literal_Object_detail_Boolean* value);
+    void (*setOnRenderExited)(Ark_NativePointer node,
+                              const Opt_Callback_OnRenderExitedEvent_Void* value);
     void (*setOnShowFileSelector)(Ark_NativePointer node,
                                   const Opt_Callback_OnShowFileSelectorEvent_Boolean* value);
     void (*setOnFileSelectorShow)(Ark_NativePointer node,
