@@ -37,7 +37,8 @@ struct WaterFlowMainPage {
     new TextList(3, 'BindSheetDrag', 'pages/grid/GridBindSheetDrag'),
     new TextList(4, 'ItemDragWithVibrator', 'pages/grid/ItemDragWithVibrator'),
     new TextList(5, 'GridScrollWithSelect','pages/grid/GridScrollWithSelect'),
-    new TextList(6, 'GridDragAndPan','pages/grid/GridDragAndPan')
+    new TextList(6, 'GridDragAndPan','pages/grid/GridDragAndPan'),
+    new TextList(7, 'GridCalculator','pages/grid/GridCalculator')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
