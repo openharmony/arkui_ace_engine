@@ -59,6 +59,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     sections_ = pattern->GetSections();
     if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
         info_->isDataValid_ = false;
+        WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
         return;
     }
 
