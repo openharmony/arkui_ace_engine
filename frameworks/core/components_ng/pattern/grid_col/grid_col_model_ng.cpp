@@ -38,7 +38,8 @@ void GridColModelNG::Create(const V2::GridContainerSize &span, const V2::GridCon
     auto *stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_COL_ETS_TAG, nodeId);
-    auto frameNode = CreateFrameNode(nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_COL_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, span);
@@ -48,19 +49,8 @@ void GridColModelNG::Create(const V2::GridContainerSize &span, const V2::GridCon
 
 RefPtr<FrameNode> GridColModelNG::CreateFrameNode(int32_t nodeId)
 {
-    RefPtr<FrameNode> frameNode = FrameNode::GetFrameNode(V2::GRID_COL_ETS_TAG, nodeId);
-    if (frameNode) {
-        return frameNode;
-    }
-    auto defaultSpan = V2::GridContainerSize(1);
-    auto defaultOther = V2::GridContainerSize(0);
-    frameNode = FrameNode::CreateFrameNode(V2::GRID_COL_ETS_TAG, nodeId, AceType::MakeRefPtr<GridColLayoutPattern>());
-    auto castGridColLayoutProperty = (frameNode)->GetLayoutPropertyPtr<GridColLayoutProperty>();
-    if (castGridColLayoutProperty) {
-        castGridColLayoutProperty->UpdateSpan(defaultSpan);
-        castGridColLayoutProperty->UpdateOffset(defaultOther);
-        castGridColLayoutProperty->UpdateOrder(defaultOther);
-    }
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_COL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
     return frameNode;
 }
 
@@ -79,24 +69,18 @@ void GridColModelNG::SetOrder(const V2::GridContainerSize &order)
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, order);
 }
 
-void GridColModelNG::SetSpan(FrameNode *frameNode, const std::optional<V2::GridContainerSize>& span)
+void GridColModelNG::SetSpan(FrameNode *frameNode, const V2::GridContainerSize &span)
 {
-    int32_t defaultValue {1};
-    V2::GridContainerSize gcSizeValue = (span.has_value()) ? span.value() : V2::GridContainerSize(defaultValue);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, gcSizeValue, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, span, frameNode);
 }
 
-void GridColModelNG::SetOffset(FrameNode *frameNode, const std::optional<V2::GridContainerSize>& offset)
+void GridColModelNG::SetOffset(FrameNode *frameNode, const V2::GridContainerSize &offset)
 {
-    int32_t defaultValue {0};
-    V2::GridContainerSize gcSizeValue = (offset.has_value()) ? offset.value() : V2::GridContainerSize(defaultValue);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, gcSizeValue, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, offset, frameNode);
 }
 
-void GridColModelNG::SetOrder(FrameNode *frameNode, const std::optional<V2::GridContainerSize>& order)
+void GridColModelNG::SetOrder(FrameNode *frameNode, const V2::GridContainerSize &order)
 {
-    int32_t defaultValue {0};
-    V2::GridContainerSize gcSizeValue = (order.has_value()) ? order.value() : V2::GridContainerSize(defaultValue);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, gcSizeValue, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, order, frameNode);
 }
 } // namespace OHOS::Ace::NG
