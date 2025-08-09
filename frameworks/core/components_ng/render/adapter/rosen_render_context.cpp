@@ -911,8 +911,11 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_NULL_VOID(ctx->bgLoadingCtx_);
         ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bgImage_);
+        CHECK_NULL_VOID(ctx->GetHost());
+        CHECK_NULL_VOID(ctx->GetHost()->GetGeometryNode());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBackground();
             ctx->RequestNextFrame();

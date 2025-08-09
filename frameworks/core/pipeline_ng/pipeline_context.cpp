@@ -54,6 +54,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -5293,6 +5294,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     }
 
     TriggerIdleCallback(deadline);
+    UiNodeGc::ReleaseNodeRawMemory(deadline, taskExecutor_);
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const
