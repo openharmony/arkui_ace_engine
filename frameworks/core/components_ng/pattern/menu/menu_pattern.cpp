@@ -205,7 +205,7 @@ void MenuPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(warpperPattern);
         auto isMenuHide = warpperPattern->IsHide();
         TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
-        if (!isMenuHide) {
+        if (menuNode->IsOnMainTree() && !isMenuHide) {
             menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
