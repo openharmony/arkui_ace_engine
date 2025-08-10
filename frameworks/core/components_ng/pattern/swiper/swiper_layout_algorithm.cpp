@@ -725,7 +725,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const La
             targetIsSameWithStartFlag_ = true;
             AdjustStartInfoOnSwipeByGroup(startIndex, prevItemPosition_, startIndexInVisibleWindow, startPos);
             LayoutForward(layoutWrapper, layoutConstraint, startIndexInVisibleWindow, startPos);
-            if (isMeasureOneMoreItem_ || Positive(prevMargin_)) {
+            if (isMeasureOneMoreItem_ || Positive(prevMargin_) || Positive(ignoreBlankOffset_)) {
                 float startPosition =
                     itemPosition_.empty() ? 0.0f : itemPosition_.begin()->second.startPos - spaceWidth_;
                 LayoutBackward(layoutWrapper, layoutConstraint, GetStartIndex() - 1, startPosition);
