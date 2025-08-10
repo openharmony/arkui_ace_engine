@@ -31,7 +31,7 @@ ani_ref* GetHostContext(ArkUI_Int32 key)
 #ifndef PREVIEW
     return OHOS::Ace::Framework::AniContextModule::GetAniContext(key);
 #endif
-    return OHOS::Ace::Framework::AniContextModule::GetAniContext(key);
+    return nullptr;
 }
 
 void SyncInstanceId(ArkUI_Int32 instanceId)
