@@ -15,147 +15,37 @@
 
 import { ArkDividerPeer, ArkCommonMethodPeer, AttributeModifier, ResourceColor, DividerAttribute, LineCapStyle } from './component';
 import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
+import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
+import { Length } from './component/units';
+import { PeerNode } from './PeerNode';
 
-class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
-    static identity: string = 'color';
-
-    constructor(value: ResourceColor | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let colorPeerNode = node as ArkDividerPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                colorPeerNode.colorAttribute(this.value as ResourceColor);
-            }
-        }
-    }
-
-    static factory(value: ResourceColor | undefined): ColorModifier {
-        return new ColorModifier(value);
-    }
-}
-
-class StrokeWidthModifier extends ModifierWithKey<string | number | undefined> {
-    static identity: string = 'strokeWidth';
-
-    constructor(value: string | number | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let strokeWidthPeerNode = node as ArkDividerPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                strokeWidthPeerNode.strokeWidthAttribute(this.value as string | number);
-            }
-        }
-    }
-
-    static factory(value: string | number | undefined): StrokeWidthModifier {
-        return new StrokeWidthModifier(value);
-    }
-}
-
-class VerticalModifier extends ModifierWithKey<boolean | undefined> {
-    static identity: string = 'vertical';
-
-    constructor(value: boolean | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let verticalPeerNode = node as ArkDividerPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                verticalPeerNode.verticalAttribute(this.value as boolean);
-            }
-        }
-    }
-
-    static factory(value: boolean | undefined): VerticalModifier {
-        return new VerticalModifier(value);
-    }
-}
-
-class LineCapModifier extends ModifierWithKey<LineCapStyle | undefined> {
-    static identity: string = 'lineCap';
-
-    constructor(value: LineCapStyle | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let lineCapPeerNode = node as ArkDividerPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                lineCapPeerNode.lineCapAttribute(this.value as LineCapStyle);
-            }
-        }
-    }
-
-    static factory(value: LineCapStyle | undefined): LineCapModifier {
-        return new LineCapModifier(value);
-    }
-}
-
-export class ArkDividerAttributeSet extends ArkCommonAttributeSet implements DividerAttribute {
-    color(value: ResourceColor | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, ColorModifier.identity, ColorModifier.factory, value);
-        return this;
-    }
-
-    vertical(value: boolean | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, VerticalModifier.identity, VerticalModifier.factory, value);
-        return this;
-    }
-
-    strokeWidth(value: string | number | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, StrokeWidthModifier.identity, StrokeWidthModifier.factory, value);
-        return this;
-    }
-
-    lineCap(value: LineCapStyle | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, LineCapModifier.identity, LineCapModifier.factory, value);
-        return this;
-    }
-}
-
-export class DividerModifier implements AttributeModifier<DividerAttribute> {
-    attributeSet: ArkDividerAttributeSet = new ArkDividerAttributeSet();
-
+export class DividerModifier extends CommonMethodModifier implements DividerAttribute, AttributeModifier<DividerAttribute> {
     applyNormalAttribute(instance: DividerAttribute): void {}
     applyPressedAttribute(instance: DividerAttribute): void {}
     applyFocusedAttribute(instance: DividerAttribute): void {}
     applyDisabledAttribute(instance: DividerAttribute): void {}
     applySelectedAttribute(instance: DividerAttribute): void {}
 
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+    }
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+    }
+
     color(value: ResourceColor | undefined): this {
-        this.attributeSet.color(value);
         return this;
     }
 
     strokeWidth(value: string | number | undefined): this {
-        this.attributeSet.strokeWidth(value);
         return this;
     }
 
     vertical(value: boolean | undefined): this {
-        this.attributeSet.vertical(value);
         return this;
     }
 
     lineCap(value: LineCapStyle | undefined): this {
-        this.attributeSet.lineCap(value);
         return this;
     }
 }

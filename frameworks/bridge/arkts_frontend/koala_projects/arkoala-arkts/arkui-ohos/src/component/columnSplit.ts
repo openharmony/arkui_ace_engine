@@ -16,21 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Dimension } from "./units"
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { Dimension } from './units';
 import { ArkColumnSplitNode } from '../handwritten/modifiers/ArkColumnSplitNode';
-import { ArkColumnSplitAttributeSet, ColumnSplitModifier } from '../ColumnSplitModifier';
+import { ColumnSplitModifier } from '../ColumnSplitModifier';
+import { hookColumnSplitAttributeModifier } from '../handwritten';
 
 export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
+    _attributeSet?:ColumnSplitModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -78,8 +80,9 @@ export interface ColumnSplitAttribute extends CommonMethod {
     setColumnSplitOptions(): this {
         return this
     }
-    resizeable(value: boolean | undefined): this
-    divider(value: ColumnSplitDividerStyle | null | undefined): this
+    resizeable(value: boolean | undefined): this {return this;}
+    divider(value: ColumnSplitDividerStyle | null | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
@@ -120,6 +123,12 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
             return this
         }
         return this
+    }
+
+    public attributeModifier(modifier: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookColumnSplitAttributeModifier(this, modifier);
+        return this;
     }
     
     public applyAttributesFinish(): void {

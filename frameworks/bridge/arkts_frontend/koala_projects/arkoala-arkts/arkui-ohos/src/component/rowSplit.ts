@@ -16,20 +16,22 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
 import { ArkRowSplitNode } from '../handwritten/modifiers/ArkRowSplitNode';
-import { ArkRowSplitAttributeSet, RowSplitModifier } from '../RowSplitModifier';
+import { RowSplitModifier } from '../RowSplitModifier';
+import { hookRowSplitAttributeModifier } from '../handwritten';
 
 export class ArkRowSplitPeer extends ArkCommonMethodPeer {
+    _attributeSet?:RowSplitModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -61,7 +63,8 @@ export interface RowSplitAttribute extends CommonMethod {
     setRowSplitOptions(): this {
         return this
     }
-    resizeable(value: boolean | undefined): this
+    resizeable(value: boolean | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined
@@ -91,7 +94,13 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookRowSplitAttributeModifier(this, modifier);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

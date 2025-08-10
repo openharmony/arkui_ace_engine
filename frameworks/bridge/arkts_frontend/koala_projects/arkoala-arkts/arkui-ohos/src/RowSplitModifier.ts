@@ -15,46 +15,24 @@
 
 import { ArkRowSplitPeer, ArkCommonMethodPeer, AttributeModifier, RowSplitAttribute } from './component';
 import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
+import { CommonMethodModifier } from "./CommonMethodModifier"
+import { PeerNode } from './PeerNode';
 
-class ResizeableModifier extends ModifierWithKey<boolean | undefined> {
-    static identity: string = 'resizeable';
-
-    constructor(value: boolean | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let resizeableNode = node as ArkRowSplitPeer;
-        if (reset) {
-            // now do nothing
-        } else if (this.value !== undefined) {
-            resizeableNode.resizeableAttribute(this.value as boolean);
-        }
-    }
-
-    static factory(value: boolean | undefined): ResizeableModifier {
-        return new ResizeableModifier(value);
-    }
-}
-
-export class ArkRowSplitAttributeSet extends ArkCommonAttributeSet implements RowSplitAttribute {
-    resizeable(value: boolean | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, ResizeableModifier.identity, ResizeableModifier.factory, value);
-        return this;
-    }
-}
-
-export class RowSplitModifier implements AttributeModifier<RowSplitAttribute> {
-    attributeSet: ArkRowSplitAttributeSet = new ArkRowSplitAttributeSet();
-
+export class RowSplitModifier extends CommonMethodModifier implements RowSplitAttribute, AttributeModifier<RowSplitAttribute> {
     applyNormalAttribute(instance: RowSplitAttribute): void {}
     applyPressedAttribute(instance: RowSplitAttribute): void {}
     applyFocusedAttribute(instance: RowSplitAttribute): void {}
     applyDisabledAttribute(instance: RowSplitAttribute): void {}
     applySelectedAttribute(instance: RowSplitAttribute): void {}
 
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+    }
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+    }
+
     resizeable(value: boolean | undefined): this {
-        this.attributeSet.resizeable(value);
         return this;
     }
 }

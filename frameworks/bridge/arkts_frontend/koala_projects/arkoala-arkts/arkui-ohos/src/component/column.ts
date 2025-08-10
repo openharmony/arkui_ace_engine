@@ -35,7 +35,6 @@ import { ColumnModifier } from '../ColumnModifier';
 import { hookColumnAttributeModifier } from '../handwritten';
 
 export class ArkColumnPeer extends ArkCommonMethodPeer {
-
     _attributeSet?:ColumnModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags);
