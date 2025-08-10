@@ -42,10 +42,6 @@ export class ArkWithThemePeer extends PeerNode {
         return _peer
     }
     setWithThemeOptionsAttribute(options: WithThemeOptions): void {
-        // const thisSerializer : Serializer = Serializer.hold()
-        // WithThemeOptions_serializer.write(thisSerializer, options)
-        // ArkUIGeneratedNativeModule._WithThemeInterface_setWithThemeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        // thisSerializer.release()
         const elmtId: int32  = this.getId();
         const colorMode = options.colorMode ?? ThemeColorMode.SYSTEM;
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(options.theme);

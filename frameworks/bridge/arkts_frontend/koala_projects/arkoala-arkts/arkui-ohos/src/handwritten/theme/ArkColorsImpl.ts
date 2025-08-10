@@ -57,7 +57,7 @@ export class ArkColorsImpl implements Colors {
 
     compForegroundPrimary: ResourceColor = _r(125831003, 10001, '', '');
     compBackgroundPrimary: ResourceColor = _r(125831004, 10001, '', '');
-    compBackgroundPrimaryTran: ResourceColor = _r('', '', 'sys.color.comp_background_primary_tran'); // TODO: 添加实际资源ID
+    compBackgroundPrimaryTran: ResourceColor = _r('', '', 'sys.color.comp_background_primary_tran');
     compBackgroundPrimaryContrary: ResourceColor = _r(125831005, 10001, '', '');
     compBackgroundGray: ResourceColor = _r(125831006, 10001, '', '');
     compBackgroundSecondary: ResourceColor = _r(125831007, 10001, '', '');
