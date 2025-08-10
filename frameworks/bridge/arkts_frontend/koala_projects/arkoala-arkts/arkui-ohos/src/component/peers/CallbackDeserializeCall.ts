@@ -2741,12 +2741,6 @@ export function deserializeAndCallWebKeyboardCallback(thisDeserializer: Deserial
     _continuation(_callResult)
 }
 export function deserializeAndCallWithThemeInterface(thisDeserializer: Deserializer): void {
-    // const _resourceId : int32 = thisDeserializer.readInt32()
-    // const _call  = (ResourceHolder.instance().get(_resourceId) as WithThemeInterface)
-    // let options : WithThemeOptions = thisDeserializer.readWithThemeOptions()
-    // let _continuation : ((value: WithThemeAttribute) => void) = thisDeserializer.readCallback_WithThemeAttribute_Void(true)
-    // const _callResult  = _call(options)
-    // _continuation(_callResult)
 }
 export function deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
