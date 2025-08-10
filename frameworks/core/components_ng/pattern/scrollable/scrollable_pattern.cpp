@@ -3034,6 +3034,9 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     StopScrollBarAnimatorByProxy();
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     isScrolling_ = true;
+    if (scrollBarProxy_) {
+        scrollBarProxy_->SetIsScrollableNodeScrolling(true);
+    }
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
@@ -3217,6 +3220,9 @@ void ScrollablePattern::OnScrollStop(
             host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
         isScrolling_ = false;
+        if (scrollBarProxy_) {
+            scrollBarProxy_->SetIsScrollableNodeScrolling(false);
+        }
         FireObserverOnScrollStop();
         FireOnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
         auto scrollBar = GetScrollBar();

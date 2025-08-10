@@ -456,7 +456,7 @@ bool ScrollBarPattern::UpdateScrollBarDisplay()
             return true;
         }
         SetOpacity(UINT8_MAX);
-        if (displayMode_ == DisplayMode::AUTO) {
+        if (displayMode_ == DisplayMode::AUTO && scrollBarProxy_ && !scrollBarProxy_->IsScrollableNodeScrolling()) {
             StartDisappearAnimator();
         }
         return true;
