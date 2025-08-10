@@ -459,6 +459,16 @@ void UITaskScheduler::FlushAfterLayoutTask()
     FlushPersistAfterLayoutTask();
 }
 
+void UITaskScheduler::FlushAfterModifierTask()
+{
+    decltype(afterModifierTasks_) tasks(std::move(afterModifierTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
 void UITaskScheduler::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
     decltype(afterLayoutCallbacksInImplicitAnimationTask_) tasks(
@@ -487,6 +497,11 @@ void UITaskScheduler::FlushPersistAfterLayoutTask()
 void UITaskScheduler::AddAfterRenderTask(std::function<void()>&& task)
 {
     afterRenderTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::AddAfterModifierTask(std::function<void()>&& task)
+{
+    afterModifierTasks_.emplace_back(std::move(task));
 }
 
 void UITaskScheduler::FlushAfterRenderTask()

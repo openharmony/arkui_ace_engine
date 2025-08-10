@@ -1886,6 +1886,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UITaskSchedulerTestNg015
+ * @tc.desc: Test FlushAfterModifierTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterModifierTask.
+     */
+    taskScheduler.FlushAfterModifierTask();
+
+    /**
+     * @tc.steps3: Call FlushAfterModifierTask.
+     * @tc.expected: afterModifierTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddAfterModifierTask([]() {});
+    taskScheduler.AddAfterModifierTask(nullptr);
+    EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushTaskWithCheck.
+     * @tc.expected: afterModifierTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushTaskWithCheck();
+    EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 0);
+}
+
+/**
  * @tc.name: TestAddIgnoreLayoutSafeAreaBundle
  * @tc.desc: Test AddIgnoreLayoutSafeAreaBundle
  * @tc.type: FUNC

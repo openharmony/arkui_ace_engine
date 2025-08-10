@@ -767,6 +767,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
+    taskScheduler_->FlushAfterModifierTask();
     // the application is in the background and the dark and light colors are switched.
     if (!onShow_ && backgroundColorModeUpdated_) {
         backgroundColorModeUpdated_ = false;
@@ -5211,6 +5212,11 @@ void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
+}
+
+void PipelineContext::AddAfterModifierTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddAfterModifierTask(std::move(task));
 }
 
 void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
