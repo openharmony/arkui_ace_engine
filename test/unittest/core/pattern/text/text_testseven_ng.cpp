@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,14 +27,14 @@ namespace OHOS::Ace::NG {
 namespace {
 class TextMockClipboardImpl : public MockClipboardImpl {
 public:
-    explicit TextMockClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : MockClipboardImpl(taskExecutor) {}
+    explicit TextMockClipboardImpl(const RefPtr<TaskExecutor> &taskExecutor) : MockClipboardImpl(taskExecutor) {}
     ~TextMockClipboardImpl() = default;
 
-    MOCK_METHOD2(AddTextRecord, void(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr));
-    MOCK_METHOD2(AddSpanStringRecord, void(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data));
+    MOCK_METHOD2(AddTextRecord, void(const RefPtr<PasteDataMix> &pasteData, const std::string &selectedStr));
+    MOCK_METHOD2(AddSpanStringRecord, void(const RefPtr<PasteDataMix> &pasteData, std::vector<uint8_t> &data));
     MOCK_METHOD2(AddMultiTypeRecord,
-        void(const RefPtr<PasteDataMix>& pasteData, const RefPtr<MultiTypeRecordMix>& multiTypeRecord));
-    MOCK_METHOD2(SetData, void(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption));
+        void(const RefPtr<PasteDataMix> &pasteData, const RefPtr<MultiTypeRecordMix> &multiTypeRecord));
+    MOCK_METHOD2(SetData, void(const RefPtr<PasteDataMix> &pasteData, CopyOptions copyOption));
 };
 } // namespace
 
@@ -42,7 +42,7 @@ class TextTestSevenNg : public TextBases {
 public:
 };
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString001
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -74,7 +74,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     pattern->HandleOnCopy();
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString002
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -106,7 +106,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     pattern->HandleOnCopy();
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString003
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -131,7 +131,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     pattern->HandleOnCopy();
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString004
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -154,7 +154,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString004, TestSize.Level1)
     EXPECT_EQ(spanStr->spans_.size(), spanStringDe->spans_.size());
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString005
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -173,7 +173,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     textLayoutProperty->UpdateFontWeight(FontWeight::W400);
     textLayoutProperty->UpdateFontFamily(fontFamily);
     textLayoutProperty->UpdateFontFeature(fontFeature);
-    textLayoutProperty->UpdateTextDecoration({TextDecoration::UNDERLINE});
+    textLayoutProperty->UpdateTextDecoration({ TextDecoration::UNDERLINE });
     textLayoutProperty->UpdateTextDecorationColor(Color::RED);
     textLayoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     textLayoutProperty->UpdateTextCase(TextCase::LOWERCASE);
@@ -232,7 +232,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     EXPECT_EQ((*it)->textLineStyle->GetEllipsisMode().value(), EllipsisMode::MIDDLE);
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString006
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -258,7 +258,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString006, TestSize.Level1)
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString007
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -279,7 +279,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->fontStyle->UpdateFontWeight(FontWeight::W400);
     span0->fontStyle->UpdateFontFamily(fontFamily);
     span0->fontStyle->UpdateFontFeature(fontFeature);
-    span0->fontStyle->UpdateTextDecoration({TextDecoration::UNDERLINE});
+    span0->fontStyle->UpdateTextDecoration({ TextDecoration::UNDERLINE });
     span0->fontStyle->UpdateTextDecorationColor(Color::RED);
     span0->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     span0->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -349,7 +349,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     EXPECT_EQ((*it)->textLineStyle->GetEllipsisMode().value(), EllipsisMode::MIDDLE);
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString008
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
@@ -396,14 +396,14 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     }
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString009
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
+    auto *stack = ViewStackProcessor::GetInstance();
     RefPtr<FrameNode> frameNode =
         ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
@@ -462,14 +462,14 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     }
 }
 
-/**
+/* *
  * @tc.name: CopyTextWithSpanString010
  * @tc.desc: test sr CopyTextWithSpanString
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
+    auto *stack = ViewStackProcessor::GetInstance();
     RefPtr<FrameNode> frameNode =
         ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
@@ -513,17 +513,17 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
 }
 
 
-/**
+/* *
  * @tc.name: InheritParentTextStyle001
  * @tc.desc: test InheritParentTextStyle of multiple paragraph.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
 {
-    /**
+    /* *
      * @tc.steps: step1. Construct a minimal version 10.
      */
-    /**
+    /* *
      * @tc.steps: step1. init
      */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
@@ -536,7 +536,7 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
         static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
     layoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    /**
+    /* *
      * @tc.steps: step3. set theme.
      */
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -550,14 +550,14 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
     TextStyle textStyle;
     multipleAlgorithm->ConstructTextStyles(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper), textStyle);
 
-    /**
+    /* *
      * @tc.steps: step2. Construct MultipleParagraphLayoutAlgorithm and test inheritTextStyle_.
      */
     textStyle.SetFontSize(FONT_SIZE_VALUE);
     multipleAlgorithm->InheritParentTextStyle(textStyle);
     EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), ADAPT_FONT_SIZE_VALUE);
 
-    /**
+    /* *
      * @tc.steps: step3. Construct a minimal version 16 and test inheritTextStyle_.
      */
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
@@ -570,17 +570,17 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
     EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), FONT_SIZE_VALUE);
 }
 
-/**
+/* *
  * @tc.name: ConstructTextStyles001
  * @tc.desc: test ConstructTextStyles of multiple paragraph.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, ConstructTextStyles001, TestSize.Level1)
 {
-    /**
+    /* *
      * @tc.steps: step1. Construct a minimal version 10.
      */
-    /**
+    /* *
      * @tc.steps: step1. init
      */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
@@ -592,7 +592,7 @@ HWTEST_F(TextTestSevenNg, ConstructTextStyles001, TestSize.Level1)
     SymbolShadow symbolShadow;
     symbolShadow.radius = 10.0f;
     layoutProperty->UpdateSymbolShadow(symbolShadow);
-    /**
+    /* *
      * @tc.steps: step3. set theme.
      */
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -609,14 +609,14 @@ HWTEST_F(TextTestSevenNg, ConstructTextStyles001, TestSize.Level1)
     EXPECT_EQ(textStyle.symbolTextStyle_, nullptr);
 }
 
-/**
+/* *
  * @tc.name: ToJsonValue001
  * @tc.desc: Test TextLayoutProperty ToJsonValue001.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, ToJsonValue001, TestSize.Level1)
 {
-    /**
+    /* *
      * @tc.steps: step1. create textFrameNode.
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
@@ -630,7 +630,7 @@ HWTEST_F(TextTestSevenNg, ToJsonValue001, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    /**
+    /* *
      * @tc.steps: step2. run ToJsonValue().
      */
     textLayoutProperty->UpdateLineSpacing(LINE_SPACING_VALUE);
@@ -640,42 +640,42 @@ HWTEST_F(TextTestSevenNg, ToJsonValue001, TestSize.Level1)
     EXPECT_EQ(json->GetString("lineSpacing"), "20.00px");
     EXPECT_EQ(json->GetString("onlyBetweenLines"), "true");
 
-    /**
+    /* *
      * @tc.steps: step3. create symbolFrameNode.
      */
-     auto symbolFrameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SYMBOL_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto symbolFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(symbolFrameNode, nullptr);
     auto symbolPattern = symbolFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(symbolPattern, nullptr);
     auto symbolLayoutProperty = symbolPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(symbolLayoutProperty, nullptr);
 
-     /**
+    /* *
      * @tc.steps: step4. run symbol ToJsonValue().
      */
-     json = JsonUtil::Create(true);
-     std::vector<Color> symbolColorList;
-     symbolColorList.emplace_back(Color::RED);
-     symbolColorList.emplace_back(Color::GREEN);
-     symbolColorList.emplace_back(Color::BLUE);
-     symbolLayoutProperty->UpdateSymbolColorList(symbolColorList);
-     symbolLayoutProperty->ToJsonValue(json, filter);
+    json = JsonUtil::Create(true);
+    std::vector<Color> symbolColorList;
+    symbolColorList.emplace_back(Color::RED);
+    symbolColorList.emplace_back(Color::GREEN);
+    symbolColorList.emplace_back(Color::BLUE);
+    symbolLayoutProperty->UpdateSymbolColorList(symbolColorList);
+    symbolLayoutProperty->ToJsonValue(json, filter);
 
-     auto sub_json=json->GetObject("fontColor");
-     for (uint32_t i=0;i<symbolColorList.size();++i) {
-        EXPECT_EQ(sub_json->GetString("color_"+std::to_string(i)),symbolColorList[i].ColorToString());
-     }
+    auto sub_json = json->GetObject("fontColor");
+    for (uint32_t i = 0; i < symbolColorList.size(); ++i) {
+        EXPECT_EQ(sub_json->GetString("color_" + std::to_string(i)), symbolColorList[i].ColorToString());
+    }
 }
 
-/**
+/* *
  * @tc.name: ToJsonValue002
  * @tc.desc: Test TextLayoutProperty ToJsonValue002.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, ToJsonValue002, TestSize.Level1)
 {
-    /**
+    /* *
      * @tc.steps: step1. create textFrameNode.
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
@@ -689,7 +689,7 @@ HWTEST_F(TextTestSevenNg, ToJsonValue002, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    /**
+    /* *
      * @tc.steps: step2. run ToJsonValue().
      */
     textLayoutProperty->UpdateOptimizeTrailingSpace(true);
@@ -698,14 +698,14 @@ HWTEST_F(TextTestSevenNg, ToJsonValue002, TestSize.Level1)
     EXPECT_EQ(json->GetString("optimizeTrailingSpace"), "true");
 }
 
-/**
+/* *
  * @tc.name: SpanBuildParagraph001
  * @tc.desc: test InheritParentTextStyle of multiple paragraph.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
 {
-    /**
+    /* *
      * @tc.steps: step1. Construct textLayoutAlgorithm with span.
      */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
@@ -733,7 +733,7 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
     contentConstraint.maxSize.SetHeight(RK356_HEIGHT);
     contentConstraint.maxSize.SetWidth(RK356_WIDTH);
 
-    /**
+    /* *
      * @tc.steps: step2. test span MAX_LINES_FIRST.
      */
     TextStyle textStyle;
@@ -741,16 +741,16 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
     textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
     textStyle.SetFontSize(FONT_SIZE_VALUE);
 
-    textLayoutAlgorithm->BuildParagraph(
-        textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->BuildParagraph(textStyle, textLayoutProperty, contentConstraint,
+        AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
 
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
     textFrameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    textLayoutAlgorithm->BuildParagraph(
-        textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->BuildParagraph(textStyle, textLayoutProperty, contentConstraint,
+        AccessibilityManager::RawPtr(layoutWrapper));
     MockContainer::Current()->SetApiTargetVersion(originApiVersion);
     EXPECT_EQ(textStyle.GetFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
 }
