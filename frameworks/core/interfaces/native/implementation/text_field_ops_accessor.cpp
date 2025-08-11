@@ -55,8 +55,9 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
                 LOGW("container is null");
                 return;
             }
-            std::variant<int32_t, std::string> u8Content = UtfUtils::Str16DebugToStr8(content);
-            auto arkResourceContent = Converter::ArkValue<Ark_Resource>(u8Content, &ctx);
+            auto u8Content = UtfUtils::Str16DebugToStr8(content);
+            auto arkResourceContent = Converter::ArkCreate<Ark_Resource>(u8Content,
+                Converter::ResourceType::STRING, &ctx);
             arkResourceContent.bundleName = Converter::ArkValue<Ark_String>(container->GetBundleName(), &ctx);
             arkResourceContent.moduleName = Converter::ArkValue<Ark_String>(container->GetModuleName(), &ctx);
             arkResourceContent.type = resourceType;
@@ -95,7 +96,7 @@ Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
     //     TextFieldModel::GetInstance()->SetWidthAuto(frameNode, true);
     //     return;
     // }
-    
+
     return {};
 }
 Ark_NativePointer TextFieldOpsSetHeightImpl(Ark_NativePointer node,

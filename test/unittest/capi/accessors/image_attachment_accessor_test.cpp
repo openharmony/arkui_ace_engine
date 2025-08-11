@@ -222,10 +222,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
     for (auto& [num_id, str_id, expected] : resourceInitTable) {
         auto expectPointer = std::get_if<Dimension>(&expected);
         ASSERT_TRUE(expectPointer);
-        auto sizeResource = ArkValue<Ark_Length>(Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = num_id });
+        auto sizeResource = ArkValue<Opt_Length>(static_cast<int>(num_id));
         Ark_SizeOptions size {
-            .width = ArkValue<Opt_Length>(sizeResource),
-            .height = ArkValue<Opt_Length>(sizeResource),
+            .width = sizeResource,
+            .height = sizeResource,
         };
         Ark_ImageAttachmentInterface content {
             .size = ArkValue<Opt_SizeOptions>(size),

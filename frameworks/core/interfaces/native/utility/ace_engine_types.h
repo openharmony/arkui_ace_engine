@@ -53,6 +53,12 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
+struct SimpleResource {
+    std::string content;
+    std::string bundleName;
+    std::string moduleName;
+};
+
 struct RadioStyle {
     std::optional<Color> checkedBackgroundColor;
     std::optional<Color> uncheckedBorderColor;

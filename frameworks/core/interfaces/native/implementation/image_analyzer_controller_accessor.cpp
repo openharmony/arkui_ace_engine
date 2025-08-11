@@ -34,17 +34,6 @@ void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)
             break;
     }
 }
-
-void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src)
-{
-    std::vector<Ark_ImageAnalyzerType> array;
-    std::transform(src.begin(), src.end(), std::back_inserter(array),
-        [](auto val) { return Converter::ArkValue<Ark_ImageAnalyzerType>(val); });
-
-    dst.array = reinterpret_cast<Ark_ImageAnalyzerType*>(array.data());
-    dst.length = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(src.size()));
-}
-
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
