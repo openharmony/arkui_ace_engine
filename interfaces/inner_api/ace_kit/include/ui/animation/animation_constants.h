@@ -95,7 +95,7 @@ enum class FinishCallbackType {
     LOGICALLY = 1
 };
 
-enum class AnimationInterface : int32_t {
+enum class AnimationInterface : int8_t {
     UNKNOWN = -1,
     ANIMATION,
     ANIMATE_TO,
