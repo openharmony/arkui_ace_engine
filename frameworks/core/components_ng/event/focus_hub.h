@@ -801,6 +801,12 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_TAB) == MASK_FOCUS_STEP_TAB;
     }
 
+    static inline bool IsHomeOrEndStep(FocusStep step)
+    {
+        return step == FocusStep::UP_END || step == FocusStep::LEFT_END || step == FocusStep::DOWN_END ||
+               step == FocusStep::RIGHT_END;
+    }
+
     static inline FocusStep GetRealFocusStepByTab(FocusStep moveStep, bool isRtl = false)
     {
         if (isRtl) {
@@ -883,7 +889,8 @@ public:
         FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
     }
 
-    RefPtr<FocusHub> GetHeadOrTailChild(bool isHead);
+    RefPtr<FocusHub> GetHeadOrTailChild(bool isHead, bool isHomeOrEnd = false);
+    RefPtr<FocusHub> FindHeadOrTailDescendantFocus(bool isHead, bool isHomeOrEnd = false);
 
     // multi thread function start
     void RemoveSelfMultiThread(BlurReason reason);
