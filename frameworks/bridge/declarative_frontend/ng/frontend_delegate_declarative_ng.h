@@ -133,6 +133,7 @@ public:
         return nullptr;
     }
     size_t GetComponentsCount() override;
+    std::string GetInitParams() override;
     std::string GetParams() override;
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
 

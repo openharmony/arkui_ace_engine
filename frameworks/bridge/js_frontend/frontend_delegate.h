@@ -120,6 +120,11 @@ public:
     {
         return -1;
     }
+    // Gets current page's init params
+    virtual std::string GetInitParams()
+    {
+        return "";
+    }
     // Gets current page's params
     virtual std::string GetParams()
     {

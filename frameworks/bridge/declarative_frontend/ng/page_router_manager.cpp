@@ -846,6 +846,38 @@ void PageRouterManager::GetPageNameAndPath(const std::string& url, std::string& 
     }
 }
 
+std::string PageRouterManager::GetInitParams() const
+{
+    CHECK_RUN_ON(JS);
+    RefPtr<FrameNode> pageNode = nullptr;
+    if (insertPageProcessingType_ == InsertPageProcessingType::INSERT_BELLOW_TOP) {
+        constexpr size_t STACK_SIZE = 2;
+        if (pageRouterStack_.size() < STACK_SIZE) {
+            return "";
+        }
+        auto it = pageRouterStack_.rbegin();
+        ++it;
+        pageNode = it->Upgrade();
+    } else if (insertPageProcessingType_ == InsertPageProcessingType::INSERT_BOTTOM) {
+        if (pageRouterStack_.empty()) {
+            return "";
+        }
+        pageNode = pageRouterStack_.front().Upgrade();
+    } else {
+        if (pageRouterStack_.empty()) {
+            return "";
+        }
+        pageNode = GetCurrentPageNode();
+    }
+
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, "");
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_RETURN(pageInfo, "");
+    return pageInfo->GetPageInitParams();
+}
+
 std::string PageRouterManager::GetParams() const
 {
     CHECK_RUN_ON(JS);
