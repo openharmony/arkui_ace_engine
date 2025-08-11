@@ -997,6 +997,30 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, st
     PushOuterBorderColorVector(bottomColor, values);
 }
 
+void ParseOutLineColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+    int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    ParseOuterBorderEdgeColor(vm, leftArg, leftColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, rightArg, rightColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, topArg, topColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, bottomArg, bottomColor, resObjs, nodeInfo);
+    
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+    PushOuterBorderColorVector(leftColor, values);
+}
+
 bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
 {
     if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
@@ -2254,7 +2278,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineColor(ArkUIRuntimeCallInfo* runti
     std::vector<uint32_t> colorOptions;
     std::vector<RefPtr<ResourceObject>> vectorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
+    ParseOutLineColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
     auto rawPtr = static_cast<void*>(&vectorResObj);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineColor(
         nativeNode, colorOptions.data(), colorOptions.size(), rawPtr);
