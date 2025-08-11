@@ -75,19 +75,20 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
                           const Callback_Number_Void* onIdleCallback,
                           const Ark_Number* delayTime)
 {
-    // CHECK_NULL_VOID(delayTime);
-    // auto delayTimeInt = Converter::Convert<int32_t>(*delayTime);
-    // auto context = PipelineContext::GetCurrentContext();
-    // CHECK_NULL_VOID(context);
-    // auto onFrameCallbackFunc = [callback = CallbackHelper(*onFrameCallback)](double delayTimeInt) -> void {
-    //     auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
-    //     callback.Invoke(delayTime);
-    // };
-    // auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](double delayTimeInt) -> void {
-    //     auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
-    //     callback.Invoke(delayTime);
-    // };
-    // context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
+    CHECK_NULL_VOID(delayTime);
+    auto delayTimeInt = Converter::Convert<int32_t>(*delayTime);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto onFrameCallbackFunc = [callback = CallbackHelper(*onFrameCallback)](double delayTimeInt) -> void {
+        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+        callback.Invoke(delayTime);
+    };
+    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](
+                                  double delayTimeInt, uint32_t frameCount) -> void {
+        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+        callback.Invoke(delayTime);
+    };
+    context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
 }
 } // namespace SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()

@@ -2011,6 +2011,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg190, TestSize.Level1)
     context_->frameCallbackFuncs_.clear();
     context_->AddFrameCallback(std::move(frameCallbackFunc2), std::move(idleCallbackFunc2), delayMillis);
     EXPECT_TRUE(context_->frameCallbackFuncs_.empty());
+
+    /**
+     * @tc.steps5:
+     * Test the parameters frameCallbackFunc and idleCallbackFunc are not nullptr, and delayMillis is granter than 0.
+     * @tc.expected: The member frameCallbackFuncs_ is not empty
+     */
+    context_->frameCallbackFuncs_.clear();
+    context_->AddFrameCallback(std::move(frameCallbackFunc), std::move(idleCallbackFunc), delayMillis);
+    EXPECT_FALSE(context_->frameCallbackFuncs_.empty());
 }
 
 /**
