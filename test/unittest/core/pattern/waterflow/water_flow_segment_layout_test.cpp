@@ -2128,4 +2128,46 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowRTLPaddingWithSections003, TestSize.Leve
     EXPECT_LE(multiColumnItem.Right(), WATER_FLOW_WIDTH - 30.0f + 1.0f);
     EXPECT_GE(multiColumnItem.Left(), 10.0f - 1.0f);
 }
+
+/**
+ * @tc.name: InvalidSectionWithDefaultSize
+ * @tc.desc: Verify WaterFlow maintains default size when both children count and segment tails are invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, InvalidSectionWithDefaultSize, TestSize.Level1)
+{
+    // Initialize WaterFlow with default size
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.0f));
+
+    CreateWaterFlowItems(5);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_13);
+    CreateDone();
+
+    // Verify initial indices
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 4);
+
+    // Create mismatch by removing children
+    for (int i = 3; i <= 4; ++i) {
+        frameNode_->RemoveChildAtIndex(3);
+    }
+    frameNode_->ChildrenUpdatedFrom(3);
+
+    // Ensure mismatch by modifying segment tails
+    if (!info->segmentTails_.empty()) {
+        info->segmentTails_.back() = 10;
+    }
+
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    // WaterFlow should maintain default size
+    auto geometryNode = frameNode_->GetGeometryNode();
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 400.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 800.0f);
+}
 } // namespace OHOS::Ace::NG
