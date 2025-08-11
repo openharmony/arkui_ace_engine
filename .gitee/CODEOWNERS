@@ -711,7 +711,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/water_flow_modifier.ts @
 frameworks/bridge/declarative_frontend/ark_modifier/tsconfig.json @arkui_architecture
 frameworks/bridge/declarative_frontend/ark_mock/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_node/ @arkuiframework
-frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuistatemgmt
+frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_shape/ @arkui_superman
 frameworks/bridge/declarative_frontend/ark_theme/ @arkuiframework
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
@@ -741,8 +741,8 @@ frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.cpp @ar
 frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_focus_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_focus_function.h @arkuievent
-frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.h @arkuieco3
 frameworks/bridge/declarative_frontend/engine/functions/js_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_animation_on_finish_function.cpp @arkuievent
@@ -1104,7 +1104,7 @@ frameworks/bridge/declarative_frontend/jsview/js_content_slot.cpp @arkuiframewor
 frameworks/bridge/declarative_frontend/jsview/js_content_slot.h @arkuiframework
 frameworks/bridge/declarative_frontend/jsview/js_counter.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_counter.h @arkui_image
-frameworks/bridge/declarative_frontend/jsview/js_data_change_listener.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_data_change_listener.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp @arkui_image
@@ -1131,8 +1131,8 @@ frameworks/bridge/declarative_frontend/jsview/js_flex_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_folder_stack.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_folder_stack.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_foreach.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_foreach.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_form.cpp @arondave
 frameworks/bridge/declarative_frontend/jsview/js_form.h @arondave
 frameworks/bridge/declarative_frontend/jsview/js_form_link.cpp @arondave
@@ -1155,8 +1155,8 @@ frameworks/bridge/declarative_frontend/jsview/js_grid_row.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_grid_row.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_hyperlink.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_if_else.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_if_else.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_image_animator.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_image_animator.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_image.cpp @arkui_image
@@ -1177,11 +1177,11 @@ frameworks/bridge/declarative_frontend/jsview/js_layout_manager.cpp @arkui_rich_
 frameworks/bridge/declarative_frontend/jsview/js_layout_manager.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_component.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_component.h @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.cpp @arkui_image
@@ -1280,12 +1280,12 @@ frameworks/bridge/declarative_frontend/jsview/js_relative_container.cpp @arkuila
 frameworks/bridge/declarative_frontend/jsview/js_relative_container.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_remote_window.cpp
 frameworks/bridge/declarative_frontend/jsview/js_remote_window.h
-frameworks/bridge/declarative_frontend/jsview/js_repeat.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_repeat.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_repeat.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_repeat.h @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_richeditor.cpp @arkui_rich_editor
 frameworks/bridge/declarative_frontend/jsview/js_richeditor.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/jsview/js_richtext.cpp @arkwebinarkuireview
@@ -1457,8 +1457,8 @@ frameworks/bridge/declarative_frontend/jsview/models/ellipse_model_impl.cpp @ark
 frameworks/bridge/declarative_frontend/jsview/models/ellipse_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.cpp @form_framework
 frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.h @form_framework
 frameworks/bridge/declarative_frontend/jsview/models/gauge_model_impl.cpp @arkui_image
@@ -1477,16 +1477,16 @@ frameworks/bridge/declarative_frontend/jsview/models/grid_row_model_impl.cpp @ar
 frameworks/bridge/declarative_frontend/jsview/models/grid_row_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/hyperlink_model_impl.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/models/if_else_model_impl.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/models/if_else_model_impl.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/models/if_else_model_impl.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/models/if_else_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/image_animator_model_impl.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/image_animator_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/image_model_impl.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/image_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/indexer_model_impl.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/models/indexer_model_impl.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/models/lazy_for_each_model_impl.cpp @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/models/lazy_for_each_model_impl.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/models/lazy_for_each_model_impl.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/models/lazy_for_each_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/linear_split_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/linear_split_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/line_model_impl.cpp @arkuilayout
@@ -2080,13 +2080,13 @@ frameworks/core/components/focusable/ @arkuievent
 frameworks/core/components/focus_animation/ @arkuievent
 frameworks/core/components/focus_collaboration/ @arkuievent
 frameworks/core/components/font/ @huawei_g_five
-frameworks/core/components/foreach/ @arkuistatemgmt
+frameworks/core/components/foreach/ @arkuieco3
 frameworks/core/components/form/ @form_framework
 frameworks/core/components/gesture_listener/ @arkuievent
 frameworks/core/components/grid/ @arkuiscroll
 frameworks/core/components/grid_layout/ @arkuilayout
 frameworks/core/components/hyperlink/ @huawei_g_five
-frameworks/core/components/ifelse/ @arkuistatemgmt
+frameworks/core/components/ifelse/ @arkuieco3
 frameworks/core/components/image/ @arkui_image
 frameworks/core/components/indexer/ @arkuiscroll
 frameworks/core/components/list/ @arkuiscroll
@@ -2102,7 +2102,7 @@ frameworks/core/components/padding/ @arkuilayout
 frameworks/core/components/page/ @arkui_superman
 frameworks/core/components/page_transition/ @arkui_superman
 frameworks/core/components/panel/ @arkui_superman
-frameworks/core/components_part_upd/foreach/ @arkuistatemgmt
+frameworks/core/components_part_upd/foreach/ @arkuieco3
 frameworks/core/components/picker/ @arkui_image
 frameworks/core/components/piece/ @arkui_image
 frameworks/core/components/plugin/ @arkuiabilitygroup
@@ -2167,7 +2167,7 @@ frameworks/core/components_v2/common/common_def.h @arkuiframework
 frameworks/core/components_v2/common/element_proxy.cpp @arkuistatemgmt
 frameworks/core/components_v2/common/element_proxy.h @arkuistatemgmt
 frameworks/core/components_v2/extensions/ @arkuievent
-frameworks/core/components_v2/foreach/ @arkuistatemgmt
+frameworks/core/components_v2/foreach/ @arkuieco3
 frameworks/core/components_v2/grid/ @arkuiscroll
 frameworks/core/components_v2/grid_layout/ @arkuilayout
 frameworks/core/components_v2/indexer/ @arkuiscroll
@@ -2596,7 +2596,7 @@ frameworks/core/components_ng/pattern/web/ @arkwebinarkuireview
 frameworks/core/components_ng/pattern/window_scene/
 frameworks/core/components_ng/pattern/xcomponent/ @arkuilayout
 frameworks/core/components_ng/svg/ @arkui_image
-frameworks/core/components_ng/syntax/ @arkuistatemgmt
+frameworks/core/components_ng/syntax/ @arkuieco3
 frameworks/core/components_ng/property/accessibility_property.cpp @arkuiabilitygroup
 frameworks/core/components_ng/property/accessibility_property.h @arkuiabilitygroup
 frameworks/core/components_ng/property/attraction_effect.h @arkuiframework
@@ -3135,10 +3135,10 @@ interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkuiframework
 
 [Arkoala]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkuistatemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkwebinarkuireview
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/customDialogController.ts @arkuipopupwindow
@@ -3339,7 +3339,7 @@ test/unittest/core/pipeline/ @arkuiframework
 test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
-test/unittest/core/syntax/ @arkuistatemgmt
+test/unittest/core/syntax/ @arkuieco3
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
