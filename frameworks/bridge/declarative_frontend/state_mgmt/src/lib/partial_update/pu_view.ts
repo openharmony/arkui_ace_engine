@@ -220,7 +220,7 @@ abstract class ViewPU extends PUV2ViewBase
 
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
-    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this)
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this);
 
     // Disable optimization when V1 is involved.
     ObserveV2.getObserve().isParentChildOptimizable_ = false;
@@ -231,7 +231,6 @@ abstract class ViewPU extends PUV2ViewBase
     } else if (parent instanceof ViewBuildNodeBase) {
       this.localStorage_ = parent.getShareLocalStorage();
     }
-
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
@@ -287,7 +286,7 @@ abstract class ViewPU extends PUV2ViewBase
     // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
     this.purgeDeletedElmtIds();
 
-    // un-registers its own id once all its children are unregistered
+    // unregisters its own id once its children are unregistered above
     UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
 
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
@@ -388,7 +387,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtProfiler.end();
   }
 
-  private onActiveInternal(): void {
+  public onActiveInternal(): void {
     if (!this.isViewActive()) {
       return;
     }
@@ -400,7 +399,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
 
-  private onInactiveInternal(): void {
+  public onInactiveInternal(): void {
     if (this.isViewActive()) {
       return;
     }
@@ -500,7 +499,7 @@ abstract class ViewPU extends PUV2ViewBase
    * framework internal functions, apps must not call
    */
   public forceRerenderNode(elmtId: number): void {
-    stateMgmtProfiler.begin('ViewPU.forceRerenderNode');
+    stateMgmtProfiler.begin('ViewPU/V2.forceRerenderNode');
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
     this.purgeDeletedElmtIds();
@@ -912,7 +911,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
@@ -926,7 +925,7 @@ abstract class ViewPU extends PUV2ViewBase
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`)
+        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`);
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId);
@@ -951,7 +950,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       ViewStackProcessor.StopGetAccessRecording();
 
-      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();
@@ -998,8 +997,8 @@ abstract class ViewPU extends PUV2ViewBase
     }
     this.recycleManager_ = new RecycleManager;
   }
-  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc): void {
-    const updateFunc = (elmtId, isFirstRender): void => {
+  rebuildUpdateFunc(elmtId: number, compilerAssignedUpdateFunc: UpdateFunc): void {
+    const updateFunc: UpdateFunc = (elmtId, isFirstRender) => {
       this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       this.currentlyRenderedElmtIdStack_.pop();
