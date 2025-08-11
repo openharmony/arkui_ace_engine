@@ -153,13 +153,13 @@ bool IsSnapshotRegionInRange(LocalizedSnapshotRegion& snapshotRegion, float& nod
     return true;
 }
 
-bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& options,
+int32_t SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& options,
     Rosen::Drawing::Rect& specifiedAreaRect)
 {
     auto context = node->GetRenderContext();
     if (!context) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get the render context of target node.");
-        return false;
+        return ERROR_CODE_INTERNAL_ERROR;
     }
     RectF nodeRect = context->GetPaintRectWithoutTransform();
     float nodeWidth = nodeRect.Width();
@@ -167,13 +167,13 @@ bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& opti
 
     LocalizedSnapshotRegion snapshotRegion = options.snapshotRegion;
     if (!IsSnapshotRegionValid(snapshotRegion) || !IsSnapshotRegionInRange(snapshotRegion, nodeWidth, nodeHeight)) {
-        return false;
+        return ERROR_CODE_PARAM_INVALID;
     }
 
     auto nodeLayoutProperty = node->GetLayoutProperty();
     if (!nodeLayoutProperty) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get the layout property of target node.");
-        return false;
+        return ERROR_CODE_INTERNAL_ERROR;
     }
 
     TextDirection layoutDirection = nodeLayoutProperty->GetLayoutDirection();
@@ -188,7 +188,7 @@ bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& opti
         snapshotRegion.top,
         isRegionMirror ? nodeWidth - snapshotRegion.start : snapshotRegion.end,
         snapshotRegion.bottom);
-    return true;
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
@@ -295,9 +295,9 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
         return;
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
-    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
-    if (!isSetReigon) {
-        callback(nullptr, ERROR_CODE_PARAM_INVALID, nullptr);
+    int32_t setRegionReslut = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
+        callback(nullptr, setRegionReslut, nullptr);
         return;
     }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
@@ -504,9 +504,9 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         return;
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
-    bool isSetReigon = SetCaptureReigon(node, param.options, specifiedAreaRect);
-    if (!isSetReigon) {
-        callback(nullptr, ERROR_CODE_PARAM_INVALID, nullptr);
+    int32_t setRegionReslut = SetCaptureReigon(node, param.options, specifiedAreaRect);
+    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
+        callback(nullptr, setRegionReslut, nullptr);
         return;
     }
     rsInterface.TakeSurfaceCaptureForUI(
@@ -521,7 +521,6 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncStart_%s", node->GetInspectorIdValue("").c_str());
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> regionResult(ERROR_CODE_PARAM_INVALID, nullptr);
     CHECK_NULL_RETURN(node, result);
     auto rsNode = GetRsNode(node);
 
@@ -561,9 +560,9 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
         return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
-    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
-    if (!isSetReigon) {
-        return regionResult;
+    int32_t setRegionReslut = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
+        return {setRegionReslut, nullptr};
     }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
         options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
@@ -590,7 +589,6 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const RefPtr<FrameNode>& node,
     std::shared_ptr<Rosen::RSNode> rsNode, const SnapshotOptions& options)
 {
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> regionResult(ERROR_CODE_PARAM_INVALID, nullptr);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
     {
@@ -603,9 +601,9 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
         return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
-    bool isSetReigon = SetCaptureReigon(node, options, specifiedAreaRect);
-    if (!isSetReigon) {
-        return regionResult;
+    int32_t setRegionReslut = SetCaptureReigon(node, options, specifiedAreaRect);
+    if (setRegionReslut != ERROR_CODE_NO_ERROR) {
+        return {setRegionReslut, nullptr};
     }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
         options.scale, options.scale, options.waitUntilRenderFinished, specifiedAreaRect);
