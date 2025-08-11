@@ -283,7 +283,7 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(loadingTextLayoutProperty);
     auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue(""));
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -341,7 +341,7 @@ void RefreshPattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(loadingTextNode_);
     auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    textLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue(""));
     loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -389,7 +389,7 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(loadingTextLayoutProperty);
         auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+        loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue(""));
         loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         if (accessibilityProperty->HasAccessibilityLevel()) {
             auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();

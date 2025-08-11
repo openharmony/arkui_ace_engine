@@ -74,8 +74,8 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
-    auto parentSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_PARENT);
+    auto idealSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_CONTENT);
+    auto parentSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_PARENT);
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
     MinusPaddingToSize(padding, parentSize);

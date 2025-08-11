@@ -447,7 +447,7 @@ HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
     EXPECT_TRUE(pattern_->isHigherVersion_);
     EXPECT_TRUE(pattern_->hasLoadingText_);
-    
+
     pattern_->OnColorConfigurationUpdate();
     auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     EXPECT_EQ(progressPaintProperty->GetColorValue(Color::WHITE), Color::BLACK);
