@@ -152,6 +152,7 @@ public:
     static CalcDimension ParseTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj);
     static void ResetResObj(FrameNode* frameNode, NavDestinationPatternType type, const std::string& key);
+    static void SetIsCustomTitleBarSize(FrameNode* frameNode, bool isCustom);
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
 

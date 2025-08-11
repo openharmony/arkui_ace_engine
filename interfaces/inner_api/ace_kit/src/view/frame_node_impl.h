@@ -76,6 +76,9 @@ public:
     void ResetCompositingFilter() override;
     bool NeedAvoidContainerModal() override;
     NG::OffsetF GetParentGlobalOffsetDuringLayout() override;
+    int32_t GetContainerModalTitleHeight() override;
+    NG::OffsetF GetContainerModalButtonsOffset() override;
+    NG::SizeF GetContainerModalButtonsSize() override;
 
     void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) override;
     int32_t GetMeasureWidth() override;

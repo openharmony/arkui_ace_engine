@@ -737,6 +737,20 @@ void ResetNavDestinationOnReady(ArkUINodeHandle node)
     NavDestinationModelNG::SetOnReady(frameNode, nullptr);
 }
 
+void SetNavDestinationIsCustomTitleBarSize(ArkUINodeHandle node, ArkUI_Bool isCustom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetIsCustomTitleBarSize(frameNode, isCustom);
+}
+
+void ResetNavDestinationIsCustomTitleBarSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetIsCustomTitleBarSize(frameNode, false);
+}
+
 void SetNavDestinationBeforeCreateLayoutWrapperCallBack(
     ArkUINodeHandle node, void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node))
 {
@@ -809,6 +823,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetNavDestinationOnBackPressed = ResetNavDestinationOnBackPressed,
         .setNavDestinationOnReady = SetNavDestinationOnReady,
         .resetNavDestinationOnReady = ResetNavDestinationOnReady,
+        .setNavDestinationIsCustomTitleBarSize = SetNavDestinationIsCustomTitleBarSize,
+        .resetNavDestinationIsCustomTitleBarSize = ResetNavDestinationIsCustomTitleBarSize,
         .setNavDestinationBeforeCreateLayoutWrapperCallBack = SetNavDestinationBeforeCreateLayoutWrapperCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

@@ -4463,6 +4463,8 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationOnBackPressed)(ArkUINodeHandle node);
     void (*setNavDestinationOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetNavDestinationOnReady)(ArkUINodeHandle node);
+    void (*setNavDestinationIsCustomTitleBarSize)(ArkUINodeHandle node, ArkUI_Bool isCustom);
+    void (*resetNavDestinationIsCustomTitleBarSize)(ArkUINodeHandle node);
     void (*setNavDestinationBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
 };
@@ -5492,6 +5494,8 @@ struct ArkUINavigationModifier {
     void (*resetToolBar)(ArkUINodeHandle node);
     void (*setOnNavBarStateChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnNavBarStateChange)(ArkUINodeHandle node);
+    void (*setIsCustomTitleBarSize)(ArkUINodeHandle node, ArkUI_Bool isCustom);
+    void (*resetIsCustomTitleBarSize)(ArkUINodeHandle node);
     void (*setBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
 };
