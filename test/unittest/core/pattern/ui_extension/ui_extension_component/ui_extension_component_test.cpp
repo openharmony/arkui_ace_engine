@@ -219,7 +219,6 @@ void UIExtensionComponentTestNg::FireCallbacks(RefPtr<UIExtensionPattern> patter
     RefPtr<WantWrap> wantWrapPtr = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
     AAFwk::WantParams wantParams;
     OHOS::AAFwk::Want want;
-
     pattern->FireOnRemoteReadyCallback();
     pattern->FireModalOnDestroy();
     pattern->FireOnReleaseCallback(1);
@@ -503,7 +502,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionUsageTest, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
 
