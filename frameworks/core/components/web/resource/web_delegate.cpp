@@ -7603,6 +7603,9 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
     CHECK_NULL_RETURN(nweb_, -1);
+    if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
     std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
     int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
     return webAccessibilityId;

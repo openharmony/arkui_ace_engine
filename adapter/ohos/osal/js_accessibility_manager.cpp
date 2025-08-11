@@ -7355,6 +7355,10 @@ int64_t JsAccessibilityManager::GetWebAccessibilityIdBySurfaceId(const std::stri
     auto webPattern = weakWebPattern.Upgrade();
     CHECK_NULL_RETURN(webPattern, INVALID_NODE_ID);
     int64_t webAccessibilityId = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
+    if (webAccessibilityId == INVALID_NODE_ID) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "JsAccessibilityManager GetWebAccessibilityIdBySurfaceId node is Invalid");
+        return INVALID_NODE_ID;
+    }
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(webPattern->GetTreeId(), webAccessibilityId);
     TAG_LOGD(AceLogTag::ACE_WEB,
         "JsAccessibilityManager GetWebAccessibilityIdBySurfaceId return webAccessibilityId: %{public}" PRId64,
