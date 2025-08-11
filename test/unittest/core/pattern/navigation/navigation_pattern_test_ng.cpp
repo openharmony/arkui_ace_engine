@@ -21,6 +21,7 @@
 
 #define protected public
 #define private public
+#include "base/utils/system_properties.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -2038,5 +2039,41 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
     EXPECT_NE(ResSchedReport::GetInstance().loadPageOn_, true);
     ResSchedReport::GetInstance().TriggerModuleSerializer();
     EXPECT_EQ(ResSchedReport::GetInstance().loadPageOn_, true);
+}
+
+
+/**
+ * @tc.name: NavigationPatternTest_019
+ * @tc.desc: Test Navigation HandleDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Navigation ,then get pattern.
+     */
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    pattern->HandleDragStart();
+    pattern->HandleDragEnd();
+    /**
+     * @tc.steps: step2. check pattern->preNavBarWidth_.
+     * @tc.expected: preNavBarWidth_ is correct.
+     */
+    EXPECT_EQ(pattern->preNavBarWidth_, static_cast<float>(DEFAULT_NAVBAR_WIDTH.ConvertToPx()));
+    pattern->preNavBarWidth_ = 0;
+    pattern->userSetMinContentFlag_ = true;
+    pattern->userSetNavBarRangeFlag_ = false;
+    pattern->HandleDragUpdate(FLOAT_260);
+    EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
 }
 } // namespace OHOS::Ace::NG
