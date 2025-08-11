@@ -66,6 +66,7 @@ export interface WithThemeOptions {
     theme?: CustomTheme;
     colorMode?: ThemeColorMode;
 }
+export type WithThemeInterface = (options: WithThemeOptions) => WithThemeAttribute;
 export interface WithThemeAttribute {
     // attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this
 }

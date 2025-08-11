@@ -91,7 +91,7 @@ import { TextPickerSelectedCallback } from "./../textpickerselectedops"
 import { TextPickerValueCallback } from "./../textpickervalueops"
 import { TimePickerSelectedCallback } from "./../timepickerselectedops"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
-import { WithThemeAttribute, WithThemeOptions } from "./../withTheme"
+import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { Resource } from "global.resource"
@@ -6392,23 +6392,23 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return (_continuationValue as WebKeyboardOptions); }
     }
-    // readWithThemeInterface(isSync: boolean = false): WithThemeInterface {
-    //     const _resource : CallbackResource = this.readCallbackResource()
-    //     const _call : KPointer = this.readPointer()
-    //     const _callSync : KPointer = this.readPointer()
-    //     return (options: WithThemeOptions):WithThemeAttribute => {
-    // const _argsSerializer : Serializer = Serializer.hold();
-    // _argsSerializer.writeInt32(_resource.resourceId);
-    // _argsSerializer.writePointer(_call);
-    // _argsSerializer.writePointer(_callSync);
-    // _argsSerializer.writeWithThemeOptions(options);
-    // let _continuationValue : WithThemeAttribute | undefined;
-    // const _continuationCallback : ((value: WithThemeAttribute) => void) = (value: WithThemeAttribute):void => {     _continuationValue = value; }
-    // _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    // (isSync) ? (InteropNativeModule._CallCallbackSync(219587748, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(219587748, _argsSerializer.asBuffer(), _argsSerializer.length()));
-    // _argsSerializer.release();
-    // return (_continuationValue as WithThemeAttribute); }
-    // }
+    readWithThemeInterface(isSync: boolean = false): WithThemeInterface {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (options: WithThemeOptions):WithThemeAttribute => {
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeWithThemeOptions(options);
+    let _continuationValue : WithThemeAttribute | undefined;
+    const _continuationCallback : ((value: WithThemeAttribute) => void) = (value: WithThemeAttribute):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(219587748, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(219587748, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as WithThemeAttribute); }
+    }
     readAccessibilityOptions(): AccessibilityOptions {
         let valueDeserializer : Deserializer = this
         const accessibilityPreferred_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -14482,1235 +14482,1235 @@ export class Deserializer extends DeserializerBase {
         let value : CurrentDayStyle = ({dayColor: dayColor_result, lunarColor: lunarColor_result, markLunarColor: markLunarColor_result, dayFontSize: dayFontSize_result, lunarDayFontSize: lunarDayFontSize_result, dayHeight: dayHeight_result, dayWidth: dayWidth_result, gregorianCalendarHeight: gregorianCalendarHeight_result, dayYAxisOffset: dayYAxisOffset_result, lunarDayYAxisOffset: lunarDayYAxisOffset_result, underscoreXAxisOffset: underscoreXAxisOffset_result, underscoreYAxisOffset: underscoreYAxisOffset_result, scheduleMarkerXAxisOffset: scheduleMarkerXAxisOffset_result, scheduleMarkerYAxisOffset: scheduleMarkerYAxisOffset_result, colSpace: colSpace_result, dailyFiveRowSpace: dailyFiveRowSpace_result, dailySixRowSpace: dailySixRowSpace_result, lunarHeight: lunarHeight_result, underscoreWidth: underscoreWidth_result, underscoreLength: underscoreLength_result, scheduleMarkerRadius: scheduleMarkerRadius_result, boundaryRowOffset: boundaryRowOffset_result, boundaryColOffset: boundaryColOffset_result} as CurrentDayStyle)
         return value
     }
-    // readCustomColors(): CustomColors {
-    //     let valueDeserializer : Deserializer = this
-    //     const brand_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let brand_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (brand_buf_runtimeType))
-    //     {
-    //         const brand_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let brand_buf_ : Color | number | string | Resource | undefined
-    //         if (brand_buf__selector == 0) {
-    //             brand_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (brand_buf__selector == 1) {
-    //             brand_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (brand_buf__selector == 2) {
-    //             brand_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (brand_buf__selector == 3) {
-    //             brand_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for brand_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         brand_buf = (brand_buf_ as Color | number | string | Resource)
-    //     }
-    //     const brand_result : ResourceColor | undefined = brand_buf
-    //     const warning_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let warning_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (warning_buf_runtimeType))
-    //     {
-    //         const warning_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let warning_buf_ : Color | number | string | Resource | undefined
-    //         if (warning_buf__selector == 0) {
-    //             warning_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (warning_buf__selector == 1) {
-    //             warning_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (warning_buf__selector == 2) {
-    //             warning_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (warning_buf__selector == 3) {
-    //             warning_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for warning_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         warning_buf = (warning_buf_ as Color | number | string | Resource)
-    //     }
-    //     const warning_result : ResourceColor | undefined = warning_buf
-    //     const alert_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let alert_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (alert_buf_runtimeType))
-    //     {
-    //         const alert_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let alert_buf_ : Color | number | string | Resource | undefined
-    //         if (alert_buf__selector == 0) {
-    //             alert_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (alert_buf__selector == 1) {
-    //             alert_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (alert_buf__selector == 2) {
-    //             alert_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (alert_buf__selector == 3) {
-    //             alert_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for alert_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         alert_buf = (alert_buf_ as Color | number | string | Resource)
-    //     }
-    //     const alert_result : ResourceColor | undefined = alert_buf
-    //     const confirm_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let confirm_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (confirm_buf_runtimeType))
-    //     {
-    //         const confirm_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let confirm_buf_ : Color | number | string | Resource | undefined
-    //         if (confirm_buf__selector == 0) {
-    //             confirm_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (confirm_buf__selector == 1) {
-    //             confirm_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (confirm_buf__selector == 2) {
-    //             confirm_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (confirm_buf__selector == 3) {
-    //             confirm_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for confirm_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         confirm_buf = (confirm_buf_ as Color | number | string | Resource)
-    //     }
-    //     const confirm_result : ResourceColor | undefined = confirm_buf
-    //     const fontPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontPrimary_buf_runtimeType))
-    //     {
-    //         const fontPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (fontPrimary_buf__selector == 0) {
-    //             fontPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontPrimary_buf__selector == 1) {
-    //             fontPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontPrimary_buf__selector == 2) {
-    //             fontPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontPrimary_buf__selector == 3) {
-    //             fontPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontPrimary_buf = (fontPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontPrimary_result : ResourceColor | undefined = fontPrimary_buf
-    //     const fontSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontSecondary_buf_runtimeType))
-    //     {
-    //         const fontSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (fontSecondary_buf__selector == 0) {
-    //             fontSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontSecondary_buf__selector == 1) {
-    //             fontSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontSecondary_buf__selector == 2) {
-    //             fontSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontSecondary_buf__selector == 3) {
-    //             fontSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontSecondary_buf = (fontSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontSecondary_result : ResourceColor | undefined = fontSecondary_buf
-    //     const fontTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontTertiary_buf_runtimeType))
-    //     {
-    //         const fontTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (fontTertiary_buf__selector == 0) {
-    //             fontTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontTertiary_buf__selector == 1) {
-    //             fontTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontTertiary_buf__selector == 2) {
-    //             fontTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontTertiary_buf__selector == 3) {
-    //             fontTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontTertiary_buf = (fontTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontTertiary_result : ResourceColor | undefined = fontTertiary_buf
-    //     const fontFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontFourth_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontFourth_buf_runtimeType))
-    //     {
-    //         const fontFourth_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontFourth_buf_ : Color | number | string | Resource | undefined
-    //         if (fontFourth_buf__selector == 0) {
-    //             fontFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontFourth_buf__selector == 1) {
-    //             fontFourth_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontFourth_buf__selector == 2) {
-    //             fontFourth_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontFourth_buf__selector == 3) {
-    //             fontFourth_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontFourth_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontFourth_buf = (fontFourth_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontFourth_result : ResourceColor | undefined = fontFourth_buf
-    //     const fontEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontEmphasize_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontEmphasize_buf_runtimeType))
-    //     {
-    //         const fontEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontEmphasize_buf_ : Color | number | string | Resource | undefined
-    //         if (fontEmphasize_buf__selector == 0) {
-    //             fontEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontEmphasize_buf__selector == 1) {
-    //             fontEmphasize_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontEmphasize_buf__selector == 2) {
-    //             fontEmphasize_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontEmphasize_buf__selector == 3) {
-    //             fontEmphasize_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontEmphasize_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontEmphasize_buf = (fontEmphasize_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontEmphasize_result : ResourceColor | undefined = fontEmphasize_buf
-    //     const fontOnPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontOnPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontOnPrimary_buf_runtimeType))
-    //     {
-    //         const fontOnPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontOnPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (fontOnPrimary_buf__selector == 0) {
-    //             fontOnPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontOnPrimary_buf__selector == 1) {
-    //             fontOnPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontOnPrimary_buf__selector == 2) {
-    //             fontOnPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontOnPrimary_buf__selector == 3) {
-    //             fontOnPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontOnPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontOnPrimary_buf = (fontOnPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontOnPrimary_result : ResourceColor | undefined = fontOnPrimary_buf
-    //     const fontOnSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontOnSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontOnSecondary_buf_runtimeType))
-    //     {
-    //         const fontOnSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontOnSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (fontOnSecondary_buf__selector == 0) {
-    //             fontOnSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontOnSecondary_buf__selector == 1) {
-    //             fontOnSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontOnSecondary_buf__selector == 2) {
-    //             fontOnSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontOnSecondary_buf__selector == 3) {
-    //             fontOnSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontOnSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontOnSecondary_buf = (fontOnSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontOnSecondary_result : ResourceColor | undefined = fontOnSecondary_buf
-    //     const fontOnTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontOnTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontOnTertiary_buf_runtimeType))
-    //     {
-    //         const fontOnTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontOnTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (fontOnTertiary_buf__selector == 0) {
-    //             fontOnTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontOnTertiary_buf__selector == 1) {
-    //             fontOnTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontOnTertiary_buf__selector == 2) {
-    //             fontOnTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontOnTertiary_buf__selector == 3) {
-    //             fontOnTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontOnTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontOnTertiary_buf = (fontOnTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontOnTertiary_result : ResourceColor | undefined = fontOnTertiary_buf
-    //     const fontOnFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let fontOnFourth_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (fontOnFourth_buf_runtimeType))
-    //     {
-    //         const fontOnFourth_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let fontOnFourth_buf_ : Color | number | string | Resource | undefined
-    //         if (fontOnFourth_buf__selector == 0) {
-    //             fontOnFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (fontOnFourth_buf__selector == 1) {
-    //             fontOnFourth_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (fontOnFourth_buf__selector == 2) {
-    //             fontOnFourth_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (fontOnFourth_buf__selector == 3) {
-    //             fontOnFourth_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for fontOnFourth_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         fontOnFourth_buf = (fontOnFourth_buf_ as Color | number | string | Resource)
-    //     }
-    //     const fontOnFourth_result : ResourceColor | undefined = fontOnFourth_buf
-    //     const iconPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconPrimary_buf_runtimeType))
-    //     {
-    //         const iconPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (iconPrimary_buf__selector == 0) {
-    //             iconPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconPrimary_buf__selector == 1) {
-    //             iconPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconPrimary_buf__selector == 2) {
-    //             iconPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconPrimary_buf__selector == 3) {
-    //             iconPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconPrimary_buf = (iconPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconPrimary_result : ResourceColor | undefined = iconPrimary_buf
-    //     const iconSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconSecondary_buf_runtimeType))
-    //     {
-    //         const iconSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (iconSecondary_buf__selector == 0) {
-    //             iconSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconSecondary_buf__selector == 1) {
-    //             iconSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconSecondary_buf__selector == 2) {
-    //             iconSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconSecondary_buf__selector == 3) {
-    //             iconSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconSecondary_buf = (iconSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconSecondary_result : ResourceColor | undefined = iconSecondary_buf
-    //     const iconTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconTertiary_buf_runtimeType))
-    //     {
-    //         const iconTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (iconTertiary_buf__selector == 0) {
-    //             iconTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconTertiary_buf__selector == 1) {
-    //             iconTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconTertiary_buf__selector == 2) {
-    //             iconTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconTertiary_buf__selector == 3) {
-    //             iconTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconTertiary_buf = (iconTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconTertiary_result : ResourceColor | undefined = iconTertiary_buf
-    //     const iconFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconFourth_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconFourth_buf_runtimeType))
-    //     {
-    //         const iconFourth_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconFourth_buf_ : Color | number | string | Resource | undefined
-    //         if (iconFourth_buf__selector == 0) {
-    //             iconFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconFourth_buf__selector == 1) {
-    //             iconFourth_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconFourth_buf__selector == 2) {
-    //             iconFourth_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconFourth_buf__selector == 3) {
-    //             iconFourth_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconFourth_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconFourth_buf = (iconFourth_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconFourth_result : ResourceColor | undefined = iconFourth_buf
-    //     const iconEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconEmphasize_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconEmphasize_buf_runtimeType))
-    //     {
-    //         const iconEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconEmphasize_buf_ : Color | number | string | Resource | undefined
-    //         if (iconEmphasize_buf__selector == 0) {
-    //             iconEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconEmphasize_buf__selector == 1) {
-    //             iconEmphasize_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconEmphasize_buf__selector == 2) {
-    //             iconEmphasize_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconEmphasize_buf__selector == 3) {
-    //             iconEmphasize_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconEmphasize_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconEmphasize_buf = (iconEmphasize_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconEmphasize_result : ResourceColor | undefined = iconEmphasize_buf
-    //     const iconSubEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconSubEmphasize_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconSubEmphasize_buf_runtimeType))
-    //     {
-    //         const iconSubEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconSubEmphasize_buf_ : Color | number | string | Resource | undefined
-    //         if (iconSubEmphasize_buf__selector == 0) {
-    //             iconSubEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconSubEmphasize_buf__selector == 1) {
-    //             iconSubEmphasize_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconSubEmphasize_buf__selector == 2) {
-    //             iconSubEmphasize_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconSubEmphasize_buf__selector == 3) {
-    //             iconSubEmphasize_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconSubEmphasize_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconSubEmphasize_buf = (iconSubEmphasize_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconSubEmphasize_result : ResourceColor | undefined = iconSubEmphasize_buf
-    //     const iconOnPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconOnPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconOnPrimary_buf_runtimeType))
-    //     {
-    //         const iconOnPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconOnPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (iconOnPrimary_buf__selector == 0) {
-    //             iconOnPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconOnPrimary_buf__selector == 1) {
-    //             iconOnPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconOnPrimary_buf__selector == 2) {
-    //             iconOnPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconOnPrimary_buf__selector == 3) {
-    //             iconOnPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconOnPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconOnPrimary_buf = (iconOnPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconOnPrimary_result : ResourceColor | undefined = iconOnPrimary_buf
-    //     const iconOnSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconOnSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconOnSecondary_buf_runtimeType))
-    //     {
-    //         const iconOnSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconOnSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (iconOnSecondary_buf__selector == 0) {
-    //             iconOnSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconOnSecondary_buf__selector == 1) {
-    //             iconOnSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconOnSecondary_buf__selector == 2) {
-    //             iconOnSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconOnSecondary_buf__selector == 3) {
-    //             iconOnSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconOnSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconOnSecondary_buf = (iconOnSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconOnSecondary_result : ResourceColor | undefined = iconOnSecondary_buf
-    //     const iconOnTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconOnTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconOnTertiary_buf_runtimeType))
-    //     {
-    //         const iconOnTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconOnTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (iconOnTertiary_buf__selector == 0) {
-    //             iconOnTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconOnTertiary_buf__selector == 1) {
-    //             iconOnTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconOnTertiary_buf__selector == 2) {
-    //             iconOnTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconOnTertiary_buf__selector == 3) {
-    //             iconOnTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconOnTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconOnTertiary_buf = (iconOnTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconOnTertiary_result : ResourceColor | undefined = iconOnTertiary_buf
-    //     const iconOnFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let iconOnFourth_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (iconOnFourth_buf_runtimeType))
-    //     {
-    //         const iconOnFourth_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let iconOnFourth_buf_ : Color | number | string | Resource | undefined
-    //         if (iconOnFourth_buf__selector == 0) {
-    //             iconOnFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (iconOnFourth_buf__selector == 1) {
-    //             iconOnFourth_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (iconOnFourth_buf__selector == 2) {
-    //             iconOnFourth_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (iconOnFourth_buf__selector == 3) {
-    //             iconOnFourth_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for iconOnFourth_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         iconOnFourth_buf = (iconOnFourth_buf_ as Color | number | string | Resource)
-    //     }
-    //     const iconOnFourth_result : ResourceColor | undefined = iconOnFourth_buf
-    //     const backgroundPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let backgroundPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (backgroundPrimary_buf_runtimeType))
-    //     {
-    //         const backgroundPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let backgroundPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (backgroundPrimary_buf__selector == 0) {
-    //             backgroundPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (backgroundPrimary_buf__selector == 1) {
-    //             backgroundPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (backgroundPrimary_buf__selector == 2) {
-    //             backgroundPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (backgroundPrimary_buf__selector == 3) {
-    //             backgroundPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for backgroundPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         backgroundPrimary_buf = (backgroundPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const backgroundPrimary_result : ResourceColor | undefined = backgroundPrimary_buf
-    //     const backgroundSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let backgroundSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (backgroundSecondary_buf_runtimeType))
-    //     {
-    //         const backgroundSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let backgroundSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (backgroundSecondary_buf__selector == 0) {
-    //             backgroundSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (backgroundSecondary_buf__selector == 1) {
-    //             backgroundSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (backgroundSecondary_buf__selector == 2) {
-    //             backgroundSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (backgroundSecondary_buf__selector == 3) {
-    //             backgroundSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for backgroundSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         backgroundSecondary_buf = (backgroundSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const backgroundSecondary_result : ResourceColor | undefined = backgroundSecondary_buf
-    //     const backgroundTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let backgroundTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (backgroundTertiary_buf_runtimeType))
-    //     {
-    //         const backgroundTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let backgroundTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (backgroundTertiary_buf__selector == 0) {
-    //             backgroundTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (backgroundTertiary_buf__selector == 1) {
-    //             backgroundTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (backgroundTertiary_buf__selector == 2) {
-    //             backgroundTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (backgroundTertiary_buf__selector == 3) {
-    //             backgroundTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for backgroundTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         backgroundTertiary_buf = (backgroundTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const backgroundTertiary_result : ResourceColor | undefined = backgroundTertiary_buf
-    //     const backgroundFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let backgroundFourth_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (backgroundFourth_buf_runtimeType))
-    //     {
-    //         const backgroundFourth_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let backgroundFourth_buf_ : Color | number | string | Resource | undefined
-    //         if (backgroundFourth_buf__selector == 0) {
-    //             backgroundFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (backgroundFourth_buf__selector == 1) {
-    //             backgroundFourth_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (backgroundFourth_buf__selector == 2) {
-    //             backgroundFourth_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (backgroundFourth_buf__selector == 3) {
-    //             backgroundFourth_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for backgroundFourth_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         backgroundFourth_buf = (backgroundFourth_buf_ as Color | number | string | Resource)
-    //     }
-    //     const backgroundFourth_result : ResourceColor | undefined = backgroundFourth_buf
-    //     const backgroundEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let backgroundEmphasize_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (backgroundEmphasize_buf_runtimeType))
-    //     {
-    //         const backgroundEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let backgroundEmphasize_buf_ : Color | number | string | Resource | undefined
-    //         if (backgroundEmphasize_buf__selector == 0) {
-    //             backgroundEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (backgroundEmphasize_buf__selector == 1) {
-    //             backgroundEmphasize_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (backgroundEmphasize_buf__selector == 2) {
-    //             backgroundEmphasize_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (backgroundEmphasize_buf__selector == 3) {
-    //             backgroundEmphasize_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for backgroundEmphasize_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         backgroundEmphasize_buf = (backgroundEmphasize_buf_ as Color | number | string | Resource)
-    //     }
-    //     const backgroundEmphasize_result : ResourceColor | undefined = backgroundEmphasize_buf
-    //     const compForegroundPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compForegroundPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compForegroundPrimary_buf_runtimeType))
-    //     {
-    //         const compForegroundPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compForegroundPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (compForegroundPrimary_buf__selector == 0) {
-    //             compForegroundPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compForegroundPrimary_buf__selector == 1) {
-    //             compForegroundPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compForegroundPrimary_buf__selector == 2) {
-    //             compForegroundPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compForegroundPrimary_buf__selector == 3) {
-    //             compForegroundPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compForegroundPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compForegroundPrimary_buf = (compForegroundPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compForegroundPrimary_result : ResourceColor | undefined = compForegroundPrimary_buf
-    //     const compBackgroundPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundPrimary_buf_runtimeType))
-    //     {
-    //         const compBackgroundPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundPrimary_buf__selector == 0) {
-    //             compBackgroundPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundPrimary_buf__selector == 1) {
-    //             compBackgroundPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundPrimary_buf__selector == 2) {
-    //             compBackgroundPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundPrimary_buf__selector == 3) {
-    //             compBackgroundPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundPrimary_buf = (compBackgroundPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundPrimary_result : ResourceColor | undefined = compBackgroundPrimary_buf
-    //     const compBackgroundPrimaryTran_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundPrimaryTran_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundPrimaryTran_buf_runtimeType))
-    //     {
-    //         const compBackgroundPrimaryTran_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundPrimaryTran_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundPrimaryTran_buf__selector == 0) {
-    //             compBackgroundPrimaryTran_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundPrimaryTran_buf__selector == 1) {
-    //             compBackgroundPrimaryTran_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundPrimaryTran_buf__selector == 2) {
-    //             compBackgroundPrimaryTran_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundPrimaryTran_buf__selector == 3) {
-    //             compBackgroundPrimaryTran_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundPrimaryTran_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundPrimaryTran_buf = (compBackgroundPrimaryTran_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundPrimaryTran_result : ResourceColor | undefined = compBackgroundPrimaryTran_buf
-    //     const compBackgroundPrimaryContrary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundPrimaryContrary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundPrimaryContrary_buf_runtimeType))
-    //     {
-    //         const compBackgroundPrimaryContrary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundPrimaryContrary_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundPrimaryContrary_buf__selector == 0) {
-    //             compBackgroundPrimaryContrary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundPrimaryContrary_buf__selector == 1) {
-    //             compBackgroundPrimaryContrary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundPrimaryContrary_buf__selector == 2) {
-    //             compBackgroundPrimaryContrary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundPrimaryContrary_buf__selector == 3) {
-    //             compBackgroundPrimaryContrary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundPrimaryContrary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundPrimaryContrary_buf = (compBackgroundPrimaryContrary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundPrimaryContrary_result : ResourceColor | undefined = compBackgroundPrimaryContrary_buf
-    //     const compBackgroundGray_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundGray_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundGray_buf_runtimeType))
-    //     {
-    //         const compBackgroundGray_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundGray_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundGray_buf__selector == 0) {
-    //             compBackgroundGray_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundGray_buf__selector == 1) {
-    //             compBackgroundGray_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundGray_buf__selector == 2) {
-    //             compBackgroundGray_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundGray_buf__selector == 3) {
-    //             compBackgroundGray_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundGray_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundGray_buf = (compBackgroundGray_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundGray_result : ResourceColor | undefined = compBackgroundGray_buf
-    //     const compBackgroundSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundSecondary_buf_runtimeType))
-    //     {
-    //         const compBackgroundSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundSecondary_buf__selector == 0) {
-    //             compBackgroundSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundSecondary_buf__selector == 1) {
-    //             compBackgroundSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundSecondary_buf__selector == 2) {
-    //             compBackgroundSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundSecondary_buf__selector == 3) {
-    //             compBackgroundSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundSecondary_buf = (compBackgroundSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundSecondary_result : ResourceColor | undefined = compBackgroundSecondary_buf
-    //     const compBackgroundTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundTertiary_buf_runtimeType))
-    //     {
-    //         const compBackgroundTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundTertiary_buf__selector == 0) {
-    //             compBackgroundTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundTertiary_buf__selector == 1) {
-    //             compBackgroundTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundTertiary_buf__selector == 2) {
-    //             compBackgroundTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundTertiary_buf__selector == 3) {
-    //             compBackgroundTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundTertiary_buf = (compBackgroundTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundTertiary_result : ResourceColor | undefined = compBackgroundTertiary_buf
-    //     const compBackgroundEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundEmphasize_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundEmphasize_buf_runtimeType))
-    //     {
-    //         const compBackgroundEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundEmphasize_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundEmphasize_buf__selector == 0) {
-    //             compBackgroundEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundEmphasize_buf__selector == 1) {
-    //             compBackgroundEmphasize_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundEmphasize_buf__selector == 2) {
-    //             compBackgroundEmphasize_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundEmphasize_buf__selector == 3) {
-    //             compBackgroundEmphasize_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundEmphasize_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundEmphasize_buf = (compBackgroundEmphasize_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundEmphasize_result : ResourceColor | undefined = compBackgroundEmphasize_buf
-    //     const compBackgroundNeutral_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundNeutral_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundNeutral_buf_runtimeType))
-    //     {
-    //         const compBackgroundNeutral_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundNeutral_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundNeutral_buf__selector == 0) {
-    //             compBackgroundNeutral_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundNeutral_buf__selector == 1) {
-    //             compBackgroundNeutral_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundNeutral_buf__selector == 2) {
-    //             compBackgroundNeutral_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundNeutral_buf__selector == 3) {
-    //             compBackgroundNeutral_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundNeutral_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundNeutral_buf = (compBackgroundNeutral_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundNeutral_result : ResourceColor | undefined = compBackgroundNeutral_buf
-    //     const compEmphasizeSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compEmphasizeSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compEmphasizeSecondary_buf_runtimeType))
-    //     {
-    //         const compEmphasizeSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compEmphasizeSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (compEmphasizeSecondary_buf__selector == 0) {
-    //             compEmphasizeSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compEmphasizeSecondary_buf__selector == 1) {
-    //             compEmphasizeSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compEmphasizeSecondary_buf__selector == 2) {
-    //             compEmphasizeSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compEmphasizeSecondary_buf__selector == 3) {
-    //             compEmphasizeSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compEmphasizeSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compEmphasizeSecondary_buf = (compEmphasizeSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compEmphasizeSecondary_result : ResourceColor | undefined = compEmphasizeSecondary_buf
-    //     const compEmphasizeTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compEmphasizeTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compEmphasizeTertiary_buf_runtimeType))
-    //     {
-    //         const compEmphasizeTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compEmphasizeTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (compEmphasizeTertiary_buf__selector == 0) {
-    //             compEmphasizeTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compEmphasizeTertiary_buf__selector == 1) {
-    //             compEmphasizeTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compEmphasizeTertiary_buf__selector == 2) {
-    //             compEmphasizeTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compEmphasizeTertiary_buf__selector == 3) {
-    //             compEmphasizeTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compEmphasizeTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compEmphasizeTertiary_buf = (compEmphasizeTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compEmphasizeTertiary_result : ResourceColor | undefined = compEmphasizeTertiary_buf
-    //     const compDivider_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compDivider_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compDivider_buf_runtimeType))
-    //     {
-    //         const compDivider_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compDivider_buf_ : Color | number | string | Resource | undefined
-    //         if (compDivider_buf__selector == 0) {
-    //             compDivider_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compDivider_buf__selector == 1) {
-    //             compDivider_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compDivider_buf__selector == 2) {
-    //             compDivider_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compDivider_buf__selector == 3) {
-    //             compDivider_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compDivider_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compDivider_buf = (compDivider_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compDivider_result : ResourceColor | undefined = compDivider_buf
-    //     const compCommonContrary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compCommonContrary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compCommonContrary_buf_runtimeType))
-    //     {
-    //         const compCommonContrary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compCommonContrary_buf_ : Color | number | string | Resource | undefined
-    //         if (compCommonContrary_buf__selector == 0) {
-    //             compCommonContrary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compCommonContrary_buf__selector == 1) {
-    //             compCommonContrary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compCommonContrary_buf__selector == 2) {
-    //             compCommonContrary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compCommonContrary_buf__selector == 3) {
-    //             compCommonContrary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compCommonContrary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compCommonContrary_buf = (compCommonContrary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compCommonContrary_result : ResourceColor | undefined = compCommonContrary_buf
-    //     const compBackgroundFocus_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compBackgroundFocus_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compBackgroundFocus_buf_runtimeType))
-    //     {
-    //         const compBackgroundFocus_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compBackgroundFocus_buf_ : Color | number | string | Resource | undefined
-    //         if (compBackgroundFocus_buf__selector == 0) {
-    //             compBackgroundFocus_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compBackgroundFocus_buf__selector == 1) {
-    //             compBackgroundFocus_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compBackgroundFocus_buf__selector == 2) {
-    //             compBackgroundFocus_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compBackgroundFocus_buf__selector == 3) {
-    //             compBackgroundFocus_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compBackgroundFocus_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compBackgroundFocus_buf = (compBackgroundFocus_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compBackgroundFocus_result : ResourceColor | undefined = compBackgroundFocus_buf
-    //     const compFocusedPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compFocusedPrimary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compFocusedPrimary_buf_runtimeType))
-    //     {
-    //         const compFocusedPrimary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compFocusedPrimary_buf_ : Color | number | string | Resource | undefined
-    //         if (compFocusedPrimary_buf__selector == 0) {
-    //             compFocusedPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compFocusedPrimary_buf__selector == 1) {
-    //             compFocusedPrimary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compFocusedPrimary_buf__selector == 2) {
-    //             compFocusedPrimary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compFocusedPrimary_buf__selector == 3) {
-    //             compFocusedPrimary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compFocusedPrimary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compFocusedPrimary_buf = (compFocusedPrimary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compFocusedPrimary_result : ResourceColor | undefined = compFocusedPrimary_buf
-    //     const compFocusedSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compFocusedSecondary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compFocusedSecondary_buf_runtimeType))
-    //     {
-    //         const compFocusedSecondary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compFocusedSecondary_buf_ : Color | number | string | Resource | undefined
-    //         if (compFocusedSecondary_buf__selector == 0) {
-    //             compFocusedSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compFocusedSecondary_buf__selector == 1) {
-    //             compFocusedSecondary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compFocusedSecondary_buf__selector == 2) {
-    //             compFocusedSecondary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compFocusedSecondary_buf__selector == 3) {
-    //             compFocusedSecondary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compFocusedSecondary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compFocusedSecondary_buf = (compFocusedSecondary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compFocusedSecondary_result : ResourceColor | undefined = compFocusedSecondary_buf
-    //     const compFocusedTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let compFocusedTertiary_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (compFocusedTertiary_buf_runtimeType))
-    //     {
-    //         const compFocusedTertiary_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let compFocusedTertiary_buf_ : Color | number | string | Resource | undefined
-    //         if (compFocusedTertiary_buf__selector == 0) {
-    //             compFocusedTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (compFocusedTertiary_buf__selector == 1) {
-    //             compFocusedTertiary_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (compFocusedTertiary_buf__selector == 2) {
-    //             compFocusedTertiary_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (compFocusedTertiary_buf__selector == 3) {
-    //             compFocusedTertiary_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for compFocusedTertiary_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         compFocusedTertiary_buf = (compFocusedTertiary_buf_ as Color | number | string | Resource)
-    //     }
-    //     const compFocusedTertiary_result : ResourceColor | undefined = compFocusedTertiary_buf
-    //     const interactiveHover_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let interactiveHover_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (interactiveHover_buf_runtimeType))
-    //     {
-    //         const interactiveHover_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let interactiveHover_buf_ : Color | number | string | Resource | undefined
-    //         if (interactiveHover_buf__selector == 0) {
-    //             interactiveHover_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (interactiveHover_buf__selector == 1) {
-    //             interactiveHover_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (interactiveHover_buf__selector == 2) {
-    //             interactiveHover_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (interactiveHover_buf__selector == 3) {
-    //             interactiveHover_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for interactiveHover_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         interactiveHover_buf = (interactiveHover_buf_ as Color | number | string | Resource)
-    //     }
-    //     const interactiveHover_result : ResourceColor | undefined = interactiveHover_buf
-    //     const interactivePressed_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let interactivePressed_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (interactivePressed_buf_runtimeType))
-    //     {
-    //         const interactivePressed_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let interactivePressed_buf_ : Color | number | string | Resource | undefined
-    //         if (interactivePressed_buf__selector == 0) {
-    //             interactivePressed_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (interactivePressed_buf__selector == 1) {
-    //             interactivePressed_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (interactivePressed_buf__selector == 2) {
-    //             interactivePressed_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (interactivePressed_buf__selector == 3) {
-    //             interactivePressed_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for interactivePressed_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         interactivePressed_buf = (interactivePressed_buf_ as Color | number | string | Resource)
-    //     }
-    //     const interactivePressed_result : ResourceColor | undefined = interactivePressed_buf
-    //     const interactiveFocus_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let interactiveFocus_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (interactiveFocus_buf_runtimeType))
-    //     {
-    //         const interactiveFocus_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let interactiveFocus_buf_ : Color | number | string | Resource | undefined
-    //         if (interactiveFocus_buf__selector == 0) {
-    //             interactiveFocus_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (interactiveFocus_buf__selector == 1) {
-    //             interactiveFocus_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (interactiveFocus_buf__selector == 2) {
-    //             interactiveFocus_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (interactiveFocus_buf__selector == 3) {
-    //             interactiveFocus_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for interactiveFocus_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         interactiveFocus_buf = (interactiveFocus_buf_ as Color | number | string | Resource)
-    //     }
-    //     const interactiveFocus_result : ResourceColor | undefined = interactiveFocus_buf
-    //     const interactiveActive_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let interactiveActive_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (interactiveActive_buf_runtimeType))
-    //     {
-    //         const interactiveActive_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let interactiveActive_buf_ : Color | number | string | Resource | undefined
-    //         if (interactiveActive_buf__selector == 0) {
-    //             interactiveActive_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (interactiveActive_buf__selector == 1) {
-    //             interactiveActive_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (interactiveActive_buf__selector == 2) {
-    //             interactiveActive_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (interactiveActive_buf__selector == 3) {
-    //             interactiveActive_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for interactiveActive_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         interactiveActive_buf = (interactiveActive_buf_ as Color | number | string | Resource)
-    //     }
-    //     const interactiveActive_result : ResourceColor | undefined = interactiveActive_buf
-    //     const interactiveSelect_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let interactiveSelect_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (interactiveSelect_buf_runtimeType))
-    //     {
-    //         const interactiveSelect_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let interactiveSelect_buf_ : Color | number | string | Resource | undefined
-    //         if (interactiveSelect_buf__selector == 0) {
-    //             interactiveSelect_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (interactiveSelect_buf__selector == 1) {
-    //             interactiveSelect_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (interactiveSelect_buf__selector == 2) {
-    //             interactiveSelect_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (interactiveSelect_buf__selector == 3) {
-    //             interactiveSelect_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for interactiveSelect_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         interactiveSelect_buf = (interactiveSelect_buf_ as Color | number | string | Resource)
-    //     }
-    //     const interactiveSelect_result : ResourceColor | undefined = interactiveSelect_buf
-    //     const interactiveClick_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let interactiveClick_buf : ResourceColor | undefined
-    //     if ((RuntimeType.UNDEFINED) != (interactiveClick_buf_runtimeType))
-    //     {
-    //         const interactiveClick_buf__selector : int32 = valueDeserializer.readInt8()
-    //         let interactiveClick_buf_ : Color | number | string | Resource | undefined
-    //         if (interactiveClick_buf__selector == 0) {
-    //             interactiveClick_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-    //         }
-    //         else if (interactiveClick_buf__selector == 1) {
-    //             interactiveClick_buf_ = (valueDeserializer.readNumber() as number)
-    //         }
-    //         else if (interactiveClick_buf__selector == 2) {
-    //             interactiveClick_buf_ = (valueDeserializer.readString() as string)
-    //         }
-    //         else if (interactiveClick_buf__selector == 3) {
-    //             interactiveClick_buf_ = valueDeserializer.readResource()
-    //         }
-    //         else {
-    //             throw new Error("One of the branches for interactiveClick_buf_ has to be chosen through deserialisation.")
-    //         }
-    //         interactiveClick_buf = (interactiveClick_buf_ as Color | number | string | Resource)
-    //     }
-    //     const interactiveClick_result : ResourceColor | undefined = interactiveClick_buf
-    //     let value : CustomColors = ({brand: brand_result, warning: warning_result, alert: alert_result, confirm: confirm_result, fontPrimary: fontPrimary_result, fontSecondary: fontSecondary_result, fontTertiary: fontTertiary_result, fontFourth: fontFourth_result, fontEmphasize: fontEmphasize_result, fontOnPrimary: fontOnPrimary_result, fontOnSecondary: fontOnSecondary_result, fontOnTertiary: fontOnTertiary_result, fontOnFourth: fontOnFourth_result, iconPrimary: iconPrimary_result, iconSecondary: iconSecondary_result, iconTertiary: iconTertiary_result, iconFourth: iconFourth_result, iconEmphasize: iconEmphasize_result, iconSubEmphasize: iconSubEmphasize_result, iconOnPrimary: iconOnPrimary_result, iconOnSecondary: iconOnSecondary_result, iconOnTertiary: iconOnTertiary_result, iconOnFourth: iconOnFourth_result, backgroundPrimary: backgroundPrimary_result, backgroundSecondary: backgroundSecondary_result, backgroundTertiary: backgroundTertiary_result, backgroundFourth: backgroundFourth_result, backgroundEmphasize: backgroundEmphasize_result, compForegroundPrimary: compForegroundPrimary_result, compBackgroundPrimary: compBackgroundPrimary_result, compBackgroundPrimaryTran: compBackgroundPrimaryTran_result, compBackgroundPrimaryContrary: compBackgroundPrimaryContrary_result, compBackgroundGray: compBackgroundGray_result, compBackgroundSecondary: compBackgroundSecondary_result, compBackgroundTertiary: compBackgroundTertiary_result, compBackgroundEmphasize: compBackgroundEmphasize_result, compBackgroundNeutral: compBackgroundNeutral_result, compEmphasizeSecondary: compEmphasizeSecondary_result, compEmphasizeTertiary: compEmphasizeTertiary_result, compDivider: compDivider_result, compCommonContrary: compCommonContrary_result, compBackgroundFocus: compBackgroundFocus_result, compFocusedPrimary: compFocusedPrimary_result, compFocusedSecondary: compFocusedSecondary_result, compFocusedTertiary: compFocusedTertiary_result, interactiveHover: interactiveHover_result, interactivePressed: interactivePressed_result, interactiveFocus: interactiveFocus_result, interactiveActive: interactiveActive_result, interactiveSelect: interactiveSelect_result, interactiveClick: interactiveClick_result} as CustomColors)
-    //     return value
-    // }
+    readCustomColors(): CustomColors {
+        let valueDeserializer : Deserializer = this
+        const brand_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let brand_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (brand_buf_runtimeType))
+        {
+            const brand_buf__selector : int32 = valueDeserializer.readInt8()
+            let brand_buf_ : Color | number | string | Resource | undefined
+            if (brand_buf__selector == 0) {
+                brand_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (brand_buf__selector == 1) {
+                brand_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (brand_buf__selector == 2) {
+                brand_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (brand_buf__selector == 3) {
+                brand_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for brand_buf_ has to be chosen through deserialisation.")
+            }
+            brand_buf = (brand_buf_ as Color | number | string | Resource)
+        }
+        const brand_result : ResourceColor | undefined = brand_buf
+        const warning_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let warning_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (warning_buf_runtimeType))
+        {
+            const warning_buf__selector : int32 = valueDeserializer.readInt8()
+            let warning_buf_ : Color | number | string | Resource | undefined
+            if (warning_buf__selector == 0) {
+                warning_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (warning_buf__selector == 1) {
+                warning_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (warning_buf__selector == 2) {
+                warning_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (warning_buf__selector == 3) {
+                warning_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for warning_buf_ has to be chosen through deserialisation.")
+            }
+            warning_buf = (warning_buf_ as Color | number | string | Resource)
+        }
+        const warning_result : ResourceColor | undefined = warning_buf
+        const alert_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let alert_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (alert_buf_runtimeType))
+        {
+            const alert_buf__selector : int32 = valueDeserializer.readInt8()
+            let alert_buf_ : Color | number | string | Resource | undefined
+            if (alert_buf__selector == 0) {
+                alert_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (alert_buf__selector == 1) {
+                alert_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (alert_buf__selector == 2) {
+                alert_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (alert_buf__selector == 3) {
+                alert_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for alert_buf_ has to be chosen through deserialisation.")
+            }
+            alert_buf = (alert_buf_ as Color | number | string | Resource)
+        }
+        const alert_result : ResourceColor | undefined = alert_buf
+        const confirm_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let confirm_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (confirm_buf_runtimeType))
+        {
+            const confirm_buf__selector : int32 = valueDeserializer.readInt8()
+            let confirm_buf_ : Color | number | string | Resource | undefined
+            if (confirm_buf__selector == 0) {
+                confirm_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (confirm_buf__selector == 1) {
+                confirm_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (confirm_buf__selector == 2) {
+                confirm_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (confirm_buf__selector == 3) {
+                confirm_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for confirm_buf_ has to be chosen through deserialisation.")
+            }
+            confirm_buf = (confirm_buf_ as Color | number | string | Resource)
+        }
+        const confirm_result : ResourceColor | undefined = confirm_buf
+        const fontPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontPrimary_buf_runtimeType))
+        {
+            const fontPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontPrimary_buf_ : Color | number | string | Resource | undefined
+            if (fontPrimary_buf__selector == 0) {
+                fontPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontPrimary_buf__selector == 1) {
+                fontPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontPrimary_buf__selector == 2) {
+                fontPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontPrimary_buf__selector == 3) {
+                fontPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            fontPrimary_buf = (fontPrimary_buf_ as Color | number | string | Resource)
+        }
+        const fontPrimary_result : ResourceColor | undefined = fontPrimary_buf
+        const fontSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontSecondary_buf_runtimeType))
+        {
+            const fontSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontSecondary_buf_ : Color | number | string | Resource | undefined
+            if (fontSecondary_buf__selector == 0) {
+                fontSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontSecondary_buf__selector == 1) {
+                fontSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontSecondary_buf__selector == 2) {
+                fontSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontSecondary_buf__selector == 3) {
+                fontSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            fontSecondary_buf = (fontSecondary_buf_ as Color | number | string | Resource)
+        }
+        const fontSecondary_result : ResourceColor | undefined = fontSecondary_buf
+        const fontTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontTertiary_buf_runtimeType))
+        {
+            const fontTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontTertiary_buf_ : Color | number | string | Resource | undefined
+            if (fontTertiary_buf__selector == 0) {
+                fontTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontTertiary_buf__selector == 1) {
+                fontTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontTertiary_buf__selector == 2) {
+                fontTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontTertiary_buf__selector == 3) {
+                fontTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            fontTertiary_buf = (fontTertiary_buf_ as Color | number | string | Resource)
+        }
+        const fontTertiary_result : ResourceColor | undefined = fontTertiary_buf
+        const fontFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontFourth_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontFourth_buf_runtimeType))
+        {
+            const fontFourth_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontFourth_buf_ : Color | number | string | Resource | undefined
+            if (fontFourth_buf__selector == 0) {
+                fontFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontFourth_buf__selector == 1) {
+                fontFourth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontFourth_buf__selector == 2) {
+                fontFourth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontFourth_buf__selector == 3) {
+                fontFourth_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontFourth_buf_ has to be chosen through deserialisation.")
+            }
+            fontFourth_buf = (fontFourth_buf_ as Color | number | string | Resource)
+        }
+        const fontFourth_result : ResourceColor | undefined = fontFourth_buf
+        const fontEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontEmphasize_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontEmphasize_buf_runtimeType))
+        {
+            const fontEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontEmphasize_buf_ : Color | number | string | Resource | undefined
+            if (fontEmphasize_buf__selector == 0) {
+                fontEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontEmphasize_buf__selector == 1) {
+                fontEmphasize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontEmphasize_buf__selector == 2) {
+                fontEmphasize_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontEmphasize_buf__selector == 3) {
+                fontEmphasize_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontEmphasize_buf_ has to be chosen through deserialisation.")
+            }
+            fontEmphasize_buf = (fontEmphasize_buf_ as Color | number | string | Resource)
+        }
+        const fontEmphasize_result : ResourceColor | undefined = fontEmphasize_buf
+        const fontOnPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontOnPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontOnPrimary_buf_runtimeType))
+        {
+            const fontOnPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontOnPrimary_buf_ : Color | number | string | Resource | undefined
+            if (fontOnPrimary_buf__selector == 0) {
+                fontOnPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontOnPrimary_buf__selector == 1) {
+                fontOnPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontOnPrimary_buf__selector == 2) {
+                fontOnPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontOnPrimary_buf__selector == 3) {
+                fontOnPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontOnPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            fontOnPrimary_buf = (fontOnPrimary_buf_ as Color | number | string | Resource)
+        }
+        const fontOnPrimary_result : ResourceColor | undefined = fontOnPrimary_buf
+        const fontOnSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontOnSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontOnSecondary_buf_runtimeType))
+        {
+            const fontOnSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontOnSecondary_buf_ : Color | number | string | Resource | undefined
+            if (fontOnSecondary_buf__selector == 0) {
+                fontOnSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontOnSecondary_buf__selector == 1) {
+                fontOnSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontOnSecondary_buf__selector == 2) {
+                fontOnSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontOnSecondary_buf__selector == 3) {
+                fontOnSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontOnSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            fontOnSecondary_buf = (fontOnSecondary_buf_ as Color | number | string | Resource)
+        }
+        const fontOnSecondary_result : ResourceColor | undefined = fontOnSecondary_buf
+        const fontOnTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontOnTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontOnTertiary_buf_runtimeType))
+        {
+            const fontOnTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontOnTertiary_buf_ : Color | number | string | Resource | undefined
+            if (fontOnTertiary_buf__selector == 0) {
+                fontOnTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontOnTertiary_buf__selector == 1) {
+                fontOnTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontOnTertiary_buf__selector == 2) {
+                fontOnTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontOnTertiary_buf__selector == 3) {
+                fontOnTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontOnTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            fontOnTertiary_buf = (fontOnTertiary_buf_ as Color | number | string | Resource)
+        }
+        const fontOnTertiary_result : ResourceColor | undefined = fontOnTertiary_buf
+        const fontOnFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontOnFourth_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (fontOnFourth_buf_runtimeType))
+        {
+            const fontOnFourth_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontOnFourth_buf_ : Color | number | string | Resource | undefined
+            if (fontOnFourth_buf__selector == 0) {
+                fontOnFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (fontOnFourth_buf__selector == 1) {
+                fontOnFourth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontOnFourth_buf__selector == 2) {
+                fontOnFourth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontOnFourth_buf__selector == 3) {
+                fontOnFourth_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontOnFourth_buf_ has to be chosen through deserialisation.")
+            }
+            fontOnFourth_buf = (fontOnFourth_buf_ as Color | number | string | Resource)
+        }
+        const fontOnFourth_result : ResourceColor | undefined = fontOnFourth_buf
+        const iconPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconPrimary_buf_runtimeType))
+        {
+            const iconPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconPrimary_buf_ : Color | number | string | Resource | undefined
+            if (iconPrimary_buf__selector == 0) {
+                iconPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconPrimary_buf__selector == 1) {
+                iconPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconPrimary_buf__selector == 2) {
+                iconPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconPrimary_buf__selector == 3) {
+                iconPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            iconPrimary_buf = (iconPrimary_buf_ as Color | number | string | Resource)
+        }
+        const iconPrimary_result : ResourceColor | undefined = iconPrimary_buf
+        const iconSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconSecondary_buf_runtimeType))
+        {
+            const iconSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconSecondary_buf_ : Color | number | string | Resource | undefined
+            if (iconSecondary_buf__selector == 0) {
+                iconSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconSecondary_buf__selector == 1) {
+                iconSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconSecondary_buf__selector == 2) {
+                iconSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconSecondary_buf__selector == 3) {
+                iconSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            iconSecondary_buf = (iconSecondary_buf_ as Color | number | string | Resource)
+        }
+        const iconSecondary_result : ResourceColor | undefined = iconSecondary_buf
+        const iconTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconTertiary_buf_runtimeType))
+        {
+            const iconTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconTertiary_buf_ : Color | number | string | Resource | undefined
+            if (iconTertiary_buf__selector == 0) {
+                iconTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconTertiary_buf__selector == 1) {
+                iconTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconTertiary_buf__selector == 2) {
+                iconTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconTertiary_buf__selector == 3) {
+                iconTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            iconTertiary_buf = (iconTertiary_buf_ as Color | number | string | Resource)
+        }
+        const iconTertiary_result : ResourceColor | undefined = iconTertiary_buf
+        const iconFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconFourth_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconFourth_buf_runtimeType))
+        {
+            const iconFourth_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconFourth_buf_ : Color | number | string | Resource | undefined
+            if (iconFourth_buf__selector == 0) {
+                iconFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconFourth_buf__selector == 1) {
+                iconFourth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconFourth_buf__selector == 2) {
+                iconFourth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconFourth_buf__selector == 3) {
+                iconFourth_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconFourth_buf_ has to be chosen through deserialisation.")
+            }
+            iconFourth_buf = (iconFourth_buf_ as Color | number | string | Resource)
+        }
+        const iconFourth_result : ResourceColor | undefined = iconFourth_buf
+        const iconEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconEmphasize_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconEmphasize_buf_runtimeType))
+        {
+            const iconEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconEmphasize_buf_ : Color | number | string | Resource | undefined
+            if (iconEmphasize_buf__selector == 0) {
+                iconEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconEmphasize_buf__selector == 1) {
+                iconEmphasize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconEmphasize_buf__selector == 2) {
+                iconEmphasize_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconEmphasize_buf__selector == 3) {
+                iconEmphasize_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconEmphasize_buf_ has to be chosen through deserialisation.")
+            }
+            iconEmphasize_buf = (iconEmphasize_buf_ as Color | number | string | Resource)
+        }
+        const iconEmphasize_result : ResourceColor | undefined = iconEmphasize_buf
+        const iconSubEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconSubEmphasize_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconSubEmphasize_buf_runtimeType))
+        {
+            const iconSubEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconSubEmphasize_buf_ : Color | number | string | Resource | undefined
+            if (iconSubEmphasize_buf__selector == 0) {
+                iconSubEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconSubEmphasize_buf__selector == 1) {
+                iconSubEmphasize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconSubEmphasize_buf__selector == 2) {
+                iconSubEmphasize_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconSubEmphasize_buf__selector == 3) {
+                iconSubEmphasize_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconSubEmphasize_buf_ has to be chosen through deserialisation.")
+            }
+            iconSubEmphasize_buf = (iconSubEmphasize_buf_ as Color | number | string | Resource)
+        }
+        const iconSubEmphasize_result : ResourceColor | undefined = iconSubEmphasize_buf
+        const iconOnPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconOnPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconOnPrimary_buf_runtimeType))
+        {
+            const iconOnPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconOnPrimary_buf_ : Color | number | string | Resource | undefined
+            if (iconOnPrimary_buf__selector == 0) {
+                iconOnPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconOnPrimary_buf__selector == 1) {
+                iconOnPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconOnPrimary_buf__selector == 2) {
+                iconOnPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconOnPrimary_buf__selector == 3) {
+                iconOnPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconOnPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            iconOnPrimary_buf = (iconOnPrimary_buf_ as Color | number | string | Resource)
+        }
+        const iconOnPrimary_result : ResourceColor | undefined = iconOnPrimary_buf
+        const iconOnSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconOnSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconOnSecondary_buf_runtimeType))
+        {
+            const iconOnSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconOnSecondary_buf_ : Color | number | string | Resource | undefined
+            if (iconOnSecondary_buf__selector == 0) {
+                iconOnSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconOnSecondary_buf__selector == 1) {
+                iconOnSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconOnSecondary_buf__selector == 2) {
+                iconOnSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconOnSecondary_buf__selector == 3) {
+                iconOnSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconOnSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            iconOnSecondary_buf = (iconOnSecondary_buf_ as Color | number | string | Resource)
+        }
+        const iconOnSecondary_result : ResourceColor | undefined = iconOnSecondary_buf
+        const iconOnTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconOnTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconOnTertiary_buf_runtimeType))
+        {
+            const iconOnTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconOnTertiary_buf_ : Color | number | string | Resource | undefined
+            if (iconOnTertiary_buf__selector == 0) {
+                iconOnTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconOnTertiary_buf__selector == 1) {
+                iconOnTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconOnTertiary_buf__selector == 2) {
+                iconOnTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconOnTertiary_buf__selector == 3) {
+                iconOnTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconOnTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            iconOnTertiary_buf = (iconOnTertiary_buf_ as Color | number | string | Resource)
+        }
+        const iconOnTertiary_result : ResourceColor | undefined = iconOnTertiary_buf
+        const iconOnFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iconOnFourth_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (iconOnFourth_buf_runtimeType))
+        {
+            const iconOnFourth_buf__selector : int32 = valueDeserializer.readInt8()
+            let iconOnFourth_buf_ : Color | number | string | Resource | undefined
+            if (iconOnFourth_buf__selector == 0) {
+                iconOnFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (iconOnFourth_buf__selector == 1) {
+                iconOnFourth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (iconOnFourth_buf__selector == 2) {
+                iconOnFourth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (iconOnFourth_buf__selector == 3) {
+                iconOnFourth_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for iconOnFourth_buf_ has to be chosen through deserialisation.")
+            }
+            iconOnFourth_buf = (iconOnFourth_buf_ as Color | number | string | Resource)
+        }
+        const iconOnFourth_result : ResourceColor | undefined = iconOnFourth_buf
+        const backgroundPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundPrimary_buf_runtimeType))
+        {
+            const backgroundPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundPrimary_buf_ : Color | number | string | Resource | undefined
+            if (backgroundPrimary_buf__selector == 0) {
+                backgroundPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundPrimary_buf__selector == 1) {
+                backgroundPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundPrimary_buf__selector == 2) {
+                backgroundPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundPrimary_buf__selector == 3) {
+                backgroundPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundPrimary_buf = (backgroundPrimary_buf_ as Color | number | string | Resource)
+        }
+        const backgroundPrimary_result : ResourceColor | undefined = backgroundPrimary_buf
+        const backgroundSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundSecondary_buf_runtimeType))
+        {
+            const backgroundSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundSecondary_buf_ : Color | number | string | Resource | undefined
+            if (backgroundSecondary_buf__selector == 0) {
+                backgroundSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundSecondary_buf__selector == 1) {
+                backgroundSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundSecondary_buf__selector == 2) {
+                backgroundSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundSecondary_buf__selector == 3) {
+                backgroundSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundSecondary_buf = (backgroundSecondary_buf_ as Color | number | string | Resource)
+        }
+        const backgroundSecondary_result : ResourceColor | undefined = backgroundSecondary_buf
+        const backgroundTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundTertiary_buf_runtimeType))
+        {
+            const backgroundTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundTertiary_buf_ : Color | number | string | Resource | undefined
+            if (backgroundTertiary_buf__selector == 0) {
+                backgroundTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundTertiary_buf__selector == 1) {
+                backgroundTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundTertiary_buf__selector == 2) {
+                backgroundTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundTertiary_buf__selector == 3) {
+                backgroundTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundTertiary_buf = (backgroundTertiary_buf_ as Color | number | string | Resource)
+        }
+        const backgroundTertiary_result : ResourceColor | undefined = backgroundTertiary_buf
+        const backgroundFourth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundFourth_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundFourth_buf_runtimeType))
+        {
+            const backgroundFourth_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundFourth_buf_ : Color | number | string | Resource | undefined
+            if (backgroundFourth_buf__selector == 0) {
+                backgroundFourth_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundFourth_buf__selector == 1) {
+                backgroundFourth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundFourth_buf__selector == 2) {
+                backgroundFourth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundFourth_buf__selector == 3) {
+                backgroundFourth_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundFourth_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundFourth_buf = (backgroundFourth_buf_ as Color | number | string | Resource)
+        }
+        const backgroundFourth_result : ResourceColor | undefined = backgroundFourth_buf
+        const backgroundEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundEmphasize_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundEmphasize_buf_runtimeType))
+        {
+            const backgroundEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundEmphasize_buf_ : Color | number | string | Resource | undefined
+            if (backgroundEmphasize_buf__selector == 0) {
+                backgroundEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundEmphasize_buf__selector == 1) {
+                backgroundEmphasize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundEmphasize_buf__selector == 2) {
+                backgroundEmphasize_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundEmphasize_buf__selector == 3) {
+                backgroundEmphasize_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundEmphasize_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundEmphasize_buf = (backgroundEmphasize_buf_ as Color | number | string | Resource)
+        }
+        const backgroundEmphasize_result : ResourceColor | undefined = backgroundEmphasize_buf
+        const compForegroundPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compForegroundPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compForegroundPrimary_buf_runtimeType))
+        {
+            const compForegroundPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compForegroundPrimary_buf_ : Color | number | string | Resource | undefined
+            if (compForegroundPrimary_buf__selector == 0) {
+                compForegroundPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compForegroundPrimary_buf__selector == 1) {
+                compForegroundPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compForegroundPrimary_buf__selector == 2) {
+                compForegroundPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compForegroundPrimary_buf__selector == 3) {
+                compForegroundPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compForegroundPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            compForegroundPrimary_buf = (compForegroundPrimary_buf_ as Color | number | string | Resource)
+        }
+        const compForegroundPrimary_result : ResourceColor | undefined = compForegroundPrimary_buf
+        const compBackgroundPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundPrimary_buf_runtimeType))
+        {
+            const compBackgroundPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundPrimary_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundPrimary_buf__selector == 0) {
+                compBackgroundPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundPrimary_buf__selector == 1) {
+                compBackgroundPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundPrimary_buf__selector == 2) {
+                compBackgroundPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundPrimary_buf__selector == 3) {
+                compBackgroundPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundPrimary_buf = (compBackgroundPrimary_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundPrimary_result : ResourceColor | undefined = compBackgroundPrimary_buf
+        const compBackgroundPrimaryTran_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundPrimaryTran_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundPrimaryTran_buf_runtimeType))
+        {
+            const compBackgroundPrimaryTran_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundPrimaryTran_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundPrimaryTran_buf__selector == 0) {
+                compBackgroundPrimaryTran_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundPrimaryTran_buf__selector == 1) {
+                compBackgroundPrimaryTran_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundPrimaryTran_buf__selector == 2) {
+                compBackgroundPrimaryTran_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundPrimaryTran_buf__selector == 3) {
+                compBackgroundPrimaryTran_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundPrimaryTran_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundPrimaryTran_buf = (compBackgroundPrimaryTran_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundPrimaryTran_result : ResourceColor | undefined = compBackgroundPrimaryTran_buf
+        const compBackgroundPrimaryContrary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundPrimaryContrary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundPrimaryContrary_buf_runtimeType))
+        {
+            const compBackgroundPrimaryContrary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundPrimaryContrary_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundPrimaryContrary_buf__selector == 0) {
+                compBackgroundPrimaryContrary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundPrimaryContrary_buf__selector == 1) {
+                compBackgroundPrimaryContrary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundPrimaryContrary_buf__selector == 2) {
+                compBackgroundPrimaryContrary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundPrimaryContrary_buf__selector == 3) {
+                compBackgroundPrimaryContrary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundPrimaryContrary_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundPrimaryContrary_buf = (compBackgroundPrimaryContrary_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundPrimaryContrary_result : ResourceColor | undefined = compBackgroundPrimaryContrary_buf
+        const compBackgroundGray_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundGray_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundGray_buf_runtimeType))
+        {
+            const compBackgroundGray_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundGray_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundGray_buf__selector == 0) {
+                compBackgroundGray_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundGray_buf__selector == 1) {
+                compBackgroundGray_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundGray_buf__selector == 2) {
+                compBackgroundGray_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundGray_buf__selector == 3) {
+                compBackgroundGray_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundGray_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundGray_buf = (compBackgroundGray_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundGray_result : ResourceColor | undefined = compBackgroundGray_buf
+        const compBackgroundSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundSecondary_buf_runtimeType))
+        {
+            const compBackgroundSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundSecondary_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundSecondary_buf__selector == 0) {
+                compBackgroundSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundSecondary_buf__selector == 1) {
+                compBackgroundSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundSecondary_buf__selector == 2) {
+                compBackgroundSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundSecondary_buf__selector == 3) {
+                compBackgroundSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundSecondary_buf = (compBackgroundSecondary_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundSecondary_result : ResourceColor | undefined = compBackgroundSecondary_buf
+        const compBackgroundTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundTertiary_buf_runtimeType))
+        {
+            const compBackgroundTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundTertiary_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundTertiary_buf__selector == 0) {
+                compBackgroundTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundTertiary_buf__selector == 1) {
+                compBackgroundTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundTertiary_buf__selector == 2) {
+                compBackgroundTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundTertiary_buf__selector == 3) {
+                compBackgroundTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundTertiary_buf = (compBackgroundTertiary_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundTertiary_result : ResourceColor | undefined = compBackgroundTertiary_buf
+        const compBackgroundEmphasize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundEmphasize_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundEmphasize_buf_runtimeType))
+        {
+            const compBackgroundEmphasize_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundEmphasize_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundEmphasize_buf__selector == 0) {
+                compBackgroundEmphasize_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundEmphasize_buf__selector == 1) {
+                compBackgroundEmphasize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundEmphasize_buf__selector == 2) {
+                compBackgroundEmphasize_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundEmphasize_buf__selector == 3) {
+                compBackgroundEmphasize_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundEmphasize_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundEmphasize_buf = (compBackgroundEmphasize_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundEmphasize_result : ResourceColor | undefined = compBackgroundEmphasize_buf
+        const compBackgroundNeutral_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundNeutral_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundNeutral_buf_runtimeType))
+        {
+            const compBackgroundNeutral_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundNeutral_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundNeutral_buf__selector == 0) {
+                compBackgroundNeutral_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundNeutral_buf__selector == 1) {
+                compBackgroundNeutral_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundNeutral_buf__selector == 2) {
+                compBackgroundNeutral_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundNeutral_buf__selector == 3) {
+                compBackgroundNeutral_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundNeutral_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundNeutral_buf = (compBackgroundNeutral_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundNeutral_result : ResourceColor | undefined = compBackgroundNeutral_buf
+        const compEmphasizeSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compEmphasizeSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compEmphasizeSecondary_buf_runtimeType))
+        {
+            const compEmphasizeSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compEmphasizeSecondary_buf_ : Color | number | string | Resource | undefined
+            if (compEmphasizeSecondary_buf__selector == 0) {
+                compEmphasizeSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compEmphasizeSecondary_buf__selector == 1) {
+                compEmphasizeSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compEmphasizeSecondary_buf__selector == 2) {
+                compEmphasizeSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compEmphasizeSecondary_buf__selector == 3) {
+                compEmphasizeSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compEmphasizeSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            compEmphasizeSecondary_buf = (compEmphasizeSecondary_buf_ as Color | number | string | Resource)
+        }
+        const compEmphasizeSecondary_result : ResourceColor | undefined = compEmphasizeSecondary_buf
+        const compEmphasizeTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compEmphasizeTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compEmphasizeTertiary_buf_runtimeType))
+        {
+            const compEmphasizeTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compEmphasizeTertiary_buf_ : Color | number | string | Resource | undefined
+            if (compEmphasizeTertiary_buf__selector == 0) {
+                compEmphasizeTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compEmphasizeTertiary_buf__selector == 1) {
+                compEmphasizeTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compEmphasizeTertiary_buf__selector == 2) {
+                compEmphasizeTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compEmphasizeTertiary_buf__selector == 3) {
+                compEmphasizeTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compEmphasizeTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            compEmphasizeTertiary_buf = (compEmphasizeTertiary_buf_ as Color | number | string | Resource)
+        }
+        const compEmphasizeTertiary_result : ResourceColor | undefined = compEmphasizeTertiary_buf
+        const compDivider_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compDivider_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compDivider_buf_runtimeType))
+        {
+            const compDivider_buf__selector : int32 = valueDeserializer.readInt8()
+            let compDivider_buf_ : Color | number | string | Resource | undefined
+            if (compDivider_buf__selector == 0) {
+                compDivider_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compDivider_buf__selector == 1) {
+                compDivider_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compDivider_buf__selector == 2) {
+                compDivider_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compDivider_buf__selector == 3) {
+                compDivider_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compDivider_buf_ has to be chosen through deserialisation.")
+            }
+            compDivider_buf = (compDivider_buf_ as Color | number | string | Resource)
+        }
+        const compDivider_result : ResourceColor | undefined = compDivider_buf
+        const compCommonContrary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compCommonContrary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compCommonContrary_buf_runtimeType))
+        {
+            const compCommonContrary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compCommonContrary_buf_ : Color | number | string | Resource | undefined
+            if (compCommonContrary_buf__selector == 0) {
+                compCommonContrary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compCommonContrary_buf__selector == 1) {
+                compCommonContrary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compCommonContrary_buf__selector == 2) {
+                compCommonContrary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compCommonContrary_buf__selector == 3) {
+                compCommonContrary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compCommonContrary_buf_ has to be chosen through deserialisation.")
+            }
+            compCommonContrary_buf = (compCommonContrary_buf_ as Color | number | string | Resource)
+        }
+        const compCommonContrary_result : ResourceColor | undefined = compCommonContrary_buf
+        const compBackgroundFocus_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compBackgroundFocus_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compBackgroundFocus_buf_runtimeType))
+        {
+            const compBackgroundFocus_buf__selector : int32 = valueDeserializer.readInt8()
+            let compBackgroundFocus_buf_ : Color | number | string | Resource | undefined
+            if (compBackgroundFocus_buf__selector == 0) {
+                compBackgroundFocus_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compBackgroundFocus_buf__selector == 1) {
+                compBackgroundFocus_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compBackgroundFocus_buf__selector == 2) {
+                compBackgroundFocus_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compBackgroundFocus_buf__selector == 3) {
+                compBackgroundFocus_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compBackgroundFocus_buf_ has to be chosen through deserialisation.")
+            }
+            compBackgroundFocus_buf = (compBackgroundFocus_buf_ as Color | number | string | Resource)
+        }
+        const compBackgroundFocus_result : ResourceColor | undefined = compBackgroundFocus_buf
+        const compFocusedPrimary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compFocusedPrimary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compFocusedPrimary_buf_runtimeType))
+        {
+            const compFocusedPrimary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compFocusedPrimary_buf_ : Color | number | string | Resource | undefined
+            if (compFocusedPrimary_buf__selector == 0) {
+                compFocusedPrimary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compFocusedPrimary_buf__selector == 1) {
+                compFocusedPrimary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compFocusedPrimary_buf__selector == 2) {
+                compFocusedPrimary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compFocusedPrimary_buf__selector == 3) {
+                compFocusedPrimary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compFocusedPrimary_buf_ has to be chosen through deserialisation.")
+            }
+            compFocusedPrimary_buf = (compFocusedPrimary_buf_ as Color | number | string | Resource)
+        }
+        const compFocusedPrimary_result : ResourceColor | undefined = compFocusedPrimary_buf
+        const compFocusedSecondary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compFocusedSecondary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compFocusedSecondary_buf_runtimeType))
+        {
+            const compFocusedSecondary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compFocusedSecondary_buf_ : Color | number | string | Resource | undefined
+            if (compFocusedSecondary_buf__selector == 0) {
+                compFocusedSecondary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compFocusedSecondary_buf__selector == 1) {
+                compFocusedSecondary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compFocusedSecondary_buf__selector == 2) {
+                compFocusedSecondary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compFocusedSecondary_buf__selector == 3) {
+                compFocusedSecondary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compFocusedSecondary_buf_ has to be chosen through deserialisation.")
+            }
+            compFocusedSecondary_buf = (compFocusedSecondary_buf_ as Color | number | string | Resource)
+        }
+        const compFocusedSecondary_result : ResourceColor | undefined = compFocusedSecondary_buf
+        const compFocusedTertiary_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let compFocusedTertiary_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (compFocusedTertiary_buf_runtimeType))
+        {
+            const compFocusedTertiary_buf__selector : int32 = valueDeserializer.readInt8()
+            let compFocusedTertiary_buf_ : Color | number | string | Resource | undefined
+            if (compFocusedTertiary_buf__selector == 0) {
+                compFocusedTertiary_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (compFocusedTertiary_buf__selector == 1) {
+                compFocusedTertiary_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (compFocusedTertiary_buf__selector == 2) {
+                compFocusedTertiary_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (compFocusedTertiary_buf__selector == 3) {
+                compFocusedTertiary_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for compFocusedTertiary_buf_ has to be chosen through deserialisation.")
+            }
+            compFocusedTertiary_buf = (compFocusedTertiary_buf_ as Color | number | string | Resource)
+        }
+        const compFocusedTertiary_result : ResourceColor | undefined = compFocusedTertiary_buf
+        const interactiveHover_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let interactiveHover_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (interactiveHover_buf_runtimeType))
+        {
+            const interactiveHover_buf__selector : int32 = valueDeserializer.readInt8()
+            let interactiveHover_buf_ : Color | number | string | Resource | undefined
+            if (interactiveHover_buf__selector == 0) {
+                interactiveHover_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (interactiveHover_buf__selector == 1) {
+                interactiveHover_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (interactiveHover_buf__selector == 2) {
+                interactiveHover_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (interactiveHover_buf__selector == 3) {
+                interactiveHover_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for interactiveHover_buf_ has to be chosen through deserialisation.")
+            }
+            interactiveHover_buf = (interactiveHover_buf_ as Color | number | string | Resource)
+        }
+        const interactiveHover_result : ResourceColor | undefined = interactiveHover_buf
+        const interactivePressed_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let interactivePressed_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (interactivePressed_buf_runtimeType))
+        {
+            const interactivePressed_buf__selector : int32 = valueDeserializer.readInt8()
+            let interactivePressed_buf_ : Color | number | string | Resource | undefined
+            if (interactivePressed_buf__selector == 0) {
+                interactivePressed_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (interactivePressed_buf__selector == 1) {
+                interactivePressed_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (interactivePressed_buf__selector == 2) {
+                interactivePressed_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (interactivePressed_buf__selector == 3) {
+                interactivePressed_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for interactivePressed_buf_ has to be chosen through deserialisation.")
+            }
+            interactivePressed_buf = (interactivePressed_buf_ as Color | number | string | Resource)
+        }
+        const interactivePressed_result : ResourceColor | undefined = interactivePressed_buf
+        const interactiveFocus_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let interactiveFocus_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (interactiveFocus_buf_runtimeType))
+        {
+            const interactiveFocus_buf__selector : int32 = valueDeserializer.readInt8()
+            let interactiveFocus_buf_ : Color | number | string | Resource | undefined
+            if (interactiveFocus_buf__selector == 0) {
+                interactiveFocus_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (interactiveFocus_buf__selector == 1) {
+                interactiveFocus_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (interactiveFocus_buf__selector == 2) {
+                interactiveFocus_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (interactiveFocus_buf__selector == 3) {
+                interactiveFocus_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for interactiveFocus_buf_ has to be chosen through deserialisation.")
+            }
+            interactiveFocus_buf = (interactiveFocus_buf_ as Color | number | string | Resource)
+        }
+        const interactiveFocus_result : ResourceColor | undefined = interactiveFocus_buf
+        const interactiveActive_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let interactiveActive_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (interactiveActive_buf_runtimeType))
+        {
+            const interactiveActive_buf__selector : int32 = valueDeserializer.readInt8()
+            let interactiveActive_buf_ : Color | number | string | Resource | undefined
+            if (interactiveActive_buf__selector == 0) {
+                interactiveActive_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (interactiveActive_buf__selector == 1) {
+                interactiveActive_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (interactiveActive_buf__selector == 2) {
+                interactiveActive_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (interactiveActive_buf__selector == 3) {
+                interactiveActive_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for interactiveActive_buf_ has to be chosen through deserialisation.")
+            }
+            interactiveActive_buf = (interactiveActive_buf_ as Color | number | string | Resource)
+        }
+        const interactiveActive_result : ResourceColor | undefined = interactiveActive_buf
+        const interactiveSelect_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let interactiveSelect_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (interactiveSelect_buf_runtimeType))
+        {
+            const interactiveSelect_buf__selector : int32 = valueDeserializer.readInt8()
+            let interactiveSelect_buf_ : Color | number | string | Resource | undefined
+            if (interactiveSelect_buf__selector == 0) {
+                interactiveSelect_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (interactiveSelect_buf__selector == 1) {
+                interactiveSelect_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (interactiveSelect_buf__selector == 2) {
+                interactiveSelect_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (interactiveSelect_buf__selector == 3) {
+                interactiveSelect_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for interactiveSelect_buf_ has to be chosen through deserialisation.")
+            }
+            interactiveSelect_buf = (interactiveSelect_buf_ as Color | number | string | Resource)
+        }
+        const interactiveSelect_result : ResourceColor | undefined = interactiveSelect_buf
+        const interactiveClick_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let interactiveClick_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (interactiveClick_buf_runtimeType))
+        {
+            const interactiveClick_buf__selector : int32 = valueDeserializer.readInt8()
+            let interactiveClick_buf_ : Color | number | string | Resource | undefined
+            if (interactiveClick_buf__selector == 0) {
+                interactiveClick_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (interactiveClick_buf__selector == 1) {
+                interactiveClick_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (interactiveClick_buf__selector == 2) {
+                interactiveClick_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (interactiveClick_buf__selector == 3) {
+                interactiveClick_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for interactiveClick_buf_ has to be chosen through deserialisation.")
+            }
+            interactiveClick_buf = (interactiveClick_buf_ as Color | number | string | Resource)
+        }
+        const interactiveClick_result : ResourceColor | undefined = interactiveClick_buf
+        let value : CustomColors = ({brand: brand_result, warning: warning_result, alert: alert_result, confirm: confirm_result, fontPrimary: fontPrimary_result, fontSecondary: fontSecondary_result, fontTertiary: fontTertiary_result, fontFourth: fontFourth_result, fontEmphasize: fontEmphasize_result, fontOnPrimary: fontOnPrimary_result, fontOnSecondary: fontOnSecondary_result, fontOnTertiary: fontOnTertiary_result, fontOnFourth: fontOnFourth_result, iconPrimary: iconPrimary_result, iconSecondary: iconSecondary_result, iconTertiary: iconTertiary_result, iconFourth: iconFourth_result, iconEmphasize: iconEmphasize_result, iconSubEmphasize: iconSubEmphasize_result, iconOnPrimary: iconOnPrimary_result, iconOnSecondary: iconOnSecondary_result, iconOnTertiary: iconOnTertiary_result, iconOnFourth: iconOnFourth_result, backgroundPrimary: backgroundPrimary_result, backgroundSecondary: backgroundSecondary_result, backgroundTertiary: backgroundTertiary_result, backgroundFourth: backgroundFourth_result, backgroundEmphasize: backgroundEmphasize_result, compForegroundPrimary: compForegroundPrimary_result, compBackgroundPrimary: compBackgroundPrimary_result, compBackgroundPrimaryTran: compBackgroundPrimaryTran_result, compBackgroundPrimaryContrary: compBackgroundPrimaryContrary_result, compBackgroundGray: compBackgroundGray_result, compBackgroundSecondary: compBackgroundSecondary_result, compBackgroundTertiary: compBackgroundTertiary_result, compBackgroundEmphasize: compBackgroundEmphasize_result, compBackgroundNeutral: compBackgroundNeutral_result, compEmphasizeSecondary: compEmphasizeSecondary_result, compEmphasizeTertiary: compEmphasizeTertiary_result, compDivider: compDivider_result, compCommonContrary: compCommonContrary_result, compBackgroundFocus: compBackgroundFocus_result, compFocusedPrimary: compFocusedPrimary_result, compFocusedSecondary: compFocusedSecondary_result, compFocusedTertiary: compFocusedTertiary_result, interactiveHover: interactiveHover_result, interactivePressed: interactivePressed_result, interactiveFocus: interactiveFocus_result, interactiveActive: interactiveActive_result, interactiveSelect: interactiveSelect_result, interactiveClick: interactiveClick_result} as CustomColors)
+        return value
+    }
     readDataPanelShadowOptions(): DataPanelShadowOptions {
         let valueDeserializer : Deserializer = this
         const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -24609,18 +24609,18 @@ export class Deserializer extends DeserializerBase {
         let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
         return value
     }
-    // readCustomTheme(): CustomTheme {
-    //     let valueDeserializer : Deserializer = this
-    //     const colors_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let colors_buf : CustomColors | undefined
-    //     if ((RuntimeType.UNDEFINED) != (colors_buf_runtimeType))
-    //     {
-    //         colors_buf = valueDeserializer.readCustomColors()
-    //     }
-    //     const colors_result : CustomColors | undefined = colors_buf
-    //     let value : CustomTheme = ({colors: colors_result} as CustomTheme)
-    //     return value
-    // }
+    readCustomTheme(): CustomTheme {
+        let valueDeserializer : Deserializer = this
+        const colors_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let colors_buf : CustomColors | undefined
+        if ((RuntimeType.UNDEFINED) != (colors_buf_runtimeType))
+        {
+            colors_buf = valueDeserializer.readCustomColors()
+        }
+        const colors_result : CustomColors | undefined = colors_buf
+        let value : CustomTheme = ({colors: colors_result} as CustomTheme)
+        return value
+    }
     readDigitIndicator(): DigitIndicator {
         throw new Error("Can not deserialize builder class")
     }
@@ -28653,25 +28653,25 @@ export class Deserializer extends DeserializerBase {
         let value : TimePickerDialogOptions = ({selected: selected_result, format: format_result, start: start_result, end: end_result, useMilitaryTime: useMilitaryTime_result, disappearTextStyle: disappearTextStyle_result, textStyle: textStyle_result, acceptButtonStyle: acceptButtonStyle_result, cancelButtonStyle: cancelButtonStyle_result, selectedTextStyle: selectedTextStyle_result, maskRect: maskRect_result, alignment: alignment_result, offset: offset_result, onAccept: onAccept_result, onCancel: onCancel_result, onChange: onChange_result, onEnterSelectedArea: onEnterSelectedArea_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, enableCascade: enableCascade_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, shadow: shadow_result, dateTimeOptions: dateTimeOptions_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, enableHapticFeedback: enableHapticFeedback_result} as TimePickerDialogOptions)
         return value
     }
-    // readWithThemeOptions(): WithThemeOptions {
-    //     let valueDeserializer : Deserializer = this
-    //     const theme_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let theme_buf : CustomTheme | undefined
-    //     if ((RuntimeType.UNDEFINED) != (theme_buf_runtimeType))
-    //     {
-    //         theme_buf = valueDeserializer.readCustomTheme()
-    //     }
-    //     const theme_result : CustomTheme | undefined = theme_buf
-    //     const colorMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-    //     let colorMode_buf : ThemeColorMode | undefined
-    //     if ((RuntimeType.UNDEFINED) != (colorMode_buf_runtimeType))
-    //     {
-    //         colorMode_buf = TypeChecker.ThemeColorMode_FromNumeric(valueDeserializer.readInt32())
-    //     }
-    //     const colorMode_result : ThemeColorMode | undefined = colorMode_buf
-    //     let value : WithThemeOptions = ({theme: theme_result, colorMode: colorMode_result} as WithThemeOptions)
-    //     return value
-    // }
+    readWithThemeOptions(): WithThemeOptions {
+        let valueDeserializer : Deserializer = this
+        const theme_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let theme_buf : CustomTheme | undefined
+        if ((RuntimeType.UNDEFINED) != (theme_buf_runtimeType))
+        {
+            theme_buf = valueDeserializer.readCustomTheme()
+        }
+        const theme_result : CustomTheme | undefined = theme_buf
+        const colorMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let colorMode_buf : ThemeColorMode | undefined
+        if ((RuntimeType.UNDEFINED) != (colorMode_buf_runtimeType))
+        {
+            colorMode_buf = TypeChecker.ThemeColorMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const colorMode_result : ThemeColorMode | undefined = colorMode_buf
+        let value : WithThemeOptions = ({theme: theme_result, colorMode: colorMode_result} as WithThemeOptions)
+        return value
+    }
     readLength(): Length | undefined {
         const valueType  = this.readInt8()
         if ((RuntimeType.NUMBER) == (valueType)) {
