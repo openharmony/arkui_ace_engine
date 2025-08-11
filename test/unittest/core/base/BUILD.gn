@@ -160,7 +160,7 @@ group("core_base_unittest") {
     ":observer_test_ng",
     ":short_cuts_little_test_ng",
     ":short_cuts_test_ng",
-    ":simplifiedInspector_test_ng",
+    ":simplified_inspector_test_ng",
     ":thread_safe_node_test_ng",
     ":ui_node_gc_test_ng",
     ":ui_node_test_ng",
