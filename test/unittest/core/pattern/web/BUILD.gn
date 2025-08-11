@@ -143,6 +143,12 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   if (defined(global_parts_info.inputmethod_imf)) {
     external_deps += [ "imf:inputmethod_client" ]
   }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.web_webview)) {
+    external_deps += [
+      "webview:libarkweb_utils",
+    ]
+  }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
@@ -248,6 +254,12 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
 
   if (defined(global_parts_info.inputmethod_imf)) {
     external_deps += [ "imf:inputmethod_client" ]
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.web_webview)) {
+    external_deps += [
+      "webview:libarkweb_utils",
+    ]
   }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

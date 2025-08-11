@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -1035,6 +1036,9 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
+    if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
     auto it = surfaceToWebAccessibilityMap.find(surfaceId);
     if (it != surfaceToWebAccessibilityMap.end()) {
         return it->second;
