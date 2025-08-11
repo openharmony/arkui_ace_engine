@@ -4827,6 +4827,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         auto size = geometryNode_->GetFrameSize();
+        geometryNode_->SetPreFrameSize(size);
         geometryNode_->SetFrameSize(SizeF({ round(size.Width()), round(size.Height()) }));
     }
 
