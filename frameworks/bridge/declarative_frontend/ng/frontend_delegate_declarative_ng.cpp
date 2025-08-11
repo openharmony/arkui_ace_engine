@@ -569,6 +569,12 @@ void FrontendDelegateDeclarativeNG::GetRouterStateByUrl(std::string& url, std::v
     pageRouterManager_->GetStateByUrl(url, stateArray);
 }
 
+std::string FrontendDelegateDeclarativeNG::GetInitParams()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    return pageRouterManager_->GetInitParams();
+}
+
 std::string FrontendDelegateDeclarativeNG::GetParams()
 {
     CHECK_NULL_RETURN(pageRouterManager_, "");
