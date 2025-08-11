@@ -336,7 +336,7 @@ ArkUINativeModuleValue NodeAdapterBridge::GetNodeType(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto* adapter = GetNodeAdapter(runtimeCallInfo);
-    CHECK_NULL_RETURN(vm, panda::StringRef::NewFromUtf8(vm, ""));
+    CHECK_NULL_RETURN(adapter, panda::StringRef::NewFromUtf8(vm, ""));
     auto nodeType = GetArkUIFullNodeAPI()->getNodeAdapterAPI()->getNodeType(adapter->GetHandle());
     return panda::StringRef::NewFromUtf8(vm, nodeType);
 }
