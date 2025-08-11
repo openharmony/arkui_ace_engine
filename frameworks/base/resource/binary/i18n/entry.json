@@ -645,6 +645,10 @@
             "start":"بدء",
             "back":"رجوع"
         },
+        "window":{
+            "leftSide":"إظهار على اليسار",
+            "rightSide":"إظهار على اليمين"
+        },
         "navigation":{
             "back":"رجوع"
         },
@@ -1487,6 +1491,10 @@
             "start":"Inicio",
             "back":"Volver"
         },
+        "window":{
+            "leftSide":"Mostrar a la izquierda",
+            "rightSide":"Mostrar a la derecha"
+        },
         "navigation":{
             "back":"Volver"
         },
@@ -1682,6 +1690,10 @@
             "start":"Начать",
             "back":"Назад"
         },
+        "window":{
+            "leftSide":"Показать слева",
+            "rightSide":"Показать справа"
+        },
         "navigation":{
             "back":"Назад"
         },
@@ -1725,6 +1737,10 @@
             "next":"다음",
             "start":"시작",
             "back":"뒤로"
+        },
+        "window":{
+            "leftSide":"왼쪽에 표시",
+            "rightSide":"오른쪽에 표시"
         },
         "navigation":{
             "back":"뒤로"
@@ -2026,6 +2042,10 @@
             "start":"開始",
             "back":"戻る"
         },
+        "window":{
+            "leftSide":"左に表示",
+            "rightSide":"右に表示"
+        },
         "navigation":{
             "back":"戻る"
         },
@@ -2239,6 +2259,10 @@
             "next":"Tiếp",
             "start":"Bắt đầu",
             "back":"Trở lại"
+        },
+        "window":{
+            "leftSide":"Hiển thị bên trái",
+            "rightSide":"Hiển thị bên phải"
         },
         "navigation":{
             "back":"Trở lại"
@@ -2553,6 +2577,10 @@
             "next":"Suivant",
             "start":"Démarrer",
             "back":"Revenir"
+        },
+        "window":{
+            "leftSide":"Afficher à gauche",
+            "rightSide":"Afficher à droite"
         },
         "navigation":{
             "back":"Revenir"
