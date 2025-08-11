@@ -64,7 +64,7 @@ export class ArkUIAniModule {
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
-    native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void

@@ -24,7 +24,7 @@
 #include "list/list_children_main_size_module.h"
 #include "load.h"
 #include "log/log.h"
-#include "water_flow/waterFlowSection_module.h"
+#include "water_flow/water_flow_module.h"
 #include "interop/interop_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "xcomponent/xcomponent_module_methods.h"
@@ -135,9 +135,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
         },
         ani_native_function {
-            "_SetWaterFlowOptions",
-            "JLarkui/component/waterFlow/WaterFlowOptions;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+            "_SetWaterFlowSection",
+            "JLarkui/component/waterFlow/WaterFlowSections;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
             "_SetListChildrenMainSize",

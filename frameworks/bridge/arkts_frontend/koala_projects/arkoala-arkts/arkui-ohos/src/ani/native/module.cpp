@@ -32,7 +32,7 @@
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
-#include "water_flow/waterFlowSection_module.h"
+#include "water_flow/water_flow_module.h"
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
@@ -374,9 +374,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
         },
         ani_native_function {
-            "_SetWaterFlowOptions",
-            "JLarkui/component/waterFlow/WaterFlowOptions;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+            "_SetWaterFlowSection",
+            "JLarkui/component/waterFlow/WaterFlowSections;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
             "_SetListChildrenMainSize",
