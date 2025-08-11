@@ -11326,7 +11326,7 @@ void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 {
-    if (info.Length() != 2) {
+    if (info.Length() < 2 || info.Length() > 3) {
         return;
     }
 
@@ -11364,7 +11364,12 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(2, params);
     };
-    ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec);
+
+    bool isOutOfBoundsAllowed = false;
+    if (info.Length() == 3 && info[2]->IsBoolean()) {
+        isOutOfBoundsAllowed = info[2]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetOnVisibleChange(std::move(onVisibleChange), ratioVec, isOutOfBoundsAllowed);
 }
 
 void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info)

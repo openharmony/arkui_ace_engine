@@ -1992,6 +1992,18 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     }
     auto visibleResult = GetCacheVisibleRect(timestamp, IsDebugInspectorId());
     SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
+    DispatchVisibleAreaChangeEvent(visibleResult);
+}
+
+void FrameNode::DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult)
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
+    auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
+    auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
+    auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
             ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
@@ -2002,8 +2014,13 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
         }
     }
     if (hasUserCallback) {
-        ProcessVisibleAreaChangeEvent(
-            visibleResult.visibleRect, visibleResult.frameRect, visibleAreaUserRatios, visibleAreaUserCallback, true);
+        if (visibleAreaUserCallback.isOutOfBoundsAllowed) {
+            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
+                visibleAreaUserRatios, visibleAreaUserCallback, true);
+        } else {
+            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect, visibleAreaUserRatios,
+                visibleAreaUserCallback, true);
+        }
     }
 }
 
@@ -2020,6 +2037,10 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
             NearEqual(currentVisibleRatio, lastVisibleRatio_) ? "non-execution" : "execution");
     }
     if (isUser) {
+        if (visibleAreaCallback.isOutOfBoundsAllowed) {
+            auto rect = renderContext_->GetPaintRectWithoutTransform();
+            currentVisibleRatio = rect.IsEmpty() ? VISIBLE_RATIO_MIN : currentVisibleRatio;
+        }
         if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
             auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
             ProcessAllVisibleCallback(

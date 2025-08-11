@@ -1639,6 +1639,7 @@ private:
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
     void UpdateBackground();
+    void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

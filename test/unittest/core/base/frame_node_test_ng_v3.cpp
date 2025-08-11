@@ -474,4 +474,44 @@ HWTEST_F(FrameNodeTestNg, GetGlobalPositionOnDisplay001, TestSize.Level1)
     frameNode->AddChild(child);
     EXPECT_TRUE(frameNode->GetCurrentPageRootNode() != nullptr);
 }
+
+/**
+ * @tc.name: TriggerVisibleAreaChangeCallback100
+ * @tc.desc: Test TriggerVisibleAreaChangeCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("column", 3, AceType::MakeRefPtr<Pattern>(), false);
+    frameNode->SetActive(true);
+    child->SetActive(true);
+    frameNode->AddChild(child);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->onShow_ = true;
+    frameNode->AttachContext(AceType::RawPtr(context));
+    child->AttachContext(AceType::RawPtr(context));
+
+    RectF rect = RectF(0, 0, 100, 100);
+    child->renderContext_->UpdatePaintRect(rect);
+    frameNode->renderContext_->UpdatePaintRect(rect);
+    auto eventHub = child->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onVisibleChange = [](bool visible, double ratio) {};
+    std::vector<double> ratioList = { 0.0, 1.0 };
+    VisibleCallbackInfo addInfo;
+    addInfo.callback = std::move(onVisibleChange);
+    addInfo.isCurrentVisible = false;
+    child->SetVisibleAreaUserCallback(ratioList, addInfo);
+    auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
+    child->TriggerVisibleAreaChangeCallback(1, false);
+    EXPECT_FALSE(visibleAreaUserCallback.isOutOfBoundsAllowed);
+    visibleAreaUserCallback.isOutOfBoundsAllowed = true;
+    child->TriggerVisibleAreaChangeCallback(2, false);
+    EXPECT_TRUE(visibleAreaUserCallback.isOutOfBoundsAllowed);
+}
 } // namespace OHOS::Ace::NG
