@@ -661,11 +661,7 @@ HWTEST_F(TextTestSevenNg, ToJsonValue001, TestSize.Level1)
     symbolColorList.emplace_back(Color::BLUE);
     symbolLayoutProperty->UpdateSymbolColorList(symbolColorList);
     symbolLayoutProperty->ToJsonValue(json, filter);
-
-    auto sub_json = json->GetObject("fontColor");
-    for (uint32_t i = 0; i < symbolColorList.size(); ++i) {
-        EXPECT_EQ(sub_json->GetString("color_" + std::to_string(i)), symbolColorList[i].ColorToString());
-    }
+    EXPECT_EQ(json->GetString("fontColor"), StringUtils::SymbolColorListToString(symbolColorList));
 }
 
 /**
