@@ -1246,4 +1246,39 @@ HWTEST_F(ScrollBarTestNg, CreateWithResourceObj001, TestSize.Level1)
     EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: UpdateScrollBarDisplay
+ * @tc.desc: Test UpdateScrollBarDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateScrollBarDisplay, TestSize.Level1)
+{
+    ScrollBarModelNG scrollBarModel;
+    auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    scrollBarModel.Create(
+        scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::AUTO));
+    GetScrollBar();
+
+    /**
+     * @tc.steps: step1. scrollable node is scrolling
+     * @tc.expected: don't start disappearAnimation
+     */
+    pattern_->controlDistance_ = 100.0f;
+    pattern_->controlDistanceChanged_ = true;
+    pattern_->scrollBarProxy_->SetIsScrollableNodeScrolling(true);
+    pattern_->UpdateScrollBarDisplay();
+    EXPECT_FALSE(pattern_->controlDistanceChanged_);
+    EXPECT_FALSE(pattern_->disappearAnimation_);
+
+    /**
+     * @tc.steps: step2. scrollable node isn't scrolling
+     * @tc.expected: start disappearAnimation
+     */
+    pattern_->controlDistanceChanged_ = true;
+    pattern_->scrollBarProxy_->SetIsScrollableNodeScrolling(false);
+    pattern_->UpdateScrollBarDisplay();
+    EXPECT_FALSE(pattern_->controlDistanceChanged_);
+    EXPECT_TRUE(pattern_->disappearAnimation_);
+}
 } // namespace OHOS::Ace::NG
