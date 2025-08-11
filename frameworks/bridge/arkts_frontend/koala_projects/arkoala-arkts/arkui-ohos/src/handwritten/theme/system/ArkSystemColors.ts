@@ -114,7 +114,7 @@ export class ArkSystemColors implements Colors {
 
         this.compForegroundPrimary = _r(125831003, 10001, '', '');
         this.compBackgroundPrimary = _r(125831004, 10001, '', '');
-        this.compBackgroundPrimaryTran = _r('', '', 'sys.color.comp_background_primary_tran'); // TODO: 添加实际资源ID
+        this.compBackgroundPrimaryTran = _r('', '', 'sys.color.comp_background_primary_tran');
         this.compBackgroundPrimaryContrary = _r(125831005, 10001, '', '');
         this.compBackgroundGray = _r(125831006, 10001, '', '');
         this.compBackgroundSecondary = _r(125831007, 10001, '', '');
