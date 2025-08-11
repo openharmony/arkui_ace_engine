@@ -346,7 +346,7 @@ protected:
     // Dialog
     TranslateOptions CalcContentTranslateForDialog(const SizeF& frameSize);
     // slide
-    OffsetF CalcTranslateForSlideTransition(const SizeF& frameSize, bool isRight, bool isEnter, bool isEnd);
+    OffsetF CalcTranslateForSlideTransition(const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd);
 
     OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const override;
 

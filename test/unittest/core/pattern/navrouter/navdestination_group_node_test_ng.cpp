@@ -892,7 +892,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
     ASSERT_NE(navDestinationRenderContext, nullptr);
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
     navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::SLIDE_RIGHT;
-    navDestinationNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 100.0f));
+    navDestinationNode->GetRenderContext()->UpdatePaintRect(RectF{0.0f, 0.0f, 200.0f, 100.0f});
 
     navDestinationNode->DoSystemSlideTransition(NavigationOperation::POP, false);
     EXPECT_FALSE(eventHub->enabled_);
