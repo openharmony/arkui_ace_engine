@@ -24,6 +24,7 @@ config("ani_config") {
 }
 
 ohos_shared_library("display_sync_ani") {
+  shlib_type = "ani"
   public_configs = [ ":ani_config" ]
   sources = [ "./src/display_sync.cpp" ]
   deps = [ "$ace_root/build:libace_compatible" ]
@@ -37,7 +38,7 @@ generate_static_abc("display_sync_ani_abc") {
   base_url = "./ets"
   files = [
     "./ets/@ohos.graphics.displaySync.ets",
-    "./ets/arkui.component.common.ets"
+    "./ets/arkui.component.common.ets",
   ]
   paths_keys = [ "@ohos.graphics.displaySync" ]
   paths_values = [ "./ets/@ohos.graphics.displaySync.ets" ]

@@ -70,7 +70,7 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
     FrameRateRange& frameRateRange)
 {
-    static const char *className = "Larkui/component/common/ExpectedFrameRateRange;";
+    static const char *className = "arkui.component.common.ExpectedFrameRateRange";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return;
@@ -122,7 +122,7 @@ static RefPtr<UIDisplaySync> GetUIDisplaySync(ani_env *env, ani_object obj)
 
 ani_object createIntervalInfo(ani_env *env, int64_t timestamp, int64_t targetTimestamp)
 {
-    static const char *className = "L@ohos/graphics/displaySync/displaySync/IntervalInfo;";
+    static const char *className = "@ohos.graphics.displaySync.displaySync.IntervalInfo";
     ani_class intervalInfo_cls;
 
     if (ANI_OK != env->FindClass(className, &intervalInfo_cls))
@@ -130,10 +130,10 @@ ani_object createIntervalInfo(ani_env *env, int64_t timestamp, int64_t targetTim
         return nullptr;
     }
     ani_method intervalInfoCtor;
-    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "DD:V", &intervalInfoCtor);
+    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "ll:", &intervalInfoCtor);
     ani_object intervalInfoObj;
     env->Object_New(
-        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_double(timestamp), ani_double(targetTimestamp));
+        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_long(timestamp), ani_long(targetTimestamp));
     return intervalInfoObj;
 }
 
@@ -208,7 +208,7 @@ static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object displaySync_obj = {};
-    static const char *className = "L@ohos/graphics/displaySync/displaySync/DisplaySync;";
+    static const char *className = "@ohos.graphics.displaySync.displaySync.DisplaySync";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find class fail");
@@ -242,7 +242,7 @@ static void clean([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj
 
 ani_status BindDisplaySync(ani_env *env)
 {
-    static const char *className = "L@ohos/graphics/displaySync/displaySync/DisplaySync;";
+    static const char *className = "@ohos.graphics.displaySync.displaySync.DisplaySync";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind DisplaySync result fail");
@@ -252,8 +252,8 @@ ani_status BindDisplaySync(ani_env *env)
     std::array methods = {
         ani_native_function{"on", nullptr, reinterpret_cast<void *>(JSOnFrame_On)},
         ani_native_function{"off", nullptr, reinterpret_cast<void *>(JSOnFrame_Off)},
-        ani_native_function{"start", ":V", reinterpret_cast<void *>(JSStart)},
-        ani_native_function{"stop", ":V", reinterpret_cast<void *>(JSStop)},
+        ani_native_function{"start", ":", reinterpret_cast<void *>(JSStart)},
+        ani_native_function{"stop", ":", reinterpret_cast<void *>(JSStop)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
     };
@@ -262,7 +262,7 @@ ani_status BindDisplaySync(ani_env *env)
         return ANI_ERROR;
     };
 
-    static const char *cleanerName = "L@ohos/graphics/displaySync/displaySync/Cleaner;";
+    static const char *cleanerName = "@ohos.graphics.displaySync.displaySync.Cleaner";
     ani_class cleanerCls;
     if (ANI_OK != env->FindClass(cleanerName, &cleanerCls)) {
         return (ani_status)ANI_ERROR;
@@ -286,7 +286,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     ani_namespace displaySyncNamespace;
-    if (ANI_OK != env->FindNamespace("L@ohos/graphics/displaySync/displaySync;", &displaySyncNamespace)) {
+    if (ANI_OK != env->FindNamespace("@ohos.graphics.displaySync.displaySync", &displaySyncNamespace)) {
         return ANI_ERROR;
     }
     std::array staticMethods = {
