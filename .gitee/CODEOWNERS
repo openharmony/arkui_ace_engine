@@ -3339,6 +3339,8 @@ test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/core/base/frame_node_test_ng_coverage.cpp @arkui_architecture
+test/unittest/core/base/inspector_test_ng.cpp @arkuiabilitygroup
+test/unittest/core/base/simplified_inspector_test_ng.cpp @arkuiframework
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
