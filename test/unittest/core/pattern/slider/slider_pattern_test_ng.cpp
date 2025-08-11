@@ -2478,7 +2478,7 @@ HWTEST_F(SliderPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(paintProperty, nullptr);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>();
+    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>(frameNode->GetThemeScopeId());
     ASSERT_NE(sliderTheme, nullptr);
 
     /**
