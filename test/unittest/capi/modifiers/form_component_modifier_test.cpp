@@ -636,9 +636,7 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
     initValue.module = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.dimension = Converter::ArkValue<Opt_FormDimension>(Ark_Empty());
     initValue.temporary = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-#ifdef WRONG_GEN
     initValue.want = Converter::ArkValue<Opt_Want>(Ark_Empty());
-#endif
     initValue.renderingMode = Converter::ArkValue<Opt_FormRenderingMode>(Ark_Empty());
     initValue.shape = Converter::ArkValue<Opt_FormShape>(Ark_Empty());
     auto checkValue = [this, &initValue](
@@ -674,9 +672,7 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, Test
     initValue.module = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.dimension = Converter::ArkValue<Opt_FormDimension>(Ark_Empty());
     initValue.temporary = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-#ifdef WRONG_GEN
     initValue.want = Converter::ArkValue<Opt_Want>(Ark_Empty());
-#endif
     initValue.renderingMode = Converter::ArkValue<Opt_FormRenderingMode>(Ark_Empty());
     initValue.shape = Converter::ArkValue<Opt_FormShape>(Ark_Empty());
     auto checkValue = [this, &initValue](

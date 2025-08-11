@@ -300,33 +300,6 @@ HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
-    LOGE("Custom objects are not supported.");
-    ASSERT_NE(modifier_->setTransform0, nullptr);
-    using OneTestStep = std::tuple<Opt_CustomObject, std::string>;
-    double matrix1[4][4] = {{11, 12, 13, 14}, {21, 22, 23, 24}, {31, 32, 33, 34}, {41, 42, 43, 44}};
-    double matrix2[4][4] = {{22, 24, 26, 28}, {42, 44, 46, 48}, {62, 64, 66, 68}, {82, 84, 86, 88}};
-    static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_CustomObject>(matrix1),
-            "{\"type\":\"matrix\",\"matrix\":\""
-            "11.000000,21.000000,31.000000,41.000000,"
-            "12.000000,22.000000,32.000000,42.000000,"
-            "13.000000,23.000000,33.000000,43.000000,"
-            "14.000000,24.000000,34.000000,44.000000,\"}"},
-        {Converter::ArkValue<Opt_CustomObject>(matrix2),
-            "{\"type\":\"matrix\",\"matrix\":\""
-            "22.000000,42.000000,62.000000,82.000000,"
-            "24.000000,44.000000,64.000000,84.000000,"
-            "26.000000,46.000000,66.000000,86.000000,"
-            "28.000000,48.000000,68.000000,88.000000,\"}"},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setTransform1(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TRANSFORM_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-#endif
 }
 
 /*
@@ -336,26 +309,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, TestSize.Level1)
 {
-#ifdef WRONG_GEN
-    ASSERT_NE(modifier_->setTransform0, nullptr);
-    using OneTestStep = std::tuple<Opt_CustomObject, std::string>;
-    Opt_CustomObject invalidValue1 = {};
-    Opt_CustomObject invalidValue2 = {};
-    Opt_CustomObject invalidValue3 = {};
-
-    static const std::vector<OneTestStep> testPlan = {
-        {invalidValue1, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE},
-        {invalidValue2, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE},
-        {invalidValue3, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setTransform1(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TRANSFORM_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-#endif
 }
+
 //////////// ClickEffect
 /*
  * @tc.name: setClickEffectTestDefaultValues
