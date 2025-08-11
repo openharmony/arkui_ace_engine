@@ -152,6 +152,7 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetShowDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return;
     }
     GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
@@ -180,6 +181,7 @@ static ani_object ShowDialog(ani_env* env, ani_object options, ani_object option
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetShowDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
@@ -211,6 +213,7 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_obj
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetActionMenuOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return;
     }
     dialogProps.autoCancel = true;
@@ -239,6 +242,7 @@ static ani_object ShowActionMenu(ani_env* env, ani_object options)
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetActionMenuOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     dialogProps.autoCancel = true;
@@ -270,7 +274,10 @@ static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_ob
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogContent enter.");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
     frameNode->SetBuilderFunc(nullptr);
 
     OHOS::Ace::DialogProperties dialogProps;
@@ -312,6 +319,7 @@ static ani_object OpenCustomDialog(ani_env* env, ani_object builderOptions, ani_
 
     if (!GetCustomDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
@@ -342,12 +350,16 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] UpdateCustomDialog enter.");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
     auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetBaseDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     dialogProps.isSysBlurStyle = false;
@@ -384,7 +396,10 @@ static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialogContent enter.");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
     auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
@@ -428,13 +443,17 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogWithController enter.");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
     frameNode->SetBuilderFunc(nullptr);
 
     OHOS::Ace::DialogProperties dialogProps;
     dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
     if (!OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog controller fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     GetBaseDialogOptions(env, options, dialogProps);

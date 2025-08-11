@@ -61,31 +61,37 @@ ani_error GetErrorObject(ani_env *env, const std::string &errMsg, int32_t code)
 {
     CHECK_NULL_RETURN(env, nullptr);
     ani_class errClass;
-    if (ANI_OK != env->FindClass("@ohos.base.BusinessError", &errClass)) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "find class failed");
+    ani_status status = env->FindClass("@ohos.base.BusinessError", &errClass);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "find class failed. status: %{public}d", status);
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(errClass, "<ctor>", ":", &ctor)) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "cannot find constructor for class.");
+    status = env->Class_FindMethod(errClass, "<ctor>", ":", &ctor);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "cannot find constructor for class. status: %{public}d", status);
         return nullptr;
     }
     ani_string errMessage;
-    if (ANI_OK != env->String_NewUTF8(errMsg.c_str(), errMsg.size(), &errMessage)) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "convert string to ani string failed.");
+    status = env->String_NewUTF8(errMsg.c_str(), errMsg.size(), &errMessage);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "convert string to ani string failed. status: %{public}d", status);
         return nullptr;
     }
     ani_object errObj;
-    if (ANI_OK != env->Object_New(errClass, ctor, &errObj)) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "cannot create ani error object.");
+    status = env->Object_New(errClass, ctor, &errObj);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "cannot create ani error object. status: %{public}d", status);
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetFieldByName_Double(errObj, "code", static_cast<ani_double>(code))) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "set error code failed.");
+    status = env->Object_SetPropertyByName_Int(errObj, "code", static_cast<ani_int>(code));
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "set error code failed. status: %{public}d", status);
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(errObj, "message", errMessage)) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "set error message failed.");
+    status = env->Object_SetPropertyByName_Ref(errObj, "message", errMessage);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "set error message failed. status: %{public}d", status);
         return nullptr;
     }
     return static_cast<ani_error>(errObj);
@@ -96,11 +102,11 @@ void AniThrow(ani_env *env, const std::string &errMsg, int32_t code)
     CHECK_NULL_VOID(env);
     auto errObj = GetErrorObject(env, errMsg, code);
     if (errObj == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "get error object failed!");
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get error object failed!");
         return;
     }
     if (ANI_OK != env->ThrowError(errObj)) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "throw ani error object failed!");
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "throw ani error object failed!");
         return;
     }
 }
