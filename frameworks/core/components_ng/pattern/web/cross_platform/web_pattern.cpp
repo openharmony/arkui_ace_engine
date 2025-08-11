@@ -439,6 +439,15 @@ void WebPattern::OnAreaChangedInner()
     if (webOffset_ == offset) {
         return;
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    const double SCREEN_CENTER_POSITION = pipeline->GetRootWidth() / 2.f;
+    if (offset.GetX() == webOffset_.GetX() + SCREEN_CENTER_POSITION) {
+        auto pageOutOffset = Offset(webOffset_.GetX() + drawSize_.Width(), offset.GetY());
+        TAG_LOGI(AceLogTag::ACE_WEB, "Set offset to pageOutOffset");
+        delegate_->SetBoundsOrResize(drawSize_, pageOutOffset);
+        return;
+    }
     webOffset_ = offset;
     if (isInWindowDrag_)
         return;
@@ -1052,7 +1061,7 @@ void WebPattern::ExitFullScreen()
 std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    CHECK_NULL_RETURN(frameNode, OffsetF());
     return frameNode->GetTransformRelativeOffset();
 }
 
