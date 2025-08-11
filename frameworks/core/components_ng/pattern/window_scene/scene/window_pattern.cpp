@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t ADD_BACKGROUND_COLOR_MS = 50;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 
@@ -655,12 +656,8 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
-            auto context = GetContext();
-            CHECK_NULL_VOID(context);
-            auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-            auto snapshotContext = snapshotWindow_->GetRenderContext();
-            CHECK_NULL_VOID(snapshotContext);
-            snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+            needAddBackgroundColor_ = true;
+            AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
@@ -731,10 +728,39 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             auto context = self->snapshotWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateBackgroundColor(Color::TRANSPARENT);
+            self->needAddBackgroundColor_ = false;
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
     UpdateSnapshotWindowProperty();
+}
+
+void WindowPattern::AddBackgroundColorDelayed()
+{
+    if (session_->IsExitSplitOnBackground()) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    addBackgroundColorTask_.Cancel();
+    addBackgroundColorTask_.Reset([weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_EQUAL_VOID(self->needAddBackgroundColor_, false);
+        ACE_SCOPED_TRACE("WindowScene::AddBackgroundColorTask");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "add background color: %{public}d", self->session_->GetPersistentId());
+        auto context = self->GetContext();
+        CHECK_NULL_VOID(context);
+        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        CHECK_NULL_VOID(self->snapshotWindow_);
+        auto snapshotContext = self->snapshotWindow_->GetRenderContext();
+        CHECK_NULL_VOID(snapshotContext);
+        snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+    });
+    taskExecutor->PostDelayedTask(
+        addBackgroundColorTask_, TaskExecutor::TaskType::UI, ADD_BACKGROUND_COLOR_MS, __func__);
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)
