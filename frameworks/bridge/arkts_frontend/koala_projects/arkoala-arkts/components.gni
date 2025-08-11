@@ -86,7 +86,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/VideoModifier.ets",
   "arkui-preprocessed/arkui/SideBarContainerModifier.ets",
   "arkui-preprocessed/arkui/StepperItemModifier.ets",
-  "arkui-preprocessed/arkui/SwiperModifier.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniCustomNodeModule.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniModule.ets",
   "arkui-preprocessed/arkui/ani/arkts/index.ets",
