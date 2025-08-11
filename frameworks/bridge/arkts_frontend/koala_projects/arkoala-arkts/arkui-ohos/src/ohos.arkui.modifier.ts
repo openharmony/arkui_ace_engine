@@ -15,15 +15,17 @@
 
 export { AttributeUpdater } from './AttributeUpdater'
 
-// export { ColumnModifier } from './handwritten/modifiers/ArkColumnModifier'
-
 export { CommonModifier } from './CommonModifier'
 
 export { DividerModifier } from './DividerModifier';
 
 export { BlankModifier } from './BlankModifier';
 
+export { FlexModifier } from './FlexModifier';
+
 export { StackModifier } from './StackModifier';
+
+export { FolderStackModifier } from './FolderStackModifier';
 
 export { GridColModifier } from './GridColModifier';
 
@@ -36,6 +38,8 @@ export { RowSplitModifier } from './RowSplitModifier';
 export { ColumnModifier } from './ColumnModifier';
 
 export { ColumnSplitModifier } from './ColumnSplitModifier';
+
+export { RelativeContainerModifier } from './RelativeContainerModifier';
 
 export { ButtonModifier } from './ButtonModifier';
 

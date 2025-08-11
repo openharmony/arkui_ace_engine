@@ -82,10 +82,16 @@ export interface PolylineOptions {
 export type PolylineInterface = (options?: PolylineOptions) => PolylineAttribute;
 export interface PolylineAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this
+    setPolylineOptions(options?: PolylineOptions): this {
+        return this
+    }
     attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
     points_value?: Array<ShapePoint> | undefined
+    public setPolylineOptions(options?: PolylineOptions): this {
+        return this
+    }
     public points(value: Array<ShapePoint> | undefined): this {
         return this
         }
@@ -122,10 +128,9 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
     }
 }
 /** @memo */
-export function Polyline(
+export function PolylineImpl(
     /** @memo */
     style: ((attributes: PolylineAttribute) => void) | undefined,
-    options?: PolylineOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -133,9 +138,7 @@ export function Polyline(
         return new ArkPolylineComponent()
     })
     NodeAttach<ArkPolylinePeer>((): ArkPolylinePeer => ArkPolylinePeer.create(receiver), (_: ArkPolylinePeer) => {
-        receiver.setPolylineOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

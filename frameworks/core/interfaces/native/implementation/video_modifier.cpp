@@ -188,7 +188,7 @@ void SetOnStartImpl(Ark_NativePointer node,
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnStart(frameNode, onStart);
 }
@@ -203,7 +203,7 @@ void SetOnPauseImpl(Ark_NativePointer node,
         return;
     }
     auto onPause = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnPause(frameNode, onPause);
 }
@@ -218,7 +218,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnFinish(frameNode, onFinish);
 }
@@ -239,7 +239,7 @@ void SetOnFullscreenChangeImpl(Ark_NativePointer node,
         Ark_FullscreenInfo event = {
             .fullscreen = Converter::ArkValue<Ark_Boolean>(fullscreen)
         };
-        arkCallback.Invoke(event);
+        arkCallback.InvokeSync(event);
     };
     VideoModelStatic::SetOnFullScreenChange(frameNode, onFullscreenChange);
 }
@@ -260,7 +260,7 @@ void SetOnPreparedImpl(Ark_NativePointer node,
         Ark_PreparedInfo event = {
             .duration = Converter::ArkValue<Ark_Number>(static_cast<float>(duration))
         };
-        arkCallback.Invoke(event);
+        arkCallback.InvokeSync(event);
     };
     VideoModelStatic::SetOnPrepared(frameNode, onPrepared);
 }
@@ -280,7 +280,7 @@ void SetOnSeekingImpl(Ark_NativePointer node,
         Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
-        arkCallback.Invoke(event);
+        arkCallback.InvokeSync(event);
     };
     VideoModelStatic::SetOnSeeking(frameNode, onSeeking);
 }
@@ -300,7 +300,7 @@ void SetOnSeekedImpl(Ark_NativePointer node,
         Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
-        arkCallback.Invoke(event);
+        arkCallback.InvokeSync(event);
     };
     VideoModelStatic::SetOnSeeked(frameNode, onSeeked);
 }
@@ -320,7 +320,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
         Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
-        arkCallback.Invoke(event);
+        arkCallback.InvokeSync(event);
     };
     VideoModelStatic::SetOnUpdate(frameNode, onUpdate);
 }
@@ -335,7 +335,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnError(frameNode, onError);
 }
@@ -350,7 +350,7 @@ void SetOnStopImpl(Ark_NativePointer node,
         return;
     }
     auto onStop = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnStop(frameNode, onStop);
 }

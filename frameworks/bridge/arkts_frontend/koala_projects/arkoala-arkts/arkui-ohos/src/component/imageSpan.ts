@@ -155,6 +155,9 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
 }
 export type ImageSpanInterface = (value: ResourceStr | PixelMap) => ImageSpanAttribute;
 export interface ImageSpanAttribute extends BaseSpan {
+    setImageSpanOptions(value: ResourceStr | PixelMap): this {
+        return this
+    }
     verticalAlign(value: ImageSpanAlignment | undefined): this
     colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this
     objectFit(value: ImageFit | undefined): this
@@ -169,6 +172,9 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     onComplete_value?: ImageCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
     alt_value?: PixelMap | undefined
+    public setImageSpanOptions(value: ResourceStr | PixelMap): this {
+        return this
+    }
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
         return this
     }
@@ -264,10 +270,9 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
     }
 }
 /** @memo */
-export function ImageSpan(
+export function ImageSpanImpl(
     /** @memo */
     style: ((attributes: ImageSpanAttribute) => void) | undefined,
-    value: ResourceStr | PixelMap,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -275,9 +280,7 @@ export function ImageSpan(
         return new ArkImageSpanComponent()
     })
     NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (_: ArkImageSpanPeer) => {
-        receiver.setImageSpanOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

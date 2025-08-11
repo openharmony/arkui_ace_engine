@@ -16,21 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
 import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
-import { Alignment } from "./enums"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { Alignment } from './enums';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
 import { ArkStackNode } from '../handwritten/modifiers/ArkStackNode';
-import { ArkStackAttributeSet, StackModifier } from '../StackModifier';
+import { StackModifier } from '../StackModifier';
+import { hookStackAttributeModifier } from '../handwritten';
 
 export class ArkStackPeer extends ArkCommonMethodPeer {
+    _attributeSet?:StackModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -83,12 +85,19 @@ export interface StackOptions {
 }
 export type StackInterface = (options?: StackOptions) => StackAttribute;
 export interface StackAttribute extends CommonMethod {
-    alignContent(value: Alignment | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
+    setStackOptions(options?: StackOptions): this {
+        return this
+    }
+    alignContent(value: Alignment | undefined): this {return this;}
+    pointLight(value: PointLightStyle | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribute {
     alignContent_value?: Alignment | undefined
     pointLight_value?: PointLightStyle | undefined
+    public setStackOptions(options?: StackOptions): this {
+        return this
+    }
     public alignContent(value: Alignment | undefined): this {
         return this
     }
@@ -124,17 +133,23 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookStackAttributeModifier(this, modifier);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
+
 /** @memo */
-export function Stack(
+export function StackImpl(
     /** @memo */
     style: ((attributes: StackAttribute) => void) | undefined,
-    options?: StackOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -142,9 +157,7 @@ export function Stack(
         return new ArkStackComponent()
     })
     NodeAttach<ArkStackPeer>((): ArkStackPeer => ArkStackPeer.create(receiver), (_: ArkStackPeer) => {
-        receiver.setStackOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

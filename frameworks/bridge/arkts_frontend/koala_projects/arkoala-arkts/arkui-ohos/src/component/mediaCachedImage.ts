@@ -83,8 +83,14 @@ export interface ASTCResource {
 }
 export type MediaCachedImageInterface = (src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) => MediaCachedImageAttribute;
 export interface MediaCachedImageAttribute extends ImageAttribute {
+    setMediaCachedImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
+        return this
+    }
 }
 export class ArkMediaCachedImageStyle extends ArkImageStyle implements MediaCachedImageAttribute {
+    public setMediaCachedImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
+        return this
+    }
 }
 export class ArkMediaCachedImageComponent extends ArkImageComponent implements MediaCachedImageAttribute {
     getPeer(): ArkMediaCachedImagePeer {
@@ -105,10 +111,9 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
     }
 }
 /** @memo */
-export function MediaCachedImage(
+export function MediaCachedImageImpl(
     /** @memo */
     style: ((attributes: MediaCachedImageAttribute) => void) | undefined,
-    src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -116,9 +121,7 @@ export function MediaCachedImage(
         return new ArkMediaCachedImageComponent()
     })
     NodeAttach<ArkMediaCachedImagePeer>((): ArkMediaCachedImagePeer => ArkMediaCachedImagePeer.create(receiver), (_: ArkMediaCachedImagePeer) => {
-        receiver.setMediaCachedImageOptions(src)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

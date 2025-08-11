@@ -2309,6 +2309,9 @@ void DialogPattern::OnAttachToMainTree()
 
 void DialogPattern::OnDetachFromMainTree()
 {
+    if (dialogProperties_.destroyCallback) {
+        dialogProperties_.destroyCallback(customNode_);
+    }
     RemoveFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

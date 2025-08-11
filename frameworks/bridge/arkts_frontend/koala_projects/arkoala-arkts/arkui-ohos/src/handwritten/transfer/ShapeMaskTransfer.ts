@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+
+import { ArkUIAniModule } from "arkui.ani"
 import { ShapeMask, Rect, RoundRect, CornerRadius, Vector2, Circle, CommandPath } from "../../Graphics"
 import { ShapeBaseTransfer } from "./ShapeBaseTransfer";
+import { TransferUtil } from "./TransferUtil";
 
 export class ShapeMaskTransfer {
     static transferStatic(input: Any): Object {
@@ -47,13 +50,15 @@ export class ShapeMaskTransfer {
             const pathValue = ESValue.wrap(input).getProperty("path");
             shapeMask.path = ShapeBaseTransfer.transferPathStatic(pathValue);
         }
-        if (ESValue.wrap(input).getProperty("fillColor").isNumber()) {
-            const fillColor = ESValue.wrap(input).getProperty("fillColor").toNumber();
-            shapeMask.fillColor = fillColor;
+
+        let maskVal = ESValue.wrap(input);
+        let fiColor = TransferUtil.getPropColorInt(maskVal, "fillColor");
+        if (fiColor !== undefined) {
+            shapeMask.fillColor = fiColor as number;
         }
-        if (ESValue.wrap(input).getProperty("strokeColor").isNumber()) {
-            const strokeColor = ESValue.wrap(input).getProperty("strokeColor").toNumber();
-            shapeMask.strokeColor = strokeColor;
+        let stroColor = TransferUtil.getPropColorInt(maskVal, "strokeColor");
+        if (stroColor !== undefined) {
+            shapeMask.strokeColor = stroColor as number;
         }
         if (ESValue.wrap(input).getProperty("strokeWidth").isNumber()) {
             const strokeWidth = ESValue.wrap(input).getProperty("strokeWidth").toNumber();
@@ -110,9 +115,13 @@ export class ShapeMaskTransfer {
         } else {
             ret.setProperty('path', null);
         }
-        ret.setProperty('fillColor', ESValue.wrap(staticValue.fillColor));
-        ret.setProperty('strokeColor', ESValue.wrap(staticValue.strokeColor));
-        ret.setProperty('strokeWidth', ESValue.wrap(staticValue.strokeWidth));
+        let fiColor = Double.toInt(staticValue.fillColor);
+        let fillColor = ArkUIAniModule._ToColorLong(fiColor);
+        ret.setProperty('fillColor', fillColor);
+        let stroColor = Double.toInt(staticValue.strokeColor);
+        let strokeColor = ArkUIAniModule._ToColorLong(stroColor);
+        ret.setProperty('strokeColor', strokeColor);
+        ret.setProperty('strokeWidth', staticValue.strokeWidth);
         return ret.unwrap();
     }
 }

@@ -124,6 +124,9 @@ export interface Literal_String_target_NavigationType_type {
     type?: NavigationType;
 }
 export interface NavigatorAttribute extends CommonMethod {
+    setNavigatorOptions(value?: Literal_String_target_NavigationType_type): this {
+        return this
+    }
     active(value: boolean | undefined): this
     type(value: NavigationType | undefined): this
     target(value: string | undefined): this
@@ -134,6 +137,9 @@ export class ArkNavigatorStyle extends ArkCommonMethodStyle implements Navigator
     type_value?: NavigationType | undefined
     target_value?: string | undefined
     params_value?: Object | undefined
+    public setNavigatorOptions(value?: Literal_String_target_NavigationType_type): this {
+        return this
+    }
     public active(value: boolean | undefined): this {
         return this
     }
@@ -198,10 +204,9 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements N
     }
 }
 /** @memo */
-export function Navigator(
+export function NavigatorImpl(
     /** @memo */
     style: ((attributes: NavigatorAttribute) => void) | undefined,
-    value?: Literal_String_target_NavigationType_type,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -209,9 +214,7 @@ export function Navigator(
         return new ArkNavigatorComponent()
     })
     NodeAttach<ArkNavigatorPeer>((): ArkNavigatorPeer => ArkNavigatorPeer.create(receiver), (_: ArkNavigatorPeer) => {
-        receiver.setNavigatorOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

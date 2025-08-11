@@ -1233,6 +1233,9 @@ export type Callback_Number_String_Void = (index: number, value: string) => void
 export type Callback_Opt_Union_Number_Resource_Void = (selected: number | Resource | undefined) => void;
 export type Callback_Opt_ResourceStr_Void = (value: ResourceStr | undefined) => void;
 export interface SelectAttribute extends CommonMethod {
+    setSelectOptions(options: Array<SelectOption>): this {
+        return this
+    }
     selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this
     value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this
     font(value: Font | undefined): this
@@ -1292,6 +1295,9 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     dividerStyle_value?: DividerStyleOptions | undefined
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
+    public setSelectOptions(options: Array<SelectOption>): this {
+        return this
+    }
     public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         return this
     }
@@ -1809,10 +1815,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
     }
 }
 /** @memo */
-export function Select(
+export function SelectImpl(
     /** @memo */
     style: ((attributes: SelectAttribute) => void) | undefined,
-    options: Array<SelectOption>,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1820,9 +1825,7 @@ export function Select(
         return new ArkSelectComponent()
     })
     NodeAttach<ArkSelectPeer>((): ArkSelectPeer => ArkSelectPeer.create(receiver), (_: ArkSelectPeer) => {
-        receiver.setSelectOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -10715,17 +10715,17 @@ export class Deserializer extends DeserializerBase {
         const moduleName_result : string = (valueDeserializer.readString() as string)
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let params_buf : Array<Object | undefined> | undefined
+        let params_buf : Array<string | int | long | double | Resource> | undefined
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<Object | undefined> = new Array<Object | undefined>(params_buf__length)
+            let params_buf_ : Array<string | int | long | double | Resource> = new Array<string | int | long | double | Resource>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
             params_buf = params_buf_
         }
-        const params_result : Array<Object | undefined> | undefined = params_buf
+        const params_result : Array<string | int | long | double | Resource> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
@@ -20813,7 +20813,7 @@ export class Deserializer extends DeserializerBase {
         }
         const range_result : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> = (range_buf as Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>)
         const value_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let value_buf : string | Array<string> | undefined
+        let value_buf : ResourceStr | Array<ResourceStr> | undefined
         if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
         {
             const value_buf__selector : int32 = valueDeserializer.readInt8()
@@ -20832,9 +20832,9 @@ export class Deserializer extends DeserializerBase {
             else {
                 throw new Error("One of the branches for value_buf_ has to be chosen through deserialisation.")
             }
-            value_buf = (value_buf_ as string | Array<string>)
+            value_buf = (value_buf_ as ResourceStr | Array<ResourceStr>)
         }
-        const value_result : string | Array<string> | undefined = value_buf
+        const value_result : ResourceStr | Array<ResourceStr> | undefined = value_buf
         const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let selected_buf : number | Array<number> | undefined
         if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
@@ -28112,7 +28112,7 @@ export class Deserializer extends DeserializerBase {
         }
         const range_result : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> = (range_buf as Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>)
         const value_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let value_buf : string | Array<string> | undefined
+        let value_buf : ResourceStr | Array<ResourceStr> | undefined
         if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
         {
             const value_buf__selector : int32 = valueDeserializer.readInt8()
@@ -28131,9 +28131,9 @@ export class Deserializer extends DeserializerBase {
             else {
                 throw new Error("One of the branches for value_buf_ has to be chosen through deserialisation.")
             }
-            value_buf = (value_buf_ as string | Array<string>)
+            value_buf = (value_buf_ as ResourceStr | Array<ResourceStr>)
         }
-        const value_result : string | Array<string> | undefined = value_buf
+        const value_result : ResourceStr | Array<ResourceStr> | undefined = value_buf
         const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let selected_buf : number | Array<number> | undefined
         if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))

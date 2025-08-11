@@ -199,6 +199,9 @@ export interface RatingConfiguration extends CommonConfiguration<RatingConfigura
 }
 export type OnRatingChangeCallback = (rating: number) => void;
 export interface RatingAttribute extends CommonMethod {
+    setRatingOptions(options?: RatingOptions): this {
+        return this
+    }
     stars(value: number | undefined): this
     stepSize(value: number | undefined): this
     starStyle(value: StarStyleOptions | undefined): this
@@ -212,6 +215,9 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     starStyle_value?: StarStyleOptions | undefined
     onChange_value?: ((index: number) => void) | undefined
     contentModifier_value?: ContentModifier<RatingConfiguration> | undefined
+    public setRatingOptions(options?: RatingOptions): this {
+        return this
+    }
     public stars(value: number | undefined): this {
         return this
     }
@@ -345,10 +351,9 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
     }
 }
 /** @memo */
-export function Rating(
+export function RatingImpl(
     /** @memo */
     style: ((attributes: RatingAttribute) => void) | undefined,
-    options?: RatingOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -356,9 +361,7 @@ export function Rating(
         return new ArkRatingComponent()
     })
     NodeAttach<ArkRatingPeer>((): ArkRatingPeer => ArkRatingPeer.create(receiver), (_: ArkRatingPeer) => {
-        receiver.setRatingOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

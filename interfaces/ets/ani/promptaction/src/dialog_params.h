@@ -71,10 +71,11 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
 bool GetTransitionEffectParam(ani_env* env, ani_object object, const char *name,
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>& result);
 bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
-bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& builderCallback,
-    std::function<void()>& destroyCallback);
+bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& builderCallback);
+bool GetDestroyCallback(ani_env *env, ani_object object,
+    std::function<void(const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> node)>& destroyCallback);
 bool GetCustomBuilderWithId(ani_env *env, ani_object object,
-    std::function<void(const int32_t dialogId)>& builderCallback, std::function<void()>& destroyCallback);
+    std::function<void(const int32_t dialogId)>& builderCallback);
 bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderRadiusProperty>& result);
 bool GetBorderWidth(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderWidthProperty>& result);
 bool GetBorderColor(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderColorProperty>& result);

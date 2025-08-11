@@ -14,83 +14,29 @@
  */
 
 import { ArkGridRowPeer, ArkCommonMethodPeer, AttributeModifier, GridRowAttribute } from './component';
-import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
+import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ItemAlign } from './component/enums';
+import { PeerNode } from './PeerNode';
 
-class OnBreakpointChangeModifier extends ModifierWithKey<((breakpoints: string) => void) | undefined> {
-    static identity: string = 'onBreakpointChange';
-
-    constructor(value: ((breakpoints: string) => void) | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let onBreakpointChangeNode = node as ArkGridRowPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                onBreakpointChangeNode.onBreakpointChangeAttribute(this.value as ((breakpoints: string) => void));
-            }
-        }
-    }
-
-    static factory(value: ((breakpoints: string) => void) | undefined): OnBreakpointChangeModifier {
-        return new OnBreakpointChangeModifier(value);
-    }
-}
-
-class AlignItemsModifier extends ModifierWithKey<ItemAlign | undefined> {
-    static identity: string = 'alignItems';
-
-    constructor(value: ItemAlign | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let alignItemsNode = node as ArkGridRowPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                alignItemsNode.alignItemsAttribute(this.value as ItemAlign);
-            }
-        }
-    }
-
-    static factory(value: ItemAlign | undefined): AlignItemsModifier {
-        return new AlignItemsModifier(value);
-    }
-}
-
-export class ArkGridRowAttributeSet extends ArkCommonAttributeSet implements GridRowAttribute {
-    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, OnBreakpointChangeModifier.identity, OnBreakpointChangeModifier.factory, value);
-        return this;
-    }
-
-    alignItems(value: ItemAlign | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, AlignItemsModifier.identity, AlignItemsModifier.factory, value);
-        return this;
-    }
-}
-
-export class GridRowModifier implements AttributeModifier<GridRowAttribute> {
-    attributeSet: ArkGridRowAttributeSet = new ArkGridRowAttributeSet();
-
+export class GridRowModifier extends CommonMethodModifier implements GridRowAttribute,AttributeModifier<GridRowAttribute> {
     applyNormalAttribute(instance: GridRowAttribute): void {}
     applyPressedAttribute(instance: GridRowAttribute): void {}
     applyFocusedAttribute(instance: GridRowAttribute): void {}
     applyDisabledAttribute(instance: GridRowAttribute): void {}
     applySelectedAttribute(instance: GridRowAttribute): void {}
 
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+    }
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+    }
+
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
-        this.attributeSet.onBreakpointChange(value);
         return this;
     }
 
     alignItems(value: ItemAlign | undefined): this {
-        this.attributeSet.alignItems(value);
         return this;
     }
 }

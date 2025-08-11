@@ -328,6 +328,9 @@ export type CheckboxInterface = (options?: CheckboxOptions) => CheckboxAttribute
 export type OnCheckboxChangeCallback = (value: boolean) => void;
 export type Callback_Opt_Boolean_Void = (select: boolean | undefined) => void;
 export interface CheckboxAttribute extends CommonMethod {
+    setCheckboxOptions(options?: CheckboxOptions): this {
+        return this
+    }
     select(value: boolean | Bindable<boolean> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
     shape(value: CheckBoxShape | undefined): this
@@ -345,6 +348,9 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
     mark_value?: MarkStyle | undefined
     onChange_value?: OnCheckboxChangeCallback | undefined
     contentModifier_value?: ContentModifier<CheckBoxConfiguration> | undefined
+    public setCheckboxOptions(options?: CheckboxOptions): this {
+        return this
+    }
     public select(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
@@ -500,10 +506,9 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
     }
 }
 /** @memo */
-export function Checkbox(
+export function CheckboxImpl(
     /** @memo */
     style: ((attributes: CheckboxAttribute) => void) | undefined,
-    options?: CheckboxOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -511,9 +516,7 @@ export function Checkbox(
         return new ArkCheckboxComponent()
     })
     NodeAttach<ArkCheckboxPeer>((): ArkCheckboxPeer => ArkCheckboxPeer.create(receiver), (_: ArkCheckboxPeer) => {
-        receiver.setCheckboxOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

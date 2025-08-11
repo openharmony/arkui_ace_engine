@@ -8219,6 +8219,7 @@ export interface CommonMethod {
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {return this;}
+    applyAttributesFinish(): void {}
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | undefined
@@ -13410,3 +13411,5 @@ export interface Bindable<T> {
     readonly value: T;
     readonly onChange: (value: T) => void;
 }
+export type BindableResourceStr = string | Resource | ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>
+export type BindableResourceStrArray = string[] | Resource[] | ResourceStr[] | Bindable<ResourceStr[]> | Bindable<Resource[]> | Bindable<string[]>
