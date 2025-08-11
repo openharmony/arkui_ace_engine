@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_RELATED_CONFIGURATION_H
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_STILL_TIME_LIMIT = 500;
@@ -44,9 +45,14 @@ public:
 
     void SetDragSpringLoadingConfiguration(
         const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration);
+    
+    DragPreviewOption GetOrCreateDragPreviewOption();
+    void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied);
+    void SetDragPreviewOption(const DragPreviewOption& previewOption, bool isResetOptions);
 
 private:
     RefPtr<DragSpringLoadingConfiguration> dragSpringLoadingConfiguration_;
+    std::unique_ptr<DragPreviewOption> previewOption_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -807,7 +807,9 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
 
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     layoutProperty->UpdateTextInputType(TextInputType::JS_ENUM_URL);
-    host->previewOption_.enableEdgeAutoScroll = false;
+    auto dragPreviewOption = host->GetDragPreviewOption();
+    dragPreviewOption.enableEdgeAutoScroll = false;
+    host->SetDragPreviewOptions(dragPreviewOption);
     eventHub->onDragMove_(event, extraParams);
     EXPECT_FALSE(pattern_->contentScroller_.isScrolling);
 

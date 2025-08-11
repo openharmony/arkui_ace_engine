@@ -66,7 +66,9 @@ HWTEST_F(ListItemManagerTestNg, HandleAutoScroll001, TestSize.Level1)
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto host = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listPattern);
     ASSERT_NE(host, nullptr);
-    host->previewOption_.enableEdgeAutoScroll = false;
+    auto dragPreviewOption = host->GetDragPreviewOption();
+    dragPreviewOption.enableEdgeAutoScroll = false;
+    host->SetDragPreviewOptions(dragPreviewOption);
     auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
     ASSERT_NE(lazyForEachNode, nullptr);
     auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);

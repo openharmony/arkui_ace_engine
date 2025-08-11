@@ -372,7 +372,9 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
         dragDropManager->dragDropState_ = testCase.dragDropMgrState;
         dragDropManager->isDragNodeNeedClean_ = testCase.isDragNodeNeedClean;
         DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(testCase.isMenuShow);
-        frameNode->previewOption_.isDragPreviewEnabled = testCase.isDragPreviewEnabled;
+        auto dragPreviewOption = frameNode->GetDragPreviewOption();
+        dragPreviewOption.isDragPreviewEnabled = testCase.isDragPreviewEnabled;
+        frameNode->SetDragPreviewOptions(dragPreviewOption);
         gestureEventHub->bindMenuStatus_.isBindLongPressMenu = testCase.isBindMenu;
         EXPECT_EQ(liftingState->CheckDoShowPreview(frameNode), testCase.exceptResult);
     }
@@ -416,7 +418,9 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
         }
         auto& params = machine->GetDragDropInitiatingParams();
         params.isNeedGather = testCase.isNeedGather;
-        frameNode->previewOption_.defaultAnimationBeforeLifting = testCase.defaultAnimationBeforeLifting;
+        auto dragPreviewOption = frameNode->GetDragPreviewOption();
+        dragPreviewOption.defaultAnimationBeforeLifting = testCase.defaultAnimationBeforeLifting;
+        frameNode->SetDragPreviewOptions(dragPreviewOption);
         liftingState->HandlePreDragStatus(testCase.preDragStatus);
         auto type = frameNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE);
         EXPECT_EQ(type == VisibleType::VISIBLE, testCase.exceptResult);

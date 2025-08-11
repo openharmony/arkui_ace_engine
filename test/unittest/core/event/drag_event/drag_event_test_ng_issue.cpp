@@ -1178,4 +1178,105 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue020, TestSize.Level1)
     status = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(frameNode, dragTouchRestrict);
     EXPECT_FALSE(status);
 };
+
+/**
+ * @tc.name: DragEventTestNGIssue021
+ * @tc.desc: Test DragDropRelatedConfigurations DragPreviewOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropRelatedConfigurations.
+     */
+    auto dragDropRelatedConfigurations = AceType::MakeRefPtr<DragDropRelatedConfigurations>();
+    ASSERT_NE(dragDropRelatedConfigurations, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetOrCreateDragPreviewOption function.
+     */
+    auto dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.isScaleEnabled, true);
+
+    /**
+     * @tc.steps: step3. call SetDragPreviewOption function.
+     */
+    dragPreviewOption.isScaleEnabled = false;
+    dragPreviewOption.options.isFilled = false;
+    dragDropRelatedConfigurations->SetDragPreviewOption(dragPreviewOption, false);
+    dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.isScaleEnabled, false);
+    EXPECT_EQ(dragPreviewOption.options.isFilled, true);
+
+    dragPreviewOption.options.isFilled = false;
+    dragDropRelatedConfigurations->SetDragPreviewOption(dragPreviewOption, true);
+    dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.isScaleEnabled, false);
+    EXPECT_EQ(dragPreviewOption.options.isFilled, false);
+
+    /**
+     * @tc.steps: step3. call SetOptionsAfterApplied function.
+     */
+    OptionsAfterApplied options;
+    options.isFilled = false;
+    dragDropRelatedConfigurations->SetOptionsAfterApplied(options);
+    dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.isFilled, false);
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue022
+ * @tc.desc: Test DragDropRelatedConfigurations DragPreviewOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue022, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create DragDropRelatedConfigurations.
+    */
+    auto dragDropRelatedConfigurations = AceType::MakeRefPtr<DragDropRelatedConfigurations>();
+    ASSERT_NE(dragDropRelatedConfigurations, nullptr);
+
+    /**
+    * @tc.steps: step2. call SetDragPreviewOption function.
+    */
+    DragPreviewOption dragPreviewOption;
+    EXPECT_EQ(dragPreviewOption.isScaleEnabled, true);
+    EXPECT_EQ(dragPreviewOption.options.isFilled, true);
+    dragPreviewOption.isScaleEnabled = false;
+    dragPreviewOption.options.isFilled = false;
+    dragDropRelatedConfigurations->SetDragPreviewOption(dragPreviewOption, false);
+    dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.isScaleEnabled, false);
+    EXPECT_EQ(dragPreviewOption.options.isFilled, true);
+
+    dragPreviewOption.options.isFilled = false;
+    dragDropRelatedConfigurations->SetDragPreviewOption(dragPreviewOption, true);
+    dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.isScaleEnabled, false);
+    EXPECT_EQ(dragPreviewOption.options.isFilled, false);
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue023
+ * @tc.desc: Test DragDropRelatedConfigurations DragPreviewOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue023, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create DragDropRelatedConfigurations.
+    */
+    auto dragDropRelatedConfigurations = AceType::MakeRefPtr<DragDropRelatedConfigurations>();
+    ASSERT_NE(dragDropRelatedConfigurations, nullptr);
+
+    /**
+    * @tc.steps: step2. call SetOptionsAfterApplied function.
+    */
+    OptionsAfterApplied options;
+    options.isFilled = false;
+    dragDropRelatedConfigurations->SetOptionsAfterApplied(options);
+    auto dragPreviewOption = dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.isFilled, false);
+};
 } // namespace OHOS::Ace::NG
