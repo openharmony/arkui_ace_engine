@@ -77,12 +77,12 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     const auto& padding = hostLayoutProperty->CreatePaddingAndBorder();
     auto measureType = hostLayoutProperty->GetMeasureType();
     OptionalSizeF frameSize;
-    auto version10OrLarger =
-        PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
-    bool isEnableMatchParent = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
-                               layoutWrapper->GetHostNode()->GetPattern()->IsEnableMatchParent();
-    bool isEnableFix = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
-                       layoutWrapper->GetHostNode()->GetPattern()->IsEnableFix();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    bool version10OrLarger = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN);
+    const auto& pattern = host->GetPattern();
+    bool isEnableMatchParent = pattern && pattern->IsEnableMatchParent();
+    bool isEnableFix = pattern && pattern->IsEnableFix();
     auto widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
     auto heightLayoutPolicy = LayoutCalPolicy::NO_MATCH;
     auto layoutPolicy = hostLayoutProperty->GetLayoutPolicyProperty();

@@ -755,12 +755,9 @@ HWTEST_F(BoxLayoutAlgorithmTestOld, BoxLayoutAlgorithmTestOld_PerformMeasureSelf
     /**
      * @tc.steps: step1. creat a layoutwrapper and SetLayoutAlgorithm for it.
      */
-    auto layoutWrapper = CreatlayoutWrapper();
-
-    auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, 0, []() { return AceType::MakeRefPtr<Pattern>(); });
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
 
     /**
      * @tc.steps: step2. layout parameter initialization.
