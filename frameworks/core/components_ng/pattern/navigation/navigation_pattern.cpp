@@ -5328,11 +5328,27 @@ void NavigationPattern::AdjustPrimaryAndProxyNodePosition(
     const std::vector<RefPtr<NavDestinationGroupNode>>& destNodes, std::optional<int32_t> homeIndex)
 {
     int32_t nodeCount = static_cast<int32_t>(destNodes.size());
-    for (int32_t index = 0; index < nodeCount; ++index) {
+    if (homeIndex.has_value()) {
+        for (int32_t index = 0; index < nodeCount; ++index) {
+            auto node = destNodes[index];
+            if (homeIndex.value() == index) {
+                ReplaceNodeWithProxyNodeIfNeeded(navContentNode, node);
+                primaryNodes_.push_back(node);
+                continue;
+            }
+            RestoreNodeFromProxyNodeIfNeeded(primaryContentNode, navContentNode, node);
+        }
+        return;
+    }
+    bool meetStandard = false;
+    for (int32_t index = nodeCount - 1; index >= 0; --index) {
         auto node = destNodes[index];
-        if (!homeIndex.has_value() || homeIndex.value() == index) {
+        if (!meetStandard) {
             ReplaceNodeWithProxyNodeIfNeeded(navContentNode, node);
-            primaryNodes_.push_back(node);
+            primaryNodes_.insert(primaryNodes_.begin(), node);
+            if (node->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
+                meetStandard = true;
+            }
             continue;
         }
         RestoreNodeFromProxyNodeIfNeeded(primaryContentNode, navContentNode, node);
