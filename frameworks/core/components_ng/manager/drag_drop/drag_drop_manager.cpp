@@ -2469,9 +2469,12 @@ void DragDropManager::DragMoveAnimation(
 void DragDropManager::DragMoveDefaultAnimation(const RefPtr<OverlayManager>& overlayManager,
     const DragPreviewInfo& info, AnimationOption option, const Offset& newOffset, Point point)
 {
-    auto renderContext = info_.textNode && info_.relativeContainerNode ? info_.relativeContainerNode->GetRenderContext()
-                                                                       : info_.imageNode->GetRenderContext();
+    auto targetNode = info_.textNode && info_.relativeContainerNode ? info_.relativeContainerNode : info_.imageNode;
+    CHECK_NULL_VOID(targetNode);
+    auto renderContext = targetNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto context = targetNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     auto offset = OffsetF(point.GetX(), point.GetY());
     auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
     auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
@@ -2489,7 +2492,7 @@ void DragDropManager::DragMoveDefaultAnimation(const RefPtr<OverlayManager>& ove
             }
             UpdateGatherNodePosition(overlayManager, info.imageNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& overlayManager,
@@ -2501,6 +2504,8 @@ void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& 
     auto offset = OffsetF(point.GetX(), point.GetY());
     auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
     CHECK_NULL_VOID(overlayManager);
+    auto context = info_.imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
     auto menuRenderContext = GetMenuRenderContextFromMenuWrapper(menuWrapperNode);
     AnimationUtils::Animate(
@@ -2516,7 +2521,7 @@ void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& 
             relativeContainerNodeRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
             UpdateGatherNodePosition(overlayManager, info.imageNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragDropManager::UpdateDragPreviewScale()
@@ -2653,6 +2658,8 @@ void DragDropManager::StartDragDefaultAnimation(AnimationOption option, const Of
 {
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto context = info_.imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     auto animateCallback = [renderContext, info = info_, newOffset, overlayManager, animateProperty, point]() {
         CHECK_NULL_VOID(renderContext);
         DragAnimationHelper::UpdateStartAnimation(overlayManager, animateProperty, point, info, newOffset);
@@ -2675,7 +2682,7 @@ void DragDropManager::StartDragDefaultAnimation(AnimationOption option, const Of
         CHECK_NULL_VOID(pipeline);
         pipeline->Animate(option, option.GetCurve(), animateCallback, option.GetOnFinishEvent());
     } else {
-        AnimationUtils::Animate(option, animateCallback, option.GetOnFinishEvent());
+        AnimationUtils::Animate(option, animateCallback, option.GetOnFinishEvent(), nullptr, context);
     }
 }
 

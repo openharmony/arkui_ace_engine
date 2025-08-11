@@ -194,6 +194,8 @@ void DragAnimationHelper::PlayNodeAnimationBeforeLifting(const RefPtr<FrameNode>
     option.SetCurve(springCurve);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     renderContext->UpdateTransformScale({ 1.0f, 1.0f });
 
     AnimationUtils::Animate(
@@ -201,7 +203,7 @@ void DragAnimationHelper::PlayNodeAnimationBeforeLifting(const RefPtr<FrameNode>
         [renderContext]() mutable {
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>& actuator)
@@ -215,6 +217,8 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
     }
     auto frameContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(frameContext);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -228,7 +232,7 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
         [frameContext]() mutable {
             frameContext->UpdateTransformScale({ 1.0f, 1.0f });
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 float DragAnimationHelper::GetLiftingNodeScale(const RefPtr<RenderContext>& renderContext)
@@ -301,6 +305,8 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     CHECK_NULL_VOID(textNode);
     auto textNodeContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textNodeContext);
+    auto context = textNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     textNodeContext->SetVisible(true);
     auto windowScale = dragDropManager->GetWindowScale();
     auto badgeScale = GreatNotEqual(windowScale, 0.0f) ? BADGE_ANIMATION_SCALE / windowScale : BADGE_ANIMATION_SCALE;
@@ -320,7 +326,7 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
         [textNodeContext, badgeScale]() mutable {
             textNodeContext->UpdateTransformScale({ badgeScale, badgeScale });
         },
-        textOption.GetOnFinishEvent());
+        textOption.GetOnFinishEvent(), nullptr, context);
 
     dragDropManager->SetIsShowBadgeAnimation(false);
 }
@@ -499,6 +505,8 @@ void DragAnimationHelper::DoGrayedAnimation(
     auto frameTag = frameNode->GetTag();
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     if (gestureHub->IsTextCategoryComponent(frameTag)) {
         return;
     }
@@ -506,7 +514,7 @@ void DragAnimationHelper::DoGrayedAnimation(
     option.SetCurve(cure);
     AnimationUtils::Animate(
         option, [frameNode, opacity]() { ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode); },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 RefPtr<FrameNode> DragAnimationHelper::CreateImageNode(const RefPtr<PixelMap>& pixelMap)
@@ -761,6 +769,9 @@ void DragAnimationHelper::ShowDragNodeCopyAnimation(const RefPtr<OverlayManager>
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     }
     auto renderContext = dragNodeCopy->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = dragNodeCopy->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATING_SPRING_VELOCITY,
@@ -773,7 +784,7 @@ void DragAnimationHelper::ShowDragNodeCopyAnimation(const RefPtr<OverlayManager>
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 
@@ -793,6 +804,8 @@ void DragAnimationHelper::HideDragNodeCopyWithAnimation(const RefPtr<OverlayMana
     }
     auto renderContext = dragNodeCopy->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto context = dragNodeCopy->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationOption option;
     option.SetDuration(NODE_RESET_DURATION);
     option.SetCurve(Curves::SHARP);
@@ -816,7 +829,7 @@ void DragAnimationHelper::HideDragNodeCopyWithAnimation(const RefPtr<OverlayMana
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale({ 1.0, 1.0f });
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 
@@ -973,6 +986,8 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
     CHECK_NULL_VOID(imageNode);
     auto renderContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto context = imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(
         option,
         [renderContext, info = dragDropManager->GetDragPreviewInfo(), newOffset, overlayManager,
@@ -985,7 +1000,7 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
                 dragDropManager->UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
                 dragDropManager->UpdateTextNodePosition(info.textNode, newOffset);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragAnimationHelper::InitImageNodeProperties(const RefPtr<FrameNode>& imageNode, const RefPtr<PixelMap>& pixelMap)
