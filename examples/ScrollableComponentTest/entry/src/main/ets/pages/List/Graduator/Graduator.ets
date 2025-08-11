@@ -34,7 +34,7 @@ export class TimePointDataSource implements IDataSource {
   private listeners: DataChangeListener[] = []
   // 使用 Map 替代索引签名对象
   private cachedData: Map<number, TimePoint> = new Map()
-  private startDate = new Date(2000, 0, 1, 0, 0)
+  public startDate = new Date(2000, 0, 1, 0, 0)
   private endDate = new Date(2101, 0, 1, 0, 0)
   private totalHours = (this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60)
   private lat = 30.0

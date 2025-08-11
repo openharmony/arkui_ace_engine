@@ -16,7 +16,7 @@
 
 @Entry
 @Component
-struct StickyNestedScroll {
+struct ScrollToControlParent {
   private scroller: Scroller = new Scroller()
   private listScroller: Scroller = new Scroller();
   private scrollOffset: number = 0
