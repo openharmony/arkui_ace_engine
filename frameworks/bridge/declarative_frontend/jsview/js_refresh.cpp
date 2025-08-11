@@ -164,11 +164,12 @@ void JSRefresh::JsRefreshOffset(const JSRef<JSVal>& jsVal)
 
 void JSRefresh::Create(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    auto info0 = info[0];
+    if (!info0->IsObject()) {
         return;
     }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = JSRef<JSObject>::Cast(info0);
     auto refreshing = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING));
     auto jsOffset = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET));
     auto friction = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FRICTION));

@@ -60,6 +60,10 @@ const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 
 const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
 constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 constexpr Dimension LOADING_TEXT_DISPLAY_DISTANCE = 80.0_vp;
+double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
+{
+    return context ? context->NormalizeToPx(dimension) : dimension.ConvertToPx();
+}
 } // namespace
 
 
@@ -105,11 +109,11 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     } else if (progressChild_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto geometryNode = host->GetGeometryNode();
+        const auto& geometryNode = host->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
         auto refreshHeight = geometryNode->GetFrameSize().Height();
         auto scrollOffset = std::clamp(scrollOffset_, 0.0f, refreshHeight);
-        UpdateScrollTransition(scrollOffset);
+        UpdateScrollTransition(host, scrollOffset);
     }
     return false;
 }
@@ -119,11 +123,7 @@ void RefreshPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     hasLoadingText_ = layoutProperty->HasLoadingText();
     refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance());
@@ -131,17 +131,17 @@ void RefreshPattern::OnModifyDone()
         refreshOffset_ = GetTriggerRefreshDisTance();
     }
     pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
-    InitPanEvent(gestureHub);
-    InitOnKeyEvent();
-    InitChildNode();
+    InitPanEvent(host);
+    InitOnKeyEvent(host);
+    InitChildNode(host);
     if (!isHigherVersion_) {
         triggerLoadingDistance_ = static_cast<float>(
             std::clamp(layoutProperty->GetIndicatorOffset().value_or(triggerLoadingDistanceTheme_).ConvertToPx(),
                 -1.0f * triggerLoadingDistanceTheme_.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
         InitLowVersionOffset();
     }
-    RefreshStatusChangeEffect();
-    SetAccessibilityAction();
+    RefreshStatusChangeEffect(layoutProperty->GetIsRefreshing().value_or(false));
+    SetAccessibilityAction(host);
 }
 
 RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
@@ -160,11 +160,16 @@ RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
     return refreshLayoutAlgorithm;
 }
 
-void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+void RefreshPattern::InitPanEvent(const RefPtr<FrameNode>& host)
 {
     if (panEvent_) {
         return;
     }
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag start and drag motion triggered by self");
         auto pattern = weak.Upgrade();
@@ -199,21 +204,18 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         gestureHub->SetIsAllowMouse(false);
     }
 }
 
-void RefreshPattern::InitOnKeyEvent()
+void RefreshPattern::InitOnKeyEvent(const RefPtr<FrameNode>& host)
 {
     if (isKeyEventRegisted_) {
         return;
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
+    const auto& focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
@@ -224,9 +226,8 @@ void RefreshPattern::InitOnKeyEvent()
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
-void RefreshPattern::InitProgressNode()
+void RefreshPattern::InitProgressNode(const RefPtr<FrameNode>& host)
 {
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
@@ -251,7 +252,7 @@ void RefreshPattern::InitProgressNode()
     }
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
-    CalcLength length = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
+    CalcLength length = CalcLength(NormalizeToPx(loadingProgressSizeTheme_, context));
     progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(length, length));
     progressChild_->MarkDirtyNode();
 }
@@ -345,21 +346,20 @@ void RefreshPattern::OnColorModeChange(uint32_t colorMode)
     loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void RefreshPattern::InitChildNode()
+void RefreshPattern::InitChildNode(const RefPtr<FrameNode>& host)
 {
     if (isCustomBuilderExist_) {
         return;
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<NG::RefreshAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (!progressChild_) {
-        InitProgressNode();
+        InitProgressNode(host);
         if (isHigherVersion_) {
             CHECK_NULL_VOID(progressChild_);
-            auto progressContext = progressChild_->GetRenderContext();
+            const auto& progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
             progressContext->UpdateOpacity(0.0f);
         } else {
@@ -399,11 +399,8 @@ void RefreshPattern::InitChildNode()
     }
 }
 
-void RefreshPattern::RefreshStatusChangeEffect()
+void RefreshPattern::RefreshStatusChangeEffect(bool refreshingProp)
 {
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto refreshingProp = layoutProperty->GetIsRefreshing().value_or(false);
     if (isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
             QuickStartFresh();
@@ -554,44 +551,11 @@ float RefreshPattern::GetFollowRatio()
 {
     auto loadingVisibleHeight = GetLoadingVisibleHeight();
     auto ratio = 0.0f;
-    if (!NearEqual(static_cast<float>(refreshOffset_.ConvertToPx()), loadingVisibleHeight)) {
-        ratio = static_cast<float>(
-            (scrollOffset_ - loadingVisibleHeight) / (refreshOffset_.ConvertToPx() - loadingVisibleHeight));
+    float refreshOffset = NormalizeToPx(refreshOffset_, GetContext());
+    if (!NearEqual(refreshOffset, loadingVisibleHeight)) {
+        ratio = (scrollOffset_ - loadingVisibleHeight) / (refreshOffset - loadingVisibleHeight);
     }
     return std::clamp(ratio, 0.0f, 1.0f);
-}
-
-void RefreshPattern::FireStateChange(int32_t value)
-{
-    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
-    CHECK_NULL_VOID(refreshEventHub);
-    refreshEventHub->FireOnStateChange(value);
-    if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto inspectorId = host->GetInspectorId().value_or("");
-        Recorder::EventParamsBuilder builder;
-        builder.SetId(inspectorId)
-            .SetType(host->GetTag())
-            .SetEventType(Recorder::EventType::REFRESH)
-            .SetHost(host)
-            .SetDescription(host->GetAutoEventParamValue(""));
-        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
-    }
-}
-
-void RefreshPattern::FireRefreshing()
-{
-    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
-    CHECK_NULL_VOID(refreshEventHub);
-    refreshEventHub->FireOnRefreshing();
-}
-
-void RefreshPattern::FireChangeEvent(const std::string& value)
-{
-    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
-    CHECK_NULL_VOID(refreshEventHub);
-    refreshEventHub->FireChangeEvent(value);
 }
 
 void RefreshPattern::FireOnOffsetChange(float value)
@@ -641,7 +605,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
         }
         host->AddChild(builder, 0);
         UpdateFirstChildPlacement();
-        UpdateScrollTransition(0.f);
+        UpdateScrollTransition(host, 0.f);
         TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode exists");
     } else {
         auto customNodeChild = host->GetFirstChild();
@@ -655,9 +619,8 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     isCustomBuilderExist_ = true;
 }
 
-void RefreshPattern::SetAccessibilityAction()
+void RefreshPattern::SetAccessibilityAction(const RefPtr<FrameNode>& host)
 {
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
@@ -707,16 +670,29 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         return;
     }
     refreshStatus_ = newStatus;
+    isRefreshing_ = (refreshStatus_ == RefreshStatus::REFRESH);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto refreshEventHub = host->GetOrCreateEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(refreshEventHub);
     if (refreshStatus_ == RefreshStatus::REFRESH) {
-        isRefreshing_ = true;
         // the two-way binding of 'refreshing' variable need to be changed before 'onRefreshing' function is triggered
-        FireChangeEvent("true");
-        FireRefreshing();
+        refreshEventHub->FireChangeEvent("true");
+        refreshEventHub->FireOnRefreshing();
     } else {
-        isRefreshing_ = false;
-        FireChangeEvent("false");
+        refreshEventHub->FireChangeEvent("false");
     }
-    FireStateChange(static_cast<int>(refreshStatus_));
+    refreshEventHub->FireOnStateChange(static_cast<int>(refreshStatus_));
+    if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto inspectorId = host->GetInspectorId().value_or("");
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetEventType(Recorder::EventType::REFRESH)
+            .SetHost(host)
+            .SetDescription(host->GetAutoEventParamValue(""));
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
     TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
@@ -766,7 +742,7 @@ void RefreshPattern::InitOffsetProperty()
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
+        const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->AttachNodeAnimatableProperty(offsetProperty_);
         offsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
@@ -777,17 +753,17 @@ void RefreshPattern::UpdateFirstChildPlacement()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
+    const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto refreshHeight = geometryNode->GetFrameSize().Height();
     auto scrollOffset = std::clamp(scrollOffset_, 0.0f, refreshHeight);
     if (progressChild_) {
         if (isSourceFromAnimation_) {
             UpdateLoadingProgressTranslate(0.0f);
-            UpdateScrollTransition(scrollOffset);
+            UpdateScrollTransition(host, scrollOffset);
         } else {
             UpdateLoadingProgressTranslate(scrollOffset);
-            UpdateScrollTransition(scrollOffset);
+            UpdateScrollTransition(host, scrollOffset);
             UpdateLoadingProgressStatus(GetLoadingProgressStatus(), GetFollowRatio());
         }
     } else {
@@ -795,9 +771,8 @@ void RefreshPattern::UpdateFirstChildPlacement()
     }
 }
 
-void RefreshPattern::UpdateScrollTransition(float scrollOffset)
+void RefreshPattern::UpdateScrollTransition(const RefPtr<FrameNode>& host, float scrollOffset)
 {
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childCount = host->TotalChildCount();
     // If the refresh has no children without loadingProgress and text, it does not need to update offset.
@@ -858,7 +833,7 @@ float RefreshPattern::GetLoadingVisibleHeight()
 {
     float loadingHeight = 0.0f;
     CHECK_NULL_RETURN(progressChild_, 0.0f);
-    auto geometryNode = progressChild_->GetGeometryNode();
+    const auto& geometryNode = progressChild_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     if (loadingTextNode_) {
         auto loadingTextGeometryNode = loadingTextNode_->GetGeometryNode();
@@ -959,9 +934,8 @@ void RefreshPattern::QuickFirstChildAppear()
         [weak = AceType::WeakClaim(this), refreshOffset = refreshOffset_]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto offsetProperty = pattern->offsetProperty_;
-            CHECK_NULL_VOID(offsetProperty);
-            offsetProperty->Set(static_cast<float>(refreshOffset.ConvertToPx()));
+            CHECK_NULL_VOID(pattern->offsetProperty_);
+            pattern->offsetProperty_->Set(static_cast<float>(NormalizeToPx(refreshOffset, pattern->GetContext())));
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();

@@ -134,7 +134,7 @@ public:
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<FrameNode>& host);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
@@ -148,8 +148,8 @@ private:
     void OnAttachToMainTreeMultiThread();
     float GetFollowRatio();
     void HandleCustomBuilderDragUpdateStage();
-    void SetAccessibilityAction();
-    void InitOnKeyEvent();
+    void SetAccessibilityAction(const RefPtr<FrameNode>& host);
+    void InitOnKeyEvent(const RefPtr<FrameNode>& host);
     bool OnKeyEvent(const KeyEvent& event);
     void QuickEndFresh();
     void QuickStartFresh();
@@ -162,19 +162,16 @@ private:
     void SpeedTriggerAnimation(float speed);
     void SpeedAnimationFinish();
     void SwitchToFinish();
-    void InitChildNode();
-    void InitProgressNode();
+    void InitChildNode(const RefPtr<FrameNode>& host);
+    void InitProgressNode(const RefPtr<FrameNode>& host);
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();
     float GetLoadingVisibleHeight();
-    void UpdateScrollTransition(float scrollOffset);
+    void UpdateScrollTransition(const RefPtr<FrameNode>& host, float scrollOffset);
     RefreshAnimationState GetLoadingProgressStatus();
-    void RefreshStatusChangeEffect();
+    void RefreshStatusChangeEffect(bool refreshingProp);
     float GetTargetOffset();
     void ResetAnimation();
-    void FireStateChange(int32_t value);
-    void FireRefreshing();
-    void FireChangeEvent(const std::string& value);
     void FireOnOffsetChange(float value);
     void FireOnStepOffsetChange(float value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
