@@ -58,6 +58,11 @@
             "https://gitee.com/jiyujia926",
             "https://gitee.com/guido_grassel"
         ],
+        "https://gitee.com/arkuieco3": [
+            "https://gitee.com/liubihao",
+            "https://gitee.com/maoruihao",
+            "https://gitee.com/lixingchi1"
+        ],
         "https://gitee.com/arkuiscroll": [
             "https://gitee.com/yangcan18",
             "https://gitee.com/yeyinglong_admin",
@@ -276,7 +281,10 @@
         },
         "https://gitee.com/lixingchi1": {
             "info": "[逻辑组件 lixingchi]",
-            "group": "https://gitee.com/arkuistatemgmt"
+            "group": [
+                "https://gitee.com/arkuistatemgmt",
+                "https://gitee.com/arkuieco3"
+            ]
         },
         "https://gitee.com/s10021109": {
             "info": "[状态管理 chenbenzhi]",
@@ -521,6 +529,14 @@
         "https://gitee.com/guozejun": {
             "info": "[idlize guozejun]",
             "group": "https://gitee.com/arkui-idlize"
+        },
+        "https://gitee.com/liubihao": {
+            "info": "[逻辑组件 liubihao]",
+            "group": "https://gitee.com/arkuieco3"
+        },
+        "https://gitee.com/maoruihao": {
+            "info": "[逻辑组件 maoruihao]",
+            "group": "https://gitee.com/arkuieco3"
         }
     }
 }
