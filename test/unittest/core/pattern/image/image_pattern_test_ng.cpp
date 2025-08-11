@@ -2829,4 +2829,34 @@ HWTEST_F(ImagePatternTestNg, ImageCreateTest001, TestSize.Level0)
     imagePattern->OnConfigurationUpdate();
     EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
 }
+
+/**
+ * @tc.name: TestImageLoadingCtxCreate
+ * @tc.desc: Test Create imageLoadingCtx for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImageLoadingCtxCreate, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto loadingCtx1 = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr), false, true);
+    ASSERT_NE(loadingCtx1, nullptr);
+    /**
+    * @tc.steps: step2. check isSceneBoardWindow_ value.
+    * @tc.expected: isSceneBoardWindow_ is true.
+    */
+    EXPECT_TRUE(loadingCtx1->isSceneBoardWindow_);
+    auto loadingCtx2 = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr), false, false);
+    ASSERT_NE(loadingCtx2, nullptr);
+    /**
+    * @tc.steps: step2. check isSceneBoardWindow_ value.
+    * @tc.expected: isSceneBoardWindow_ is false.
+    */
+    EXPECT_FALSE(loadingCtx2->isSceneBoardWindow_);
+}
 } // namespace OHOS::Ace::NG

@@ -897,7 +897,8 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 
     imageDfxConfig_ = CreateImageDfxConfig(src);
 
-    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_, imageDfxConfig_);
+    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        src, std::move(loadNotifier), syncLoad_, isSceneBoardWindow_, imageDfxConfig_);
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{private}s", imageDfxConfig_.ToStringWithSrc().c_str());
@@ -924,7 +925,7 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
 
         altImageDfxConfig_ = CreateImageDfxConfig(altImageSourceInfo);
         altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
-            altImageSourceInfo, std::move(altLoadNotifier), false, altImageDfxConfig_);
+            altImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altImageDfxConfig_);
         altLoadingCtx_->LoadImageData();
     }
 }
@@ -2323,6 +2324,7 @@ void ImagePattern::InitDefaultValue()
     // If the default value is set to false, the SceneBoard memory increases.
     // Therefore the default value is different in the SceneBoard.
     if (container && container->IsSceneBoardWindow()) {
+        isSceneBoardWindow_ = true;
         autoResizeDefault_ = true;
         interpolationDefault_ = ImageInterpolation::NONE;
     }
