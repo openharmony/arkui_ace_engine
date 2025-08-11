@@ -532,7 +532,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void SwipeToWithoutAnimation(int32_t index, bool byUser = false);
+    void SwipeToWithoutAnimation(int32_t index, std::optional<int32_t> rawIndex = std::nullopt);
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();

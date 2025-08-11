@@ -1917,7 +1917,7 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
     taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
-void SwiperPattern::SwipeToWithoutAnimation(int32_t index, bool byUser)
+void SwiperPattern::SwipeToWithoutAnimation(int32_t index, std::optional<int32_t> rawIndex)
 {
     if (currentIndex_ != index) {
         FireWillShowEvent(index);
@@ -1936,8 +1936,10 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index, bool byUser)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
-    if (byUser) {
-        jumpIndexByUser_ = index;
+    if (rawIndex.has_value()) {
+        auto tempIndex = CheckIndexRange(rawIndex.value());
+        tempIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(tempIndex, GetDisplayCount()) : tempIndex;
+        jumpIndexByUser_ = CheckTargetIndex(tempIndex);
     }
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
@@ -2241,7 +2243,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)), true);
+        SwipeToWithoutAnimation(GetLoopIndex(targetIndex), index);
     } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
@@ -2306,7 +2308,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)), true);
+        SwipeToWithoutAnimation(GetLoopIndex(targetIndex), index);
     }
 }
 
