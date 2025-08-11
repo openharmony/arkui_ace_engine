@@ -324,6 +324,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetFocusedInstanceId)
         },
         ani_native_function {
+            "_GetNodePtrWithPeerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNodePtrWithPeerPtr)
+        },
+        ani_native_function {
+            "_GetNodeIdWithNodePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNodeIdWithNodePtr)
+        },
+        ani_native_function {
+            "_GetNodeIdWithPeerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNodeIdWithPeerPtr)
+        },
+        ani_native_function {
+            "_CreateRenderNodePeerWithNodePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateRenderNodePeerWithNodePtr)
+        },
+        ani_native_function {
+            "_ToColorLong",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ToColorLong)
+        },
+        ani_native_function {
+            "_ToColorInt",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ToColorInt)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
@@ -999,6 +1029,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SendThemeToNative)
         },
         ani_native_function {
+            "_RemoveThemeInNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveThemeInNative)
+        },
+        ani_native_function {
             "_SetDefaultTheme",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDefaultTheme)
@@ -1012,6 +1047,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_RestoreColorMode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreColorMode)
+        },
+        ani_native_function {
+            "_SetThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetThemeScopeId)
+        },
+        ani_native_function {
+            "_CreateAndBindTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAndBindTheme)
+        },
+        ani_native_function {
+            "_ApplyParentThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
         },
     };
 

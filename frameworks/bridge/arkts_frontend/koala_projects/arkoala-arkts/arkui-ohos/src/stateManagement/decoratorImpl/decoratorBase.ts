@@ -51,7 +51,7 @@ export class DecoratedVariableBase {
     protected readonly owningComponent_: ExtendableComponent | null;
     // can be read publically
     public _varName: string;
-    public readonly decorator: string;
+    public decorator: string;
     // public readonly info: string;  Remaining to be added
     get varName(): string {
         return this._varName;
@@ -203,5 +203,13 @@ export abstract class DecoratedV2VariableBase extends DecoratedVariableBase impl
     }
     public info(): string {
         return this.varName;
+    }
+
+    get(): Any {
+        return undefined as Any;
+    }
+
+    set(newValue: Any): void {
+        return;
     }
 }

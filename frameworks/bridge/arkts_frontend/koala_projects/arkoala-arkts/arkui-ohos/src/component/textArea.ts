@@ -1049,6 +1049,9 @@ export type Callback_EnterKeyType_Void = (enterKey: EnterKeyType) => void;
 export type Callback_String_PasteEvent_Void = (value: string, event: PasteEvent) => void;
 export type Callback_ResourceStr_Void = (text: ResourceStr) => void;
 export interface TextAreaAttribute extends CommonMethod {
+    setTextAreaOptions(value?: TextAreaOptions): this {
+        return this
+    }
     placeholderColor(value: ResourceColor | undefined): this
     placeholderFont(value: Font | undefined): this
     enterKeyType(value: EnterKeyType | undefined): this
@@ -1169,6 +1172,9 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((parameter: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    public setTextAreaOptions(value?: TextAreaOptions): this {
+        return this
+    }
     public placeholderColor(value: ResourceColor | undefined): this {
         return this
     }
@@ -1871,10 +1877,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     }
 }
 /** @memo */
-export function TextArea(
+export function TextAreaImpl(
     /** @memo */
     style: ((attributes: TextAreaAttribute) => void) | undefined,
-    value?: TextAreaOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1882,10 +1887,8 @@ export function TextArea(
         return new ArkTextAreaComponent()
     })
     NodeAttach<ArkTextAreaPeer>((): ArkTextAreaPeer => ArkTextAreaPeer.create(receiver), (_: ArkTextAreaPeer) => {
-        receiver.setTextAreaOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class TextAreaControllerInternal {

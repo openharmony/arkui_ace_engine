@@ -268,6 +268,9 @@ export type Tuple_Union_ResourceColor_LinearGradient_Number = [
     number
 ]
 export interface GaugeAttribute extends CommonMethod {
+    setGaugeOptions(options: GaugeOptions): this {
+        return this
+    }
     value(value: number | undefined): this
     startAngle(value: number | undefined): this
     endAngle(value: number | undefined): this
@@ -290,6 +293,9 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     indicator_value?: GaugeIndicatorOptions | undefined
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier | undefined
+    public setGaugeOptions(options: GaugeOptions): this {
+        return this
+    }
     public value(value: number | undefined): this {
         return this
     }
@@ -420,10 +426,9 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
     }
 }
 /** @memo */
-export function Gauge(
+export function GaugeImpl(
     /** @memo */
     style: ((attributes: GaugeAttribute) => void) | undefined,
-    options: GaugeOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -431,9 +436,7 @@ export function Gauge(
         return new ArkGaugeComponent()
     })
     NodeAttach<ArkGaugePeer>((): ArkGaugePeer => ArkGaugePeer.create(receiver), (_: ArkGaugePeer) => {
-        receiver.setGaugeOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -13,22 +13,34 @@
  * limitations under the License.
  */
 
-import { AttributeModifier } from 'arkui/component/common'
-import { ColumnAttribute } from 'arkui/component/column'
- 
+import { ColumnAttribute, AttributeModifier, PointLightStyle, HorizontalAlign, FlexAlign } from './component';
 import { CommonMethodModifier } from './CommonMethodModifier';
 import { PeerNode } from './PeerNode';
+
 export class ColumnModifier extends CommonMethodModifier implements ColumnAttribute, AttributeModifier<ColumnAttribute> {
-    applyNormalAttribute(instance: ColumnAttribute): void { }
-    applyPressedAttribute(instance: ColumnAttribute): void { }
-    applyFocusedAttribute(instance: ColumnAttribute): void { }
-    applyDisabledAttribute(instance: ColumnAttribute): void { }
-    applySelectedAttribute(instance: ColumnAttribute): void { }
+    applyNormalAttribute(instance: ColumnAttribute): void {}
+    applyPressedAttribute(instance: ColumnAttribute): void {}
+    applyFocusedAttribute(instance: ColumnAttribute): void {}
+    applyDisabledAttribute(instance: ColumnAttribute): void {}
+    applySelectedAttribute(instance: ColumnAttribute): void {}
 
     applyModifierPatch(value: PeerNode): void {
         super.applyModifierPatch(value)
     }
     mergeModifier(value: CommonMethodModifier): void {
         super.mergeModifier(value)
+    }
+
+    alignItems(value: HorizontalAlign | undefined): this {
+        return this
+    }
+    justifyContent(value: FlexAlign | undefined): this {
+        return this
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        return this
+    }
+    reverse(value: boolean | undefined): this {
+        return this
     }
 }

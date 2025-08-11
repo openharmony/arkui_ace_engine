@@ -15,82 +15,28 @@
 
 import { ArkStackPeer, ArkCommonMethodPeer, AttributeModifier, Alignment, PointLightStyle, StackAttribute } from './component';
 import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
+import { CommonMethodModifier } from "./CommonMethodModifier"
+import { PeerNode } from './PeerNode';
 
-class AlignContentModifier extends ModifierWithKey<Alignment | undefined> {
-    static identity: string = 'alignContent';
-
-    constructor(value: Alignment | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let alignContentPeerNode = node as ArkStackPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                alignContentPeerNode.alignContentAttribute(this.value as Alignment);
-            }
-        }
-    }
-
-    static factory(value: Alignment | undefined): AlignContentModifier {
-        return new AlignContentModifier(value);
-    }
-}
-
-class PointLightModifier extends ModifierWithKey<PointLightStyle | undefined> {
-    static identity: string = 'pointLight';
-
-    constructor(value: PointLightStyle | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let pointLightPeerNode = node as ArkStackPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                pointLightPeerNode.pointLightAttribute(this.value as PointLightStyle);
-            }
-        }
-    }
-
-    static factory(value: PointLightStyle | undefined): PointLightModifier {
-        return new PointLightModifier(value);
-    }
-}
-
-export class ArkStackAttributeSet extends ArkCommonAttributeSet implements StackAttribute {
-
-    alignContent(value: Alignment | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, AlignContentModifier.identity, AlignContentModifier.factory, value);
-        return this;
-    }
-
-    pointLight(value: PointLightStyle | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, PointLightModifier.identity, PointLightModifier.factory, value);
-        return this;
-    }
-}
-
-export class StackModifier implements AttributeModifier<StackAttribute> {
-    attributeSet: ArkStackAttributeSet = new ArkStackAttributeSet();
-
+export class StackModifier extends CommonMethodModifier implements StackAttribute, AttributeModifier<StackAttribute> {
     applyNormalAttribute(instance: StackAttribute): void {}
     applyPressedAttribute(instance: StackAttribute): void {}
     applyFocusedAttribute(instance: StackAttribute): void {}
     applyDisabledAttribute(instance: StackAttribute): void {}
     applySelectedAttribute(instance: StackAttribute): void {}
 
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+    }
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+    }
+
     alignContent(value: Alignment | undefined): this {
-        this.attributeSet.alignContent(value);
         return this;
     }
 
     pointLight(value: PointLightStyle | undefined): this {
-        this.attributeSet.pointLight(value);
         return this;
     }
 }

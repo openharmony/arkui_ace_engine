@@ -116,6 +116,7 @@ class AniStorage implements IAniStorage {
  */
 class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
+    private readonly storage_: IAniStorage = new AniStorage();
     private map_: TypedMap = new TypedMap();
     private simpleTypeSet: Set<Type> = new Set<Type>([
         Type.from<int>(),
@@ -126,7 +127,6 @@ class PersistentStorage {
         Type.from<string>(),
         Type.from<boolean>(),
     ]);
-    private readonly storage_: IAniStorage = new AniStorage();
 
     private static getOrCreate(): PersistentStorage {
         if (PersistentStorage.instance_) {
@@ -343,7 +343,7 @@ class PersistentStorage {
                 return;
             }
             try {
-                if (this.simpleTypeSet.has(ttype) === undefined) {
+                if (this.simpleTypeSet.has(ttype) && toJson === undefined) {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {

@@ -892,6 +892,9 @@ export type Callback_DeleteValue_Boolean = (parameter: DeleteValue) => boolean;
 export type Callback_DeleteValue_Void = (parameter: DeleteValue) => void;
 export type Callback_EditableTextChangeValue_Boolean = (parameter: EditableTextChangeValue) => boolean;
 export interface SearchAttribute extends CommonMethod {
+    setSearchOptions(options?: SearchOptions): this {
+        return this
+    }
     fontColor(value: ResourceColor | undefined): this
     searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this
     cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this
@@ -986,6 +989,9 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((parameter: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    public setSearchOptions(options?: SearchOptions): this {
+        return this
+    }
     public fontColor(value: ResourceColor | undefined): this {
         return this
     }
@@ -1544,10 +1550,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     }
 }
 /** @memo */
-export function Search(
+export function SearchImpl(
     /** @memo */
     style: ((attributes: SearchAttribute) => void) | undefined,
-    options?: SearchOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1555,10 +1560,8 @@ export function Search(
         return new ArkSearchComponent()
     })
     NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (_: ArkSearchPeer) => {
-        receiver.setSearchOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class SearchControllerInternal {

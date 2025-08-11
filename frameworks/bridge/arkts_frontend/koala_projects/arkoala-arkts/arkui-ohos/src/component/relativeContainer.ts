@@ -16,20 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Dimension } from "./units"
-import { Axis } from "./enums"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { Dimension } from './units';
+import { Axis } from './enums';
+import { RelativeContainerModifier } from '../RelativeContainerModifier';
+import { hookRelativeContainerAttributeModifier } from '../handwritten';
 
 export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
+    _attributeSet?:RelativeContainerModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -125,12 +128,19 @@ export interface LocalizedBarrierStyle {
     referencedId: Array<string>;
 }
 export interface RelativeContainerAttribute extends CommonMethod {
-    guideLine(value: Array<GuideLineStyle> | undefined): this
-    barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this
+    setRelativeContainerOptions(): this {
+        return this
+    }
+    guideLine(value: Array<GuideLineStyle> | undefined): this {return this;}
+    barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements RelativeContainerAttribute {
     guideLine_value?: Array<GuideLineStyle> | undefined
     barrier_value?: Array<BarrierStyle> | undefined
+    public setRelativeContainerOptions(): this {
+        return this
+    }
     public guideLine(value: Array<GuideLineStyle> | undefined): this {
         return this
     }
@@ -174,17 +184,22 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookRelativeContainerAttributeModifier(this, modifier);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function RelativeContainer(
+export function RelativeContainerImpl(
     /** @memo */
     style: ((attributes: RelativeContainerAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -192,9 +207,7 @@ export function RelativeContainer(
         return new ArkRelativeContainerComponent()
     })
     NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (_: ArkRelativeContainerPeer) => {
-        receiver.setRelativeContainerOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

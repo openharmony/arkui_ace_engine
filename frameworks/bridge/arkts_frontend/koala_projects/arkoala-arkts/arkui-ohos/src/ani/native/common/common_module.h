@@ -37,6 +37,12 @@ void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
 ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity);
+ani_long GetNodePtrWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_int GetNodeIdWithNodePtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_int GetNodeIdWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_long CreateRenderNodePeerWithNodePtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_long ToColorLong(ani_env* env, ani_object obj, ani_int color);
+ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color);
 ani_int CheckIsUIThread(ani_env* env, ani_object obj, ani_int id);
 ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);
@@ -79,8 +85,13 @@ ani_int GetStringColorValue(ani_env* env, ani_object aniClass, ani_string src);
 ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src);
 void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_int id);
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_boolean isDark);
+void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId);
 void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode);
 void RestoreColorMode(ani_env* env, ani_object aniClass);
+void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId);
+void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
+    ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
+void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

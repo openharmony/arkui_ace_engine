@@ -379,6 +379,6 @@ generated_sources = [
   "implementation/worker_event_listener_accessor.cpp",
   "implementation/x_component_controller_accessor.cpp",
   "implementation/x_component_modifier.cpp",
-
+  "implementation/with_theme_modifier.cpp",
   "utility/converter.cpp",
 ]

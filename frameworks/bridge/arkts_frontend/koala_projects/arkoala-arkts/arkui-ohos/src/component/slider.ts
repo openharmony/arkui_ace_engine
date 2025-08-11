@@ -573,6 +573,9 @@ export interface SliderConfiguration extends CommonConfiguration<SliderConfigura
 export type SliderInterface = (options?: SliderOptions) => SliderAttribute;
 export type Callback_Number_SliderChangeMode_Void = (value: number, mode: SliderChangeMode) => void;
 export interface SliderAttribute extends CommonMethod {
+    setSliderOptions(options?: SliderOptions): this {
+        return this
+    }
     blockColor(value: ResourceColor | undefined): this
     trackColor(value: ResourceColor | LinearGradient | undefined): this
     selectedColor(value: ResourceColor | LinearGradient | undefined): this
@@ -621,6 +624,9 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     slideRange_value?: SlideRange | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
+    public setSliderOptions(options?: SliderOptions): this {
+        return this
+    }
     public blockColor(value: ResourceColor | undefined): this {
         return this
     }
@@ -926,10 +932,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     }
 }
 /** @memo */
-export function Slider(
+export function SliderImpl(
     /** @memo */
     style: ((attributes: SliderAttribute) => void) | undefined,
-    options?: SliderOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -937,9 +942,7 @@ export function Slider(
         return new ArkSliderComponent()
     })
     NodeAttach<ArkSliderPeer>((): ArkSliderPeer => ArkSliderPeer.create(receiver), (_: ArkSliderPeer) => {
-        receiver.setSliderOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

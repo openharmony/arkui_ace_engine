@@ -16,20 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Alignment, FoldStatus, AppRotation } from "./enums"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { WindowStatusType } from "./arkui-external"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
+import { Alignment, FoldStatus, AppRotation } from './enums';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { WindowStatusType } from './arkui-external';
+import { FolderStackModifier } from '../FolderStackModifier';
+import { hookFolderStackAttributeModifier } from '../handwritten';
 
 export class ArkFolderStackPeer extends ArkCommonMethodPeer {
+    _attributeSet?:FolderStackModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -123,11 +126,15 @@ export interface OnFoldStatusChangeInfo {
 export type OnFoldStatusChangeCallback = (event: OnFoldStatusChangeInfo) => void;
 export type OnHoverStatusChangeCallback = (param: HoverEventParam) => void;
 export interface FolderStackAttribute extends CommonMethod {
-    alignContent(value: Alignment | undefined): this
-    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this
-    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this
-    enableAnimation(value: boolean | undefined): this
-    autoHalfFold(value: boolean | undefined): this
+    setFolderStackOptions(options?: FolderStackOptions): this {
+        return this
+    }
+    alignContent(value: Alignment | undefined): this {return this;}
+    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {return this;}
+    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {return this;}
+    enableAnimation(value: boolean | undefined): this {return this;}
+    autoHalfFold(value: boolean | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderStackAttribute {
     alignContent_value?: Alignment | undefined
@@ -135,6 +142,9 @@ export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderS
     onHoverStatusChange_value?: OnHoverStatusChangeCallback | undefined
     enableAnimation_value?: boolean | undefined
     autoHalfFold_value?: boolean | undefined
+    public setFolderStackOptions(options?: FolderStackOptions): this {
+        return this
+    }
     public alignContent(value: Alignment | undefined): this {
         return this
     }
@@ -209,6 +219,12 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
+
+    public attributeModifier(modifier: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookFolderStackAttributeModifier(this, modifier);
+        return this;
+    }
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -216,10 +232,9 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function FolderStack(
+export function FolderStackImpl(
     /** @memo */
     style: ((attributes: FolderStackAttribute) => void) | undefined,
-    options?: FolderStackOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -227,9 +242,7 @@ export function FolderStack(
         return new ArkFolderStackComponent()
     })
     NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (_: ArkFolderStackPeer) => {
-        receiver.setFolderStackOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

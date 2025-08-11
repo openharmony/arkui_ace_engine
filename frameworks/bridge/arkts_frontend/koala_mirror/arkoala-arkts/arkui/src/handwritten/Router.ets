@@ -227,7 +227,7 @@ class RouterImpl implements Router {
                     const linker = getNearestNonBootRuntimeLinker()
                     if (linker) {
                         rejectIssueMessage = `Cannot load class ${className}`
-                        const cls = linker.loadClass(className, true);
+                        const cls = linker.loadClass(className.replaceChar(c'/', c'.'), true);
                         const view = cls.createInstance();
                         resolvePromise(view as UserView);
                         return

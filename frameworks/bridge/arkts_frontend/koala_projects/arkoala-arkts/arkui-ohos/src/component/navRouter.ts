@@ -83,12 +83,18 @@ export enum NavRouteMode {
     REPLACE = 2
 }
 export interface NavRouterAttribute extends CommonMethod {
+    setNavRouterOptions(value?: RouteInfo): this {
+        return this
+    }
     onStateChange(value: ((isVisible: boolean) => void) | undefined): this
     mode(value: NavRouteMode | undefined): this
 }
 export class ArkNavRouterStyle extends ArkCommonMethodStyle implements NavRouterAttribute {
     onStateChange_value?: ((isVisible: boolean) => void) | undefined
     mode_value?: NavRouteMode | undefined
+    public setNavRouterOptions(value?: RouteInfo): this {
+        return this
+    }
     public onStateChange(value: ((isVisible: boolean) => void) | undefined): this {
         return this
     }
@@ -131,10 +137,9 @@ export class ArkNavRouterComponent extends ArkCommonMethodComponent implements N
     }
 }
 /** @memo */
-export function NavRouter(
+export function NavRouterImpl(
     /** @memo */
     style: ((attributes: NavRouterAttribute) => void) | undefined,
-    value?: RouteInfo,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -142,9 +147,7 @@ export function NavRouter(
         return new ArkNavRouterComponent()
     })
     NodeAttach<ArkNavRouterPeer>((): ArkNavRouterPeer => ArkNavRouterPeer.create(receiver), (_: ArkNavRouterPeer) => {
-        receiver.setNavRouterOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

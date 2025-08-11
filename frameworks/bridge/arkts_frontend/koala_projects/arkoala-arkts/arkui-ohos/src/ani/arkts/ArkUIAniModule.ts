@@ -51,6 +51,12 @@ export class ArkUIAniModule {
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
     native static _Common_GetFocused_InstanceId(): KInt
+    native static _GetNodePtrWithPeerPtr(ptr: KPointer): KLong
+    native static _GetNodeIdWithNodePtr(ptr: KPointer): KInt
+    native static _GetNodeIdWithPeerPtr(ptr: KPointer): KInt
+    native static _CreateRenderNodePeerWithNodePtr(ptr: KPointer): KPointer
+    native static _ToColorLong(color: KInt): KLong
+    native static _ToColorInt(color: KLong): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
@@ -288,6 +294,16 @@ export class ArkUIAniModule {
     native static _GetNumberColorValue(color: number): KUInt
     native static _SendThemeToNative(thisArray: KSerializerBuffer, thisLength: number, elmtId: KInt): void
     native static _SetDefaultTheme(thisArray: KSerializerBuffer, thisLength: number, isDark: boolean): void
+    native static _RemoveThemeInNative(withThemeId: number): void
     native static _UpdateColorMode(colorMode: KInt): void
     native static _RestoreColorMode(): void
+    native static _SetThemeScopeId(themeScopeId: number): void
+    native static _CreateAndBindTheme(
+        themeScopeId: KInt,
+        themeId: KInt,
+        thisArray: KSerializerBuffer, thisLength: number,
+        colorMode: KInt,
+        onThemeScopeDestroy: () => void
+    ): void;
+    native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
 }

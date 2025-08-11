@@ -324,9 +324,6 @@ public:
     }
     void CheckIsNeedForceExitWindow(bool result);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType);
-    bool CheckEnableCustomNodeDel() const {
-        return false;
-    }
 
     bool IsNeedCallbackBackPressed();
 

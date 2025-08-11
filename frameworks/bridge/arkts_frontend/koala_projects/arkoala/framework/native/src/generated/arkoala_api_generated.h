@@ -3279,6 +3279,8 @@ typedef struct Ark_Union_DotIndicator_DigitIndicator_Boolean Ark_Union_DotIndica
 typedef struct Opt_Union_DotIndicator_DigitIndicator_Boolean Opt_Union_DotIndicator_DigitIndicator_Boolean;
 typedef struct Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
 typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
+typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_Union_String_ImageAttachment_CustomSpan Ark_Union_String_ImageAttachment_CustomSpan;
 typedef struct Opt_Union_String_ImageAttachment_CustomSpan Opt_Union_String_ImageAttachment_CustomSpan;
 typedef struct Ark_AttachmentType Ark_AttachmentType;
@@ -19730,6 +19732,15 @@ typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions
     Ark_Tag tag;
     Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions value;
 } Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_WithThemeOptions {
+    /* kind: Interface */
+    Opt_CustomTheme theme;
+    Opt_ThemeColorMode colorMode;
+} Ark_WithThemeOptions;
+typedef struct Opt_WithThemeOptions {
+    Ark_Tag tag;
+    Ark_WithThemeOptions value;
+} Opt_WithThemeOptions;
 typedef struct Ark_Union_String_ImageAttachment_CustomSpan {
     Ark_Int32 selector;
     union {
@@ -20125,14 +20136,6 @@ typedef struct Opt_Union_SubTabBarStyle_BottomTabBarStyle {
     Ark_Tag tag;
     Ark_Union_SubTabBarStyle_BottomTabBarStyle value;
 } Opt_Union_SubTabBarStyle_BottomTabBarStyle;
-typedef struct Ark_WithThemeOptions {
-    Opt_CustomTheme theme;
-    Opt_ThemeColorMode colorMode;
-} Ark_WithThemeOptions;
-typedef struct Opt_WithThemeOptions {
-    Ark_Tag tag;
-    Ark_WithThemeOptions value;
-} Opt_WithThemeOptions;
 typedef struct Ark_RichEditorSpan {
     Ark_Int32 selector;
     union {
@@ -24171,6 +24174,13 @@ typedef struct GENERATED_ArkUIWindowSceneModifier {
                                 const Opt_Position* destination,
                                 const Opt_Number* fraction);
 } GENERATED_ArkUIWindowSceneModifier;
+
+typedef struct GENERATED_ArkUIWithThemeModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setWithThemeOptions)(Ark_NativePointer node,
+                                const Ark_WithThemeOptions* options);
+} GENERATED_ArkUIWithThemeModifier;
 
 typedef struct GENERATED_ArkUIXComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -28389,6 +28399,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIVideoModifier* (*getVideoModifier)();
     const GENERATED_ArkUIWebModifier* (*getWebModifier)();
     const GENERATED_ArkUIWindowSceneModifier* (*getWindowSceneModifier)();
+    const GENERATED_ArkUIWithThemeModifier* (*getWithThemeModifier)();
     const GENERATED_ArkUIXComponentModifier* (*getXComponentModifier)();
     const GENERATED_ArkUISideBarContainerModifier* (*getSideBarContainerModifier)();
     const GENERATED_ArkUIRemoteWindowModifier* (*getRemoteWindowModifier)();

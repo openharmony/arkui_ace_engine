@@ -16,22 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { int32, int64, float32 } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
-import { ItemAlign } from "./enums"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Length } from "./units"
+import { ItemAlign } from './enums';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { Length } from './units';
 import { ArkGridRowNode } from '../handwritten/modifiers/ArkGridRowNode';
-import { ArkGridRowAttributeSet, GridRowModifier } from '../GridRowModifier';
+import { GridRowModifier } from '../GridRowModifier';
+import { hookGridRowAttributeModifier } from '../handwritten';
 
 export class ArkGridRowPeer extends ArkCommonMethodPeer {
+    _attributeSet?:GridRowModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -124,12 +126,19 @@ export interface GridRowOptions {
 }
 export type GridRowInterface = (option?: GridRowOptions) => GridRowAttribute;
 export interface GridRowAttribute extends CommonMethod {
-    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this
-    alignItems(value: ItemAlign | undefined): this
+    setGridRowOptions(option?: GridRowOptions): this {
+        return this
+    }
+    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {return this;}
+    alignItems(value: ItemAlign | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttribute {
     onBreakpointChange_value?: ((breakpoints: string) => void) | undefined
     alignItems_value?: ItemAlign | undefined
+    public setGridRowOptions(option?: GridRowOptions): this {
+        return this
+    }
     public onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
         return this
     }
@@ -165,6 +174,12 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
         }
         return this
     }
+ 
+    public attributeModifier(modifier: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookGridRowAttributeModifier(this, modifier);
+        return this;
+    }
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -172,10 +187,9 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
     }
 }
 /** @memo */
-export function GridRow(
+export function GridRowImpl(
     /** @memo */
     style: ((attributes: GridRowAttribute) => void) | undefined,
-    option?: GridRowOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -183,9 +197,7 @@ export function GridRow(
         return new ArkGridRowComponent()
     })
     NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (_: ArkGridRowPeer) => {
-        receiver.setGridRowOptions(option)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

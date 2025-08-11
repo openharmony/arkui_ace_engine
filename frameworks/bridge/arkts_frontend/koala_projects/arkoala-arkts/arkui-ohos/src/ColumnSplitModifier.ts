@@ -13,84 +13,29 @@
  * limitations under the License.
  */
 
-import { ArkColumnSplitPeer, ArkCommonMethodPeer, AttributeModifier, ColumnSplitAttribute, ColumnSplitDividerStyle } from './component';
-import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
-
-class ResizeableModifier extends ModifierWithKey<boolean | undefined> {
-    static identity: string = 'resizeable';
-
-    constructor(value: boolean | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let resizeableNode = node as ArkColumnSplitPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                resizeableNode.resizeableAttribute(this.value as boolean);
-            }
-        }
-    }
-
-    static factory(value: boolean | undefined): ResizeableModifier {
-        return new ResizeableModifier(value);
-    }
-}
-
-class DividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | null | undefined> {
-    static identity: string = 'divider';
-
-    constructor(value: ColumnSplitDividerStyle | null | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let dividerNode = node as ArkColumnSplitPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                dividerNode.dividerAttribute(this.value as ColumnSplitDividerStyle);
-            }
-        }
-    }
-
-    static factory(value: ColumnSplitDividerStyle | null | undefined) {
-        return new DividerModifier(value);
-    }
-}
-
-export class ArkColumnSplitAttributeSet extends ArkCommonAttributeSet implements ColumnSplitAttribute {
-    resizeable(value: boolean | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, ResizeableModifier.identity, ResizeableModifier.factory, value);
-        return this;
-    }
-
-    divider(value: ColumnSplitDividerStyle | null | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, DividerModifier.identity, DividerModifier.factory, value);
-        return this;
-    }
-}
-
-export class ColumnSplitModifier implements AttributeModifier<ColumnSplitAttribute> {
-    attributeSet: ArkColumnSplitAttributeSet = new ArkColumnSplitAttributeSet();
-
+import { AttributeModifier, ColumnSplitAttribute, ColumnSplitDividerStyle } from './component';
+import { CommonMethodModifier } from './CommonMethodModifier';
+import { PeerNode } from './PeerNode';
+ 
+export class ColumnSplitModifier extends CommonMethodModifier implements ColumnSplitAttribute,AttributeModifier<ColumnSplitAttribute> {
     applyNormalAttribute(instance: ColumnSplitAttribute): void {}
     applyPressedAttribute(instance: ColumnSplitAttribute): void {}
     applyFocusedAttribute(instance: ColumnSplitAttribute): void {}
     applyDisabledAttribute(instance: ColumnSplitAttribute): void {}
     applySelectedAttribute(instance: ColumnSplitAttribute): void {}
 
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+    }
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+    }
+
     resizeable(value: boolean | undefined): this {
-        this.attributeSet.resizeable(value);
         return this;
     }
 
     divider(value: ColumnSplitDividerStyle | null | undefined): this {
-        this.attributeSet.divider(value);
         return this;
     }
 }
-

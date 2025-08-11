@@ -24,7 +24,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
+import { PeerNode, findPeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Font, ResourceColor, Length } from "./units"
 import { Resource } from "global.resource"
@@ -35,6 +35,9 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { InteropNativeModule } from "@koalaui/interop"
 import { TextModifier } from "../TextModifier"
 import { hookTextAttributeModifier } from "../handwritten"
+import { ArkThemeScopeManager } from '../handwritten/theme/ArkThemeScopeManager';
+import { __context, __id } from "@koalaui/runtime";
+import { ArkUIAniModule } from 'arkui.ani';
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         const obj : TextController = new TextController()
@@ -89,9 +92,11 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTextPeer {
         const peerId  = PeerNode.nextId()
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", peerId, component ? component.isFirstBuild : true);
         const _peerPtr  = ArkUIGeneratedNativeModule._Text_construct(peerId, flags)
         const _peer  = new ArkTextPeer(_peerPtr, peerId, "Text", flags)
         component?.setPeer(_peer)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(peerId);
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
@@ -942,6 +947,9 @@ export interface TextOverflowOptions {
 export type TextInterface = (content?: string | Resource, value?: TextOptions) => TextAttribute;
 export type Callback_MarqueeState_Void = (parameter: MarqueeState) => void;
 export interface TextAttribute extends CommonMethod {
+    setTextOptions(content?: string | Resource, value?: TextOptions): this {
+        return this
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this { return this;}
     fontColor(value: ResourceColor | undefined): this { return this;}
     fontSize(value: number | string | Resource | undefined): this { return this;}
@@ -1029,6 +1037,9 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     editMenuOptions_value?: EditMenuOptions | undefined
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
+    public setTextOptions(content?: string | Resource, value?: TextOptions): this {
+        return this
+    }
     public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
@@ -1573,10 +1584,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
 
 }
 /** @memo */
-export function Text(
+export function TextImpl(
     /** @memo */
     style: ((attributes: TextAttribute) => void) | undefined,
-    content?: string | Resource, value?: TextOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1584,9 +1594,12 @@ export function Text(
         return new ArkTextComponent()
     })
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
-        receiver.setTextOptions(content,value)
+        ArkThemeScopeManager.getInstance().applyParentThemeScopeId(receiver);
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstBuild)
+
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
+    
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
     })
 }

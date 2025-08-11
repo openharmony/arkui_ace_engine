@@ -1396,6 +1396,9 @@ export type Callback_NavigationMode_Void = (mode: NavigationMode) => void;
 export type Callback_String_Opt_Object_Void = (name: string, param: Object | undefined) => void;
 export type Type_NavigationAttribute_customNavContentTransition_delegate = (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation) => NavigationAnimatedTransition | undefined;
 export interface NavigationAttribute extends CommonMethod {
+    setNavigationOptions(pathInfos?: NavPathStack): this {
+        return this
+    }
     navBarWidth(value: Length | Bindable<Length> | undefined): this
     navBarPosition(value: NavBarPosition | undefined): this
     navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this
@@ -1453,6 +1456,9 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     recoverable_value?: boolean | undefined
     enableDragBar_value?: boolean | undefined
     enableModeChangeAnimation_value?: boolean | undefined
+    public setNavigationOptions(pathInfos?: NavPathStack): this {
+        return this
+    }
     public navBarWidth(value: Length | Bindable<Length> | undefined): this {
         return this
     }
@@ -1574,6 +1580,41 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
                 info = pathInfos!
             }
             hookNavigationSetNavigationOptionsImpl(this.getPeer().peer.ptr, info)
+
+            if (pathInfos != undefined) {
+                    const updater: (name: string, param: object|undefined)=>PeerNode =
+                    (name: string, param: object|undefined) => {
+                        let node = ArkStackPeer.create(new ArkStackComponent())
+                        return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
+                            setNeedCreate(true)
+                            this._navDestination(name, param);
+                            setNeedCreate(false)
+                        })
+                    }
+                    const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
+                    NavExtender.setUpdateStackCallback(pathInfos!, () => {
+                        addPartialUpdate(() => {
+                            if (!this.isNeedSync()) {
+                                return
+                            }
+                            InteropNativeModule._NativeLog("AceNavigation: sync navigation stack")
+                            this.updateNeedSync(false)
+                            let size: int32 = pathInfos!.size() as int32
+                            InteropNativeModule._NativeLog("AceNavigation: path stack size: " + size)
+                            let names: Array<string> = pathInfos!.getAllPathName()
+                            for (let index: int32 = 0; index < size; index++) {
+                                if (NavExtender.checkNeedCreate(this.getPeer().peer.ptr, index)) {
+                                    InteropNativeModule._NativeLog("AceNavigation: create new node: " + index + ", name: " + names[index])
+                                    let param = pathInfos!.getParamByIndex(index)
+                                    let node = value_casted(names[index], param)
+                                    NavExtender.setNavDestinationNode(pathInfos!, index, node.peer.ptr)
+                                }
+                            }
+                            NavExtender.syncStack(pathInfos!)
+                        }, __context, (isBefore: boolean) => {})
+                        this.updateNeedSync(true)
+                    })
+            }
             return this
         }
         return this
@@ -1868,10 +1909,9 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function Navigation(
+export function NavigationImpl(
     /** @memo */
     style: ((attributes: NavigationAttribute) => void) | undefined,
-    pathInfos?: NavPathStack,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1879,61 +1919,7 @@ export function Navigation(
         return new ArkNavigationComponent()
     })
     NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer) => {
-        receiver.setNavigationOptions(pathInfos)
         style?.(receiver)
         content_?.()
-        if (pathInfos != undefined) {
-            remember(() => {
-                const updater: (name: string, param: object|undefined)=>PeerNode =
-                (name: string, param: object|undefined) => {
-                    let node = ArkStackPeer.create(new ArkStackComponent())
-                    return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
-                        setNeedCreate(true)
-                        receiver._navDestination(name, param);
-                        setNeedCreate(false)
-                    })
-                }
-                const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
-                NavExtender.setUpdateStackCallback(pathInfos!, () => {
-                    addPartialUpdate(() => {
-                        if (!receiver.isNeedSync()) {
-                            return
-                        }
-                        InteropNativeModule._NativeLog("AceNavigation: sync navigation stack")
-                        receiver.updateNeedSync(false)
-                        let size: int32 = pathInfos!.size() as int32
-                        InteropNativeModule._NativeLog("AceNavigation: path stack size: " + size)
-                        let names: Array<string> = pathInfos!.getAllPathName()
-                        for (let index: int32 = 0; index < size; index++) {
-                            if (NavExtender.checkNeedCreate(receiver.getPeer().peer.ptr, index)) {
-                                InteropNativeModule._NativeLog("AceNavigation: create new node: " + index + ", name: " + names[index])
-                                let param = pathInfos!.getParamByIndex(index)
-                                let node = value_casted(names[index], param)
-                                NavExtender.setNavDestinationNode(pathInfos!, index, node.peer.ptr)
-                            }
-                        }
-                        NavExtender.syncStack(pathInfos!)
-                    }, __context, (isBefore: boolean) => {})
-                    receiver.updateNeedSync(true)
-                })
-            })
-            // NavExtender.setOnPopCallback(pathInfos!, (id: string) => {
-            //     const result = PathStackUtils.result
-            //     if (runtimeType(result) === RuntimeType.UNDEFINED) {
-            //         return
-            //     }
-            //     const info = PathStackUtils.getNavPathInfoById(id)
-            //     if (runtimeType(info) === RuntimeType.UNDEFINED) {
-            //         return
-            //     }
-            //     const onPop = info!.onPop
-            //     if (runtimeType(onPop) === RuntimeType.UNDEFINED) {
-            //         return;
-            //     }
-            //     const popInfo: PopInfo = {result: result!, info: info!}
-            //     onPop!(popInfo)
-            // })
-        }
-        receiver.applyAttributesFinish()
     })
 }

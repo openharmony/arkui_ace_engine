@@ -58,9 +58,15 @@ export interface EllipseOptions {
 }
 export type EllipseInterface = (options?: EllipseOptions) => EllipseAttribute;
 export interface EllipseAttribute extends CommonShapeMethod {
+    setEllipseOptions(options?: EllipseOptions): this {
+        return this
+    }
     attributeModifier(modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements EllipseAttribute {
+    public setEllipseOptions(options?: EllipseOptions): this {
+        return this
+    }
 }
 export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implements EllipseAttribute {
     getPeer(): ArkEllipsePeer {
@@ -85,10 +91,9 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
     }
 }
 /** @memo */
-export function Ellipse(
+export function EllipseImpl(
     /** @memo */
     style: ((attributes: EllipseAttribute) => void) | undefined,
-    options?: EllipseOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -96,9 +101,7 @@ export function Ellipse(
         return new ArkEllipseComponent()
     })
     NodeAttach<ArkEllipsePeer>((): ArkEllipsePeer => ArkEllipsePeer.create(receiver), (_: ArkEllipsePeer) => {
-        receiver.setEllipseOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

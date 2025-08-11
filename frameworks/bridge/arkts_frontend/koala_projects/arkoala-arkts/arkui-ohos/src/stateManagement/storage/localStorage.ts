@@ -269,10 +269,11 @@ export class LocalStorage {
         owner: ExtendableComponent,
         propName: string,
         varName: string,
+        decoratorName: string,
         defaultValue: T,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
-        return this.store_.makeStorageLink<T>(owner, propName, varName, defaultValue, watchFunc);
+        return this.store_.__makeStorageLink<T>(owner, propName, varName, decoratorName, defaultValue, watchFunc);
     }
 
     /**
