@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
@@ -97,6 +98,7 @@ std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
 
 PipelineBase::~PipelineBase()
 {
+    NG::UiNodeGc::PostReleaseNodeRawMemoryTask(taskExecutor_);
     std::lock_guard lock(destructMutex_);
     LOGI("PipelineBase destroyed");
 }

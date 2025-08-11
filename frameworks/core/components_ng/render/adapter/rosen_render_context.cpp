@@ -488,6 +488,12 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
         rsContext = GetRSUIContext(pipeline);
+        if (!rsContext) {
+            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsContext = rsUIDirector_->GetRSUIContext();
+        }
     }
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
@@ -905,8 +911,11 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_NULL_VOID(ctx->bgLoadingCtx_);
         ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bgImage_);
+        CHECK_NULL_VOID(ctx->GetHost());
+        CHECK_NULL_VOID(ctx->GetHost()->GetGeometryNode());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBackground();
             ctx->RequestNextFrame();

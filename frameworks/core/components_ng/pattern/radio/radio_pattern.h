@@ -225,7 +225,7 @@ private:
     CalcSize GetChildContentSize(const RefPtr<RadioTheme>& radioTheme);
     void LoadBuilder();
     void SetBuilderState();
-    void UpdateIndicatorType();
+    void UpdateIndicatorType(bool checkValue);
     void UpdateState();
     void UpdateGroupCheckStatus(
         const RefPtr<FrameNode>& frameNode, const RefPtr<GroupManager>& groupManager, bool check);

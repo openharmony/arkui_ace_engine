@@ -31,7 +31,7 @@ import { VoidCallback } from "./units"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ColorMetrics } from "../Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { PixelMap } from "./arkui-pixelmap"
 
 export class VideoControllerInternal {

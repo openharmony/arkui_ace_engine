@@ -1820,7 +1820,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
     if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
         newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
         // current mode is stack, set navBar or HomeDestination invisible
-        if (navigationMode_ == NavigationMode::STACK && navBarOrHomeDestNode) {
+        auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+        if (layoutProperty && layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK
+            && navBarOrHomeDestNode) {
             navBarOrHomeDestNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
             DealTransitionVisibility(navBarOrHomeDestNode, false, true);
         }

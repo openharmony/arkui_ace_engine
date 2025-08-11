@@ -2387,6 +2387,11 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event gestureHub actionCancelTask  webId:%{public}d", pattern->GetWebId());
+        pattern->HandleDragCancel();
     };
 
     dragEvent_ = MakeRefPtr<DragEvent>(
@@ -3585,6 +3590,10 @@ void WebPattern::OnAttachContext(PipelineContext *context)
 
     if (updateInstanceIdCallback_) {
         updateInstanceIdCallback_(newId);
+    }
+
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRSUIContext(context);
     }
 
     if (renderSurface_) {

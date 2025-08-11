@@ -1100,6 +1100,9 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
 
 void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bool isFirstTransition)
 {
+    if (GetDismissProcess()) {
+        return;
+    }
     // get sheet animation option and finishCallback
     AnimationOption option = sheetObject_->GetAnimationOptionForOverlay(isTransitionIn, isFirstTransition);
     // Init other animation information, includes the starting point of the animation.
@@ -1613,6 +1616,9 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
 
 void SheetPresentationPattern::UpdateMaskBackgroundColorRender()
 {
+    if (GetDismissProcess()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     UpdateMaskBackgroundColor();

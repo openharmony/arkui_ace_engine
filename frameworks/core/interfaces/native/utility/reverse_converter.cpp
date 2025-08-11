@@ -142,14 +142,16 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
-void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
+void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
-        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value());
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
+    } else {
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_Empty>(nullptr);
     }
-    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon);
+    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon, ctx);
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
-    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo);
+    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo, ctx);
 }
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)

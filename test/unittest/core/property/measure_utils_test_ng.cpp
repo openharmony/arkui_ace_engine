@@ -47,6 +47,8 @@ const Dimension HEIGHT { 100.0, DimensionUnit::PX };
 const Dimension CALC_TEST { 10.0, DimensionUnit::CALC };
 const Dimension BORDER_WIDTH_PX { 10.0, DimensionUnit::PX };
 const Dimension BORDER_WIDTH_VP { 10.0, DimensionUnit::VP };
+const Dimension BORDER_WIDTH_PRECISION { 0.99999, DimensionUnit::PX };
+const Dimension BORDER_WIDTH_PRECISION_LOW { 0.00001, DimensionUnit::PX };
 const CalcSize TEST_CALC_SIZE { NG::CalcLength(WIDTH), NG::CalcLength(HEIGHT) };
 const CalcLength CALC_LENGTH_WIDTH_PX { 20.0, DimensionUnit::PX };
 const CalcLength CALC_LENGTH_CALC { 10.0, DimensionUnit::CALC };
@@ -64,6 +66,8 @@ OptionalSizeF TEST_OPTIONAL_SIZE = { 10.0, 10.0 };
 const PaddingPropertyF TEST_PROPERTY { 10.0, 10.0, 10.0, 10.0 };
 PaddingPropertyF PADDING_PROPERTY = { 0, 0, 0, 0 };
 PaddingPropertyF TEST_PADDING_PROPERTY = { 0, 0, 0, 0 };
+const BorderWidthPropertyF PRECISION_BORDER_WIDTH_PROPERTY { 1.0, 1.0, 1.0, 1.0 };
+const BorderWidthPropertyF PRECISION_LOW_BORDER_WIDTH_PROPERTY { 0.0, 0.0, 0.0, 0.0 };
 const BorderWidthPropertyF BORDER_WIDTH_PROPERTY { 10.0, 10.0, 10.0, 10.0 };
 const Axis AXIS_HORIZONTAL = Axis::HORIZONTAL;
 const Axis AXIS_VERTICAL = Axis::VERTICAL;
@@ -1129,6 +1133,58 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level1)
     optionResult = CreateIdealSizeByPercentRef(layoutConstraint, axis, MEASURE_TYPE_MATCH_CONTENT, false);
     EXPECT_EQ(optionResult.Height(), std::nullopt);
     EXPECT_EQ(optionResult.Width(), std::nullopt);
+}
+
+/**
+ * @tc.name: MeasureUtilsTestNg033
+ * @tc.desc: Test cast to MeasureUtilsTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scaleProperty and set testPropertyT DimensionUnit is PRECISION.
+     */
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
+    BorderWidthPropertyT<Dimension> testPropertyT;
+
+    testPropertyT.leftDimen = BORDER_WIDTH_PRECISION;
+    testPropertyT.rightDimen = BORDER_WIDTH_PRECISION;
+    testPropertyT.topDimen = BORDER_WIDTH_PRECISION;
+    testPropertyT.bottomDimen = BORDER_WIDTH_PRECISION;
+
+    /**
+     * @tc.steps: step2. call ConvertToBorderWidthPropertyF.
+     * @tc.expected: the return value is the same as PRECISION_BORDER_WIDTH_PROPERTY.
+     */
+    BorderWidthPropertyF retProperty = ConvertToBorderWidthPropertyF(testPropertyT, scaleProperty, PERCENT_REFERENCE);
+    EXPECT_EQ(retProperty, PRECISION_BORDER_WIDTH_PROPERTY);
+}
+
+/**
+ * @tc.name: MeasureUtilsTestNg034
+ * @tc.desc: Test cast to MeasureUtilsTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scaleProperty and set testPropertyT DimensionUnit is PRECISION.
+     */
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
+    BorderWidthPropertyT<Dimension> testPropertyT;
+
+    testPropertyT.leftDimen = BORDER_WIDTH_PRECISION_LOW;
+    testPropertyT.rightDimen = BORDER_WIDTH_PRECISION_LOW;
+    testPropertyT.topDimen = BORDER_WIDTH_PRECISION_LOW;
+    testPropertyT.bottomDimen = BORDER_WIDTH_PRECISION_LOW;
+
+    /**
+     * @tc.steps: step2. call ConvertToBorderWidthPropertyF.
+     * @tc.expected: the return value is the same as PRECISION_BORDER_WIDTH_PROPERTY.
+     */
+    BorderWidthPropertyF retProperty = ConvertToBorderWidthPropertyF(testPropertyT, scaleProperty, PERCENT_REFERENCE);
+    EXPECT_EQ(retProperty, PRECISION_LOW_BORDER_WIDTH_PROPERTY);
 }
 
 /**

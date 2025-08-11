@@ -20,7 +20,7 @@ import { ResourceColor, Position, Length, SizeOptions, ResourceStr, Font } from 
 import { Color, TextOverflow, BorderStyle, TextHeightAdaptivePolicy } from "./enums"
 import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"

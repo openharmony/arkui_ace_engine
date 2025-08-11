@@ -2679,6 +2679,44 @@ HWTEST_F(ImagePatternTestNg, TestImageJsonImageWidth_Height01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: MaskUrl001
+ * @tc.desc: Test MaskUrl for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, MaskUrl001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator(2);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+
+    std::string result = imagePattern->MaskUrl(URL_LENGTH_EQUAL_35);
+    EXPECT_EQ(result, RESULT_FOR_URL_LENGTH_EQUAL_35);
+}
+
+/**
+ * @tc.name: MaskUrl002
+ * @tc.desc: Test MaskUrl for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, MaskUrl002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator(2);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+
+    std::string result = imagePattern->MaskUrl(URL_LENGTH_LESS_THAN_30);
+    EXPECT_EQ(result, RESULT_FOR_URL_LENGTH_LESS_THAN_30);
+}
+
+/**
  * @tc.name: ClearReloadFlagsAfterLoad001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
@@ -2749,5 +2787,46 @@ HWTEST_F(ImagePatternTestNg, TestImageLoadSuccessEvent001, TestSize.Level0)
     imagePattern->OnImageLoadSuccess();
 
     EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ImageCreateTest001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImageCreateTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+    * @tc.steps: step2. check isFullyInitializedFromTheme_ is false.
+    * @tc.expected: isFullyInitializedFromTheme_ is false.
+    */
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+    imagePattern->InitFromThemeIfNeed();
+    /**
+     * @tc.steps: step3. check isFullyInitializedFromTheme_ is true.
+     * @tc.expected: isFullyInitializedFromTheme_ is true.
+     */
+    EXPECT_TRUE(imagePattern->isFullyInitializedFromTheme_);
+    /**
+     * @tc.steps: step4. call OnConfigurationUpdate.
+     * @tc.expected: isFullyInitializedFromTheme_ is false.
+     */
+    imagePattern->OnConfigurationUpdate();
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
 }
 } // namespace OHOS::Ace::NG

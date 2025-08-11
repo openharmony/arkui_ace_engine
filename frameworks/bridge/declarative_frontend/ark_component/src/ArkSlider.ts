@@ -339,8 +339,8 @@ class StepColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class OnChangeModifier extends ModifierWithKey<(value:number,mode:SliderChangeMode) => void> {
-  constructor(value: (value:number,mode:SliderChangeMode) => void) {
+class OnChangeModifier extends ModifierWithKey<(value:number, mode:SliderChangeMode) => void> {
+  constructor(value: (value:number, mode:SliderChangeMode) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('sliderOnChange');

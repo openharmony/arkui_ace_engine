@@ -26,7 +26,6 @@
 namespace OHOS::Ace::NG {
 
 void TextPatternTestNg::SetUp() {}
-
 void TextPatternTestNg::TearDown() {}
 
 /**

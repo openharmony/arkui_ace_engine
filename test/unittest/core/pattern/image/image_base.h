@@ -116,6 +116,10 @@ constexpr Dimension IMAGE_TOP = 0.0_vp;
 constexpr Dimension IMAGE_LEFT = 0.0_vp;
 const std::vector<float> COLOR_FILTER_NULL;
 const std::string tagName = "TestNode";
+const std::string URL_LENGTH_EQUAL_35 = "https://example.com/api/v1/resource";
+const std::string URL_LENGTH_LESS_THAN_30 = "https://example.com";
+const std::string RESULT_FOR_URL_LENGTH_EQUAL_35 = "https://example*****ap*/v*/r*so*rc*";
+const std::string RESULT_FOR_URL_LENGTH_LESS_THAN_30 = "ht*ps*//*xa*pl*.c*m";
 
 class ImageBases : public testing::Test {
 public:

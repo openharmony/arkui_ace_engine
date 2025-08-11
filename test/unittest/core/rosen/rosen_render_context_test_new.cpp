@@ -1117,6 +1117,22 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew040, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RSUIContext002
+ * @tc.desc: Test RSUIContext001 Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RSUIContext002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ComponentSnapshot snapshot;
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rsUIContext = snapshot.GetRSUIContext(pipeline);
+    EXPECT_EQ(rsUIContext, nullptr);
+}
+
+/**
  * @tc.name: RosenRenderContextTestNew041
  * @tc.desc: GetClipToFrame().
  * @tc.type: FUNC

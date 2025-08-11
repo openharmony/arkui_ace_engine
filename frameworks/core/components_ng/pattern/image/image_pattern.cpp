@@ -44,6 +44,11 @@ constexpr uint32_t CRITICAL_TIME = 50;     // ms. If show time of image is less 
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
+constexpr size_t URL_SAVE_LENGTH = 15;
+constexpr size_t URL_KEEP_TOTAL_LENGTH = 30;
+constexpr int32_t NEED_MASK_INDEX = 3;
+constexpr int32_t KERNEL_MAX_LENGTH_EXCEPT_OTHER = 245;
+constexpr size_t NEED_MASK_START_OFFSET = 2;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -498,11 +503,63 @@ bool ImagePattern::SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap)
     CHECK_NULL_RETURN(host, false);
     auto id = host->GetInspectorId();
     if (id.has_value()) {
-        pixelMap->SetMemoryName(id.value());
+        std::string result = std::string("id:") + id.value();
+        pixelMap->SetMemoryName(result);
         hasSetPixelMapMemoryName_ = true;
         return true;
     }
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, false);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    if (imageSourceInfo.has_value() && !imageSourceInfo->GetPixmap()) {
+        pixelMap->SetMemoryName(HandleSrcForMemoryName(imageSourceInfo->GetSrc()));
+    }
     return false;
+}
+
+std::string ImagePattern::HandleSrcForMemoryName(std::string url)
+{
+    auto imageObj = loadingCtx_->GetImageObject();
+    CHECK_NULL_RETURN(imageObj, "");
+    auto width = imageObj->GetImageSize().Width();
+    auto height = imageObj->GetImageSize().Height();
+    if (url.length() > KERNEL_MAX_LENGTH_EXCEPT_OTHER) {
+        url = url.substr(url.size() - KERNEL_MAX_LENGTH_EXCEPT_OTHER);
+    }
+    std::string result = std::to_string(static_cast<int>(width)) + std::string("x") +
+        std::to_string(static_cast<int>(height)) + std::string("-") + MaskUrl(url);
+    return result;
+}
+
+std::string ImagePattern::MaskUrl(std::string url)
+{
+    const size_t urlLength = url.length();
+    if (urlLength < URL_KEEP_TOTAL_LENGTH) {
+        for (size_t i = NEED_MASK_START_OFFSET; i < urlLength; i += NEED_MASK_INDEX) {
+            url[i] = '*';
+        }
+        return url;
+    }
+
+    // Long URL: keep head and tail, mask middle fully, and partially mask tail
+    std::string result;
+    // Pre-allocate memory to avoid multiple reallocations during string appends, improving performance
+    result.reserve(urlLength);
+    // 1. prefix: keep first URL_SAVE_LENGTH characters
+    result.append(url.substr(0, URL_SAVE_LENGTH));
+    // 2. middle: replace with stars
+    const size_t middleLength = urlLength - URL_KEEP_TOTAL_LENGTH;
+    result.append(middleLength, '*');
+    // 3. suffix: apply masked pattern on the last URL_SAVE_LENGTH chars
+    size_t suffixStart = urlLength - URL_SAVE_LENGTH;
+    for (size_t i = 0; i < URL_SAVE_LENGTH; ++i) {
+        if (i % NEED_MASK_INDEX == NEED_MASK_START_OFFSET) {
+            result += '*';
+        } else {
+            result += url[suffixStart + i];
+        }
+    }
+    return result;
 }
 
 bool ImagePattern::CheckIfNeedLayout()
@@ -702,8 +759,30 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     return imagePaintMethod_;
 }
 
+void ImagePattern::InitFromThemeIfNeed()
+{
+    if (isFullyInitializedFromTheme_) {
+        return;
+    }
+    isFullyInitializedFromTheme_ = true;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    selectedColor_ = textTheme->GetSelectedColor();
+
+    auto imageTheme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();
+}
+
 void ImagePattern::CreateModifier()
 {
+    InitFromThemeIfNeed();
     if (!contentMod_) {
         contentMod_ = MakeRefPtr<ImageContentModifier>(WeakClaim(this));
     }
@@ -1246,6 +1325,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "alt src not match, %{public}s: %{private}s - %{private}s",
@@ -1457,7 +1537,6 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderCtx);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    imagePaintMethod_ = MakeRefPtr<ImagePaintMethod>(nullptr);
     if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
@@ -1469,13 +1548,6 @@ void ImagePattern::OnAttachToFrameNode()
         pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
-    selectedColor_ = textTheme->GetSelectedColor();
-    overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
-    auto imageTheme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID(imageTheme);
-    smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -2039,6 +2111,7 @@ void ImagePattern::OnIconConfigurationUpdate()
 
 void ImagePattern::OnConfigurationUpdate()
 {
+    isFullyInitializedFromTheme_ = false;
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnConfigurationUpdate, %{public}s-%{public}d",
         imageDfxConfig_.ToStringWithoutSrc().c_str(), loadingCtx_ ? 1 : 0);
     CHECK_NULL_VOID(loadingCtx_);

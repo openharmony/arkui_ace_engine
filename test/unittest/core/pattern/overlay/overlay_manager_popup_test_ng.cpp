@@ -1883,7 +1883,6 @@ HWTEST_F(OverlayManagerPopupTestNg, HideAllPopupsWithoutAnimation001, TestSize.L
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
     rootNode->isLayoutComplete_ = true;
-    
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetInstallationFree(0);

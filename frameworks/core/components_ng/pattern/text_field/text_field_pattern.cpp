@@ -773,6 +773,7 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
         CHECK_NULL_VOID(pattern);
         pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
         if (pattern->SelectOverlayIsOn()) {
+            pattern->selectOverlay_->UpdateIsSingleHandle(!pattern->IsSelected());
             if (pattern->IsSelected()) {
                 pattern->selectOverlay_->UpdateAllHandlesOffset();
             } else {
@@ -3391,7 +3392,6 @@ void TextFieldPattern::UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldThem
 void TextFieldPattern::OnModifyDone()
 {
     auto host = GetHost();
-    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
     Pattern::OnModifyDone();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -4802,9 +4802,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .abilityToken = container ? container->GetToken() : nullptr
     };
 
-    if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
-        textConfig.inputAttribute.inputPattern = (int32_t)TextInputType::NUMBER;
-    }
     return textConfig;
 }
 

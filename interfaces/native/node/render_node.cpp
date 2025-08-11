@@ -1219,6 +1219,7 @@ void OH_ArkUI_NodeBorderStyleOption_SetLeftBorderStyle(ArkUI_NodeBorderStyleOpti
 void OH_ArkUI_RenderNodeUtils_SetNodeBorderStyleOptionEdgeStyle(
     ArkUI_NodeBorderStyleOption* option, ArkUI_BorderStyle style, ArkUI_EdgeDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
             option->leftStyle = style;
@@ -1259,6 +1260,9 @@ void OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(
     ArkUI_NodeBorderWidthOption* option, float width, ArkUI_EdgeDirection direction)
 {
     CHECK_NULL_VOID(option);
+    if (OHOS::Ace::LessNotEqual(width, 0.0)) {
+        return;
+    }
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
             option->leftWidth = width;
@@ -1485,6 +1489,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption(ArkUI_CommandPathOption* 
 void OH_ArkUI_RenderNodeUtils_SetCommandPathOptionCommands(ArkUI_CommandPathOption* option, char* commands)
 {
     CHECK_NULL_VOID(option);
+    CHECK_NULL_VOID(commands);
     option->commands = commands;
 }
 

@@ -63,7 +63,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
-    auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
+    const auto& contentConstraintOps = layoutProperty->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(contentConstraintOps);
+    auto contentConstraint = contentConstraintOps.value();
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
     auto listItemGroupLayoutProperty =
@@ -80,7 +82,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
 
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint().value();
+    const auto& layoutConstraintOps = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraintOps);
+    auto layoutConstraint = layoutConstraintOps.value();
     CalculateLanes(listLayoutProperty_, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
     childLayoutConstraint_ = layoutProperty->CreateChildConstraint();
     isCardStyle_ = IsCardStyleForListItemGroup(layoutWrapper);
@@ -192,7 +196,9 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemGroupMaxWidth(
     columnParent->BuildColumnWidth();
     auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnParent->GetColumns())));
     float paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
-    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + paddingWidth;
+    const auto& parentIdealSizeCrossOps = parentIdealSize.CrossSize(axis_);
+    CHECK_NULL_VOID(parentIdealSizeCrossOps);
+    auto parentWidth = parentIdealSizeCrossOps.value() + paddingWidth;
     auto maxWidth = std::min(parentWidth, maxGridWidth);
     if (LessNotEqual(maxGridWidth, paddingWidth)) {
         TAG_LOGI(AceLogTag::ACE_LIST,

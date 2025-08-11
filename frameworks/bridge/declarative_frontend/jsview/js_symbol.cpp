@@ -50,8 +50,8 @@ const std::map<std::string, Ace::SymbolEffectType> SYMBOL_EFFECT_TYPE_MAP = {
     { "BounceSymbolEffect", SymbolEffectType::BOUNCE },
     { "ReplaceSymbolEffect", SymbolEffectType::REPLACE },
     { "PulseSymbolEffect", SymbolEffectType::PULSE },
-    { "QuickReplaceSymbolEffect", SymbolEffectType::QuickReplace },
-    { "DisableSymbolEffect", SymbolEffectType::Disable },
+    { "QuickReplaceSymbolEffect", SymbolEffectType::QUICK_REPLACE },
+    { "DisableSymbolEffect", SymbolEffectType::DISABLE },
 };
 
 const std::map<std::string, Ace::SymbolGradientType> SYMBOL_SHADER_TYPE_MAP = {
@@ -332,7 +332,7 @@ void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
     SymbolModel::GetInstance()->SetShaderStyle(gradients);
 }
 
-bool JSSymbol::ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGradient& gradient)
+bool JSSymbol::ParseShaderStyle(const JSRef<JSObject>& shaderStyleObj, SymbolGradient& gradient)
 {
     auto typeParam = shaderStyleObj->GetProperty("type");
     if (!typeParam->IsString()) {
@@ -419,7 +419,7 @@ void JSSymbol::ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gr
     }
 }
 
-void JSSymbol::ParseSymbolShadow(const JSRef<JSObject> symbolShadowObj, SymbolShadow& symbolShadow)
+void JSSymbol::ParseSymbolShadow(const JSRef<JSObject>& symbolShadowObj, SymbolShadow& symbolShadow)
 {
     auto colorValue = symbolShadowObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
     Color color;

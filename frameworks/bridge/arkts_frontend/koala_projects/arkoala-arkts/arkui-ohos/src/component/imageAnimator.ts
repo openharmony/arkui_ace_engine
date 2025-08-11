@@ -27,7 +27,7 @@ import { AnimationStatus, FillMode } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { PixelMap } from "./arkui-pixelmap"
 
 export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {

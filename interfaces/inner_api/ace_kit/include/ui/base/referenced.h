@@ -25,6 +25,10 @@
 
 namespace OHOS::Ace {
 
+namespace NG {
+class UiNodeGc;
+} // namespace NG
+
 template<class T>
 class RefPtr;
 template<class T>
@@ -127,6 +131,8 @@ private:
     RefCounter* refCounter_ { nullptr };
 
     ACE_DISALLOW_COPY_AND_MOVE(Referenced);
+
+    friend class NG::UiNodeGc;
 };
 
 // Use reference count to manager instance inherited from 'Referenced'.

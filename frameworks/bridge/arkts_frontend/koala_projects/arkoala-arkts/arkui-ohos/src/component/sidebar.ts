@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Callback_Boolean_Void } from "./navigation"
 import { Length, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"

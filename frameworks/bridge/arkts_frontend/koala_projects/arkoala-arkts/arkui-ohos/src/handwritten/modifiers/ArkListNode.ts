@@ -22,7 +22,7 @@ import { CustomBuilder, ListAttribute, ListItemAlign, Axis, BarState, ListDivide
     EdgeEffectOptions
 } from "../../component";
 import { ArkListPeer, ListOptions } from "../../component";
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 export class ArkListNode extends ArkBaseNode  implements ListAttribute  {
 
     constructParam(...param: Object[]): this {

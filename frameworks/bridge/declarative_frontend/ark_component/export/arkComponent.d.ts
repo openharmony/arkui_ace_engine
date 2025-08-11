@@ -458,6 +458,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     barState(value: BarState): RichEditorAttribute;
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
+    enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

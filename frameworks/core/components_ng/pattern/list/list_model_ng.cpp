@@ -240,7 +240,9 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 int32_t ListModelNG::GetSticky(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetStickyStyleValue());
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    return static_cast<int32_t>(layoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE));
 }
 
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
@@ -627,7 +629,9 @@ void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool a
 int32_t ListModelNG::GetListDirection(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListDirection().value());
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    return static_cast<int32_t>(layoutProperty->GetListDirectionValue(Axis::VERTICAL));
 }
 
 void ListModelNG::SetListDirection(FrameNode* frameNode, int32_t axis)
@@ -905,7 +909,9 @@ void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listI
 float ListModelNG::GetListSpace(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetSpaceValue();
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto value = layoutProperty->GetSpace().value_or(Dimension(0.0_vp));
     return value.ConvertToVp();
 }
 

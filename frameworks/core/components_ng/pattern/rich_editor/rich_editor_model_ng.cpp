@@ -682,4 +682,12 @@ void RichEditorModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEna
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetEnableHapticFeedback(isEnabled);
 }
+
+void RichEditorModelNG::SetSupportStyledUndo(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetSupportStyledUndo(enabled);
+}
 } // namespace OHOS::Ace::NG

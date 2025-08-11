@@ -138,6 +138,8 @@ public:
 
     ~FrameNode() override;
 
+    void OnDelete() override;
+
     int32_t FrameCount() const override
     {
         return 1;

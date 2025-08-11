@@ -31,7 +31,7 @@ import { IndicatorComponentController } from "./indicatorcomponent"
 import { EdgeEffect, Curve, PageFlipMode } from "./enums"
 import { Callback_Number_Void, Callback_Opt_Number_Void } from "./alphabetIndexer"
 import { IndicatorStyle } from "./arkui-external"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { LengthMetrics } from "../Graphics"
