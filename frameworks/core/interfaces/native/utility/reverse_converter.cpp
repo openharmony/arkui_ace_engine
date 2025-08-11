@@ -115,13 +115,6 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
     dst = peer;
 }
 
-void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
-{
-    dst.index = Converter::ArkValue<Ark_Number>(0);
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
-}
-
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
