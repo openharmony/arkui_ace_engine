@@ -119,9 +119,11 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         if (spanItemType == SpanItemType::SYMBOL) {
             const std::optional<std::vector<Color>> &colorListOptional = fontStyle->GetSymbolColorList();
             if (colorListOptional.has_value()) {
-                json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListOptional.value()).c_str(), filter);
+                json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListOptional.value())
+                    .c_str(), filter);
             } else {
-                json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(std::vector<Color>()).c_str(), filter);
+                json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(std::vector<Color>())
+                    .c_str(), filter);
             }
         } else {
             json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
