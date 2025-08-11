@@ -2142,12 +2142,8 @@ void MovingPhotoPattern::Start()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (cameraPostprocessingEnabled_) {
-        if (isGestureTriggeredLongPress_) {
-            mediaPlayer_->SetCameraPostprocessing(true);
-            isGestureTriggeredLongPress_ = false;
-        } else {
-            mediaPlayer_->SetCameraPostprocessing(false);
-        }
+        mediaPlayer_->SetCameraPostprocessing(isGestureTriggeredLongPress_);
+        isGestureTriggeredLongPress_ = false;
     }
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
