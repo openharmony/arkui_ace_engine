@@ -914,7 +914,7 @@ export interface SwiperAttribute extends CommonMethod {
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this
     _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod>| undefined): this
+    attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod>| undefined): this {return this;}
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
     index_value?: number | undefined
@@ -1035,9 +1035,6 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     }
     public _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod>| undefined): this {
-        return this
     }
 }
 export type Callback_SwiperContentTransitionProxy_Void = (parameter: SwiperContentTransitionProxy) => void;
