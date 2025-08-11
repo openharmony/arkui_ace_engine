@@ -26,14 +26,14 @@ export struct V2ChildComponent {
 }
 @ObservedV2
 export class Data1396 {
-  @Trace message: string = '';
-  @Trace img: Resource = $r('app.media.icon')
-  @Trace bgColor:Color=Color.Blue
+  @Trace public message: string = '';
+  @Trace public img: Resource = $r('app.media.icon')
+  @Trace public bgColor:Color=Color.Blue
 
-  constructor(message: string, img: Resource,bgColor:Color) {
+  constructor(message: string, img: Resource, bgColor:Color) {
     this.message = message
     this.img = img
-    this.bgColor=bgColor
+    this.bgColor = bgColor
   }
 }
 @ComponentV2
@@ -74,11 +74,11 @@ export struct ListPage {
   @Local simpleList: Array<Data1396> = [];
   private counter: number = 0;
   @Local isHidden: boolean = false
-  @Local img:Resource= $r('app.media.icon')
-  @Local bgcolor:Color= Color.Blue
+  @Local img:Resource = $r('app.media.icon')
+  @Local bgcolor:Color = Color.Blue
   aboutToAppear(): void {
     for (let i = 0; i < 21; i++) {
-      this.simpleList.push(new Data1396(`item_${i}`, $r('app.media.icon'),Color.Blue));
+      this.simpleList.push(new Data1396(`item_${i}`, $r('app.media.icon'), Color.Blue));
       this.counter++;
     }
   }
@@ -86,8 +86,8 @@ export struct ListPage {
   build() {
     Scroll() {
       Column({ space: 10 }) {
-        ListRepeatChildComponent({simpleList: this.simpleList,img:this.img,bgcolor:this.bgcolor})
-            .visibility(this.isHidden? Visibility.Hidden: Visibility.Visible)
+        ListRepeatChildComponent({simpleList: this.simpleList, img:this. img, bgcolor:this.bgcolor})
+            .visibility(this.isHidden ? Visibility.Hidden : Visibility.Visible)
       }
     }
   }

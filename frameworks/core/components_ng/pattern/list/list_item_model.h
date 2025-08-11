@@ -56,11 +56,11 @@ public:
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) = 0;
+    virtual void SetAutoScale(bool autoScale) {}
     virtual void SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node) = 0;
-    virtual void SetAutoScale(bool autoScale) {}
     virtual void ParseResObjStartArea(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjEndArea(const RefPtr<ResourceObject>& resObj) {};
 

@@ -31,6 +31,8 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
@@ -43,8 +45,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #ifdef ACE_STATIC
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
@@ -64,9 +64,9 @@ constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr uint32_t DVSYNC_OFFSET_SIZE = 10;
 constexpr uint32_t DVSYNC_OFFSET_TIME = 18666667;
 constexpr uint32_t DVSYNC_DELAY_TIME_BASE = 27000000;
-constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
+constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -1035,9 +1035,9 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
         }
     }
     if (!(scrollEffect_ && (scrollEffect_->IsSpringEffect() && HasEdgeEffect(offset)) &&
-        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
-        source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_CROWN ||
-        (source == SCROLL_FROM_ANIMATION_CONTROLLER && animateCanOverScroll_)))) {
+            (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
+                source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_CROWN ||
+                (source == SCROLL_FROM_ANIMATION_CONTROLLER && animateCanOverScroll_)))) {
         if (isAtTop && Positive(offset)) {
             animateOverScroll_ = false;
             return false;
@@ -1093,7 +1093,6 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->ScrollPage(reverse, smooth);
     };
     scrollBar_->SetScrollPageCallback(std::move(scrollPageCallback));
-
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -3615,6 +3614,24 @@ bool ScrollablePattern::NeedCoordinateScrollWithNavigation(
            (axis_ == Axis::VERTICAL) && (source != SCROLL_FROM_ANIMATION_SPRING);
 }
 
+void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
+{
+    auto host = GetHost();
+    // call ScrollPageMultiThread by multi thread
+    FREE_NODE_CHECK(host, ScrollPage, reverse, smooth, scrollType);
+    float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
+    if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+        distance = distance / 2.f;
+    }
+    if (smooth) {
+        float position = -GetTotalOffset() + distance;
+        AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
+}
+
 void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 {
     CHECK_NULL_VOID(velocityMotion_);
@@ -3673,24 +3690,6 @@ void ScrollablePattern::HandleClickEvent()
     bool reverse = false;
     if (scrollBar_->AnalysisUpOrDown(point, reverse) && isMousePressed_) {
         ScrollPage(reverse, true);
-    }
-}
-
-void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
-{
-    auto host = GetHost();
-    // call ScrollPageMultiThread by multi thread
-    FREE_NODE_CHECK(host, ScrollPage, reverse, smooth, scrollType);
-    float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
-    if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
-        distance = distance / 2.f;
-    }
-    if (smooth) {
-        float position = -GetTotalOffset() + distance;
-        AnimateTo(-position, -1, nullptr, true, false, false);
-    } else {
-        StopAnimate();
-        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     }
 }
 
@@ -4288,6 +4287,45 @@ void ScrollablePattern::GetEdgeEffectDumpInfo(std::unique_ptr<JsonValue>& json)
     }
 }
 
+void ScrollablePattern::CheckScrollBarOff()
+{
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto displayMode = paintProperty->GetScrollBarMode().value_or(GetDefaultScrollBarDisplayMode());
+    if (displayMode == DisplayMode::OFF) {
+        SetScrollBar(DisplayMode::OFF);
+    }
+}
+
+void ScrollablePattern::UpdateNestedScrollVelocity(float offset, NestedState state)
+{
+    if (state == NestedState::GESTURE) {
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    uint64_t currentVsync = pipeline->GetVsyncTime();
+    uint64_t diff = currentVsync - nestedScrollTimestamp_;
+    if (diff >= MAX_VSYNC_DIFF_TIME || diff <= MIN_DIFF_VSYNC) {
+        diff = DEFAULT_VSYNC_DIFF_TIME;
+    }
+    nestedScrollVelocity_ = (offset / diff) * MILLOS_PER_NANO_SECONDS;
+    nestedScrollTimestamp_ = currentVsync;
+}
+
+float ScrollablePattern::GetNestedScrollVelocity()
+{
+    if (NearZero(nestedScrollVelocity_)) {
+        return 0.0f;
+    }
+    uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
+    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
+    if (diff >= MAX_VSYNC_DIFF_TIME) {
+        nestedScrollVelocity_ = 0.0f;
+    }
+    return nestedScrollVelocity_;
+}
+
 void ScrollablePattern::AddNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy)
 {
     if (std::find(nestScrollBarProxy_.begin(), nestScrollBarProxy_.end(), scrollBarProxy) !=
@@ -4404,45 +4442,6 @@ void ScrollablePattern::SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>
     }
 }
 
-void ScrollablePattern::CheckScrollBarOff()
-{
-    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto displayMode = paintProperty->GetScrollBarMode().value_or(GetDefaultScrollBarDisplayMode());
-    if (displayMode == DisplayMode::OFF) {
-        SetScrollBar(DisplayMode::OFF);
-    }
-}
-
-void ScrollablePattern::UpdateNestedScrollVelocity(float offset, NestedState state)
-{
-    if (state == NestedState::GESTURE) {
-        return;
-    }
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    uint64_t currentVsync = pipeline->GetVsyncTime();
-    uint64_t diff = currentVsync - nestedScrollTimestamp_;
-    if (diff >= MAX_VSYNC_DIFF_TIME || diff <= MIN_DIFF_VSYNC) {
-        diff = DEFAULT_VSYNC_DIFF_TIME;
-    }
-    nestedScrollVelocity_ = (offset / diff) * MILLOS_PER_NANO_SECONDS;
-    nestedScrollTimestamp_ = currentVsync;
-}
-
-float ScrollablePattern::GetNestedScrollVelocity()
-{
-    if (NearZero(nestedScrollVelocity_)) {
-        return 0.0f;
-    }
-    uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
-    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
-    if (diff >= MAX_VSYNC_DIFF_TIME) {
-        nestedScrollVelocity_ = 0.0f;
-    }
-    return nestedScrollVelocity_;
-}
-
 void ScrollablePattern::OnColorConfigurationUpdate()
 {
     CHECK_NULL_VOID(scrollBar_);
@@ -4499,6 +4498,34 @@ void ScrollablePattern::StopScrollableAndAnimate()
     }
 }
 
+void ScrollablePattern::SetOnHiddenChangeForParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame(false);
+    CHECK_NULL_VOID(parent);
+    while (parent) {
+        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+    }
+    if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationPattern);
+        auto navDestinationEventHub = navDestinationPattern->GetOrCreateEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(navDestinationEventHub);
+        auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto scrollBarOverlayModifier = pattern->GetScrollBarOverlayModifier();
+            CHECK_NULL_VOID(scrollBarOverlayModifier);
+            scrollBarOverlayModifier->SetNavDestinationShow(isShow);
+        };
+        navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
+    }
+}
+
 void ScrollablePattern::GetRepeatCountInfo(
     RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount)
 {
@@ -4547,31 +4574,11 @@ void ScrollablePattern::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     crownSensitivity_ = sensitivity;
 }
 #endif
-void ScrollablePattern::SetOnHiddenChangeForParent()
+
+void ScrollablePattern::MarkScrollBarProxyDirty()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame(false);
-    CHECK_NULL_VOID(parent);
-    while (parent) {
-        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            break;
-        }
-        parent = parent->GetAncestorNodeOfFrame(false);
-    }
-    if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-        auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_VOID(navDestinationPattern);
-        auto navDestinationEventHub = navDestinationPattern->GetOrCreateEventHub<NavDestinationEventHub>();
-        CHECK_NULL_VOID(navDestinationEventHub);
-        auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto scrollBarOverlayModifier = pattern->GetScrollBarOverlayModifier();
-            CHECK_NULL_VOID(scrollBarOverlayModifier);
-            scrollBarOverlayModifier->SetNavDestinationShow(isShow);
-        };
-        navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
+    if (scrollBarProxy_) {
+        scrollBarProxy_->MarkScrollBarDirty();
     }
 }
 
@@ -4589,13 +4596,6 @@ bool ScrollablePattern::IsScrollableSpringEffect() const
 const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
 {
     return scrollEffect_;
-}
-
-void ScrollablePattern::MarkScrollBarProxyDirty()
-{
-    if (scrollBarProxy_) {
-        scrollBarProxy_->MarkScrollBarDirty();
-    }
 }
 
 std::string ScrollablePattern::ParseCommand(const std::string& command)

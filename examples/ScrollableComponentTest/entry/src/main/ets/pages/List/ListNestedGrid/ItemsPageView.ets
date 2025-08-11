@@ -65,7 +65,7 @@ export struct ItemsPageView {
   }
 
   aboutToAppear(): void {
-    let tmp: DataModel[] =[]
+    let tmp: DataModel[] = []
     tmp.push(this.listItems)
     tmp.push(this.gridItems)
     this.adapter.addList(tmp)
@@ -162,6 +162,6 @@ export enum ItemType {
 }
 
 export class DataModel {
-  itemType: ItemType = ItemType.listItems
-  result: ESObject
+  public itemType: ItemType = ItemType.listItems
+  public result: ESObject
 }

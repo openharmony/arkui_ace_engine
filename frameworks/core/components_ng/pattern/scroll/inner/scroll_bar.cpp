@@ -22,9 +22,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPRAE_DELAY_DURATION = 2000; // 2000ms
 constexpr double BAR_ADAPT_EPSLION = 1.0;
+constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
-constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t OGN_FIGNERID = -1;
 #ifdef ARKUI_WEARABLE
 constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
@@ -296,9 +296,8 @@ void ScrollBar::CalcScrollBarRegion(double activeMainOffset, double activeSize, 
     if (positionMode_ == PositionMode::LEFT) {
         inactiveSize = activeRect_.Height();
         inactiveMainOffset = activeRect_.Top();
-        activeRect_ =
-            Rect(-NormalizeToPx(position_) + NormalizeToPx(padding_.Left()), activeMainOffset, barWidth_, activeSize) +
-            offset;
+        activeRect_ = Rect(-NormalizeToPx(position_) + NormalizeToPx(padding_.Left()),
+            activeMainOffset, barWidth_, activeSize) + offset;
         if (isUserNormalWidth_) {
             touchRegion_ = activeRect_;
             hoverRegion_ = activeRect_;
@@ -316,12 +315,12 @@ void ScrollBar::CalcScrollBarRegion(double activeMainOffset, double activeSize, 
             touchRegion_ = activeRect_;
             hoverRegion_ = activeRect_;
         } else {
-            touchRegion_ = activeRect_ -
-                           Offset(NormalizeToPx(touchWidth_) - barWidth_ - NormalizeToPx(padding_.Right()), 0.0) +
-                           Size(NormalizeToPx(touchWidth_) - barWidth_, 0);
-            hoverRegion_ = activeRect_ -
-                           Offset(NormalizeToPx(hoverWidth_) - barWidth_ - NormalizeToPx(padding_.Right()), 0.0) +
-                           Size(NormalizeToPx(hoverWidth_) - barWidth_, 0);
+            touchRegion_ =
+                activeRect_ - Offset(NormalizeToPx(touchWidth_) - barWidth_ - NormalizeToPx(padding_.Right()), 0.0) +
+                Size(NormalizeToPx(touchWidth_) - barWidth_, 0);
+            hoverRegion_ =
+                activeRect_ - Offset(NormalizeToPx(hoverWidth_) - barWidth_ - NormalizeToPx(padding_.Right()), 0.0) +
+                Size(NormalizeToPx(hoverWidth_) - barWidth_, 0);
         }
     } else if (positionMode_ == PositionMode::BOTTOM) {
         inactiveSize = activeRect_.Width();
@@ -332,13 +331,13 @@ void ScrollBar::CalcScrollBarRegion(double activeMainOffset, double activeSize, 
             touchRegion_ = activeRect_;
             hoverRegion_ = activeRect_;
         } else {
-            auto hotRegionOffset =
-                Offset(0.0, NormalizeToPx(touchWidth_) - barWidth_ - NormalizeToPx(padding_.Bottom()));
+            auto hotRegionOffset = Offset(
+                0.0, NormalizeToPx(touchWidth_) - barWidth_ - NormalizeToPx(padding_.Bottom()));
             auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - barWidth_);
             touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
 
-            auto hoverRegionOffset =
-                Offset(0.0, NormalizeToPx(hoverWidth_) - barWidth_ - NormalizeToPx(padding_.Bottom()));
+            auto hoverRegionOffset = Offset(
+                0.0, NormalizeToPx(hoverWidth_) - barWidth_ - NormalizeToPx(padding_.Bottom()));
             auto hoverRegionSize = Size(0, NormalizeToPx(hoverWidth_) - barWidth_);
             hoverRegion_ = activeRect_ - hoverRegionOffset + hoverRegionSize;
         }
@@ -508,6 +507,85 @@ void ScrollBar::SetHoverEvent()
             }
         }
     });
+}
+
+void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    ResponseLinkResult& responseLinkResult)
+{
+    if (longPressRecognizer_ && isScrollable_) {
+        longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        longPressRecognizer_->SetNodeId(frameNode->GetId());
+        longPressRecognizer_->AttachFrameNode(frameNode);
+        longPressRecognizer_->SetTargetComponent(targetComponent);
+        longPressRecognizer_->SetIsSystemGesture(true);
+        longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+        longPressRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+            const auto &inputEventType = gestureInfo->GetInputEventType();
+            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
+            if (inputEventType == InputEventType::MOUSE_BUTTON) {
+                return GestureJudgeResult::CONTINUE;
+            }
+            return GestureJudgeResult::REJECT;
+        });
+        result.emplace_front(longPressRecognizer_);
+        responseLinkResult.emplace_back(longPressRecognizer_);
+    }
+}
+
+void ScrollBar::InitLongPressEvent()
+{
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_TIME_THRESHOLD_MS, 1, false, false);
+    longPressRecognizer_->SetOnAction([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->HandleLongPress(true);
+        }
+    });
+}
+
+void ScrollBar::HandleLongPress(bool smooth)
+{
+    Point point(locationInfo_.GetX(), locationInfo_.GetY());
+    bool reverse = false;
+    if (AnalysisUpOrDown(point, reverse) && isMousePressed_) {
+        scrollPageCallback_(reverse, smooth);
+        ScheduleCaretLongPress();
+    }
+}
+
+bool ScrollBar::AnalysisUpOrDown(Point point, bool& reverse)
+{
+    switch (CheckBarDirection(point)) {
+        case BarDirection::BAR_NONE:
+            return false;
+        case BarDirection::PAGE_UP:
+            reverse = true;
+            return true;
+        case BarDirection::PAGE_DOWN:
+            reverse = false;
+            return true;
+    }
+}
+
+void ScrollBar::ScheduleCaretLongPress()
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    if (!context->GetTaskExecutor()) {
+        return;
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPress(true);
+        },
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarInnerHandleLongPress");
 }
 
 void ScrollBar::CalcReservedHeight(const RefPtr<PipelineContext>& context)
@@ -782,85 +860,6 @@ void ScrollBar::ScheduleDisappearDelayTask()
         taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
             "ArkUIScrollBarInnerDisappearAnimation");
     }
-}
-
-void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    ResponseLinkResult& responseLinkResult)
-{
-    if (longPressRecognizer_ && isScrollable_) {
-        longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-        longPressRecognizer_->SetNodeId(frameNode->GetId());
-        longPressRecognizer_->AttachFrameNode(frameNode);
-        longPressRecognizer_->SetTargetComponent(targetComponent);
-        longPressRecognizer_->SetIsSystemGesture(true);
-        longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
-        longPressRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
-                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-            const auto &inputEventType = gestureInfo->GetInputEventType();
-            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
-            if (inputEventType == InputEventType::MOUSE_BUTTON) {
-                return GestureJudgeResult::CONTINUE;
-            }
-            return GestureJudgeResult::REJECT;
-        });
-        result.emplace_front(longPressRecognizer_);
-        responseLinkResult.emplace_back(longPressRecognizer_);
-    }
-}
-
-void ScrollBar::InitLongPressEvent()
-{
-    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_TIME_THRESHOLD_MS, 1, false, false);
-    longPressRecognizer_->SetOnAction([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
-        auto scrollBar = weakBar.Upgrade();
-        if (scrollBar) {
-            scrollBar->HandleLongPress(true);
-        }
-    });
-}
-
-void ScrollBar::HandleLongPress(bool smooth)
-{
-    Point point(locationInfo_.GetX(), locationInfo_.GetY());
-    bool reverse = false;
-    if (AnalysisUpOrDown(point, reverse) && isMousePressed_) {
-        scrollPageCallback_(reverse, smooth);
-        ScheduleCaretLongPress();
-    }
-}
-
-bool ScrollBar::AnalysisUpOrDown(Point point, bool& reverse)
-{
-    switch (CheckBarDirection(point)) {
-        case BarDirection::BAR_NONE:
-            return false;
-        case BarDirection::PAGE_UP:
-            reverse = true;
-            return true;
-        case BarDirection::PAGE_DOWN:
-            reverse = false;
-            return true;
-    }
-}
-
-void ScrollBar::ScheduleCaretLongPress()
-{
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    if (!context->GetTaskExecutor()) {
-        return;
-    }
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->HandleLongPress(true);
-        },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarInnerHandleLongPress");
 }
 
 void ScrollBar::AddScrollBarLayoutInfo()

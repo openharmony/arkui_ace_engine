@@ -104,9 +104,8 @@ public:
 
     bool IsScrollSnapTrigger() const;
 
-    void ScrollPage(bool reverse, bool smooth);
-
     void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
+    void ScrollPage(bool reverse, bool smooth);
 
     void RegisterNestScrollableNode(const ScrollableNodeInfo& scrollableNode);
 
