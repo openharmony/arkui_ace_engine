@@ -24,7 +24,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
+import { PeerNode, findPeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Font, ResourceColor, Length } from "./units"
 import { Resource } from "global.resource"
@@ -35,6 +35,9 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { InteropNativeModule } from "@koalaui/interop"
 import { TextModifier } from "../TextModifier"
 import { hookTextAttributeModifier } from "../handwritten"
+import { ArkThemeScopeManager } from '../handwritten/theme/ArkThemeScopeManager';
+import { __context, __id } from "@koalaui/runtime";
+import { ArkUIAniModule } from 'arkui.ani';
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         const obj : TextController = new TextController()
@@ -89,9 +92,11 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTextPeer {
         const peerId  = PeerNode.nextId()
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", peerId, component ? component.isFirstBuild : true);
         const _peerPtr  = ArkUIGeneratedNativeModule._Text_construct(peerId, flags)
         const _peer  = new ArkTextPeer(_peerPtr, peerId, "Text", flags)
         component?.setPeer(_peer)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(peerId);
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
@@ -1589,7 +1594,12 @@ export function TextImpl(
         return new ArkTextComponent()
     })
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
+        ArkThemeScopeManager.getInstance().applyParentThemeScopeId(receiver);
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstBuild)
+
         style?.(receiver)
         content_?.()
+    
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
     })
 }

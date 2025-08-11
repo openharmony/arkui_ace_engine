@@ -30931,6 +30931,17 @@ void impl_WindowSceneAttribute_attractionEffect(Ark_NativePointer thisPtr, KSeri
         GetNodeModifiers()->getWindowSceneModifier()->setAttractionEffect(self, (const Opt_Position*)&destination_value, (const Opt_Number*)&fraction_value);
 }
 KOALA_INTEROP_DIRECT_V3(WindowSceneAttribute_attractionEffect, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_WithTheme_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getWithThemeModifier()->construct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(WithTheme_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_WithThemeInterface_setWithThemeOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_WithThemeOptions options_value = thisDeserializer.readWithThemeOptions();;
+        GetNodeModifiers()->getWithThemeModifier()->setWithThemeOptions(self, (const Ark_WithThemeOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_V3(WithThemeInterface_setWithThemeOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_XComponent_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getXComponentModifier()->construct(id, flags);
 }
