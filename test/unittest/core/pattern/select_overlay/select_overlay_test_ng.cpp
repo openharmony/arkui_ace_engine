@@ -4137,6 +4137,11 @@ HWTEST_F(SelectOverlayTestNg, CreateCustomSelectOverlay, TestSize.Level1)
     selectInfo.menuInfo.menuIsShow = false;
     selectOverlayNode->CreateCustomSelectOverlay(infoPtr);
     EXPECT_NE(selectOverlayNode->selectMenuStatus_, FrameNodeStatus::GONE);
+
+    ASSERT_NE(selectOverlayNode->selectMenu_, nullptr);
+    auto menuPattern = selectOverlayNode->selectMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_NE(menuPattern->GetTargetId(), -1);
 }
 
 /**
