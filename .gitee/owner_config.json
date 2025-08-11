@@ -5,7 +5,8 @@
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/bad-eleven",
             "https://gitee.com/gongpingde",
-            "https://gitee.com/liyujie43"
+            "https://gitee.com/liyujie43",
+            "https://gitee.com/jiangtao92"
         ],
         "https://gitee.com/arkui_superman": [
             "https://gitee.com/jiangdayuan",
@@ -28,7 +29,6 @@
             "https://gitee.com/xiang-shouxing"
         ],
         "https://gitee.com/arkuievent": [
-            "https://gitee.com/jiangtao92",
             "https://gitee.com/piggyguy",
             "https://gitee.com/benb365",
             "https://gitee.com/zhou-chaobo",
@@ -151,6 +151,10 @@
             "info": "[公共 laoyitong]",
             "group": "https://gitee.com/arkui-default"
         },
+        "https://gitee.com/jiangtao92": {
+            "info": "[公共 jiangtao]",
+            "group": "https://gitee.com/arkuievent"
+        },
         "https://gitee.com/jiangdayuan": {
             "info": "[导航/模态 jiangdayuan]",
             "group": "https://gitee.com/arkui_superman"
@@ -207,10 +211,6 @@
             "info": "[视效/命令节点框架 xiangshouxing]",
             "group": "https://gitee.com/arkuiframework"
         },
-        "https://gitee.com/jiangtao92": {
-            "info": "[事件公共 jiangtao]",
-            "group": "https://gitee.com/arkuievent"
-        },
         "https://gitee.com/piggyguy": {
             "info": "[拖拽/事件手势/组件截图 jiadexiang]",
             "group": "https://gitee.com/arkuievent"
@@ -260,7 +260,7 @@
             "group": "https://gitee.com/arkui_image"
         },
         "https://gitee.com/liyujie43": {
-            "info": "[Image能力 liyujie]",
+            "info": "[Image能力/公共 liyujie]",
             "group": [
                 "https://gitee.com/arkui_image",
                 "https://gitee.com/arkui-default"
