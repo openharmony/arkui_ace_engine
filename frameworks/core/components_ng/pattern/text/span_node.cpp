@@ -97,7 +97,6 @@ std::string SpanItem::GetFont() const
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
-    /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
