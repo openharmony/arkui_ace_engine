@@ -126,7 +126,7 @@ public:
     void SetSetWebIdCallback(std::function<void(int32_t)>&& SetIdCallback) {}
     void SetSetHapPathCallback(std::function<void(const std::string&)>&& callback) {}
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick)
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
     {
         onCreateMenuCallback_ = std::move(onCreateMenuCallback);
         onMenuItemClick_ = std::move(onMenuItemClick);

@@ -19,7 +19,6 @@
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"

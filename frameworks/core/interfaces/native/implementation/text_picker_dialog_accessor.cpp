@@ -17,12 +17,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_text_picker_dialog_view.h"
-#else
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
-#endif
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 #include "text_picker_modifier.h"
