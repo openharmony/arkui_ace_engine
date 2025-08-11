@@ -34,7 +34,7 @@ public:
 
 /**
  * @tc.name: TextOverlayModifierTest001
- * @tc.desc: test text_overlay_modifier.cpp.
+ * @tc.desc: test text_overlay_modifier.cpp
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
