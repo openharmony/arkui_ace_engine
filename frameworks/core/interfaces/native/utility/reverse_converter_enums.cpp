@@ -282,6 +282,19 @@ void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src)
     }
 }
 
+void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src)
+{
+    switch (src) {
+        case ARKUI_EVENT_HAND_NONE: dst = ARK_INTERACTION_HAND_NONE; break;
+        case ARKUI_EVENT_HAND_LEFT: dst = ARK_INTERACTION_HAND_LEFT; break;
+        case ARKUI_EVENT_HAND_RIGHT: dst = ARK_INTERACTION_HAND_RIGHT; break;
+        default:
+            LOGE("Unexpected enum value in InteractionHand: %{public}d", src);
+            dst = INVALID_ENUM_VAL<Ark_InteractionHand>;
+            break;
+    }
+}
+
 void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
 {
     switch (src) {

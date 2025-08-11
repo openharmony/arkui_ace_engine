@@ -15237,8 +15237,6 @@ typedef struct Ark_TouchObject {
     Ark_Number displayY;
     Ark_Number windowX;
     Ark_Number windowY;
-    Ark_Number screenX;
-    Ark_Number screenY;
     Ark_Number x;
     Ark_Number y;
     Opt_InteractionHand hand;

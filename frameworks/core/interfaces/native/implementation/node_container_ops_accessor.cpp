@@ -119,7 +119,7 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
     }
     auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
         const auto event = Converter::ArkTouchEventSync(info);
-        callback.Invoke(event.ArkValue());
+        callback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
