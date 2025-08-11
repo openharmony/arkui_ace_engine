@@ -602,7 +602,7 @@ HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
     refreshAccessibilityProperty->SetAccessibilityLevel("no");
     EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
     EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");
-    pattern_->InitChildNode();
+    pattern_->InitChildNode(frameNode_);
     EXPECT_TRUE(progressAccessibilityProperty->accessibilityLevel_.has_value());
     EXPECT_EQ(progressAccessibilityProperty->accessibilityLevel_.value(), "no");
     EXPECT_TRUE(textAccessibilityProperty->accessibilityLevel_.has_value());
