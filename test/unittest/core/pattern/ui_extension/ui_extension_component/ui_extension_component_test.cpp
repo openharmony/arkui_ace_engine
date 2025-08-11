@@ -219,6 +219,7 @@ void UIExtensionComponentTestNg::FireCallbacks(RefPtr<UIExtensionPattern> patter
     RefPtr<WantWrap> wantWrapPtr = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
     AAFwk::WantParams wantParams;
     OHOS::AAFwk::Want want;
+
     pattern->FireOnRemoteReadyCallback();
     pattern->FireModalOnDestroy();
     pattern->FireOnReleaseCallback(1);
