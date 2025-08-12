@@ -58,13 +58,13 @@ export class SwiperController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._SwiperController_getFinalizer()
     }
-    public showNext(): undefined {
+    public showNext(): void {
         return this.showNext_serialize()
     }
-    public showPrevious(): undefined {
+    public showPrevious(): void {
         return this.showPrevious_serialize()
     }
-    public changeIndex(index: number, useAnimation?: boolean | undefined | SwiperAnimationMode | boolean | undefined): undefined {
+    public changeIndex(index: number, useAnimation?: boolean | undefined | SwiperAnimationMode | boolean | undefined): void {
         const index_type = runtimeType(index)
         const useAnimation_type = runtimeType(useAnimation)
         if ((RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
@@ -72,14 +72,14 @@ export class SwiperController implements MaterializedBase {
             const useAnimation_casted = useAnimation as (boolean | undefined)
             return this.changeIndex0_serialize(index_casted, useAnimation_casted)
         }
-        if ((RuntimeType.NUMBER == useAnimation_type) || (RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
+        if ((RuntimeType.OBJECT == useAnimation_type) || (RuntimeType.NUMBER == useAnimation_type) || (RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
             const index_casted = index as (number)
             const animationMode_casted = useAnimation as (SwiperAnimationMode | boolean | undefined)
             return this.changeIndex1_serialize(index_casted, animationMode_casted)
         }
         throw new Error("Can not select appropriate overload")
     }
-    public finishAnimation(callback_?: VoidCallback): undefined {
+    public finishAnimation(callback_?: VoidCallback): void {
         const callback__casted = callback_ as (VoidCallback | undefined)
         return this.finishAnimation_serialize(callback__casted)
     }
@@ -87,15 +87,13 @@ export class SwiperController implements MaterializedBase {
         const indices_casted = indices as (Array<number> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
-    private showNext_serialize(): undefined {
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_showNext(this.peer!.ptr)
-        return retval
+    private showNext_serialize(): void {
+        ArkUIGeneratedNativeModule._SwiperController_showNext(this.peer!.ptr)
     }
-    private showPrevious_serialize(): undefined {
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_showPrevious(this.peer!.ptr)
-        return retval
+    private showPrevious_serialize(): void {
+        ArkUIGeneratedNativeModule._SwiperController_showPrevious(this.peer!.ptr)
     }
-    private changeIndex0_serialize(index: number, useAnimation?: boolean): undefined {
+    private changeIndex0_serialize(index: number, useAnimation?: boolean): void {
         const thisSerializer : Serializer = Serializer.hold()
         let useAnimation_type : int32 = RuntimeType.UNDEFINED
         useAnimation_type = runtimeType(useAnimation)
@@ -104,11 +102,10 @@ export class SwiperController implements MaterializedBase {
             const useAnimation_value  = useAnimation!
             thisSerializer.writeBoolean(useAnimation_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_changeIndex0(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperController_changeIndex0(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
     }
-    private changeIndex1_serialize(index: number, animationMode?: SwiperAnimationMode | boolean): undefined {
+    private changeIndex1_serialize(index: number, animationMode?: SwiperAnimationMode | boolean): void {
         const thisSerializer : Serializer = Serializer.hold()
         let animationMode_type : int32 = RuntimeType.UNDEFINED
         animationMode_type = runtimeType(animationMode)
@@ -128,11 +125,10 @@ export class SwiperController implements MaterializedBase {
                 thisSerializer.writeBoolean(animationMode_value_1)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_changeIndex1(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperController_changeIndex1(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
     }
-    private finishAnimation_serialize(callback_?: VoidCallback): undefined {
+    private finishAnimation_serialize(callback_?: VoidCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -141,9 +137,8 @@ export class SwiperController implements MaterializedBase {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
     }
     private preloadItems_serialize(indices: Array<number> | undefined): Promise<void> {
         const thisSerializer : Serializer = Serializer.hold()
