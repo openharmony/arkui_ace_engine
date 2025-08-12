@@ -952,6 +952,16 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
 
     eventHub->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
+
+    // Close the keyboard when dragging enter the textinput/textarea/search from outside it.
+    pattern_->customKeyboardBuilder_ = [] {};
+    pattern_->isCustomKeyboardAttached_ = true;
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    pattern_->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboard);
+    pattern_->dragStatus_ = DragStatus::NONE;
+    host->isDisallowDropForcedly_ = false;
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCustomKeyboardAttached_);
 }
 
 /**
