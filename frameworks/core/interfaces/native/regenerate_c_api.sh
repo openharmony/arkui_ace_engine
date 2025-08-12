@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,11 +20,11 @@ OHOS_DIR_ARG=$5
 
 OHOS_DIR=${OHOS_DIR_ARG:=../../../../../../..}
 
-if [[ ! -d $IDLIZE_PATH && "x$IDLIZE_VER" == "x" ]]; then
+if [[ ! -d "$IDLIZE_PATH" && "x$IDLIZE_VER" == "x" ]]; then
     echo "Please define IDLIZE_PATH environment that points to idlize source directory."
     echo "Or define IDLIZE_VER environment that points to version in repository."
-    lv=`npm view @idlizer/arkgen dist-tags.latest`
-    nv=`npm view @idlizer/arkgen dist-tags.next`
+    lv=$(npm view @idlizer/arkgen dist-tags.latest)
+    nv=$(npm view @idlizer/arkgen dist-tags.next)
     echo "Latest version: ${lv} Next version: ${nv}"
     exit 1
 fi
@@ -32,7 +32,7 @@ fi
 DEST_DIR=${DEST_DIR_ARG:=.}
 DTS_DIR=${DTS_DIR_ARG:=${OHOS_DIR}/interface/sdk-js/api/@internal/component/ets,${OHOS_DIR}/interface/sdk-js/api/global}
 TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
-if [[ ! -d $IDLIZE_PATH ]]; then
+if [[ ! -d "$IDLIZE_PATH" ]]; then
     GENERATOR=${GENERATOR_ARG:=npx --yes @idlizer/arkgen@$IDLIZE_VER --dts2peer}
 else
     # Use the below to run generator from your idlize workspace
