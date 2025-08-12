@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
-
 import { AttributeModifier, CommonMethod, Bindable } from "arkui/component/common"
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { ButtonStyle, SideBarPosition, SideBarContainerAttribute, ArkSideBarContainerPeer, DividerStyle } from "arkui/component/sidebar"

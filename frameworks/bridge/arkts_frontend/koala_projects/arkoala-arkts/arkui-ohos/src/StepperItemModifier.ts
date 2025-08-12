@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
-
 import { AttributeModifier, CommonMethod } from "arkui/component/common"
 import { ItemState, StepperItemAttribute, ArkStepperItemPeer } from "arkui/component/stepperItem"
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
