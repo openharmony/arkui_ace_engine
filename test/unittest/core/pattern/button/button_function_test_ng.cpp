@@ -2145,7 +2145,10 @@ HWTEST_F(ButtonFunctionTestNg, UpdateComponentColor, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto renderContext = buttonNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-
+    auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
     /**
      * @tc.steps: step2. Update component color with different conditions.
      * @tc.expected: step2. Color properties are updated correctly.
@@ -2156,13 +2159,11 @@ HWTEST_F(ButtonFunctionTestNg, UpdateComponentColor, TestSize.Level1)
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentColor(Color::RED, static_cast<ButtonColorType>(2));
         if (pipelineContext->IsSystmColorChange() && pair.second) {
-            auto color = layoutProperty->GetFontColor();
-            ASSERT_NE(color.has_value(), true);
             pattern->UpdateComponentColor(Color::RED, ButtonColorType::FONT_COLOR);
-            color = layoutProperty->GetFontColor();
-            EXPECT_EQ(color.value_or(Color::BLACK), Color::RED);
+            auto foregroundColor = textRenderContext->GetForegroundColor();
+            EXPECT_EQ(foregroundColor, Color::RED);
             pattern->UpdateComponentColor(Color::RED, ButtonColorType::BACKGROUND_COLOR);
-            color = renderContext->GetBackgroundColor();
+            auto color = renderContext->GetBackgroundColor();
             EXPECT_EQ(color.value_or(Color::BLACK), Color::RED);
         }
     }
