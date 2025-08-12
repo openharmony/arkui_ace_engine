@@ -3023,10 +3023,9 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
     if (JSViewAbstract::ParseJsDimensionVp(outlineWidthValue, borderWidth, borderWidthResObj)) {
         if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
             outlineWidth.SetBorderWidth(Dimension { -1 });
-            menuParam.outlineWidth = outlineWidth;
-            return;
+        } else {
+            outlineWidth.SetBorderWidth(borderWidth);
         }
-        outlineWidth.SetBorderWidth(borderWidth);
         ParseMenuOutlineWidthWithResourceObj(borderWidthResObj, outlineWidth);
         menuParam.outlineWidth = outlineWidth;
         return;
