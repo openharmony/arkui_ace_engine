@@ -120,7 +120,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     auto defaultColor = theme ? theme->GetTextStyle().GetTextColor() : Color::BLACK;
     /* distinguish SymbolGlyph font color list and Text font color in "fontColor" */
     if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
-        const std::optional<std::vector<Color>> &colorListOptional = GetSymbolColorList();
+        const std::optional<std::vector<Color>>& colorListOptional = GetSymbolColorList();
         if (colorListOptional.has_value()) {
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListOptional.value())
                 .c_str(), filter);

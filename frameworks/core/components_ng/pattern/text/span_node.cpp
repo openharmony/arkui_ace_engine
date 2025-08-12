@@ -136,12 +136,12 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
         json->PutExtAttr("textShadow", jsonShadow, filter);
     }
-    auto Dime_ = Dimension();
+    auto dim = Dimension();
     if (textLineStyle) {
-        json->PutExtAttr("lineHeight", textLineStyle->GetLineHeight().value_or(Dime_).ToString().c_str(), filter);
-        json->PutExtAttr("lineSpacing", textLineStyle->GetLineSpacing().value_or(Dime_).ToString().c_str(), filter);
+        json->PutExtAttr("lineHeight", textLineStyle->GetLineHeight().value_or(dim).ToString().c_str(), filter);
+        json->PutExtAttr("lineSpacing", textLineStyle->GetLineSpacing().value_or(dim).ToString().c_str(), filter);
         json->PutExtAttr("baselineOffset",
-            textLineStyle->GetBaselineOffset().value_or(Dime_).ToString().c_str(), filter);
+            textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
     }
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }
