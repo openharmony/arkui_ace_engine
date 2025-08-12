@@ -685,7 +685,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
             auto renderContext = weakRender.Upgrade();
             CHECK_NULL_VOID(renderContext);
             renderContext->SetOpacity(1.0f);
-        });
+        }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
     }
     // recover after transition animation.
     opacityOption.SetDelay(OPACITY_TITLE_OUT_DELAY);
@@ -695,7 +695,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetOpacity(0.0f);
-    });
+    }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAnimation(bool isTransitionIn)
@@ -726,7 +726,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
             auto renderContext = weakRender.Upgrade();
             CHECK_NULL_VOID(renderContext);
             renderContext->SetOpacity(1.0f);
-        });
+        }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
     }
     transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
     backButtonNodeContext->SetOpacity(1.0f);
@@ -735,7 +735,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetOpacity(0.0f);
-    });
+    }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
@@ -980,7 +980,8 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         auto translate = CalcTranslateForSlideTransition(frameSize, isRight, isEnter, false);
         renderContext->UpdateTranslateInXY(translate);
         OnStartOneTransitionAnimation();
-        AnimationUtils::Animate(option, translateEvent, option.GetOnFinishEvent());
+        AnimationUtils::Animate(
+            option, translateEvent, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     } else {
         // mask animation
         auto option = BuildAnimationOption(
@@ -1079,7 +1080,8 @@ void NavDestinationGroupNode::DoMaskAnimation(const AnimationOption& option, Col
 
     // initial property
     renderContext->SetActualForegroundColor(begin);
-    AnimationUtils::Animate(option, maskEvent, option.GetOnFinishEvent());
+    AnimationUtils::Animate(
+        option, maskEvent, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operation, bool isEnter)
@@ -1167,7 +1169,7 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
         };
     }
     OnStartOneTransitionAnimation();
-    AnimationUtils::Animate(option, event, finish);
+    AnimationUtils::Animate(option, event, finish, nullptr /* repeatCallback */, GetContextRefPtr());
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,

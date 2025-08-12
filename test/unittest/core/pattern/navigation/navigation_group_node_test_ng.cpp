@@ -978,7 +978,9 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateNavdestinationVisiblity001, TestSize.L
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestination->isOnAnimation_ = true;
-    navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    auto layoutProperty = navDestination->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     auto navPattern = navDestination->GetPattern<NavDestinationPattern>();
     navPattern->SetCustomNode(navDestination);
     /*
@@ -986,14 +988,14 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateNavdestinationVisiblity001, TestSize.L
      */
     navigationNode->lastStandardIndex_ = -1;
     navigationNode->UpdateNavDestinationVisibility(navDestination, nullptr, 1, 10, nullptr);
-    EXPECT_EQ(navDestination->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
 
     /*
      *@tc.steps test if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) false
      */
-    navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     navigationNode->UpdateNavDestinationVisibility(navDestination, navDestination, 1, 10, nullptr);
-    EXPECT_EQ(navDestination->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

@@ -801,7 +801,7 @@ void NavigationTitleUtil::FoldStatusChangedAnimation(const RefPtr<FrameNode>& ho
                 auto renderNodeContext = weakRenderNodeContext.Upgrade();
                 CHECK_NULL_VOID(renderNodeContext);
                 renderNodeContext->UpdateOpacity(1.0f);
-            });
+            }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
     });
     AnimationUtils::Animate(
         option,
@@ -810,7 +810,7 @@ void NavigationTitleUtil::FoldStatusChangedAnimation(const RefPtr<FrameNode>& ho
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(0.0f);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, titleBar->GetContextRefPtr());
 }
 
 bool NavigationTitleUtil::IsNeedHoverModeAction(const RefPtr<TitleBarNode>& titleBarNode)
