@@ -962,6 +962,7 @@ private:
     std::string selectedColumnId_;
     bool lastTimeIsLuanar_ = true;
     bool isFirstTimeSetFocus_ = true;
+    bool isDirectionSetByAr = false;
 };
 } // namespace OHOS::Ace::NG
 
