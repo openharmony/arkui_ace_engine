@@ -750,6 +750,13 @@ void SetNavDestinationBeforeCreateLayoutWrapperCallBack(
     NavDestinationModelNG::SetBeforeCreateLayoutWrapperCallBack(
         frameNode, std::move(beforeCreateLayoutWrapperCallBack));
 }
+
+void SetTitleAnimationElapsedTime(ArkUINodeHandle node, ArkUI_Int32 elapsedTime)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetTitleAnimationElapsedTime(frameNode, static_cast<int32_t>(elapsedTime));
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -810,6 +817,7 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setNavDestinationOnReady = SetNavDestinationOnReady,
         .resetNavDestinationOnReady = ResetNavDestinationOnReady,
         .setNavDestinationBeforeCreateLayoutWrapperCallBack = SetNavDestinationBeforeCreateLayoutWrapperCallBack,
+        .setTitleAnimationElapsedTime = SetTitleAnimationElapsedTime,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
