@@ -29,7 +29,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const char* SRC_JPG = "file://data/data/com.example.test/res/exampleAlt.jpg";
+constexpr char SRC_JPG[] = "file://data/data/com.example.test/res/exampleAlt.jpg";
 
 template <typename T>
 bool CompareVector(const std::vector<T>& vec1, const std::vector<T>& vec2)
@@ -1031,7 +1031,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest041, TestSize.Level1)
 
     auto effectTypeParam = static_cast<Rosen::UseEffectType>(effectType);
     rosenRenderContext->rsNode_->SetUseEffectType(effectTypeParam);
-    
+
     bool useEffect = true;
     rosenRenderContext->UpdateUseEffect(useEffect);
     rosenRenderContext->OnUseEffectUpdate(useEffect);
@@ -1056,7 +1056,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest042, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-   
+
     bool isFocused = true;
     rosenRenderContext->UpdateWindowFocusState(isFocused);
 
@@ -1136,7 +1136,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest044, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->HasValidBgImageResizable(), false);
     auto str = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(str, LoadNotifier(nullptr, nullptr, nullptr), true);
-   
+
     rosenRenderContext->bgLoadingCtx_ = ctx;
     auto srcSize = rosenRenderContext->bgLoadingCtx_->GetImageSize();
     auto slice = rosenRenderContext->GetBackgroundImageResizableSliceValue(ImageResizableSlice());

@@ -19,7 +19,7 @@
 namespace OHOS {
 class IRemoteObject {
 public:
-    explicit IRemoteObject(const std::u16string &descriptor = nullptr);
+    explicit IRemoteObject(const std::u16string& descriptor = nullptr);
     virtual ~IRemoteObject() = default;
 };
 template <typename T>
