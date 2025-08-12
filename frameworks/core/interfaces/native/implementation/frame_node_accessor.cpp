@@ -453,7 +453,7 @@ void RecycleImpl(Ark_FrameNode peer)
 }
 Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
 {
-    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    CHECK_NULL_RETURN(peer, nullptr);
     return peer->GetRenderNodePeer();
 }
 Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)

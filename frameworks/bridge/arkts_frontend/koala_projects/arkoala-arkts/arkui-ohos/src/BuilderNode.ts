@@ -415,6 +415,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     public disposeNode(): void {
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.disposeAll();
+        this.__frameNode?.disposeNode();
         this.__frameNode = null;
         ArkUIAniModule._Common_Restore_InstanceId();
     }
