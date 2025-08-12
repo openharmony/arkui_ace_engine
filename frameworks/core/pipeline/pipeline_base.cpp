@@ -933,9 +933,12 @@ void PipelineBase::ContainerModalUnFocus() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     if (window_) {
-        return window_->GetCurrentWindowRect();
+        Rect res = window_->GetCurrentWindowRect();
+        if (res.IsValid()) {
+            return res;
+        }
     }
-    return {};
+    return Rect { 0.0, 0.0, width_, height_ };
 }
 
 Rect PipelineBase::GetGlobalDisplayWindowRect() const
