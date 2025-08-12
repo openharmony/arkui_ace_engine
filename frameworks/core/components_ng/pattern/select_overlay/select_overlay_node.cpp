@@ -399,6 +399,7 @@ bool PrepareButtonProp(RefPtr<OHOS::Ace::NG::ButtonLayoutProperty>& buttonLayout
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
@@ -672,6 +673,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
 
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     BindCreateMenuItemClickEvent(button, menuOptionsParam, overlayId, systemCallback, menuItemCallback);
     SetResponseRegion(button);
