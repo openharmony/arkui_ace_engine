@@ -315,3 +315,13 @@ export interface ArkThemeResource extends Resource {
     type?: int;
     opacityRatio: number;
 }
+
+export interface ThemeInternal extends Theme {
+    shapes: Shapes;
+    typography: Typography;
+}
+
+export interface CustomThemeInternal extends CustomTheme {
+    shapes?: CustomShapes;
+    typography?: CustomTypography;
+}

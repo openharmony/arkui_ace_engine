@@ -3588,6 +3588,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WindowSceneAttribute_attractionEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WithTheme_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _WithThemeInterface_setWithThemeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _XComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _XComponentInterface_setXComponentOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

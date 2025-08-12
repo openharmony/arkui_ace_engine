@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-import { CustomTheme, Theme, Colors } from '@ohos/arkui/theme';
+import { CustomTheme, Colors } from '@ohos/arkui/theme';
 import { ArkThemeCache } from './ArkThemeCache';
 import { Shapes, Typography } from './index';
 import { ThemeColorMode } from 'arkui/component/common';
-import { ArkShapesImpl } from './ArkShapesImpl';
-import { ArkTypographyImpl } from './ArkTypographyImpl';
+import { int32 } from "@koalaui/common";
+import { ThemeInternal, CustomThemeInternal } from './index';
 
 /**
  * Theme counter used to generate next theme id
  */
-let themeCounter = 0;
+let themeCounter: int32 = 0;
 
 /**
  * Base ArkTheme class
  */
-export class ArkThemeBase extends Theme {
+export class ArkThemeBase implements ThemeInternal {
     // Theme tokens
     colors: Colors;
     shapes: Shapes;
@@ -37,7 +37,7 @@ export class ArkThemeBase extends Theme {
     /**
      * Unique theme instance id
      */
-    id: number;
+    id: int32;
 
     /**
      * Copy of CustomTheme used to create this theme instance
@@ -190,16 +190,18 @@ export class ArkThemeBase extends Theme {
             // return undefined if original custom theme is undefined
             return undefined;
         }
-        const copyTheme: CustomTheme = new CustomTheme();
+        const copyTheme: CustomThemeInternal = {} as CustomThemeInternal;
         if (customTheme.colors) {
-            copyTheme.colors = new Colors();
-            Colors.assign(copyTheme.colors!, customTheme.colors!);
+            copyTheme.colors = customTheme.colors!;
         }
-        if (customTheme.shapes) {
-            copyTheme.shapes = customTheme.shapes;
-        }
-        if (customTheme.typography) {
-            copyTheme.typography = customTheme.typography!;
+        if (customTheme instanceof CustomThemeInternal) {
+            const srcTheme = customTheme as CustomThemeInternal;
+            if (srcTheme.shapes) {
+                copyTheme.shapes = srcTheme.shapes!;
+            }
+            if (srcTheme.typography) {
+                copyTheme.typography = srcTheme.typography!;
+            }
         }
         return copyTheme;
     }

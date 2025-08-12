@@ -21,8 +21,8 @@
 #include <vector>
 #include <map>
 
+#include "ui/base/referenced.h"
 #include "ui/properties/color.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::NG {
@@ -79,7 +79,7 @@ enum class AniThemeColorIdentifier : int32_t {
     INTERACTIVE_SELECT = 49,
     INTERACTIVE_CLICK = 50,
 };
-class AniThemeColors {
+class AniThemeColors : public Referenced {
 public:
     AniThemeColors() = default;
     virtual ~AniThemeColors() = default;
@@ -312,26 +312,48 @@ public:
     AniTheme() = default;
     virtual ~AniTheme() = default;
 
-    void SetColors(const AniThemeColors& colors)
+    void SetColors(const RefPtr<AniThemeColors>& colors)
     {
         colors_ = colors;
     }
 
-    const AniThemeColors& Colors() const
+    const RefPtr<AniThemeColors>& Colors() const
     {
         return colors_;
     }
 
 private:
-    AniThemeColors colors_;
+    RefPtr<AniThemeColors> colors_;
 };
 
 class AniThemeScope {
 public:
-    static std::map<int32_t, AniTheme> aniThemes;
     // keeps the current theme in static optional object
     inline static std::optional<AniTheme> aniCurrentTheme = std::nullopt;
     inline static bool isCurrentThemeDefault = true;
+
+    static const AniTheme& GetAniTheme(int32_t themeScopeId)
+    {
+        return aniThemes[themeScopeId];
+    }
+
+    static void AddAniTheme(int32_t themeScopeId, const AniTheme& aniTheme)
+    {
+        aniThemes[themeScopeId] = aniTheme;
+    }
+
+    static void RemoveAniTheme(int32_t themeScopeId)
+    {
+        aniThemes.erase(themeScopeId);
+    }
+
+    static bool IsAniThemeExists(int32_t themeScopeId)
+    {
+        auto iter = aniThemes.find(themeScopeId);
+        return iter != aniThemes.end();
+    }
+private:
+    static std::map<int32_t, AniTheme> aniThemes;
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_THEME_H

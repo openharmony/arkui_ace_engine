@@ -387,9 +387,9 @@ export struct SubHeader {
           LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
         } as LocalizedPadding)
         .width('100%')
-        // .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        // .accessibilityDescription(this.select ? '' :
-        //   Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
+        .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' :
+          Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -409,9 +409,9 @@ export struct SubHeader {
         } as Margin)
         .width('100%')
         .flexShrink(1)
-        // .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        // .accessibilityDescription(this.select ? '' :
-        //   Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
+        .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' :
+          Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -493,9 +493,9 @@ export struct SubHeader {
       .applyStyles(this.rightAreaParentAgingStyles)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
       .hoverEffect(HoverEffect.None)
-      // .accessibilityGroup(true)
-      // .accessibilityText(this.getRightAreaAccessibilityText())
-      // .accessibilityDescription(this.getAccessibilityDescription())
+      .accessibilityGroup(true)
+      .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -532,9 +532,9 @@ export struct SubHeader {
       .applyStyles(this.rightAreaParentStyles)
       .hoverEffect(HoverEffect.None)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
-      // .accessibilityGroup(true)
-      // .accessibilityText(this.getRightAreaAccessibilityText())
-      // .accessibilityDescription(this.getAccessibilityDescription())
+      .accessibilityGroup(true)
+      .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -874,7 +874,7 @@ export struct SubHeader {
           } as LocalizedMargin)
       }
     }
-    // .attributeModifier(this.subHeaderModifier)
+    .attributeModifier(this.subHeaderModifier)
     .alignItems(VerticalAlign.Center)
     .focusable(true)
     .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
@@ -1084,9 +1084,9 @@ struct SingleIconStyle {
       .align(Alignment.Center)
       .backgroundColor(this.bgColor)
       .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
-      // .accessibilityLevel(this.getRightIconAccessibilityLevel())
-      // .accessibilityText(this.getRightIconAccessibilityText())
-      // .accessibilityDescription(this.getRightIconAccessibilityDescription())
+      .accessibilityLevel(this.getRightIconAccessibilityLevel())
+      .accessibilityText(this.getRightIconAccessibilityText())
+      .accessibilityDescription(this.getRightIconAccessibilityDescription())
       .focusBox({
         margin: new LengthMetrics(INDEX_ZERO, LengthUnit.VP),
         strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),

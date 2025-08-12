@@ -14,6 +14,9 @@
  */
 
 #include "mock_model_pattern.h"
+
+#include "core/components_ng/pattern/form/form_model_ng.h"
+
 namespace OHOS::Ace::NG {
 
 ModelPattern::ModelPattern(uint32_t key, const ModelViewContext& context) : key_(key)
@@ -158,5 +161,22 @@ void ModelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     json->PutExtAttr("customRender", SceneCustomRenderToStr(mainProperty).c_str(), filter);
     json->PutExtAttr("shader", SceneShaderPathToStr(mainProperty).c_str(), filter);
     json->PutExtAttr("scene", SceneResourceToStr(mainProperty).c_str(), filter);
+}
+
+// TEMPORARY SUBSTITUIONS!!!
+void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleName)
+{
+}
+
+void FormModelNG::SetDimension(FrameNode* frameNode, int32_t dimension)
+{
+}
+
+void FormModelNG::AllowUpdate(FrameNode* frameNode, bool allowUpdate)
+{
+}
+
+void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
+{
 }
 }

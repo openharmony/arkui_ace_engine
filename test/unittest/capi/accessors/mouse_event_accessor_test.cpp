@@ -421,7 +421,8 @@ HWTEST_F(MouseEventAccessorTest, SetRawDeltaXTest, TestSize.Level1)
     auto deltaX = info->GetRawDeltaX();
     EXPECT_EQ(deltaX, 0);
     for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setRawDeltaX(peer_, &value);
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        accessor_->setRawDeltaX(peer_, &optValue);
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         auto deltaX = info->GetRawDeltaX();
@@ -459,7 +460,8 @@ HWTEST_F(MouseEventAccessorTest, SetRawDeltaYTest, TestSize.Level1)
     auto deltaY = info->GetRawDeltaY();
     EXPECT_EQ(deltaY, 0);
     for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setRawDeltaY(peer_, &value);
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        accessor_->setRawDeltaY(peer_, &optValue);
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         auto deltaY = info->GetRawDeltaY();
@@ -516,10 +518,9 @@ HWTEST_F(MouseEventAccessorTest, SetPressedButtonsTest, TestSize.Level1)
 {
     auto eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
-    Array_MouseButton pressedButtons;
-    Ark_MouseButton arr[] ={Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT, Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT};
-    pressedButtons.array = arr;
-    pressedButtons.length = 2;
+    std::array arr{Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT, Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT};
+    Converter::ConvContext ctx;
+    auto pressedButtons = Converter::ArkValue<Opt_Array_MouseButton>(arr, &ctx);
     accessor_->setPressedButtons(peer_, &pressedButtons);
     auto buttons = eventInfo->GetPressedButtons();
     EXPECT_EQ(buttons[0], MouseButton::LEFT_BUTTON);

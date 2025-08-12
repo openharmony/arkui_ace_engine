@@ -13,16 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/syntax/with_theme_node.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WithThemeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = WithThemeNode::GetOrCreateWithThemeNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // WithThemeModifier
 namespace WithThemeInterfaceModifier {
