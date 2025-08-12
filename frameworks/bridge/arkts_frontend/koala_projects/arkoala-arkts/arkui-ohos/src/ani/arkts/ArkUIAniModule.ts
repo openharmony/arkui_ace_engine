@@ -277,6 +277,7 @@ export class ArkUIAniModule {
     native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
+    native static _CanvasRenderingContext_GetCanvasId(peerPtr: KPointer): KInt
 
     native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
     native static _TraceBegin(traceName: string): void

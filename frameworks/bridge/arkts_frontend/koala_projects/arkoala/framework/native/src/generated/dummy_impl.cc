@@ -35031,7 +35031,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                              const Opt_String* type,
-                             const Opt_Float32* quality)
+                             const Opt_Number* quality)
     {
         if (!needGroupedLog(1))
             return {};
@@ -35180,7 +35180,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                              const Opt_String* type,
-                             const Opt_Float32* quality)
+                             const Opt_Number* quality)
     {
         if (!needGroupedLog(1))
             return {};

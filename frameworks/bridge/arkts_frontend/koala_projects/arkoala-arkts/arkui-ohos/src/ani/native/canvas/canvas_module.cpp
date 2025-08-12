@@ -253,4 +253,15 @@ ani_object CanvasModule::GetDrawingCanvas(ani_env* env, [[maybe_unused]] ani_obj
     CHECK_NULL_RETURN(canvas, undefined);
     return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, canvas);
 }
+
+ani_int CanvasModule::GetCanvasId(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr)
+{
+    auto* peer = reinterpret_cast<ArkUICanvasRenderingContext>(peerPtr);
+    CHECK_NULL_RETURN(peer, -1);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_RETURN(canvasModifier, -1);
+    return canvasModifier->getCanvasId(peer);
+}
 } // namespace OHOS::Ace::Ani
