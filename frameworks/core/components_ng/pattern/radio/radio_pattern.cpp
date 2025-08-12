@@ -82,7 +82,7 @@ void RadioPattern::SetBuilderState()
     layoutProperty->UpdateVisibility(VisibleType::GONE);
 }
 
-void RadioPattern::UpdateIndicatorType(bool checkValue)
+void RadioPattern::UpdateIndicatorType()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -99,7 +99,7 @@ void RadioPattern::UpdateIndicatorType(bool checkValue)
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
     renderContext->UpdateOpacity(1);
-    if (!checkValue) {
+    if (!radioPaintProperty->GetRadioCheckValue()) {
         SetBuilderState();
     }
 }
@@ -125,10 +125,10 @@ void RadioPattern::OnModifyDone()
         if (radioPaintProperty && !radioPaintProperty->GetRadioCheckValue()) {
             radioModifier_->InitOpacityScale(false);
         }
-        auto callback = [weak = WeakClaim(this), checkValue = radioPaintProperty->GetRadioCheckValue()]() {
+        auto callback = [weak = WeakClaim(this)]() {
             auto radio = weak.Upgrade();
             if (radio) {
-                radio->UpdateIndicatorType(checkValue);
+                radio->UpdateIndicatorType();
             }
         };
         pipeline->AddBuildFinishCallBack(callback);
