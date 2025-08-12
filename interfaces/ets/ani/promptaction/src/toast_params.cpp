@@ -169,8 +169,7 @@ std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncCo
             } else {
                 int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
                 std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, errorMsg);
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, errorMsg, errorCode);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");

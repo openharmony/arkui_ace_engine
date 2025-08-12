@@ -550,7 +550,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
                 asyncContext->env->GetNull(&args[0]);
             } else {
-                args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
+                args[0] = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", errorCode);
             }
             args[1] = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
             ani_ref fnReturnVal {};
@@ -605,8 +605,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<Promp
                         "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, 0, "cancel");
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", 0);
                 status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_OVERLAY,
@@ -762,7 +761,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
                 asyncContext->env->GetNull(&args[0]);
             } else {
-                args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
+                args[0] = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", errorCode);
             }
             args[1] = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
             ani_ref fnReturnVal {};
@@ -817,8 +816,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(std::shared_ptr<P
                         "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, 0, "cancel");
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", 0);
                 status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
@@ -1396,8 +1394,7 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
             } else {
                 int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
                 std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, errorMsg);
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, errorMsg, errorCode);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");
@@ -1453,8 +1450,7 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
                 }
             } else {
                 std::string strMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, strMsg);
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, strMsg, errorCode);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");
