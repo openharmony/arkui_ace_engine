@@ -189,6 +189,8 @@ constexpr int32_t HALF = 2;
 constexpr int32_t AI_TIMEOUT_LIMIT = 200;
 constexpr int32_t CHECK_PRE_SIZE = 5;
 constexpr int32_t ADJUST_RATIO = 10;
+constexpr int32_t DRAG_RESIZE_DELAY_TIME = 100;
+constexpr int32_t DRAG_RESIZE_NO_MOVE_CHECK_TIME = 200;
 
 struct TranslateTextExtraData {
     bool needTranslate = false;
@@ -6083,15 +6085,23 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
     AdjustRotationRenderFit(type);
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
-                return;
+        return;
     }
+    dragResizeTimerFlag_ = false;
+    auto dragTime = std::chrono::high_resolution_clock::now().time_since_epoch();
+    lastDragTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(dragTime).count();
     if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG ||
         type == WindowSizeChangeReason::SPLIT_DRAG_START || type == WindowSizeChangeReason::SPLIT_DRAG) {
+        if (dragResizeTimerCount_ == 0) {
+            DragResizeNoMoveTimer();
+        }
         dragWindowFlag_ = true;
         delegate_->SetDragResizeStartFlag(true);
         WindowDrag(width, height);
     }
     if (type == WindowSizeChangeReason::DRAG_END || type == WindowSizeChangeReason::SPLIT_DRAG_END) {
+        dragResizeTimerFlag_ = true;
+        dragResizeTimerCount_ = 0;
         delegate_->SetDragResizeStartFlag(false);
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
@@ -6104,6 +6114,36 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
     }
 }
 
+void WebPattern::DragResizeNoMoveTimer()
+{
+    if (dragResizeTimerFlag_) {
+        dragResizeTimerCount_ = 0;
+        return;
+    }
+    dragResizeTimerCount_++;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto time = std::chrono::high_resolution_clock::now().time_since_epoch();
+    int nowTime = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
+    int diff = nowTime - lastDragTime_;
+    if (diff > DRAG_RESIZE_NO_MOVE_CHECK_TIME) {
+        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+        delegate_->SetDragResizeStartFlag(false);
+        delegate_->SetBoundsOrResize(drawSize_, offset, false);
+        delegate_->ResizeVisibleViewport(visibleViewportSize_, false);
+    }
+    taskExecutor->PostDelayedTask([weak = WeakClaim(this)] () {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->DragResizeNoMoveTimer();
+        },
+        TaskExecutor::TaskType::UI, DRAG_RESIZE_DELAY_TIME, "ArkUIWebDraggingResizeDelay");
+}
+
 void WebPattern::WindowDrag(int32_t width, int32_t height)
 {
     if (delegate_) {
@@ -6114,6 +6154,10 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
         if (!GetPendingSizeStatus() && dragWindowFlag_) {
             int64_t pre_height = height - lastHeight_;
             int64_t pre_width = width - lastWidth_;
+            if (pre_width == 0 && pre_height == 0) {
+                delegate_->SetDragResizePreSize(pre_height, pre_width);
+                return;
+            }
             if (pre_height <= CHECK_PRE_SIZE && pre_height > 0) {
                 pre_height = 0;
             }

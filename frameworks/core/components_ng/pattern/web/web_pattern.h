@@ -999,6 +999,7 @@ private:
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
+    void DragResizeNoMoveTimer();
     void WindowDrag(int32_t width, int32_t height);
     void WindowMaximize();
     void OnOverlayScrollbarEnabledUpdate(bool enable);
@@ -1417,6 +1418,9 @@ private:
     RectF secondInfoHandle_;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::u16string content_;
+    int64_t lastDragTime_ = 0L;
+    bool dragResizeTimerFlag_ = false;
+    int32_t dragResizeTimerCount_ = 0;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
